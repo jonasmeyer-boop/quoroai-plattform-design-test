@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dein Hafen</title>
 <style>
-/* quoroai-plattform-design · Begehbarer Hafen · Marker: HAFEN-V1 */
+/* quoroai-plattform-design · Begehbarer Hafen · Marker: HAFEN-V2 (Eröffnungs-Kino: Hafen wächst aus dem Wasser) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -51,6 +51,42 @@ button{font-family:inherit}
 #kamera img{width:100%;height:100%;display:block;mix-blend-mode:multiply}
 html.einschweben #kamera{animation:einschweben 1.2s var(--feder)}
 @keyframes einschweben{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:none}}
+
+/* Eröffnungs-Kino */
+#kino-leinwand{
+  position:absolute;inset:0;width:100%;height:100%;display:none;
+  mix-blend-mode:multiply;opacity:1;transition:opacity .7s ease;
+}
+body.kino #kino-leinwand{display:block}
+body.kino #kamera img{visibility:hidden}
+body.kino .raum{pointer-events:none}
+body.kino .raum .chip{opacity:0}
+#kino-lage{position:fixed;inset:0;z-index:7;display:none;pointer-events:none}
+body.kino #kino-lage{display:block}
+.tafel{
+  position:absolute;left:50%;bottom:11svh;
+  transform:translate(-50%,18px);
+  padding:12px 24px;border-radius:999px;white-space:nowrap;
+  background:rgba(255,255,255,.7);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:0.5px solid rgba(255,255,255,.85);
+  box-shadow:0 6px 24px rgba(13,21,36,.12);
+  font-size:16px;font-weight:700;color:var(--tinte);
+  opacity:0;transition:opacity .5s ease,transform .5s ease;
+}
+.tafel.da{opacity:1;transform:translate(-50%,0)}
+#kino-weiter{
+  position:absolute;top:80px;right:max(24px,calc((100vw - 960px)/2));
+  pointer-events:auto;cursor:pointer;
+  padding:8px 16px;border-radius:999px;border:0.5px solid var(--linie);
+  background:rgba(255,255,255,.7);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  font-size:13px;font-weight:600;color:var(--grau);
+}
+@media (max-width:860px){
+  .tafel{font-size:13px;padding:10px 16px}
+}
 
 .raum{
   position:absolute;
@@ -324,6 +360,7 @@ body.strecke-offen #leiste{display:none}
 <div id="buehne">
   <div id="kamera">
     <img src="bilder/hafen-gross.jpg" width="11008" height="6144" alt="Modell eines Hafens von schräg oben: Leuchtturm, Liegeplätze mit Schiffen, Lagerhallen, Zollhaus, Hafenmeisterei und Hafentor">
+    <canvas id="kino-leinwand" aria-hidden="true"></canvas>
     <button class="raum" data-ziel="leuchtturm"     style="--l:22%;--t:27%;--w:6%;--h:34%;--chipt:8%"><span class="chip">KI-Berater</span></button>
     <button class="raum" data-ziel="liegeplaetze"   style="--l:28.5%;--t:27%;--w:18%;--h:19%;--chipt:80%"><span class="chip">Mandate <span class="zahl" data-zahl="1">1</span></span></button>
     <button class="raum" data-ziel="lagerhallen"    style="--l:56.5%;--t:17.5%;--w:23%;--h:23%;--chipt:40%"><span class="chip">Dokumente</span></button>
@@ -535,6 +572,13 @@ body.strecke-offen #leiste{display:none}
 
 </div>
 
+<div id="kino-lage">
+  <div class="tafel" data-von="0.4" data-bis="3.1">Willkommen im Hafen deiner Beratung.</div>
+  <div class="tafel" data-von="3.6" data-bis="6.4">Der Leuchtturm denkt immer mit.</div>
+  <div class="tafel" data-von="6.9" data-bis="9.2">Sechs Orte. Alles an einem Ort.</div>
+  <button id="kino-weiter" type="button">Überspringen</button>
+</div>
+
 <div id="leiste">
   <button id="zurueck" type="button"><span id="leiste-links">← Hafen</span><span class="ort">/</span><span class="ort" id="leiste-ort"></span></button>
 </div>
@@ -553,8 +597,12 @@ body.strecke-offen #leiste{display:none}
     zollhaus:'Zahlen', hafenmeisterei:'Team', empfang:'Empfang'
   };
 
-  /* Einschwebe nur ohne Direkteinstieg */
-  if (!location.hash && !reduziert) {
+  /* Eröffnungs-Kino nur beim ersten Besuch ohne Direkteinstieg; sonst Einschwebe */
+  var kinoLaeuft = false;
+  try {
+    kinoLaeuft = !location.hash && !reduziert && !sessionStorage.getItem('hafenKinoGesehen');
+  } catch (e) { kinoLaeuft = !location.hash && !reduziert; }
+  if (!kinoLaeuft && !location.hash && !reduziert) {
     document.documentElement.classList.add('einschweben');
     kamera.addEventListener('animationend', function(){
       document.documentElement.classList.remove('einschweben');
@@ -831,6 +879,67 @@ body.strecke-offen #leiste{display:none}
     chipZahl('empfang', 1);
   });
   document.getElementById('strecke-fertig').addEventListener('click', verlasseStrecke);
+
+  /* Eröffnungs-Kino: der Hafen wächst aus dem Wasser (121 Frames, ~9,6 s) */
+  if (kinoLaeuft) (function(){
+    try { sessionStorage.setItem('hafenKinoGesehen', '1'); } catch (e) {}
+    var N = 121, DAUER = 9600;
+    var leinwand = document.getElementById('kino-leinwand');
+    var ctx = leinwand.getContext('2d');
+    var tafeln = Array.prototype.slice.call(document.querySelectorAll('.tafel'));
+    var bilder = [], vorbei = false;
+    for (var i = 0; i < N; i++) {
+      var b = new Image();
+      b.src = 'aufbau/f_' + String(i + 1).padStart(3, '0') + '.jpg';
+      bilder.push(b);
+    }
+    function passeAn(){
+      var dpr = Math.min(devicePixelRatio || 1, 2);
+      leinwand.width = Math.round(kamera.clientWidth * dpr);
+      leinwand.height = Math.round(kamera.clientHeight * dpr);
+    }
+    function male(idx){
+      while (idx > 0 && !(bilder[idx].complete && bilder[idx].naturalWidth)) idx--;
+      var b = bilder[idx];
+      if (!(b.complete && b.naturalWidth)) return;
+      var br = b.naturalWidth / b.naturalHeight, cr = leinwand.width / leinwand.height;
+      var w, h;
+      if (br > cr) { h = leinwand.height; w = h * br; } else { w = leinwand.width; h = w / br; }
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, leinwand.width, leinwand.height);
+      ctx.drawImage(b, (leinwand.width - w) / 2, (leinwand.height - h) / 2, w, h);
+    }
+    function ende(){
+      if (vorbei) return;
+      vorbei = true;
+      leinwand.style.opacity = '0';
+      setTimeout(function(){
+        document.body.classList.remove('kino');
+        window.removeEventListener('resize', passeAn);
+      }, 750);
+    }
+    document.getElementById('kino-weiter').addEventListener('click', ende);
+    document.body.classList.add('kino');
+    passeAn();
+    window.addEventListener('resize', passeAn);
+    var t0 = null;
+    function schritt(t){
+      if (vorbei) return;
+      if (t0 === null) {
+        if (!(bilder[0].complete && bilder[0].naturalWidth)) { requestAnimationFrame(schritt); return; }
+        t0 = t;
+      }
+      var p = Math.min((t - t0) / DAUER, 1);
+      male(Math.floor(p * (N - 1)));
+      var sek = p * DAUER / 1000;
+      tafeln.forEach(function(tf){
+        tf.classList.toggle('da', sek >= parseFloat(tf.dataset.von) && sek <= parseFloat(tf.dataset.bis));
+      });
+      if (p >= 1) { ende(); return; }
+      requestAnimationFrame(schritt);
+    }
+    requestAnimationFrame(schritt);
+  })();
 })();
 </script>
 </body>
