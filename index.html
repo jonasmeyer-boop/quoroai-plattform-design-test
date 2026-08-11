@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entwürfe · quoroai-plattform-design</title>
+<style>
+/* Marker: ENTWURFS-INDEX-V1 */
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#f4f4f5;color:#17181c;
+  font-family:system-ui,sans-serif;line-height:1.6;
+  padding:64px 24px;
+}
+.rahmen{max-width:920px;margin:0 auto}
+h1{font-size:28px;letter-spacing:-.02em}
+p.unter{color:#6b7280;margin-top:6px;max-width:60ch}
+.liste{margin-top:40px;display:grid;gap:20px}
+a.entwurf{
+  display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:center;
+  background:#fff;border:0.5px solid rgba(23,24,28,.12);border-radius:20px;
+  padding:16px;text-decoration:none;color:inherit;
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+a.entwurf:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(23,24,28,.1)}
+a.entwurf img{width:100%;height:124px;object-fit:cover;border-radius:12px;display:block}
+a.entwurf h2{font-size:18px;letter-spacing:-.01em}
+a.entwurf p{font-size:14px;color:#6b7280;margin-top:4px}
+@media (max-width:700px){
+  a.entwurf{grid-template-columns:1fr}
+  a.entwurf img{height:160px}
+}
+</style>
+</head>
+<body>
+<div class="rahmen">
+  <h1>Entwürfe: Plattform für Unternehmensberatungen</h1>
+  <p class="unter">Drei Richtungen für das begehbare Zuhause der Beratung. Marke, Motiv und Stimmung sind je Entwurf eigenständig, die Beispielmarke Nordholm &amp; Partner ist Platzhalter.</p>
+  <div class="liste">
+    <a class="entwurf" href="entwurf-a-nachtglut.html">
+      <img src="bilder/entwurf-a-nachtturm.jpg" alt="Nachtturm">
+      <div><h2>A · Nachtglut</h2><p>Dunkles Premium: der Beratungsturm bei Nacht, warme Glut in den Etagen. Das Haus, das nie schließt.</p></div>
+    </a>
+    <a class="entwurf" href="entwurf-b-tageslicht.html">
+      <img src="bilder/entwurf-b-modell.jpg" alt="Weißes Modell">
+      <div><h2>B · Tageslicht</h2><p>Helles Atelier: weißes Architekturmodell auf Weiß, Kobalt als Akzent. Die ruhige, klare Richtung.</p></div>
+    </a>
+    <a class="entwurf" href="entwurf-c-signal.html">
+      <img src="bilder/entwurf-c-campus.jpg" alt="Campus">
+      <div><h2>C · Signal</h2><p>Mutig und laut: der Beratungs-Campus von schräg oben, Signalgrün auf Papierweiß, harte Kanten.</p></div>
+    </a>
+  </div>
+</div>
+</body>
+</html>
