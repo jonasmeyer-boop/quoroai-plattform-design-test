@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dein Berater · Übersicht</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
+<style>
+/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V1 */
+@font-face{
+  font-family:'Manrope';
+  src:url('schriften/manrope.woff2') format('woff2');
+  font-weight:200 800;
+  font-display:swap;
+}
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+:root{
+  --papier:#fafaf7;
+  --tinte:#10131a;
+  --grau:#636c7d;
+  --blau:#2b5fe3;
+  --stift:#1d46c9;
+  --linie:rgba(16,19,26,.1);
+  --karte:#ffffff;
+  --radius:16px;
+  --feder:cubic-bezier(.22,.9,.24,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--papier);color:var(--tinte);
+  font-family:'Manrope',system-ui,sans-serif;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:10;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 max(24px,calc((100vw - 880px)/2));
+  background:linear-gradient(var(--papier) 55%, color-mix(in srgb, var(--papier) 1%, transparent));
+  pointer-events:none;
+}
+nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em}
+nav .wortmarke small{display:block;font-size:10px;font-weight:500;color:var(--grau)}
+nav .griffe{display:flex;align-items:center;gap:8px;pointer-events:auto}
+nav .griffe .glocke{
+  position:relative;width:36px;height:36px;border-radius:999px;
+  border:0.5px solid var(--linie);background:#fff;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+nav .griffe .glocke svg{width:19px;height:19px}
+nav .griffe .glocke svg path{fill:none;stroke:var(--tinte);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav .griffe .glocke .zahl{
+  position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px;
+  border-radius:999px;background:var(--blau);color:#fff;font-size:10px;font-weight:800;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+nav .griffe .ab{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:12.5px;font-weight:700;color:var(--grau);cursor:pointer;
+}
+
+main{max-width:880px;margin:0 auto;padding:108px 24px 96px}
+
+/* Auftakt: Gruß + Eingangstür ins Gespräch */
+.anstrich{width:96px;height:12px;display:block;overflow:visible;margin-bottom:16px}
+.anstrich path{fill:none;stroke:var(--stift);stroke-width:2.5;stroke-linecap:round;opacity:.85}
+.vorgruss{
+  font-family:'Caveat',cursive;font-size:clamp(24px,3.6vw,32px);font-weight:700;
+  color:var(--stift);rotate:-1.5deg;opacity:.92;
+}
+h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-top:2px}
+.tuer{position:relative;margin-top:22px;max-width:680px}
+.tuer input{
+  width:100%;min-height:54px;padding:0 62px 0 22px;border-radius:999px;
+  border:0.5px solid var(--linie);background:#fff;
+  font-family:inherit;font-size:16px;color:var(--tinte);outline:none;
+  box-shadow:0 8px 30px rgba(16,19,26,.07);
+}
+.tuer input:focus{border-color:var(--blau)}
+.tuer a.los{
+  position:absolute;right:7px;top:50%;translate:0 -50%;
+  width:40px;height:40px;border-radius:999px;background:var(--tinte);
+  display:inline-flex;align-items:center;justify-content:center;text-decoration:none;
+  transition:background .2s ease;
+}
+.tuer a.los:hover{background:var(--blau)}
+.tuer a.los svg{width:19px;height:19px}
+.tuer a.los svg path{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.chips a{
+  padding:10px 18px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:14px;font-weight:600;color:var(--tinte);
+  text-decoration:none;transition:border-color .2s;
+}
+.chips a:hover{border-color:var(--blau)}
+.ki-hinweis{font-size:11px;color:var(--grau);opacity:.75;margin-top:12px}
+
+/* Abschnitte */
+section{margin-top:52px}
+.kopfzeile{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
+.kopfzeile h2{font-size:13px;font-weight:800;color:var(--grau)}
+.kopfzeile a{font-size:13px;font-weight:700;color:var(--blau);text-decoration:none}
+.kopfzeile a:hover{text-decoration:underline}
+
+/* Karten (Akte-Auszug) */
+.reihe{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.karte{
+  background:var(--karte);border:0.5px solid var(--linie);border-radius:var(--radius);
+  padding:18px 20px;box-shadow:0 10px 30px rgba(16,19,26,.06);
+  opacity:0;translate:0 10px;
+}
+.karte.da{opacity:1;translate:none;transition:opacity .5s ease,translate .5s var(--feder)}
+.karte .wert{font-size:26px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.karte .wert.blau{color:var(--blau)}
+.karte .label{font-size:12.5px;color:var(--grau);margin-top:2px}
+.karte .delta{font-size:12px;font-weight:700;color:var(--blau);margin-top:6px}
+.karte .delta.amber{color:#a06008}
+.karte .quelle{font-size:11px;color:var(--grau);opacity:.8;margin-top:10px}
+
+/* Zeilen-Listen (Gespräche, Unterlagen) */
+.zeilen{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+.zeile{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:15px 20px;border-radius:var(--radius);
+  border:0.5px solid var(--linie);background:#fff;
+  box-shadow:0 6px 20px rgba(16,19,26,.05);
+  text-decoration:none;color:var(--tinte);cursor:pointer;
+  transition:border-color .2s ease,translate .2s var(--feder);
+}
+.zeile:hover{border-color:var(--blau);translate:0 -1px}
+.zeile .z-titel{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.zeile .z-meta{font-size:12.5px;color:var(--grau);margin-top:2px}
+.zeile .z-status{
+  flex-shrink:0;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;
+  color:var(--grau);background:rgba(16,19,26,.05);white-space:nowrap;
+}
+.zeile .z-status.geteilt{color:var(--blau);background:color-mix(in srgb, var(--blau) 10%, transparent)}
+.zeile .z-status.offen{color:#a06008;background:rgba(178,109,10,.12)}
+
+/* Termine + Anfragen nebeneinander */
+.doppel{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.termin-lage{display:flex;align-items:center;gap:14px}
+.termin-blatt{
+  width:46px;height:52px;flex-shrink:0;border-radius:10px;overflow:hidden;
+  border:0.5px solid var(--linie);background:#fff;text-align:center;
+}
+.termin-blatt .tb-tag{font-size:9.5px;font-weight:800;letter-spacing:.06em;color:#fff;background:var(--blau);padding:3px 0}
+.termin-blatt .tb-zeit{font-size:15px;font-weight:800;padding-top:7px;font-variant-numeric:tabular-nums}
+.termin-wann{font-size:14.5px;font-weight:800;letter-spacing:-.01em}
+.termin-mit{font-size:12.5px;color:var(--grau);margin-top:2px}
+
+/* Blatt-Symbol für Unterlagen */
+.blatt{
+  width:34px;height:44px;flex-shrink:0;position:relative;
+  background:#fff;border:1px solid var(--linie);border-radius:4px;
+}
+.blatt::before{
+  content:'';position:absolute;right:-1px;top:-1px;border:8px solid transparent;
+  border-left-color:color-mix(in srgb, var(--blau) 25%, transparent);
+  border-bottom-color:color-mix(in srgb, var(--blau) 25%, transparent);
+  border-radius:0 0 0 4px;
+}
+.blatt::after{
+  content:'';position:absolute;left:6px;right:6px;top:13px;height:19px;
+  background:linear-gradient(var(--linie) 1.5px, transparent 1.5px);background-size:100% 6px;
+}
+.zeile .mit-blatt{display:flex;align-items:center;gap:14px}
+
+/* Fuß: Leistungen + Rechnungen */
+.fuss-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.fuss-links a{
+  padding:11px 18px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:13.5px;font-weight:700;color:var(--tinte);
+  text-decoration:none;transition:border-color .2s;
+}
+.fuss-links a:hover{border-color:var(--blau)}
+.fuss-links a small{color:var(--grau);font-weight:600;margin-left:6px}
+
+@media (prefers-reduced-motion: reduce){
+  .karte{opacity:1;translate:none}
+  .karte.da{transition:none}
+}
+@media (max-width:700px){
+  .reihe{grid-template-columns:1fr}
+  .doppel{grid-template-columns:1fr}
+  nav .wortmarke small{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wortmarke">Nordholm &amp; Partner<small>Beispielmarke deiner Beratung</small></div>
+  <div class="griffe">
+    <button class="glocke" type="button" aria-label="Benachrichtigungen">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17 L18 17 C16.8 15.6 16.4 14.6 16.2 12.2 C16 9.2 14.6 7 12 7 C9.4 7 8 9.2 7.8 12.2 C7.6 14.6 7.2 15.6 6 17 Z M10.4 19.5 a1.8 1.8 0 0 0 3.2 0"/></svg>
+      <span class="zahl">2</span>
+    </button>
+    <button class="ab" type="button">Abmelden</button>
+  </div>
+</nav>
+
+<main>
+  <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
+  <div class="vorgruss">Guten Tag, Herr Petersen.</div>
+  <h1>Womit ringst du gerade?</h1>
+  <div class="tuer">
+    <input type="text" placeholder="Frag deine Beratung" aria-label="Deine Frage an die Beratung">
+    <a class="los" href="gespraech.html" aria-label="Frage senden">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5 V6 M6.5 11.5 L12 5.5 L17.5 11.5"/></svg>
+    </a>
+  </div>
+  <div class="chips">
+    <a href="gespraech.html">Wie läuft mein Geschäft?</a>
+    <a href="gespraech.html">Warum schrumpft meine Marge?</a>
+    <a href="gespraech.html">Buch mir einen Menschen</a>
+  </div>
+  <p class="ki-hinweis">Du sprichst mit dem KI-Berater von Nordholm &amp; Partner. Er ersetzt keine Rechts- oder Steuerberatung.</p>
+
+  <section>
+    <div class="kopfzeile">
+      <h2>Aus deinen Gesprächen</h2>
+      <a href="gespraech.html">Ganze Akte ansehen</a>
+    </div>
+    <div class="reihe">
+      <div class="karte"><div class="wert blau">+38.000 €</div><div class="label">Preismodell, rechnerisch im Jahr</div><div class="delta">ab Woche 6 wirksam</div><div class="quelle">aus „Was bringt mir das Preismodell?"</div></div>
+      <div class="karte"><div class="wert">30,4 %</div><div class="label">Marge heute</div><div class="delta amber">fällt seit April</div><div class="quelle">aus „Warum schrumpft meine Marge?"</div></div>
+      <div class="karte"><div class="wert">20.550 €</div><div class="label">offene Forderungen</div><div class="delta amber">eine Rechnung seit 9 Tagen</div><div class="quelle">aus „Wie läuft mein Geschäft?"</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kopfzeile">
+      <h2>Deine Gespräche</h2>
+      <a href="gespraech.html">Neues Gespräch</a>
+    </div>
+    <div class="zeilen">
+      <a class="zeile" href="gespraech.html"><span><span class="z-titel">Warum schrumpft meine Marge?</span><br><span class="z-meta">gestern, 16:40</span></span><span class="z-status geteilt">freigegeben</span></a>
+      <a class="zeile" href="gespraech.html"><span><span class="z-titel">Wie läuft mein Geschäft?</span><br><span class="z-meta">Montag, 9:12</span></span><span class="z-status">nur für dich</span></a>
+      <a class="zeile" href="gespraech.html"><span><span class="z-titel">Was bringt mir das Preismodell?</span><br><span class="z-meta">5. August</span></span><span class="z-status">nur für dich</span></a>
+    </div>
+  </section>
+
+  <section class="doppel">
+    <div>
+      <div class="kopfzeile"><h2>Termine</h2></div>
+      <div class="zeilen">
+        <div class="zeile"><div class="termin-lage"><div class="termin-blatt"><div class="tb-tag">DO</div><div class="tb-zeit">10:00</div></div><div><div class="termin-wann">Donnerstag, 10:00–11:00</div><div class="termin-mit">Dr. Anna Vogelsang · Preis und Marge</div></div></div><span class="z-status geteilt">Videocall</span></div>
+        <div class="zeile"><div class="termin-lage"><div class="termin-blatt"><div class="tb-tag">DI</div><div class="tb-zeit">14:30</div></div><div><div class="termin-wann">Dienstag, 14:30–15:00</div><div class="termin-mit">Jahresgespräch · Steuerbüro</div></div></div><span class="z-status">vor Ort</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="kopfzeile"><h2>Anfragen</h2></div>
+      <div class="zeilen">
+        <div class="zeile"><span><span class="z-titel">Gespräch mit einem Menschen</span><br><span class="z-meta">Dr. Anna Vogelsang · Wunsch: Freitag, 9:00</span></span><span class="z-status offen">liegt vor</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kopfzeile">
+      <h2>Unterlagen</h2>
+      <a href="#">Alle durchsuchen</a>
+    </div>
+    <div class="zeilen">
+      <div class="zeile"><div class="mit-blatt"><div class="blatt"></div><span><span class="z-titel">Preismodell Benchmark</span><br><span class="z-meta">12 Seiten · gestern · Fassung 1</span></span></div><span class="z-status geteilt">neu</span></div>
+      <div class="zeile"><div class="mit-blatt"><div class="blatt"></div><span><span class="z-titel">Rahmenvertrag Stahl</span><br><span class="z-meta">Fassung 2 · von deiner Beratung</span></span></div><span class="z-status">geteilt am 4. August</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kopfzeile"><h2>Zusammenarbeit</h2></div>
+    <div class="fuss-links">
+      <a href="#">Leistungsnachweis<small>14,5 Std. im August</small></a>
+      <a href="#">Rechnungen<small>eine offen</small></a>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function zufall(a, b){ return a + Math.random() * (b - a); }
+  /* Der Stift zieht seinen Anstrich, die Karten belichten gestaffelt */
+  var svg = document.querySelector('.anstrich');
+  var NS = 'http://www.w3.org/2000/svg';
+  var d = 'M2 6';
+  for (var i = 1; i <= 6; i++) d += ' L' + (2 + 92 * i / 6) + ' ' + (6 + zufall(-2, 2));
+  var p = document.createElementNS(NS, 'path');
+  p.setAttribute('d', d);
+  svg.appendChild(p);
+  if (!reduziert) {
+    var len = p.getTotalLength();
+    p.style.strokeDasharray = len;
+    p.style.strokeDashoffset = len;
+    p.style.transition = 'stroke-dashoffset .55s cubic-bezier(.45,.05,.55,.95) .1s';
+    void p.getBoundingClientRect();
+    p.style.strokeDashoffset = 0;
+  }
+  document.querySelectorAll('.karte').forEach(function(k, i){
+    setTimeout(function(){ k.classList.add('da'); }, reduziert ? 0 : 250 + i * 140);
+  });
+  /* Eingabe führt ins Gespräch — die Übersicht ist nur die Tür */
+  var feld = document.querySelector('.tuer input');
+  feld.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' && feld.value.trim()) location.href = 'gespraech.html';
+  });
+})();
+</script>
+</body>
+</html>
