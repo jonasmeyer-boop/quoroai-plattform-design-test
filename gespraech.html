@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V21 (V20 + Herunterladen im Blatt-Blick für Dokumente, Bilder und eigene Unterlagen) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V22 (V21 + Termin-Karten mit Kalender-Blättchen, Termine-Drehbuch) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -483,6 +483,25 @@ body.blatt-offen{overflow:hidden}
   width:40px;height:40px;border-radius:999px;flex-shrink:0;
   display:inline-flex;align-items:center;justify-content:center;
   background:color-mix(in srgb, var(--blau) 10%, transparent);color:var(--blau);font-weight:800;font-size:14px;
+}
+
+/* Termin-Karte: was ansteht, ruhig und lesbar */
+.karte.termin .termin-lage{display:flex;align-items:center;gap:16px}
+.termin-blatt{
+  width:46px;height:52px;flex-shrink:0;border-radius:10px;overflow:hidden;
+  border:0.5px solid var(--linie);background:#fff;text-align:center;
+}
+.termin-blatt .tb-tag{
+  font-size:9.5px;font-weight:800;letter-spacing:.06em;color:#fff;
+  background:var(--blau);padding:3px 0;
+}
+.termin-blatt .tb-zeit{font-size:15px;font-weight:800;padding-top:7px;font-variant-numeric:tabular-nums}
+.karte.termin .termin-wann{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.karte.termin .termin-mit{font-size:13px;color:var(--grau);margin-top:3px}
+.karte.termin .termin-art{
+  flex-shrink:0;margin-left:auto;font-size:11px;font-weight:800;
+  color:var(--blau);background:color-mix(in srgb, var(--blau) 10%, transparent);
+  padding:4px 10px;border-radius:999px;
 }
 
 /* Anfrage an einen Menschen: ehrlicher Status statt Sofort-Buchung */
@@ -1386,6 +1405,21 @@ body.blatt-offen{overflow:hidden}
     return k;
   }
 
+  function baueTermin(d){
+    var k = karteAus(
+      '<div class="termin-lage">' +
+      '<div class="termin-blatt"><div class="tb-tag"></div><div class="tb-zeit"></div></div>' +
+      '<div><div class="termin-wann"></div><div class="termin-mit"></div></div>' +
+      '<span class="termin-art"></span>' +
+      '</div>', 'termin', d.sk);
+    k.querySelector('.tb-tag').textContent = d.tag || '';
+    k.querySelector('.tb-zeit').textContent = d.zeit || '';
+    k.querySelector('.termin-wann').textContent = d.wann || '';
+    k.querySelector('.termin-mit').textContent = d.mit || '';
+    k.querySelector('.termin-art').textContent = d.form || 'Videocall';
+    return k;
+  }
+
   function baueAnfrage(d){
     var k = karteAus(
       '<div class="anfrage-kopf"><h3>Gespräch mit einem Menschen</h3><span class="anfrage-status offen">Anfrage liegt vor</span></div>' +
@@ -2035,6 +2069,7 @@ body.blatt-offen{overflow:hidden}
       }
       var k = null, nachher = null;
       if (s.grenze) k = baueGrenze(s.grenze);
+      if (s.termin) k = baueTermin(s.termin);
       if (s.hero) { k = baueHero(s.hero); nachher = function(kk){ starteHero(kk); }; }
       if (s.kurve) k = baueKurve(s.kurve);
       if (s.wasserfall) k = baueWasserfall(s.wasserfall);
@@ -2145,6 +2180,15 @@ body.blatt-offen{overflow:hidden}
         {t: 'Wenn du das angehen willst: Dr. Anna Vogelsang hat das Modell mitgerechnet. Soll ich euch zusammenbringen?'},
         {chips: ['Buch mir einen Menschen', 'Warum schrumpft meine Marge?']}
       ]},
+    { probe: /(termine|kalender|steht an|anstehen)/i,
+      frage: 'Welche Termine stehen an?',
+      schritte: [
+        {t: 'Zwei Dinge stehen an:'},
+        {termin: {tag: 'DO', zeit: '10:00', wann: 'Donnerstag, 10:00–11:00', mit: 'Dr. Anna Vogelsang · Preis und Marge', form: 'Videocall'}},
+        {termin: {tag: 'DI', zeit: '14:30', wann: 'nächsten Dienstag, 14:30–15:00', mit: 'Jahresgespräch · mit deinem Steuerbüro', form: 'vor Ort'}},
+        {t: 'Absagen oder verschieben geht direkt bei deiner Beratung — sag mir einfach Bescheid, ich richte es aus.'},
+        {chips: ['Buch mir einen Menschen', 'Wie läuft mein Geschäft?']}
+      ]},
     { probe: /(mensch|termin|berater|buch|anruf|sprechen)/i,
       frage: 'Buch mir einen Menschen.',
       schritte: [
@@ -2227,6 +2271,10 @@ body.blatt-offen{overflow:hidden}
       runter();
       await materialisiere(b);
       await stift.notiz(kapitel, b, 'steht!', 'rechts');
+      var t = baueTermin({tag: slot.slice(0, 2).toUpperCase(), zeit: slot.split(', ')[1] || '', wann: slot, mit: 'Dr. Anna Vogelsang · Preis und Marge', form: 'Videocall'});
+      kapitel.querySelector('.lauf').appendChild(t);
+      runter();
+      await materialisiere(t);
       zeigeChips(kapitel, ['Wie läuft mein Geschäft?', 'Was bringt mir das Preismodell?']);
       kamera.halt();
     })();
