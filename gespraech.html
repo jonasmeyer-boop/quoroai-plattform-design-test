@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V9 (V8 + Mobil-Feinschliff: zeilenweises Unterstreichen, Luft unter Notizen, Platz überm Eingabefeld) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V10 (V9 + Auftakt: handgezogener Anstrich, Tageszeit-Gruß in Handschrift) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -125,11 +125,19 @@ body.regal-offen{overflow:hidden}
 .merk{font-weight:800}
 
 /* Begrüßung */
-#gruss .strich{
-  width:0;height:1px;background:var(--tinte);margin-bottom:28px;
-  transition:width .8s var(--feder);
+#gruss .anstrich{
+  width:96px;height:12px;display:block;overflow:visible;margin-bottom:18px;
 }
-#gruss.da .strich{width:64px}
+#gruss .anstrich path{
+  fill:none;stroke:var(--stift);stroke-width:2.5;stroke-linecap:round;opacity:.85;
+}
+#gruss .vorgruss{
+  font-family:'Caveat',cursive;font-size:clamp(22px,3.5vw,30px);font-weight:700;
+  color:var(--stift);min-height:1.2em;margin-bottom:6px;
+  opacity:0;translate:0 6px;rotate:-1.5deg;
+  transition:opacity .6s ease,translate .6s var(--feder);
+}
+#gruss .vorgruss.da{opacity:.92;translate:none}
 #gruss h1{
   font-size:clamp(30px,5vw,46px);font-weight:800;letter-spacing:-.03em;line-height:1.15;
   min-height:1.2em;
@@ -381,7 +389,7 @@ body.hirn #hirn-lampe{display:inline-flex}
 #senden:active{transform:scale(.97)}
 
 @media (prefers-reduced-motion: reduce){
-  #gruss .strich{transition:none}
+  #gruss .vorgruss{transition:none;opacity:.92;translate:none}
   #gruss h1 .caret{animation:none;opacity:0}
   .kapitel p.antwort .wort{transition:none;filter:none}
   .kapitel p.antwort.aktiv::after{display:none}
@@ -430,7 +438,8 @@ body.hirn #hirn-lampe{display:inline-flex}
 
 <main id="akte">
   <div id="gruss">
-    <div class="strich"></div>
+    <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
+    <div class="vorgruss" id="vorgruss"></div>
     <h1><span id="gruss-text"></span><span class="caret"></span></h1>
     <div class="chips" id="start-chips"></div>
   </div>
@@ -1775,7 +1784,21 @@ body.hirn #hirn-lampe{display:inline-flex}
     var gruss = document.getElementById('gruss');
     var ziel = 'Womit ringst du gerade?';
     var el = document.getElementById('gruss-text');
+    var vorgruss = document.getElementById('vorgruss');
     var startChips = ['Wie läuft mein Geschäft?', 'Warum schrumpft meine Marge?', 'Buch mir einen Menschen'];
+
+    /* Der Gruß kennt die Uhrzeit — wie ein Berater, nicht wie ein Formular */
+    var stunde = new Date().getHours();
+    vorgruss.textContent = stunde < 5 ? 'Gute Nacht.' : (stunde < 11 ? 'Guten Morgen.' : (stunde < 18 ? 'Guten Tag.' : 'Guten Abend.'));
+
+    /* Der Stift zieht seinen Anstrich von Hand: leicht zittrig, nie zweimal gleich */
+    var anstrich = gruss.querySelector('.anstrich');
+    var pts = [];
+    for (var p = 0; p <= 6; p++) pts.push([2 + 92 * p / 6, 6 + zufall(-2, 2)]);
+    var pfad = document.createElementNS(NS, 'path');
+    pfad.setAttribute('d', glatt(pts));
+    anstrich.appendChild(pfad);
+
     function chipsRein(){
       var lage = document.getElementById('start-chips');
       startChips.forEach(function(c, i){
@@ -1786,14 +1809,20 @@ body.hirn #hirn-lampe{display:inline-flex}
         setTimeout(function(){ b.classList.add('da'); }, reduziert ? 0 : 140 * i + 100);
       });
     }
-    if (reduziert) { el.textContent = ziel; gruss.classList.add('da'); chipsRein(); return; }
-    setTimeout(function(){ gruss.classList.add('da'); }, 250);
+    if (reduziert) { el.textContent = ziel; vorgruss.classList.add('da'); gruss.classList.add('da'); chipsRein(); return; }
+    var laenge = pfad.getTotalLength();
+    pfad.style.strokeDasharray = laenge;
+    pfad.style.strokeDashoffset = laenge;
+    pfad.style.transition = 'stroke-dashoffset .55s cubic-bezier(.45,.05,.55,.95) .15s';
+    void pfad.getBoundingClientRect();
+    pfad.style.strokeDashoffset = 0;
+    setTimeout(function(){ gruss.classList.add('da'); vorgruss.classList.add('da'); }, 450);
     var i = 0;
     setTimeout(function tippe(){
       el.textContent = ziel.slice(0, ++i);
       if (i < ziel.length) setTimeout(tippe, 42 + Math.random() * 40);
       else { chipsRein(); document.getElementById('frage').focus(); }
-    }, 1150);
+    }, 1250);
   })();
 })();
 </script>
