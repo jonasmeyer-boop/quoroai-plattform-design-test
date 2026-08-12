@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="de" data-schrift="clash">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>quoroAI · Designsystem</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<style>
+/* Marker: SYSTEM-V1 · Das quoroAI-Designsystem: weißer Grund, Logo-Lila #6f63e8.
+   Schrift ist noch offen: drei Kandidaten per Schalter oben rechts.
+   Gilt für quoroAI-gebrandete Flächen (Beratungsseite); Kundenflächen
+   bleiben White-Label über marke.js. */
+
+/* ---------- Schriften (variabel, selbst gehostet) ---------- */
+@font-face{font-family:'Clash Display';src:url('schriften/clash-display.woff2') format('woff2');font-weight:200 700;font-display:swap}
+@font-face{font-family:'Bricolage';src:url('schriften/bricolage.woff2') format('woff2');font-weight:200 800;font-display:swap}
+@font-face{font-family:'Chillax';src:url('schriften/chillax.woff2') format('woff2');font-weight:200 700;font-display:swap}
+@font-face{font-family:'General Sans';src:url('schriften/general-sans.woff2') format('woff2');font-weight:200 700;font-display:swap}
+
+/* ---------- Farbwelt: alles aus #6f63e8 abgeleitet ---------- */
+:root{
+  --lila-050:#f5f4fe; --lila-100:#ecebfd; --lila-200:#dcd9fb;
+  --lila-300:#c0bbf6; --lila-400:#9d93f1; --lila-500:#8478ec;
+  --lila-600:#6f63e8; /* die Marke, direkt aus dem Logo */
+  --lila-700:#5a4cd6; --lila-800:#483dae; --lila-900:#3b3486;
+
+  --nebel-050:#fafafc; --nebel-100:#f4f4f9; --nebel-200:#e9e8f1;
+  --nebel-300:#d6d5e2; --nebel-400:#a8a6bb; --nebel-500:#7f7d93;
+  --nebel-600:#5d5b71; --nebel-700:#434153;
+
+  --tinte:#18152f;          /* Text: Schwarz mit einem Hauch Violett */
+  --grund:#fdfdfe;          /* Seite */
+  --flaeche:#ffffff;        /* Karten und Felder */
+
+  --gruen:#177452;     --gruen-fond:#e5f5ec;
+  --bernstein:#9a5b00; --bernstein-fond:#fdf2df;
+  --rot:#c03246;       --rot-fond:#fdeaec;
+
+  /* Radien: Karten 20, Innenflächen 12 (konzentrisch bei 8er-Polster), Knöpfe Kapsel */
+  --radius-karte:20px; --radius-innen:12px; --radius-kapsel:999px;
+
+  --schrift-text:'General Sans',system-ui,sans-serif;
+  --kurve:cubic-bezier(.16,1,.3,1);
+}
+[data-schrift="clash"]{--schrift-schau:'Clash Display',sans-serif; --schau-spur:-.02em; --schau-gewicht:600}
+[data-schrift="bricolage"]{--schrift-schau:'Bricolage',sans-serif; --schau-spur:-.025em; --schau-gewicht:650}
+[data-schrift="chillax"]{--schrift-schau:'Chillax',sans-serif; --schau-spur:-.015em; --schau-gewicht:600}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-optical-sizing:auto}
+body{
+  background:var(--grund);color:var(--tinte);
+  font-family:var(--schrift-text);font-size:17px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.rahmen{max-width:1080px;margin:0 auto;padding:0 24px}
+
+h1,h2,h3,.schau{font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);letter-spacing:var(--schau-spur);line-height:1.12}
+a{color:var(--lila-600)}
+:focus-visible{outline:3px solid var(--lila-400);outline-offset:2px;border-radius:4px}
+
+/* ---------- Kopfzeile ---------- */
+header{
+  position:sticky;top:0;z-index:10;height:64px;
+  display:flex;align-items:center;gap:12px;
+  background:rgba(253,253,254,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:0.5px solid var(--nebel-200);
+  padding:0 24px;
+}
+header img{width:30px;height:30px;border-radius:7px}
+header .wortmarke{font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);font-size:19px;letter-spacing:-.01em}
+header .bereich{color:var(--nebel-500);font-size:15px;margin-left:2px}
+.schalter{margin-left:auto;display:flex;background:var(--nebel-100);border-radius:var(--radius-kapsel);padding:3px;gap:2px}
+.schalter button{
+  border:0;background:transparent;font:inherit;font-size:14px;font-weight:500;color:var(--nebel-600);
+  padding:6px 14px;border-radius:var(--radius-kapsel);cursor:pointer;min-height:32px;
+  transition:background .18s var(--kurve),color .18s var(--kurve);
+}
+.schalter button[aria-pressed="true"]{background:var(--flaeche);color:var(--tinte);box-shadow:0 1px 4px rgba(24,21,47,.12)}
+
+/* ---------- Bühne: das System in Aktion ---------- */
+.buehne{position:relative;overflow:hidden;padding:96px 0 80px;text-align:left}
+.buehne::before{ /* der eine ruhige Glanzmoment der Seite */
+  content:"";position:absolute;inset:-40% -20% auto auto;width:70%;height:120%;
+  background:
+    radial-gradient(42% 46% at 68% 38%, var(--lila-200), transparent 70%),
+    radial-gradient(30% 34% at 86% 62%, var(--lila-100), transparent 70%);
+  filter:blur(6px);pointer-events:none;
+}
+.buehne .rahmen{position:relative}
+.buehne h1{font-size:clamp(40px,6.4vw,68px);max-width:15ch}
+.buehne h1 em{font-style:normal;color:var(--lila-600)}
+.buehne p{margin-top:18px;max-width:44ch;font-size:19px;color:var(--nebel-600)}
+.buehne .taten{margin-top:32px;display:flex;gap:12px;flex-wrap:wrap}
+
+/* ---------- Knöpfe ---------- */
+.knopf{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:46px;padding:0 24px;border-radius:var(--radius-kapsel);
+  font:inherit;font-size:16px;font-weight:600;cursor:pointer;border:0;
+  transition:transform .12s var(--kurve),background .18s var(--kurve),box-shadow .18s var(--kurve);
+}
+.knopf:active{transform:scale(.97)}
+.knopf.primaer{background:var(--lila-600);color:#fff;box-shadow:0 8px 20px rgba(111,99,232,.28)}
+.knopf.primaer:hover{background:var(--lila-700)}
+.knopf.sekundaer{background:var(--lila-100);color:var(--lila-800)}
+.knopf.sekundaer:hover{background:var(--lila-200)}
+.knopf.leise{background:transparent;color:var(--tinte);box-shadow:inset 0 0 0 1px var(--nebel-300)}
+.knopf.leise:hover{background:var(--nebel-100)}
+.knopf.gefahr{background:var(--rot-fond);color:var(--rot)}
+
+/* ---------- Abschnitte ---------- */
+section{padding:56px 0;border-top:0.5px solid var(--nebel-200)}
+section h2{font-size:30px;margin-bottom:8px}
+section p.unter{color:var(--nebel-500);max-width:62ch;margin-bottom:32px}
+
+/* Farben */
+.reihe-name{font-size:14px;font-weight:600;color:var(--nebel-600);margin:24px 0 10px}
+.farbreihe{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px}
+.chip{border-radius:var(--radius-innen);height:76px;display:flex;flex-direction:column;justify-content:flex-end;padding:8px 10px;border:0.5px solid rgba(24,21,47,.08)}
+.chip b{font-size:12px;font-weight:600}
+.chip span{font-size:11px;opacity:.75}
+.chip.hell{color:var(--tinte)} .chip.dunkel{color:#fff}
+.chip.marke{outline:2px solid var(--tinte);outline-offset:2px}
+
+/* Schriftmuster */
+.muster{display:grid;gap:22px}
+.muster .zeile{display:grid;grid-template-columns:150px 1fr;gap:20px;align-items:baseline}
+.muster .mass{font-size:13px;color:var(--nebel-500)}
+.muster .schau-1{font-size:56px}
+.muster .schau-2{font-size:34px}
+.muster .schau-3{font-size:24px}
+.muster .betont{font-weight:600}
+.muster .klein{font-size:15px;color:var(--nebel-600)}
+.muster .fussnote{font-size:13px;color:var(--nebel-500)}
+.muster .zahlen{font-size:34px;font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);letter-spacing:0;font-variant-numeric:tabular-nums}
+@media (max-width:700px){.muster .zeile{grid-template-columns:1fr;gap:4px}.muster .schau-1{font-size:40px}}
+
+/* Bausteine */
+.bausteine{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.baustein{background:var(--flaeche);border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);padding:24px}
+.baustein h3{font-size:17px;margin-bottom:18px}
+.baustein .satz{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+.pille{display:inline-flex;align-items:center;min-height:28px;padding:2px 12px;border-radius:var(--radius-kapsel);font-size:13.5px;font-weight:600}
+.pille.aktiv{background:var(--gruen-fond);color:var(--gruen)}
+.pille.wartet{background:var(--bernstein-fond);color:var(--bernstein)}
+.pille.entwurf{background:var(--nebel-100);color:var(--nebel-600)}
+.pille.lila{background:var(--lila-100);color:var(--lila-800)}
+
+.feld label{display:block;font-size:14px;font-weight:600;margin-bottom:6px}
+.feld input{
+  width:100%;min-height:46px;padding:0 14px;font:inherit;font-size:16px;color:var(--tinte);
+  background:var(--flaeche);border:1px solid var(--nebel-300);border-radius:var(--radius-innen);
+  transition:border-color .15s,box-shadow .15s;
+}
+.feld input:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+.feld .hilfe{font-size:13px;color:var(--nebel-500);margin-top:6px}
+
+.karte-demo{background:var(--flaeche);border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);padding:20px;box-shadow:0 10px 30px rgba(24,21,47,.06)}
+.karte-demo .kopf{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.karte-demo .name{font-weight:600}
+.karte-demo .zahl{font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);font-size:40px;letter-spacing:var(--schau-spur);margin-top:10px}
+.karte-demo .deut{font-size:14px;color:var(--nebel-500)}
+
+/* Raster und Radien */
+.regeln{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.regel{background:var(--nebel-050);border-radius:var(--radius-karte);padding:24px}
+.regel h3{font-size:17px;margin-bottom:10px}
+.regel p{font-size:15px;color:var(--nebel-600)}
+.radien-schau{margin-top:16px;background:var(--lila-100);border-radius:var(--radius-karte);padding:8px;width:fit-content}
+.radien-schau > div{background:var(--flaeche);border-radius:var(--radius-innen);padding:14px 22px;font-size:14px;color:var(--nebel-600)}
+.punkte8{margin-top:16px;display:flex;gap:8px;align-items:flex-end}
+.punkte8 i{display:block;width:24px;background:var(--lila-300);border-radius:6px}
+
+footer{padding:40px 0 64px;color:var(--nebel-500);font-size:14px}
+footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
+
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important}}
+</style>
+</head>
+<body>
+
+<header>
+  <img src="bilder/quoro-icon.svg" alt="quoroAI">
+  <span class="wortmarke">quoroAI</span>
+  <span class="bereich">Designsystem</span>
+  <div class="schalter" role="group" aria-label="Schrift wählen">
+    <button type="button" data-wahl="clash" aria-pressed="true">Clash</button>
+    <button type="button" data-wahl="bricolage" aria-pressed="false">Bricolage</button>
+    <button type="button" data-wahl="chillax" aria-pressed="false">Chillax</button>
+  </div>
+</header>
+
+<div class="buehne">
+  <div class="rahmen">
+    <h1>Beratung, die <em>niemals</em> den Raum verlässt.</h1>
+    <p>Ihr KI-Unternehmensberater unter Ihrer Marke. Jedes Gespräch wird Strategie, jede Strategie wird sichtbar.</p>
+    <div class="taten">
+      <button class="knopf primaer" type="button">Mandat eröffnen</button>
+      <button class="knopf leise" type="button">Das Modell ansehen</button>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="rahmen">
+    <h2>Farbwelt</h2>
+    <p class="unter">Weißer Grund, eine Akzentfarbe: das Lila aus dem Logo. Alle Stufen sind daraus abgeleitet, die Grautöne tragen denselben violetten Unterton, damit nichts fremd wirkt.</p>
+
+    <div class="reihe-name">Lila · aus #6f63e8</div>
+    <div class="farbreihe">
+      <div class="chip hell" style="background:#f5f4fe"><b>050</b><span>f5f4fe</span></div>
+      <div class="chip hell" style="background:#ecebfd"><b>100</b><span>ecebfd</span></div>
+      <div class="chip hell" style="background:#dcd9fb"><b>200</b><span>dcd9fb</span></div>
+      <div class="chip hell" style="background:#c0bbf6"><b>300</b><span>c0bbf6</span></div>
+      <div class="chip hell" style="background:#9d93f1"><b>400</b><span>9d93f1</span></div>
+      <div class="chip dunkel" style="background:#8478ec"><b>500</b><span>8478ec</span></div>
+      <div class="chip dunkel marke" style="background:#6f63e8"><b>600 · Marke</b><span>6f63e8</span></div>
+      <div class="chip dunkel" style="background:#5a4cd6"><b>700</b><span>5a4cd6</span></div>
+      <div class="chip dunkel" style="background:#483dae"><b>800</b><span>483dae</span></div>
+      <div class="chip dunkel" style="background:#3b3486"><b>900</b><span>3b3486</span></div>
+    </div>
+
+    <div class="reihe-name">Nebel · Grau mit violettem Unterton</div>
+    <div class="farbreihe">
+      <div class="chip hell" style="background:#fafafc"><b>050</b><span>fafafc</span></div>
+      <div class="chip hell" style="background:#f4f4f9"><b>100</b><span>f4f4f9</span></div>
+      <div class="chip hell" style="background:#e9e8f1"><b>200</b><span>e9e8f1</span></div>
+      <div class="chip hell" style="background:#d6d5e2"><b>300</b><span>d6d5e2</span></div>
+      <div class="chip hell" style="background:#a8a6bb"><b>400</b><span>a8a6bb</span></div>
+      <div class="chip dunkel" style="background:#7f7d93"><b>500</b><span>7f7d93</span></div>
+      <div class="chip dunkel" style="background:#5d5b71"><b>600</b><span>5d5b71</span></div>
+      <div class="chip dunkel" style="background:#434153"><b>700</b><span>434153</span></div>
+      <div class="chip dunkel" style="background:#18152f"><b>Tinte</b><span>18152f</span></div>
+    </div>
+
+    <div class="reihe-name">Semantik · gedämpft, damit das Lila führt</div>
+    <div class="farbreihe" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+      <div class="chip hell" style="background:#e5f5ec;color:#177452"><b>Gut · 177452</b><span>Fond e5f5ec</span></div>
+      <div class="chip hell" style="background:#fdf2df;color:#9a5b00"><b>Wartet · 9a5b00</b><span>Fond fdf2df</span></div>
+      <div class="chip hell" style="background:#fdeaec;color:#c03246"><b>Gefahr · c03246</b><span>Fond fdeaec</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="rahmen">
+    <h2>Schrift</h2>
+    <p class="unter">Lauftext ist immer General Sans. Die Schauschrift für Überschriften und große Zahlen wählst du oben rechts: Clash Display (präzise), Bricolage Grotesque (eigenwillig) oder Chillax (weich, wie die Logo-Rundungen).</p>
+    <div class="muster">
+      <div class="zeile"><span class="mass">Schau 1 · 56</span><span class="schau schau-1">Zwölf Mandate, ein Berater.</span></div>
+      <div class="zeile"><span class="mass">Schau 2 · 34</span><span class="schau schau-2">Die Morgenlage für Waldmann Consulting</span></div>
+      <div class="zeile"><span class="mass">Schau 3 · 24</span><span class="schau schau-3">Liquidität über 13 Wochen</span></div>
+      <div class="zeile"><span class="mass">Betont · 17</span><span class="betont">Der nächste Schritt gehört der Beratung, nicht der Software.</span></div>
+      <div class="zeile"><span class="mass">Text · 17</span><span>Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich. Änderungen prüft die Beratung, bevor der Kunde sie sieht.</span></div>
+      <div class="zeile"><span class="mass">Klein · 15</span><span class="klein">Zuletzt geprüft am 12. August 2026 von Greta Hollstein.</span></div>
+      <div class="zeile"><span class="mass">Fußnote · 13</span><span class="fussnote">Alle Beträge netto in Euro.</span></div>
+      <div class="zeile"><span class="mass">Zahlen</span><span class="zahlen">247.380,55 € · 13 Wochen · +4,7 %</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="rahmen">
+    <h2>Bausteine</h2>
+    <p class="unter">Knöpfe als Kapseln, Zustand über Wort und Fläche statt Deko-Punkten, Felder mit Namen darüber.</p>
+    <div class="bausteine">
+      <div class="baustein">
+        <h3>Knöpfe</h3>
+        <div class="satz">
+          <button class="knopf primaer" type="button">Freigeben</button>
+          <button class="knopf sekundaer" type="button">Entwurf sichern</button>
+          <button class="knopf leise" type="button">Abbrechen</button>
+          <button class="knopf gefahr" type="button">Mandat schließen</button>
+        </div>
+      </div>
+      <div class="baustein">
+        <h3>Zustände</h3>
+        <div class="satz">
+          <span class="pille aktiv">Aktiv</span>
+          <span class="pille wartet">Wartet auf Freigabe</span>
+          <span class="pille entwurf">Entwurf</span>
+          <span class="pille lila">KI-Vorschlag</span>
+        </div>
+      </div>
+      <div class="baustein">
+        <h3>Eingabe</h3>
+        <div class="feld">
+          <label for="mandat">Name des Mandats</label>
+          <input id="mandat" type="text" placeholder="z. B. Steinbach &amp; Cie.">
+          <div class="hilfe">So erscheint das Mandat später im Modell.</div>
+        </div>
+      </div>
+      <div class="baustein" style="background:var(--nebel-050);border:0">
+        <h3>Karte</h3>
+        <div class="karte-demo">
+          <div class="kopf"><span class="name">Nordholm &amp; Partner</span><span class="pille aktiv">Aktiv</span></div>
+          <div class="zahl">18.240 €</div>
+          <div class="deut">Beratungsleistung im August, 46 Gespräche</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="rahmen">
+    <h2>Raster und Radien</h2>
+    <div class="regeln">
+      <div class="regel">
+        <h3>Achterraster</h3>
+        <p>Alle Abstände sind Vielfache von 8: 8, 16, 24, 32, 48, 64. Halbe Schritte (4) nur innerhalb von Bausteinen.</p>
+        <div class="punkte8"><i style="height:8px"></i><i style="height:16px"></i><i style="height:24px"></i><i style="height:32px"></i><i style="height:48px"></i><i style="height:64px"></i></div>
+      </div>
+      <div class="regel">
+        <h3>Konzentrische Radien</h3>
+        <p>Karten 20, Innenflächen 12, dazwischen 8 Polster: innen plus Polster ergibt außen. Knöpfe und Pillen sind Kapseln.</p>
+        <div class="radien-schau"><div>innen 12 + Polster 8 = außen 20</div></div>
+      </div>
+      <div class="regel">
+        <h3>Bewegung</h3>
+        <p>Eine Kurve für alles: cubic-bezier(.16, 1, .3, 1). Kurz für Berührung (120 ms), normal für Wechsel (180 bis 300 ms). Wer weniger Bewegung wünscht, bekommt keine.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="rahmen">quoroAI-Designsystem, Arbeitsstand. Die Schauschrift ist noch nicht entschieden, der Schalter oben rechts merkt sich deine Wahl.</div>
+</footer>
+
+<script>
+/* Schrift-Schalter: Wahl landet am <html> und im Speicher */
+(function(){
+  'use strict';
+  var knoepfe = document.querySelectorAll('.schalter button');
+  function setze(wahl){
+    document.documentElement.dataset.schrift = wahl;
+    knoepfe.forEach(function(k){ k.setAttribute('aria-pressed', String(k.dataset.wahl === wahl)); });
+    try { localStorage.setItem('quoro-schau-schrift', wahl); } catch (e) {}
+  }
+  knoepfe.forEach(function(k){ k.addEventListener('click', function(){ setze(k.dataset.wahl); }); });
+  var gemerkt = null;
+  try { gemerkt = localStorage.getItem('quoro-schau-schrift'); } catch (e) {}
+  if (gemerkt === 'clash' || gemerkt === 'bricolage' || gemerkt === 'chillax') setze(gemerkt);
+})();
+</script>
+</body>
+</html>
