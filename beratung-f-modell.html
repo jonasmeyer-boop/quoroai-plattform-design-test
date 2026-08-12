@@ -193,13 +193,69 @@ body.gezoomt #schleier{opacity:1}
 }
 body.drin #raum{opacity:1;transform:scale(1)}
 
-/* ========== Dashboard-Bausteine je Mandat ========== */
-.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+/* ========== Dashboard-Bausteine je Mandat ==========
+   Die Dashboards schweben über dem unscharfen Strategieraum, deshalb dürfen
+   ihre Tafeln Glas sein (Systemregel: schwebende Tafeln über Bild). Nur die
+   Lese-Zeilen bleiben solide weiß. */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:12px}
 .kpis .karte{padding:14px 16px}
 .kpis .karte .wert{font-size:22px}
 svg.kurve{width:100%;height:34px;display:block;overflow:visible;margin-top:8px}
 svg.kurve path{fill:none;stroke:var(--stift);stroke-width:2.2;stroke-linecap:round;opacity:.9}
 svg.kurve path.amber{stroke:var(--bernstein)}
+
+/* Die Lage-Tafel: der Held jedes Dashboards */
+.held{margin-top:14px;display:grid;grid-template-columns:1.45fr 1fr;gap:12px;align-items:stretch}
+.tafel-glas{
+  border-radius:var(--radius-karte);padding:20px 22px;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+.held .gross{
+  font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);letter-spacing:var(--schau-spur);
+  font-size:clamp(38px,4.6vw,52px);line-height:1.05;font-variant-numeric:tabular-nums;
+}
+.held .deut{font-size:13.5px;color:var(--grau);margin-top:2px}
+.held .hand-notiz{font-family:'Caveat',cursive;font-size:19px;font-weight:700;color:var(--stift);rotate:-1.2deg;margin-top:6px}
+svg.zieh{width:100%;height:64px;display:block;overflow:visible;margin-top:14px}
+svg.zieh .linie{fill:none;stroke:var(--stift);stroke-width:2.4;stroke-linecap:round}
+svg.zieh .linie.amber{stroke:var(--bernstein)}
+svg.zieh .fuell{opacity:0;transition:opacity .8s ease .15s}
+svg.zieh.voll .fuell{opacity:1}
+.held .ki{
+  display:grid;gap:8px;align-content:start;
+  border-radius:var(--radius-karte);padding:18px 20px;
+  background:color-mix(in srgb, var(--lila-600) 12%, rgba(255,255,255,.42));
+  backdrop-filter:blur(16px) saturate(170%);-webkit-backdrop-filter:blur(16px) saturate(170%);
+  border:1px solid rgba(255,255,255,.55);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 14px 40px rgba(59,52,134,.14);
+}
+.held .ki .v-name{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--lila-800)}
+.held .ki .v-satz{font-size:14.5px;line-height:1.5}
+.held .ki .v-hand{font-family:'Caveat',cursive;font-size:19px;font-weight:700;color:var(--stift);rotate:-1deg}
+.held .ki .knopf,.held .tafel-glas .knopf{min-height:38px;padding:0 16px;font-size:13.5px;justify-self:start;margin-top:2px}
+.held .ruhig{display:grid;gap:10px;align-content:start}
+.held .ruhig .z-fuell{flex-direction:row;justify-content:flex-start}
+
+/* Die Flotte in der Zentrale: ein Griff je Mandat */
+.flotte{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:10px}
+.flotte-karte{
+  text-align:left;cursor:pointer;border:1px solid rgba(255,255,255,.65);
+  border-radius:var(--radius-karte);padding:16px 18px;font:inherit;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 10px 30px rgba(24,21,47,.08);
+  transition:translate .25s var(--feder),box-shadow .25s ease;
+  display:grid;gap:2px;
+}
+.flotte-karte:hover{translate:0 -3px;box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 18px 44px rgba(24,21,47,.14)}
+.flotte-karte .f-kopf{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.flotte-karte .f-kopf b{font-size:14px;letter-spacing:-.01em}
+.flotte-karte .f-kopf .zustand{width:36px;height:17px}
+.flotte-karte .f-zahl{font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);letter-spacing:var(--schau-spur);font-size:24px;margin-top:4px;font-variant-numeric:tabular-nums}
+.flotte-karte .f-deut{font-size:12px;color:var(--grau)}
 
 /* ========== Zonen-Lage: die Inhalte, SIE scrollt ========== */
 #zonen{
@@ -209,7 +265,7 @@ svg.kurve path.amber{stroke:var(--bernstein)}
   -webkit-mask-image:linear-gradient(to bottom, transparent 56px, rgba(0,0,0,.5) 92px, #000 126px);
 }
 body.gezoomt #zonen{display:block}
-.inhalt{display:none;max-width:640px;margin:0 auto;padding:132px 24px 80px}
+.inhalt{display:none;max-width:720px;margin:0 auto;padding:132px 24px 80px}
 .inhalt.offen{display:block}
 /* Ankunfts-Staffel: jede Gruppe bekommt ihre Verzögerung (--verz) aus dem Skript,
    so dass die letzte exakt mit dem Raum-Blend fertig wird. Als Keyframe-Animation,
@@ -239,8 +295,10 @@ body.gezoomt #zonen{display:block}
 .zeile .z-hand{font-family:'Caveat',cursive;font-size:18px;font-weight:700;color:var(--stift);rotate:-1deg;margin-top:4px}
 .karten{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
 .karte{
-  background:#fff;border:0.5px solid var(--linie);border-radius:var(--radius-karte);
-  padding:15px 18px;box-shadow:0 8px 24px rgba(16,19,26,.07);
+  background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.65);
+  border-radius:var(--radius-karte);padding:15px 18px;
+  backdrop-filter:blur(16px) saturate(170%);-webkit-backdrop-filter:blur(16px) saturate(170%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 10px 30px rgba(24,21,47,.08);
 }
 .karte .wert{
   font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);
@@ -335,6 +393,8 @@ body.gezoomt #zonen{display:block}
   .inhalt .kopf .z-fuell{flex-direction:row;align-items:center;gap:8px;margin-top:4px}
   .zeile{padding:12px 14px;gap:10px}
   .tueren .knopf{min-height:44px}
+  .held{grid-template-columns:1fr}
+  .flotte-karte{padding:13px 14px}
   .karten,.kpis{grid-template-columns:1fr}
   #film .weiter{bottom:calc(16px + env(safe-area-inset-bottom))}
 }
@@ -408,10 +468,26 @@ body.gezoomt #zonen{display:block}
       <div><h2>Petersen Stahlbau</h2><div class="stand">3 Gespräche diese Woche, Termin Donnerstag, 10:00</div></div>
       <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">1 Gespräch freigegeben</span></span>
     </div>
+    <div class="held">
+      <div class="tafel-glas">
+        <div class="gross" data-zaehl>30,4 %</div>
+        <div class="deut">Marge heute, seit April im Sinkflug</div>
+        <svg class="zieh" viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden="true">
+          <defs><linearGradient id="verlauf-p" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a5b00" stop-opacity=".2"/><stop offset="1" stop-color="#9a5b00" stop-opacity="0"/></linearGradient></defs>
+          <path class="fuell" fill="url(#verlauf-p)" d="M2 8 L18 10 L34 9 L50 14 L66 18 L82 24 L98 30 L98 36 L2 36 Z"/>
+          <path class="linie amber" d="M2 8 L18 10 L34 9 L50 14 L66 18 L82 24 L98 30"/>
+        </svg>
+        <div class="hand-notiz">hier kippt es!</div>
+      </div>
+      <div class="ki">
+        <span class="v-name">KI-Vorschlag</span>
+        <span class="v-satz">Preismodell umstellen: rechnerisch +38.000 € im Jahr, ab Woche 6 wirksam.</span>
+        <button class="bald knopf primaer" type="button">Vorschlag ansehen</button>
+      </div>
+    </div>
     <div class="kpis">
-      <div class="karte"><div class="wert">30,4 %</div><div class="label">Marge heute</div><svg class="kurve" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"><path class="amber" d="M2 8 L18 10 L34 9 L50 14 L66 18 L82 24 L98 30"/></svg><div class="delta amber">fällt seit April</div></div>
-      <div class="karte"><div class="wert">20.550 €</div><div class="label">offene Forderungen</div><div class="delta amber">eine Rechnung seit 9 Tagen</div></div>
-      <div class="karte"><div class="wert blau">+38.000 €</div><div class="label">Preismodell, rechnerisch im Jahr</div><div class="delta">ab Woche 6 wirksam</div></div>
+      <div class="karte"><div class="wert" data-zaehl>20.550 €</div><div class="label">offene Forderungen</div><div class="delta amber">eine Rechnung seit 9 Tagen</div></div>
+      <div class="karte"><div class="wert" data-zaehl>3</div><div class="label">Gespräche diese Woche</div><div class="delta">eines freigegeben</div></div>
     </div>
     <h3>Was wartet</h3>
     <div class="zeilen">
@@ -436,10 +512,26 @@ body.gezoomt #zonen{display:block}
       <div><h2>Cordes Logistik</h2><div class="stand">letzte Frage heute, 8:12</div></div>
       <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">Übergabe offen</span></span>
     </div>
+    <div class="held">
+      <div class="tafel-glas">
+        <div class="gross" data-zaehl>12,1 %</div>
+        <div class="deut">Frachtmarge, stabil seit Mai</div>
+        <svg class="zieh" viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden="true">
+          <defs><linearGradient id="verlauf-c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6f63e8" stop-opacity=".2"/><stop offset="1" stop-color="#6f63e8" stop-opacity="0"/></linearGradient></defs>
+          <path class="fuell" fill="url(#verlauf-c)" d="M2 20 L18 17 L34 19 L50 15 L66 17 L82 14 L98 15 L98 36 L2 36 Z"/>
+          <path class="linie" d="M2 20 L18 17 L34 19 L50 15 L66 17 L82 14 L98 15"/>
+        </svg>
+      </div>
+      <div class="ki">
+        <span class="v-name">Übergabe des KI-Beraters</span>
+        <span class="v-satz">Die Steuerfrage von 8:12 liegt außerhalb meines Rahmens.</span>
+        <span class="v-hand">die gehört dir.</span>
+        <button class="bald knopf primaer" type="button">Frage beantworten</button>
+      </div>
+    </div>
     <div class="kpis">
-      <div class="karte"><div class="wert">12,1 %</div><div class="label">Frachtmarge</div><div class="delta">stabil seit Mai</div></div>
-      <div class="karte"><div class="wert">4</div><div class="label">Gespräche im August</div><div class="delta">alle nur für den Kunden</div></div>
-      <div class="karte"><div class="wert">6,5</div><div class="label">Std. im August</div><div class="delta">Leistungsnachweis offen</div></div>
+      <div class="karte"><div class="wert" data-zaehl>4</div><div class="label">Gespräche im August</div><div class="delta">alle nur für den Kunden</div></div>
+      <div class="karte"><div class="wert" data-zaehl>6,5</div><div class="label">Std. im August</div><div class="delta">Leistungsnachweis offen</div></div>
     </div>
     <h3>Was wartet</h3>
     <div class="zeilen">
@@ -461,10 +553,24 @@ body.gezoomt #zonen{display:block}
       <div><h2>Bäckerei Freitag</h2><div class="stand">6 Gespräche im Juli, keines freigegeben</div></div>
       <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">läuft ruhig</span></span>
     </div>
+    <div class="held">
+      <div class="tafel-glas">
+        <div class="gross" data-zaehl>31 %</div>
+        <div class="deut">Personalquote, Ziel gehalten</div>
+        <svg class="zieh" viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden="true">
+          <defs><linearGradient id="verlauf-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6f63e8" stop-opacity=".2"/><stop offset="1" stop-color="#6f63e8" stop-opacity="0"/></linearGradient></defs>
+          <path class="fuell" fill="url(#verlauf-f)" d="M2 18 L18 20 L34 17 L50 19 L66 16 L82 18 L98 17 L98 36 L2 36 Z"/>
+          <path class="linie" d="M2 18 L18 20 L34 17 L50 19 L66 16 L82 18 L98 17"/>
+        </svg>
+      </div>
+      <div class="tafel-glas ruhig">
+        <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">läuft ruhig</span></span>
+        <span style="font-size:14.5px;line-height:1.5">Leistungsnachweis Juli über 2.900 € ist versendet und bezahlt. Kein Eingriff nötig.</span>
+      </div>
+    </div>
     <div class="kpis">
-      <div class="karte"><div class="wert">31 %</div><div class="label">Personalquote</div><div class="delta">stabil, Ziel gehalten</div></div>
-      <div class="karte"><div class="wert">2.900 €</div><div class="label">Leistungsnachweis Juli</div><div class="delta">versendet und bezahlt</div></div>
-      <div class="karte"><div class="wert">6</div><div class="label">Gespräche im Juli</div><div class="delta">keines freigegeben</div></div>
+      <div class="karte"><div class="wert" data-zaehl>6</div><div class="label">Gespräche im Juli</div><div class="delta">keines freigegeben</div></div>
+      <div class="karte"><div class="wert" data-zaehl>2.900 €</div><div class="label">Leistungsnachweis Juli</div><div class="delta">versendet und bezahlt</div></div>
     </div>
     <h3>Gespräche und Unterlagen</h3>
     <div class="zeilen">
@@ -482,10 +588,27 @@ body.gezoomt #zonen{display:block}
       <div><h2>MTS Maschinenbau</h2><div class="stand">letzte Frage am 22. Juli, davor wöchentlich</div></div>
       <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">seit 3 Wochen still</span></span>
     </div>
+    <div class="held">
+      <div class="tafel-glas">
+        <div class="gross" data-zaehl>0 Fragen</div>
+        <div class="deut">seit 3 Wochen, davor kam jede Woche eine</div>
+        <svg class="zieh" viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden="true">
+          <defs><linearGradient id="verlauf-m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a5b00" stop-opacity=".2"/><stop offset="1" stop-color="#9a5b00" stop-opacity="0"/></linearGradient></defs>
+          <path class="fuell" fill="url(#verlauf-m)" d="M2 10 L18 6 L34 12 L50 8 L66 22 L82 30 L98 31 L98 36 L2 36 Z"/>
+          <path class="linie amber" d="M2 10 L18 6 L34 12 L50 8 L66 22 L82 30 L98 31"/>
+        </svg>
+        <div class="hand-notiz">hier wird es still.</div>
+      </div>
+      <div class="ki">
+        <span class="v-name">KI-Vorschlag</span>
+        <span class="v-satz">Halbjahresblick anbieten, das kam zuletzt gut an.</span>
+        <span class="v-hand">vielleicht anrufen?</span>
+        <button class="bald knopf primaer" type="button">Gespräch beginnen</button>
+      </div>
+    </div>
     <div class="kpis">
-      <div class="karte"><div class="wert">0</div><div class="label">Fragen seit 3 Wochen</div><svg class="kurve" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"><path class="amber" d="M2 10 L18 6 L34 12 L50 8 L66 22 L82 30 L98 31"/></svg><div class="delta amber">davor wöchentlich</div></div>
-      <div class="karte"><div class="wert">4.200 €</div><div class="label">offene Rechnung</div><div class="delta amber">seit 12 Tagen</div></div>
-      <div class="karte"><div class="wert">11,2</div><div class="label">Std. im Juli</div><div class="delta">Halbjahresblick kam gut an</div></div>
+      <div class="karte"><div class="wert" data-zaehl>4.200 €</div><div class="label">offene Rechnung</div><div class="delta amber">seit 12 Tagen</div></div>
+      <div class="karte"><div class="wert" data-zaehl>11,2</div><div class="label">Std. im Juli</div><div class="delta">Halbjahresblick kam gut an</div></div>
     </div>
     <h3>Was wartet</h3>
     <div class="zeilen">
@@ -502,10 +625,43 @@ body.gezoomt #zonen{display:block}
     <div class="kopf">
       <div><h2 data-du="Deine Zentrale" data-sie="Ihre Zentrale">Deine Zentrale</h2><div class="stand">der KI-Berater, die Marke, die Abrechnung</div></div>
     </div>
-    <h3 data-du="Dein KI-Berater, diese Woche" data-sie="Ihr KI-Berater, diese Woche">Dein KI-Berater, diese Woche</h3>
-    <div class="karten">
-      <div class="karte"><div class="wert">126</div><div class="label">Fragen beantwortet</div><div class="delta">aus 4 Mandaten</div></div>
-      <div class="karte"><div class="wert">4</div><div class="label">an Menschen übergeben</div><div class="delta amber">eine wartet auf Antwort</div></div>
+    <div class="held">
+      <div class="tafel-glas">
+        <div class="gross" data-zaehl>126 Fragen</div>
+        <div class="deut" data-du="hat dein KI-Berater diese Woche beantwortet, aus 4 Mandaten" data-sie="hat Ihr KI-Berater diese Woche beantwortet, aus 4 Mandaten">hat dein KI-Berater diese Woche beantwortet, aus 4 Mandaten</div>
+        <svg class="zieh" viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden="true">
+          <defs><linearGradient id="verlauf-z" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6f63e8" stop-opacity=".22"/><stop offset="1" stop-color="#6f63e8" stop-opacity="0"/></linearGradient></defs>
+          <path class="fuell" fill="url(#verlauf-z)" d="M2 28 L18 25 L34 26 L50 20 L66 21 L82 14 L98 8 L98 36 L2 36 Z"/>
+          <path class="linie" d="M2 28 L18 25 L34 26 L50 20 L66 21 L82 14 L98 8"/>
+        </svg>
+      </div>
+      <div class="tafel-glas ruhig">
+        <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">eine wartet</span></span>
+        <span style="font-size:14.5px;line-height:1.5" data-du="4 Fragen hat er an dich übergeben. Drei sind beantwortet, die Steuerfrage von Cordes wartet noch." data-sie="4 Fragen hat er an Sie übergeben. Drei sind beantwortet, die Steuerfrage von Cordes wartet noch.">4 Fragen hat er an dich übergeben. Drei sind beantwortet, die Steuerfrage von Cordes wartet noch.</span>
+      </div>
+    </div>
+    <h3 data-du="Deine Mandate, ein Griff je Gebäude" data-sie="Ihre Mandate, ein Griff je Gebäude">Deine Mandate, ein Griff je Gebäude</h3>
+    <div class="flotte">
+      <button class="flotte-karte" type="button" data-zu="petersen">
+        <span class="f-kopf"><b>Petersen Stahlbau</b><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span></span>
+        <span class="f-zahl">30,4 %</span>
+        <span class="f-deut">Marge fällt, Preismodell liegt bereit</span>
+      </button>
+      <button class="flotte-karte" type="button" data-zu="cordes">
+        <span class="f-kopf"><b>Cordes Logistik</b><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span></span>
+        <span class="f-zahl">12,1 %</span>
+        <span class="f-deut">Frachtmarge stabil, Steuerfrage wartet</span>
+      </button>
+      <button class="flotte-karte" type="button" data-zu="freitag">
+        <span class="f-kopf"><b>Bäckerei Freitag</b><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span></span>
+        <span class="f-zahl">31 %</span>
+        <span class="f-deut">Personalquote im Ziel, läuft ruhig</span>
+      </button>
+      <button class="flotte-karte" type="button" data-zu="mts">
+        <span class="f-kopf"><b>MTS Maschinenbau</b><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span></span>
+        <span class="f-zahl">0 Fragen</span>
+        <span class="f-deut">seit 3 Wochen still, Anruf vorgeschlagen</span>
+      </button>
     </div>
     <h3>So tritt er auf</h3>
     <div class="karten">
@@ -607,9 +763,10 @@ body.gezoomt #zonen{display:block}
     if (sofort || reduziert) { void kamera.offsetWidth; kamera.style.transition = alteTransition || ''; }
   }
 
-  /* Der Stift zeichnet die Dashboard-Kurven, sobald der Raum steht */
+  /* Der Stift zeichnet die Dashboard-Kurven, sobald der Raum steht;
+     danach füllt sich die Fläche unter der Linie */
   function zeichneKurven(sec){
-    sec.querySelectorAll('svg.kurve path').forEach(function(pfad){
+    sec.querySelectorAll('svg.kurve path, svg.zieh .linie').forEach(function(pfad){
       var len = pfad.getTotalLength();
       pfad.style.transition = 'none';
       pfad.style.strokeDasharray = len;
@@ -618,6 +775,34 @@ body.gezoomt #zonen{display:block}
       void pfad.getBoundingClientRect();
       pfad.style.transition = 'stroke-dashoffset .7s cubic-bezier(.45,.05,.55,.95) .5s';
       pfad.style.strokeDashoffset = 0;
+    });
+    sec.querySelectorAll('svg.zieh').forEach(function(s){
+      s.classList.remove('voll');
+      if (reduziert) { s.classList.add('voll'); return; }
+      setTimeout(function(){ s.classList.add('voll'); }, 1000);
+    });
+  }
+
+  /* Die großen Zahlen zählen beim Ankommen hoch */
+  function zaehleHoch(sec){
+    sec.querySelectorAll('[data-zaehl]').forEach(function(el){
+      var text = el.dataset.zaehlText || (el.dataset.zaehlText = el.textContent.trim());
+      var m = text.match(/^([+]?)([\d.]+(?:,\d+)?)(.*)$/);
+      el.textContent = text;
+      if (!m || reduziert) return;
+      var ziel = parseFloat(m[2].replace(/\./g, '').replace(',', '.'));
+      if (!ziel) return;
+      var dez = (m[2].split(',')[1] || '').length;
+      var fmt = new Intl.NumberFormat('de-DE', {minimumFractionDigits: dez, maximumFractionDigits: dez});
+      var start = null, dauer = 900;
+      function schritt(t){
+        if (!start) start = t;
+        var p = Math.min((t - start) / dauer, 1);
+        var weich = 1 - Math.pow(1 - p, 3);
+        el.textContent = p < 1 ? m[1] + fmt.format(ziel * weich) + m[3] : text;
+        if (p < 1) requestAnimationFrame(schritt);
+      }
+      setTimeout(function(){ requestAnimationFrame(schritt); }, 300);
     });
   }
 
@@ -651,7 +836,7 @@ body.gezoomt #zonen{display:block}
     } else {
       raumTimer = setTimeout(function(){ if (offen === ziel) document.body.classList.add('drin'); }, 330);
     }
-    if (offeneSection) zeichneKurven(offeneSection);
+    if (offeneSection) { zeichneKurven(offeneSection); zaehleHoch(offeneSection); }
     if (location.hash !== '#' + ziel) history.replaceState(null, '', '#' + ziel);
   }
   function schliesse(){
@@ -670,6 +855,10 @@ body.gezoomt #zonen{display:block}
   });
   document.querySelectorAll('#tisch .t-zettel').forEach(function(t){
     t.addEventListener('click', function(){ oeffne(t.dataset.zu); });
+  });
+  /* Die Flotte der Zentrale springt direkt ins Mandat */
+  document.querySelectorAll('.flotte-karte').forEach(function(k){
+    k.addEventListener('click', function(){ oeffne(k.dataset.zu); });
   });
   krume.addEventListener('click', schliesse);
   window.addEventListener('keydown', function(e){ if (e.key === 'Escape') schliesse(); });
