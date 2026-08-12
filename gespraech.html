@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V12 (V11 + Blatt-Blick: Dokument-Karten öffnen sich zum Papier, auch aus der Akte) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V13 (V12 + eigene Unterlagen: Büroklammer, Ziehen auf den Tisch, Anlagen-Chips, eigene Karten mit Bildvorschau) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -332,7 +332,10 @@ body.hirn #hirn-lampe{display:inline-flex}
 .dokument .meta{font-size:12.5px;color:var(--grau)}
 
 /* Dokument öffnen: die Karte ist ein Griff, kein Bild */
-.karte[data-doku]{cursor:pointer}
+.karte[data-doku],.karte[data-bild]{cursor:pointer}
+#regal .karte[data-bild]{pointer-events:auto}
+.karte[data-bild].belichtet:hover{translate:0 -2px;box-shadow:0 14px 34px rgba(16,19,26,.1)}
+.karte[data-bild].belichtet{transition:border-color .5s ease,box-shadow .25s ease,translate .25s var(--feder)}
 .karte[data-doku] .dokument::after{
   content:'›';margin-left:auto;padding-left:12px;
   font-size:24px;font-weight:600;color:var(--grau);
@@ -430,8 +433,64 @@ body.blatt-offen{overflow:hidden}
   background:linear-gradient(color-mix(in srgb, var(--papier) 1%, transparent), var(--papier) 40%);
 }
 #eingabe .zeile{position:relative}
+#anhang-knopf{
+  position:absolute;left:7px;top:50%;translate:0 -50%;z-index:1;
+  width:40px;height:40px;border-radius:999px;border:none;background:transparent;
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+  transition:background .2s ease;
+}
+#anhang-knopf:hover{background:rgba(16,19,26,.06)}
+#anhang-knopf svg{width:19px;height:19px}
+#anhang-knopf svg path{fill:none;stroke:var(--grau);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
+#anhang-knopf:hover svg path{stroke:var(--blau)}
+#anlagen{display:flex;gap:8px;flex-wrap:wrap;padding:0 6px 10px}
+.anlage{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 10px 6px 6px;
+  border-radius:12px;border:0.5px solid var(--linie);background:#fff;
+  box-shadow:0 4px 14px rgba(16,19,26,.06);font-size:12.5px;font-weight:700;
+}
+.anlage img{width:28px;height:28px;border-radius:6px;object-fit:cover}
+.anlage .mini-blatt{
+  width:22px;height:28px;border-radius:3px;border:1px solid var(--linie);
+  position:relative;background:#fff;flex-shrink:0;
+}
+.anlage .mini-blatt::after{
+  content:'';position:absolute;left:4px;right:4px;top:8px;height:12px;
+  background:linear-gradient(var(--linie) 1.5px, transparent 1.5px);background-size:100% 5px;
+}
+.anlage .groesse{color:var(--grau);font-weight:500}
+.anlage button{
+  width:20px;height:20px;border-radius:999px;border:none;cursor:pointer;
+  background:rgba(16,19,26,.08);color:var(--tinte);font-size:12px;line-height:1;
+  transition:background .15s,color .15s;
+}
+.anlage button:hover{background:var(--tinte);color:#fff}
+
+/* Ablage: die ganze Seite ist der Tisch */
+#ablage{
+  position:fixed;inset:0;z-index:70;
+  display:flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb, var(--papier) 90%, transparent);
+  backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+  opacity:0;pointer-events:none;transition:opacity .25s ease;
+}
+#ablage.offen{opacity:1}
+#ablage .rahmen{position:relative;width:min(560px,84vw);padding:56px 32px;text-align:center}
+#ablage .strichrahmen{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+#ablage .strichrahmen path{
+  fill:none;stroke:var(--stift);stroke-width:2.5;stroke-linecap:round;
+  stroke-dasharray:10 12;opacity:.8;
+}
+#ablage .ablage-text{font-family:'Caveat',cursive;font-size:clamp(30px,5vw,42px);font-weight:700;color:var(--stift)}
+#ablage .ablage-unter{font-size:14px;color:var(--grau);margin-top:4px}
+
+/* eigene Unterlagen als Karten */
+.karte .dokument img.vorschau{width:40px;height:52px;border-radius:4px;object-fit:cover;flex-shrink:0}
+#blatt-blick .bogen-inhalt img.gross{width:100%;border-radius:12px;margin-top:16px;display:block}
+
 #frage{
-  width:100%;min-height:54px;padding:0 62px 0 22px;border-radius:999px;
+  width:100%;min-height:54px;padding:0 62px 0 56px;border-radius:999px;
   border:0.5px solid var(--linie);background:#fff;
   font-family:inherit;font-size:16px;color:var(--tinte);outline:none;
   box-shadow:0 8px 30px rgba(16,19,26,.07);
@@ -517,13 +576,26 @@ body.blatt-offen{overflow:hidden}
   </div>
 </main>
 
+<div id="ablage" aria-hidden="true">
+  <div class="rahmen">
+    <svg class="strichrahmen" aria-hidden="true"></svg>
+    <div class="ablage-text">Leg es auf den Tisch</div>
+    <div class="ablage-unter">Verträge, Auswertungen, Fotos — dein Berater liest alles mit.</div>
+  </div>
+</div>
+
 <div id="eingabe">
+  <div id="anlagen" hidden></div>
   <div class="zeile">
+    <button id="anhang-knopf" type="button" aria-label="Unterlage anhängen" title="Unterlage anhängen">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 12.5 L15.5 5.5 a3.1 3.1 0 0 1 4.4 4.4 L10.6 19.2 a4.9 4.9 0 0 1 -6.9 -6.9 L13 3"/></svg>
+    </button>
     <input id="frage" type="text" placeholder="Frag deine Beratung" aria-label="Deine Frage an die Beratung" autocomplete="off">
     <button id="senden" type="button" aria-label="Frage senden" title="Frage senden">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5 V6 M6.5 11.5 L12 5.5 L17.5 11.5"/></svg>
     </button>
   </div>
+  <input type="file" id="datei-wahl" multiple hidden>
 </div>
 
 <script>
@@ -577,6 +649,10 @@ body.blatt-offen{overflow:hidden}
   }
   function euro(n){ return n.toLocaleString('de-DE') + ' €'; }
   function zufall(a, b){ return a + Math.random() * (b - a); }
+  function groesse(b){
+    if (b >= 1048576) return (b / 1048576).toFixed(1).replace('.', ',') + ' MB';
+    return Math.max(1, Math.round(b / 1024)) + ' kB';
+  }
   /* Schreibkosten eines Worts in Takt-Einheiten: Satzzeichen kaufen sich eine Atempause */
   function wortKosten(text){
     if (/[.!?…]["“”)]*\s*$/.test(text)) return 4.2;
@@ -1000,6 +1076,11 @@ body.blatt-offen{overflow:hidden}
         notiz.textContent = 'die 4 % halten!';
         notiz.hidden = false;
         fuss.innerHTML = '<span>Seite 1 von 12</span><span>Das vollständige Dokument liegt in deiner Akte</span>';
+      } else if (/^von dir/.test(metaText)) {
+        inhalt.innerHTML =
+          '<h4>Deine Unterlage</h4>' +
+          '<p>Dein Berater hat sie gelesen und in deine Akte gelegt. Im echten Produkt öffnet sie sich hier im Original.</p>';
+        fuss.innerHTML = '<span>von dir abgelegt</span><span>liegt in deiner Akte</span>';
       } else if (/entsteht|in arbeit/i.test(name + ' ' + metaText)) {
         inhalt.innerHTML =
           '<h4>Dieses Dokument entsteht gerade</h4>' +
@@ -1012,13 +1093,29 @@ body.blatt-offen{overflow:hidden}
         fuss.innerHTML = '<span>Vorführung</span><span>Demo-Daten</span>';
       }
     }
-    function oeffne(name, metaText){
-      fuelle(name, metaText || '');
+    function zeige(){
       blick.classList.add('offen');
       blick.setAttribute('aria-hidden', 'false');
       blick.scrollTop = 0;
       zu.hidden = false;
       document.body.classList.add('blatt-offen');
+    }
+    function oeffne(name, metaText){
+      fuelle(name, metaText || '');
+      zeige();
+    }
+    function oeffneBild(url, name, metaText){
+      titel.textContent = name;
+      meta.textContent = metaText || '';
+      notiz.hidden = true;
+      inhalt.innerHTML = '';
+      var im = document.createElement('img');
+      im.className = 'gross';
+      im.src = url;
+      im.alt = name;
+      inhalt.appendChild(im);
+      fuss.innerHTML = '<span>von dir abgelegt</span><span>liegt in deiner Akte</span>';
+      zeige();
     }
     function schliesse(){
       blick.classList.remove('offen');
@@ -1032,9 +1129,10 @@ body.blatt-offen{overflow:hidden}
     });
     /* Ein Griff für alle Dokument-Karten — auch für die Klone im Regal */
     function greife(e){
-      var karte = e.target.closest('.karte[data-doku]');
+      var karte = e.target.closest('.karte[data-doku], .karte[data-bild]');
       if (!karte) return;
-      oeffne(karte.dataset.doku, karte.dataset.dokuMeta);
+      if (karte.dataset.bild) oeffneBild(karte.dataset.bild, karte.dataset.doku || 'Dein Bild', karte.dataset.dokuMeta);
+      else oeffne(karte.dataset.doku, karte.dataset.dokuMeta);
     }
     document.getElementById('akte').addEventListener('click', greife);
     document.getElementById('regal-inhalt').addEventListener('click', greife);
@@ -1326,6 +1424,128 @@ body.blatt-offen{overflow:hidden}
     };
   }
 
+  /* ---------- Eigene Unterlagen: anhängen, hinlegen, ablegen ---------- */
+  var wartendeAnlagen = [];
+  var zeichneAnlagen = function(){};
+  (function(){
+    var knopf = document.getElementById('anhang-knopf');
+    var wahl = document.getElementById('datei-wahl');
+    var leiste = document.getElementById('anlagen');
+    var ablage = document.getElementById('ablage');
+    var tiefe = 0;
+
+    zeichneAnlagen = function(){
+      leiste.innerHTML = '';
+      leiste.hidden = !wartendeAnlagen.length;
+      wartendeAnlagen.forEach(function(a){
+        var chip = document.createElement('span');
+        chip.className = 'anlage';
+        if (a.url) {
+          var im = document.createElement('img');
+          im.src = a.url; im.alt = '';
+          chip.appendChild(im);
+        } else {
+          var mb = document.createElement('span');
+          mb.className = 'mini-blatt';
+          chip.appendChild(mb);
+        }
+        var name = document.createElement('span');
+        name.textContent = a.datei.name;
+        chip.appendChild(name);
+        var gr = document.createElement('span');
+        gr.className = 'groesse';
+        gr.textContent = groesse(a.datei.size);
+        chip.appendChild(gr);
+        var weg = document.createElement('button');
+        weg.type = 'button'; weg.textContent = '×';
+        weg.setAttribute('aria-label', a.datei.name + ' entfernen');
+        weg.addEventListener('click', function(){
+          var wo = wartendeAnlagen.indexOf(a);
+          if (wo !== -1) {
+            if (a.url) URL.revokeObjectURL(a.url);
+            wartendeAnlagen.splice(wo, 1);
+          }
+          zeichneAnlagen();
+        });
+        chip.appendChild(weg);
+        leiste.appendChild(chip);
+      });
+    };
+    function nimm(dateien){
+      Array.prototype.slice.call(dateien).forEach(function(f){
+        wartendeAnlagen.push({datei: f, url: /^image\//.test(f.type) ? URL.createObjectURL(f) : null});
+      });
+      zeichneAnlagen();
+    }
+    knopf.addEventListener('click', function(){ wahl.click(); });
+    wahl.addEventListener('change', function(){ nimm(wahl.files); wahl.value = ''; });
+
+    /* Der Stift zeichnet den Ablage-Rahmen: gestrichelt, leicht zittrig */
+    (function(){
+      var svg = ablage.querySelector('.strichrahmen');
+      var rahmen = ablage.querySelector('.rahmen');
+      var w = rahmen.offsetWidth, h = rahmen.offsetHeight;
+      if (!w || !h) return;
+      svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+      var r = 4, pts = [], schritt = 34;
+      function kante(x1, y1, x2, y2){
+        var laenge = Math.hypot(x2 - x1, y2 - y1), n = Math.max(2, Math.round(laenge / schritt));
+        for (var i = 0; i < n; i++) {
+          var t = i / n;
+          pts.push([x1 + (x2 - x1) * t + zufall(-1.5, 1.5), y1 + (y2 - y1) * t + zufall(-1.5, 1.5)]);
+        }
+      }
+      kante(r, r, w - r, r); kante(w - r, r, w - r, h - r);
+      kante(w - r, h - r, r, h - r); kante(r, h - r, r, r);
+      pts.push(pts[0]);
+      var p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', glatt(pts) + 'Z');
+      svg.appendChild(p);
+    })();
+
+    /* Ziehen aus Downloads, Bildern, wo auch immer: die Seite ist der Tisch */
+    function hatDateien(e){
+      return e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') !== -1;
+    }
+    window.addEventListener('dragenter', function(e){
+      if (!hatDateien(e)) return;
+      e.preventDefault();
+      tiefe++;
+      ablage.classList.add('offen');
+      ablage.setAttribute('aria-hidden', 'false');
+    });
+    window.addEventListener('dragover', function(e){ if (hatDateien(e)) e.preventDefault(); });
+    window.addEventListener('dragleave', function(e){
+      if (!hatDateien(e)) return;
+      tiefe = Math.max(0, tiefe - 1);
+      if (!tiefe) { ablage.classList.remove('offen'); ablage.setAttribute('aria-hidden', 'true'); }
+    });
+    window.addEventListener('drop', function(e){
+      if (!hatDateien(e)) return;
+      e.preventDefault();
+      tiefe = 0;
+      ablage.classList.remove('offen');
+      ablage.setAttribute('aria-hidden', 'true');
+      nimm(e.dataTransfer.files);
+    });
+  })();
+
+  function baueEigene(a){
+    var k;
+    if (a.url) {
+      k = karteAus('<div class="dokument"><img class="vorschau" alt=""><div><div class="name"></div><div class="meta"></div></div></div>');
+      k.querySelector('img').src = a.url;
+      k.dataset.bild = a.url;
+    } else {
+      k = karteAus('<div class="dokument"><div class="blatt"></div><div><div class="name"></div><div class="meta"></div></div></div>');
+    }
+    k.dataset.doku = a.datei.name;
+    k.dataset.dokuMeta = 'von dir · ' + groesse(a.datei.size);
+    k.querySelector('.name').textContent = a.datei.name;
+    k.querySelector('.meta').textContent = 'von dir · ' + groesse(a.datei.size);
+    return k;
+  }
+
   /* ---------- Kapitel-Motor ---------- */
   var aktuellesKapitel = null;
 
@@ -1343,6 +1563,19 @@ body.blatt-offen{overflow:hidden}
     });
     akte.appendChild(sec);
     aktuellesKapitel = sec;
+    /* Mitgebrachte Unterlagen liegen zuerst auf dem Tisch */
+    if (wartendeAnlagen.length) {
+      var lage = document.createElement('div');
+      lage.className = 'reihe' + (wartendeAnlagen.length === 2 ? ' zweier' : '');
+      sec.querySelector('.lauf').appendChild(lage);
+      wartendeAnlagen.forEach(function(a){
+        var k = baueEigene(a);
+        lage.appendChild(k);
+        materialisiere(k);
+      });
+      wartendeAnlagen.length = 0;
+      zeichneAnlagen();
+    }
     runter();
     return sec;
   }
@@ -1823,15 +2056,25 @@ body.blatt-offen{overflow:hidden}
   }
 
   function frageStellen(text){
-    if (beschaeftigt || !text.trim()) return;
+    if (beschaeftigt) return;
+    var t = text.trim();
+    if (!t && !wartendeAnlagen.length) return;
+    if (!t) t = 'Schau dir das mal an.';
+    var mitgebracht = wartendeAnlagen.length;
     document.getElementById('frage').value = '';
-    if (hirnAn) { hirnFrage(text.trim()); return; }
+    if (hirnAn) { hirnFrage(t); return; }
     var passendes = null;
     for (var i = 0; i < SKRIPTE.length; i++) {
-      if (SKRIPTE[i].probe.test(text)) { passendes = SKRIPTE[i]; break; }
+      if (SKRIPTE[i].probe.test(t)) { passendes = SKRIPTE[i]; break; }
     }
-    var kapitel = neuesKapitel(passendes ? passendes.frage : text.trim());
-    spiele(kapitel, (passendes || SONST).schritte);
+    var kapitel = neuesKapitel(passendes ? passendes.frage : t);
+    var schritte = (passendes || SONST).schritte;
+    if (mitgebracht) {
+      schritte = [{t: mitgebracht > 1
+        ? 'Angekommen — deine Unterlagen liegen mit in der Akte, ich habe sie gelesen.'
+        : 'Angekommen — deine Unterlage liegt mit in der Akte, ich habe sie gelesen.'}].concat(schritte);
+    }
+    spiele(kapitel, schritte);
   }
 
   document.getElementById('senden').addEventListener('click', function(){
