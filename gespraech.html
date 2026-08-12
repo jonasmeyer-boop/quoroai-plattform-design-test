@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V14 (V13 + Logo-Platz in der Wortmarke, currily als vierte Demo-Marke zur Sehprobe) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V15 (V14 + Kapitel falten sich wie Papier statt zuzuschnappen) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -1550,17 +1550,52 @@ body.blatt-offen{overflow:hidden}
   /* ---------- Kapitel-Motor ---------- */
   var aktuellesKapitel = null;
 
+  /* Kapitel falten sich wie Papier: erst verblasst der Inhalt, dann gleitet
+     die Höhe — nie ein Sprung. Auffalten umgekehrt. */
+  function klappeZu(sec){
+    if (sec.classList.contains('zu')) return;
+    if (reduziert) { sec.classList.add('zu'); return; }
+    var lauf = sec.querySelector('.lauf');
+    var blende = lauf.animate([{opacity: 1}, {opacity: 0}], {duration: 240, easing: 'ease'});
+    blende.onfinish = function(){
+      var vorher = sec.offsetHeight;
+      sec.classList.add('zu');
+      var nachher = sec.offsetHeight;
+      sec.style.overflow = 'hidden';
+      var falt = sec.animate([{height: vorher + 'px'}, {height: nachher + 'px'}],
+        {duration: 460, easing: 'cubic-bezier(.22,.9,.24,1)'});
+      falt.onfinish = function(){ sec.style.overflow = ''; };
+    };
+  }
+  function klappeAuf(sec){
+    if (!sec.classList.contains('zu')) return;
+    if (reduziert) { sec.classList.remove('zu'); return; }
+    var vorher = sec.offsetHeight;
+    sec.classList.remove('zu');
+    var nachher = sec.offsetHeight;
+    var lauf = sec.querySelector('.lauf');
+    sec.style.overflow = 'hidden';
+    lauf.style.opacity = '0';
+    var falt = sec.animate([{height: vorher + 'px'}, {height: nachher + 'px'}],
+      {duration: 500, easing: 'cubic-bezier(.22,.9,.24,1)'});
+    falt.onfinish = function(){
+      sec.style.overflow = '';
+      var blende = lauf.animate([{opacity: 0}, {opacity: 1}], {duration: 260, easing: 'ease'});
+      blende.onfinish = function(){ lauf.style.opacity = ''; };
+    };
+  }
+
   function neuesKapitel(frage){
     var gruss = document.getElementById('gruss');
     if (gruss) gruss.remove();
-    if (aktuellesKapitel) aktuellesKapitel.classList.add('zu');
+    if (aktuellesKapitel) klappeZu(aktuellesKapitel);
     var sec = document.createElement('section');
     sec.className = 'kapitel';
     sec.innerHTML = '<h2 class="frage"></h2><div class="lauf"></div>';
     sec.querySelector('.frage').textContent = frage;
     sec.querySelector('.frage').addEventListener('click', function(){
-      if (sec.classList.contains('zu')) sec.classList.remove('zu');
-      else if (sec !== aktuellesKapitel) sec.classList.add('zu');
+      if (sec.classList.contains('zu')) klappeAuf(sec);
+      else if (sec !== aktuellesKapitel) klappeZu(sec);
     });
     akte.appendChild(sec);
     aktuellesKapitel = sec;
