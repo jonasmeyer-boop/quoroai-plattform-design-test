@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dein Berater</title>
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V4 (V3 + Anschluss ans lokale Vorführ-Hirn) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V5 (V4 + Schreibhand-Abspielpuffer, Hero-Formate, Cache no-store) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -644,11 +644,13 @@ body.hirn #hirn-lampe{display:inline-flex}
     k.querySelector('.label').textContent = d.label;
     if (d.unter) k.querySelector('.delta').textContent = d.unter;
     k.dataset.ziel = d.wert; k.dataset.vorz = d.vorzeichen || '';
+    k.dataset.format = (d.format === undefined ? '€' : d.format);
     return k;
   }
   function starteHero(k){
-    var vz = k.dataset.vorz;
-    zaehleHoch(k.querySelector('.wert'), parseFloat(k.dataset.ziel), ganz(function(n){ return vz + euro(n); }));
+    var vz = k.dataset.vorz, fmt = k.dataset.format;
+    var format = fmt === '€' ? euro : (fmt === '%' ? function(n){ return n + ' %'; } : function(n){ return n.toLocaleString('de-DE'); });
+    zaehleHoch(k.querySelector('.wert'), parseFloat(k.dataset.ziel), ganz(function(n){ return vz + format(n); }));
   }
 
   function baueHebel(d){
@@ -1019,57 +1021,71 @@ body.hirn #hirn-lampe{display:inline-flex}
     if (s && s.bereit) { hirnAn = true; document.body.classList.add('hirn'); }
   }).catch(function(){ /* kein Server: Drehbuch */ });
 
-  function neuerSchreiber(kapitel){
-    var lauf = kapitel.querySelector('.lauf');
+  /* Zerlegt ankommenden Text in Wort-Häppchen für den Spielplan (löst *Marken* auf) */
+  function neuerZerleger(spielplan){
     return {
-      puffer: '', absatz: null, huelle: null, markZaehler: 0, klartext: '',
-      wo(){
-        if (!this.absatz) {
-          this.absatz = document.createElement('p');
-          this.absatz.className = 'antwort';
-          lauf.appendChild(this.absatz);
-          this.huelle = null;
-        }
-        return this.huelle || this.absatz;
-      },
-      span(text){
-        if (!text) return;
-        var s = document.createElement('span');
-        s.className = 'wort';
-        s.textContent = text;
-        this.wo().appendChild(s);
-        if (reduziert) s.classList.add('da');
-        else requestAnimationFrame(function(){ s.classList.add('da'); });
-        this.klartext += text;
-      },
-      stueck(t){
-        if (/\n\s*\n/.test(t)) { this.absatz = null; this.huelle = null; this.klartext += ' '; return; }
+      puffer: '', imMerk: false, markZaehler: 0,
+      wort(t){
         var teile = t.split('*');
         for (var i = 0; i < teile.length; i++) {
           if (i > 0) {
-            if (!this.huelle) {
-              this.wo();
-              this.huelle = document.createElement('span');
-              this.huelle.className = 'merk';
-              this.huelle.dataset.sk = 'm' + (++this.markZaehler);
-              this.absatz.appendChild(this.huelle);
-            } else {
-              this.huelle = null;
-            }
+            this.imMerk = !this.imMerk;
+            if (this.imMerk) this.markZaehler++;
           }
-          this.span(teile[i].replace(/\n/g, ' '));
+          if (teile[i]) spielplan.push({art: 'wort', text: teile[i], merk: this.imMerk ? 'm' + this.markZaehler : null});
         }
       },
       fuege(text){
         this.puffer += text;
         while (true) {
-          var m = this.puffer.match(/^([\s\S]*?\S)(\s+)/);
-          if (!m) break;
-          this.stueck(m[1] + m[2]);
-          this.puffer = this.puffer.slice(m[0].length);
+          var br = this.puffer.match(/^\s*\n[ \t]*\n\s*/);
+          if (br) { spielplan.push({art: 'absatz'}); this.puffer = this.puffer.slice(br[0].length); continue; }
+          var wortVorBruch = this.puffer.match(/^([^\n]*?\S)(?=\s*\n[ \t]*\n)/);
+          if (wortVorBruch) { this.wort(wortVorBruch[1] + ' '); this.puffer = this.puffer.slice(wortVorBruch[0].length); continue; }
+          var m = this.puffer.match(/^([^\n]*?\S)([ \t]+|\n(?![ \t]*\n))/);
+          if (m) { this.wort(m[1] + ' '); this.puffer = this.puffer.slice(m[0].length); continue; }
+          break;
         }
       },
-      ende(){ if (this.puffer) { this.stueck(this.puffer); this.puffer = ''; } }
+      ende(){ if (this.puffer.trim()) this.wort(this.puffer.trim() + ' '); this.puffer = ''; }
+    };
+  }
+
+  /* Trägt Wörter mit ruhiger Hand in die Seite (die Anzeige-Seite des Spielplans) */
+  function neuerSchreiber(kapitel){
+    var lauf = kapitel.querySelector('.lauf');
+    return {
+      absatz: null, huelle: null, huelleSk: null, klartext: '',
+      neuerAbsatz(){ this.absatz = null; this.huelle = null; this.huelleSk = null; },
+      wo(merk){
+        if (!this.absatz) {
+          this.absatz = document.createElement('p');
+          this.absatz.className = 'antwort';
+          lauf.appendChild(this.absatz);
+          this.huelle = null; this.huelleSk = null;
+        }
+        if (merk !== this.huelleSk) {
+          if (merk) {
+            this.huelle = document.createElement('span');
+            this.huelle.className = 'merk';
+            this.huelle.dataset.sk = merk;
+            this.absatz.appendChild(this.huelle);
+          } else {
+            this.huelle = null;
+          }
+          this.huelleSk = merk;
+        }
+        return this.huelle || this.absatz;
+      },
+      zeige(token){
+        var s = document.createElement('span');
+        s.className = 'wort';
+        s.textContent = token.text;
+        this.wo(token.merk).appendChild(s);
+        if (reduziert) s.classList.add('da');
+        else requestAnimationFrame(function(){ s.classList.add('da'); });
+        this.klartext += token.text;
+      }
     };
   }
 
@@ -1081,7 +1097,6 @@ body.hirn #hirn-lampe{display:inline-flex}
     var reihe = null;
     function schliesseReihe(){ reihe = null; }
     async function karteRein(d){
-      schreiber.absatz = null; schreiber.huelle = null;
       var klein = (d.art === 'kpi' || d.art === 'hebel' || d.art === 'donut');
       var k = null;
       if (d.art === 'kpi') k = baueKpi(d);
@@ -1116,7 +1131,6 @@ body.hirn #hirn-lampe{display:inline-flex}
       await fertigMat;
     }
     async function skizzeRein(sk){
-      schreiber.absatz = null; schreiber.huelle = null;
       var ziel = findeSk(kapitel, sk.ziel);
       if (!ziel) return;
       runter();
@@ -1129,7 +1143,53 @@ body.hirn #hirn-lampe{display:inline-flex}
         if (nach) await stift.pfeil(kapitel, ziel, nach);
       }
     }
-    try {
+    /* Abspiel-Puffer: Ankunft und Anzeige sind entkoppelt. Der Leser füllt den
+       Spielplan, die Schreibhand trägt ihn mit ruhigem, mitwachsendem Takt ein. */
+    var spielplan = [];
+    var zulaufFertig = false;
+    var zerleger = neuerZerleger(spielplan);
+
+    async function schreibhand(){
+      var seitLauf = 0;
+      while (true) {
+        if (!spielplan.length) {
+          if (zulaufFertig) break;
+          await warte(60);
+          continue;
+        }
+        var eintrag = spielplan.shift();
+        if (eintrag.art === 'wort') {
+          schliesseReihe();
+          schreiber.zeige(eintrag);
+          if (++seitLauf % 8 === 0) runter();
+          /* Grundtakt 34 ms; läuft das Modell weit voraus, schreibt die Hand schneller */
+          var takt = spielplan.length > 260 ? 6 : (spielplan.length > 120 ? 16 : 34);
+          if (/[.!?:]\s*$/.test(eintrag.text)) takt += spielplan.length > 120 ? 40 : 150;
+          else if (/,\s*$/.test(eintrag.text)) takt += 40;
+          await warte(takt);
+        } else if (eintrag.art === 'absatz') {
+          schreiber.neuerAbsatz();
+          await warte(spielplan.length > 120 ? 60 : 240);
+        } else if (eintrag.art === 'karte') {
+          schreiber.neuerAbsatz();
+          await karteRein(eintrag.karte);
+          await warte(260);
+        } else if (eintrag.art === 'skizze') {
+          schreiber.neuerAbsatz();
+          await skizzeRein(eintrag.skizze);
+          await warte(180);
+        } else if (eintrag.art === 'chips') {
+          zeigeChips(kapitel, eintrag.chips);
+        } else if (eintrag.art === 'fehler') {
+          var p = document.createElement('p');
+          p.className = 'antwort fehl';
+          p.textContent = 'Das Hirn meldet: ' + eintrag.text;
+          lauf.appendChild(p);
+        }
+      }
+    }
+
+    async function zulauf(){
       var antwort = await fetch('/frage', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -1148,21 +1208,27 @@ body.hirn #hirn-lampe{display:inline-flex}
           if (!zeilen[i].trim()) continue;
           var e;
           try { e = JSON.parse(zeilen[i]); } catch (fehler) { continue; }
-          if (e.art === 'text') { schliesseReihe(); schreiber.fuege(e.text); if (Math.random() < 0.15) runter(); }
-          if (e.art === 'karte') await karteRein(e.karte);
-          if (e.art === 'skizze') await skizzeRein(e.skizze);
-          if (e.art === 'chips') { schreiber.ende(); zeigeChips(kapitel, e.chips); }
-          if (e.art === 'fehler') {
-            var p = document.createElement('p');
-            p.className = 'antwort fehl';
-            p.textContent = 'Das Hirn meldet: ' + e.text;
-            lauf.appendChild(p);
+          if (e.art === 'text') { zerleger.fuege(e.text); }
+          else if (e.art === 'karte' || e.art === 'skizze' || e.art === 'chips' || e.art === 'fehler') {
+            zerleger.ende();
+            spielplan.push(e.art === 'karte' ? {art:'karte', karte:e.karte}
+              : e.art === 'skizze' ? {art:'skizze', skizze:e.skizze}
+              : e.art === 'chips' ? {art:'chips', chips:e.chips}
+              : {art:'fehler', text:e.text});
           }
         }
       }
-      schreiber.ende();
+      zerleger.ende();
+    }
+
+    try {
+      var laufend = schreibhand();
+      await zulauf();
+      zulaufFertig = true;
+      await laufend;
       hirnVerlauf.push({frage: text, antwort: schreiber.klartext.slice(0, 1200)});
     } catch (fehler) {
+      zulaufFertig = true;
       var p2 = document.createElement('p');
       p2.className = 'antwort fehl';
       p2.textContent = 'Verbindung zum Hirn verloren: ' + fehler;
