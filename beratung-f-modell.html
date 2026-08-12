@@ -12,8 +12,8 @@
    Modell begehbar (Zoom je Bauplan begehbare-plattform), und der Stift kritzelt aufs
    Foto wie in der Kundenwelt. Chrome ist IMMER Quoro (Entscheidung 2026-08-12), die
    Marke der Beratung erscheint nur als Inhalt. Der Zoom endet nicht vor der Fassade:
-   bei etwa 3/4 der Fahrt blendet es in den Strategieraum, dort wartet je Mandat ein
-   Dashboard mit allem auf einen Blick. · Marker: BERATUNG-F-MODELL-V3 */
+   schon ab 1/3 der Fahrt blendet es in den Strategieraum, und Raum und Dashboard
+   kommen im selben Moment an. · Marker: BERATUNG-F-MODELL-V4 */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -172,11 +172,12 @@ body.gezoomt #auftakt,body.gezoomt #tisch{opacity:0;pointer-events:none}
 }
 body.gezoomt #schleier{opacity:1}
 
-/* ========== Der Strategieraum: ab 3/4 der Kamerafahrt blendet es hinein ========== */
+/* ========== Der Strategieraum: schon ab 1/3 der Kamerafahrt blendet es hinein,
+   und Raum + Dashboard kommen im selben Moment an (~1,1 s nach dem Klick) ========== */
 #raum{
   position:fixed;inset:0;z-index:25;pointer-events:none;
   opacity:0;transform:scale(1.09);
-  transition:opacity .5s ease,transform .9s var(--feder);
+  transition:opacity .55s ease,transform .75s var(--feder);
 }
 #raum img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 #raum::after{
@@ -199,6 +200,14 @@ svg.kurve path.amber{stroke:var(--bernstein)}
 body.gezoomt #zonen{display:block}
 .inhalt{display:none;max-width:640px;margin:0 auto;padding:132px 24px 80px}
 .inhalt.offen{display:block}
+/* Ankunfts-Staffel: jede Gruppe bekommt ihre Verzögerung (--verz) aus dem Skript,
+   so dass die letzte exakt mit dem Raum-Blend fertig wird. Als Keyframe-Animation,
+   weil Transitions nach dem display-Wechsel der Sektion nicht anlaufen. */
+.inhalt.offen > *{
+  opacity:0;translate:0 12px;
+  animation:ankunft .35s var(--feder) var(--verz,0s) forwards;
+}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
 .inhalt .kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .inhalt h2{font-size:clamp(24px,3.4vw,32px);font-weight:800;letter-spacing:-.03em;line-height:1.2}
 .inhalt .stand{font-size:13px;color:var(--grau);margin-top:2px}
@@ -215,10 +224,8 @@ body.gezoomt #zonen{display:block}
   padding:13px 18px;border-radius:var(--radius);
   border:0.5px solid var(--linie);background:#fff;
   box-shadow:0 8px 24px rgba(16,19,26,.07);cursor:pointer;
-  opacity:0;translate:0 10px;
   transition:border-color .2s ease;
 }
-.inhalt.offen .zeile{opacity:1;translate:none;transition:opacity .45s ease,translate .45s var(--feder),border-color .2s ease}
 .zeile:hover{border-color:var(--blau)}
 .zeile .z-titel{font-size:14px;font-weight:800;letter-spacing:-.01em;line-height:1.4}
 .zeile .z-meta{font-size:12px;color:var(--grau);margin-top:2px}
@@ -291,7 +298,8 @@ body.gezoomt #zonen{display:block}
 @media (prefers-reduced-motion: reduce){
   #kamera{transition:none}
   #schleier{transition:none}
-  .inhalt.offen .zeile{transition:none}
+  #raum{transition:none}
+  .inhalt.offen > *{animation:none;opacity:1;translate:none}
 }
 
 /* ========== Mobil: das Modell ist breiter als der Schirm, man schaut sich um ========== */
@@ -585,7 +593,7 @@ body.gezoomt #zonen{display:block}
       pfad.style.strokeDashoffset = reduziert ? 0 : len;
       if (reduziert) return;
       void pfad.getBoundingClientRect();
-      pfad.style.transition = 'stroke-dashoffset .9s cubic-bezier(.45,.05,.55,.95) .35s';
+      pfad.style.transition = 'stroke-dashoffset .7s cubic-bezier(.45,.05,.55,.95) .5s';
       pfad.style.strokeDashoffset = 0;
     });
   }
@@ -602,15 +610,23 @@ body.gezoomt #zonen{display:block}
       s.classList.toggle('offen', an);
       if (an) offeneSection = s;
     });
+    /* Ankunfts-Staffel: die Gruppen des Dashboards landen nacheinander,
+       die letzte exakt dann, wenn der Raum-Blend fertig ist (~1,1 s) */
+    if (offeneSection) {
+      var kinder = Array.prototype.slice.call(offeneSection.children);
+      kinder.forEach(function(kind, i){
+        kind.style.setProperty('--verz', (sofort || reduziert) ? '0s' : (0.3 + i * 0.07).toFixed(2) + 's');
+      });
+    }
     zonenLage.scrollTop = 0;
     krumeZiel.textContent = ZONEN_NAMEN[ziel];
     krume.hidden = false;
-    /* ab etwa 3/4 der Kamerafahrt blendet es in den Strategieraum */
+    /* schon ab etwa 1/3 der Kamerafahrt blendet es in den Strategieraum */
     clearTimeout(raumTimer);
     if (sofort || reduziert) {
       document.body.classList.add('drin');
     } else {
-      raumTimer = setTimeout(function(){ if (offen === ziel) document.body.classList.add('drin'); }, 720);
+      raumTimer = setTimeout(function(){ if (offen === ziel) document.body.classList.add('drin'); }, 330);
     }
     if (offeneSection) zeichneKurven(offeneSection);
     if (location.hash !== '#' + ziel) history.replaceState(null, '', '#' + ziel);
