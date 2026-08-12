@@ -146,6 +146,7 @@ body.gezoomt .zone .chip,body.gezoomt .stift-text,body.gezoomt #stift-lage{opaci
   transition:opacity .4s ease;
 }
 #tisch .t-titel{font-size:12px;font-weight:600;color:var(--grau)}
+#tisch .t-reihe{display:flex;flex-direction:column;gap:8px}
 #tisch .t-zettel{
   display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;
   padding:10px 15px;border-radius:13px;border:0.5px solid var(--linie);
@@ -302,14 +303,27 @@ body.gezoomt #zonen{display:block}
   nav{padding:0 18px}
   #buehne{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
   #kamera{
-    position:relative;left:0;top:47%;translate:0 -50%;
-    width:200vw;min-width:200vw;
+    position:relative;left:0;top:49%;translate:0 -50%;
+    width:225vw;min-width:225vw;
   }
   .zone .chip{font-size:11.5px;padding:6px 11px;gap:6px}
   .stift-text{font-size:14px}
   #auftakt{left:18px;top:70px;max-width:calc(100vw - 36px)}
-  #tisch{left:18px;right:18px;max-width:none;bottom:calc(12px + env(safe-area-inset-bottom))}
-  #tisch .t-zettel{padding:9px 13px}
+  /* Der Tisch wird eine wischbare Reihe: eine Karte je Zettel,
+     statt eines Stapels, der das Modell erdrückt */
+  #tisch{left:0;right:0;max-width:none;bottom:calc(12px + env(safe-area-inset-bottom))}
+  #tisch .t-titel{padding:0 18px}
+  #tisch .t-reihe{
+    flex-direction:row;gap:10px;overflow-x:auto;
+    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+    padding:2px 18px 6px;scrollbar-width:none;
+  }
+  #tisch .t-reihe::-webkit-scrollbar{display:none}
+  #tisch .t-zettel{
+    flex:0 0 auto;width:min(78vw,340px);scroll-snap-align:start;
+    padding:11px 14px;align-items:center;
+  }
+  #tisch .t-text b{font-size:12.5px}
   .z-fuell .zustand{width:36px;height:17px}
   #krume{left:18px;top:70px}
   .inhalt{padding:138px 18px calc(56px + env(safe-area-inset-bottom))}
@@ -363,6 +377,7 @@ body.gezoomt #zonen{display:block}
 
 <div id="tisch">
   <div class="t-titel" data-du="Auf deinem Tisch" data-sie="Auf Ihrem Tisch">Auf deinem Tisch</div>
+  <div class="t-reihe">
   <button class="t-zettel" type="button" data-zu="petersen">
     <span class="t-text"><b>Herr Petersen möchte ein Gespräch mit einem Menschen</b><span>Petersen Stahlbau, Wunsch: Freitag, 9:00</span></span>
     <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">liegt vor</span></span>
@@ -375,6 +390,7 @@ body.gezoomt #zonen{display:block}
     <span class="t-text"><b data-du="Der KI-Berater hat dir eine Steuerfrage übergeben" data-sie="Der KI-Berater hat Ihnen eine Steuerfrage übergeben">Der KI-Berater hat dir eine Steuerfrage übergeben</b><span>Cordes Logistik, heute, 8:12</span></span>
     <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">wartet auf Antwort</span></span>
   </button>
+  </div>
 </div>
 
 <div id="schleier"></div>
@@ -705,8 +721,12 @@ body.gezoomt #zonen{display:block}
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.fillStyle = '#fff';
       ctx.fillRect(0, 0, innerWidth, innerHeight);
-      /* deckend einpassen: contain, nie verzerren */
-      var s = Math.min(innerWidth / b.naturalWidth, innerHeight / b.naturalHeight);
+      /* quer: einpassen ohne Beschnitt · hochkant: füllen mit Beschnitt,
+         sonst bleibt vom Film nur ein Briefschlitz zwischen weißen Flächen */
+      var hochkant = innerHeight > innerWidth;
+      var s = hochkant
+        ? Math.max(innerWidth / b.naturalWidth, innerHeight / b.naturalHeight)
+        : Math.min(innerWidth / b.naturalWidth, innerHeight / b.naturalHeight);
       var w = b.naturalWidth * s, h = b.naturalHeight * s;
       ctx.drawImage(b, (innerWidth - w) / 2, (innerHeight - h) / 2, w, h);
     }
