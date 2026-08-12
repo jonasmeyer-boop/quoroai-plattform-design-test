@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vorschlag C · Die Blaupause</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
+<style>
+/* BERATUNG-C-BLAUPAUSE-V1 · Die ganze Beratung als Werkplan: Umrisse in Stift, Belichtetes als echte Fläche */
+@font-face{
+  font-family:'Manrope';
+  src:url('schriften/manrope.woff2') format('woff2');
+  font-weight:200 800;
+  font-display:swap;
+}
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+:root{
+  --papier:#fafaf7;
+  --tinte:#10131a;
+  --grau:#636c7d;
+  --blau:#2b5fe3;
+  --stift:#1d46c9;
+  --linie:rgba(16,19,26,.1);
+  --karte:#ffffff;
+  --radius:16px;
+  --feder:cubic-bezier(.22,.9,.24,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  background-color:var(--papier);
+  /* Millimeterpapier: Hairline-Raster 8px, kräftigere Linie alle 40px, alles aus dem Stift gemischt */
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--stift) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--stift) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--stift) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--stift) 4%, transparent) 1px, transparent 1px);
+  background-size:40px 40px, 40px 40px, 8px 8px, 8px 8px;
+  color:var(--tinte);
+  font-family:'Manrope',system-ui,sans-serif;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--blau);outline-offset:3px;border-radius:4px}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:10;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 max(24px,calc((100vw - 940px)/2));
+  background:linear-gradient(var(--papier) 55%, color-mix(in srgb, var(--papier) 1%, transparent));
+  pointer-events:none;
+}
+nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .marke-logo{height:26px;width:auto;display:block}
+nav .wortmarke [data-marke-name]{display:block}
+nav .wortmarke .marke-wechsel{cursor:pointer;pointer-events:auto;display:inline-block}
+nav .wortmarke .marke-wechsel:hover{color:var(--blau)}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
+nav .zurueck{
+  pointer-events:auto;
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:12.5px;font-weight:700;color:var(--grau);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav .zurueck:hover{border-color:var(--blau);color:var(--tinte)}
+
+/* Demo-Hinweis in Handschrift, wenn eine Fläche noch entsteht */
+#demo-hinweis{
+  position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:60;pointer-events:none;
+  font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--stift);
+  opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--feder);
+}
+#demo-hinweis.da{opacity:.95;translate:-50% 0}
+
+main{max-width:940px;margin:0 auto;padding:104px 24px 96px}
+
+/* Auftakt */
+.vorgruss{
+  font-family:'Caveat',cursive;font-size:clamp(23px,3.4vw,30px);font-weight:700;
+  color:var(--stift);rotate:-1.5deg;opacity:.92;
+}
+h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-top:2px}
+
+/* Revisionsvermerke: drei Zettel am Planrand */
+.vermerke{display:flex;gap:16px;margin-top:34px;align-items:stretch}
+.zettel{
+  flex:1;min-width:0;position:relative;cursor:pointer;
+  background:var(--karte);border:0.5px solid var(--linie);border-radius:var(--radius);
+  padding:16px 18px 14px;box-shadow:0 8px 24px rgba(16,19,26,.07);
+  transition:border-color .2s ease,translate .25s var(--feder),rotate .25s var(--feder);
+}
+.zettel:nth-child(1){rotate:-1.1deg}
+.zettel:nth-child(2){rotate:.7deg;translate:0 6px}
+.zettel:nth-child(3){rotate:-.5deg}
+.zettel:hover{border-color:var(--blau);translate:0 -2px;rotate:0deg}
+.zettel .v-titel{font-size:13.5px;font-weight:800;letter-spacing:-.01em;line-height:1.4}
+.zettel .v-meta{font-size:12px;color:var(--grau);margin-top:5px}
+.zettel .v-hand{
+  font-family:'Caveat',cursive;font-size:19px;font-weight:700;line-height:1.2;
+  color:var(--stift);margin-top:8px;rotate:-2deg;display:inline-block;
+}
+.zettel .v-hand.amber{color:#a06008}
+
+/* Der Plan: Zeichnungsrahmen mit vier Blöcken und Schriftfeld */
+.plan{
+  margin-top:38px;border:1px solid color-mix(in srgb, var(--stift) 45%, transparent);
+  border-radius:4px;padding:30px 30px 0;position:relative;
+}
+.plan-titel{
+  position:absolute;top:-13px;left:22px;padding:0 10px;background:var(--papier);
+  font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:color-mix(in srgb, var(--stift) 75%, var(--grau));
+}
+.bloecke{display:grid;grid-template-columns:1fr 1fr;gap:34px 44px}
+.block{
+  position:relative;cursor:pointer;border-radius:var(--radius);
+  -webkit-tap-highlight-color:transparent;
+}
+.block .bau{transition:opacity .35s ease}
+.block.offen .bau{opacity:.1}
+.plan-svg{display:block;width:100%;height:auto;overflow:visible}
+.plan-svg path{
+  fill:none;stroke:var(--stift);stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;
+}
+.plan-svg path.boden{stroke:color-mix(in srgb, var(--stift) 45%, transparent);stroke-width:1.1}
+.plan-svg path.fest{
+  stroke:var(--tinte);stroke-width:1.3;fill:#fff;fill-opacity:0;
+  transition:fill-opacity .7s ease;
+}
+.plan-svg.fertig path.fest{fill-opacity:1}
+.plan-svg.fertig path.fest{filter:drop-shadow(0 2px 3px rgba(16,19,26,.12))}
+.block .schrift{margin-top:6px;padding-bottom:4px}
+.block .schrift .b-name{
+  font-family:'Caveat',cursive;font-size:24px;font-weight:700;line-height:1.15;
+  color:var(--stift);
+}
+.block .schrift .b-meta{font-size:12px;color:var(--grau);margin-top:1px}
+.block:hover .plan-svg path:not(.fest):not(.boden){stroke:var(--blau)}
+
+/* Stift-Anmerkungen in Bernstein: Ellipse um MTS, Pfeil zu Cordes */
+.anno{position:absolute;pointer-events:none;z-index:2}
+.anno svg{display:block;width:100%;height:100%;overflow:visible}
+.anno path{fill:none;stroke:#a06008;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.anno-ellipse{inset:-14px -12px -2px}
+.anno-pfeil{top:-16px;right:2px;width:170px;height:78px}
+.hand-notiz{
+  position:absolute;z-index:2;pointer-events:none;
+  font-family:'Caveat',cursive;font-weight:700;color:#a06008;line-height:1.15;
+  opacity:0;transition:opacity .5s ease;
+}
+.hand-notiz.da{opacity:1}
+.notiz-mts{top:-4px;right:-2px;font-size:21px;rotate:-4deg;background:rgba(178,109,10,.12);padding:1px 9px;border-radius:999px}
+.notiz-cordes{top:-38px;right:60px;font-size:20px;rotate:-2.5deg;text-align:right;max-width:220px}
+
+/* Belichten: der Umriss wird zur echten Karte */
+.karte-mandat{
+  position:absolute;inset:-6px;z-index:3;
+  background:var(--karte);border:0.5px solid var(--linie);border-radius:var(--radius);
+  box-shadow:0 18px 50px rgba(16,19,26,.16);
+  padding:18px 20px;display:flex;flex-direction:column;
+  clip-path:inset(0 0 100% 0 round var(--radius));opacity:0;pointer-events:none;
+  transition:clip-path .5s var(--feder),opacity .3s ease;
+}
+.block.offen .karte-mandat{clip-path:inset(0 0 0 0 round var(--radius));opacity:1;pointer-events:auto}
+.karte-mandat .k-kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.karte-mandat .k-name{font-size:16px;font-weight:800;letter-spacing:-.01em}
+.karte-mandat .k-zu{
+  flex-shrink:0;width:28px;height:28px;border-radius:999px;cursor:pointer;
+  border:0.5px solid var(--linie);background:#fff;color:var(--grau);
+  font-size:15px;font-weight:700;line-height:1;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:border-color .2s ease,color .2s ease;
+}
+.karte-mandat .k-zu:hover{border-color:var(--blau);color:var(--tinte)}
+.karte-mandat .k-stand{font-size:12.5px;color:var(--grau);margin-top:8px;max-width:44ch}
+.karte-mandat .k-fuss{margin-top:auto;padding-top:12px}
+.pille{
+  display:inline-block;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;
+  color:var(--grau);background:rgba(16,19,26,.05);white-space:nowrap;
+}
+.pille.geteilt{color:var(--blau);background:color-mix(in srgb, var(--blau) 10%, transparent)}
+.pille.offen{color:#a06008;background:rgba(178,109,10,.12)}
+
+/* Schriftfeld: Kennzahlen wie im Plankopf einer technischen Zeichnung */
+.schriftfeld{
+  margin:34px -30px 0;border-top:1px solid color-mix(in srgb, var(--stift) 45%, transparent);
+  display:flex;flex-wrap:wrap;
+}
+.schriftfeld > div{
+  padding:10px 18px;font-size:11.5px;color:var(--grau);
+  border-right:1px solid color-mix(in srgb, var(--stift) 25%, transparent);
+}
+.schriftfeld > div:last-child{border-right:0}
+.schriftfeld b{color:var(--tinte);font-weight:800}
+.schriftfeld .feld-marke{font-weight:800;color:var(--tinte)}
+.schriftfeld .feld-legende{
+  font-family:'Caveat',cursive;font-size:17px;font-weight:700;color:var(--stift);
+  margin-left:auto;border-right:0;rotate:-1deg;
+}
+.schriftfeld .bald{cursor:pointer}
+.schriftfeld .bald:hover b{color:var(--blau)}
+
+@media (prefers-reduced-motion: reduce){
+  .plan-svg path{stroke-dasharray:none!important;stroke-dashoffset:0!important;transition:none!important}
+  .plan-svg path.fest{transition:none}
+  .karte-mandat{transition:none}
+  .block .bau{transition:none}
+  .hand-notiz{transition:none}
+  .zettel{transition:border-color .2s ease}
+}
+@media (max-width:760px){
+  .vermerke{flex-direction:column;gap:12px}
+  .zettel:nth-child(2){translate:none}
+  .bloecke{grid-template-columns:1fr;gap:38px}
+  .plan{padding:26px 18px 0}
+  .schriftfeld{margin:30px -18px 0}
+  .schriftfeld .feld-legende{margin-left:0}
+  .notiz-cordes{right:8px;top:-32px}
+  .anno-pfeil{right:0}
+  nav .wortmarke small{display:none}
+}
+</style>
+<script src="marke.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="wortmarke"><img class="marke-logo" alt="" hidden><div><span data-marke-name data-logo-versteckt>Nordholm &amp; Partner</span><small class="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung · Beispielmarke wechseln</small></div></div>
+  <a class="zurueck" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<div id="demo-hinweis">Diese Fläche entsteht gerade.</div>
+
+<main>
+  <div class="vorgruss">Blatt 1 · Die ganze Beratung</div>
+  <h1 data-du="Dein Plan, Stück für Stück belichtet." data-sie="Ihr Plan, Stück für Stück belichtet.">Dein Plan, Stück für Stück belichtet.</h1>
+
+  <!-- Revisionsvermerke: die drei wartenden Dinge, als Zettel am Planrand -->
+  <div class="vermerke">
+    <div class="zettel bald" role="button" tabindex="0">
+      <div class="v-titel">Herr Petersen möchte ein Gespräch mit einem Menschen</div>
+      <div class="v-meta">Petersen Stahlbau · Wunsch: Freitag, 9:00</div>
+      <span class="v-hand">liegt vor</span>
+    </div>
+    <div class="zettel bald" role="button" tabindex="0">
+      <div class="v-titel">„Warum schrumpft meine Marge?“ ist jetzt freigegeben</div>
+      <div class="v-meta">Petersen Stahlbau · gestern, 16:40</div>
+      <span class="v-hand">zum Mitlesen</span>
+    </div>
+    <div class="zettel bald" role="button" tabindex="0">
+      <div class="v-titel">Der KI-Berater hat eine Steuerfrage übergeben</div>
+      <div class="v-meta">Cordes Logistik · heute, 8:12</div>
+      <span class="v-hand amber">wartet auf Antwort!</span>
+    </div>
+  </div>
+
+  <!-- Der Plan: vier Mandate als gezeichnete Blöcke, Belichtung zeigt den Baufortschritt -->
+  <div class="plan">
+    <span class="plan-titel">Plan der Beratung</span>
+    <div class="bloecke">
+
+      <div class="block" role="button" tabindex="0" aria-expanded="false" aria-label="Petersen Stahlbau belichten">
+        <div class="bau">
+          <svg class="plan-svg" viewBox="0 0 240 150" aria-hidden="true">
+            <path class="boden" d="M10 132 H230"/>
+            <path class="fest" d="M22 130 L22 60 L52 38 L52 60 L82 38 L82 60 L82 130 Z"/>
+            <path class="fest" d="M82 130 L82 60 L112 38 L112 60 L142 38 L142 60 L172 38 L172 130 Z"/>
+            <path class="fest" d="M92 130 V102 H114 V130 Z"/>
+            <path d="M172 130 V88 H224 V130 Z"/>
+          </svg>
+          <div class="schrift">
+            <div class="b-name">Petersen Stahlbau</div>
+            <div class="b-meta">3 Gespräche diese Woche · Termin Donnerstag, 10:00</div>
+          </div>
+        </div>
+        <div class="karte-mandat">
+          <div class="k-kopf">
+            <div class="k-name">Petersen Stahlbau</div>
+            <button class="k-zu" type="button" aria-label="Karte schließen">&#215;</button>
+          </div>
+          <div class="k-stand">Drei Gespräche diese Woche, der KI-Berater läuft rund. Termin am Donnerstag, 10:00. Herr Petersen wünscht zusätzlich ein Gespräch am Freitag, 9:00.</div>
+          <div class="k-fuss"><span class="pille geteilt">1 Gespräch freigegeben</span></div>
+        </div>
+      </div>
+
+      <div class="block" role="button" tabindex="0" aria-expanded="false" aria-label="Cordes Logistik belichten">
+        <div class="hand-notiz notiz-cordes" data-du="Steuerfrage wartet auf dich" data-sie="Steuerfrage wartet auf Sie">Steuerfrage wartet auf dich</div>
+        <div class="anno anno-pfeil" aria-hidden="true">
+          <svg viewBox="0 0 170 78">
+            <path class="ziehen" d="M156 8 C120 14, 84 26, 66 62"/>
+            <path class="ziehen" d="M62 46 C63 52, 64 58, 66 62 C70 60, 76 58, 81 57"/>
+          </svg>
+        </div>
+        <div class="bau">
+          <svg class="plan-svg" viewBox="0 0 240 150" aria-hidden="true">
+            <path class="boden" d="M10 132 H230"/>
+            <path d="M16 130 L16 72 L198 60 L198 130 Z"/>
+            <path class="fest" d="M36 130 V102 H62 V130 Z"/>
+            <path d="M84 130 V102 H110 V130 Z"/>
+            <path d="M132 130 V102 H158 V130 Z"/>
+            <path d="M198 130 V84 H226 V130 Z"/>
+          </svg>
+          <div class="schrift">
+            <div class="b-name">Cordes Logistik</div>
+            <div class="b-meta">letzte Frage heute, 8:12 · Übergabe offen</div>
+          </div>
+        </div>
+        <div class="karte-mandat">
+          <div class="k-kopf">
+            <div class="k-name">Cordes Logistik</div>
+            <button class="k-zu" type="button" aria-label="Karte schließen">&#215;</button>
+          </div>
+          <div class="k-stand">Letzte Frage heute, 8:12. Eine Steuerfrage liegt außerhalb des Rahmens des KI-Beraters, die Übergabe ist noch offen.</div>
+          <div class="k-fuss"><span class="pille offen">wartet auf Antwort</span></div>
+        </div>
+      </div>
+
+      <div class="block" role="button" tabindex="0" aria-expanded="false" aria-label="Bäckerei Freitag belichten">
+        <div class="bau">
+          <svg class="plan-svg" viewBox="0 0 240 150" aria-hidden="true">
+            <path class="boden" d="M10 132 H230"/>
+            <path class="fest" d="M62 130 V78 L112 46 L162 78 V130 Z"/>
+            <path class="fest" d="M80 130 V98 H106 V130 Z"/>
+            <path d="M118 98 H144 V118 H118 Z"/>
+            <path d="M134 62 V40 H148 V71 Z"/>
+          </svg>
+          <div class="schrift">
+            <div class="b-name">Bäckerei Freitag</div>
+            <div class="b-meta">läuft ruhig · Leistungsnachweis Juli versendet</div>
+          </div>
+        </div>
+        <div class="karte-mandat">
+          <div class="k-kopf">
+            <div class="k-name">Bäckerei Freitag</div>
+            <button class="k-zu" type="button" aria-label="Karte schließen">&#215;</button>
+          </div>
+          <div class="k-stand">Läuft ruhig, ohne offene Punkte. Der Leistungsnachweis für Juli ist versendet, 6 Gespräche im Juli.</div>
+          <div class="k-fuss"><span class="pille">läuft ruhig</span></div>
+        </div>
+      </div>
+
+      <div class="block" role="button" tabindex="0" aria-expanded="false" aria-label="MTS Maschinenbau belichten">
+        <div class="hand-notiz notiz-mts">seit 3 Wochen still!</div>
+        <div class="anno anno-ellipse" aria-hidden="true">
+          <svg viewBox="0 0 264 212" preserveAspectRatio="none">
+            <path class="ziehen" d="M132 14 C 206 16, 252 58, 246 104 C 240 152, 178 200, 108 196 C 44 192, 8 148, 16 100 C 24 50, 66 13, 138 16"/>
+          </svg>
+        </div>
+        <div class="bau">
+          <svg class="plan-svg" viewBox="0 0 240 150" aria-hidden="true">
+            <path class="boden" d="M10 132 H230"/>
+            <path d="M20 130 V68 H152 V130 Z"/>
+            <path d="M62 68 V52 H112 V68 Z"/>
+            <path d="M172 130 V42 H186 V130 Z"/>
+            <path class="fest" d="M72 130 V104 H96 V130 Z"/>
+          </svg>
+          <div class="schrift">
+            <div class="b-name">MTS Maschinenbau</div>
+            <div class="b-meta">letzte Frage am 22. Juli · davor wöchentlich</div>
+          </div>
+        </div>
+        <div class="karte-mandat">
+          <div class="k-kopf">
+            <div class="k-name">MTS Maschinenbau</div>
+            <button class="k-zu" type="button" aria-label="Karte schließen">&#215;</button>
+          </div>
+          <div class="k-stand">Letzte Frage am 22. Juli, davor kam wöchentlich eine. Seit drei Wochen fragt niemand mehr.</div>
+          <div class="k-fuss"><span class="pille offen">seit 3 Wochen still</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="schriftfeld">
+      <div class="feld-marke" data-marke-name>Nordholm &amp; Partner</div>
+      <div><b>126</b> Fragen diese Woche</div>
+      <div class="bald" role="button" tabindex="0"><b>34,0 Std.</b> im August</div>
+      <div class="bald" role="button" tabindex="0"><b>3</b> Rechnungen offen · <b>12.400&nbsp;€</b></div>
+      <div class="feld-legende">gefüllt heißt: schon gebaut</div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  /* Ohne Kern bleibt die Seite bedienbar, dann eben in Standardmarke und Du-Form */
+  var Marke = window.Marke || {anwenden: function(){}};
+  Marke.anwenden();
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Ehrlichkeit: was noch entsteht, sagt das, statt tot zu sein */
+  var hinweisTimer = null;
+  function demoHinweis(){
+    var h = document.getElementById('demo-hinweis');
+    h.classList.add('da');
+    clearTimeout(hinweisTimer);
+    hinweisTimer = setTimeout(function(){ h.classList.remove('da'); }, 2200);
+  }
+  document.querySelectorAll('.bald').forEach(function(el){
+    el.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); demoHinweis(); });
+    el.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); demoHinweis(); }
+    });
+  });
+
+  /* Der Stift zeichnet: jeder Pfad zieht sich einmal durch, Blöcke gestaffelt */
+  function zeichne(svg, start, dauer){
+    var pfade = svg.querySelectorAll('path');
+    pfade.forEach(function(p, i){
+      var len = p.getTotalLength();
+      p.style.transition = 'none';
+      p.style.strokeDasharray = len;
+      p.style.strokeDashoffset = len;
+      void p.getBoundingClientRect();
+      p.style.transition = 'stroke-dashoffset ' + dauer + 's cubic-bezier(.45,.05,.55,.95) ' + (start + i * 0.1) + 's';
+      p.style.strokeDashoffset = 0;
+    });
+    return (start + pfade.length * 0.1 + dauer) * 1000;
+  }
+
+  var plaene = document.querySelectorAll('.plan-svg');
+  if (reduziert) {
+    plaene.forEach(function(s){ s.classList.add('fertig'); });
+    document.querySelectorAll('.hand-notiz').forEach(function(n){ n.classList.add('da'); });
+  } else {
+    var spaetestens = 0;
+    plaene.forEach(function(s, i){
+      var ende = zeichne(s, 0.15 + i * 0.28, 0.6);
+      spaetestens = Math.max(spaetestens, ende);
+      setTimeout(function(){ s.classList.add('fertig'); }, ende - 300);
+    });
+    /* Die Stift-Anmerkungen kommen zuletzt, wie nachgetragen */
+    document.querySelectorAll('.anno svg').forEach(function(s){ zeichne(s, spaetestens / 1000 + 0.15, 0.55); });
+    setTimeout(function(){
+      document.querySelectorAll('.hand-notiz').forEach(function(n){ n.classList.add('da'); });
+    }, spaetestens + 650);
+  }
+
+  /* Der Wow-Moment: ein Klick belichtet den Umriss zur echten Karte */
+  var offener = null;
+  function schliesse(){
+    if (!offener) return;
+    var b = offener;
+    offener = null;
+    b.classList.remove('offen');
+    b.setAttribute('aria-expanded', 'false');
+    b.focus();
+    if (!reduziert) {
+      var svg = b.querySelector('.plan-svg');
+      setTimeout(function(){ zeichne(svg, 0, 0.4); }, 250);
+    }
+  }
+  function oeffne(b){
+    if (offener === b) return;
+    schliesse();
+    offener = b;
+    b.classList.add('offen');
+    b.setAttribute('aria-expanded', 'true');
+    b.querySelector('.k-zu').focus();
+  }
+  document.querySelectorAll('.block').forEach(function(b){
+    b.addEventListener('click', function(e){
+      if (b.classList.contains('offen')) return;
+      e.preventDefault();
+      oeffne(b);
+    });
+    b.addEventListener('keydown', function(e){
+      if ((e.key === 'Enter' || e.key === ' ') && !b.classList.contains('offen') && e.target === b) {
+        e.preventDefault();
+        oeffne(b);
+      }
+    });
+    b.querySelector('.k-zu').addEventListener('click', function(e){
+      e.stopPropagation();
+      schliesse();
+    });
+  });
+  window.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') schliesse();
+  });
+})();
+</script>
+</body>
+</html>

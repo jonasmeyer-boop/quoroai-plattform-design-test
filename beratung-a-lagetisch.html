@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vorschlag A · Der Lagetisch</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
+<style>
+/* quoroai-plattform-design · Beratungs-Cockpit, Vorschlag A: der Lagetisch. Alle Mandate liegen als Akten auf dem Tisch, Dringendes obenauf, der Stift hat danebengekritzelt. Klick zoomt in die Akte. · Marker: BERATUNG-A-LAGETISCH-V1 */
+@font-face{
+  font-family:'Manrope';
+  src:url('schriften/manrope.woff2') format('woff2');
+  font-weight:200 800;
+  font-display:swap;
+}
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+:root{
+  --papier:#fafaf7;
+  --tinte:#10131a;
+  --grau:#636c7d;
+  --blau:#2b5fe3;
+  --stift:#1d46c9;
+  --linie:rgba(16,19,26,.1);
+  --karte:#ffffff;
+  --radius:16px;
+  --feder:cubic-bezier(.22,.9,.24,1);
+  --bernstein:#a06008;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  background:var(--papier);color:var(--tinte);
+  font-family:'Manrope',system-ui,sans-serif;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:40;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:linear-gradient(var(--papier) 55%, color-mix(in srgb, var(--papier) 1%, transparent));
+  pointer-events:none;
+}
+nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .marke-logo{height:26px;width:auto;display:block}
+nav .wortmarke [data-marke-name]{display:block}
+nav .wortmarke .marke-wechsel{cursor:pointer;pointer-events:auto;display:inline-block}
+nav .wortmarke .marke-wechsel:hover{color:var(--blau)}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
+nav a.vorschlaege{
+  pointer-events:auto;
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:12.5px;font-weight:700;color:var(--grau);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--blau);color:var(--tinte)}
+
+#demo-hinweis{
+  position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:60;pointer-events:none;
+  font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--stift);
+  opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--feder);
+}
+#demo-hinweis.da{opacity:.95;translate:-50% 0}
+
+/* Die Bühne: der Tisch füllt den Schirm, alles liegt darauf */
+.buehne{position:relative;height:100svh;min-height:640px;overflow:hidden}
+.buehne::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 90% at 50% 30%, transparent 55%, color-mix(in srgb, var(--tinte) 4%, transparent));
+}
+#tisch{position:absolute;inset:0;transform-origin:0 0;transition:transform .6s var(--feder)}
+.buehne.gezoomt #tisch .akte{cursor:default}
+
+/* Auftakt liegt oben links auf dem Tisch */
+.auftakt{position:absolute;left:max(24px,4vw);top:88px;z-index:5;max-width:min(480px,80vw)}
+.anstrich{width:96px;height:12px;display:block;overflow:visible;margin-bottom:14px}
+.anstrich path{fill:none;stroke:var(--stift);stroke-width:2.5;stroke-linecap:round;opacity:.85}
+.vorgruss{
+  font-family:'Caveat',cursive;font-size:clamp(22px,3vw,28px);font-weight:700;
+  color:var(--stift);rotate:-1.5deg;opacity:.92;
+}
+h1{font-size:clamp(26px,3.8vw,38px);font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-top:2px}
+
+/* Die Randnotiz des Stifts: Zahlen wie mit Bleistift an den Tischrand geschrieben */
+.randnotiz{
+  position:absolute;left:max(24px,4vw);bottom:22px;z-index:5;
+  font-family:'Caveat',cursive;font-size:19px;font-weight:600;color:var(--grau);
+  rotate:-1deg;opacity:.9;
+}
+
+/* Wartende Zettel: liegen obenauf, leicht verdreht */
+.zettel{
+  position:absolute;z-index:6;width:min(250px,60vw);
+  background:#fff;border:0.5px solid var(--linie);border-radius:12px;
+  padding:13px 16px;cursor:pointer;
+  box-shadow:0 14px 34px rgba(16,19,26,.12);
+  transition:translate .25s var(--feder),box-shadow .25s ease,border-color .2s ease;
+}
+.zettel:hover{translate:0 -3px;border-color:var(--blau);box-shadow:0 20px 44px rgba(16,19,26,.16)}
+.zettel .zl-titel{font-size:13.5px;font-weight:800;letter-spacing:-.01em;line-height:1.35}
+.zettel .zl-meta{font-size:11.5px;color:var(--grau);margin-top:3px}
+.zettel .zl-hand{
+  font-family:'Caveat',cursive;font-size:18px;font-weight:700;color:var(--stift);
+  margin-top:5px;rotate:-1deg;
+}
+.zettel .zl-hand.warn{color:var(--bernstein)}
+
+/* Akten: die Mandate liegen als Mappen auf dem Tisch */
+.akte{
+  position:absolute;z-index:4;width:min(240px,42vw);
+  background:#fff;border:0.5px solid var(--linie);border-radius:var(--radius);
+  padding:16px 18px 14px;cursor:pointer;
+  /* gestapeltes Papier: die Blätter darunter schauen hervor */
+  box-shadow:
+    0 1.5px 0 #fff, 0 2px 0 var(--linie),
+    0 4.5px 0 #fff, 0 5px 0 var(--linie),
+    0 16px 34px rgba(16,19,26,.10);
+  transition:translate .25s var(--feder),border-color .2s ease;
+}
+.akte:hover{translate:0 -3px;border-color:var(--blau)}
+.akte::before{
+  /* der Reiter der Mappe */
+  content:'';position:absolute;top:-9px;left:16px;width:58px;height:10px;
+  background:color-mix(in srgb, var(--blau) 16%, #fff);
+  border:0.5px solid var(--linie);border-bottom:none;border-radius:6px 6px 0 0;
+}
+.akte .ak-name{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.akte .ak-meta{font-size:11.5px;color:var(--grau);margin-top:3px;line-height:1.5}
+.akte .ak-status{display:inline-block;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:999px;margin-top:8px;color:var(--grau);background:rgba(16,19,26,.05)}
+.akte .ak-status.geteilt{color:var(--blau);background:color-mix(in srgb, var(--blau) 10%, transparent)}
+.akte .ak-status.offen{color:var(--bernstein);background:rgba(178,109,10,.12)}
+
+/* Der Stift kritzelt auf den Tisch: Kringel und Pfeil liegen ÜBER den Akten */
+#kritzel{position:absolute;inset:0;z-index:7;pointer-events:none;overflow:visible}
+#kritzel path{fill:none;stroke:var(--bernstein);stroke-width:2.5;stroke-linecap:round;opacity:.8}
+#kritzel path.blau{stroke:var(--stift)}
+.kritzel-text{
+  position:absolute;z-index:7;pointer-events:none;
+  font-family:'Caveat',cursive;font-size:20px;font-weight:700;color:var(--bernstein);
+}
+.kritzel-text.blau{color:var(--stift)}
+
+/* Die geöffnete Akte: nach dem Zoom liegt sie aufgeschlagen vor dir */
+#lupe{
+  position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb, var(--papier) 55%, transparent);
+  opacity:0;pointer-events:none;transition:opacity .3s ease .15s;
+}
+#lupe.da{opacity:1;pointer-events:auto}
+#lupe .mappe{
+  width:min(560px,calc(100vw - 40px));max-height:min(560px,calc(100svh - 120px));overflow:auto;
+  background:#fff;border:0.5px solid var(--linie);border-radius:20px;
+  box-shadow:0 30px 80px rgba(16,19,26,.22);padding:26px 28px;
+  translate:0 12px;transition:translate .3s var(--feder) .15s;
+}
+#lupe.da .mappe{translate:none}
+#lupe .m-kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+#lupe h2{font-size:22px;font-weight:800;letter-spacing:-.02em}
+#lupe .m-stand{font-size:13px;color:var(--grau);margin-top:2px}
+#lupe .zu{
+  flex-shrink:0;width:34px;height:34px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;cursor:pointer;font-size:15px;font-weight:800;color:var(--grau);
+}
+#lupe .zu:hover{border-color:var(--blau);color:var(--tinte)}
+#lupe .m-zeilen{margin-top:16px;display:flex;flex-direction:column}
+#lupe .m-zeile{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-top:0.5px solid var(--linie);font-size:13.5px}
+#lupe .m-zeile b{font-weight:800}
+#lupe .m-zeile span{color:var(--grau)}
+#lupe .m-tueren{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+#lupe .m-tueren button{
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:12.5px;font-weight:700;color:var(--tinte);cursor:pointer;
+  transition:border-color .2s ease;
+}
+#lupe .m-tueren button:hover{border-color:var(--blau)}
+
+@media (prefers-reduced-motion: reduce){
+  #tisch{transition:none}
+  #lupe,#lupe .mappe{transition:none}
+  .zettel,.akte{transition:none}
+}
+
+/* Mobil: der Tisch wird zur Ablage untereinander */
+@media (max-width:760px){
+  nav .wortmarke small{display:none}
+  .buehne{height:auto;min-height:0;overflow:visible;padding:96px 18px 40px}
+  #tisch{position:static;transform:none!important}
+  .auftakt{position:static;max-width:none;margin-bottom:20px}
+  .randnotiz{position:static;margin-top:26px;rotate:0deg}
+  .zettel,.akte{position:static;width:auto;rotate:0deg!important;margin-top:12px}
+  .zettel{z-index:auto}
+  #kritzel,.kritzel-text{display:none}
+}
+</style>
+<script src="marke.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="wortmarke"><img class="marke-logo" alt="" hidden><div><span data-marke-name data-logo-versteckt>Nordholm &amp; Partner</span><small class="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung · Beispielmarke wechseln</small></div></div>
+  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<div id="demo-hinweis">Diese Fläche entsteht gerade.</div>
+
+<main class="buehne">
+  <div id="tisch">
+    <div class="auftakt">
+      <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
+      <div class="vorgruss">Der Lagetisch, Mittwochmorgen.</div>
+      <h1 data-du="Alles liegt vor dir. Dringendes obenauf." data-sie="Alles liegt vor Ihnen. Dringendes obenauf.">Alles liegt vor dir. Dringendes obenauf.</h1>
+    </div>
+
+    <!-- die drei wartenden Zettel, obenauf -->
+    <div class="zettel bald" style="left:52%;top:17%;rotate:-2deg">
+      <div class="zl-titel">Herr Petersen möchte ein Gespräch mit einem Menschen</div>
+      <div class="zl-meta">Petersen Stahlbau · liegt vor</div>
+      <div class="zl-hand">Freitag, 9:00?</div>
+    </div>
+    <div class="zettel bald" style="left:71%;top:26%;rotate:2deg">
+      <div class="zl-titel">„Warum schrumpft meine Marge?" ist jetzt freigegeben</div>
+      <div class="zl-meta">Petersen Stahlbau · gestern, 16:40</div>
+      <div class="zl-hand blau" style="color:var(--stift)">zum Mitlesen!</div>
+    </div>
+    <div class="zettel bald" style="left:36%;top:31%;rotate:-1deg">
+      <div class="zl-titel" data-du="Der KI-Berater hat dir eine Steuerfrage übergeben" data-sie="Der KI-Berater hat Ihnen eine Steuerfrage übergeben">Der KI-Berater hat dir eine Steuerfrage übergeben</div>
+      <div class="zl-meta">Cordes Logistik · heute, 8:12</div>
+      <div class="zl-hand warn">wartet auf Antwort</div>
+    </div>
+
+    <!-- die vier Akten auf dem Tisch -->
+    <div class="akte" data-mandat="petersen" style="left:6%;top:56%;rotate:-3deg">
+      <div class="ak-name">Petersen Stahlbau</div>
+      <div class="ak-meta">3 Gespräche diese Woche<br>Termin Donnerstag, 10:00</div>
+      <span class="ak-status geteilt">1 Gespräch freigegeben</span>
+    </div>
+    <div class="akte" data-mandat="cordes" style="left:31%;top:63%;rotate:2deg">
+      <div class="ak-name">Cordes Logistik</div>
+      <div class="ak-meta">letzte Frage heute, 8:12<br>Übergabe offen</div>
+      <span class="ak-status offen">wartet</span>
+    </div>
+    <div class="akte" data-mandat="baeckerei" style="left:56%;top:57%;rotate:-1deg">
+      <div class="ak-name">Bäckerei Freitag</div>
+      <div class="ak-meta">Leistungsnachweis Juli versendet<br>6 Gespräche im Juli</div>
+      <span class="ak-status">läuft ruhig</span>
+    </div>
+    <div class="akte" data-mandat="mts" style="left:78%;top:66%;rotate:3deg">
+      <div class="ak-name">MTS Maschinenbau</div>
+      <div class="ak-meta">letzte Frage am 22. Juli<br>davor wöchentlich</div>
+      <span class="ak-status offen">seit 3 Wochen still</span>
+    </div>
+
+    <!-- der Stift kritzelt: Kringel um MTS, Pfeil zum Steuerzettel -->
+    <svg id="kritzel" aria-hidden="true"></svg>
+    <div class="kritzel-text" id="kritzel-mts" style="left:78%;top:88%">seit 3 Wochen still!</div>
+
+    <div class="randnotiz">126 Fragen diese Woche · 34,0 Std. im August · 3 Rechnungen offen</div>
+  </div>
+</main>
+
+<!-- die geöffnete Akte nach dem Zoom -->
+<div id="lupe" aria-hidden="true">
+  <div class="mappe">
+    <div class="m-kopf">
+      <div><h2 id="m-name">Petersen Stahlbau</h2><div class="m-stand" id="m-stand"></div></div>
+      <button class="zu" type="button" aria-label="Akte schließen">×</button>
+    </div>
+    <div class="m-zeilen" id="m-zeilen"></div>
+    <div class="m-tueren">
+      <button class="bald" type="button">Gespräche mitlesen</button>
+      <button class="bald" type="button">Unterlagen</button>
+      <button class="bald" type="button">Leistungsnachweis</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var Marke = window.Marke || {anwenden: function(){}};
+  Marke.anwenden();
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var mobil = window.matchMedia('(max-width: 760px)').matches;
+  function zufall(a, b){ return a + Math.random() * (b - a); }
+
+  /* Der Stift zieht seinen Anstrich */
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.querySelector('.anstrich');
+  var d = 'M2 6';
+  for (var i = 1; i <= 6; i++) d += ' L' + (2 + 92 * i / 6) + ' ' + (6 + zufall(-2, 2));
+  var p = document.createElementNS(NS, 'path');
+  p.setAttribute('d', d);
+  svg.appendChild(p);
+
+  /* Kringel um die stille Akte, Pfeil zum wartenden Steuerzettel */
+  var kritzel = document.getElementById('kritzel');
+  function male(){
+    if (mobil) return;
+    kritzel.innerHTML = '';
+    /* keine viewBox: SVG-Einheiten sind dann Pixel der Fläche, exakt wie offsetLeft/Top */
+    var mts = document.querySelector('.akte[data-mandat="mts"]');
+    var cx = mts.offsetLeft + mts.offsetWidth / 2, cy = mts.offsetTop + mts.offsetHeight / 2;
+    var rx = mts.offsetWidth * 0.62, ry = mts.offsetHeight * 0.72;
+    /* eine leicht unrunde Hand-Ellipse aus zwei Bögen */
+    var e = document.createElementNS(NS, 'path');
+    e.setAttribute('d',
+      'M' + (cx - rx) + ' ' + cy +
+      ' C' + (cx - rx) + ' ' + (cy - ry * 1.25) + ' ' + (cx + rx * 0.9) + ' ' + (cy - ry * 1.15) + ' ' + (cx + rx) + ' ' + (cy - ry * 0.1) +
+      ' C' + (cx + rx * 1.06) + ' ' + (cy + ry * 0.95) + ' ' + (cx - rx * 0.75) + ' ' + (cy + ry * 1.2) + ' ' + (cx - rx * 1.04) + ' ' + (cy + ry * 0.15));
+    kritzel.appendChild(e);
+    /* Pfeil vom Rand zum Steuer-Zettel */
+    var zettel = document.querySelectorAll('.zettel')[2];
+    var zx = zettel.offsetLeft, zy = zettel.offsetTop + zettel.offsetHeight / 2;
+    var a = document.createElementNS(NS, 'path');
+    a.setAttribute('class', 'blau');
+    a.setAttribute('d', 'M' + (zx - 90) + ' ' + (zy + 55) + ' Q' + (zx - 60) + ' ' + (zy + 10) + ' ' + (zx - 14) + ' ' + zy +
+      ' M' + (zx - 30) + ' ' + (zy - 3) + ' L' + (zx - 14) + ' ' + zy + ' L' + (zx - 26) + ' ' + (zy + 11));
+    kritzel.appendChild(a);
+    /* zeichnen lassen */
+    if (!reduziert) {
+      [e, a].forEach(function(pfad, i){
+        var len = pfad.getTotalLength();
+        pfad.style.strokeDasharray = len;
+        pfad.style.strokeDashoffset = len;
+        pfad.style.transition = 'stroke-dashoffset .9s cubic-bezier(.45,.05,.55,.95) ' + (0.5 + i * 0.4) + 's';
+        void pfad.getBoundingClientRect();
+        pfad.style.strokeDashoffset = 0;
+      });
+    }
+  }
+  male();
+  var malTimer = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(malTimer);
+    malTimer = setTimeout(function(){ mobil = window.matchMedia('(max-width: 760px)').matches; male(); }, 200);
+  });
+  /* die Kritzel-Notiz unter den Kringel schieben */
+  (function(){
+    var mts = document.querySelector('.akte[data-mandat="mts"]');
+    var t = document.getElementById('kritzel-mts');
+    if (!mobil) { t.style.left = (mts.offsetLeft - 10) + 'px'; t.style.top = (mts.offsetTop + mts.offsetHeight + 26) + 'px'; }
+  })();
+
+  if (!reduziert) {
+    var len = p.getTotalLength();
+    p.style.strokeDasharray = len;
+    p.style.strokeDashoffset = len;
+    p.style.transition = 'stroke-dashoffset .55s cubic-bezier(.45,.05,.55,.95) .1s';
+    void p.getBoundingClientRect();
+    p.style.strokeDashoffset = 0;
+  }
+
+  /* Ehrlichkeit: was noch entsteht, sagt das */
+  var hinweisTimer = null;
+  function demoHinweis(text){
+    var h = document.getElementById('demo-hinweis');
+    h.textContent = text;
+    h.classList.add('da');
+    clearTimeout(hinweisTimer);
+    hinweisTimer = setTimeout(function(){ h.classList.remove('da'); }, 2200);
+  }
+  document.querySelectorAll('.bald').forEach(function(el){
+    el.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); demoHinweis('Diese Fläche entsteht gerade.'); });
+  });
+
+  /* Der Zoom: Klick auf eine Akte fährt den Tisch heran, dann liegt sie aufgeschlagen da */
+  var MANDATE = {
+    petersen: {name: 'Petersen Stahlbau', stand: '3 Gespräche diese Woche · Termin Donnerstag, 10:00', zeilen: [
+      ['„Warum schrumpft meine Marge?"', 'gestern freigegeben · zum Mitlesen'],
+      ['Gespräch mit einem Menschen', 'angefragt · Wunsch: Freitag, 9:00'],
+      ['Preismodell Benchmark', 'gestern in die Unterlagen gelegt']
+    ]},
+    cordes: {name: 'Cordes Logistik', stand: 'letzte Frage heute, 8:12', zeilen: [
+      ['Steuerfrage übergeben', 'heute, 8:12 · wartet auf Antwort'],
+      ['4 Gespräche im August', 'alle nur für den Kunden'],
+      ['Leistungsnachweis August', '6,5 Std. bisher']
+    ]},
+    baeckerei: {name: 'Bäckerei Freitag', stand: 'läuft ruhig', zeilen: [
+      ['Leistungsnachweis Juli', 'versendet und bezahlt'],
+      ['6 Gespräche im Juli', 'keines freigegeben'],
+      ['Nächster Termin', 'noch keiner vereinbart']
+    ]},
+    mts: {name: 'MTS Maschinenbau', stand: 'seit 3 Wochen still', zeilen: [
+      ['Letzte Frage am 22. Juli', 'davor wöchentlich'],
+      ['Offene Rechnung', '4.200 € · seit 12 Tagen'],
+      ['Vorschlag des KI-Beraters', 'anstoßen: Halbjahresblick anbieten']
+    ]}
+  };
+  var buehne = document.querySelector('.buehne');
+  var tisch = document.getElementById('tisch');
+  var lupe = document.getElementById('lupe');
+  var offen = false;
+
+  function oeffne(akte){
+    var m = MANDATE[akte.dataset.mandat];
+    if (!m) return;
+    document.getElementById('m-name').textContent = m.name;
+    document.getElementById('m-stand').textContent = m.stand;
+    var z = document.getElementById('m-zeilen');
+    z.innerHTML = '';
+    m.zeilen.forEach(function(paar){
+      var e = document.createElement('div');
+      e.className = 'm-zeile';
+      var b = document.createElement('b'); b.textContent = paar[0];
+      var s = document.createElement('span'); s.textContent = paar[1];
+      e.appendChild(b); e.appendChild(s);
+      z.appendChild(e);
+    });
+    if (!mobil) {
+      /* Tisch heranfahren: die Akte rückt in die Mitte */
+      var x = akte.offsetLeft + akte.offsetWidth / 2;
+      var y = akte.offsetTop + akte.offsetHeight / 2;
+      var s2 = 2.1;
+      tisch.style.transform = 'translate(' + (window.innerWidth / 2 - s2 * x) + 'px,' + (window.innerHeight / 2 - s2 * y) + 'px) scale(' + s2 + ')';
+      buehne.classList.add('gezoomt');
+    }
+    lupe.classList.add('da');
+    lupe.setAttribute('aria-hidden', 'false');
+    offen = true;
+  }
+  function schliesse(){
+    if (!offen) return;
+    tisch.style.transform = '';
+    buehne.classList.remove('gezoomt');
+    lupe.classList.remove('da');
+    lupe.setAttribute('aria-hidden', 'true');
+    offen = false;
+  }
+  document.querySelectorAll('.akte').forEach(function(a){
+    a.addEventListener('click', function(){ if (!offen) oeffne(a); });
+  });
+  lupe.querySelector('.zu').addEventListener('click', schliesse);
+  lupe.addEventListener('click', function(e){ if (e.target === lupe) schliesse(); });
+  window.addEventListener('keydown', function(e){ if (e.key === 'Escape') schliesse(); });
+})();
+</script>
+</body>
+</html>
