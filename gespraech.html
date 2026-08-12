@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V18 (V17 + Grenz-Momente als ruhige Karten, KI-Pflichthinweis im Fuß) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V19 (V18 + Gesprächsliste: jedes Gespräch öffnet seinen eigenen Raum) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -54,6 +54,56 @@ nav .wortmarke small[role="button"]{pointer-events:auto;cursor:pointer}
 nav .wortmarke small[role="button"]:hover{color:var(--blau)}
 nav .hinweis{font-size:12px;color:var(--grau)}
 nav .griffe{display:flex;align-items:center;gap:8px}
+#gespraeche-griff{
+  pointer-events:auto;cursor:pointer;
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:12.5px;font-weight:700;color:var(--tinte);
+  transition:border-color .2s ease;
+}
+#gespraeche-griff:hover{border-color:var(--blau)}
+
+/* Die Gesprächsliste */
+#gespraechsliste{
+  position:fixed;inset:0;z-index:22;overflow-y:auto;
+  background:color-mix(in srgb, var(--papier) 92%, transparent);
+  backdrop-filter:blur(18px) saturate(160%);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);
+  opacity:0;pointer-events:none;transition:opacity .35s ease;
+}
+#gespraechsliste.offen{opacity:1;pointer-events:auto}
+#gespraechsliste .innen{max-width:640px;margin:0 auto;padding:96px 24px}
+#gespraechsliste h2{font-size:clamp(26px,4vw,36px);font-weight:800;letter-spacing:-.03em}
+#gespraechsliste .unter{color:var(--grau);font-size:15px;margin-top:4px}
+#neues-gespraech{
+  margin-top:22px;padding:12px 20px;border-radius:999px;border:none;cursor:pointer;
+  background:var(--tinte);color:#fff;font-size:14px;font-weight:800;
+  transition:transform .1s ease;
+}
+#neues-gespraech:active{transform:scale(.97)}
+.gespraech-zeile{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  width:100%;text-align:left;cursor:pointer;
+  margin-top:12px;padding:16px 20px;border-radius:var(--radius);
+  border:0.5px solid var(--linie);background:#fff;
+  box-shadow:0 6px 20px rgba(16,19,26,.05);
+  transition:border-color .2s ease,translate .2s var(--feder),box-shadow .2s ease;
+}
+.gespraech-zeile:hover{border-color:var(--blau);translate:0 -1px;box-shadow:0 10px 26px rgba(16,19,26,.08)}
+.gespraech-zeile .g-titel{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.gespraech-zeile .g-meta{font-size:12.5px;color:var(--grau);margin-top:3px}
+.gespraech-zeile .g-status{
+  flex-shrink:0;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;
+  color:var(--grau);background:rgba(16,19,26,.05);
+}
+.gespraech-zeile .g-status.geteilt{color:var(--blau);background:color-mix(in srgb, var(--blau) 10%, transparent)}
+.gespraech-zeile .g-status.jetzt{color:#fff;background:var(--blau)}
+#gespraeche-zu{
+  position:fixed;top:16px;right:max(24px,calc((100vw - 640px)/2));z-index:23;
+  padding:10px 18px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:14px;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 16px rgba(16,19,26,.1);
+}
+body.gespraeche-offen{overflow:hidden}
 #freigabe{
   pointer-events:auto;cursor:pointer;
   display:inline-flex;align-items:center;gap:7px;
@@ -606,6 +656,7 @@ body.blatt-offen{overflow:hidden}
   <div class="wortmarke"><img id="marke-logo" alt="" hidden><div><span id="marke-name">Nordholm &amp; Partner</span><small id="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Beispielmarke deiner Beratung · wechseln</small></div></div>
   <span id="hirn-lampe">Hirn an</span>
   <div class="griffe">
+    <button id="gespraeche-griff" type="button" title="Alle deine Gespräche">Gespräche</button>
     <button id="freigabe" type="button" aria-pressed="false" title="Wer darf dieses Gespräch lesen?">
       <span class="punkt-f"></span><span id="freigabe-text">Nur für dich</span>
     </button>
@@ -621,6 +672,16 @@ body.blatt-offen{overflow:hidden}
   </div>
 </div>
 <button id="regal-zu" type="button" hidden>Zurück ins Gespräch</button>
+
+<div id="gespraechsliste" aria-hidden="true">
+  <div class="innen">
+    <h2>Deine Gespräche</h2>
+    <p class="unter">Jedes Gespräch hat seinen eigenen Raum — mit Akte, Karten und Rechenwegen.</p>
+    <button id="neues-gespraech" type="button">+ Neues Gespräch</button>
+    <div id="gespraeche-einträge"></div>
+  </div>
+</div>
+<button id="gespraeche-zu" type="button" hidden>Zurück ins Gespräch</button>
 
 <div id="blatt-blick" aria-hidden="true">
   <article class="bogen" role="dialog" aria-modal="true" aria-label="Dokument">
@@ -1571,6 +1632,79 @@ body.blatt-offen{overflow:hidden}
     male();
   })();
 
+  /* ---------- Die Gesprächsliste: jedes Gespräch hat seinen Raum ---------- */
+  var gespraechsliste = (function(){
+    var blende = document.getElementById('gespraechsliste');
+    var eintraege = document.getElementById('gespraeche-einträge');
+    var griff = document.getElementById('gespraeche-griff');
+    var zu = document.getElementById('gespraeche-zu');
+    var neu = document.getElementById('neues-gespraech');
+    /* Frühere Gespräche der Vorführung: öffnen spielt ihr Drehbuch neu an —
+       im Produkt lädt hier der gespeicherte Verlauf. */
+    var FRUEHERE = [
+      {frage: 'Warum schrumpft meine Marge?', zeit: 'gestern, 16:40', geteilt: true},
+      {frage: 'Wie läuft mein Geschäft?', zeit: 'Montag, 9:12', geteilt: false},
+      {frage: 'Was bringt mir das Preismodell?', zeit: '5. August', geteilt: false}
+    ];
+    function zeile(titel, meta, status, statusKlasse){
+      var z = document.createElement('button');
+      z.type = 'button';
+      z.className = 'gespraech-zeile';
+      var links = document.createElement('div');
+      var t = document.createElement('div');
+      t.className = 'g-titel';
+      t.textContent = titel;
+      var m = document.createElement('div');
+      m.className = 'g-meta';
+      m.textContent = meta;
+      links.appendChild(t); links.appendChild(m);
+      var s = document.createElement('span');
+      s.className = 'g-status' + (statusKlasse ? ' ' + statusKlasse : '');
+      s.textContent = status;
+      z.appendChild(links); z.appendChild(s);
+      return z;
+    }
+    function fuelle(){
+      eintraege.innerHTML = '';
+      var ersteFrage = akte.querySelector('.kapitel .frage');
+      var titel = ersteFrage ? ersteFrage.textContent.replace(/ \+$/, '') : 'Neues Gespräch';
+      var karten = akte.querySelectorAll('.karte').length;
+      var geteilt = false;
+      try { geteilt = sessionStorage.getItem('freigabe') === '1'; } catch (e) {}
+      var jetzt = zeile(titel, 'gerade eben · ' + karten + ' Karten in der Akte' + (geteilt ? ' · freigegeben' : ''), 'jetzt offen', 'jetzt');
+      jetzt.addEventListener('click', schliesse);
+      eintraege.appendChild(jetzt);
+      FRUEHERE.forEach(function(g){
+        var z = zeile(g.frage, g.zeit, g.geteilt ? 'freigegeben' : 'nur für dich', g.geteilt ? 'geteilt' : '');
+        z.addEventListener('click', function(){
+          try { sessionStorage.setItem('starte-frage', g.frage); sessionStorage.removeItem('freigabe'); } catch (e) {}
+          location.reload();
+        });
+        eintraege.appendChild(z);
+      });
+    }
+    function oeffne(){
+      fuelle();
+      blende.classList.add('offen');
+      blende.setAttribute('aria-hidden', 'false');
+      zu.hidden = false;
+      document.body.classList.add('gespraeche-offen');
+    }
+    function schliesse(){
+      blende.classList.remove('offen');
+      blende.setAttribute('aria-hidden', 'true');
+      zu.hidden = true;
+      document.body.classList.remove('gespraeche-offen');
+    }
+    griff.addEventListener('click', oeffne);
+    zu.addEventListener('click', schliesse);
+    neu.addEventListener('click', function(){
+      try { sessionStorage.removeItem('starte-frage'); sessionStorage.removeItem('freigabe'); } catch (e) {}
+      location.reload();
+    });
+    return {offen: function(){ return blende.classList.contains('offen'); }, schliesse: schliesse};
+  })();
+
   /* ---------- Eigene Unterlagen: anhängen, hinlegen, ablegen ---------- */
   var wartendeAnlagen = [];
   var zeichneAnlagen = function(){};
@@ -2361,6 +2495,7 @@ body.blatt-offen{overflow:hidden}
     window.addEventListener('keydown', function(e){
       if (e.key !== 'Escape') return;
       if (blattBlick.offen()) { blattBlick.schliesse(); return; }
+      if (gespraechsliste.offen()) { gespraechsliste.schliesse(); return; }
       if (regal.classList.contains('offen')) schliesseRegal();
     });
   })();
@@ -2443,6 +2578,15 @@ body.blatt-offen{overflow:hidden}
         lage.appendChild(b);
         setTimeout(function(){ b.classList.add('da'); }, reduziert ? 0 : 140 * i + 100);
       });
+    }
+    /* Aus der Gesprächsliste geöffnet: das Gespräch liegt sofort an */
+    var starteFrage = null;
+    try { starteFrage = sessionStorage.getItem('starte-frage'); sessionStorage.removeItem('starte-frage'); } catch (e) {}
+    if (starteFrage) {
+      el.textContent = ziel;
+      gruss.classList.add('da');
+      setTimeout(function(){ frageStellen(starteFrage); }, 450);
+      return;
     }
     if (reduziert) { el.textContent = ziel; vorgruss.classList.add('da'); gruss.classList.add('da'); chipsRein(); return; }
     var laenge = pfad.getTotalLength();
