@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V11 (V10 + Senden als runder Pfeil im Eingabefeld statt Fragen-Knopf) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V12 (V11 + Blatt-Blick: Dokument-Karten öffnen sich zum Papier, auch aus der Akte) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -331,6 +331,63 @@ body.hirn #hirn-lampe{display:inline-flex}
 .dokument .name{font-weight:800;font-size:15px}
 .dokument .meta{font-size:12.5px;color:var(--grau)}
 
+/* Dokument öffnen: die Karte ist ein Griff, kein Bild */
+.karte[data-doku]{cursor:pointer}
+.karte[data-doku] .dokument::after{
+  content:'›';margin-left:auto;padding-left:12px;
+  font-size:24px;font-weight:600;color:var(--grau);
+  transition:color .2s ease,translate .2s var(--feder);
+}
+.karte[data-doku]:hover .dokument::after{color:var(--blau);translate:3px 0}
+.karte[data-doku].belichtet{transition:border-color .5s ease,box-shadow .25s ease,translate .25s var(--feder)}
+.karte[data-doku].belichtet:hover{translate:0 -2px;box-shadow:0 14px 34px rgba(16,19,26,.1)}
+#regal .karte[data-doku]{pointer-events:auto}
+
+/* Der Blatt-Blick: das Dokument zieht sich aus der Karte groß */
+#blatt-blick{
+  position:fixed;inset:0;z-index:24;overflow-y:auto;
+  background:color-mix(in srgb, var(--tinte) 16%, transparent);
+  backdrop-filter:blur(10px) saturate(120%);
+  -webkit-backdrop-filter:blur(10px) saturate(120%);
+  opacity:0;pointer-events:none;transition:opacity .3s ease;
+}
+#blatt-blick.offen{opacity:1;pointer-events:auto}
+#blatt-blick .bogen{
+  position:relative;max-width:680px;margin:76px auto 96px;
+  background:#fff;border-radius:20px;padding:44px 48px 36px;
+  box-shadow:0 30px 80px rgba(16,19,26,.28);
+  translate:0 30px;scale:.96;
+  transition:translate .5s var(--feder),scale .5s var(--feder);
+}
+#blatt-blick.offen .bogen{translate:none;scale:none}
+#blatt-blick .bogen-titel{font-size:clamp(24px,3.6vw,32px);font-weight:800;letter-spacing:-.03em;line-height:1.15}
+#blatt-blick .bogen-meta{font-size:13px;color:var(--grau);margin-top:6px;padding-bottom:20px;border-bottom:1px solid var(--linie)}
+#blatt-blick .bogen-inhalt h4{font-size:13px;font-weight:800;color:var(--grau);margin:26px 0 6px}
+#blatt-blick .bogen-inhalt p{font-size:15.5px;max-width:58ch}
+#blatt-blick .bogen-inhalt table{width:100%;border-collapse:collapse;margin-top:8px;font-size:14.5px}
+#blatt-blick .bogen-inhalt th{text-align:left;font-size:12px;color:var(--grau);font-weight:700;padding:6px 0;border-bottom:1px solid var(--linie)}
+#blatt-blick .bogen-inhalt td{padding:9px 0;border-bottom:0.5px solid var(--linie);font-variant-numeric:tabular-nums}
+#blatt-blick .bogen-inhalt td.neu{font-weight:800;color:var(--blau)}
+#blatt-blick .rand-notiz{
+  position:absolute;right:26px;top:34px;rotate:-3deg;
+  font-family:'Caveat',cursive;font-size:22px;font-weight:700;color:var(--stift);opacity:.9;
+}
+#blatt-blick .bogen-fuss{
+  margin-top:30px;padding-top:14px;border-top:1px solid var(--linie);
+  font-size:12.5px;color:var(--grau);display:flex;justify-content:space-between;gap:12px;
+}
+#blatt-zu{
+  position:fixed;top:16px;right:max(24px,calc((100vw - 680px)/2));z-index:25;
+  padding:10px 18px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:14px;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 16px rgba(16,19,26,.15);
+}
+body.blatt-offen{overflow:hidden}
+@media (max-width:700px){
+  #blatt-blick .bogen{margin:64px 12px 80px;padding:28px 22px 26px}
+  #blatt-blick .rand-notiz{position:static;display:block;rotate:-2deg;margin-top:8px}
+}
+
 /* Kalender */
 .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
 .slots button{
@@ -439,6 +496,17 @@ body.hirn #hirn-lampe{display:inline-flex}
   </div>
 </div>
 <button id="regal-zu" type="button" hidden>Zurück ins Gespräch</button>
+
+<div id="blatt-blick" aria-hidden="true">
+  <article class="bogen" role="dialog" aria-modal="true" aria-label="Dokument">
+    <div class="rand-notiz" hidden></div>
+    <div class="bogen-titel"></div>
+    <div class="bogen-meta"></div>
+    <div class="bogen-inhalt"></div>
+    <div class="bogen-fuss"></div>
+  </article>
+</div>
+<button id="blatt-zu" type="button" hidden>Schließen</button>
 
 <main id="akte">
   <div id="gruss">
@@ -898,8 +966,80 @@ body.hirn #hirn-lampe{display:inline-flex}
     var k = karteAus('<div class="dokument"><div class="blatt"></div><div><div class="name"></div><div class="meta"></div></div></div>', '', d.sk);
     k.querySelector('.name').textContent = d.name;
     k.querySelector('.meta').textContent = d.meta;
+    k.dataset.doku = d.name;
+    k.dataset.dokuMeta = d.meta;
     return k;
   }
+
+  /* ---------- Der Blatt-Blick: Dokument-Karten lassen sich öffnen ---------- */
+  var blattBlick = (function(){
+    var blick = document.getElementById('blatt-blick');
+    var zu = document.getElementById('blatt-zu');
+    var titel = blick.querySelector('.bogen-titel');
+    var meta = blick.querySelector('.bogen-meta');
+    var inhalt = blick.querySelector('.bogen-inhalt');
+    var fuss = blick.querySelector('.bogen-fuss');
+    var notiz = blick.querySelector('.rand-notiz');
+
+    /* Demo-Inhalte: ein ausgearbeitetes Blatt, ein Zustand für Entstehendes */
+    function fuelle(name, metaText){
+      titel.textContent = name;
+      meta.textContent = metaText;
+      notiz.hidden = true;
+      if (/preismodell/i.test(name)) {
+        inhalt.innerHTML =
+          '<h4>Das Wichtigste in Kürze</h4>' +
+          '<p>Eine Preisanpassung von 4 Prozent auf die C-Kunden bringt rechnerisch <strong>+38.000 € im Jahr</strong> — auch wenn jeder zwanzigste Auftrag dadurch verloren geht. Die Staffeln werden dabei neu geschnitten, A- und B-Kunden bleiben unberührt.</p>' +
+          '<h4>Staffeln heute → neu</h4>' +
+          '<table><tr><th>Abnahme</th><th>heute</th><th>neu</th></tr>' +
+          '<tr><td>bis 500 Stück</td><td>Liste</td><td class="neu">Liste +4 %</td></tr>' +
+          '<tr><td>bis 2.000 Stück</td><td>−3 %</td><td class="neu">−2 %</td></tr>' +
+          '<tr><td>ab 2.000 Stück</td><td>−7 %</td><td class="neu">−5 %</td></tr></table>' +
+          '<h4>Der Branchenvergleich</h4>' +
+          '<p>Deine C-Kunden zahlen heute rund 6 Prozent unter dem Branchenschnitt vergleichbarer Zulieferer. Die 4 Prozent holen die Hälfte davon auf — genug für die Marge, zu wenig für einen Wechselgrund.</p>';
+        notiz.textContent = 'die 4 % halten!';
+        notiz.hidden = false;
+        fuss.innerHTML = '<span>Seite 1 von 12</span><span>Das vollständige Dokument liegt in deiner Akte</span>';
+      } else if (/entsteht|in arbeit/i.test(name + ' ' + metaText)) {
+        inhalt.innerHTML =
+          '<h4>Dieses Dokument entsteht gerade</h4>' +
+          '<p>Deine Beratung rechnet die Antwort in Ruhe durch — mit Rechenweg, nicht nur mit Ergebnis. Sobald das Blatt fertig ist, liegt es hier und in deiner Akte.</p>';
+        fuss.innerHTML = '<span>Entwurf</span><span>meldet sich von selbst</span>';
+      } else {
+        inhalt.innerHTML =
+          '<h4>Inhalt</h4>' +
+          '<p>Dieses Blatt ist in der Vorführung nur angedeutet. Im echten Produkt öffnet sich hier das vollständige Dokument deiner Beratung.</p>';
+        fuss.innerHTML = '<span>Vorführung</span><span>Demo-Daten</span>';
+      }
+    }
+    function oeffne(name, metaText){
+      fuelle(name, metaText || '');
+      blick.classList.add('offen');
+      blick.setAttribute('aria-hidden', 'false');
+      blick.scrollTop = 0;
+      zu.hidden = false;
+      document.body.classList.add('blatt-offen');
+    }
+    function schliesse(){
+      blick.classList.remove('offen');
+      blick.setAttribute('aria-hidden', 'true');
+      zu.hidden = true;
+      document.body.classList.remove('blatt-offen');
+    }
+    zu.addEventListener('click', schliesse);
+    blick.addEventListener('click', function(e){
+      if (!blick.querySelector('.bogen').contains(e.target)) schliesse();
+    });
+    /* Ein Griff für alle Dokument-Karten — auch für die Klone im Regal */
+    function greife(e){
+      var karte = e.target.closest('.karte[data-doku]');
+      if (!karte) return;
+      oeffne(karte.dataset.doku, karte.dataset.dokuMeta);
+    }
+    document.getElementById('akte').addEventListener('click', greife);
+    document.getElementById('regal-inhalt').addEventListener('click', greife);
+    return {offen: function(){ return blick.classList.contains('offen'); }, schliesse: schliesse};
+  })();
 
   function baueKalender(slots){
     var k = karteAus(
@@ -1747,7 +1887,9 @@ body.hirn #hirn-lampe{display:inline-flex}
     document.getElementById('akte-griff').addEventListener('click', oeffneRegal);
     zu.addEventListener('click', schliesseRegal);
     window.addEventListener('keydown', function(e){
-      if (e.key === 'Escape' && regal.classList.contains('offen')) schliesseRegal();
+      if (e.key !== 'Escape') return;
+      if (blattBlick.offen()) { blattBlick.schliesse(); return; }
+      if (regal.classList.contains('offen')) schliesseRegal();
     });
   })();
 
