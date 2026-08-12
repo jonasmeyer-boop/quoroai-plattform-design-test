@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V20 (V19 + Mensch-Moment ehrlich: Anfrage mit Status und Zurückziehen statt Sofort-Buchung) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V21 (V20 + Herunterladen im Blatt-Blick für Dokumente, Bilder und eigene Unterlagen) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -445,6 +445,13 @@ body.hirn #hirn-lampe{display:inline-flex}
   position:absolute;right:26px;top:34px;rotate:-3deg;
   font-family:'Caveat',cursive;font-size:22px;font-weight:700;color:var(--stift);opacity:.9;
 }
+#blatt-blick .bogen-aktion{margin-top:24px}
+#blatt-blick .bogen-aktion button{
+  padding:9px 18px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:13px;font-weight:700;cursor:pointer;
+  transition:border-color .2s ease,color .2s ease;
+}
+#blatt-blick .bogen-aktion button:hover{border-color:var(--blau);color:var(--blau)}
 #blatt-blick .bogen-fuss{
   margin-top:30px;padding-top:14px;border-top:1px solid var(--linie);
   font-size:12.5px;color:var(--grau);display:flex;justify-content:space-between;gap:12px;
@@ -705,6 +712,7 @@ body.blatt-offen{overflow:hidden}
     <div class="bogen-titel"></div>
     <div class="bogen-meta"></div>
     <div class="bogen-inhalt"></div>
+    <div class="bogen-aktion"><button id="blatt-laden" type="button" hidden>↓ Herunterladen</button></div>
     <div class="bogen-fuss"></div>
   </article>
 </div>
@@ -1200,13 +1208,31 @@ body.blatt-offen{overflow:hidden}
     var inhalt = blick.querySelector('.bogen-inhalt');
     var fuss = blick.querySelector('.bogen-fuss');
     var notiz = blick.querySelector('.rand-notiz');
+    var laden = document.getElementById('blatt-laden');
+    var ladbar = null;
+    function setzeLadbar(x){ ladbar = x; laden.hidden = !x; }
+    laden.addEventListener('click', function(){
+      if (!ladbar) return;
+      var a = document.createElement('a');
+      if (ladbar.url) {
+        a.href = ladbar.url;
+      } else {
+        a.href = URL.createObjectURL(new Blob([ladbar.text], {type: 'text/markdown'}));
+        setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+      }
+      a.download = ladbar.name;
+      a.click();
+    });
 
     /* Demo-Inhalte: ein ausgearbeitetes Blatt, ein Zustand für Entstehendes */
     function fuelle(name, metaText){
       titel.textContent = name;
       meta.textContent = metaText;
       notiz.hidden = true;
+      setzeLadbar(null);
       if (/preismodell/i.test(name)) {
+        setzeLadbar({name: 'Preismodell-Benchmark.md', text:
+          '# Preismodell Benchmark\n\n## Das Wichtigste in Kürze\n\nEine Preisanpassung von 4 Prozent auf die C-Kunden bringt rechnerisch +38.000 € im Jahr — auch wenn jeder zwanzigste Auftrag dadurch verloren geht.\n\n## Staffeln heute → neu\n\n| Abnahme | heute | neu |\n|---|---|---|\n| bis 500 Stück | Liste | Liste +4 % |\n| bis 2.000 Stück | −3 % | −2 % |\n| ab 2.000 Stück | −7 % | −5 % |\n\n## Der Branchenvergleich\n\nDeine C-Kunden zahlen heute rund 6 Prozent unter dem Branchenschnitt vergleichbarer Zulieferer.\n\n— Vorführung, Demo-Daten\n'});
         inhalt.innerHTML =
           '<h4>Das Wichtigste in Kürze</h4>' +
           '<p>Eine Preisanpassung von 4 Prozent auf die C-Kunden bringt rechnerisch <strong>+38.000 € im Jahr</strong> — auch wenn jeder zwanzigste Auftrag dadurch verloren geht. Die Staffeln werden dabei neu geschnitten, A- und B-Kunden bleiben unberührt.</p>' +
@@ -1225,6 +1251,7 @@ body.blatt-offen{overflow:hidden}
           '<h4>Deine Unterlage</h4>' +
           '<p>Dein Berater hat sie gelesen und in deine Akte gelegt. Im echten Produkt öffnet sie sich hier im Original.</p>';
         fuss.innerHTML = '<span>von dir abgelegt</span><span>liegt in deiner Akte</span>';
+        if (eigeneUrls[name]) setzeLadbar({url: eigeneUrls[name], name: name});
       } else if (/entsteht|in arbeit/i.test(name + ' ' + metaText)) {
         inhalt.innerHTML =
           '<h4>Dieses Dokument entsteht gerade</h4>' +
@@ -1249,6 +1276,7 @@ body.blatt-offen{overflow:hidden}
       zeige();
     }
     function oeffneQuelle(q){
+      setzeLadbar(null);
       titel.textContent = q.titel;
       meta.textContent = (q.abschnitt ? 'Abschnitt ' + q.abschnitt + ' · ' : '') +
         (q.art === 'wissen' ? 'aus dem Wissen deiner Beratung' : 'aus deiner Akte');
@@ -1262,6 +1290,7 @@ body.blatt-offen{overflow:hidden}
       zeige();
     }
     function oeffneBild(url, name, metaText){
+      setzeLadbar({url: url, name: name});
       titel.textContent = name;
       meta.textContent = metaText || '';
       notiz.hidden = true;
@@ -1743,6 +1772,7 @@ body.blatt-offen{overflow:hidden}
 
   /* ---------- Eigene Unterlagen: anhängen, hinlegen, ablegen ---------- */
   var wartendeAnlagen = [];
+  var eigeneUrls = {};
   var zeichneAnlagen = function(){};
   (function(){
     var knopf = document.getElementById('anhang-knopf');
@@ -1791,6 +1821,7 @@ body.blatt-offen{overflow:hidden}
     function nimm(dateien){
       Array.prototype.slice.call(dateien).forEach(function(f){
         wartendeAnlagen.push({datei: f, url: /^image\//.test(f.type) ? URL.createObjectURL(f) : null});
+        eigeneUrls[f.name] = URL.createObjectURL(f);
       });
       zeichneAnlagen();
     }
