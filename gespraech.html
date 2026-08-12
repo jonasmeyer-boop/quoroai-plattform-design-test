@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V30 (Kopfzeile: Glocke und Pillen auf einer Höhe) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V31 (Mitlese-Schalter an der Gesprächszeit, Kopfzeile vier Griffe) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -63,7 +63,7 @@ nav .wortmarke small[role="button"]:hover{color:var(--blau)}
 nav .hinweis{font-size:12px;color:var(--grau)}
 nav .griffe{display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0}
 /* eine Höhe für die ganze Reihe — Kreis wie Pillen */
-#uebersicht-griff,#gespraeche-griff,#freigabe,#akte-griff{
+#uebersicht-griff,#gespraeche-griff,#akte-griff{
   height:35px;display:inline-flex;align-items:center;
 }
 #uebersicht-griff{
@@ -166,33 +166,25 @@ nav .griffe{display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shri
   box-shadow:0 4px 16px rgba(16,19,26,.1);
 }
 body.gespraeche-offen{overflow:hidden}
+/* Der Mitlese-Schalter lebt an der Gesprächszeit — Status gehört zum Gespräch,
+   nicht in die Kopfzeile. Er zieht mit jedem neuen Kapitel um. */
 #freigabe{
-  pointer-events:auto;cursor:pointer;
-  display:inline-flex;align-items:center;gap:7px;
-  padding:8px 14px;border-radius:999px;border:0.5px solid var(--linie);
-  background:#fff;font-size:12.5px;font-weight:700;color:var(--grau);
-  transition:border-color .25s ease,background .25s ease,color .25s ease;
+  cursor:pointer;border:0;background:none;padding:0;
+  display:inline-flex;align-items:center;gap:6px;margin-left:12px;
+  font-size:12px;font-weight:700;color:var(--grau);letter-spacing:0;
+  white-space:nowrap;transition:color .25s ease;
 }
+#freigabe::before{content:'·';margin-right:6px;font-weight:600;color:var(--grau)}
 #freigabe .punkt-f{
   width:7px;height:7px;border-radius:999px;background:var(--grau);
   transition:background .25s ease;
 }
-/* Der Schalter reserviert sich die Breite seines längsten Zustands,
-   damit beim Umschalten kein Nachbar verrutscht */
-#freigabe-text{text-align:center}
-#freigabe-text::after{
-  content:"Deine Beratung liest mit";
-  display:block;height:0;visibility:hidden;overflow:hidden;
-}
-#freigabe:hover{border-color:var(--blau)}
-#freigabe.geteilt{
-  border-color:color-mix(in srgb, var(--blau) 35%, transparent);
-  background:color-mix(in srgb, var(--blau) 8%, white);
-  color:var(--blau);
-}
+#freigabe:hover{color:var(--blau)}
+#freigabe.geteilt{color:var(--blau)}
 #freigabe.geteilt .punkt-f{background:var(--blau)}
+.kapitel.zu #freigabe{display:none}
 #freigabe-frage{
-  position:fixed;top:58px;right:max(24px,calc((100vw - 1080px)/2));z-index:56;
+  position:fixed;top:58px;right:auto;z-index:56;
   width:min(320px,calc(100vw - 32px));
   background:#fff;border:0.5px solid var(--linie);border-radius:16px;
   box-shadow:0 18px 50px rgba(16,19,26,.16);padding:16px 18px;
@@ -788,16 +780,14 @@ body.blatt-offen{overflow:hidden}
   .vergleich .dazwischen{transform:rotate(90deg);justify-self:start;margin-left:24px}
   .stift-notiz{font-size:19px}
   #hirn-lampe{display:none}
-  #freigabe-text::after{content:"Beratung liest mit"}
 }
 /* Handy: Logo statt Namen, engere Knöpfe, kürzeste Wörter */
 @media (max-width:480px){
   nav{padding:0 14px}
   #marke-name{display:none}
   nav .griffe{gap:6px}
-  #gespraeche-griff,#freigabe{padding:8px 11px}
+  #gespraeche-griff{padding:8px 11px}
   #akte-griff{padding:8px 12px}
-  #freigabe-text::after{content:"Nur für dich"}
   .denken{gap:12px;height:56px}
   .denken svg{width:160px;height:52px}
   #akte{padding-top:96px;padding-bottom:224px}
@@ -817,12 +807,14 @@ body.blatt-offen{overflow:hidden}
       <span class="glocke-zahl" hidden>0</span>
     </button>
     <button id="gespraeche-griff" type="button" title="Alle Gespräche">Gespräche</button>
-    <button id="freigabe" type="button" aria-pressed="false" title="Wer darf dieses Gespräch lesen?">
-      <span class="punkt-f"></span><span id="freigabe-text">Nur für dich</span>
-    </button>
     <button id="akte-griff" type="button" data-zahl="0">Deine Akte <span class="zahl">0</span></button>
   </div>
 </nav>
+
+<!-- Der Mitlese-Schalter wartet hier, bis das erste Kapitel ihn zu sich holt -->
+<button id="freigabe" type="button" aria-pressed="false" title="Wer darf dieses Gespräch lesen?" hidden>
+  <span class="punkt-f"></span><span id="freigabe-text">Nur für dich</span>
+</button>
 
 <div id="regal" aria-hidden="true">
   <div class="innen">
@@ -1880,6 +1872,12 @@ body.blatt-offen{overflow:hidden}
       if (geteilt) { setze(false); return; }
       document.getElementById('ff-marke').textContent = document.getElementById('marke-name').textContent;
       frage.hidden = !frage.hidden;
+      if (!frage.hidden) {
+        /* das Fenster öffnet sich am Schalter, nicht irgendwo oben rechts */
+        var r = knopf.getBoundingClientRect();
+        frage.style.top = Math.round(r.bottom + 10) + 'px';
+        frage.style.left = Math.round(Math.max(16, Math.min(r.left, window.innerWidth - frage.offsetWidth - 16))) + 'px';
+      }
     });
     document.getElementById('ff-ja').addEventListener('click', function(){ frage.hidden = true; setze(true); });
     document.getElementById('ff-nein').addEventListener('click', function(){ frage.hidden = true; });
@@ -2209,6 +2207,10 @@ body.blatt-offen{overflow:hidden}
       if (sec.classList.contains('zu')) klappeAuf(sec);
       else if (sec !== aktuellesKapitel) klappeZu(sec);
     });
+    /* Der Mitlese-Schalter zieht ans neue Kapitel — Status wohnt beim Gespräch */
+    var mitlese = document.getElementById('freigabe');
+    sec.querySelector('.frage').appendChild(mitlese);
+    mitlese.hidden = false;
     akte.appendChild(sec);
     aktuellesKapitel = sec;
     /* Mitgebrachte Unterlagen liegen zuerst auf dem Tisch */
