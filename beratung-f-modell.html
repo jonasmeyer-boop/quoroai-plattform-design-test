@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vorschlag F · Das Modell</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
+<link rel="icon" href="bilder/quoro-icon.svg">
 <style>
 /* quoroai-plattform-design · Beratungs-Cockpit, Vorschlag F: das Modell der Beratung.
    Ein fotorealistisches weißes Architekturmodell trägt das ganze Cockpit: jedes Mandat
@@ -13,7 +13,8 @@
    Foto wie in der Kundenwelt. Chrome ist IMMER Quoro (Entscheidung 2026-08-12), die
    Marke der Beratung erscheint nur als Inhalt. Der Zoom endet nicht vor der Fassade:
    schon ab 1/3 der Fahrt blendet es in den Strategieraum, und Raum und Dashboard
-   kommen im selben Moment an. · Marker: BERATUNG-F-MODELL-V4 */
+   kommen im selben Moment an. Logo: das echte Quoro-Zeichen von quoroai.io
+   (Entscheidung 2026-08-12). · Marker: BERATUNG-F-MODELL-V5 */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -55,7 +56,8 @@ nav{
   display:flex;align-items:center;justify-content:space-between;
   padding:0 24px;pointer-events:none;
 }
-nav .wortmarke{font-weight:800;font-size:17px;letter-spacing:-.02em}
+nav .wortmarke{font-weight:800;font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
 nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau);letter-spacing:0}
 nav a.vorschlaege{
   pointer-events:auto;
@@ -322,7 +324,7 @@ body.gezoomt #zonen{display:block}
 <body>
 
 <nav>
-  <div class="wortmarke">quoro<small>Cockpit der Beratung</small></div>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoro<small>Cockpit der Beratung</small></div></div>
   <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
 </nav>
 
