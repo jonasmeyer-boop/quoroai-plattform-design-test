@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Vorschlag F, das Modell</title>
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="system.css">
@@ -60,6 +60,13 @@ nav a.vorschlaege{
   text-decoration:none;transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--blau);color:var(--tinte)}
+/* Sobald ein Raum offen ist, wird die Kopfzeile Milchglas:
+   scrollender Inhalt kracht sonst sichtbar in Logo und Knopf */
+body.gezoomt nav{
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
 
 /* ========== Brotkrumen-Pille (nur bei offener Zone) ========== */
 #krume{
@@ -189,7 +196,12 @@ svg.kurve path{fill:none;stroke:var(--stift);stroke-width:2.2;stroke-linecap:rou
 svg.kurve path.amber{stroke:var(--bernstein)}
 
 /* ========== Zonen-Lage: die Inhalte, SIE scrollt ========== */
-#zonen{position:fixed;inset:0;z-index:30;overflow-y:auto;overscroll-behavior:contain;display:none}
+#zonen{
+  position:fixed;inset:0;z-index:30;overflow-y:auto;overscroll-behavior:contain;display:none;
+  /* Inhalt löst sich unter Kopfzeile und Brotkrume auf, statt hineinzukrachen */
+  mask-image:linear-gradient(to bottom, transparent 56px, rgba(0,0,0,.5) 92px, #000 126px);
+  -webkit-mask-image:linear-gradient(to bottom, transparent 56px, rgba(0,0,0,.5) 92px, #000 126px);
+}
 body.gezoomt #zonen{display:block}
 .inhalt{display:none;max-width:640px;margin:0 auto;padding:132px 24px 80px}
 .inhalt.offen{display:block}
@@ -287,17 +299,25 @@ body.gezoomt #zonen{display:block}
 /* ========== Mobil: das Modell ist breiter als der Schirm, man schaut sich um ========== */
 @media (max-width:760px){
   nav .wortmarke small{display:none}
+  nav{padding:0 18px}
   #buehne{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
   #kamera{
-    position:relative;left:0;top:50%;translate:0 -50%;
-    width:175vw;min-width:175vw;
+    position:relative;left:0;top:47%;translate:0 -50%;
+    width:200vw;min-width:200vw;
   }
-  #auftakt{left:18px;top:70px}
-  #tisch{left:18px;right:18px;max-width:none;bottom:14px}
+  .zone .chip{font-size:11.5px;padding:6px 11px;gap:6px}
+  .stift-text{font-size:14px}
+  #auftakt{left:18px;top:70px;max-width:calc(100vw - 36px)}
+  #tisch{left:18px;right:18px;max-width:none;bottom:calc(12px + env(safe-area-inset-bottom))}
   #tisch .t-zettel{padding:9px 13px}
-  #krume{left:18px}
-  .inhalt{padding:118px 18px 64px}
+  .z-fuell .zustand{width:36px;height:17px}
+  #krume{left:18px;top:70px}
+  .inhalt{padding:138px 18px calc(56px + env(safe-area-inset-bottom))}
+  .inhalt .kopf .z-fuell{flex-direction:row;align-items:center;gap:8px;margin-top:4px}
+  .zeile{padding:12px 14px;gap:10px}
+  .tueren .knopf{min-height:44px}
   .karten,.kpis{grid-template-columns:1fr}
+  #film .weiter{bottom:calc(16px + env(safe-area-inset-bottom))}
 }
 </style>
 </head>
