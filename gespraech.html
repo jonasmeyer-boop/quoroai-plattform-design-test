@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V15 (V14 + Kapitel falten sich wie Papier statt zuzuschnappen) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V16 (V15 + Belege: Quellen-Chips unter Antworten, Zitatstelle im Blatt-Blick) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -417,6 +417,31 @@ body.blatt-offen{overflow:hidden}
 .karte.belichtet .bestaetigung svg circle{animation:ziehen .6s .1s ease forwards}
 .karte.belichtet .bestaetigung svg path{animation:ziehen .4s .55s ease forwards}
 @keyframes ziehen{to{stroke-dashoffset:0}}
+
+/* Belege: die Antwort zeigt, worauf sie sich stützt */
+.belege{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px}
+.belege .belege-wort{font-size:11.5px;font-weight:700;color:var(--grau)}
+.beleg{
+  display:inline-flex;align-items:center;gap:8px;padding:7px 12px;
+  border-radius:999px;border:0.5px solid var(--linie);background:#fff;
+  font-size:12.5px;font-weight:700;cursor:pointer;
+  opacity:0;translate:0 6px;
+  transition:opacity .4s ease,translate .4s var(--feder),border-color .2s;
+}
+.beleg.da{opacity:1;translate:none}
+.beleg:hover{border-color:var(--blau)}
+.beleg .beleg-art{
+  font-size:10.5px;font-weight:800;color:var(--blau);
+  background:color-mix(in srgb, var(--blau) 10%, transparent);
+  padding:2px 7px;border-radius:999px;
+}
+.beleg .abschn{color:var(--grau);font-weight:500}
+#blatt-blick .zitat{
+  margin-top:18px;padding:14px 18px;
+  border-left:3px solid var(--stift);
+  background:color-mix(in srgb, var(--blau) 5%, transparent);
+  border-radius:0 12px 12px 0;font-size:15px;max-width:58ch;
+}
 
 /* Chips + Eingabe */
 .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
@@ -1105,6 +1130,19 @@ body.blatt-offen{overflow:hidden}
       fuelle(name, metaText || '');
       zeige();
     }
+    function oeffneQuelle(q){
+      titel.textContent = q.titel;
+      meta.textContent = (q.abschnitt ? 'Abschnitt ' + q.abschnitt + ' · ' : '') +
+        (q.art === 'wissen' ? 'aus dem Wissen deiner Beratung' : 'aus deiner Akte');
+      notiz.hidden = true;
+      inhalt.innerHTML = '<h4>Die Stelle, auf die sich dein Berater stützt</h4>';
+      var z = document.createElement('div');
+      z.className = 'zitat';
+      z.textContent = q.auszug || 'Die zitierte Stelle liegt im Original in deiner Akte.';
+      inhalt.appendChild(z);
+      fuss.innerHTML = '<span>Beleg</span><span>im Original in deiner Akte</span>';
+      zeige();
+    }
     function oeffneBild(url, name, metaText){
       titel.textContent = name;
       meta.textContent = metaText || '';
@@ -1137,8 +1175,42 @@ body.blatt-offen{overflow:hidden}
     }
     document.getElementById('akte').addEventListener('click', greife);
     document.getElementById('regal-inhalt').addEventListener('click', greife);
-    return {offen: function(){ return blick.classList.contains('offen'); }, schliesse: schliesse};
+    return {offen: function(){ return blick.classList.contains('offen'); }, schliesse: schliesse, oeffneQuelle: oeffneQuelle};
   })();
+
+  /* Beleg-Chips: die Antwort stützt sich sichtbar auf Stellen aus Akte und Wissen */
+  function zeigeBelege(kapitel, liste){
+    if (!liste || !liste.length) return;
+    var lage = document.createElement('div');
+    lage.className = 'belege';
+    var wort = document.createElement('span');
+    wort.className = 'belege-wort';
+    wort.textContent = 'Belegt mit';
+    lage.appendChild(wort);
+    liste.forEach(function(q, i){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'beleg';
+      var name = document.createElement('span');
+      name.textContent = q.titel;
+      b.appendChild(name);
+      if (q.abschnitt) {
+        var ab = document.createElement('span');
+        ab.className = 'abschn';
+        ab.textContent = 'Abschn. ' + q.abschnitt;
+        b.appendChild(ab);
+      }
+      var art = document.createElement('span');
+      art.className = 'beleg-art';
+      art.textContent = q.art === 'wissen' ? 'Wissen' : 'Akte';
+      b.appendChild(art);
+      b.addEventListener('click', function(){ blattBlick.oeffneQuelle(q); });
+      lage.appendChild(b);
+      setTimeout(function(){ b.classList.add('da'); }, reduziert ? 0 : 110 * i + 60);
+    });
+    kapitel.querySelector('.lauf').appendChild(lage);
+    runter();
+  }
 
   function baueKalender(slots){
     var k = karteAus(
@@ -1644,6 +1716,7 @@ body.blatt-offen{overflow:hidden}
       var s = schritte[i];
       if (s.t) { await stroeme(kapitel, s.t, s.marken); await warte(240); continue; }
       if (s.chips) { zeigeChips(kapitel, s.chips); continue; }
+      if (s.belege) { zeigeBelege(kapitel, s.belege); await warte(420); continue; }
       if (s.skizze) {
         runter();
         await warte(250);
@@ -1727,6 +1800,9 @@ body.blatt-offen{overflow:hidden}
         {kurve: {von:'März', bis:'August', alt:'Umsatz steigt seit März deutlich'}},
         {t: 'Die Ausnahme: Deine *Marge fällt seit April*, obwohl der Umsatz steigt. Du verkaufst mehr und verdienst daran weniger. Genau da würde ich ansetzen.', marken:['merk-marge']},
         {skizze: [{art:'unterstreich', ziel:'merk-marge'}]},
+        {belege: [
+          {titel:'Monatsauswertung Juli', abschnitt:'2', art:'akte', auszug:'Der Rohertrag je Auftrag lag im Juli bei 31,8 Prozent — im April noch bei 34,6. Der Materialanteil stieg im gleichen Zeitraum um 2,1 Punkte.'}
+        ]},
         {chips: ['Warum schrumpft meine Marge?', 'Buch mir einen Menschen']}
       ]},
     { probe: /(warum|marge|rendite|gewinn|schrumpft)/i,
@@ -1762,6 +1838,10 @@ body.blatt-offen{overflow:hidden}
           {art:'pfeil', ziel:'hebel-preis', nach:'formel'},
           {art:'kreis', ziel:'formel-ergebnis'}
         ]},
+        {belege: [
+          {titel:'Rahmenvertrag Stahl', abschnitt:'3', art:'akte', auszug:'Die Preisgleitklausel nach Ziffer 3.2 endet zum 30. September; danach gilt der Tagespreis des Lieferanten, sofern kein neuer Rahmen vereinbart ist.'},
+          {titel:'Branchenspiegel Metallzulieferer 2025', abschnitt:'5', art:'wissen', auszug:'Zulieferer mit 20 bis 80 Mitarbeitenden erzielen im Median 35,9 Prozent Rohertragsmarge; das untere Quartil liegt bei 31,2 Prozent.'}
+        ]},
         {t: 'Den vollen Rechenweg habe ich dir in die Akte gelegt:'},
         {dokument: {name:'Preismodell Benchmark', meta:'12 Seiten · eben erstellt · liegt in deiner Akte'}},
         {chips: ['Was bringt mir das Preismodell?', 'Buch mir einen Menschen']}
@@ -1783,6 +1863,9 @@ body.blatt-offen{overflow:hidden}
           {wann:'Woche 3', was:'Kunden informieren'},
           {wann:'Woche 6', was:'wirksam'}
         ], alt:'Fahrplan über vier Schritte bis Woche 6', sk:'fahrplan'}},
+        {belege: [
+          {titel:'Preismodell Benchmark', abschnitt:'1', art:'akte', auszug:'Bei plus vier Prozent auf C-Kunden und fünf Prozent Mengenverlust bleibt ein Ergebnisplus von 38.000 Euro jährlich — die Rechnung hält selbst bei acht Prozent Verlust noch 24.000 Euro.'}
+        ]},
         {t: 'Wenn du das angehen willst: Dr. Anna Vogelsang hat das Modell mitgerechnet. Soll ich euch zusammenbringen?'},
         {chips: ['Buch mir einen Menschen', 'Warum schrumpft meine Marge?']}
       ]},
@@ -2027,6 +2110,10 @@ body.blatt-offen{overflow:hidden}
           await warte(180);
         } else if (eintrag.art === 'chips') {
           zeigeChips(kapitel, eintrag.chips);
+        } else if (eintrag.art === 'quellen') {
+          schreiber.neuerAbsatz();
+          zeigeBelege(kapitel, eintrag.quellen);
+          await warte(300);
         } else if (eintrag.art === 'fehler') {
           var p = document.createElement('p');
           p.className = 'antwort fehl';
@@ -2060,11 +2147,12 @@ body.blatt-offen{overflow:hidden}
           var e;
           try { e = JSON.parse(zeilen[i]); } catch (fehler) { continue; }
           if (e.art === 'text') { zerleger.fuege(e.text); }
-          else if (e.art === 'karte' || e.art === 'skizze' || e.art === 'chips' || e.art === 'fehler') {
+          else if (e.art === 'karte' || e.art === 'skizze' || e.art === 'chips' || e.art === 'quellen' || e.art === 'fehler') {
             zerleger.ende();
             spielplan.push(e.art === 'karte' ? {art:'karte', karte:e.karte}
               : e.art === 'skizze' ? {art:'skizze', skizze:e.skizze}
               : e.art === 'chips' ? {art:'chips', chips:e.chips}
+              : e.art === 'quellen' ? {art:'quellen', quellen:e.quellen}
               : {art:'fehler', text:e.text});
           }
         }
