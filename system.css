@@ -69,7 +69,7 @@ body.quoro{
 .knopf.gefahr{background:var(--rot-fond);color:var(--rot)}
 
 /* ---------- Zustände: Wort und Fläche, keine Deko-Punkte ---------- */
-.pille{display:inline-flex;align-items:center;min-height:28px;padding:2px 12px;border-radius:var(--radius-kapsel);font-size:13.5px;font-weight:600;white-space:nowrap}
+.pille{display:inline-flex;align-items:center;min-height:28px;padding:2px 12px;border-radius:var(--radius-kapsel);font-size:13.5px;font-weight:600;white-space:nowrap;flex-shrink:0}
 .pille.aktiv{background:var(--gruen-fond);color:var(--gruen)}
 .pille.wartet{background:var(--bernstein-fond);color:var(--bernstein)}
 .pille.entwurf{background:var(--nebel-100);color:var(--nebel-600)}
