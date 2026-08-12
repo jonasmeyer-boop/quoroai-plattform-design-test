@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V33 (Mitlese-Pille ohne Status-Punkt) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V34 (Mitlese-Schalter zeigt beide Plätze) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -167,22 +167,24 @@ nav .griffe{display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shri
 }
 body.gespraeche-offen{overflow:hidden}
 /* Der Mitlese-Schalter wohnt an der Eingabe — er regelt, wer liest, was hier
-   geschrieben wird, und ist darum immer sichtbar, bevor man tippt. */
+   geschrieben wird, und ist darum immer sichtbar, bevor man tippt.
+   Zwei Plätze: der gefüllte zeigt, was gilt; ein Klick wechselt die Seite. */
 #eingabe .privat-zeile{display:flex;justify-content:flex-end;margin-bottom:10px}
 #freigabe{
   pointer-events:auto;cursor:pointer;
-  display:inline-flex;align-items:center;gap:8px;
-  padding:7px 14px;border-radius:999px;border:0.5px solid var(--linie);
-  background:#fff;font-size:12px;font-weight:700;color:var(--grau);
-  box-shadow:0 4px 16px rgba(16,19,26,.06);white-space:nowrap;
-  transition:color .25s ease,border-color .25s ease,background .25s ease,opacity .3s ease;
+  display:inline-flex;gap:2px;padding:3px;border-radius:999px;
+  border:0.5px solid var(--linie);background:#fff;
+  font-size:12px;font-weight:700;white-space:nowrap;
+  box-shadow:0 4px 16px rgba(16,19,26,.06);
+  transition:opacity .3s ease;
 }
-#freigabe:hover{border-color:var(--blau);color:var(--tinte)}
-#freigabe.geteilt{
-  color:var(--blau);
-  border-color:color-mix(in srgb, var(--blau) 30%, transparent);
-  background:color-mix(in srgb, var(--blau) 7%, white);
+#freigabe span{
+  padding:6px 13px;border-radius:999px;color:var(--grau);
+  transition:background .25s ease,color .25s ease;
 }
+#freigabe span:not(.hier):hover{color:var(--tinte)}
+#freigabe span.hier{background:var(--tinte);color:#fff}
+#freigabe.geteilt span.hier{background:var(--blau)}
 #freigabe-frage{
   position:fixed;top:58px;right:auto;z-index:56;
   width:min(320px,calc(100vw - 32px));
@@ -880,7 +882,7 @@ body.blatt-offen{overflow:hidden}
   <!-- Der Mitlese-Schalter wohnt an der Eingabe: er regelt, wer sieht, was du hier schreibst -->
   <div class="privat-zeile">
     <button id="freigabe" type="button" aria-pressed="false" title="Wer darf dieses Gespräch lesen?">
-      <span id="freigabe-text">Nur für dich</span>
+      <span id="fg-privat" class="hier">Nur für dich</span><span id="fg-geteilt">Beratung liest mit</span>
     </button>
   </div>
   <div class="zeile">
@@ -1845,20 +1847,16 @@ body.blatt-offen{overflow:hidden}
   /* ---------- Freigabe: privat, bis du es ausdrücklich teilst ---------- */
   (function(){
     var knopf = document.getElementById('freigabe');
-    var text = document.getElementById('freigabe-text');
+    var segPrivat = document.getElementById('fg-privat');
+    var segGeteilt = document.getElementById('fg-geteilt');
     var geteilt = false;
     try { geteilt = sessionStorage.getItem('freigabe') === '1'; } catch (e) {}
-    /* Schmale Fenster bekommen kürzere Formen, passend zur reservierten Breite im CSS */
-    var schmal = window.matchMedia('(max-width:700px)');
-    var handy = window.matchMedia('(max-width:480px)');
-    if (schmal.addEventListener) schmal.addEventListener('change', function(){ male(); });
-    if (handy.addEventListener) handy.addEventListener('change', function(){ male(); });
     function male(){
       knopf.classList.toggle('geteilt', geteilt);
       knopf.setAttribute('aria-pressed', String(geteilt));
-      text.textContent = geteilt
-        ? (handy.matches ? 'Liest mit' : schmal.matches ? 'Beratung liest mit' : rede('Deine Beratung liest mit', 'Ihre Beratung liest mit'))
-        : rede('Nur für dich', 'Nur für Sie');
+      segPrivat.textContent = rede('Nur für dich', 'Nur für Sie');
+      segPrivat.classList.toggle('hier', !geteilt);
+      segGeteilt.classList.toggle('hier', geteilt);
       knopf.title = geteilt
         ? rede('Deine Beratung kann dieses Gespräch lesen. Klicken nimmt die Freigabe zurück.', 'Ihre Beratung kann dieses Gespräch lesen. Klicken nimmt die Freigabe zurück.')
         : rede('Niemand außer dir sieht dieses Gespräch. Klicken gibt es für deine Beratung frei.', 'Niemand außer Ihnen sieht dieses Gespräch. Klicken gibt es für Ihre Beratung frei.');
@@ -1873,6 +1871,9 @@ body.blatt-offen{overflow:hidden}
     }
     knopf.addEventListener('click', function(e){
       e.stopPropagation();
+      /* Klick auf den Platz, der schon gilt, ändert nichts */
+      if (segPrivat.contains(e.target) && !geteilt) return;
+      if (segGeteilt.contains(e.target) && geteilt) return;
       if (geteilt) { setze(false); return; }
       document.getElementById('ff-marke').textContent = document.getElementById('marke-name').textContent;
       frage.hidden = !frage.hidden;
