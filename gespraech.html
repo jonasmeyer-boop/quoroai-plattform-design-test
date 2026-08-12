@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V23 (V22 + Benachrichtigungs-Glocke mit Zähler und Neuigkeiten) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V24 (V23 + Zeit an den Kapiteln, Aufzählungen im Schreibfluss) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -266,6 +266,18 @@ body.regal-offen{overflow:hidden}
 .kapitel.zu .frage{cursor:pointer;color:var(--grau);font-size:17px;padding:16px 0;transition:color .2s}
 .kapitel.zu .frage:hover{color:var(--tinte)}
 .kapitel.zu .frage::after{content:' +';color:var(--blau)}
+.kapitel .frage .kapitel-zeit{
+  font-size:12px;font-weight:600;color:var(--grau);letter-spacing:0;
+  margin-left:12px;white-space:nowrap;
+}
+.kapitel.zu .frage .kapitel-zeit{font-size:11px}
+
+/* Aufzählungen im Antwortfluss */
+.kapitel p.antwort.punkt{margin-top:8px;padding-left:20px;position:relative}
+.kapitel p.antwort.punkt::before{
+  content:'';position:absolute;left:2px;top:.58em;
+  width:6px;height:6px;border-radius:999px;background:var(--blau);
+}
 .kapitel.zu .lauf{display:none}
 .kapitel p.antwort{
   margin-top:20px;font-size:17px;color:var(--tinte);max-width:60ch;
@@ -1035,10 +1047,10 @@ body.blatt-offen{overflow:hidden}
   function ganz(f){ return function(n){ return f(Math.round(n)); }; }
 
   /* ---------- Text-Strom mit Merk-Stellen (*so*) ---------- */
-  function stroeme(kapitel, text, marken){
+  function stroeme(kapitel, text, marken, klasse){
     return new Promise(function(fertig){
       var p = document.createElement('p');
-      p.className = 'antwort';
+      p.className = 'antwort' + (klasse ? ' ' + klasse : '');
       kapitel.querySelector('.lauf').appendChild(p);
       var teile = text.split('*');
       var markenIndex = 0;
@@ -1865,7 +1877,7 @@ body.blatt-offen{overflow:hidden}
     }
     function fuelle(){
       eintraege.innerHTML = '';
-      var ersteFrage = akte.querySelector('.kapitel .frage');
+      var ersteFrage = akte.querySelector('.kapitel .f-text') || akte.querySelector('.kapitel .frage');
       var titel = ersteFrage ? ersteFrage.textContent.replace(/ \+$/, '') : 'Neues Gespräch';
       var karten = akte.querySelectorAll('.karte').length;
       var geteilt = false;
@@ -2072,8 +2084,11 @@ body.blatt-offen{overflow:hidden}
     if (aktuellesKapitel) klappeZu(aktuellesKapitel);
     var sec = document.createElement('section');
     sec.className = 'kapitel';
-    sec.innerHTML = '<h2 class="frage"></h2><div class="lauf"></div>';
-    sec.querySelector('.frage').textContent = frage;
+    sec.innerHTML = '<h2 class="frage"><span class="f-text"></span><span class="kapitel-zeit"></span></h2><div class="lauf"></div>';
+    sec.querySelector('.f-text').textContent = frage;
+    var jetzt = new Date();
+    sec.querySelector('.kapitel-zeit').textContent =
+      'heute, ' + jetzt.getHours() + ':' + String(jetzt.getMinutes()).padStart(2, '0');
     sec.querySelector('.frage').addEventListener('click', function(){
       if (sec.classList.contains('zu')) klappeAuf(sec);
       else if (sec !== aktuellesKapitel) klappeZu(sec);
@@ -2126,6 +2141,11 @@ body.blatt-offen{overflow:hidden}
       if (s.t) { await stroeme(kapitel, s.t, s.marken); await warte(240); continue; }
       if (s.chips) { zeigeChips(kapitel, s.chips); continue; }
       if (s.belege) { zeigeBelege(kapitel, s.belege); await warte(420); continue; }
+      if (s.liste) {
+        for (var jl = 0; jl < s.liste.length; jl++) await stroeme(kapitel, s.liste[jl], null, 'punkt');
+        await warte(240);
+        continue;
+      }
       if (s.skizze) {
         runter();
         await warte(250);
@@ -2267,6 +2287,12 @@ body.blatt-offen{overflow:hidden}
         {skizze: [{art:'kreis', ziel:'vergleich-neu'}, {art:'notiz', ziel:'vergleich-neu', text:'zurück über 33!', wo:'unten'}]},
         {t: 'Es trifft vor allem die *C-Kunden*, und die tragen heute:', marken:['merk-c']},
         {reihe: [{art:'donut', prozent:38, label:'Umsatzanteil C-Kunden', unter:'mit der schwächsten Marge', sk:'donut'}], form:'eins-zwei'},
+        {t: 'Drei Dinge musst du dafür tun:'},
+        {liste: [
+          'Staffeln neu schneiden — A- und B-Kunden bleiben unberührt.',
+          'Preisliste einmal sauber durchrechnen lassen.',
+          'C-Kunden vier Wochen vorher informieren, mit Begründung.'
+        ]},
         {t: 'Und so kommst du hin, in vier Wochen:'},
         {fahrplan: {schritte: [
           {wann:'Woche 1', was:'Staffeln schneiden'},
@@ -2390,7 +2416,7 @@ body.blatt-offen{overflow:hidden}
   /* Zerlegt ankommenden Text in Wort-Häppchen für den Spielplan (löst *Marken* auf) */
   function neuerZerleger(spielplan){
     return {
-      puffer: '', imMerk: false, markZaehler: 0,
+      puffer: '', imMerk: false, markZaehler: 0, anZeilenanfang: true,
       wort(t){
         var teile = t.split('*');
         for (var i = 0; i < teile.length; i++) {
@@ -2406,10 +2432,20 @@ body.blatt-offen{overflow:hidden}
         while (true) {
           var br = this.puffer.match(/^\s*\n[ \t]*\n\s*/);
           if (br) { spielplan.push({art: 'absatz'}); this.puffer = this.puffer.slice(br[0].length); continue; }
+          /* '- ' am Zeilenanfang eröffnet einen Aufzählungspunkt */
+          var listeStart = this.puffer.match(/^([ \t]*\n)?[ \t]*[-•] (?=\S)/);
+          if (listeStart && (listeStart[1] || this.anZeilenanfang)) {
+            spielplan.push({art: 'aufzaehlung'});
+            this.puffer = this.puffer.slice(listeStart[0].length);
+            this.anZeilenanfang = false;
+            continue;
+          }
           var wortVorBruch = this.puffer.match(/^([^\n]*?\S)(?=\s*\n[ \t]*\n)/);
           if (wortVorBruch) { this.wort(wortVorBruch[1] + ' '); this.puffer = this.puffer.slice(wortVorBruch[0].length); continue; }
-          var m = this.puffer.match(/^([^\n]*?\S)([ \t]+|\n(?![ \t]*\n))/);
-          if (m) { this.wort(m[1] + ' '); this.puffer = this.puffer.slice(m[0].length); continue; }
+          var wortVorListe = this.puffer.match(/^([^\n]*?\S)(?=[ \t]*\n[ \t]*[-•] )/);
+          if (wortVorListe) { this.wort(wortVorListe[1] + ' '); this.puffer = this.puffer.slice(wortVorListe[0].length); continue; }
+          var m = this.puffer.match(/^([^\n]*?\S)([ \t]+|\n(?![ \t]*\n|[ \t]*[-•] ))/);
+          if (m) { this.wort(m[1] + ' '); this.puffer = this.puffer.slice(m[0].length); this.anZeilenanfang = false; continue; }
           break;
         }
       },
@@ -2421,16 +2457,17 @@ body.blatt-offen{overflow:hidden}
   function neuerSchreiber(kapitel){
     var lauf = kapitel.querySelector('.lauf');
     return {
-      absatz: null, huelle: null, huelleSk: null, klartext: '',
-      neuerAbsatz(){
+      absatz: null, huelle: null, huelleSk: null, klartext: '', naechsteArt: null,
+      neuerAbsatz(art){
         if (this.absatz) this.absatz.classList.remove('aktiv');
         this.absatz = null; this.huelle = null; this.huelleSk = null;
+        this.naechsteArt = art || null;
       },
       fertig(){ if (this.absatz) this.absatz.classList.remove('aktiv'); },
       wo(merk){
         if (!this.absatz) {
           this.absatz = document.createElement('p');
-          this.absatz.className = 'antwort aktiv';
+          this.absatz.className = 'antwort aktiv' + (this.naechsteArt ? ' ' + this.naechsteArt : '');
           lauf.appendChild(this.absatz);
           this.huelle = null; this.huelleSk = null;
         }
@@ -2539,12 +2576,13 @@ body.blatt-offen{overflow:hidden}
         }
         if (denk) { denk.weg(); denk = null; letzte = performance.now(); } /* schmilzt weg, während die ersten Worte schon kommen */
         var art = spielplan[0].art;
-        if (art === 'wort' || art === 'absatz') {
+        if (art === 'wort' || art === 'absatz' || art === 'aufzaehlung') {
           schliesseReihe();
           if (reduziert) {
-            while (spielplan.length && (spielplan[0].art === 'wort' || spielplan[0].art === 'absatz')) {
+            while (spielplan.length && (spielplan[0].art === 'wort' || spielplan[0].art === 'absatz' || spielplan[0].art === 'aufzaehlung')) {
               var e0 = spielplan.shift();
-              if (e0.art === 'wort') schreiber.zeige(e0); else schreiber.neuerAbsatz();
+              if (e0.art === 'wort') schreiber.zeige(e0);
+              else schreiber.neuerAbsatz(e0.art === 'aufzaehlung' ? 'punkt' : null);
             }
             continue;
           }
@@ -2567,9 +2605,14 @@ body.blatt-offen{overflow:hidden}
                   guthaben -= 6;
                   spielplan.shift();
                   schreiber.neuerAbsatz();
+                } else if (e.art === 'aufzaehlung') {
+                  if (guthaben < 3) break;
+                  guthaben -= 3;
+                  spielplan.shift();
+                  schreiber.neuerAbsatz('punkt');
                 } else break;
               }
-              if (!spielplan.length || (spielplan[0].art !== 'wort' && spielplan[0].art !== 'absatz')) { weiter(); return; }
+              if (!spielplan.length || (spielplan[0].art !== 'wort' && spielplan[0].art !== 'absatz' && spielplan[0].art !== 'aufzaehlung')) { weiter(); return; }
               requestAnimationFrame(tick);
             }
             requestAnimationFrame(tick);
@@ -2699,7 +2742,8 @@ body.blatt-offen{overflow:hidden}
         if (!karten.length) return;
         leer = false;
         var h = document.createElement('h3');
-        h.textContent = kap.querySelector('.frage').textContent.replace(/ \+$/, '');
+        var ft = kap.querySelector('.f-text');
+        h.textContent = (ft ? ft.textContent : kap.querySelector('.frage').textContent).replace(/ \+$/, '');
         inhalt.appendChild(h);
         var brett = document.createElement('div');
         brett.className = 'brett';
