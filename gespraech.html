@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V35 (mobiler Rückweg: runder Pfeil zur Übersicht) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V36 (Beleg-Sorte Web: öffnet die Quelle im neuen Tab) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -1514,9 +1514,13 @@ body.blatt-offen{overflow:hidden}
       }
       var art = document.createElement('span');
       art.className = 'beleg-art';
-      art.textContent = q.art === 'wissen' ? 'Wissen' : 'Akte';
+      art.textContent = q.art === 'wissen' ? 'Wissen' : q.art === 'web' ? 'Web' : 'Akte';
       b.appendChild(art);
-      b.addEventListener('click', function(){ blattBlick.oeffneQuelle(q); });
+      /* Web-Quellen öffnen die Seite selbst, Akte und Wissen den Blatt-Blick */
+      b.addEventListener('click', function(){
+        if (q.art === 'web' && q.url) window.open(q.url, '_blank', 'noopener');
+        else blattBlick.oeffneQuelle(q);
+      });
       lage.appendChild(b);
       setTimeout(function(){ b.classList.add('da'); }, reduziert ? 0 : 110 * i + 60);
     });
