@@ -6,7 +6,7 @@
 <title>Dein Berater · Unterlagen</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Unterlagen: alles, was die Beratung freigegeben hat · Marker: UNTERLAGEN-V2 (Weißmarke + Anrede) */
+/* quoroai-plattform-design · Unterlagen: alles, was die Beratung freigegeben hat · Marker: UNTERLAGEN-V3 (Review-Fixes) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -24,6 +24,7 @@
   --linie:rgba(16,19,26,.1);--karte:#ffffff;--radius:16px;--feder:cubic-bezier(.22,.9,.24,1);
 }
 *{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
 body{
   background:var(--papier);color:var(--tinte);
   font-family:'Manrope',system-ui,sans-serif;line-height:1.6;
@@ -39,7 +40,8 @@ nav{
 }
 nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
 nav .wortmarke .marke-logo{height:26px;width:auto;display:block}
-nav .wortmarke .marke-wechsel{cursor:pointer;pointer-events:auto}
+nav .wortmarke [data-marke-name]{display:block}
+nav .wortmarke .marke-wechsel{cursor:pointer;pointer-events:auto;display:inline-block}
 nav .wortmarke .marke-wechsel:hover{color:var(--blau)}
 nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
 nav .zurueck{
@@ -174,7 +176,9 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
 <script>
 (function(){
   'use strict';
-  window.Marke.anwenden();
+  /* Ohne Kern bleibt die Seite bedienbar — dann eben in Standardmarke und Du-Form */
+  var Marke = window.Marke || {anwenden: function(){}, rede: function(du){ return du; }};
+  Marke.anwenden();
   var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function zufall(a, b){ return a + Math.random() * (b - a); }
 
@@ -208,14 +212,14 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
     {titel: 'Preismodell Benchmark', meta: '12 Seiten · gestern · Fassung 1', status: 'neu',
      text: 'Preisanpassung von vier Prozent auf die C-Kunden bringt 38.000 Euro im Jahr. Staffeln neu geschnitten, A- und B-Kunden unberührt. Branchenschnitt sechs Prozent darüber.',
      fassungen: []},
-    {titel: 'Rahmenvertrag Stahl', meta: window.Marke.rede('Fassung 2 · 4. August · von deiner Beratung', 'Fassung 2 · 4. August · von Ihrer Beratung'), status: 'Fassung 2',
+    {titel: 'Rahmenvertrag Stahl', meta: Marke.rede('Fassung 2 · 4. August · von deiner Beratung', 'Fassung 2 · 4. August · von Ihrer Beratung'), status: 'Fassung 2',
      text: 'Preisgleitklausel nach Ziffer 3.2 endet zum 30. September. Danach gilt der Tagespreis des Lieferanten, sofern kein neuer Rahmen vereinbart ist. Kündigungsfrist drei Monate.',
      fassungen: [{name: 'Fassung 1', meta: '12. Mai'}]},
     {titel: 'Jahresabschluss 2025, Entwurf', meta: '48 Seiten · 28. Juli', status: 'geteilt',
      text: 'Umsatzerlöse 4,1 Millionen Euro, Rohertrag 31,8 Prozent, Eigenkapitalquote 38 Prozent. Vorbehaltlich der Schlussbuchungen des Steuerbüros.',
      fassungen: []},
     {titel: 'Fotos Halle 2, Begehung', meta: '9 Bilder · 15. Juli', status: 'geteilt',
-     warnung: window.Marke.rede('Aus diesen Bildern kann dein Berater nicht zitieren — sie enthalten keinen lesbaren Text.', 'Aus diesen Bildern kann Ihr Berater nicht zitieren — sie enthalten keinen lesbaren Text.'),
+     warnung: Marke.rede('Aus diesen Bildern kann dein Berater nicht zitieren — sie enthalten keinen lesbaren Text.', 'Aus diesen Bildern kann Ihr Berater nicht zitieren — sie enthalten keinen lesbaren Text.'),
      text: 'Begehung Halle zwei Fotos Anbau Brandschutz',
      fassungen: []},
     {titel: 'Benchmark Metallzulieferer 2025', meta: '22 Seiten · 2. Juli', status: 'geteilt',

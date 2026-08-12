@@ -6,7 +6,7 @@
 <title>Dein Berater · Übersicht</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V5 (V4 + Weißmarke und Anrede über den Marken-Kern) */
+/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V6 (Review-Fixes) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -31,6 +31,7 @@
   --feder:cubic-bezier(.22,.9,.24,1);
 }
 *{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
 body{
   background:var(--papier);color:var(--tinte);
   font-family:'Manrope',system-ui,sans-serif;line-height:1.6;
@@ -47,7 +48,8 @@ nav{
 }
 nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
 nav .wortmarke .marke-logo{height:26px;width:auto;display:block}
-nav .wortmarke .marke-wechsel{cursor:pointer;pointer-events:auto}
+nav .wortmarke [data-marke-name]{display:block}
+nav .wortmarke .marke-wechsel{cursor:pointer;pointer-events:auto;display:inline-block}
 nav .wortmarke .marke-wechsel:hover{color:var(--blau)}
 nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
 nav .griffe{display:flex;align-items:center;gap:8px;pointer-events:auto}
@@ -328,7 +330,9 @@ section{margin-top:52px}
 <script>
 (function(){
   'use strict';
-  window.Marke.anwenden();
+  /* Ohne Kern bleibt die Seite bedienbar — dann eben in Standardmarke und Du-Form */
+  var Marke = window.Marke || {anwenden: function(){}, rede: function(du){ return du; }};
+  Marke.anwenden();
   var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function zufall(a, b){ return a + Math.random() * (b - a); }
   /* Der Stift zieht seinen Anstrich, die Karten belichten gestaffelt */
@@ -405,7 +409,7 @@ section{margin-top:52px}
     a.addEventListener('click', function(e){ e.preventDefault(); demoHinweis('Diese Fläche entsteht gerade.'); });
   });
   document.querySelector('nav .ab').addEventListener('click', function(){
-    demoHinweis(window.Marke.rede('Die Anmeldung entsteht gerade — in der Vorführung bleibst du drin.', 'Die Anmeldung entsteht gerade — in der Vorführung bleiben Sie drin.'));
+    demoHinweis(Marke.rede('Die Anmeldung entsteht gerade — in der Vorführung bleibst du drin.', 'Die Anmeldung entsteht gerade — in der Vorführung bleiben Sie drin.'));
   });
 
   /* Die Glocke lebt: Neuigkeiten führen zu ihrem Abschnitt */
