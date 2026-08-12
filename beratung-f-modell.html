@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vorschlag F · Das Modell</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
+<style>
+/* quoroai-plattform-design · Beratungs-Cockpit, Vorschlag F: das Modell der Beratung.
+   Ein fotorealistisches weißes Architekturmodell trägt das ganze Cockpit: jedes Mandat
+   ein Gebäude, die Zentrale der KI-Berater. Ein Film zeigt den Aufbau, danach ist das
+   Modell begehbar (Zoom je Bauplan begehbare-plattform), und der Stift kritzelt aufs
+   Foto wie in der Kundenwelt. · Marker: BERATUNG-F-MODELL-V1 */
+@font-face{
+  font-family:'Manrope';
+  src:url('schriften/manrope.woff2') format('woff2');
+  font-weight:200 800;
+  font-display:swap;
+}
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+:root{
+  --papier:#fafaf7;
+  --tinte:#10131a;
+  --grau:#636c7d;
+  --blau:#2b5fe3;
+  --stift:#1d46c9;
+  --linie:rgba(16,19,26,.1);
+  --karte:#ffffff;
+  --radius:16px;
+  --feder:cubic-bezier(.22,.9,.24,1);
+  --bernstein:#a06008;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  background:var(--papier);color:var(--tinte);
+  font-family:'Manrope',system-ui,sans-serif;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+button{font-family:inherit}
+
+/* ========== Navigation (oberste Schicht) ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;pointer-events:none;
+}
+nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .marke-logo{height:26px;width:auto;display:block}
+nav .wortmarke [data-marke-name]{display:block}
+nav .wortmarke .marke-wechsel{cursor:pointer;pointer-events:auto;display:inline-block}
+nav .wortmarke .marke-wechsel:hover{color:var(--blau)}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
+nav a.vorschlaege{
+  pointer-events:auto;
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--linie);
+  background:rgba(255,255,255,.8);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  font-size:12.5px;font-weight:700;color:var(--grau);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--blau);color:var(--tinte)}
+
+/* ========== Brotkrumen-Pille (nur bei offener Zone) ========== */
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--linie);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;cursor:pointer;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--grau);font-weight:600}
+#krume:hover .zurueck{color:var(--blau)}
+#krume b{font-weight:800}
+
+/* ========== Bühne + Kamera ========== */
+#buehne{position:fixed;inset:0;z-index:1;overflow:hidden}
+#kamera{
+  position:absolute;
+  width:min(100vw, calc(100svh * 1.7917));
+  aspect-ratio:2752/1536;
+  left:50%;top:50%;translate:-50% -50%;
+  transition:transform 1s var(--feder);
+}
+#kamera > img{
+  position:absolute;inset:0;width:100%;height:100%;display:block;
+  mix-blend-mode:multiply; /* Weiß des Fotos verschwindet auf dem Papier */
+  filter:brightness(1.065); /* zieht das Fast-Weiß des Fotos auf Papierton, sonst bleibt eine Naht */
+  user-select:none;-webkit-user-drag:none;
+}
+
+/* Klickflächen: unsichtbare Türen auf den Gebäuden, direkte Kinder der Kamera */
+.zone{
+  position:absolute;left:var(--l);top:var(--t);width:var(--w);height:var(--h);
+  background:none;border:none;cursor:pointer;
+}
+.zone .chip{
+  position:absolute;left:50%;top:var(--chipt,50%);translate:-50% -50%;
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+  padding:7px 13px;border-radius:999px;border:0.5px solid var(--linie);
+  background:rgba(255,255,255,.78);backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);
+  font-size:12.5px;font-weight:800;letter-spacing:-.01em;color:var(--tinte);
+  box-shadow:0 10px 26px rgba(16,19,26,.12);
+  transition:translate .25s var(--feder),box-shadow .25s ease,border-color .2s ease;
+}
+.zone:hover .chip,.zone:focus-visible .chip{translate:-50% calc(-50% - 3px);border-color:var(--blau);box-shadow:0 16px 34px rgba(16,19,26,.16)}
+.zone:focus-visible{outline:none}
+body.gezoomt .zone .chip,body.gezoomt .stift-text,body.gezoomt #stift-lage{opacity:0;transition:opacity .3s ease}
+.zone .chip .zahl{
+  min-width:17px;height:17px;padding:0 5px;border-radius:999px;
+  background:var(--tinte);color:#fff;font-size:10.5px;font-weight:800;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.zone .chip .zahl[data-zahl="0"]{display:none}
+
+/* Der Stift kritzelt aufs Foto: zoomt mit der Kamera mit */
+#stift-lage{position:absolute;inset:0;pointer-events:none;overflow:visible}
+#stift-lage path{fill:none;stroke:var(--bernstein);stroke-width:2.5;stroke-linecap:round;opacity:.85}
+#stift-lage path.blau{stroke:var(--stift)}
+.stift-text{
+  position:absolute;pointer-events:none;white-space:nowrap;
+  font-family:'Caveat',cursive;font-size:clamp(15px,1.5vw,21px);font-weight:700;color:var(--bernstein);
+}
+.stift-text.blau{color:var(--stift)}
+
+/* Auftakt-Zeile über dem Modell */
+#auftakt{position:fixed;left:24px;top:76px;z-index:10;max-width:min(430px,72vw);pointer-events:none;transition:opacity .4s ease}
+#auftakt .vorgruss{
+  font-family:'Caveat',cursive;font-size:clamp(21px,2.6vw,27px);font-weight:700;
+  color:var(--stift);rotate:-1.5deg;opacity:.92;
+}
+#auftakt h1{font-size:clamp(22px,3vw,32px);font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-top:2px}
+
+/* Der Tisch: was wartet, als Glas-Ablage unten ========== */
+#tisch{
+  position:fixed;left:24px;bottom:20px;z-index:10;
+  display:flex;flex-direction:column;gap:8px;max-width:min(430px,calc(100vw - 48px));
+  transition:opacity .4s ease;
+}
+#tisch .t-titel{font-size:12px;font-weight:800;color:var(--grau)}
+#tisch .t-zettel{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;
+  padding:10px 15px;border-radius:13px;border:0.5px solid var(--linie);
+  background:rgba(255,255,255,.78);backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);
+  cursor:pointer;box-shadow:0 10px 26px rgba(16,19,26,.1);
+  transition:translate .25s var(--feder),border-color .2s ease;
+}
+#tisch .t-zettel:hover{translate:0 -2px;border-color:var(--blau)}
+#tisch .t-text b{display:block;font-size:12.5px;font-weight:800;letter-spacing:-.01em;line-height:1.4}
+#tisch .t-text span{font-size:11px;color:var(--grau)}
+#tisch .t-status{
+  flex-shrink:0;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:999px;
+  color:var(--grau);background:rgba(16,19,26,.05);white-space:nowrap;
+}
+#tisch .t-status.geteilt{color:var(--blau);background:color-mix(in srgb, var(--blau) 10%, transparent)}
+#tisch .t-status.offen{color:var(--bernstein);background:rgba(178,109,10,.12)}
+
+body.gezoomt #auftakt,body.gezoomt #tisch{opacity:0;pointer-events:none}
+
+/* ========== Schleier ========== */
+#schleier{
+  position:fixed;inset:0;z-index:20;pointer-events:none;opacity:0;
+  background:color-mix(in srgb, var(--papier) 62%, transparent);
+  backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);
+  transition:opacity .45s ease;
+}
+body.gezoomt #schleier{opacity:1}
+
+/* ========== Zonen-Lage: die Inhalte, SIE scrollt ========== */
+#zonen{position:fixed;inset:0;z-index:30;overflow-y:auto;overscroll-behavior:contain;display:none}
+body.gezoomt #zonen{display:block}
+.inhalt{display:none;max-width:640px;margin:0 auto;padding:132px 24px 80px}
+.inhalt.offen{display:block}
+.inhalt .kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.inhalt h2{font-size:clamp(24px,3.4vw,32px);font-weight:800;letter-spacing:-.03em;line-height:1.2}
+.inhalt .stand{font-size:13px;color:var(--grau);margin-top:2px}
+.inhalt .status{
+  flex-shrink:0;font-size:11px;font-weight:800;padding:5px 11px;border-radius:999px;margin-top:6px;
+  color:var(--grau);background:rgba(16,19,26,.06);white-space:nowrap;
+}
+.inhalt .status.geteilt{color:var(--blau);background:color-mix(in srgb, var(--blau) 12%, transparent)}
+.inhalt .status.offen{color:var(--bernstein);background:rgba(178,109,10,.14)}
+.inhalt h3{font-size:12.5px;font-weight:800;color:var(--grau);margin-top:26px}
+.zeilen{margin-top:10px;display:flex;flex-direction:column;gap:9px}
+.zeile{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;text-align:left;
+  padding:13px 18px;border-radius:var(--radius);
+  border:0.5px solid var(--linie);background:#fff;
+  box-shadow:0 8px 24px rgba(16,19,26,.07);cursor:pointer;
+  opacity:0;translate:0 10px;
+  transition:border-color .2s ease;
+}
+.inhalt.offen .zeile{opacity:1;translate:none;transition:opacity .45s ease,translate .45s var(--feder),border-color .2s ease}
+.zeile:hover{border-color:var(--blau)}
+.zeile .z-titel{font-size:14px;font-weight:800;letter-spacing:-.01em;line-height:1.4}
+.zeile .z-meta{font-size:12px;color:var(--grau);margin-top:2px}
+.zeile .z-status{
+  flex-shrink:0;font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:999px;
+  color:var(--grau);background:rgba(16,19,26,.05);white-space:nowrap;
+}
+.zeile .z-status.geteilt{color:var(--blau);background:color-mix(in srgb, var(--blau) 10%, transparent)}
+.zeile .z-status.offen{color:var(--bernstein);background:rgba(178,109,10,.12)}
+.zeile .z-hand{font-family:'Caveat',cursive;font-size:18px;font-weight:700;color:var(--stift);rotate:-1deg;margin-top:4px}
+.karten{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.karte{
+  background:#fff;border:0.5px solid var(--linie);border-radius:var(--radius);
+  padding:15px 18px;box-shadow:0 8px 24px rgba(16,19,26,.07);
+}
+.karte .wert{font-size:24px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.karte .wert.blau{color:var(--blau)}
+.karte .label{font-size:12px;color:var(--grau);margin-top:2px}
+.karte .delta{font-size:11.5px;font-weight:700;color:var(--blau);margin-top:5px}
+.karte .delta.amber{color:var(--bernstein)}
+.proben{display:flex;align-items:center;gap:7px;margin-top:9px}
+.probe{width:20px;height:20px;border-radius:6px;border:0.5px solid var(--linie)}
+.probe.p-blau{background:var(--blau)}
+.probe.p-stift{background:var(--stift)}
+.probe.p-tinte{background:var(--tinte)}
+.probe.p-papier{background:var(--papier)}
+.anrede-wert{
+  margin-left:2px;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;
+  color:var(--blau);background:color-mix(in srgb, var(--blau) 10%, transparent);
+}
+.tueren{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
+.tueren button{
+  padding:10px 17px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:12.5px;font-weight:700;color:var(--tinte);cursor:pointer;
+  transition:border-color .2s ease;
+}
+.tueren button:hover{border-color:var(--blau)}
+
+/* ========== Demo-Hinweis ========== */
+#demo-hinweis{
+  position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;
+  font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--stift);
+  opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--feder);
+}
+#demo-hinweis.da{opacity:.95;translate:-50% 0}
+
+/* ========== Der Aufbau-Film ========== */
+#film{
+  position:fixed;inset:0;z-index:100;background:var(--papier);
+  display:flex;align-items:center;justify-content:center;
+}
+#film canvas{position:absolute;inset:0;width:100%;height:100%;mix-blend-mode:multiply}
+#film .tafel{
+  position:absolute;left:50%;bottom:14svh;translate:-50% 0;z-index:2;
+  padding:12px 22px;border-radius:999px;border:0.5px solid var(--linie);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  font-size:clamp(14px,1.9vw,17px);font-weight:700;letter-spacing:-.01em;white-space:nowrap;
+  box-shadow:0 14px 40px rgba(16,19,26,.12);
+  opacity:0;transition:opacity .45s ease;
+}
+#film .tafel.da{opacity:1}
+#film .weiter{
+  position:absolute;right:20px;bottom:20px;z-index:2;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--linie);
+  background:rgba(255,255,255,.8);font-size:12.5px;font-weight:700;color:var(--grau);cursor:pointer;
+}
+#film .weiter:hover{color:var(--tinte);border-color:var(--blau)}
+#film.aus{opacity:0;pointer-events:none;transition:opacity .7s ease}
+
+@media (prefers-reduced-motion: reduce){
+  #kamera{transition:none}
+  #schleier{transition:none}
+  .inhalt.offen .zeile{transition:none}
+}
+
+/* ========== Mobil: das Modell ist breiter als der Schirm, man schaut sich um ========== */
+@media (max-width:760px){
+  nav .wortmarke small{display:none}
+  #buehne{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+  #kamera{
+    position:relative;left:0;top:50%;translate:0 -50%;
+    width:175vw;min-width:175vw;
+  }
+  #auftakt{left:18px;top:70px}
+  #tisch{left:18px;right:18px;max-width:none;bottom:14px}
+  #tisch .t-zettel{padding:9px 13px}
+  #krume{left:18px}
+  .inhalt{padding:118px 18px 64px}
+  .karten{grid-template-columns:1fr}
+}
+</style>
+<script src="marke.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="wortmarke"><img class="marke-logo" alt="" hidden><div><span data-marke-name data-logo-versteckt>Nordholm &amp; Partner</span><small class="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung · Beispielmarke wechseln</small></div></div>
+  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<button id="krume" type="button" hidden><span class="zurueck">← Modell</span><span>/</span><b id="krume-ziel">Zone</b></button>
+<div id="demo-hinweis">Diese Fläche entsteht gerade.</div>
+
+<div id="buehne">
+  <div id="kamera">
+    <img src="bilder/modell/modell-gross.jpg" width="2752" height="1536" alt="Weißes Architekturmodell der Beratung: fünf Gebäude auf einer Grundplatte">
+    <svg id="stift-lage" aria-hidden="true"></svg>
+    <div class="stift-text" id="stift-mts" style="left:23.5%;top:51.5%">seit 3 Wochen still!</div>
+    <div class="stift-text blau" id="stift-cordes" style="left:44.5%;top:80%">Steuerfrage wartet!</div>
+
+    <button class="zone" data-ziel="mts" style="--l:24.5%;--t:27%;--w:15.5%;--h:23%;--chipt:38%">
+      <span class="chip">MTS Maschinenbau<span class="zahl" data-zahl="0">0</span></span>
+    </button>
+    <button class="zone" data-ziel="zentrale" style="--l:44%;--t:19%;--w:12%;--h:43%;--chipt:34%">
+      <span class="chip">Zentrale<span class="zahl" data-zahl="0">0</span></span>
+    </button>
+    <button class="zone" data-ziel="petersen" style="--l:60%;--t:55%;--w:14.5%;--h:19%;--chipt:42%">
+      <span class="chip">Petersen Stahlbau<span class="zahl" data-zahl="2">2</span></span>
+    </button>
+    <button class="zone" data-ziel="cordes" style="--l:44.5%;--t:63%;--w:17.5%;--h:14%;--chipt:46%">
+      <span class="chip">Cordes Logistik<span class="zahl" data-zahl="1">1</span></span>
+    </button>
+    <button class="zone" data-ziel="freitag" style="--l:31%;--t:57%;--w:13%;--h:15%;--chipt:40%">
+      <span class="chip">Bäckerei Freitag<span class="zahl" data-zahl="0">0</span></span>
+    </button>
+  </div>
+</div>
+
+<div id="auftakt">
+  <div class="vorgruss">Guten Morgen, Frau Vogelsang.</div>
+  <h1 data-du="Deine Beratung. Als Modell." data-sie="Ihre Beratung. Als Modell.">Deine Beratung. Als Modell.</h1>
+</div>
+
+<div id="tisch">
+  <div class="t-titel" data-du="Auf deinem Tisch" data-sie="Auf Ihrem Tisch">Auf deinem Tisch</div>
+  <button class="t-zettel" type="button" data-zu="petersen">
+    <span class="t-text"><b>Herr Petersen möchte ein Gespräch mit einem Menschen</b><span>Petersen Stahlbau · Wunsch: Freitag, 9:00</span></span>
+    <span class="t-status offen">liegt vor</span>
+  </button>
+  <button class="t-zettel" type="button" data-zu="petersen">
+    <span class="t-text"><b>„Warum schrumpft meine Marge?" ist jetzt freigegeben</b><span>Petersen Stahlbau · gestern, 16:40</span></span>
+    <span class="t-status geteilt">zum Mitlesen</span>
+  </button>
+  <button class="t-zettel" type="button" data-zu="cordes">
+    <span class="t-text"><b data-du="Der KI-Berater hat dir eine Steuerfrage übergeben" data-sie="Der KI-Berater hat Ihnen eine Steuerfrage übergeben">Der KI-Berater hat dir eine Steuerfrage übergeben</b><span>Cordes Logistik · heute, 8:12</span></span>
+    <span class="t-status offen">wartet auf Antwort</span>
+  </button>
+</div>
+
+<div id="schleier"></div>
+
+<div id="zonen">
+  <section class="inhalt" data-raum="petersen">
+    <div class="kopf">
+      <div><h2>Petersen Stahlbau</h2><div class="stand">3 Gespräche diese Woche · Termin Donnerstag, 10:00</div></div>
+      <span class="status geteilt">1 Gespräch freigegeben</span>
+    </div>
+    <h3>Was wartet</h3>
+    <div class="zeilen">
+      <button class="zeile bald" type="button"><span><span class="z-titel">Gespräch mit einem Menschen</span><br><span class="z-meta">Wunsch: Freitag, 9:00 · über den KI-Berater</span></span><span class="z-status offen">Zeit bestätigen</span></button>
+      <button class="zeile bald" type="button"><span><span class="z-titel">„Warum schrumpft meine Marge?"</span><br><span class="z-meta">freigegeben gestern, 16:40</span></span><span class="z-status geteilt">mitlesen</span></button>
+    </div>
+    <h3>Was zuletzt geschah</h3>
+    <div class="zeilen">
+      <button class="zeile bald" type="button"><span><span class="z-titel">Preismodell Benchmark</span><br><span class="z-meta">gestern in die Unterlagen gelegt · 12 Seiten</span></span><span class="z-status">Unterlage</span></button>
+      <button class="zeile bald" type="button"><span><span class="z-titel">Termin Donnerstag, 10:00</span><br><span class="z-meta">Dr. Anna Vogelsang · Preis und Marge</span></span><span class="z-status geteilt">Videocall</span></button>
+    </div>
+    <div class="tueren">
+      <button class="bald" type="button">Gespräche mitlesen</button>
+      <button class="bald" type="button">Unterlagen</button>
+      <button class="bald" type="button">Leistungsnachweis</button>
+    </div>
+  </section>
+
+  <section class="inhalt" data-raum="cordes">
+    <div class="kopf">
+      <div><h2>Cordes Logistik</h2><div class="stand">letzte Frage heute, 8:12</div></div>
+      <span class="status offen">Übergabe offen</span>
+    </div>
+    <h3>Was wartet</h3>
+    <div class="zeilen">
+      <button class="zeile bald" type="button"><span><span class="z-titel">Steuerfrage, übergeben um 8:12</span><br><span class="z-meta">außerhalb des Rahmens des KI-Beraters</span><br><span class="z-hand" data-du="die gehört dir." data-sie="die gehört Ihnen.">die gehört dir.</span></span><span class="z-status offen">wartet auf Antwort</span></button>
+    </div>
+    <h3>Was zuletzt geschah</h3>
+    <div class="zeilen">
+      <button class="zeile bald" type="button"><span><span class="z-titel">4 Gespräche im August</span><br><span class="z-meta">alle nur für den Kunden</span></span><span class="z-status">läuft</span></button>
+      <button class="zeile bald" type="button"><span><span class="z-titel">Leistungsnachweis August</span><br><span class="z-meta">6,5 Std. bisher</span></span><span class="z-status">offen</span></button>
+    </div>
+    <div class="tueren">
+      <button class="bald" type="button">Frage beantworten</button>
+      <button class="bald" type="button">Unterlagen</button>
+    </div>
+  </section>
+
+  <section class="inhalt" data-raum="freitag">
+    <div class="kopf">
+      <div><h2>Bäckerei Freitag</h2><div class="stand">6 Gespräche im Juli · keines freigegeben</div></div>
+      <span class="status">läuft ruhig</span>
+    </div>
+    <h3>Was zuletzt geschah</h3>
+    <div class="zeilen">
+      <button class="zeile bald" type="button"><span><span class="z-titel">Leistungsnachweis Juli</span><br><span class="z-meta">versendet und bezahlt</span></span><span class="z-status geteilt">erledigt</span></button>
+      <button class="zeile bald" type="button"><span><span class="z-titel">Nächster Termin</span><br><span class="z-meta">noch keiner vereinbart</span></span><span class="z-status">offen</span></button>
+    </div>
+    <div class="tueren">
+      <button class="bald" type="button">Gespräche ansehen</button>
+      <button class="bald" type="button">Leistungsnachweis</button>
+    </div>
+  </section>
+
+  <section class="inhalt" data-raum="mts">
+    <div class="kopf">
+      <div><h2>MTS Maschinenbau</h2><div class="stand">letzte Frage am 22. Juli · davor wöchentlich</div></div>
+      <span class="status offen">seit 3 Wochen still</span>
+    </div>
+    <h3>Was wartet</h3>
+    <div class="zeilen">
+      <button class="zeile bald" type="button"><span><span class="z-titel">Offene Rechnung</span><br><span class="z-meta">4.200 € · seit 12 Tagen</span></span><span class="z-status offen">erinnern</span></button>
+      <button class="zeile bald" type="button"><span><span class="z-titel">Vorschlag des KI-Beraters</span><br><span class="z-meta">Halbjahresblick anbieten, das kam zuletzt gut an</span><br><span class="z-hand">vielleicht anrufen?</span></span><span class="z-status">Vorschlag</span></button>
+    </div>
+    <div class="tueren">
+      <button class="bald" type="button">Gespräche ansehen</button>
+      <button class="bald" type="button">Rechnung ansehen</button>
+    </div>
+  </section>
+
+  <section class="inhalt" data-raum="zentrale">
+    <div class="kopf">
+      <div><h2 data-du="Deine Zentrale" data-sie="Ihre Zentrale">Deine Zentrale</h2><div class="stand">der KI-Berater, die Marke, die Abrechnung</div></div>
+    </div>
+    <h3 data-du="Dein KI-Berater, diese Woche" data-sie="Ihr KI-Berater, diese Woche">Dein KI-Berater, diese Woche</h3>
+    <div class="karten">
+      <div class="karte"><div class="wert">126</div><div class="label">Fragen beantwortet</div><div class="delta">aus 4 Mandaten</div></div>
+      <div class="karte"><div class="wert">4</div><div class="label">an Menschen übergeben</div><div class="delta amber">eine wartet auf Antwort</div></div>
+    </div>
+    <h3>So tritt er auf</h3>
+    <div class="karten">
+      <div class="karte"><div class="wert blau" style="font-size:18px" data-marke-name>Nordholm &amp; Partner</div><div class="label">Marke und Anrede</div><div class="proben" aria-label="Markenfarben"><span class="probe p-blau" title="Akzent"></span><span class="probe p-stift" title="Stift"></span><span class="probe p-tinte" title="Tinte"></span><span class="probe p-papier" title="Papier"></span><span class="anrede-wert" data-du="per Du" data-sie="per Sie">per Du</span></div></div>
+      <div class="karte"><div class="wert">34,0</div><div class="label">Std. im August, alle Mandate</div><div class="delta amber">3 Rechnungen offen · 12.400 €</div></div>
+    </div>
+    <div class="tueren">
+      <button class="bald" type="button">Persona einstellen</button>
+      <button class="bald" type="button">Leistungsnachweise</button>
+      <button class="bald" type="button">Rechnungen</button>
+    </div>
+  </section>
+</div>
+
+<div id="film" hidden>
+  <canvas></canvas>
+  <div class="tafel"></div>
+  <button class="weiter" type="button">Überspringen</button>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var Marke = window.Marke || {anwenden: function(){}, sie: false};
+  Marke.anwenden();
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Ehrlichkeit ---------- */
+  var hinweisTimer = null;
+  function demoHinweis(text){
+    var h = document.getElementById('demo-hinweis');
+    h.textContent = text;
+    h.classList.add('da');
+    clearTimeout(hinweisTimer);
+    hinweisTimer = setTimeout(function(){ h.classList.remove('da'); }, 2200);
+  }
+  document.querySelectorAll('.bald').forEach(function(el){
+    el.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); demoHinweis('Diese Fläche entsteht gerade.'); });
+  });
+
+  /* ---------- Der Stift kritzelt aufs Foto ---------- */
+  var NS = 'http://www.w3.org/2000/svg';
+  var kamera = document.getElementById('kamera');
+  var stift = document.getElementById('stift-lage');
+  function kritzle(){
+    stift.innerHTML = '';
+    var W = kamera.clientWidth, H = kamera.clientHeight;
+    if (!W) return;
+    /* Kringel um MTS (Zone: l 24.5 t 27 w 15.5 h 23) */
+    var cx = W * 0.3225, cy = H * 0.385, rx = W * 0.095, ry = H * 0.15;
+    var e = document.createElementNS(NS, 'path');
+    e.setAttribute('d',
+      'M' + (cx - rx) + ' ' + cy +
+      ' C' + (cx - rx) + ' ' + (cy - ry * 1.25) + ' ' + (cx + rx * 0.9) + ' ' + (cy - ry * 1.15) + ' ' + (cx + rx) + ' ' + (cy - ry * 0.1) +
+      ' C' + (cx + rx * 1.06) + ' ' + (cy + ry * 0.95) + ' ' + (cx - rx * 0.75) + ' ' + (cy + ry * 1.2) + ' ' + (cx - rx * 1.04) + ' ' + (cy + ry * 0.15));
+    stift.appendChild(e);
+    /* Pfeil zur Cordes-Halle (Notiz sitzt bei 44.5/80, Halle bei ~53/70) */
+    var ax = W * 0.53, ay = H * 0.755;
+    var a = document.createElementNS(NS, 'path');
+    a.setAttribute('class', 'blau');
+    a.setAttribute('d', 'M' + (W * 0.475) + ' ' + (H * 0.815) + ' Q' + (W * 0.51) + ' ' + (H * 0.80) + ' ' + ax + ' ' + ay +
+      ' M' + (ax - W * 0.014) + ' ' + (ay + H * 0.004) + ' L' + ax + ' ' + ay + ' L' + (ax - W * 0.006) + ' ' + (ay + H * 0.022));
+    stift.appendChild(a);
+    if (!reduziert) {
+      [e, a].forEach(function(pfad, i){
+        var len = pfad.getTotalLength();
+        pfad.style.strokeDasharray = len;
+        pfad.style.strokeDashoffset = len;
+        pfad.style.transition = 'stroke-dashoffset .9s cubic-bezier(.45,.05,.55,.95) ' + (0.8 + i * 0.4) + 's';
+        void pfad.getBoundingClientRect();
+        pfad.style.strokeDashoffset = 0;
+      });
+    }
+  }
+
+  /* ---------- Zoom-Navigation (Bauplan begehbare-plattform) ---------- */
+  var ZONEN_NAMEN = {petersen: 'Petersen Stahlbau', cordes: 'Cordes Logistik', freitag: 'Bäckerei Freitag', mts: 'MTS Maschinenbau', zentrale: 'Zentrale'};
+  var krume = document.getElementById('krume');
+  var krumeZiel = document.getElementById('krume-ziel');
+  var zonenLage = document.getElementById('zonen');
+  var offen = null;
+
+  function zoomeZu(ziel, sofort){
+    var zone = document.querySelector('.zone[data-ziel="' + ziel + '"]');
+    if (!zone) return;
+    /* vor dem Messen laufenden Transform zurücksetzen */
+    var alteTransition = kamera.style.transition;
+    kamera.style.transition = 'none';
+    kamera.style.transform = '';
+    void kamera.offsetWidth;
+    var kr = kamera.getBoundingClientRect();
+    var rw = zone.offsetWidth, rh = zone.offsetHeight;
+    var s = Math.min(window.innerWidth / rw, window.innerHeight / rh) * 0.92;
+    var mx = kr.left + zone.offsetLeft + rw / 2;
+    var my = kr.top + zone.offsetTop + rh / 2;
+    kamera.style.transformOrigin = (zone.offsetLeft + rw / 2) + 'px ' + (zone.offsetTop + rh / 2) + 'px';
+    if (!sofort && !reduziert) kamera.style.transition = alteTransition || '';
+    kamera.style.transform = 'translate(' + (window.innerWidth / 2 - mx) + 'px,' + (window.innerHeight / 2 - my) + 'px) scale(' + s + ')';
+    if (sofort || reduziert) { void kamera.offsetWidth; kamera.style.transition = alteTransition || ''; }
+  }
+
+  function oeffne(ziel, sofort){
+    if (!ZONEN_NAMEN[ziel]) return;
+    offen = ziel;
+    zoomeZu(ziel, sofort);
+    document.body.classList.add('gezoomt');
+    document.querySelectorAll('.inhalt').forEach(function(s){ s.classList.toggle('offen', s.dataset.raum === ziel); });
+    zonenLage.scrollTop = 0;
+    krumeZiel.textContent = ZONEN_NAMEN[ziel];
+    krume.hidden = false;
+    if (location.hash !== '#' + ziel) history.replaceState(null, '', '#' + ziel);
+  }
+  function schliesse(){
+    if (!offen) return;
+    offen = null;
+    kamera.style.transform = '';
+    document.body.classList.remove('gezoomt');
+    krume.hidden = true;
+    history.replaceState(null, '', location.pathname);
+  }
+
+  document.querySelectorAll('.zone').forEach(function(z){
+    z.addEventListener('click', function(){ if (!offen) oeffne(z.dataset.ziel); });
+  });
+  document.querySelectorAll('#tisch .t-zettel').forEach(function(t){
+    t.addEventListener('click', function(){ oeffne(t.dataset.zu); });
+  });
+  krume.addEventListener('click', schliesse);
+  window.addEventListener('keydown', function(e){ if (e.key === 'Escape') schliesse(); });
+  window.addEventListener('hashchange', function(){
+    var z = location.hash.slice(1);
+    if (ZONEN_NAMEN[z]) oeffne(z); else schliesse();
+  });
+  /* Mobil: den Blick aufs Modell zentrieren, statt am linken Rand zu starten */
+  var buehne = document.getElementById('buehne');
+  function zentriere(){
+    if (buehne.scrollWidth > buehne.clientWidth) buehne.scrollLeft = (buehne.scrollWidth - buehne.clientWidth) / 2;
+  }
+  zentriere();
+
+  var resizeTimer = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function(){
+      kritzle();
+      if (offen) zoomeZu(offen, true); else zentriere();
+    }, 180);
+  });
+
+  /* ---------- Der Aufbau-Film: der KI-Berater baut das Modell ---------- */
+  var FRAMES = 111, PFAD = 'bilder/modell/aufbau/f_';
+  var film = document.getElementById('film');
+  var direkt = ZONEN_NAMEN[location.hash.slice(1)];
+  var gesehen = false;
+  try { gesehen = sessionStorage.getItem('modell-film') === '1'; } catch (e) {}
+
+  function filmEnde(){
+    film.classList.add('aus');
+    try { sessionStorage.setItem('modell-film', '1'); } catch (e) {}
+    setTimeout(function(){ film.hidden = true; }, 750);
+    kritzle();
+  }
+
+  function starteFilm(){
+    film.hidden = false;
+    var canvas = film.querySelector('canvas');
+    var ctx = canvas.getContext('2d');
+    var tafel = film.querySelector('.tafel');
+    var bilder = [], geladen = 0, gestartet = false, abgebrochen = false;
+    var TAFELN = [
+      [0.02, Marke.sie ? 'Guten Morgen, Frau Vogelsang.' : 'Guten Morgen, Frau Vogelsang.'],
+      [0.28, Marke.sie ? 'Ihr KI-Berater hat gebaut.' : 'Dein KI-Berater hat gebaut.'],
+      [0.72, Marke.sie ? 'Ihre Beratung. Als Modell.' : 'Deine Beratung. Als Modell.']
+    ];
+    function male(idx){
+      var b = bilder[idx];
+      if (!b || !b.complete || !b.naturalWidth) return;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      if (canvas.width !== innerWidth * dpr) { canvas.width = innerWidth * dpr; canvas.height = innerHeight * dpr; }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, innerWidth, innerHeight);
+      /* deckend einpassen: contain, nie verzerren */
+      var s = Math.min(innerWidth / b.naturalWidth, innerHeight / b.naturalHeight);
+      var w = b.naturalWidth * s, h = b.naturalHeight * s;
+      ctx.drawImage(b, (innerWidth - w) / 2, (innerHeight - h) / 2, w, h);
+    }
+    function spiele(){
+      if (gestartet) return;
+      gestartet = true;
+      var start = null, dauer = 9000;
+      function schritt(t){
+        if (abgebrochen) return;
+        if (!start) start = t;
+        var p = Math.min((t - start) / dauer, 1);
+        male(Math.min(FRAMES - 1, Math.floor(p * (FRAMES - 1))));
+        var aktiv = null;
+        TAFELN.forEach(function(tf){ if (p >= tf[0]) aktiv = tf[1]; });
+        if (aktiv && tafel.textContent !== aktiv) { tafel.classList.remove('da'); tafel.textContent = aktiv; void tafel.offsetWidth; tafel.classList.add('da'); }
+        if (p < 1) requestAnimationFrame(schritt);
+        else setTimeout(function(){ if (!abgebrochen) filmEnde(); }, 900);
+      }
+      requestAnimationFrame(schritt);
+    }
+    /* erst ein Drittel laden, dann los; Rest lädt während des Abspielens */
+    var fehl = 0;
+    for (var i = 0; i < FRAMES; i++) (function(i){
+      var b = new Image();
+      b.src = PFAD + String(i + 1).padStart(3, '0') + '.jpg';
+      b.onload = function(){ geladen++; if (geladen === Math.floor(FRAMES / 3)) spiele(); };
+      b.onerror = function(){ fehl++; if (fehl > 6 && !gestartet) { abgebrochen = true; filmEnde(); } };
+      bilder[i] = b;
+    })(i);
+    film.querySelector('.weiter').addEventListener('click', function(){ abgebrochen = true; filmEnde(); });
+  }
+
+  if (reduziert || direkt || gesehen) {
+    film.hidden = true;
+    kritzle();
+    if (direkt) oeffne(location.hash.slice(1), true);
+  } else {
+    starteFilm();
+  }
+})();
+</script>
+</body>
+</html>
