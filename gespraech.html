@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dein Berater</title>
+<style>
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V1 */
+@font-face{
+  font-family:'Manrope';
+  src:url('schriften/manrope.woff2') format('woff2');
+  font-weight:200 800;
+  font-display:swap;
+}
+:root{
+  --papier:#fafaf7;
+  --tinte:#10131a;
+  --grau:#636c7d;
+  --blau:#2b5fe3;
+  --linie:rgba(16,19,26,.1);
+  --karte:#ffffff;
+  --radius:16px;
+  --feder:cubic-bezier(.22,.9,.24,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--papier);color:var(--tinte);
+  font-family:'Manrope',system-ui,sans-serif;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+[hidden]{display:none!important}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:10;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 max(24px,calc((100vw - 760px)/2));
+  background:linear-gradient(var(--papier) 55%, rgba(250,250,247,0));
+  pointer-events:none;
+}
+nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em}
+nav .wortmarke small{display:block;font-size:10px;font-weight:500;color:var(--grau)}
+nav .hinweis{font-size:12px;color:var(--grau)}
+
+#akte{
+  max-width:760px;margin:0 auto;
+  padding:112px 24px 180px;
+}
+
+/* Begrüßung */
+#gruss .strich{
+  width:0;height:1px;background:var(--tinte);margin-bottom:28px;
+  transition:width .8s var(--feder);
+}
+#gruss.da .strich{width:64px}
+#gruss h1{
+  font-size:clamp(30px,5vw,46px);font-weight:800;letter-spacing:-.03em;line-height:1.15;
+  min-height:1.2em;
+}
+#gruss h1 .caret{
+  display:inline-block;width:2px;height:.95em;background:var(--blau);
+  vertical-align:-.12em;margin-left:2px;
+  animation:blinzeln 1.05s steps(1) infinite;
+}
+@keyframes blinzeln{50%{opacity:0}}
+
+/* Kapitel */
+.kapitel{margin-top:56px}
+.kapitel .frage{
+  font-size:clamp(22px,3.4vw,30px);font-weight:800;letter-spacing:-.025em;line-height:1.2;
+  padding-top:24px;border-top:1px solid var(--linie);
+  cursor:default;
+}
+.kapitel.zu .frage{cursor:pointer;color:var(--grau);font-size:17px;padding:16px 0;transition:color .2s}
+.kapitel.zu .frage:hover{color:var(--tinte)}
+.kapitel.zu .frage::after{content:' +';color:var(--blau)}
+.kapitel .lauf{overflow:hidden}
+.kapitel.zu .lauf{display:none}
+.kapitel p.antwort{
+  margin-top:20px;font-size:17px;color:var(--tinte);max-width:60ch;
+}
+.kapitel p.antwort .wort{opacity:0;transition:opacity .18s ease}
+.kapitel p.antwort .wort.da{opacity:1}
+
+/* Karten & Materialisierung */
+.reihe{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+.reihe.zweier{grid-template-columns:repeat(2,1fr)}
+.karte{
+  position:relative;
+  background:var(--karte);
+  border:0.5px solid transparent;
+  border-radius:var(--radius);
+  padding:18px 20px;
+  box-shadow:0 1px 2px rgba(16,19,26,0);
+  margin-top:20px;
+}
+.reihe .karte{margin-top:0}
+.karte .inhalt-k{
+  opacity:0;filter:blur(7px);transform:translateY(6px);
+  transition:opacity .45s ease,filter .45s ease,transform .45s var(--feder);
+}
+.karte.belichtet{
+  border-color:var(--linie);
+  box-shadow:0 10px 30px rgba(16,19,26,.06);
+  transition:border-color .5s ease,box-shadow .7s ease;
+}
+.karte.belichtet .inhalt-k{opacity:1;filter:blur(0);transform:none}
+.karte .blaupause-gitter{
+  position:absolute;inset:0;border-radius:var(--radius);
+  background:
+    linear-gradient(rgba(43,95,227,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(43,95,227,.07) 1px, transparent 1px);
+  background-size:14px 14px;
+  opacity:1;transition:opacity .6s ease;pointer-events:none;
+}
+.karte.belichtet .blaupause-gitter{opacity:0}
+.karte svg.umriss{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;overflow:visible;
+}
+.karte svg.umriss rect{
+  fill:none;stroke:var(--blau);stroke-width:1.5;
+  stroke-dasharray:100;stroke-dashoffset:100;
+  transition:stroke-dashoffset .5s var(--feder),opacity .5s ease .45s;
+}
+.karte.zeichnet svg.umriss rect{stroke-dashoffset:0}
+.karte.belichtet svg.umriss rect{opacity:0}
+
+.karte .wert{font-size:26px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.karte .label{font-size:12.5px;color:var(--grau);margin-top:2px}
+.karte .delta{font-size:12px;font-weight:700;color:var(--blau);margin-top:6px}
+.karte .delta.amber{color:#a06008}
+
+.pill{
+  display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;
+  font-size:12px;font-weight:700;
+}
+.pill-blau{background:rgba(43,95,227,.1);color:var(--blau)}
+.pill-amber{background:rgba(178,109,10,.14);color:#a06008}
+.pill-gruen{background:rgba(23,138,84,.14);color:#177a4c}
+
+/* Hebel */
+.hebel h3{font-size:16px;font-weight:800;letter-spacing:-.01em}
+.hebel .impact{font-size:22px;font-weight:800;color:var(--blau);margin-top:8px;font-variant-numeric:tabular-nums}
+.hebel .notiz{font-size:13px;color:var(--grau);margin-top:4px}
+.hebel .empfohlen-pill{margin-bottom:10px}
+
+/* Kurve */
+.karte svg.kurve{width:100%;height:auto;display:block}
+.karte svg.kurve .linie{
+  fill:none;stroke:var(--blau);stroke-width:2.5;
+  stroke-dasharray:620;stroke-dashoffset:620;
+}
+.karte.belichtet svg.kurve .linie{transition:stroke-dashoffset 1.3s .2s var(--feder);stroke-dashoffset:0}
+.karte svg.kurve .flaeche{fill:url(#kv);opacity:0}
+.karte.belichtet svg.kurve .flaeche{transition:opacity .8s 1.1s ease;opacity:.3}
+.karte svg.kurve text{font-family:inherit;font-size:11px;fill:var(--grau)}
+
+/* Dokument */
+.dokument{display:flex;align-items:center;gap:16px}
+.dokument .blatt{
+  width:40px;height:52px;flex-shrink:0;position:relative;
+  background:#fff;border:1px solid var(--linie);border-radius:4px;
+}
+.dokument .blatt::before{
+  content:'';position:absolute;right:-1px;top:-1px;
+  border:9px solid transparent;
+  border-left-color:rgba(43,95,227,.25);border-bottom-color:rgba(43,95,227,.25);
+  border-radius:0 0 0 4px;
+}
+.dokument .blatt::after{
+  content:'';position:absolute;left:7px;right:7px;top:16px;height:22px;
+  background:linear-gradient(var(--linie) 1.5px, transparent 1.5px);
+  background-size:100% 7px;
+}
+.dokument .name{font-weight:800;font-size:15px}
+.dokument .meta{font-size:12.5px;color:var(--grau)}
+
+/* Kalender */
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.slots button{
+  padding:14px 8px;border-radius:12px;border:0.5px solid var(--linie);
+  background:var(--papier);font-size:14px;font-weight:700;cursor:pointer;
+  transition:border-color .2s,background .2s;
+}
+.slots button:hover{border-color:var(--blau)}
+.slots button.gewaehlt{background:var(--tinte);color:#fff;border-color:var(--tinte)}
+.slots button:disabled:not(.gewaehlt){opacity:.4;cursor:default}
+.kalender .wer{display:flex;align-items:center;gap:12px}
+.kalender .kreis{
+  width:40px;height:40px;border-radius:999px;flex-shrink:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(43,95,227,.1);color:var(--blau);font-weight:800;font-size:14px;
+}
+
+/* Bestätigung */
+.bestaetigung{display:flex;align-items:center;gap:16px}
+.bestaetigung svg{width:44px;height:44px;flex-shrink:0}
+.bestaetigung svg circle{fill:none;stroke:var(--blau);stroke-width:2.5;stroke-dasharray:126;stroke-dashoffset:126}
+.bestaetigung svg path{fill:none;stroke:var(--blau);stroke-width:3.5;stroke-linecap:round;stroke-dasharray:36;stroke-dashoffset:36}
+.karte.belichtet .bestaetigung svg circle{animation:ziehen .6s .1s ease forwards}
+.karte.belichtet .bestaetigung svg path{animation:ziehen .4s .55s ease forwards}
+@keyframes ziehen{to{stroke-dashoffset:0}}
+
+/* Chips + Eingabe */
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.chips button{
+  padding:10px 18px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:14px;font-weight:600;cursor:pointer;
+  opacity:0;translate:0 8px;transition:opacity .4s ease,translate .4s var(--feder),border-color .2s;
+}
+.chips button.da{opacity:1;translate:none}
+.chips button:hover{border-color:var(--blau)}
+
+#eingabe{
+  position:fixed;left:0;right:0;bottom:0;z-index:9;
+  padding:16px max(24px,calc((100vw - 760px)/2)) 28px;
+  background:linear-gradient(rgba(250,250,247,0), var(--papier) 40%);
+}
+#eingabe .zeile{
+  display:flex;gap:10px;
+}
+#frage{
+  flex:1;min-height:54px;padding:0 22px;border-radius:999px;
+  border:0.5px solid var(--linie);background:#fff;
+  font-family:inherit;font-size:16px;color:var(--tinte);outline:none;
+  box-shadow:0 8px 30px rgba(16,19,26,.07);
+  transition:border-color .2s;
+}
+#frage:focus{border-color:var(--blau)}
+#senden{
+  min-height:54px;padding:0 26px;border-radius:999px;border:none;cursor:pointer;
+  background:var(--tinte);color:#fff;font-size:15px;font-weight:800;
+  transition:transform .1s ease;
+}
+#senden:active{transform:scale(.97)}
+
+@media (prefers-reduced-motion: reduce){
+  #gruss .strich{transition:none}
+  #gruss h1 .caret{animation:none;opacity:0}
+  .kapitel p.antwort .wort{transition:none}
+  .karte .inhalt-k{transition:none;opacity:1;filter:none;transform:none}
+  .karte .blaupause-gitter{transition:none;opacity:0}
+  .karte svg.umriss{display:none}
+  .karte.belichtet svg.kurve .linie{transition:none;stroke-dashoffset:0}
+  .karte svg.kurve .flaeche,.karte.belichtet svg.kurve .flaeche{transition:none;opacity:.3}
+  .chips button{transition:none;opacity:1;translate:none}
+  html{scroll-behavior:auto}
+}
+@media (max-width:700px){
+  .reihe,.reihe.zweier{grid-template-columns:1fr}
+  .slots{grid-template-columns:1fr}
+  #akte{padding-top:96px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wortmarke">Nordholm &amp; Partner<small>Beispielmarke deiner Beratung</small></div>
+  <div class="hinweis">Entwurf · Gespräch</div>
+</nav>
+
+<main id="akte">
+  <div id="gruss">
+    <div class="strich"></div>
+    <h1><span id="gruss-text"></span><span class="caret"></span></h1>
+    <div class="chips" id="start-chips"></div>
+  </div>
+</main>
+
+<div id="eingabe">
+  <div class="zeile">
+    <input id="frage" type="text" placeholder="Frag deine Beratung" aria-label="Deine Frage an die Beratung" autocomplete="off">
+    <button id="senden" type="button">Fragen</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var akte = document.getElementById('akte');
+  var beschaeftigt = false;
+
+  function warte(ms){ return new Promise(function(f){ setTimeout(f, reduziert ? 0 : ms); }); }
+  function runter(){
+    if (reduziert) return;
+    window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+  }
+  function euro(n){ return n.toLocaleString('de-DE') + ' €'; }
+
+  /* ---------- Materialisierung: Blaupause wird Wirklichkeit ---------- */
+  function materialisiere(karte){
+    return new Promise(function(fertig){
+      if (reduziert) { karte.classList.add('zeichnet','belichtet'); fertig(); return; }
+      var gitter = document.createElement('div');
+      gitter.className = 'blaupause-gitter';
+      karte.appendChild(gitter);
+      var ns = 'http://www.w3.org/2000/svg';
+      var svg = document.createElementNS(ns, 'svg');
+      svg.setAttribute('class', 'umriss');
+      var r = document.createElementNS(ns, 'rect');
+      var b = karte.getBoundingClientRect();
+      r.setAttribute('x', 1); r.setAttribute('y', 1);
+      r.setAttribute('width', Math.max(b.width - 2, 2));
+      r.setAttribute('height', Math.max(b.height - 2, 2));
+      r.setAttribute('rx', 15);
+      r.setAttribute('pathLength', 100);
+      svg.appendChild(r);
+      karte.appendChild(svg);
+      void r.getBoundingClientRect();
+      karte.classList.add('zeichnet');
+      setTimeout(function(){ karte.classList.add('belichtet'); }, 480);
+      setTimeout(function(){ svg.remove(); gitter.remove(); fertig(); }, 1150);
+    });
+  }
+
+  function zaehleHoch(el, ziel, format){
+    if (reduziert) { el.textContent = format(ziel); return; }
+    var start = null;
+    function tick(t){
+      if (!start) start = t;
+      var p = Math.min((t - start) / 900, 1);
+      el.textContent = format(Math.round(ziel * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------- Text-Strom ---------- */
+  function stroeme(kapitel, text){
+    return new Promise(function(fertig){
+      var p = document.createElement('p');
+      p.className = 'antwort';
+      kapitel.querySelector('.lauf').appendChild(p);
+      var woerter = text.split(' ');
+      if (reduziert) { p.textContent = text; fertig(); return; }
+      var i = 0;
+      (function naechstes(){
+        if (i >= woerter.length) { fertig(); return; }
+        var s = document.createElement('span');
+        s.className = 'wort';
+        s.textContent = (i ? ' ' : '') + woerter[i];
+        p.appendChild(s);
+        requestAnimationFrame(function(){ s.classList.add('da'); });
+        var pause = /[.!?:]$/.test(woerter[i]) ? 190 : 26;
+        i++;
+        if (i % 9 === 0) runter();
+        setTimeout(naechstes, pause);
+      })();
+    });
+  }
+
+  /* ---------- Karten-Fabrik ---------- */
+  function karteAus(html, klasse){
+    var k = document.createElement('div');
+    k.className = 'karte' + (klasse ? ' ' + klasse : '');
+    k.innerHTML = '<div class="inhalt-k">' + html + '</div>';
+    return k;
+  }
+
+  function baueKpi(d){
+    var k = karteAus('<div class="wert">0</div><div class="label"></div>' + (d.delta ? '<div class="delta' + (d.ton === 'amber' ? ' amber' : '') + '"></div>' : ''));
+    k.querySelector('.label').textContent = d.label;
+    if (d.delta) k.querySelector('.delta').textContent = d.delta;
+    k.dataset.ziel = d.wert; k.dataset.format = d.format || '';
+    return k;
+  }
+  function starteKpi(k){
+    var format = k.dataset.format === '€' ? euro : (k.dataset.format === '%' ? function(n){ return n + ' %'; } : function(n){ return n.toLocaleString('de-DE'); });
+    zaehleHoch(k.querySelector('.wert'), parseInt(k.dataset.ziel, 10), format);
+  }
+
+  function baueKurve(){
+    return karteAus(
+      '<svg class="kurve" viewBox="0 0 600 190" role="img" aria-label="Umsatz steigt, Marge fällt seit April">' +
+      '<defs><linearGradient id="kv" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="#2b5fe3" stop-opacity=".45"/><stop offset="1" stop-color="#2b5fe3" stop-opacity="0"/>' +
+      '</linearGradient></defs>' +
+      '<path class="flaeche" d="M20,140 L120,124 L220,128 L320,96 L420,78 L580,40 L580,168 L20,168 Z"/>' +
+      '<path class="linie" d="M20,140 L120,124 L220,128 L320,96 L420,78 L580,40"/>' +
+      '<text x="20" y="185">März</text><text x="545" y="185">August</text>' +
+      '</svg>'
+    );
+  }
+
+  function baueHebel(d){
+    var k = karteAus(
+      (d.empfohlen ? '<div class="empfohlen-pill"><span class="pill pill-blau">Empfehlung</span></div>' : '') +
+      '<h3></h3><div class="impact">0</div><div class="label">im Jahr</div><div class="notiz"></div>', 'hebel');
+    k.querySelector('h3').textContent = d.name;
+    k.querySelector('.notiz').textContent = d.notiz;
+    k.dataset.ziel = d.impact;
+    return k;
+  }
+  function starteHebel(k){
+    zaehleHoch(k.querySelector('.impact'), parseInt(k.dataset.ziel, 10), function(n){ return '+' + euro(n); });
+  }
+
+  function baueDokument(d){
+    var k = karteAus('<div class="dokument"><div class="blatt"></div><div><div class="name"></div><div class="meta"></div></div></div>');
+    k.querySelector('.name').textContent = d.name;
+    k.querySelector('.meta').textContent = d.meta;
+    return k;
+  }
+
+  function baueKalender(slots){
+    var k = karteAus(
+      '<div class="kalender"><div class="wer"><span class="kreis">AV</span><div>' +
+      '<div style="font-weight:800;font-size:15px">Dr. Anna Vogelsang</div>' +
+      '<div style="font-size:12.5px;color:var(--grau)">Partnerin · Strategie und Preis</div>' +
+      '</div></div><div class="slots"></div></div>');
+    var lage = k.querySelector('.slots');
+    slots.forEach(function(s){
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = s;
+      b.addEventListener('click', function(){ waehleSlot(k, b, s); });
+      lage.appendChild(b);
+    });
+    return k;
+  }
+
+  function baueBestaetigung(text){
+    var k = karteAus(
+      '<div class="bestaetigung"><svg viewBox="0 0 44 44" aria-hidden="true">' +
+      '<circle cx="22" cy="22" r="20"/><path d="M14 23 L20 29 L31 17"/></svg>' +
+      '<div style="font-weight:700;font-size:15px">' + text + '</div></div>');
+    return k;
+  }
+
+  /* ---------- Kapitel-Motor ---------- */
+  var aktuellesKapitel = null;
+
+  function neuesKapitel(frage){
+    var gruss = document.getElementById('gruss');
+    if (gruss) gruss.remove();
+    if (aktuellesKapitel) {
+      aktuellesKapitel.classList.add('zu');
+    }
+    var sec = document.createElement('section');
+    sec.className = 'kapitel';
+    sec.innerHTML = '<h2 class="frage"></h2><div class="lauf"></div>';
+    sec.querySelector('.frage').textContent = frage;
+    sec.querySelector('.frage').addEventListener('click', function(){
+      if (sec.classList.contains('zu')) sec.classList.remove('zu');
+      else if (sec !== aktuellesKapitel) sec.classList.add('zu');
+    });
+    akte.appendChild(sec);
+    aktuellesKapitel = sec;
+    runter();
+    return sec;
+  }
+
+  function zeigeChips(kapitel, liste){
+    var lage = document.createElement('div');
+    lage.className = 'chips';
+    liste.forEach(function(c, i){
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = c;
+      b.addEventListener('click', function(){ frageStellen(c); });
+      lage.appendChild(b);
+      setTimeout(function(){ b.classList.add('da'); }, reduziert ? 0 : 120 * i + 60);
+    });
+    kapitel.querySelector('.lauf').appendChild(lage);
+    runter();
+  }
+
+  async function spiele(kapitel, schritte){
+    beschaeftigt = true;
+    for (var i = 0; i < schritte.length; i++) {
+      var s = schritte[i];
+      if (s.t) { await stroeme(kapitel, s.t); await warte(240); continue; }
+      if (s.chips) { zeigeChips(kapitel, s.chips); continue; }
+      if (s.reihe) {
+        var lage = document.createElement('div');
+        lage.className = 'reihe' + (s.reihe.length === 2 ? ' zweier' : '');
+        kapitel.querySelector('.lauf').appendChild(lage);
+        for (var j = 0; j < s.reihe.length; j++) {
+          var d = s.reihe[j];
+          var k = d.art === 'kpi' ? baueKpi(d) : baueHebel(d);
+          lage.appendChild(k);
+          runter();
+          var starte = d.art === 'kpi' ? starteKpi : starteHebel;
+          (function(k2, starte2){
+            materialisiere(k2).then(function(){});
+            setTimeout(function(){ starte2(k2); }, reduziert ? 0 : 500);
+          })(k, starte);
+          await warte(260);
+        }
+        await warte(700);
+        continue;
+      }
+      var k = null;
+      if (s.kurve) k = baueKurve();
+      if (s.dokument) k = baueDokument(s.dokument);
+      if (s.kalender) k = baueKalender(s.kalender);
+      if (s.bestaetigung) k = baueBestaetigung(s.bestaetigung);
+      if (k) {
+        kapitel.querySelector('.lauf').appendChild(k);
+        runter();
+        await materialisiere(k);
+        await warte(300);
+      }
+    }
+    beschaeftigt = false;
+  }
+
+  /* ---------- Drehbuch ---------- */
+  var SKRIPTE = [
+    { probe: /(läuft|lauf|geschäft|geht es|zahlen|überblick)/i,
+      frage: 'Wie läuft mein Geschäft?',
+      schritte: [
+        {t: 'Gut, mit einer Ausnahme. Erst das Bild:'},
+        {reihe: [
+          {art:'kpi', wert:412000, format:'€', label:'Umsatz Q3, hochgerechnet', delta:'8 % über Plan'},
+          {art:'kpi', wert:82, format:'%', label:'Auslastung deines Teams'},
+          {art:'kpi', wert:20550, format:'€', label:'offene Forderungen', delta:'eine Rechnung seit 9 Tagen', ton:'amber'}
+        ]},
+        {t: 'Und so lief das letzte halbe Jahr:'},
+        {kurve: true},
+        {t: 'Die Ausnahme: Deine Marge fällt seit April, obwohl der Umsatz steigt. Du verkaufst mehr und verdienst daran weniger. Genau da würde ich ansetzen.'},
+        {chips: ['Warum schrumpft meine Marge?', 'Buch mir einen Menschen']}
+      ]},
+    { probe: /(marge|verdien|preis|rendite|gewinn)/i,
+      frage: 'Warum schrumpft meine Marge?',
+      schritte: [
+        {t: 'Ich habe es zerlegt. Drei Hebel, der Größe nach:'},
+        {reihe: [
+          {art:'hebel', name:'Preismodell', impact:38000, notiz:'4 % auf C-Kunden, Staffeln neu geschnitten', empfohlen:true},
+          {art:'hebel', name:'Einkauf Stahl', impact:21000, notiz:'Rahmenvertrag läuft aus, neu verhandeln'},
+          {art:'hebel', name:'Ausschuss Linie 2', impact:12000, notiz:'1,8 Punkte über dem Branchenwert'}
+        ]},
+        {t: 'Den Rechenweg habe ich dir als Benchmark in die Akte gelegt:'},
+        {dokument: {name:'Preismodell Benchmark', meta:'12 Seiten · eben erstellt · liegt in deiner Akte'}},
+        {t: 'Meine Empfehlung: das Preismodell zuerst. Rund 38.000 € im Jahr, ohne einen einzigen neuen Kunden. Willst du das mit einem Menschen durchgehen?'},
+        {chips: ['Buch mir einen Menschen', 'Wie läuft mein Geschäft?']}
+      ]},
+    { probe: /(mensch|termin|berater|buch|anruf|sprechen)/i,
+      frage: 'Buch mir einen Menschen.',
+      schritte: [
+        {t: 'Gern. Für Preis und Marge ist Dr. Anna Vogelsang die Richtige. Sie hat diese Woche drei Fenster, such dir eins aus:'},
+        {kalender: ['Donnerstag, 10:00', 'Donnerstag, 16:00', 'Freitag, 9:00']}
+      ]}
+  ];
+  var SONST = {
+    schritte: [
+      {t: 'Verstanden. Das rechne ich in Ruhe durch und lege dir die Antwort in die Akte, mit Rechenweg. Du siehst hier, sobald sie liegt.'},
+      {dokument: {name:'In Arbeit: deine Frage', meta:'Antwort entsteht · landet in deiner Akte'}},
+      {chips: ['Wie läuft mein Geschäft?', 'Warum schrumpft meine Marge?', 'Buch mir einen Menschen']}
+    ]};
+
+  function waehleSlot(karte, knopf, slot){
+    if (beschaeftigt) return;
+    karte.querySelectorAll('.slots button').forEach(function(b){ b.disabled = true; });
+    knopf.classList.add('gewaehlt');
+    var kapitel = aktuellesKapitel;
+    (async function(){
+      await warte(350);
+      await stroeme(kapitel, 'Steht: ' + slot + ' mit Dr. Anna Vogelsang. Sie bekommt vorab, was wir hier besprochen haben.');
+      var k = baueBestaetigung('Termin bestätigt · ' + slot);
+      kapitel.querySelector('.lauf').appendChild(k);
+      runter();
+      await materialisiere(k);
+      zeigeChips(kapitel, ['Wie läuft mein Geschäft?', 'Warum schrumpft meine Marge?']);
+    })();
+  }
+
+  function frageStellen(text){
+    if (beschaeftigt || !text.trim()) return;
+    var passendes = null;
+    for (var i = 0; i < SKRIPTE.length; i++) {
+      if (SKRIPTE[i].probe.test(text)) { passendes = SKRIPTE[i]; break; }
+    }
+    var kapitel = neuesKapitel(passendes ? passendes.frage : text.trim());
+    spiele(kapitel, (passendes || SONST).schritte);
+    document.getElementById('frage').value = '';
+  }
+
+  document.getElementById('senden').addEventListener('click', function(){
+    frageStellen(document.getElementById('frage').value);
+  });
+  document.getElementById('frage').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') frageStellen(this.value);
+  });
+
+  /* ---------- Auftakt ---------- */
+  (function(){
+    var gruss = document.getElementById('gruss');
+    var ziel = 'Womit ringst du gerade?';
+    var el = document.getElementById('gruss-text');
+    var startChips = ['Wie läuft mein Geschäft?', 'Warum schrumpft meine Marge?', 'Buch mir einen Menschen'];
+    function chipsRein(){
+      var lage = document.getElementById('start-chips');
+      startChips.forEach(function(c, i){
+        var b = document.createElement('button');
+        b.type = 'button'; b.textContent = c;
+        b.addEventListener('click', function(){ frageStellen(c); });
+        lage.appendChild(b);
+        setTimeout(function(){ b.classList.add('da'); }, reduziert ? 0 : 140 * i + 100);
+      });
+    }
+    if (reduziert) { el.textContent = ziel; gruss.classList.add('da'); chipsRein(); return; }
+    setTimeout(function(){ gruss.classList.add('da'); }, 250);
+    var i = 0;
+    setTimeout(function tippe(){
+      el.textContent = ziel.slice(0, ++i);
+      if (i < ziel.length) setTimeout(tippe, 42 + Math.random() * 40);
+      else { chipsRein(); document.getElementById('frage').focus(); }
+    }, 1150);
+  })();
+})();
+</script>
+</body>
+</html>
