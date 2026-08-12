@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V7 (V6 + Denkbühne: neun pulsierende Szenen im Wechsel) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V8 (V7 + Weißmarke: Marke der Beratung über vier Regler, Wechsler in der Kopfzeile) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -44,11 +44,13 @@ nav{
   position:fixed;top:0;left:0;right:0;z-index:10;height:60px;
   display:flex;align-items:center;justify-content:space-between;
   padding:0 max(24px,calc((100vw - 760px)/2));
-  background:linear-gradient(var(--papier) 55%, rgba(250,250,247,0));
+  background:linear-gradient(var(--papier) 55%, color-mix(in srgb, var(--papier) 1%, transparent));
   pointer-events:none;
 }
 nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em}
 nav .wortmarke small{display:block;font-size:10px;font-weight:500;color:var(--grau)}
+nav .wortmarke small[role="button"]{pointer-events:auto;cursor:pointer}
+nav .wortmarke small[role="button"]:hover{color:var(--blau)}
 nav .hinweis{font-size:12px;color:var(--grau)}
 #akte-griff{
   pointer-events:auto;cursor:pointer;
@@ -67,7 +69,7 @@ nav .hinweis{font-size:12px;color:var(--grau)}
 /* Das Regal */
 #regal{
   position:fixed;inset:0;z-index:20;overflow-y:auto;
-  background:rgba(250,250,247,.92);
+  background:color-mix(in srgb, var(--papier) 92%, transparent);
   backdrop-filter:blur(18px) saturate(160%);
   -webkit-backdrop-filter:blur(18px) saturate(160%);
   opacity:0;pointer-events:none;transition:opacity .35s ease;
@@ -220,8 +222,8 @@ body.hirn #hirn-lampe{display:inline-flex}
 .karte .blaupause-gitter{
   position:absolute;inset:0;border-radius:var(--radius);
   background:
-    linear-gradient(rgba(43,95,227,.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(43,95,227,.07) 1px, transparent 1px);
+    linear-gradient(color-mix(in srgb, var(--blau) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--blau) 7%, transparent) 1px, transparent 1px);
   background-size:14px 14px;
   opacity:1;transition:opacity .6s ease;pointer-events:none;
 }
@@ -247,7 +249,7 @@ body.hirn #hirn-lampe{display:inline-flex}
   display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;
   font-size:12px;font-weight:700;
 }
-.pill-blau{background:rgba(43,95,227,.1);color:var(--blau)}
+.pill-blau{background:color-mix(in srgb, var(--blau) 10%, transparent);color:var(--blau)}
 
 /* Hero-Zahl */
 .karte.gross{padding:28px 28px 24px}
@@ -263,6 +265,8 @@ body.hirn #hirn-lampe{display:inline-flex}
 /* Diagramme */
 .karte svg.dia{width:100%;height:auto;display:block}
 .karte svg.dia text{font-family:'Manrope',sans-serif;fill:var(--grau)}
+.karte svg.dia text.tinte-t{fill:var(--tinte)}
+.karte svg.dia circle.punkt{fill:var(--blau)}
 .karte svg.dia .linie{fill:none;stroke:var(--blau);stroke-width:2.5;stroke-dasharray:620;stroke-dashoffset:620}
 .karte.belichtet svg.dia .linie{transition:stroke-dashoffset 1.3s .2s var(--feder);stroke-dashoffset:0}
 .karte svg.dia .flaeche{fill:url(#kv);opacity:0}
@@ -308,7 +312,7 @@ body.hirn #hirn-lampe{display:inline-flex}
 .dokument .blatt::before{
   content:'';position:absolute;right:-1px;top:-1px;
   border:9px solid transparent;
-  border-left-color:rgba(43,95,227,.25);border-bottom-color:rgba(43,95,227,.25);
+  border-left-color:color-mix(in srgb, var(--blau) 25%, transparent);border-bottom-color:color-mix(in srgb, var(--blau) 25%, transparent);
   border-radius:0 0 0 4px;
 }
 .dokument .blatt::after{
@@ -333,7 +337,7 @@ body.hirn #hirn-lampe{display:inline-flex}
 .kalender .kreis{
   width:40px;height:40px;border-radius:999px;flex-shrink:0;
   display:inline-flex;align-items:center;justify-content:center;
-  background:rgba(43,95,227,.1);color:var(--blau);font-weight:800;font-size:14px;
+  background:color-mix(in srgb, var(--blau) 10%, transparent);color:var(--blau);font-weight:800;font-size:14px;
 }
 
 /* Bestätigung */
@@ -358,7 +362,7 @@ body.hirn #hirn-lampe{display:inline-flex}
 #eingabe{
   position:fixed;left:0;right:0;bottom:0;z-index:9;
   padding:16px max(24px,calc((100vw - 760px)/2)) 28px;
-  background:linear-gradient(rgba(250,250,247,0), var(--papier) 40%);
+  background:linear-gradient(color-mix(in srgb, var(--papier) 1%, transparent), var(--papier) 40%);
 }
 #eingabe .zeile{display:flex;gap:10px}
 #frage{
@@ -410,7 +414,7 @@ body.hirn #hirn-lampe{display:inline-flex}
 <body>
 
 <nav>
-  <div class="wortmarke">Nordholm &amp; Partner<small>Beispielmarke deiner Beratung</small></div>
+  <div class="wortmarke"><span id="marke-name">Nordholm &amp; Partner</span><small id="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Beispielmarke deiner Beratung · wechseln</small></div>
   <span id="hirn-lampe">Hirn an</span>
   <button id="akte-griff" type="button" data-zahl="0">Deine Akte <span class="zahl">0</span></button>
 </nav>
@@ -764,7 +768,7 @@ body.hirn #hirn-lampe{display:inline-flex}
     return karteAus(
       '<svg class="dia" viewBox="0 0 600 190" role="img" aria-label="' + d.alt + '">' +
       '<defs><linearGradient id="kv" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0" stop-color="#2b5fe3" stop-opacity=".45"/><stop offset="1" stop-color="#2b5fe3" stop-opacity="0"/>' +
+      '<stop offset="0" style="stop-color:var(--blau)" stop-opacity=".45"/><stop offset="1" style="stop-color:var(--blau)" stop-opacity="0"/>' +
       '</linearGradient></defs>' +
       '<path class="flaeche" d="M20,140 L120,124 L220,128 L320,96 L420,78 L580,40 L580,168 L20,168 Z"/>' +
       '<path class="linie" d="M20,140 L120,124 L220,128 L320,96 L420,78 L580,40"/>' +
@@ -792,7 +796,7 @@ body.hirn #hirn-lampe{display:inline-flex}
       var top, hoehe, wertText, farbe;
       if (arten[i] === 'fest') {
         var v = (i === 0) ? d.start.wert : werte[i];
-        top = yVon(v); hoehe = yVon(min) - top; farbe = 'rgba(43,95,227,.85)';
+        top = yVon(v); hoehe = yVon(min) - top; farbe = 'color-mix(in srgb, var(--blau) 85%, transparent)';
         wertText = v.toFixed(1).replace('.', ',') + ' %';
       } else {
         var von = laufend[i-1], nach = laufend[i];
@@ -803,8 +807,8 @@ body.hirn #hirn-lampe{display:inline-flex}
       if (vorher !== null) {
         svgTeile.push('<line class="verbinder" x1="' + (vorher.x + bw) + '" y1="' + vorher.y + '" x2="' + x + '" y2="' + vorher.y + '"/>');
       }
-      svgTeile.push('<rect class="balken" x="' + x + '" y="' + top + '" width="' + bw + '" height="' + Math.max(hoehe, 3) + '" rx="4" fill="' + farbe + '" style="transition-delay:' + (0.15 * i) + 's"/>');
-      svgTeile.push('<text x="' + (x + bw/2) + '" y="' + (top - 8) + '" font-size="12" font-weight="700" fill="#10131a" text-anchor="middle">' + wertText + '</text>');
+      svgTeile.push('<rect class="balken" x="' + x + '" y="' + top + '" width="' + bw + '" height="' + Math.max(hoehe, 3) + '" rx="4" style="fill:' + farbe + ';transition-delay:' + (0.15 * i) + 's"/>');
+      svgTeile.push('<text class="tinte-t" x="' + (x + bw/2) + '" y="' + (top - 8) + '" font-size="12" font-weight="700" text-anchor="middle">' + wertText + '</text>');
       svgTeile.push('<text x="' + (x + bw/2) + '" y="' + (H - 14) + '" font-size="11" text-anchor="middle">' + namen[i] + '</text>');
       vorher = {x: x, y: arten[i] === 'fest' ? top : yVon(laufend[i])};
     }
@@ -825,8 +829,8 @@ body.hirn #hirn-lampe{display:inline-flex}
     teile.push('<path class="linie-fp" d="M70,40 L530,40"/>');
     d.schritte.forEach(function(s, i){
       var x = 70 + 460 * (n === 1 ? 0.5 : i / (n - 1));
-      teile.push('<circle class="punkt" cx="' + x + '" cy="40" r="7" fill="#2b5fe3" style="transition-delay:' + (0.3 + 0.22 * i) + 's"/>');
-      teile.push('<text x="' + x + '" y="70" font-size="12" font-weight="700" fill="#10131a" text-anchor="middle">' + s.wann + '</text>');
+      teile.push('<circle class="punkt" cx="' + x + '" cy="40" r="7" style="transition-delay:' + (0.3 + 0.22 * i) + 's"/>');
+      teile.push('<text class="tinte-t" x="' + x + '" y="70" font-size="12" font-weight="700" text-anchor="middle">' + s.wann + '</text>');
       teile.push('<text x="' + x + '" y="88" font-size="11" text-anchor="middle">' + s.was + '</text>');
     });
     return karteAus('<svg class="dia" viewBox="0 0 600 100" role="img" aria-label="' + d.alt + '">' + teile.join('') + '</svg>', '', d.sk);
@@ -838,8 +842,8 @@ body.hirn #hirn-lampe{display:inline-flex}
       '<svg class="dia" viewBox="0 0 340 130" role="img" aria-label="' + d.alt + '">' +
       '<circle class="ring" cx="65" cy="65" r="' + r + '"/>' +
       '<circle class="bogen" cx="65" cy="65" r="' + r + '" transform="rotate(-90 65 65)" stroke-dasharray="' + anteil + ' ' + umfang + '" style="stroke-dashoffset:' + anteil + '"/>' +
-      '<text class="donut-zahl" x="65" y="72" font-size="22" font-weight="800" fill="#10131a" text-anchor="middle">0 %</text>' +
-      '<text x="125" y="60" font-size="13" font-weight="700" fill="#10131a">' + d.label + '</text>' +
+      '<text class="donut-zahl tinte-t" x="65" y="72" font-size="22" font-weight="800" text-anchor="middle">0 %</text>' +
+      '<text class="tinte-t" x="125" y="60" font-size="13" font-weight="700">' + d.label + '</text>' +
       '<text x="125" y="78" font-size="12">' + (d.unter || '') + '</text>' +
       '</svg>', '', d.sk);
   }
@@ -1714,6 +1718,40 @@ body.hirn #hirn-lampe{display:inline-flex}
     zu.addEventListener('click', schliesseRegal);
     window.addEventListener('keydown', function(e){
       if (e.key === 'Escape' && regal.classList.contains('offen')) schliesseRegal();
+    });
+  })();
+
+  /* ---------- Weißmarke: die Beratung bringt ihre eigene Marke mit ----------
+     Vier Regler tragen die ganze Oberfläche: Papier, Tinte, Akzent, Stift.
+     Im Produkt kommen diese Werte aus dem Mandanten-Profil der Beratung. */
+  (function(){
+    var MARKEN = [
+      {name:'Nordholm & Partner',  blau:'#2b5fe3', stift:'#1d46c9', tinte:'#10131a', papier:'#fafaf7'},
+      {name:'Waldmann Consulting', blau:'#0e7a5a', stift:'#0a5f46', tinte:'#101613', papier:'#f8faf7'},
+      {name:'Steinbach & Cie.',    blau:'#9c3948', stift:'#7c2d3a', tinte:'#171114', papier:'#fbf9f7'}
+    ];
+    var idx = 0;
+    try { idx = parseInt(sessionStorage.getItem('marke') || '0', 10) % MARKEN.length || 0; } catch (e) {}
+    function trage(m){
+      var s = document.documentElement.style;
+      s.setProperty('--blau', m.blau);
+      s.setProperty('--stift', m.stift);
+      s.setProperty('--tinte', m.tinte);
+      s.setProperty('--papier', m.papier);
+      document.getElementById('marke-name').textContent = m.name;
+      var icon = document.querySelector('link[rel="icon"]');
+      if (icon) icon.href = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='" + encodeURIComponent(m.blau) + "'/%3E%3C/svg%3E";
+    }
+    function weiter(){
+      idx = (idx + 1) % MARKEN.length;
+      try { sessionStorage.setItem('marke', String(idx)); } catch (e) {}
+      trage(MARKEN[idx]);
+    }
+    if (idx) trage(MARKEN[idx]);
+    var knopf = document.getElementById('marke-wechsel');
+    knopf.addEventListener('click', weiter);
+    knopf.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); weiter(); }
     });
   })();
 
