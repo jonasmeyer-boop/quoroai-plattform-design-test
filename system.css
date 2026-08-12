@@ -3,7 +3,7 @@
    Lauftext General Sans, Glas als Material für Chrom, Zustände als Füllstand
    im Glas (Jonas, 2026-08-12). Gilt für quoroAI-gebrandete Flächen
    (Beratungsseite); Kundenflächen bleiben White-Label über marke.js.
-   Marker: SYSTEM-CSS-V5 */
+   Marker: SYSTEM-CSS-V6 */
 
 @font-face{font-family:'Clash Display';src:url('schriften/clash-display.woff2') format('woff2');font-weight:200 700;font-display:swap}
 @font-face{font-family:'General Sans';src:url('schriften/general-sans.woff2') format('woff2');font-weight:200 700;font-display:swap}
@@ -57,21 +57,64 @@ body.quoro{
 .quoro a{color:var(--lila-600)}
 .quoro :focus-visible{outline:3px solid var(--lila-400);outline-offset:2px;border-radius:4px}
 
-/* ---------- Knöpfe ---------- */
+/* ---------- Knöpfe: der Glaskörper (Jonas, 2026-08-12) ----------
+   Knöpfe aus demselben Glas wie die Füllstände. Der Primäre ist mit Lila
+   vollgegossen und wirft Licht, die anderen sind klare Scheiben. Beim
+   Überfahren läuft ein Lichtstreif übers Glas. */
 .knopf{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
   min-height:46px;padding:0 24px;border-radius:var(--radius-kapsel);
   font:inherit;font-size:16px;font-weight:600;cursor:pointer;border:0;
-  transition:transform .12s var(--kurve),background .18s var(--kurve),box-shadow .18s var(--kurve);
+  position:relative;overflow:hidden;
+  transition:transform .12s var(--kurve),background .2s var(--kurve),box-shadow .2s var(--kurve);
 }
 .knopf:active{transform:scale(.97)}
-.knopf.primaer{background:var(--lila-600);color:#fff;box-shadow:0 8px 20px rgba(111,99,232,.28)}
-.knopf.primaer:hover{background:var(--lila-700)}
-.knopf.sekundaer{background:var(--lila-100);color:var(--lila-800)}
-.knopf.sekundaer:hover{background:var(--lila-200)}
-.knopf.leise{background:transparent;color:var(--tinte);box-shadow:inset 0 0 0 1px var(--nebel-300)}
-.knopf.leise:hover{background:var(--nebel-100)}
-.knopf.gefahr{background:var(--rot-fond);color:var(--rot)}
+.knopf::after{ /* der Lichtlauf beim Überfahren */
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(105deg, transparent 30%, rgba(255,255,255,.55) 50%, transparent 70%) no-repeat -120px 0 / 100px 100%;
+}
+.knopf.primaer{
+  color:#fff;
+  background:linear-gradient(180deg, var(--lila-500), var(--lila-700));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55), inset 0 -2px 5px rgba(24,21,47,.22), 0 10px 24px rgba(111,99,232,.38);
+}
+.knopf.sekundaer{
+  color:var(--lila-800);
+  background:rgba(255,255,255,.5);
+  backdrop-filter:blur(16px) saturate(170%);-webkit-backdrop-filter:blur(16px) saturate(170%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), inset 0 0 0 1px rgba(255,255,255,.6), 0 6px 16px rgba(59,52,134,.14);
+}
+.knopf.leise{
+  color:var(--tinte);
+  background:rgba(255,255,255,.28);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65), inset 0 0 0 1px var(--nebel-200), 0 3px 10px rgba(59,52,134,.08);
+}
+.knopf.gefahr{
+  color:var(--rot);
+  background:rgba(255,255,255,.4);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), inset 0 0 0 1px rgba(192,50,70,.28), 0 4px 12px rgba(192,50,70,.12);
+}
+@media (hover:hover){
+  .knopf:hover::after{animation:knopf-glanz 1.6s ease-in-out infinite}
+  .knopf.primaer:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.55), inset 0 -2px 5px rgba(24,21,47,.22), 0 14px 32px rgba(111,99,232,.5)}
+  .knopf.sekundaer:hover{background:rgba(255,255,255,.72)}
+  .knopf.leise:hover{background:rgba(255,255,255,.55)}
+  .knopf.gefahr:hover{background:var(--rot-fond)}
+}
+@keyframes knopf-glanz{0%{background-position:-120px 0}60%,100%{background-position:calc(100% + 120px) 0}}
+@supports not (backdrop-filter: blur(1px)){
+  .knopf.sekundaer{background:rgba(255,255,255,.92)}
+  .knopf.leise,.knopf.gefahr{background:rgba(255,255,255,.9)}
+}
+@media (prefers-reduced-transparency: reduce){
+  .knopf.sekundaer,.knopf.leise{background:#ffffff;backdrop-filter:none;-webkit-backdrop-filter:none}
+  .knopf.gefahr{background:#ffffff;backdrop-filter:none;-webkit-backdrop-filter:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .knopf:hover::after{animation:none}
+}
 
 /* ---------- Zustand: der Füllstand im Glas (Jonas, 2026-08-12) ----------
    Die einzige Zustands-Form: eine Glaskapsel, gefüllt mit Farbe. Fast leer
@@ -183,23 +226,13 @@ body.quoro{
   border:1px solid rgba(255,255,255,.5);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 16px 40px rgba(59,52,134,.18);
 }
-.knopf.glas{
-  background:rgba(255,255,255,.5);
-  backdrop-filter:blur(20px) saturate(180%);
-  -webkit-backdrop-filter:blur(20px) saturate(180%);
-  border:1px solid rgba(255,255,255,.6);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 8px 24px rgba(59,52,134,.14);
-  color:var(--tinte);
-}
-.knopf.glas:hover{background:rgba(255,255,255,.68)}
-
 /* Ohne Verlaufsfilter oder auf Wunsch: solide Ersatzflächen */
 @supports not (backdrop-filter: blur(1px)){
-  .glas,.glas-dick,.glas-duenn,.knopf.glas{background:rgba(255,255,255,.92)}
+  .glas,.glas-dick,.glas-duenn{background:rgba(255,255,255,.92)}
   .glas-lila{background:var(--lila-100)}
 }
 @media (prefers-reduced-transparency: reduce){
-  .glas,.glas-dick,.glas-duenn,.knopf.glas{background:rgba(255,255,255,.96);backdrop-filter:none;-webkit-backdrop-filter:none}
+  .glas,.glas-dick,.glas-duenn{background:rgba(255,255,255,.96);backdrop-filter:none;-webkit-backdrop-filter:none}
   .glas-lila{background:var(--lila-100);backdrop-filter:none;-webkit-backdrop-filter:none}
 }
 
