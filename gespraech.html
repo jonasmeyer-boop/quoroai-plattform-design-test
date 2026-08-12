@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V17 (V16 + Freigabe-Schalter: Nur für dich / Deine Beratung liest mit) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V18 (V17 + Grenz-Momente als ruhige Karten, KI-Pflichthinweis im Fuß) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -552,6 +552,20 @@ body.blatt-offen{overflow:hidden}
 #senden svg path{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 #senden:hover{background:var(--blau)}
 #senden:active{scale:.9}
+#ki-hinweis{
+  margin:9px 6px 0;text-align:center;
+  font-size:11px;color:var(--grau);opacity:.75;
+}
+
+/* Grenz-Momente: ehrlich, ruhig, mit Weg nach vorn */
+.karte.grenzfall .grenze-kopf{display:flex;align-items:center;gap:9px}
+.karte.grenzfall .grenze-punkt{width:8px;height:8px;border-radius:999px;background:#a06008;flex-shrink:0}
+.karte.grenzfall h3{font-size:16px;font-weight:800;letter-spacing:-.01em}
+.karte.grenzfall .grenze-text{font-size:14px;color:var(--grau);margin-top:8px;max-width:56ch}
+.karte.grenzfall .grenze-wann{
+  font-size:13px;font-weight:800;color:#a06008;margin-top:12px;
+  font-variant-numeric:tabular-nums;
+}
 
 @media (prefers-reduced-motion: reduce){
   #gruss .vorgruss{transition:none;opacity:.92;translate:none}
@@ -647,6 +661,7 @@ body.blatt-offen{overflow:hidden}
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5 V6 M6.5 11.5 L12 5.5 L17.5 11.5"/></svg>
     </button>
   </div>
+  <p id="ki-hinweis">Du sprichst mit dem KI-Berater von <span id="ki-hinweis-name">Nordholm &amp; Partner</span>. Er ersetzt keine Rechts- oder Steuerberatung.</p>
   <input type="file" id="datei-wahl" multiple hidden>
 </div>
 
@@ -1254,6 +1269,17 @@ body.blatt-offen{overflow:hidden}
     return k;
   }
 
+  function baueGrenze(d){
+    var k = karteAus(
+      '<div class="grenze-kopf"><span class="grenze-punkt"></span><h3></h3></div>' +
+      '<p class="grenze-text"></p>' + (d.wann ? '<div class="grenze-wann"></div>' : ''),
+      'grenzfall', d.sk);
+    k.querySelector('h3').textContent = d.titel;
+    k.querySelector('.grenze-text').textContent = d.text;
+    if (d.wann) k.querySelector('.grenze-wann').textContent = d.wann;
+    return k;
+  }
+
   function baueBestaetigung(text, sk){
     return karteAus(
       '<div class="bestaetigung"><svg viewBox="0 0 44 44" aria-hidden="true">' +
@@ -1807,6 +1833,7 @@ body.blatt-offen{overflow:hidden}
         continue;
       }
       var k = null, nachher = null;
+      if (s.grenze) k = baueGrenze(s.grenze);
       if (s.hero) { k = baueHero(s.hero); nachher = function(kk){ starteHero(kk); }; }
       if (s.kurve) k = baueKurve(s.kurve);
       if (s.wasserfall) k = baueWasserfall(s.wasserfall);
@@ -1922,6 +1949,36 @@ body.blatt-offen{overflow:hidden}
       schritte: [
         {t: 'Gern. Für Preis und Marge ist Dr. Anna Vogelsang die Richtige. Sie hat diese Woche drei Fenster, such dir eins aus:'},
         {kalender: ['Donnerstag, 10:00', 'Donnerstag, 16:00', 'Freitag, 9:00']}
+      ]},
+    /* Grenz-Momente zum Vorführen: 'kontingent', 'ausgelastet', 'ausfall' tippen */
+    { probe: /kontingent/i,
+      frage: 'Und wenn mein Kontingent aufgebraucht ist?',
+      schritte: [
+        {grenze: {
+          titel: 'Dein Fragen-Kontingent ist für diesen Monat aufgebraucht',
+          text: 'Deine Beratung weiß Bescheid. Alles Besprochene bleibt dir erhalten — die Akte, die Dokumente, jeder Rechenweg.',
+          wann: 'Ab dem 1. September kannst du wieder fragen'
+        }},
+        {chips: ['Buch mir einen Menschen']}
+      ]},
+    { probe: /(ausgelastet|überlastet|voll)/i,
+      frage: 'Was, wenn gerade alle fragen?',
+      schritte: [
+        {grenze: {
+          titel: 'Gerade fragen sehr viele gleichzeitig',
+          text: 'Dein Berater arbeitet der Reihe nach. Deine Frage ist nicht verloren — stell sie in ein paar Minuten noch einmal.',
+          wann: 'Ab 15:20 Uhr geht es für dich weiter'
+        }}
+      ]},
+    { probe: /(ausfall|offline|nicht erreichbar)/i,
+      frage: 'Und wenn der Berater ausfällt?',
+      schritte: [
+        {grenze: {
+          titel: 'Der Berater ist gerade nicht erreichbar',
+          text: 'Deine Frage ist gespeichert und geht nicht verloren. Versuch es in einem Moment noch einmal — oder lass dich anrufen.',
+          wann: 'Zuletzt geprüft: gerade eben'
+        }},
+        {chips: ['Buch mir einen Menschen']}
       ]}
   ];
   var SONST = {
@@ -2328,6 +2385,7 @@ body.blatt-offen{overflow:hidden}
       s.setProperty('--tinte', m.tinte);
       s.setProperty('--papier', m.papier);
       document.getElementById('marke-name').textContent = m.name;
+      document.getElementById('ki-hinweis-name').textContent = m.name;
       var logo = document.getElementById('marke-logo');
       var name = document.getElementById('marke-name');
       if (m.logo) {
