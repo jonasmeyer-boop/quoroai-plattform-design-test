@@ -4,8 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dein Berater</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V5 (V4 + Schreibhand-Abspielpuffer, Hero-Formate, Cache no-store) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V6 (V5 + gleitender Schreibfluss, Kamera-Folge, Denkspur) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -152,8 +153,15 @@ body.regal-offen{overflow:hidden}
 .kapitel p.antwort{
   margin-top:20px;font-size:17px;color:var(--tinte);max-width:60ch;
 }
-.kapitel p.antwort .wort{opacity:0;transition:opacity .18s ease}
-.kapitel p.antwort .wort.da{opacity:1}
+.kapitel p.antwort .wort{opacity:0;filter:blur(4px);transition:opacity .32s ease,filter .32s ease}
+.kapitel p.antwort .wort.da{opacity:1;filter:blur(0)}
+.kapitel p.antwort .wort.fest{filter:none;transition:none}
+.kapitel p.antwort.aktiv::after{
+  content:'';display:inline-block;width:7px;height:7px;border-radius:999px;
+  background:var(--blau);margin-left:6px;
+  animation:atmen 1.15s ease-in-out infinite;
+}
+@keyframes atmen{0%,100%{opacity:.25;transform:scale(.75)}50%{opacity:.95;transform:scale(1)}}
 .kapitel p.antwort.fehl{color:#a06008;font-size:14px}
 #hirn-lampe{
   display:none;align-items:center;gap:6px;
@@ -161,6 +169,29 @@ body.regal-offen{overflow:hidden}
 }
 #hirn-lampe::before{content:'';width:7px;height:7px;border-radius:999px;background:var(--blau)}
 body.hirn #hirn-lampe{display:inline-flex}
+
+/* Denkspur: der Stift denkt sichtbar nach */
+.denken{
+  display:flex;align-items:center;gap:16px;margin-top:22px;height:48px;
+  opacity:0;translate:0 8px;
+  transition:opacity .32s ease,translate .32s var(--feder),height .32s var(--feder),margin-top .32s var(--feder);
+}
+.denken.da{opacity:1;translate:none}
+.denken.weg{opacity:0;translate:0 -8px;height:0;margin-top:0;overflow:hidden}
+.denken svg{width:150px;height:48px;flex-shrink:0;overflow:visible}
+.denken svg path{
+  fill:none;stroke:var(--stift);stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round;opacity:.75;
+}
+.denk-text{
+  font-size:14px;font-weight:600;
+  background:linear-gradient(90deg,var(--grau) 35%,var(--blau) 50%,var(--grau) 65%);
+  background-size:220% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:denk-schimmer 2.4s linear infinite;
+  transition:opacity .26s ease;
+}
+@keyframes denk-schimmer{from{background-position:120% 0}to{background-position:-120% 0}}
 
 /* Karten & Materialisierung */
 .reihe{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
@@ -347,7 +378,11 @@ body.hirn #hirn-lampe{display:inline-flex}
 @media (prefers-reduced-motion: reduce){
   #gruss .strich{transition:none}
   #gruss h1 .caret{animation:none;opacity:0}
-  .kapitel p.antwort .wort{transition:none}
+  .kapitel p.antwort .wort{transition:none;filter:none}
+  .kapitel p.antwort.aktiv::after{display:none}
+  .denken{transition:none}
+  .denken svg{display:none}
+  .denk-text{animation:none;background:none;color:var(--grau)}
   .karte .inhalt-k{transition:none;opacity:1;filter:none;transform:none}
   .karte .blaupause-gitter{transition:none;opacity:0}
   .karte svg.umriss{display:none}
@@ -409,12 +444,63 @@ body.hirn #hirn-lampe{display:inline-flex}
   var beschaeftigt = false;
 
   function warte(ms){ return new Promise(function(f){ setTimeout(f, reduziert ? 0 : ms); }); }
+
+  /* Kamera-Folge: gleitet beim Schreiben ruhig mit, statt zu springen.
+     Scrollt der Leser nach oben, lässt sie los; unten angekommen greift sie wieder. */
+  var kamera = (function(){
+    var an = false, folgt = true, letzte = 0, beruehrY = null;
+    function nahUnten(){ return window.innerHeight + window.scrollY >= document.body.scrollHeight - 160; }
+    window.addEventListener('wheel', function(e){ if (an && e.deltaY < 0) folgt = false; }, {passive:true});
+    window.addEventListener('touchstart', function(e){ beruehrY = e.touches[0].clientY; }, {passive:true});
+    window.addEventListener('touchmove', function(e){
+      if (an && beruehrY !== null && e.touches[0].clientY > beruehrY + 8) folgt = false;
+    }, {passive:true});
+    window.addEventListener('scroll', function(){ if (an && !folgt && nahUnten()) folgt = true; }, {passive:true});
+    function tick(t){
+      if (!an) return;
+      var dt = Math.min((t - letzte) / 1000, .05); letzte = t;
+      if (folgt) {
+        var ziel = document.body.scrollHeight - window.innerHeight;
+        var d = ziel - window.scrollY;
+        if (d > 0.5) window.scrollTo(0, window.scrollY + d * Math.min(1, dt * 4.5));
+      }
+      requestAnimationFrame(tick);
+    }
+    return {
+      laeuft: function(){ return an; },
+      start: function(){
+        if (an || reduziert) return;
+        an = true; folgt = true; letzte = performance.now();
+        document.documentElement.style.scrollBehavior = 'auto';
+        requestAnimationFrame(tick);
+      },
+      halt: function(){
+        an = false;
+        document.documentElement.style.scrollBehavior = '';
+      }
+    };
+  })();
+
   function runter(){
-    if (reduziert) return;
+    if (reduziert || kamera.laeuft()) return;
     window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
   }
   function euro(n){ return n.toLocaleString('de-DE') + ' €'; }
   function zufall(a, b){ return a + Math.random() * (b - a); }
+  /* Schreibkosten eines Worts in Takt-Einheiten: Satzzeichen kaufen sich eine Atempause */
+  function wortKosten(text){
+    if (/[.!?…]["“”)]*\s*$/.test(text)) return 4.2;
+    if (/[:;,]["“”)]*\s*$/.test(text)) return 2.1;
+    return 1;
+  }
+  function glatt(punkte){
+    var d = 'M' + punkte[0][0].toFixed(1) + ' ' + punkte[0][1].toFixed(1);
+    for (var i = 1; i < punkte.length - 1; i++) {
+      var mx = (punkte[i][0] + punkte[i+1][0]) / 2, my = (punkte[i][1] + punkte[i+1][1]) / 2;
+      d += ' Q' + punkte[i][0].toFixed(1) + ' ' + punkte[i][1].toFixed(1) + ' ' + mx.toFixed(1) + ' ' + my.toFixed(1);
+    }
+    return d;
+  }
 
   /* ---------- Stift-Ebene: die KI zeichnet ---------- */
   var NS = 'http://www.w3.org/2000/svg';
@@ -433,14 +519,6 @@ body.hirn #hirn-lampe{display:inline-flex}
     function ref(el, kapitel){
       var a = kapitel.getBoundingClientRect(), r = el.getBoundingClientRect();
       return {x: r.left - a.left, y: r.top - a.top, w: r.width, h: r.height};
-    }
-    function glatt(punkte){
-      var d = 'M' + punkte[0][0].toFixed(1) + ' ' + punkte[0][1].toFixed(1);
-      for (var i = 1; i < punkte.length - 1; i++) {
-        var mx = (punkte[i][0] + punkte[i+1][0]) / 2, my = (punkte[i][1] + punkte[i+1][1]) / 2;
-        d += ' Q' + punkte[i][0].toFixed(1) + ' ' + punkte[i][1].toFixed(1) + ' ' + mx.toFixed(1) + ' ' + my.toFixed(1);
-      }
-      return d;
     }
     function strich(kapitel, d, dauer, breite){
       var svg = lage(kapitel);
@@ -589,10 +667,11 @@ body.hirn #hirn-lampe{display:inline-flex}
           plan.push({wort: stueck, gruppe: gruppe});
         });
       });
+      /* Gleitender Takt: Tempo in Wörtern je Sekunde, stufenlos angefahren.
+         Satzzeichen kosten mehr Takt-Einheiten und atmen so von selbst. */
+      p.classList.add('aktiv');
       var i = 0, offeneGruppe = null, huelle = null;
-      (function naechstes(){
-        if (i >= plan.length) { fertig(); return; }
-        var eintrag = plan[i];
+      function zeige(eintrag){
         if (eintrag.gruppe !== offeneGruppe) {
           offeneGruppe = eintrag.gruppe;
           if (offeneGruppe) {
@@ -609,11 +688,23 @@ body.hirn #hirn-lampe{display:inline-flex}
         s.textContent = eintrag.wort;
         (huelle || p).appendChild(s);
         requestAnimationFrame(function(){ s.classList.add('da'); });
-        var pause = /[.!?:]\s*$/.test(eintrag.wort) ? 190 : 26;
-        i++;
-        if (i % 9 === 0) runter();
-        setTimeout(naechstes, pause);
-      })();
+        s.addEventListener('transitionend', function(){ s.classList.add('fest'); }, {once:true});
+      }
+      var rate = 6, guthaben = 0, letzte = performance.now();
+      function tick(t){
+        var dt = Math.min((t - letzte) / 1000, .08); letzte = t;
+        rate += (19 - rate) * Math.min(1, dt / 0.45);
+        guthaben += rate * dt;
+        while (i < plan.length) {
+          var k = wortKosten(plan[i].wort);
+          if (guthaben < k) break;
+          guthaben -= k;
+          zeige(plan[i]); i++;
+        }
+        if (i >= plan.length) { p.classList.remove('aktiv'); fertig(); return; }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
     });
   }
 
@@ -796,6 +887,136 @@ body.hirn #hirn-lampe{display:inline-flex}
       '<div style="font-weight:700;font-size:15px">' + text + '</div></div>', '', sk);
   }
 
+  /* ---------- Denkspur: der Stift denkt sichtbar nach ---------- */
+  function zeigeDenken(kapitel){
+    var lauf = kapitel.querySelector('.lauf');
+    var box = document.createElement('div');
+    box.className = 'denken';
+    if (reduziert) {
+      var still = document.createElement('span');
+      still.className = 'denk-text';
+      still.textContent = 'Denkt nach …';
+      box.appendChild(still);
+      box.classList.add('da');
+      lauf.appendChild(box);
+      return { weg: function(){ box.remove(); return Promise.resolve(); } };
+    }
+    var svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 150 48');
+    svg.setAttribute('aria-hidden', 'true');
+    var wort = document.createElement('span');
+    wort.className = 'denk-text';
+    box.appendChild(svg); box.appendChild(wort);
+    lauf.appendChild(box);
+    requestAnimationFrame(function(){ box.classList.add('da'); });
+    var lebt = true;
+
+    var saetze = ['Liest deine Zahlen …', 'Zerlegt die Frage …', 'Rechnet nach …', 'Prüft den Rechenweg …', 'Wägt die Hebel ab …', 'Skizziert die Antwort …'];
+    var idx = Math.floor(zufall(0, saetze.length));
+    wort.textContent = saetze[idx];
+    var wechsel = setInterval(function(){
+      if (!lebt) return;
+      wort.style.opacity = 0;
+      setTimeout(function(){
+        if (!lebt) return;
+        idx = (idx + 1) % saetze.length;
+        wort.textContent = saetze[idx];
+        wort.style.opacity = 1;
+      }, 260);
+    }, 2600);
+
+    function zieh(w){
+      var pf = document.createElementNS(NS, 'path');
+      pf.setAttribute('d', w.d);
+      if (w.breite) pf.setAttribute('stroke-width', w.breite);
+      svg.appendChild(pf);
+      var len = pf.getTotalLength();
+      pf.style.strokeDasharray = len;
+      pf.style.strokeDashoffset = len;
+      pf.style.transition = 'stroke-dashoffset ' + w.dauer + 'ms cubic-bezier(.45,.05,.55,.95)';
+      void pf.getBoundingClientRect();
+      pf.style.strokeDashoffset = 0;
+      return new Promise(function(f){ setTimeout(f, w.dauer + 40); });
+    }
+    /* Jede Figur ist ein kleiner Gedanke: Schleife, Kurve, Einkreisen, Fragezeichen, Welle, Rechnung */
+    function schleife(){
+      var b = zufall(8, 10), a = b * .62, pts = [];
+      for (var t = 0; t <= Math.PI * 4.6; t += .22) {
+        pts.push([12 + a * t - b * Math.sin(t) + zufall(-.6, .6), 26 - b * Math.cos(t) + zufall(-.6, .6)]);
+      }
+      return [{d: glatt(pts), dauer: 1000}];
+    }
+    function kurve(){
+      var pts = [], n = 7;
+      for (var i = 0; i <= n; i++) {
+        pts.push([14 + 96 * i / n, 38 - 24 * Math.pow(i / n, 1.3) + zufall(-2.5, 2.5)]);
+      }
+      var e = pts[n];
+      return [
+        {d: glatt(pts), dauer: 720},
+        {d: 'M' + (e[0] - 9) + ' ' + (e[1] + 6) + ' L' + (e[0] + 2) + ' ' + (e[1] - 1) + ' L' + (e[0] - 8) + ' ' + (e[1] - 8), dauer: 240}
+      ];
+    }
+    function kreisen(){
+      var start = zufall(0, Math.PI * 2), runden = zufall(1.5, 1.8);
+      var n = Math.round(18 * runden), pts = [];
+      for (var i = 0; i <= n; i++) {
+        var a = start + i / n * Math.PI * 2 * runden;
+        pts.push([75 + Math.cos(a) * (44 + zufall(-3, 3)), 24 + Math.sin(a) * (13 + zufall(-2, 2))]);
+      }
+      return [{d: glatt(pts), dauer: 950}];
+    }
+    function fragezeichen(){
+      var x = 70 + zufall(-3, 3);
+      return [
+        {d: 'M' + (x - 9) + ' 15 Q' + (x - 6) + ' 6 ' + (x + 2) + ' 7 Q' + (x + 12) + ' 8 ' + (x + 10) + ' 17 Q' + (x + 8) + ' 24 ' + x + ' 27 L' + (x - 1) + ' 32', dauer: 620},
+        {d: 'M' + (x - 2) + ' 40 a1.8 1.8 0 1 0 .2 0', dauer: 160, breite: 3}
+      ];
+    }
+    function welle(){
+      var pts = [];
+      for (var x = 12; x <= 134; x += 5) {
+        var f = 1 - (x - 12) / 122;
+        pts.push([x, 26 + (2.5 + 8 * f) * Math.sin(x / 8) + zufall(-.6, .6)]);
+      }
+      return [{d: glatt(pts), dauer: 950}];
+    }
+    function rechnung(){
+      return [
+        {d: 'M38 16 L38 32', dauer: 170},
+        {d: 'M30 24 L46 24', dauer: 170},
+        {d: 'M60 24 L88 24 M88 24 L81 18 M88 24 L81 30', dauer: 330},
+        {d: 'M101 26 L108 33 L121 13', dauer: 300, breite: 2.6}
+      ];
+    }
+    var figuren = [schleife, kurve, kreisen, fragezeichen, welle, rechnung];
+    (async function(){
+      var vorige = -1;
+      while (lebt) {
+        var wahl;
+        do { wahl = Math.floor(zufall(0, figuren.length)); } while (wahl === vorige);
+        vorige = wahl;
+        var wege = figuren[wahl]();
+        for (var i = 0; i < wege.length && lebt; i++) await zieh(wege[i]);
+        if (!lebt) break;
+        await warte(430);
+        var alte = Array.prototype.slice.call(svg.children);
+        alte.forEach(function(pf){ pf.style.transition = 'opacity .3s ease'; pf.style.opacity = 0; });
+        await warte(320);
+        alte.forEach(function(pf){ pf.remove(); });
+      }
+    })();
+
+    return {
+      weg: function(){
+        lebt = false;
+        clearInterval(wechsel);
+        box.classList.add('weg');
+        return warte(330).then(function(){ box.remove(); });
+      }
+    };
+  }
+
   /* ---------- Kapitel-Motor ---------- */
   var aktuellesKapitel = null;
 
@@ -837,6 +1058,10 @@ body.hirn #hirn-lampe{display:inline-flex}
 
   async function spiele(kapitel, schritte){
     beschaeftigt = true;
+    kamera.start();
+    var denk = zeigeDenken(kapitel);
+    await warte(zufall(1400, 2400));
+    denk.weg(); /* schmilzt weg, während die ersten Worte schon kommen */
     for (var i = 0; i < schritte.length; i++) {
       var s = schritte[i];
       if (s.t) { await stroeme(kapitel, s.t, s.marken); await warte(240); continue; }
@@ -901,6 +1126,7 @@ body.hirn #hirn-lampe{display:inline-flex}
         await warte(300);
       }
     }
+    kamera.halt();
     beschaeftigt = false;
   }
 
@@ -1003,6 +1229,7 @@ body.hirn #hirn-lampe{display:inline-flex}
     knopf.classList.add('gewaehlt');
     var kapitel = aktuellesKapitel;
     (async function(){
+      kamera.start();
       await warte(350);
       await stroeme(kapitel, 'Steht: ' + slot + ' mit Dr. Anna Vogelsang. Sie bekommt vorab, was wir hier besprochen haben.');
       var k = baueBestaetigung('Termin bestätigt · ' + slot, 'termin');
@@ -1011,6 +1238,7 @@ body.hirn #hirn-lampe{display:inline-flex}
       await materialisiere(k);
       await stift.notiz(kapitel, k, 'steht!', 'rechts');
       zeigeChips(kapitel, ['Wie läuft mein Geschäft?', 'Was bringt mir das Preismodell?']);
+      kamera.halt();
     })();
   }
 
@@ -1056,11 +1284,15 @@ body.hirn #hirn-lampe{display:inline-flex}
     var lauf = kapitel.querySelector('.lauf');
     return {
       absatz: null, huelle: null, huelleSk: null, klartext: '',
-      neuerAbsatz(){ this.absatz = null; this.huelle = null; this.huelleSk = null; },
+      neuerAbsatz(){
+        if (this.absatz) this.absatz.classList.remove('aktiv');
+        this.absatz = null; this.huelle = null; this.huelleSk = null;
+      },
+      fertig(){ if (this.absatz) this.absatz.classList.remove('aktiv'); },
       wo(merk){
         if (!this.absatz) {
           this.absatz = document.createElement('p');
-          this.absatz.className = 'antwort';
+          this.absatz.className = 'antwort aktiv';
           lauf.appendChild(this.absatz);
           this.huelle = null; this.huelleSk = null;
         }
@@ -1083,7 +1315,10 @@ body.hirn #hirn-lampe{display:inline-flex}
         s.textContent = token.text;
         this.wo(token.merk).appendChild(s);
         if (reduziert) s.classList.add('da');
-        else requestAnimationFrame(function(){ s.classList.add('da'); });
+        else {
+          requestAnimationFrame(function(){ s.classList.add('da'); });
+          s.addEventListener('transitionend', function(){ s.classList.add('fest'); }, {once:true});
+        }
         this.klartext += token.text;
       }
     };
@@ -1092,8 +1327,10 @@ body.hirn #hirn-lampe{display:inline-flex}
   async function hirnFrage(text){
     beschaeftigt = true;
     var kapitel = neuesKapitel(text);
+    kamera.start();
     var schreiber = neuerSchreiber(kapitel);
     var lauf = kapitel.querySelector('.lauf');
+    var denk = zeigeDenken(kapitel);
     var reihe = null;
     function schliesseReihe(){ reihe = null; }
     async function karteRein(d){
@@ -1150,27 +1387,59 @@ body.hirn #hirn-lampe{display:inline-flex}
     var zerleger = neuerZerleger(spielplan);
 
     async function schreibhand(){
-      var seitLauf = 0;
+      /* Gleitender Takt: Tempo in Wörtern je Sekunde, stufenlos dem Rückstand
+         angepasst — nie ein Sprung. Satzzeichen kosten mehr Einheiten und
+         atmen so von selbst; Absätze kosten am meisten. */
+      var rate = 6, guthaben = 0, letzte = performance.now();
       while (true) {
         if (!spielplan.length) {
           if (zulaufFertig) break;
-          await warte(60);
+          await warte(50);
+          letzte = performance.now();
+          guthaben = Math.min(guthaben, 1);
+          continue;
+        }
+        if (denk) { denk.weg(); denk = null; letzte = performance.now(); } /* schmilzt weg, während die ersten Worte schon kommen */
+        var art = spielplan[0].art;
+        if (art === 'wort' || art === 'absatz') {
+          schliesseReihe();
+          if (reduziert) {
+            while (spielplan.length && (spielplan[0].art === 'wort' || spielplan[0].art === 'absatz')) {
+              var e0 = spielplan.shift();
+              if (e0.art === 'wort') schreiber.zeige(e0); else schreiber.neuerAbsatz();
+            }
+            continue;
+          }
+          await new Promise(function(weiter){
+            function tick(t){
+              var dt = Math.min((t - letzte) / 1000, .08); letzte = t;
+              var ziel = Math.min(140, 20 + spielplan.length * 0.5);
+              rate += (ziel - rate) * Math.min(1, dt / 0.4);
+              guthaben += rate * dt;
+              while (spielplan.length) {
+                var e = spielplan[0];
+                if (e.art === 'wort') {
+                  var kosten = wortKosten(e.text);
+                  if (guthaben < kosten) break;
+                  guthaben -= kosten;
+                  spielplan.shift();
+                  schreiber.zeige(e);
+                } else if (e.art === 'absatz') {
+                  if (guthaben < 6) break;
+                  guthaben -= 6;
+                  spielplan.shift();
+                  schreiber.neuerAbsatz();
+                } else break;
+              }
+              if (!spielplan.length || (spielplan[0].art !== 'wort' && spielplan[0].art !== 'absatz')) { weiter(); return; }
+              requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+          });
           continue;
         }
         var eintrag = spielplan.shift();
-        if (eintrag.art === 'wort') {
-          schliesseReihe();
-          schreiber.zeige(eintrag);
-          if (++seitLauf % 8 === 0) runter();
-          /* Grundtakt 34 ms; läuft das Modell weit voraus, schreibt die Hand schneller */
-          var takt = spielplan.length > 260 ? 6 : (spielplan.length > 120 ? 16 : 34);
-          if (/[.!?:]\s*$/.test(eintrag.text)) takt += spielplan.length > 120 ? 40 : 150;
-          else if (/,\s*$/.test(eintrag.text)) takt += 40;
-          await warte(takt);
-        } else if (eintrag.art === 'absatz') {
-          schreiber.neuerAbsatz();
-          await warte(spielplan.length > 120 ? 60 : 240);
-        } else if (eintrag.art === 'karte') {
+        if (eintrag.art === 'karte') {
           schreiber.neuerAbsatz();
           await karteRein(eintrag.karte);
           await warte(260);
@@ -1186,7 +1455,11 @@ body.hirn #hirn-lampe{display:inline-flex}
           p.textContent = 'Das Hirn meldet: ' + eintrag.text;
           lauf.appendChild(p);
         }
+        letzte = performance.now();
+        guthaben = 0;
       }
+      if (denk) { var dEnde = denk; denk = null; await dEnde.weg(); }
+      schreiber.fertig();
     }
 
     async function zulauf(){
@@ -1229,11 +1502,13 @@ body.hirn #hirn-lampe{display:inline-flex}
       hirnVerlauf.push({frage: text, antwort: schreiber.klartext.slice(0, 1200)});
     } catch (fehler) {
       zulaufFertig = true;
+      if (denk) { denk.weg(); denk = null; }
       var p2 = document.createElement('p');
       p2.className = 'antwort fehl';
       p2.textContent = 'Verbindung zum Hirn verloren: ' + fehler;
       lauf.appendChild(p2);
     }
+    kamera.halt();
     beschaeftigt = false;
     runter();
   }
