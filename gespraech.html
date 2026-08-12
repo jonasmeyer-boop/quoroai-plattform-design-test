@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V28 (Review-Fixes: Anwendung über den Kern, Nav-Stapel, neutrale Labels, geklemmter Index) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V29 (Kopfzeile: Mitlese-Schalter verschiebt nichts mehr, gestufte Schmal-Stufen) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -43,14 +43,17 @@ button{font-family:inherit}
 nav{
   position:fixed;top:0;left:0;right:0;z-index:10;height:60px;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 max(24px,calc((100vw - 760px)/2));
+  /* Breiter als die Textspalte: die Griffe brauchen Platz, sonst bricht die Zeile um */
+  padding:0 max(24px,calc((100vw - 1080px)/2));
   background:linear-gradient(var(--papier) 55%, color-mix(in srgb, var(--papier) 1%, transparent));
   pointer-events:none;
 }
-nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px;min-width:0}
+nav .wortmarke>div{min-width:0}
+#marke-name{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 nav .wortmarke img{height:28px;width:auto;display:block}
 nav .marke-heim{
-  pointer-events:auto;display:inline-flex;align-items:center;gap:10px;
+  pointer-events:auto;display:flex;align-items:center;gap:10px;min-width:0;
   color:inherit;text-decoration:none;
 }
 nav .marke-heim:hover #marke-name{color:var(--blau)}
@@ -58,7 +61,7 @@ nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--gr
 nav .wortmarke small[role="button"]{pointer-events:auto;cursor:pointer}
 nav .wortmarke small[role="button"]:hover{color:var(--blau)}
 nav .hinweis{font-size:12px;color:var(--grau)}
-nav .griffe{display:flex;align-items:center;gap:8px}
+nav .griffe{display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0}
 #uebersicht-griff{
   pointer-events:auto;cursor:pointer;
   padding:8px 14px;border-radius:999px;border:0.5px solid var(--linie);
@@ -66,8 +69,10 @@ nav .griffe{display:flex;align-items:center;gap:8px}
   text-decoration:none;transition:border-color .2s ease;
 }
 #uebersicht-griff:hover{border-color:var(--blau)}
-@media (max-width:700px){
+/* Der Chat-Kopf trägt mehr Knöpfe als andere Seiten — er räumt früher auf */
+@media (max-width:880px){
   #uebersicht-griff{display:none}
+  nav .wortmarke small{display:none}
 }
 #glocke{
   pointer-events:auto;cursor:pointer;position:relative;
@@ -85,7 +90,7 @@ nav .griffe{display:flex;align-items:center;gap:8px}
   display:inline-flex;align-items:center;justify-content:center;
 }
 #glocke-liste{
-  position:fixed;top:58px;right:max(24px,calc((100vw - 760px)/2));z-index:55;
+  position:fixed;top:58px;right:max(24px,calc((100vw - 1080px)/2));z-index:55;
   width:min(340px,calc(100vw - 32px));
   background:#fff;border:0.5px solid var(--linie);border-radius:16px;
   box-shadow:0 18px 50px rgba(16,19,26,.16);padding:16px 18px;
@@ -167,6 +172,13 @@ body.gespraeche-offen{overflow:hidden}
   width:7px;height:7px;border-radius:999px;background:var(--grau);
   transition:background .25s ease;
 }
+/* Der Schalter reserviert sich die Breite seines längsten Zustands,
+   damit beim Umschalten kein Nachbar verrutscht */
+#freigabe-text{text-align:center}
+#freigabe-text::after{
+  content:"Deine Beratung liest mit";
+  display:block;height:0;visibility:hidden;overflow:hidden;
+}
 #freigabe:hover{border-color:var(--blau)}
 #freigabe.geteilt{
   border-color:color-mix(in srgb, var(--blau) 35%, transparent);
@@ -175,7 +187,7 @@ body.gespraeche-offen{overflow:hidden}
 }
 #freigabe.geteilt .punkt-f{background:var(--blau)}
 #freigabe-frage{
-  position:fixed;top:58px;right:max(24px,calc((100vw - 760px)/2));z-index:56;
+  position:fixed;top:58px;right:max(24px,calc((100vw - 1080px)/2));z-index:56;
   width:min(320px,calc(100vw - 32px));
   background:#fff;border:0.5px solid var(--linie);border-radius:16px;
   box-shadow:0 18px 50px rgba(16,19,26,.16);padding:16px 18px;
@@ -771,7 +783,16 @@ body.blatt-offen{overflow:hidden}
   .vergleich .dazwischen{transform:rotate(90deg);justify-self:start;margin-left:24px}
   .stift-notiz{font-size:19px}
   #hirn-lampe{display:none}
-  nav .wortmarke small{display:none}
+  #freigabe-text::after{content:"Beratung liest mit"}
+}
+/* Handy: Logo statt Namen, engere Knöpfe, kürzeste Wörter */
+@media (max-width:480px){
+  nav{padding:0 14px}
+  #marke-name{display:none}
+  nav .griffe{gap:6px}
+  #gespraeche-griff,#freigabe{padding:8px 11px}
+  #akte-griff{padding:8px 12px}
+  #freigabe-text::after{content:"Nur für dich"}
   .denken{gap:12px;height:56px}
   .denken svg{width:160px;height:52px}
   #akte{padding-top:96px;padding-bottom:224px}
@@ -1826,11 +1847,16 @@ body.blatt-offen{overflow:hidden}
     var text = document.getElementById('freigabe-text');
     var geteilt = false;
     try { geteilt = sessionStorage.getItem('freigabe') === '1'; } catch (e) {}
+    /* Schmale Fenster bekommen kürzere Formen, passend zur reservierten Breite im CSS */
+    var schmal = window.matchMedia('(max-width:700px)');
+    var handy = window.matchMedia('(max-width:480px)');
+    if (schmal.addEventListener) schmal.addEventListener('change', function(){ male(); });
+    if (handy.addEventListener) handy.addEventListener('change', function(){ male(); });
     function male(){
       knopf.classList.toggle('geteilt', geteilt);
       knopf.setAttribute('aria-pressed', String(geteilt));
       text.textContent = geteilt
-        ? rede('Deine Beratung liest mit', 'Ihre Beratung liest mit')
+        ? (handy.matches ? 'Liest mit' : schmal.matches ? 'Beratung liest mit' : rede('Deine Beratung liest mit', 'Ihre Beratung liest mit'))
         : rede('Nur für dich', 'Nur für Sie');
       knopf.title = geteilt
         ? rede('Deine Beratung kann dieses Gespräch lesen. Klicken nimmt die Freigabe zurück.', 'Ihre Beratung kann dieses Gespräch lesen. Klicken nimmt die Freigabe zurück.')
@@ -2885,13 +2911,20 @@ body.blatt-offen{overflow:hidden}
     var idx = 0;
     try { idx = parseInt(sessionStorage.getItem('marke') || '0', 10); } catch (e) {}
     if (!(idx >= 0 && idx < MARKEN.length)) idx = 0;
+    /* Auf dem Handy heißt der Knopf nur „Akte" — der Platz gehört dem Inhalt */
+    var akteHandy = window.matchMedia('(max-width:480px)');
+    function beschrifteAkte(){
+      document.getElementById('akte-griff').childNodes[0].nodeValue =
+        akteHandy.matches ? 'Akte ' : rede('Deine Akte ', 'Ihre Akte ');
+    }
+    if (akteHandy.addEventListener) akteHandy.addEventListener('change', beschrifteAkte);
+    beschrifteAkte();
     function trage(m){
       /* Farben, Name, Logo, Favicon, Du/Sie-Texte und -Platzhalter macht der Kern */
       if (window.Marke) window.Marke.wende(m);
       anredeSie = m.anrede === 'sie';
       /* Seiten-Eigenes, das der Kern nicht kennt */
-      var griff = document.getElementById('akte-griff');
-      griff.childNodes[0].nodeValue = rede('Deine Akte ', 'Ihre Akte ');
+      beschrifteAkte();
       document.querySelector('#freigabe-frage p').innerHTML =
         '<strong id="ff-marke"></strong> ' +
         rede('kann dann <strong>dieses eine Gespräch</strong> lesen — samt Karten und Dokumenten. Andere Gespräche bleiben privat. Du kannst das jederzeit zurücknehmen.',
