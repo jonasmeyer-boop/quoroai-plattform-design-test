@@ -11,7 +11,9 @@
    ein Gebäude, die Zentrale der KI-Berater. Ein Film zeigt den Aufbau, danach ist das
    Modell begehbar (Zoom je Bauplan begehbare-plattform), und der Stift kritzelt aufs
    Foto wie in der Kundenwelt. Chrome ist IMMER Quoro (Entscheidung 2026-08-12), die
-   Marke der Beratung erscheint nur als Inhalt. · Marker: BERATUNG-F-MODELL-V2 */
+   Marke der Beratung erscheint nur als Inhalt. Der Zoom endet nicht vor der Fassade:
+   bei etwa 3/4 der Fahrt blendet es in den Strategieraum, dort wartet je Mandat ein
+   Dashboard mit allem auf einen Blick. · Marker: BERATUNG-F-MODELL-V3 */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -170,6 +172,28 @@ body.gezoomt #auftakt,body.gezoomt #tisch{opacity:0;pointer-events:none}
 }
 body.gezoomt #schleier{opacity:1}
 
+/* ========== Der Strategieraum: ab 3/4 der Kamerafahrt blendet es hinein ========== */
+#raum{
+  position:fixed;inset:0;z-index:25;pointer-events:none;
+  opacity:0;transform:scale(1.09);
+  transition:opacity .5s ease,transform .9s var(--feder);
+}
+#raum img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+#raum::after{
+  /* sanfter Papierschleier von oben, damit Überschriften auf dem Raum sitzen */
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(color-mix(in srgb, var(--papier) 55%, transparent), transparent 34%);
+}
+body.drin #raum{opacity:1;transform:scale(1)}
+
+/* ========== Dashboard-Bausteine je Mandat ========== */
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+.kpis .karte{padding:14px 16px}
+.kpis .karte .wert{font-size:22px}
+svg.kurve{width:100%;height:34px;display:block;overflow:visible;margin-top:8px}
+svg.kurve path{fill:none;stroke:var(--stift);stroke-width:2.2;stroke-linecap:round;opacity:.9}
+svg.kurve path.amber{stroke:var(--bernstein)}
+
 /* ========== Zonen-Lage: die Inhalte, SIE scrollt ========== */
 #zonen{position:fixed;inset:0;z-index:30;overflow-y:auto;overscroll-behavior:contain;display:none}
 body.gezoomt #zonen{display:block}
@@ -283,7 +307,7 @@ body.gezoomt #zonen{display:block}
   #tisch .t-zettel{padding:9px 13px}
   #krume{left:18px}
   .inhalt{padding:118px 18px 64px}
-  .karten{grid-template-columns:1fr}
+  .karten,.kpis{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -345,19 +369,27 @@ body.gezoomt #zonen{display:block}
 
 <div id="schleier"></div>
 
+<div id="raum" aria-hidden="true"><img src="bilder/modell/strategieraum.jpg" alt=""></div>
+
 <div id="zonen">
   <section class="inhalt" data-raum="petersen">
     <div class="kopf">
       <div><h2>Petersen Stahlbau</h2><div class="stand">3 Gespräche diese Woche · Termin Donnerstag, 10:00</div></div>
       <span class="status geteilt">1 Gespräch freigegeben</span>
     </div>
+    <div class="kpis">
+      <div class="karte"><div class="wert">30,4 %</div><div class="label">Marge heute</div><svg class="kurve" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"><path class="amber" d="M2 8 L18 10 L34 9 L50 14 L66 18 L82 24 L98 30"/></svg><div class="delta amber">fällt seit April</div></div>
+      <div class="karte"><div class="wert">20.550 €</div><div class="label">offene Forderungen</div><div class="delta amber">eine Rechnung seit 9 Tagen</div></div>
+      <div class="karte"><div class="wert blau">+38.000 €</div><div class="label">Preismodell, rechnerisch im Jahr</div><div class="delta">ab Woche 6 wirksam</div></div>
+    </div>
     <h3>Was wartet</h3>
     <div class="zeilen">
       <button class="zeile bald" type="button"><span><span class="z-titel">Gespräch mit einem Menschen</span><br><span class="z-meta">Wunsch: Freitag, 9:00 · über den KI-Berater</span></span><span class="z-status offen">Zeit bestätigen</span></button>
       <button class="zeile bald" type="button"><span><span class="z-titel">„Warum schrumpft meine Marge?"</span><br><span class="z-meta">freigegeben gestern, 16:40</span></span><span class="z-status geteilt">mitlesen</span></button>
     </div>
-    <h3>Was zuletzt geschah</h3>
+    <h3>Gespräche und Unterlagen</h3>
     <div class="zeilen">
+      <button class="zeile bald" type="button"><span><span class="z-titel">Wie läuft mein Geschäft?</span><br><span class="z-meta">Montag, 9:12 · nur für den Kunden</span></span><span class="z-status">Gespräch</span></button>
       <button class="zeile bald" type="button"><span><span class="z-titel">Preismodell Benchmark</span><br><span class="z-meta">gestern in die Unterlagen gelegt · 12 Seiten</span></span><span class="z-status">Unterlage</span></button>
       <button class="zeile bald" type="button"><span><span class="z-titel">Termin Donnerstag, 10:00</span><br><span class="z-meta">Dr. Anna Vogelsang · Preis und Marge</span></span><span class="z-status geteilt">Videocall</span></button>
     </div>
@@ -373,14 +405,19 @@ body.gezoomt #zonen{display:block}
       <div><h2>Cordes Logistik</h2><div class="stand">letzte Frage heute, 8:12</div></div>
       <span class="status offen">Übergabe offen</span>
     </div>
+    <div class="kpis">
+      <div class="karte"><div class="wert">12,1 %</div><div class="label">Frachtmarge</div><div class="delta">stabil seit Mai</div></div>
+      <div class="karte"><div class="wert">4</div><div class="label">Gespräche im August</div><div class="delta">alle nur für den Kunden</div></div>
+      <div class="karte"><div class="wert">6,5</div><div class="label">Std. im August</div><div class="delta">Leistungsnachweis offen</div></div>
+    </div>
     <h3>Was wartet</h3>
     <div class="zeilen">
-      <button class="zeile bald" type="button"><span><span class="z-titel">Steuerfrage, übergeben um 8:12</span><br><span class="z-meta">außerhalb des Rahmens des KI-Beraters</span><br><span class="z-hand" data-du="die gehört dir." data-sie="die gehört Ihnen.">die gehört dir.</span></span><span class="z-status offen">wartet auf Antwort</span></button>
+      <button class="zeile bald" type="button"><span><span class="z-titel">Steuerfrage, übergeben um 8:12</span><br><span class="z-meta">außerhalb des Rahmens des KI-Beraters</span><br><span class="z-hand">die gehört dir.</span></span><span class="z-status offen">wartet auf Antwort</span></button>
     </div>
-    <h3>Was zuletzt geschah</h3>
+    <h3>Gespräche und Unterlagen</h3>
     <div class="zeilen">
-      <button class="zeile bald" type="button"><span><span class="z-titel">4 Gespräche im August</span><br><span class="z-meta">alle nur für den Kunden</span></span><span class="z-status">läuft</span></button>
-      <button class="zeile bald" type="button"><span><span class="z-titel">Leistungsnachweis August</span><br><span class="z-meta">6,5 Std. bisher</span></span><span class="z-status">offen</span></button>
+      <button class="zeile bald" type="button"><span><span class="z-titel">Was kostet mich der Dieselpreis wirklich?</span><br><span class="z-meta">Freitag, 11:05 · nur für den Kunden</span></span><span class="z-status">Gespräch</span></button>
+      <button class="zeile bald" type="button"><span><span class="z-titel">Fuhrpark-Übersicht 2026</span><br><span class="z-meta">Fassung 1 · vom Kunden hochgeladen</span></span><span class="z-status">Unterlage</span></button>
     </div>
     <div class="tueren">
       <button class="bald" type="button">Frage beantworten</button>
@@ -393,9 +430,14 @@ body.gezoomt #zonen{display:block}
       <div><h2>Bäckerei Freitag</h2><div class="stand">6 Gespräche im Juli · keines freigegeben</div></div>
       <span class="status">läuft ruhig</span>
     </div>
-    <h3>Was zuletzt geschah</h3>
+    <div class="kpis">
+      <div class="karte"><div class="wert">31 %</div><div class="label">Personalquote</div><div class="delta">stabil, Ziel gehalten</div></div>
+      <div class="karte"><div class="wert">2.900 €</div><div class="label">Leistungsnachweis Juli</div><div class="delta">versendet und bezahlt</div></div>
+      <div class="karte"><div class="wert">6</div><div class="label">Gespräche im Juli</div><div class="delta">keines freigegeben</div></div>
+    </div>
+    <h3>Gespräche und Unterlagen</h3>
     <div class="zeilen">
-      <button class="zeile bald" type="button"><span><span class="z-titel">Leistungsnachweis Juli</span><br><span class="z-meta">versendet und bezahlt</span></span><span class="z-status geteilt">erledigt</span></button>
+      <button class="zeile bald" type="button"><span><span class="z-titel">Lohnt sich die zweite Filiale?</span><br><span class="z-meta">28. Juli · nur für den Kunden</span></span><span class="z-status">Gespräch</span></button>
       <button class="zeile bald" type="button"><span><span class="z-titel">Nächster Termin</span><br><span class="z-meta">noch keiner vereinbart</span></span><span class="z-status">offen</span></button>
     </div>
     <div class="tueren">
@@ -408,6 +450,11 @@ body.gezoomt #zonen{display:block}
     <div class="kopf">
       <div><h2>MTS Maschinenbau</h2><div class="stand">letzte Frage am 22. Juli · davor wöchentlich</div></div>
       <span class="status offen">seit 3 Wochen still</span>
+    </div>
+    <div class="kpis">
+      <div class="karte"><div class="wert">0</div><div class="label">Fragen seit 3 Wochen</div><svg class="kurve" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"><path class="amber" d="M2 10 L18 6 L34 12 L50 8 L66 22 L82 30 L98 31"/></svg><div class="delta amber">davor wöchentlich</div></div>
+      <div class="karte"><div class="wert">4.200 €</div><div class="label">offene Rechnung</div><div class="delta amber">seit 12 Tagen</div></div>
+      <div class="karte"><div class="wert">11,2</div><div class="label">Std. im Juli</div><div class="delta">Halbjahresblick kam gut an</div></div>
     </div>
     <h3>Was wartet</h3>
     <div class="zeilen">
@@ -529,20 +576,50 @@ body.gezoomt #zonen{display:block}
     if (sofort || reduziert) { void kamera.offsetWidth; kamera.style.transition = alteTransition || ''; }
   }
 
+  /* Der Stift zeichnet die Dashboard-Kurven, sobald der Raum steht */
+  function zeichneKurven(sec){
+    sec.querySelectorAll('svg.kurve path').forEach(function(pfad){
+      var len = pfad.getTotalLength();
+      pfad.style.transition = 'none';
+      pfad.style.strokeDasharray = len;
+      pfad.style.strokeDashoffset = reduziert ? 0 : len;
+      if (reduziert) return;
+      void pfad.getBoundingClientRect();
+      pfad.style.transition = 'stroke-dashoffset .9s cubic-bezier(.45,.05,.55,.95) .35s';
+      pfad.style.strokeDashoffset = 0;
+    });
+  }
+
+  var raumTimer = null;
   function oeffne(ziel, sofort){
     if (!ZONEN_NAMEN[ziel]) return;
     offen = ziel;
     zoomeZu(ziel, sofort);
     document.body.classList.add('gezoomt');
-    document.querySelectorAll('.inhalt').forEach(function(s){ s.classList.toggle('offen', s.dataset.raum === ziel); });
+    var offeneSection = null;
+    document.querySelectorAll('.inhalt').forEach(function(s){
+      var an = s.dataset.raum === ziel;
+      s.classList.toggle('offen', an);
+      if (an) offeneSection = s;
+    });
     zonenLage.scrollTop = 0;
     krumeZiel.textContent = ZONEN_NAMEN[ziel];
     krume.hidden = false;
+    /* ab etwa 3/4 der Kamerafahrt blendet es in den Strategieraum */
+    clearTimeout(raumTimer);
+    if (sofort || reduziert) {
+      document.body.classList.add('drin');
+    } else {
+      raumTimer = setTimeout(function(){ if (offen === ziel) document.body.classList.add('drin'); }, 720);
+    }
+    if (offeneSection) zeichneKurven(offeneSection);
     if (location.hash !== '#' + ziel) history.replaceState(null, '', '#' + ziel);
   }
   function schliesse(){
     if (!offen) return;
     offen = null;
+    clearTimeout(raumTimer);
+    document.body.classList.remove('drin');
     kamera.style.transform = '';
     document.body.classList.remove('gezoomt');
     krume.hidden = true;
