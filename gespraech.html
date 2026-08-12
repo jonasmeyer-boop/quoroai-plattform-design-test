@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dein Berater</title>
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V3 (V2 + die Akte als Regal) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V4 (V3 + Anschluss ans lokale Vorführ-Hirn) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -154,6 +154,13 @@ body.regal-offen{overflow:hidden}
 }
 .kapitel p.antwort .wort{opacity:0;transition:opacity .18s ease}
 .kapitel p.antwort .wort.da{opacity:1}
+.kapitel p.antwort.fehl{color:#a06008;font-size:14px}
+#hirn-lampe{
+  display:none;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;color:var(--blau);
+}
+#hirn-lampe::before{content:'';width:7px;height:7px;border-radius:999px;background:var(--blau)}
+body.hirn #hirn-lampe{display:inline-flex}
 
 /* Karten & Materialisierung */
 .reihe{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
@@ -366,6 +373,7 @@ body.regal-offen{overflow:hidden}
 
 <nav>
   <div class="wortmarke">Nordholm &amp; Partner<small>Beispielmarke deiner Beratung</small></div>
+  <span id="hirn-lampe">Hirn an</span>
   <button id="akte-griff" type="button" data-zahl="0">Deine Akte <span class="zahl">0</span></button>
 </nav>
 
@@ -1004,15 +1012,176 @@ body.regal-offen{overflow:hidden}
     })();
   }
 
+  /* ---------- Das Vorführ-Hirn: echte Antworten vom lokalen Server ---------- */
+  var hirnAn = false;
+  var hirnVerlauf = [];
+  fetch('/hirn-status').then(function(r){ return r.json(); }).then(function(s){
+    if (s && s.bereit) { hirnAn = true; document.body.classList.add('hirn'); }
+  }).catch(function(){ /* kein Server: Drehbuch */ });
+
+  function neuerSchreiber(kapitel){
+    var lauf = kapitel.querySelector('.lauf');
+    return {
+      puffer: '', absatz: null, huelle: null, markZaehler: 0, klartext: '',
+      wo(){
+        if (!this.absatz) {
+          this.absatz = document.createElement('p');
+          this.absatz.className = 'antwort';
+          lauf.appendChild(this.absatz);
+          this.huelle = null;
+        }
+        return this.huelle || this.absatz;
+      },
+      span(text){
+        if (!text) return;
+        var s = document.createElement('span');
+        s.className = 'wort';
+        s.textContent = text;
+        this.wo().appendChild(s);
+        if (reduziert) s.classList.add('da');
+        else requestAnimationFrame(function(){ s.classList.add('da'); });
+        this.klartext += text;
+      },
+      stueck(t){
+        if (/\n\s*\n/.test(t)) { this.absatz = null; this.huelle = null; this.klartext += ' '; return; }
+        var teile = t.split('*');
+        for (var i = 0; i < teile.length; i++) {
+          if (i > 0) {
+            if (!this.huelle) {
+              this.wo();
+              this.huelle = document.createElement('span');
+              this.huelle.className = 'merk';
+              this.huelle.dataset.sk = 'm' + (++this.markZaehler);
+              this.absatz.appendChild(this.huelle);
+            } else {
+              this.huelle = null;
+            }
+          }
+          this.span(teile[i].replace(/\n/g, ' '));
+        }
+      },
+      fuege(text){
+        this.puffer += text;
+        while (true) {
+          var m = this.puffer.match(/^([\s\S]*?\S)(\s+)/);
+          if (!m) break;
+          this.stueck(m[1] + m[2]);
+          this.puffer = this.puffer.slice(m[0].length);
+        }
+      },
+      ende(){ if (this.puffer) { this.stueck(this.puffer); this.puffer = ''; } }
+    };
+  }
+
+  async function hirnFrage(text){
+    beschaeftigt = true;
+    var kapitel = neuesKapitel(text);
+    var schreiber = neuerSchreiber(kapitel);
+    var lauf = kapitel.querySelector('.lauf');
+    var reihe = null;
+    function schliesseReihe(){ reihe = null; }
+    async function karteRein(d){
+      schreiber.absatz = null; schreiber.huelle = null;
+      var klein = (d.art === 'kpi' || d.art === 'hebel' || d.art === 'donut');
+      var k = null;
+      if (d.art === 'kpi') k = baueKpi(d);
+      if (d.art === 'hero') k = baueHero(d);
+      if (d.art === 'hebel') k = baueHebel(d);
+      if (d.art === 'kurve') k = baueKurve({von: d.von || 'März', bis: d.bis || 'August', alt: d.alt || 'Verlauf', sk: d.sk});
+      if (d.art === 'wasserfall' && d.start && d.schritte) k = baueWasserfall(d);
+      if (d.art === 'formel' && d.zeilen) k = baueFormel(d);
+      if (d.art === 'fahrplan' && d.schritte) k = baueFahrplan(d);
+      if (d.art === 'vergleich' && d.vorher && d.nachher) k = baueVergleich(d);
+      if (d.art === 'donut') k = baueDonut(d);
+      if (d.art === 'dokument') k = baueDokument(d);
+      if (d.art === 'kalender') k = baueKalender(d.slots || ['Donnerstag, 10:00', 'Donnerstag, 16:00', 'Freitag, 9:00']);
+      if (d.art === 'bestaetigung') k = baueBestaetigung(d.text || 'Erledigt', d.sk);
+      if (!k) return;
+      if (klein) {
+        if (!reihe) { reihe = document.createElement('div'); reihe.className = 'reihe'; lauf.appendChild(reihe); }
+        reihe.appendChild(k);
+        reihe.className = 'reihe' + (reihe.children.length === 2 ? ' zweier' : '');
+      } else {
+        schliesseReihe();
+        lauf.appendChild(k);
+      }
+      runter();
+      var fertigMat = materialisiere(k);
+      setTimeout(function(){
+        if (d.art === 'kpi') starteKpi(k);
+        if (d.art === 'hero') starteHero(k);
+        if (d.art === 'hebel') starteHebel(k);
+        if (d.art === 'donut') starteDonut(k, d.prozent || 0);
+      }, reduziert ? 0 : 500);
+      await fertigMat;
+    }
+    async function skizzeRein(sk){
+      schreiber.absatz = null; schreiber.huelle = null;
+      var ziel = findeSk(kapitel, sk.ziel);
+      if (!ziel) return;
+      runter();
+      await warte(200);
+      if (sk.art === 'kreis') await stift.kreis(kapitel, ziel);
+      if (sk.art === 'unterstreich') await stift.unterstreich(kapitel, ziel);
+      if (sk.art === 'notiz') await stift.notiz(kapitel, ziel, sk.text || '!', sk.wo);
+      if (sk.art === 'pfeil') {
+        var nach = findeSk(kapitel, sk.nach);
+        if (nach) await stift.pfeil(kapitel, ziel, nach);
+      }
+    }
+    try {
+      var antwort = await fetch('/frage', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({frage: text, verlauf: hirnVerlauf.slice(-6)})
+      });
+      var leser = antwort.body.getReader();
+      var dekodierer = new TextDecoder();
+      var rest = '';
+      while (true) {
+        var teil = await leser.read();
+        if (teil.done) break;
+        rest += dekodierer.decode(teil.value, {stream: true});
+        var zeilen = rest.split('\n');
+        rest = zeilen.pop();
+        for (var i = 0; i < zeilen.length; i++) {
+          if (!zeilen[i].trim()) continue;
+          var e;
+          try { e = JSON.parse(zeilen[i]); } catch (fehler) { continue; }
+          if (e.art === 'text') { schliesseReihe(); schreiber.fuege(e.text); if (Math.random() < 0.15) runter(); }
+          if (e.art === 'karte') await karteRein(e.karte);
+          if (e.art === 'skizze') await skizzeRein(e.skizze);
+          if (e.art === 'chips') { schreiber.ende(); zeigeChips(kapitel, e.chips); }
+          if (e.art === 'fehler') {
+            var p = document.createElement('p');
+            p.className = 'antwort fehl';
+            p.textContent = 'Das Hirn meldet: ' + e.text;
+            lauf.appendChild(p);
+          }
+        }
+      }
+      schreiber.ende();
+      hirnVerlauf.push({frage: text, antwort: schreiber.klartext.slice(0, 1200)});
+    } catch (fehler) {
+      var p2 = document.createElement('p');
+      p2.className = 'antwort fehl';
+      p2.textContent = 'Verbindung zum Hirn verloren: ' + fehler;
+      lauf.appendChild(p2);
+    }
+    beschaeftigt = false;
+    runter();
+  }
+
   function frageStellen(text){
     if (beschaeftigt || !text.trim()) return;
+    document.getElementById('frage').value = '';
+    if (hirnAn) { hirnFrage(text.trim()); return; }
     var passendes = null;
     for (var i = 0; i < SKRIPTE.length; i++) {
       if (SKRIPTE[i].probe.test(text)) { passendes = SKRIPTE[i]; break; }
     }
     var kapitel = neuesKapitel(passendes ? passendes.frage : text.trim());
     spiele(kapitel, (passendes || SONST).schritte);
-    document.getElementById('frage').value = '';
   }
 
   document.getElementById('senden').addEventListener('click', function(){
