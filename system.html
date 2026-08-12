@@ -7,7 +7,7 @@
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="system.css">
 <style>
-/* Marker: SYSTEM-V3 · Der Glas-Look (Jonas, 2026-08-12): Apple-Glas als Material
+/* Marker: SYSTEM-V4 · Zustände als Füllstand im Glas; Glas-Look (Jonas, 2026-08-12): Apple-Glas als Material
    für Chrom auf weißem Grund, das Lila leuchtet dahinter. Tokens in system.css. */
 
 *{margin:0;padding:0;box-sizing:border-box}
@@ -187,8 +187,8 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
         </div>
       </div>
       <div class="chip-frei glas-duenn">
-        <span class="pille aktiv">Freigegeben</span>
-        <span>Neue Preisliste für Steinbach &amp; Cie.</span>
+        <span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span>
+        <span>Preisliste für Steinbach &amp; Cie. freigegeben</span>
       </div>
     </div>
   </div>
@@ -286,7 +286,7 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
 <section id="bausteine">
   <div class="rahmen">
     <h2>Bausteine</h2>
-    <p class="unter">Knöpfe als Kapseln, Zustand über Wort und Fläche statt Deko-Punkten, Felder mit Namen darüber. Alles hier kommt aus system.css.</p>
+    <p class="unter">Knöpfe als Kapseln, Zustände als Füllstand im Glas, Felder mit Namen darüber. Alles hier kommt aus system.css.</p>
     <div class="bausteine">
       <div class="baustein">
         <h3>Knöpfe</h3>
@@ -299,12 +299,13 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
       </div>
       <div class="baustein">
         <h3>Zustände</h3>
-        <div class="satz">
-          <span class="pille aktiv">Aktiv</span>
-          <span class="pille wartet">Wartet auf Freigabe</span>
-          <span class="pille entwurf">Entwurf</span>
-          <span class="pille lila">KI-Vorschlag</span>
+        <div class="satz" style="gap:24px">
+          <span style="display:grid;gap:7px;justify-items:center"><span class="zustand entwurf" role="img" aria-label="Entwurf" title="Entwurf"></span><span class="zustand-wort">Entwurf</span></span>
+          <span style="display:grid;gap:7px;justify-items:center"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">Wartet</span></span>
+          <span style="display:grid;gap:7px;justify-items:center"><span class="zustand vorschlag" role="img" aria-label="Vorschlag" title="Vorschlag"></span><span class="zustand-wort">Vorschlag</span></span>
+          <span style="display:grid;gap:7px;justify-items:center"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">Aktiv</span></span>
         </div>
+        <p style="margin-top:16px;font-size:14px;color:var(--nebel-500)">Der Füllstand im Glas ist die einzige Zustands-Form: fast leer ist Entwurf, halb voll wartet, voll und grün ist aktiv, der Vorschlag schimmert lila. Die grauen Worte stehen nur da, wo das Auge sie braucht.</p>
       </div>
       <div class="baustein">
         <h3>Eingabe</h3>
@@ -317,7 +318,7 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
       <div class="baustein" style="background:var(--nebel-050);border:0">
         <h3>Karte</h3>
         <div class="karte gehoben karte-demo">
-          <div class="kopf"><span class="name">Nordholm &amp; Partner</span><span class="pille aktiv">Aktiv</span></div>
+          <div class="kopf"><span class="name">Nordholm &amp; Partner</span><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span></div>
           <div class="zahl">18.240 €</div>
           <div class="deut">Beratungsleistung im August, 46 Gespräche</div>
         </div>

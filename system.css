@@ -1,8 +1,9 @@
 /* quoroai-plattform-design · Das quoroAI-Designsystem, eine Quelle.
    Weißer Grund, Logo-Lila #6f63e8, Schauschrift Clash Display (Jonas, 2026-08-12),
-   Lauftext General Sans, Glas als Material für Chrom (Jonas, 2026-08-12).
-   Gilt für quoroAI-gebrandete Flächen (Beratungsseite); Kundenflächen bleiben
-   White-Label über marke.js. Marker: SYSTEM-CSS-V2 */
+   Lauftext General Sans, Glas als Material für Chrom, Zustände als Füllstand
+   im Glas (Jonas, 2026-08-12). Gilt für quoroAI-gebrandete Flächen
+   (Beratungsseite); Kundenflächen bleiben White-Label über marke.js.
+   Marker: SYSTEM-CSS-V3 */
 
 @font-face{font-family:'Clash Display';src:url('schriften/clash-display.woff2') format('woff2');font-weight:200 700;font-display:swap}
 @font-face{font-family:'General Sans';src:url('schriften/general-sans.woff2') format('woff2');font-weight:200 700;font-display:swap}
@@ -68,12 +69,55 @@ body.quoro{
 .knopf.leise:hover{background:var(--nebel-100)}
 .knopf.gefahr{background:var(--rot-fond);color:var(--rot)}
 
-/* ---------- Zustände: Wort und Fläche, keine Deko-Punkte ---------- */
-.pille{display:inline-flex;align-items:center;min-height:28px;padding:2px 12px;border-radius:var(--radius-kapsel);font-size:13.5px;font-weight:600;white-space:nowrap;flex-shrink:0}
-.pille.aktiv{background:var(--gruen-fond);color:var(--gruen)}
-.pille.wartet{background:var(--bernstein-fond);color:var(--bernstein)}
-.pille.entwurf{background:var(--nebel-100);color:var(--nebel-600)}
-.pille.lila{background:var(--lila-100);color:var(--lila-800)}
+/* ---------- Zustand: der Füllstand im Glas (Jonas, 2026-08-12) ----------
+   Die einzige Zustands-Form: eine Glaskapsel, gefüllt mit Farbe. Fast leer
+   heißt Entwurf, halb voll wartet, voll und grün heißt aktiv, der Vorschlag
+   schimmert lila. Kein Etikett; das Element trägt IMMER ein aria-label und
+   title mit dem Zustandswort. Braucht das Auge ein Wort, steht es in Grau
+   daneben (.zustand-wort). */
+.zustand{
+  --stand:.5; --fluid:var(--nebel-300); --fluid-tief:var(--nebel-400);
+  position:relative;display:inline-block;width:48px;height:22px;flex-shrink:0;
+  border-radius:var(--radius-kapsel);overflow:hidden;
+  background:linear-gradient(180deg, rgba(24,21,47,.05), rgba(255,255,255,.4) 55%);
+  border:1px solid rgba(255,255,255,.8);
+  box-shadow:
+    inset 0 1.5px 3px rgba(24,21,47,.18),   /* die Mulde im Glas */
+    inset 0 -1px 1px rgba(255,255,255,.7),  /* Licht am Boden */
+    0 1px 0 rgba(255,255,255,.9),           /* Kante unten */
+    0 5px 12px rgba(59,52,134,.12);
+}
+.zustand::before{ /* die Flüssigkeit */
+  content:"";position:absolute;inset:2.5px auto 2.5px 2.5px;
+  width:calc((100% - 5px) * var(--stand));min-width:11px;
+  border-radius:var(--radius-kapsel);
+  background:linear-gradient(180deg, color-mix(in srgb, var(--fluid) 55%, #ffffff) 0%, var(--fluid) 45%, var(--fluid-tief) 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.55),  /* Glanz auf der Flüssigkeit */
+    0 0 7px color-mix(in srgb, var(--fluid) 45%, transparent);
+}
+.zustand::after{ /* der Glanzstreifen oben im Glas */
+  content:"";position:absolute;left:7px;right:7px;top:2.5px;height:38%;
+  border-radius:var(--radius-kapsel);pointer-events:none;
+  background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,0));
+}
+.zustand.entwurf{--stand:.18;--fluid:var(--nebel-300);--fluid-tief:var(--nebel-400)}
+.zustand.wartet{--stand:.55;--fluid:#eebb59;--fluid-tief:#c88f28}
+.zustand.aktiv{--stand:1;--fluid:#43b384;--fluid-tief:#1e8a63}
+.zustand.vorschlag{--stand:.82;--fluid:var(--lila-400);--fluid-tief:var(--lila-600)}
+.zustand.vorschlag::before{
+  background:linear-gradient(110deg, var(--lila-400) 20%, var(--lila-300) 42%, var(--lila-500) 60%, var(--lila-600) 100%);
+  background-size:220% 100%;
+  animation:zustand-schimmer 2.8s ease-in-out infinite;
+}
+@keyframes zustand-schimmer{0%,100%{background-position:0% 0}50%{background-position:100% 0}}
+.zustand-wort{font-size:13px;color:var(--nebel-500)}
+@media (prefers-reduced-transparency: reduce){
+  .zustand{background:var(--nebel-050);border-color:var(--nebel-200)}
+}
+@media (prefers-reduced-motion:reduce){
+  .zustand.vorschlag::before{animation:none}
+}
 
 /* ---------- Eingabe: Name darüber, Hilfe darunter ---------- */
 .feld label{display:block;font-size:14px;font-weight:600;margin-bottom:6px}
