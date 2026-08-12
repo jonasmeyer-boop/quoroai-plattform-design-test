@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V31 (Mitlese-Schalter an der Gesprächszeit, Kopfzeile vier Griffe) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V32 (Mitlese-Schalter als Pille an der Eingabe) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -166,23 +166,31 @@ nav .griffe{display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shri
   box-shadow:0 4px 16px rgba(16,19,26,.1);
 }
 body.gespraeche-offen{overflow:hidden}
-/* Der Mitlese-Schalter lebt an der Gesprächszeit — Status gehört zum Gespräch,
-   nicht in die Kopfzeile. Er zieht mit jedem neuen Kapitel um. */
+/* Der Mitlese-Schalter wohnt an der Eingabe — er regelt, wer liest, was hier
+   geschrieben wird, und ist darum immer sichtbar, bevor man tippt. */
+#eingabe .privat-zeile{display:flex;justify-content:flex-end;margin-bottom:10px}
 #freigabe{
-  cursor:pointer;border:0;background:none;padding:0;
-  display:inline-flex;align-items:center;gap:6px;margin-left:12px;
-  font-size:12px;font-weight:700;color:var(--grau);letter-spacing:0;
-  white-space:nowrap;transition:color .25s ease;
+  pointer-events:auto;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:7px 14px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:12px;font-weight:700;color:var(--grau);
+  box-shadow:0 4px 16px rgba(16,19,26,.06);white-space:nowrap;
+  transition:color .25s ease,border-color .25s ease,background .25s ease,opacity .3s ease;
 }
-#freigabe::before{content:'·';margin-right:6px;font-weight:600;color:var(--grau)}
+#freigabe:hover{border-color:var(--blau);color:var(--tinte)}
 #freigabe .punkt-f{
-  width:7px;height:7px;border-radius:999px;background:var(--grau);
-  transition:background .25s ease;
+  width:8px;height:8px;border-radius:999px;background:var(--grau);
+  transition:background .25s ease,box-shadow .25s ease;
 }
-#freigabe:hover{color:var(--blau)}
-#freigabe.geteilt{color:var(--blau)}
-#freigabe.geteilt .punkt-f{background:var(--blau)}
-.kapitel.zu #freigabe{display:none}
+#freigabe.geteilt{
+  color:var(--blau);
+  border-color:color-mix(in srgb, var(--blau) 30%, transparent);
+  background:color-mix(in srgb, var(--blau) 7%, white);
+}
+#freigabe.geteilt .punkt-f{
+  background:var(--blau);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--blau) 18%, transparent);
+}
 #freigabe-frage{
   position:fixed;top:58px;right:auto;z-index:56;
   width:min(320px,calc(100vw - 32px));
@@ -250,7 +258,7 @@ body.regal-offen{overflow:hidden}
 #akte{
   position:relative;
   max-width:760px;margin:0 auto;
-  padding:112px 24px 180px;
+  padding:112px 24px 220px;
 }
 
 /* Stift-Ebene: je Kapitel eine Zeichen-Lage, klappt mit dem Kapitel zu */
@@ -790,7 +798,9 @@ body.blatt-offen{overflow:hidden}
   #akte-griff{padding:8px 12px}
   .denken{gap:12px;height:56px}
   .denken svg{width:160px;height:52px}
-  #akte{padding-top:96px;padding-bottom:224px}
+  #akte{padding-top:96px;padding-bottom:264px}
+  /* solange die Handschrift „ich schreibe noch" über dem Feld steht, tritt der Schalter zurück */
+  #eingabe:has(#warte-hinweis.da) #freigabe{opacity:.15;pointer-events:none}
 }
 </style>
 <script src="marke.js"></script>
@@ -811,10 +821,6 @@ body.blatt-offen{overflow:hidden}
   </div>
 </nav>
 
-<!-- Der Mitlese-Schalter wartet hier, bis das erste Kapitel ihn zu sich holt -->
-<button id="freigabe" type="button" aria-pressed="false" title="Wer darf dieses Gespräch lesen?" hidden>
-  <span class="punkt-f"></span><span id="freigabe-text">Nur für dich</span>
-</button>
 
 <div id="regal" aria-hidden="true">
   <div class="innen">
@@ -879,6 +885,12 @@ body.blatt-offen{overflow:hidden}
 
 <div id="eingabe">
   <div id="anlagen" hidden></div>
+  <!-- Der Mitlese-Schalter wohnt an der Eingabe: er regelt, wer sieht, was du hier schreibst -->
+  <div class="privat-zeile">
+    <button id="freigabe" type="button" aria-pressed="false" title="Wer darf dieses Gespräch lesen?">
+      <span class="punkt-f"></span><span id="freigabe-text">Nur für dich</span>
+    </button>
+  </div>
   <div class="zeile">
     <div id="warte-hinweis" aria-live="polite">Einen Moment — ich schreibe noch.</div>
     <button id="anhang-knopf" type="button" aria-label="Unterlage anhängen" title="Unterlage anhängen">
@@ -1873,10 +1885,10 @@ body.blatt-offen{overflow:hidden}
       document.getElementById('ff-marke').textContent = document.getElementById('marke-name').textContent;
       frage.hidden = !frage.hidden;
       if (!frage.hidden) {
-        /* das Fenster öffnet sich am Schalter, nicht irgendwo oben rechts */
+        /* das Fenster öffnet sich über dem Schalter, rechtsbündig an ihm */
         var r = knopf.getBoundingClientRect();
-        frage.style.top = Math.round(r.bottom + 10) + 'px';
-        frage.style.left = Math.round(Math.max(16, Math.min(r.left, window.innerWidth - frage.offsetWidth - 16))) + 'px';
+        frage.style.top = Math.round(r.top - frage.offsetHeight - 12) + 'px';
+        frage.style.left = Math.round(Math.max(16, r.right - frage.offsetWidth)) + 'px';
       }
     });
     document.getElementById('ff-ja').addEventListener('click', function(){ frage.hidden = true; setze(true); });
@@ -2207,10 +2219,6 @@ body.blatt-offen{overflow:hidden}
       if (sec.classList.contains('zu')) klappeAuf(sec);
       else if (sec !== aktuellesKapitel) klappeZu(sec);
     });
-    /* Der Mitlese-Schalter zieht ans neue Kapitel — Status wohnt beim Gespräch */
-    var mitlese = document.getElementById('freigabe');
-    sec.querySelector('.frage').appendChild(mitlese);
-    mitlese.hidden = false;
     akte.appendChild(sec);
     aktuellesKapitel = sec;
     /* Mitgebrachte Unterlagen liegen zuerst auf dem Tisch */
