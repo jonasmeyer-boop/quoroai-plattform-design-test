@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V6 (V5 + gleitender Schreibfluss, Kamera-Folge, Denkspur) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V7 (V6 + Denkbühne: neun pulsierende Szenen im Wechsel) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -172,17 +172,18 @@ body.hirn #hirn-lampe{display:inline-flex}
 
 /* Denkspur: der Stift denkt sichtbar nach */
 .denken{
-  display:flex;align-items:center;gap:16px;margin-top:22px;height:48px;
+  display:flex;align-items:center;gap:18px;margin-top:22px;height:72px;
   opacity:0;translate:0 8px;
   transition:opacity .32s ease,translate .32s var(--feder),height .32s var(--feder),margin-top .32s var(--feder);
 }
 .denken.da{opacity:1;translate:none}
 .denken.weg{opacity:0;translate:0 -8px;height:0;margin-top:0;overflow:hidden}
-.denken svg{width:150px;height:48px;flex-shrink:0;overflow:visible}
-.denken svg path{
-  fill:none;stroke:var(--stift);stroke-width:2.2;
-  stroke-linecap:round;stroke-linejoin:round;opacity:.75;
-}
+.denken svg{width:220px;height:72px;flex-shrink:0;overflow:visible}
+.denken svg .strichlein{fill:none;stroke:var(--stift);stroke-linecap:round;stroke-linejoin:round}
+.denken svg .punkt{fill:var(--stift)}
+.denken svg .ringlein{fill:none;stroke:var(--stift)}
+.denken svg .zart{fill:none;stroke:var(--stift);opacity:.13}
+.denken svg text{fill:var(--stift);font-family:'Manrope',sans-serif}
 .denk-text{
   font-size:14px;font-weight:600;
   background:linear-gradient(90deg,var(--grau) 35%,var(--blau) 50%,var(--grau) 65%);
@@ -400,6 +401,8 @@ body.hirn #hirn-lampe{display:inline-flex}
   .vergleich{grid-template-columns:1fr;text-align:left}
   .vergleich .dazwischen{transform:rotate(90deg);justify-self:start;margin-left:24px}
   .stift-notiz{font-size:19px}
+  .denken{gap:12px;height:56px}
+  .denken svg{width:160px;height:52px}
   #akte{padding-top:96px}
 }
 </style>
@@ -902,7 +905,7 @@ body.hirn #hirn-lampe{display:inline-flex}
       return { weg: function(){ box.remove(); return Promise.resolve(); } };
     }
     var svg = document.createElementNS(NS, 'svg');
-    svg.setAttribute('viewBox', '0 0 150 48');
+    svg.setAttribute('viewBox', '0 0 220 72');
     svg.setAttribute('aria-hidden', 'true');
     var wort = document.createElement('span');
     wort.className = 'denk-text';
@@ -925,92 +928,224 @@ body.hirn #hirn-lampe{display:inline-flex}
       }, 260);
     }, 2600);
 
-    function zieh(w){
-      var pf = document.createElementNS(NS, 'path');
-      pf.setAttribute('d', w.d);
-      if (w.breite) pf.setAttribute('stroke-width', w.breite);
-      svg.appendChild(pf);
-      var len = pf.getTotalLength();
-      pf.style.strokeDasharray = len;
-      pf.style.strokeDashoffset = len;
-      pf.style.transition = 'stroke-dashoffset ' + w.dauer + 'ms cubic-bezier(.45,.05,.55,.95)';
-      void pf.getBoundingClientRect();
-      pf.style.strokeDashoffset = 0;
-      return new Promise(function(f){ setTimeout(f, w.dauer + 40); });
+    /* Neun lebende Szenen — alle pulsieren dauerhaft, pro Frage eine andere,
+       bei langem Nachdenken wechseln sie mit Überblendung durch. */
+    var W = 220, H = 72, MX = W / 2, MY = H / 2;
+    function el(name, attrs, ziel){
+      var e = document.createElementNS(NS, name);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      ziel.appendChild(e);
+      return e;
     }
-    /* Jede Figur ist ein kleiner Gedanke: Schleife, Kurve, Einkreisen, Fragezeichen, Welle, Rechnung */
-    function schleife(){
-      var b = zufall(8, 10), a = b * .62, pts = [];
-      for (var t = 0; t <= Math.PI * 4.6; t += .22) {
-        pts.push([12 + a * t - b * Math.sin(t) + zufall(-.6, .6), 26 - b * Math.cos(t) + zufall(-.6, .6)]);
+    /* Tinten-Sonar: ein Kern atmet, Ringe laufen hinaus */
+    function sonar(g){
+      var kern = el('circle', {cx:MX, cy:MY, r:5, 'class':'punkt'}, g);
+      var ringe = [], naechster = 0;
+      return function(t){
+        kern.setAttribute('r', 5 + Math.sin(t * 3.1) * 1.6);
+        if (t >= naechster) { ringe.push({e: el('circle', {cx:MX, cy:MY, r:6, 'class':'ringlein'}, g), start: t}); naechster = t + .8; }
+        for (var i = ringe.length - 1; i >= 0; i--) {
+          var a = (t - ringe[i].start) / 1.9;
+          if (a >= 1) { ringe[i].e.remove(); ringe.splice(i, 1); continue; }
+          ringe[i].e.setAttribute('r', 6 + a * 27);
+          ringe[i].e.setAttribute('stroke-width', 2.2 * (1 - a) + .3);
+          ringe[i].e.setAttribute('opacity', .55 * (1 - a));
+        }
+      };
+    }
+    /* Kreisende Gedanken: drei Punkte auf Bahnen, verschieden schnell */
+    function orbit(g){
+      var bahnen = [{rx:34, ry:10, v:1.4, r:3.4}, {rx:58, ry:16, v:-.85, r:3}, {rx:82, ry:23, v:.55, r:2.6}];
+      bahnen.forEach(function(b){
+        el('ellipse', {cx:MX, cy:MY, rx:b.rx, ry:b.ry, 'class':'zart', 'stroke-width':1}, g);
+        b.e = el('circle', {cx:MX, cy:MY, r:b.r, 'class':'punkt'}, g);
+        b.ph = zufall(0, 6.28);
+      });
+      var kern = el('circle', {cx:MX, cy:MY, r:4.5, 'class':'punkt'}, g);
+      return function(t){
+        kern.setAttribute('r', 4.5 + Math.sin(t * 2.6) * 1.2);
+        bahnen.forEach(function(b){
+          var a = b.ph + t * b.v;
+          b.e.setAttribute('cx', MX + Math.cos(a) * b.rx);
+          b.e.setAttribute('cy', MY + Math.sin(a) * b.ry);
+          b.e.setAttribute('r', b.r * (1 + .25 * Math.sin(t * 3 + b.ph)));
+        });
+      };
+    }
+    /* Punktschwarm: eine Welle läuft durch den Ring */
+    function schwarm(g){
+      var punkte = [], N = 18, R = 26;
+      for (var i = 0; i < N; i++) {
+        var a = i / N * Math.PI * 2;
+        punkte.push({e: el('circle', {cx: MX + Math.cos(a) * R * 1.9, cy: MY + Math.sin(a) * R * .58, r:2.2, 'class':'punkt'}, g), ph: a});
       }
-      return [{d: glatt(pts), dauer: 1000}];
+      return function(t){
+        punkte.forEach(function(p){
+          var s = .5 + .5 * Math.sin(t * 3.4 - p.ph * 2);
+          p.e.setAttribute('r', 1.8 + s * 2.6);
+          p.e.setAttribute('opacity', .35 + s * .65);
+        });
+      };
     }
-    function kurve(){
-      var pts = [], n = 7;
+    /* Fließende Doppelwelle, Amplitude atmet */
+    function fliesswelle(g){
+      var p1 = el('path', {'class':'strichlein', 'stroke-width':2.4}, g);
+      var p2 = el('path', {'class':'strichlein', 'stroke-width':2, opacity:.3}, g);
+      function bahn(t, ph, amp){
+        var d = 'M8 ' + MY;
+        for (var x = 8; x <= W - 8; x += 4) d += ' L' + x + ' ' + (MY + amp * Math.sin(x / 16 - t * 3.4 + ph)).toFixed(1);
+        return d;
+      }
+      return function(t){
+        var amp = 8 + 5 * Math.sin(t * 1.4);
+        p1.setAttribute('d', bahn(t, 0, amp));
+        p2.setAttribute('d', bahn(t, 1.9, amp * .7));
+      };
+    }
+    /* Tanzende Balken: der Berater rechnet hörbar */
+    function balken(g){
+      var st = [], N = 7, abst = 17, x0 = MX - (N - 1) / 2 * abst;
+      for (var i = 0; i < N; i++) {
+        st.push({e: el('line', {x1: x0 + i * abst, x2: x0 + i * abst, y1: MY, y2: MY, 'class':'strichlein', 'stroke-width':7}, g), ph: i * .85});
+      }
+      return function(t){
+        st.forEach(function(s, i){
+          var h = 5 + 11 * Math.abs(Math.sin(t * 2.3 + s.ph)) + 3 * Math.sin(t * 5.1 + i);
+          s.e.setAttribute('y1', MY - h);
+          s.e.setAttribute('y2', MY + h);
+        });
+      };
+    }
+    /* Flimmernde Ziffern: Zahlen rasseln durch, ab und zu € und % */
+    function ziffern(g){
+      var pool = '0123456789012345678901234567890123456789€%';
+      var slots = [], N = 4, abst = 30, x0 = MX - (N - 1) / 2 * abst;
+      for (var i = 0; i < N; i++) {
+        var tx = el('text', {x: x0 + i * abst, y: MY + 10, 'text-anchor':'middle', 'font-size':'28', 'font-weight':'800'}, g);
+        tx.textContent = String(i * 2 + 1);
+        slots.push({e: tx, naechst: zufall(0, .12), ph: i * 1.7});
+      }
+      return function(t){
+        slots.forEach(function(s){
+          if (t >= s.naechst) {
+            s.e.textContent = pool[Math.floor(zufall(0, pool.length))];
+            s.naechst = t + zufall(.07, .18);
+          }
+          s.e.setAttribute('opacity', .55 + .45 * Math.sin(t * 5 + s.ph));
+        });
+      };
+    }
+    /* Synapsen: Impulse wandern durchs Netz, Knoten blitzen auf */
+    function synapsen(g){
+      var kn = [[24,22],[62,56],[105,14],[118,60],[168,44],[200,18],[84,34]];
+      var kanten = [[0,1],[1,6],[6,2],[6,3],[3,4],[2,4],[4,5],[2,5],[0,6]];
+      kanten.forEach(function(k){
+        el('line', {x1:kn[k[0]][0], y1:kn[k[0]][1], x2:kn[k[1]][0], y2:kn[k[1]][1], 'class':'zart', 'stroke-width':1.2}, g);
+      });
+      var kreise = kn.map(function(p){ return el('circle', {cx:p[0], cy:p[1], r:3, 'class':'punkt', opacity:.45}, g); });
+      var blitz = kn.map(function(){ return -9; });
+      var pulse = [], naechster = .2;
+      return function(t){
+        if (t >= naechster) {
+          var k = kanten[Math.floor(zufall(0, kanten.length))];
+          var richtung = zufall(0, 1) < .5 ? [k[1], k[0]] : k;
+          pulse.push({von: kn[richtung[0]], nach: kn[richtung[1]], ziel: richtung[1], start: t, dauer: zufall(.45, .8), e: el('circle', {r:2.6, 'class':'punkt'}, g)});
+          naechster = t + zufall(.25, .55);
+        }
+        for (var i = pulse.length - 1; i >= 0; i--) {
+          var p = pulse[i], a = (t - p.start) / p.dauer;
+          if (a >= 1) { p.e.remove(); blitz[p.ziel] = t; pulse.splice(i, 1); continue; }
+          p.e.setAttribute('cx', p.von[0] + (p.nach[0] - p.von[0]) * a);
+          p.e.setAttribute('cy', p.von[1] + (p.nach[1] - p.von[1]) * a);
+        }
+        kreise.forEach(function(c, i){
+          var s = Math.max(0, 1 - (t - blitz[i]) / .6);
+          c.setAttribute('r', 3 + s * 3);
+          c.setAttribute('opacity', .45 + s * .55);
+        });
+      };
+    }
+    /* Endlos schreibende Stiftschleife: die Tinte läuft immer weiter */
+    function endlosschleife(g){
+      var b = 9.6, a = 5.2, pts = [];
+      for (var t2 = 0; t2 <= Math.PI * 2 * 5.2; t2 += .2) {
+        pts.push([16 + a * t2 - b * Math.sin(t2), MY - 2 - b * Math.cos(t2)]);
+      }
+      var p = el('path', {'class':'strichlein', 'stroke-width':2.4, d: glatt(pts)}, g);
+      var L = p.getTotalLength(), seg = L * .3, off = 0;
+      p.setAttribute('stroke-dasharray', seg + ' ' + (L - seg));
+      return function(t, dt){
+        off -= dt * 95;
+        p.setAttribute('stroke-dashoffset', off);
+        p.setAttribute('stroke-width', 2.1 + .7 * Math.sin(t * 2.8));
+      };
+    }
+    /* Skizzierter Kreisel: ein handgezeichneter Ring dreht und atmet */
+    function kreisel(g){
+      var pts = [], n = 26;
       for (var i = 0; i <= n; i++) {
-        pts.push([14 + 96 * i / n, 38 - 24 * Math.pow(i / n, 1.3) + zufall(-2.5, 2.5)]);
+        var a = i / n * Math.PI * 2;
+        pts.push([MX + Math.cos(a) * (21 + zufall(-1.5, 1.5)), MY + Math.sin(a) * (17 + zufall(-1.5, 1.5))]);
       }
-      var e = pts[n];
-      return [
-        {d: glatt(pts), dauer: 720},
-        {d: 'M' + (e[0] - 9) + ' ' + (e[1] + 6) + ' L' + (e[0] + 2) + ' ' + (e[1] - 1) + ' L' + (e[0] - 8) + ' ' + (e[1] - 8), dauer: 240}
-      ];
+      var p = el('path', {'class':'strichlein', 'stroke-width':2.6, d: glatt(pts) + 'Z'}, g);
+      var L = p.getTotalLength(), seg = L * .62, off = 0;
+      return function(t, dt){
+        off -= dt * 70;
+        p.setAttribute('stroke-dasharray', seg + ' ' + (L - seg));
+        p.setAttribute('stroke-dashoffset', off);
+        p.setAttribute('stroke-width', 2 + .8 * Math.sin(t * 3.2));
+      };
     }
-    function kreisen(){
-      var start = zufall(0, Math.PI * 2), runden = zufall(1.5, 1.8);
-      var n = Math.round(18 * runden), pts = [];
-      for (var i = 0; i <= n; i++) {
-        var a = start + i / n * Math.PI * 2 * runden;
-        pts.push([75 + Math.cos(a) * (44 + zufall(-3, 3)), 24 + Math.sin(a) * (13 + zufall(-2, 2))]);
+    var SZENEN = [sonar, orbit, schwarm, fliesswelle, balken, ziffern, synapsen, endlosschleife, kreisel];
+
+    /* Gemischter Stapel: jede Szene kommt einmal dran, bevor sich eine wiederholt */
+    var stapel = [], vorige = -1;
+    function ziehe(){
+      if (!stapel.length) {
+        for (var i = 0; i < SZENEN.length; i++) stapel.push(i);
+        for (var j = stapel.length - 1; j > 0; j--) {
+          var z = Math.floor(zufall(0, j + 1));
+          var tausch = stapel[j]; stapel[j] = stapel[z]; stapel[z] = tausch;
+        }
+        if (stapel[stapel.length - 1] === vorige) {
+          stapel[stapel.length - 1] = stapel[0];
+          stapel[0] = vorige;
+        }
       }
-      return [{d: glatt(pts), dauer: 950}];
+      return stapel.pop();
     }
-    function fragezeichen(){
-      var x = 70 + zufall(-3, 3);
-      return [
-        {d: 'M' + (x - 9) + ' 15 Q' + (x - 6) + ' 6 ' + (x + 2) + ' 7 Q' + (x + 12) + ' 8 ' + (x + 10) + ' 17 Q' + (x + 8) + ' 24 ' + x + ' 27 L' + (x - 1) + ' 32', dauer: 620},
-        {d: 'M' + (x - 2) + ' 40 a1.8 1.8 0 1 0 .2 0', dauer: 160, breite: 3}
-      ];
-    }
-    function welle(){
-      var pts = [];
-      for (var x = 12; x <= 134; x += 5) {
-        var f = 1 - (x - 12) / 122;
-        pts.push([x, 26 + (2.5 + 8 * f) * Math.sin(x / 8) + zufall(-.6, .6)]);
+    var gruppe = null, tickFn = null;
+    function neueSzene(){
+      var alt = gruppe;
+      if (alt) {
+        alt.style.transition = 'opacity .28s ease';
+        alt.style.opacity = 0;
+        setTimeout(function(){ alt.remove(); }, 300);
       }
-      return [{d: glatt(pts), dauer: 950}];
+      var wahl = ziehe();
+      vorige = wahl;
+      gruppe = document.createElementNS(NS, 'g');
+      gruppe.style.opacity = 0;
+      svg.appendChild(gruppe);
+      requestAnimationFrame(function(){ gruppe.style.transition = 'opacity .3s ease'; gruppe.style.opacity = 1; });
+      tickFn = SZENEN[wahl](gruppe);
     }
-    function rechnung(){
-      return [
-        {d: 'M38 16 L38 32', dauer: 170},
-        {d: 'M30 24 L46 24', dauer: 170},
-        {d: 'M60 24 L88 24 M88 24 L81 18 M88 24 L81 30', dauer: 330},
-        {d: 'M101 26 L108 33 L121 13', dauer: 300, breite: 2.6}
-      ];
+    var start = performance.now(), letzteT = start;
+    function schleifer(now){
+      if (!lebt) return;
+      var dt = Math.min((now - letzteT) / 1000, .05); letzteT = now;
+      if (tickFn) tickFn((now - start) / 1000, dt);
+      requestAnimationFrame(schleifer);
     }
-    var figuren = [schleife, kurve, kreisen, fragezeichen, welle, rechnung];
-    (async function(){
-      var vorige = -1;
-      while (lebt) {
-        var wahl;
-        do { wahl = Math.floor(zufall(0, figuren.length)); } while (wahl === vorige);
-        vorige = wahl;
-        var wege = figuren[wahl]();
-        for (var i = 0; i < wege.length && lebt; i++) await zieh(wege[i]);
-        if (!lebt) break;
-        await warte(430);
-        var alte = Array.prototype.slice.call(svg.children);
-        alte.forEach(function(pf){ pf.style.transition = 'opacity .3s ease'; pf.style.opacity = 0; });
-        await warte(320);
-        alte.forEach(function(pf){ pf.remove(); });
-      }
-    })();
+    neueSzene();
+    requestAnimationFrame(schleifer);
+    var szenenTakt = setInterval(function(){ if (lebt) neueSzene(); }, 4200);
 
     return {
       weg: function(){
         lebt = false;
         clearInterval(wechsel);
+        clearInterval(szenenTakt);
         box.classList.add('weg');
         return warte(330).then(function(){ box.remove(); });
       }
