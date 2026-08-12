@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V19 (V18 + Gesprächsliste: jedes Gespräch öffnet seinen eigenen Raum) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V20 (V19 + Mensch-Moment ehrlich: Anfrage mit Status und Zurückziehen statt Sofort-Buchung) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -477,6 +477,22 @@ body.blatt-offen{overflow:hidden}
   display:inline-flex;align-items:center;justify-content:center;
   background:color-mix(in srgb, var(--blau) 10%, transparent);color:var(--blau);font-weight:800;font-size:14px;
 }
+
+/* Anfrage an einen Menschen: ehrlicher Status statt Sofort-Buchung */
+.karte.anfrage h3{font-size:16px;font-weight:800;letter-spacing:-.01em}
+.karte.anfrage .anfrage-kopf{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.anfrage-status{flex-shrink:0;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px}
+.anfrage-status.offen{color:#a06008;background:rgba(178,109,10,.12)}
+.anfrage-status.steht{color:#fff;background:var(--blau)}
+.anfrage-status.weg{color:var(--grau);background:rgba(16,19,26,.06)}
+.karte.anfrage .anfrage-zeile{font-size:13.5px;color:var(--grau);margin-top:8px}
+.karte.anfrage .anfrage-aktion{margin-top:14px}
+.karte.anfrage .anfrage-aktion button{
+  padding:8px 16px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:13px;font-weight:700;cursor:pointer;
+  transition:border-color .2s ease,color .2s ease;
+}
+.karte.anfrage .anfrage-aktion button:hover{border-color:#a06008;color:#a06008}
 
 /* Bestätigung */
 .bestaetigung{display:flex;align-items:center;gap:16px}
@@ -1341,6 +1357,26 @@ body.blatt-offen{overflow:hidden}
     return k;
   }
 
+  function baueAnfrage(d){
+    var k = karteAus(
+      '<div class="anfrage-kopf"><h3>Gespräch mit einem Menschen</h3><span class="anfrage-status offen">Anfrage liegt vor</span></div>' +
+      '<div class="anfrage-zeile"></div>' +
+      '<div class="anfrage-aktion"><button type="button">Anfrage zurückziehen</button></div>',
+      'anfrage', d.sk);
+    k.querySelector('.anfrage-zeile').textContent =
+      d.wer + ' · ' + d.grund + (d.wunsch ? ' · Wunsch: ' + d.wunsch : '');
+    return k;
+  }
+  function anfrageStatus(k, art, text){
+    var s = k.querySelector('.anfrage-status');
+    s.className = 'anfrage-status ' + art;
+    s.textContent = text;
+    if (art !== 'offen') {
+      var a = k.querySelector('.anfrage-aktion');
+      if (a) a.remove();
+    }
+  }
+
   function baueBestaetigung(text, sk){
     return karteAus(
       '<div class="bestaetigung"><svg viewBox="0 0 44 44" aria-hidden="true">' +
@@ -2081,7 +2117,7 @@ body.blatt-offen{overflow:hidden}
     { probe: /(mensch|termin|berater|buch|anruf|sprechen)/i,
       frage: 'Buch mir einen Menschen.',
       schritte: [
-        {t: 'Gern. Für Preis und Marge ist Dr. Anna Vogelsang die Richtige. Sie hat diese Woche drei Fenster, such dir eins aus:'},
+        {t: 'Gern. Für Preis und Marge ist Dr. Anna Vogelsang die Richtige. Ich lege ihr eine Anfrage hin — gib ihr ein Wunschfenster mit:'},
         {kalender: ['Donnerstag, 10:00', 'Donnerstag, 16:00', 'Freitag, 9:00']}
       ]},
     /* Grenz-Momente zum Vorführen: 'kontingent', 'ausgelastet', 'ausfall' tippen */
@@ -2131,12 +2167,35 @@ body.blatt-offen{overflow:hidden}
     (async function(){
       kamera.start();
       await warte(350);
-      await stroeme(kapitel, 'Steht: ' + slot + ' mit Dr. Anna Vogelsang. Sie bekommt vorab, was wir hier besprochen haben.');
-      var k = baueBestaetigung('Termin bestätigt · ' + slot, 'termin');
+      await stroeme(kapitel, 'Angefragt. Dr. Anna Vogelsang bekommt deine Anfrage samt Wunschfenster und allem, was wir besprochen haben — sobald sie antwortet, siehst du es hier.');
+      var zustand = {entschieden: false};
+      var k = baueAnfrage({wer: 'Dr. Anna Vogelsang', grund: 'Preis und Marge', wunsch: slot, sk: 'anfrage'});
+      k.querySelector('.anfrage-aktion button').addEventListener('click', function(){
+        if (zustand.entschieden) return;
+        zustand.entschieden = true;
+        anfrageStatus(k, 'weg', 'Zurückgezogen');
+        (async function(){
+          await stroeme(kapitel, 'Zurückgezogen — kein Problem, jederzeit wieder.');
+          zeigeChips(kapitel, ['Wie läuft mein Geschäft?', 'Was bringt mir das Preismodell?']);
+        })();
+      });
       kapitel.querySelector('.lauf').appendChild(k);
       runter();
       await materialisiere(k);
-      await stift.notiz(kapitel, k, 'steht!', 'rechts');
+      kamera.halt();
+      /* Vorführung: die Antwort des Menschen kommt nach kurzer Zeit —
+         im Produkt entscheidet hier wirklich jemand. */
+      await warte(6500);
+      if (zustand.entschieden) return;
+      zustand.entschieden = true;
+      kamera.start();
+      anfrageStatus(k, 'steht', 'Termin steht');
+      await stroeme(kapitel, 'Dr. Anna Vogelsang hat bestätigt: ' + slot + '. Sie bekommt vorab, was wir hier besprochen haben.');
+      var b = baueBestaetigung('Termin bestätigt · ' + slot, 'termin');
+      kapitel.querySelector('.lauf').appendChild(b);
+      runter();
+      await materialisiere(b);
+      await stift.notiz(kapitel, b, 'steht!', 'rechts');
       zeigeChips(kapitel, ['Wie läuft mein Geschäft?', 'Was bringt mir das Preismodell?']);
       kamera.halt();
     })();
