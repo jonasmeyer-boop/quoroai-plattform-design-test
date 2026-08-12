@@ -7,44 +7,95 @@
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="system.css">
 <style>
-/* Marker: SYSTEM-V2 · Schauschrift entschieden: Clash Display (Jonas, 2026-08-12).
-   Tokens und Bausteine wohnen in system.css; hier nur das Schaufenster. */
+/* Marker: SYSTEM-V3 · Der Glas-Look (Jonas, 2026-08-12): Apple-Glas als Material
+   für Chrom auf weißem Grund, das Lila leuchtet dahinter. Tokens in system.css. */
 
 *{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
 .rahmen{max-width:1080px;margin:0 auto;padding:0 24px}
+section{scroll-margin-top:96px}
 
-/* ---------- Kopfzeile ---------- */
+/* ---------- Kopfzeile: Glas ---------- */
 header{
-  position:sticky;top:0;z-index:10;height:64px;
-  display:flex;align-items:center;gap:12px;
-  background:rgba(253,253,254,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  border-bottom:0.5px solid var(--nebel-200);
-  padding:0 24px;
+  position:sticky;top:0;z-index:20;height:64px;
+  display:flex;align-items:center;gap:12px;padding:0 24px;
+  border-radius:0;border-left:0;border-right:0;border-top:0;
 }
 header img{width:30px;height:30px;border-radius:7px}
 header .wortmarke{font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);font-size:19px;letter-spacing:-.01em}
 header .bereich{color:var(--nebel-500);font-size:15px;margin-left:2px}
 header .stand{margin-left:auto;font-size:14px;color:var(--nebel-500)}
+@media (max-width:700px){header .stand{display:none}}
 
-/* ---------- Bühne: das System in Aktion ---------- */
-.buehne{position:relative;overflow:hidden;padding:96px 0 80px}
-.buehne::before{ /* der eine ruhige Glanzmoment der Seite */
-  content:"";position:absolute;inset:-40% -20% auto auto;width:70%;height:120%;
-  background:
-    radial-gradient(42% 46% at 68% 38%, var(--lila-200), transparent 70%),
-    radial-gradient(30% 34% at 86% 62%, var(--lila-100), transparent 70%);
-  filter:blur(6px);pointer-events:none;
-}
-.buehne .rahmen{position:relative}
-.buehne h1{font-size:clamp(40px,6.4vw,68px);max-width:15ch}
+/* ---------- Bühne: die Glas-Lage über dem Lila ---------- */
+.buehne{position:relative;overflow:hidden;padding:110px 0 130px}
+.aurora{position:absolute;inset:0;pointer-events:none}
+.aurora i{position:absolute;border-radius:50%;filter:blur(70px);display:block}
+.aurora i:nth-child(1){width:44vw;height:44vw;right:-6vw;top:-12vw;background:var(--lila-300);opacity:.85;animation:treiben 26s ease-in-out infinite alternate}
+.aurora i:nth-child(2){width:30vw;height:30vw;right:18vw;top:16vw;background:var(--lila-400);opacity:.5;animation:treiben 32s ease-in-out infinite alternate-reverse}
+.aurora i:nth-child(3){width:24vw;height:24vw;right:-4vw;top:26vw;background:var(--lila-200);opacity:.9;animation:treiben 22s ease-in-out infinite alternate}
+@keyframes treiben{from{transform:translate(0,0) scale(1)}to{transform:translate(-6vw,4vw) scale(1.12)}}
+
+.buehne .rahmen{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
+.buehne h1{font-size:clamp(40px,5.8vw,64px);max-width:14ch}
 .buehne h1 em{font-style:normal;color:var(--lila-600)}
-.buehne p{margin-top:18px;max-width:44ch;font-size:19px;color:var(--nebel-600)}
+.buehne .unterzeile{margin-top:18px;max-width:42ch;font-size:19px;color:var(--nebel-600)}
 .buehne .taten{margin-top:32px;display:flex;gap:12px;flex-wrap:wrap}
+
+/* die schwebende Glas-Komposition */
+.glaslage{position:relative;min-height:360px}
+.tafel{
+  position:absolute;inset:24px 0 auto auto;width:min(400px,100%);
+  padding:24px;border-radius:var(--radius-karte);
+  animation:schweben 7s ease-in-out infinite alternate;
+}
+.tafel .kicker{font-size:13.5px;font-weight:600;color:var(--nebel-600)}
+.tafel .zahl{font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);letter-spacing:var(--schau-spur);font-size:44px;margin-top:10px}
+.tafel .deut{font-size:14px;color:var(--nebel-600);margin-top:2px}
+.tafel .vorschlag{margin-top:18px;display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius-innen)}
+.tafel .vorschlag span:last-child{font-size:14.5px}
+.chip-frei{
+  position:absolute;left:0;bottom:12px;display:flex;align-items:center;gap:10px;
+  padding:12px 16px;border-radius:var(--radius-kapsel);font-size:14.5px;
+  animation:schweben 7s ease-in-out 1.2s infinite alternate-reverse;
+}
+@keyframes schweben{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+
+/* ---------- Dock: Glas-Navigation, schwebt unten ---------- */
+.dock{
+  position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:30;
+  display:flex;gap:2px;padding:5px;border-radius:var(--radius-kapsel);
+}
+.dock a{
+  text-decoration:none;color:var(--tinte);font-size:14px;font-weight:500;
+  padding:8px 16px;border-radius:var(--radius-kapsel);min-height:36px;display:flex;align-items:center;
+  transition:background .18s var(--kurve);
+}
+.dock a:hover{background:rgba(255,255,255,.8)}
+@media (max-width:700px){.dock a{padding:8px 10px;font-size:13px}}
 
 /* ---------- Abschnitte ---------- */
 section{padding:56px 0;border-top:0.5px solid var(--nebel-200)}
 section h2{font-size:30px;margin-bottom:8px}
 section p.unter{color:var(--nebel-500);max-width:62ch;margin-bottom:32px}
+
+/* Material Glas: die Probe über Farbe */
+.glasprobe{
+  position:relative;overflow:hidden;border-radius:var(--radius-karte);
+  padding:40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;
+  background:
+    radial-gradient(60% 90% at 18% 20%, var(--lila-400), transparent 65%),
+    radial-gradient(50% 80% at 82% 30%, var(--lila-200), transparent 60%),
+    radial-gradient(70% 90% at 55% 95%, var(--lila-300), transparent 65%),
+    var(--lila-050);
+}
+.glasprobe .probe{padding:20px;border-radius:16px}
+.glasprobe .probe b{display:block;font-size:15px}
+.glasprobe .probe span{font-size:13.5px;color:var(--nebel-600)}
+.glasregeln{margin-top:24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.glasregeln .regel{background:var(--nebel-050);border-radius:var(--radius-karte);padding:24px}
+.glasregeln h3{font-size:17px;margin-bottom:10px}
+.glasregeln p{font-size:15px;color:var(--nebel-600)}
 
 /* Farben */
 .reihe-name{font-size:14px;font-weight:600;color:var(--nebel-600);margin:24px 0 10px}
@@ -69,7 +120,7 @@ section p.unter{color:var(--nebel-500);max-width:62ch;margin-bottom:32px}
 @media (max-width:700px){.muster .zeile{grid-template-columns:1fr;gap:4px}.muster .schau-1{font-size:40px}}
 
 /* Bausteine */
-.bausteine{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.bausteine{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:20px}
 .baustein{background:var(--flaeche);border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);padding:24px}
 .baustein h3{font-size:17px;margin-bottom:18px}
 .baustein .satz{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -80,39 +131,100 @@ section p.unter{color:var(--nebel-500);max-width:62ch;margin-bottom:32px}
 
 /* Raster und Radien */
 .regeln{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
-.regel{background:var(--nebel-050);border-radius:var(--radius-karte);padding:24px}
-.regel h3{font-size:17px;margin-bottom:10px}
-.regel p{font-size:15px;color:var(--nebel-600)}
+.regeln .regel{background:var(--nebel-050);border-radius:var(--radius-karte);padding:24px}
+.regeln h3{font-size:17px;margin-bottom:10px}
+.regeln p{font-size:15px;color:var(--nebel-600)}
 .radien-schau{margin-top:16px;background:var(--lila-100);border-radius:var(--radius-karte);padding:8px;width:fit-content}
 .radien-schau > div{background:var(--flaeche);border-radius:var(--radius-innen);padding:14px 22px;font-size:14px;color:var(--nebel-600)}
 .punkte8{margin-top:16px;display:flex;gap:8px;align-items:flex-end}
 .punkte8 i{display:block;width:24px;background:var(--lila-300);border-radius:6px}
 
-footer{padding:40px 0 64px;color:var(--nebel-500);font-size:14px}
+footer{padding:40px 0 110px;color:var(--nebel-500);font-size:14px}
 footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
+
+@media (max-width:900px){
+  .buehne{padding:72px 0 90px}
+  .buehne .rahmen{grid-template-columns:1fr;gap:40px}
+  .glaslage{min-height:320px}
+  .tafel{position:relative;inset:auto;margin-left:auto}
+  .chip-frei{bottom:-8px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .aurora i,.tafel,.chip-frei{animation:none}
+}
 </style>
 </head>
 <body class="quoro">
 
-<header>
+<header class="glas-dick">
   <img src="bilder/quoro-icon.svg" alt="quoroAI">
   <span class="wortmarke">quoroAI</span>
   <span class="bereich">Designsystem</span>
-  <span class="stand">Clash Display · entschieden am 12. August 2026</span>
+  <span class="stand">Clash Display · Glas-Look · 12. August 2026</span>
 </header>
 
 <div class="buehne">
+  <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="rahmen">
-    <h1>Beratung, die <em>niemals</em> den Raum verlässt.</h1>
-    <p>Ihr KI-Unternehmensberater unter Ihrer Marke. Jedes Gespräch wird Strategie, jede Strategie wird sichtbar.</p>
-    <div class="taten">
-      <button class="knopf primaer" type="button">Mandat eröffnen</button>
-      <button class="knopf leise" type="button">Das Modell ansehen</button>
+    <div>
+      <h1>Beratung, die <em>niemals</em> den Raum verlässt.</h1>
+      <p class="unterzeile">Ihr KI-Unternehmensberater unter Ihrer Marke. Jedes Gespräch wird Strategie, jede Strategie wird sichtbar.</p>
+      <div class="taten">
+        <button class="knopf primaer" type="button">Mandat eröffnen</button>
+        <button class="knopf glas" type="button">Das Modell ansehen</button>
+      </div>
+    </div>
+    <div class="glaslage">
+      <div class="tafel glas">
+        <div class="kicker">Morgenlage · Dienstag</div>
+        <div class="zahl">247.380,55 €</div>
+        <div class="deut">Freie Liquidität über alle zwölf Mandate</div>
+        <div class="vorschlag glas-lila">
+          <span class="pille lila">KI-Vorschlag</span>
+          <span>Skonto bei Hansen &amp; Söhne ziehen, spart 1.840 €.</span>
+        </div>
+      </div>
+      <div class="chip-frei glas-duenn">
+        <span class="pille aktiv">Freigegeben</span>
+        <span>Steinbach &amp; Cie. · neue Preisliste</span>
+      </div>
     </div>
   </div>
 </div>
 
-<section>
+<nav class="dock glas-dick" aria-label="Abschnitte">
+  <a href="#glas">Glas</a>
+  <a href="#farben">Farben</a>
+  <a href="#schrift">Schrift</a>
+  <a href="#bausteine">Bausteine</a>
+  <a href="#regeln">Regeln</a>
+</nav>
+
+<section id="glas">
+  <div class="rahmen">
+    <h2>Material Glas</h2>
+    <p class="unter">Das Markenzeichen des Systems: Glas schwebt über dem Lila und lässt es durchscheinen. Drei Stärken, klare Zuständigkeit, und wer weniger Transparenz wünscht, bekommt solide Flächen.</p>
+    <div class="glasprobe">
+      <div class="probe glas-dick"><b>Dickes Glas</b><span>Kopfzeile und Dock. Deckt am stärksten, bleibt immer lesbar.</span></div>
+      <div class="probe glas"><b>Glas</b><span>Schwebende Tafeln und Overlays, die Standardstärke.</span></div>
+      <div class="probe glas-duenn"><b>Dünnes Glas</b><span>Chips und leichte Schleier, fast nur ein Hauch.</span></div>
+      <div class="probe glas-lila"><b>Getöntes Glas</b><span>Nimmt die Marke ins Material, für KI-Momente.</span></div>
+    </div>
+    <div class="glasregeln">
+      <div class="regel">
+        <h3>Wo Glas hingehört</h3>
+        <p>Auf das Chrom: Kopfzeilen, Docks, Overlays, schwebende Tafeln über Farbe oder Bild. Glas braucht etwas dahinter, sonst ist es nur Grau.</p>
+      </div>
+      <div class="regel">
+        <h3>Wo Glas nichts verloren hat</h3>
+        <p>Überall, wo gelesen und gearbeitet wird: Karten mit Inhalt, Formulare, Tabellen. Dort bleibt der Grund solide weiß.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="farben">
   <div class="rahmen">
     <h2>Farbwelt</h2>
     <p class="unter">Weißer Grund, eine Akzentfarbe: das Lila aus dem Logo. Alle Stufen sind daraus abgeleitet, die Grautöne tragen denselben violetten Unterton, damit nichts fremd wirkt.</p>
@@ -153,7 +265,7 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
   </div>
 </section>
 
-<section>
+<section id="schrift">
   <div class="rahmen">
     <h2>Schrift</h2>
     <p class="unter">Die Schauschrift für Überschriften und große Zahlen ist Clash Display, der Lauftext General Sans. Beide liegen als variable Schriften im Haus, nichts wird von fremden Servern geladen.</p>
@@ -170,7 +282,7 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
   </div>
 </section>
 
-<section>
+<section id="bausteine">
   <div class="rahmen">
     <h2>Bausteine</h2>
     <p class="unter">Knöpfe als Kapseln, Zustand über Wort und Fläche statt Deko-Punkten, Felder mit Namen darüber. Alles hier kommt aus system.css.</p>
@@ -213,7 +325,7 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
   </div>
 </section>
 
-<section>
+<section id="regeln">
   <div class="rahmen">
     <h2>Raster und Radien</h2>
     <div class="regeln">
@@ -236,7 +348,7 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
 </section>
 
 <footer>
-  <div class="rahmen">quoroAI-Designsystem. Tokens und Bausteine: system.css · Entscheidung vom 12. August 2026 in der Chronik.</div>
+  <div class="rahmen">quoroAI-Designsystem. Tokens und Bausteine: system.css · Entscheidungen vom 12. August 2026 in der Chronik.</div>
 </footer>
 
 </body>

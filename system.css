@@ -1,7 +1,8 @@
 /* quoroai-plattform-design · Das quoroAI-Designsystem, eine Quelle.
    Weißer Grund, Logo-Lila #6f63e8, Schauschrift Clash Display (Jonas, 2026-08-12),
-   Lauftext General Sans. Gilt für quoroAI-gebrandete Flächen (Beratungsseite);
-   Kundenflächen bleiben White-Label über marke.js. Marker: SYSTEM-CSS-V1 */
+   Lauftext General Sans, Glas als Material für Chrom (Jonas, 2026-08-12).
+   Gilt für quoroAI-gebrandete Flächen (Beratungsseite); Kundenflächen bleiben
+   White-Label über marke.js. Marker: SYSTEM-CSS-V2 */
 
 @font-face{font-family:'Clash Display';src:url('schriften/clash-display.woff2') format('woff2');font-weight:200 700;font-display:swap}
 @font-face{font-family:'General Sans';src:url('schriften/general-sans.woff2') format('woff2');font-weight:200 700;font-display:swap}
@@ -68,7 +69,7 @@ body.quoro{
 .knopf.gefahr{background:var(--rot-fond);color:var(--rot)}
 
 /* ---------- Zustände: Wort und Fläche, keine Deko-Punkte ---------- */
-.pille{display:inline-flex;align-items:center;min-height:28px;padding:2px 12px;border-radius:var(--radius-kapsel);font-size:13.5px;font-weight:600}
+.pille{display:inline-flex;align-items:center;min-height:28px;padding:2px 12px;border-radius:var(--radius-kapsel);font-size:13.5px;font-weight:600;white-space:nowrap}
 .pille.aktiv{background:var(--gruen-fond);color:var(--gruen)}
 .pille.wartet{background:var(--bernstein-fond);color:var(--bernstein)}
 .pille.entwurf{background:var(--nebel-100);color:var(--nebel-600)}
@@ -89,6 +90,61 @@ body.quoro{
 /* ---------- Karte ---------- */
 .karte{background:var(--flaeche);border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);padding:20px}
 .karte.gehoben{box-shadow:0 10px 30px rgba(24,21,47,.06)}
+
+/* ---------- Glas: das Material für Chrom ----------
+   Angelehnt an Apples Liquid Glass, als Web-Annäherung ehrlich nachgebaut.
+   Glas trägt Kopfzeilen, Docks, Overlays und schwebende Flächen über Farbe.
+   Inhalt zum Lesen und Arbeiten bleibt solide (Karten, Felder, Tabellen). */
+.glas{
+  background:rgba(255,255,255,.42);
+  backdrop-filter:blur(28px) saturate(180%);
+  -webkit-backdrop-filter:blur(28px) saturate(180%);
+  border:1px solid rgba(255,255,255,.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.7),
+    0 20px 50px rgba(59,52,134,.16);
+  border-radius:var(--radius-karte);
+}
+.glas-dick{ /* Kopfzeilen und Docks: mehr Deckung, mehr Schärfe */
+  background:rgba(255,255,255,.62);
+  backdrop-filter:blur(40px) saturate(200%);
+  -webkit-backdrop-filter:blur(40px) saturate(200%);
+  border:1px solid rgba(255,255,255,.6);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75), 0 10px 30px rgba(59,52,134,.14);
+}
+.glas-duenn{ /* Chips und leichte Schleier */
+  background:rgba(255,255,255,.26);
+  backdrop-filter:blur(14px) saturate(160%);
+  -webkit-backdrop-filter:blur(14px) saturate(160%);
+  border:1px solid rgba(255,255,255,.45);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55), 0 10px 26px rgba(59,52,134,.12);
+}
+.glas-lila{ /* getöntes Glas, nimmt die Marke ins Material */
+  background:color-mix(in srgb, var(--lila-600) 13%, rgba(255,255,255,.30));
+  backdrop-filter:blur(24px) saturate(180%);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid rgba(255,255,255,.5);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 16px 40px rgba(59,52,134,.18);
+}
+.knopf.glas{
+  background:rgba(255,255,255,.5);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.6);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 8px 24px rgba(59,52,134,.14);
+  color:var(--tinte);
+}
+.knopf.glas:hover{background:rgba(255,255,255,.68)}
+
+/* Ohne Verlaufsfilter oder auf Wunsch: solide Ersatzflächen */
+@supports not (backdrop-filter: blur(1px)){
+  .glas,.glas-dick,.glas-duenn,.knopf.glas{background:rgba(255,255,255,.92)}
+  .glas-lila{background:var(--lila-100)}
+}
+@media (prefers-reduced-transparency: reduce){
+  .glas,.glas-dick,.glas-duenn,.knopf.glas{background:rgba(255,255,255,.96);backdrop-filter:none;-webkit-backdrop-filter:none}
+  .glas-lila{background:var(--lila-100);backdrop-filter:none;-webkit-backdrop-filter:none}
+}
 
 @media (prefers-reduced-motion:reduce){
   .knopf,.feld input,.feld textarea{transition-duration:.01ms}
