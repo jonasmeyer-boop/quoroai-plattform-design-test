@@ -6,7 +6,7 @@
 <title>Dein Berater · Übersicht</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V4 (V3 + Unterlagen, Leistungsnachweis und Rechnungen sind echte Türen) */
+/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V5 (V4 + Weißmarke und Anrede über den Marken-Kern) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -45,7 +45,10 @@ nav{
   background:linear-gradient(var(--papier) 55%, color-mix(in srgb, var(--papier) 1%, transparent));
   pointer-events:none;
 }
-nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em}
+nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .marke-logo{height:26px;width:auto;display:block}
+nav .wortmarke .marke-wechsel{cursor:pointer;pointer-events:auto}
+nav .wortmarke .marke-wechsel:hover{color:var(--blau)}
 nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
 nav .griffe{display:flex;align-items:center;gap:8px;pointer-events:auto}
 nav .griffe .glocke{
@@ -225,11 +228,12 @@ section{margin-top:52px}
   nav .wortmarke small{display:none}
 }
 </style>
+<script src="marke.js"></script>
 </head>
 <body>
 
 <nav>
-  <div class="wortmarke">Nordholm &amp; Partner<small>Beispielmarke deiner Beratung</small></div>
+  <div class="wortmarke"><img class="marke-logo" alt="" hidden><div><span data-marke-name data-logo-versteckt>Nordholm &amp; Partner</span><small class="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung · Beispielmarke wechseln</small></div></div>
   <div class="griffe">
     <button class="glocke" type="button" aria-label="Benachrichtigungen">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17 L18 17 C16.8 15.6 16.4 14.6 16.2 12.2 C16 9.2 14.6 7 12 7 C9.4 7 8 9.2 7.8 12.2 C7.6 14.6 7.2 15.6 6 17 Z M10.4 19.5 a1.8 1.8 0 0 0 3.2 0"/></svg>
@@ -248,9 +252,9 @@ section{margin-top:52px}
 <main>
   <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
   <div class="vorgruss">Guten Tag, Herr Petersen.</div>
-  <h1>Womit ringst du gerade?</h1>
+  <h1 data-du="Womit ringst du gerade?" data-sie="Womit ringen Sie gerade?">Womit ringst du gerade?</h1>
   <div class="tuer">
-    <input type="text" placeholder="Frag deine Beratung" aria-label="Deine Frage an die Beratung">
+    <input type="text" placeholder="Frag deine Beratung" data-du-ph="Frag deine Beratung" data-sie-ph="Fragen Sie Ihre Beratung" aria-label="Frage an die Beratung">
     <a class="los" href="gespraech.html" aria-label="Frage senden">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5 V6 M6.5 11.5 L12 5.5 L17.5 11.5"/></svg>
     </a>
@@ -260,11 +264,11 @@ section{margin-top:52px}
     <a href="gespraech.html">Warum schrumpft meine Marge?</a>
     <a href="gespraech.html">Buch mir einen Menschen</a>
   </div>
-  <p class="ki-hinweis">Du sprichst mit dem KI-Berater von Nordholm &amp; Partner. Er ersetzt keine Rechts- oder Steuerberatung.</p>
+  <p class="ki-hinweis"><span data-du="Du sprichst mit dem KI-Berater von " data-sie="Sie sprechen mit dem KI-Berater von ">Du sprichst mit dem KI-Berater von </span><span data-marke-name>Nordholm &amp; Partner</span>. Er ersetzt keine Rechts- oder Steuerberatung.</p>
 
   <section>
     <div class="kopfzeile">
-      <h2>Aus deinen Gesprächen</h2>
+      <h2 data-du="Aus deinen Gesprächen" data-sie="Aus Ihren Gesprächen">Aus deinen Gesprächen</h2>
     </div>
     <div class="reihe">
       <div class="karte" data-frage="Was bringt mir das Preismodell?"><div class="wert blau">+38.000 €</div><div class="label">Preismodell, rechnerisch im Jahr</div><div class="delta">ab Woche 6 wirksam</div><div class="quelle">aus „Was bringt mir das Preismodell?"</div></div>
@@ -275,13 +279,13 @@ section{margin-top:52px}
 
   <section>
     <div class="kopfzeile">
-      <h2>Deine Gespräche</h2>
+      <h2 data-du="Deine Gespräche" data-sie="Ihre Gespräche">Deine Gespräche</h2>
       <a href="gespraech.html">Neues Gespräch</a>
     </div>
     <div class="zeilen">
       <a class="zeile" href="gespraech.html"><span><span class="z-titel">Warum schrumpft meine Marge?</span><br><span class="z-meta">gestern, 16:40</span></span><span class="z-status geteilt">freigegeben</span></a>
-      <a class="zeile" href="gespraech.html"><span><span class="z-titel">Wie läuft mein Geschäft?</span><br><span class="z-meta">Montag, 9:12</span></span><span class="z-status">nur für dich</span></a>
-      <a class="zeile" href="gespraech.html"><span><span class="z-titel">Was bringt mir das Preismodell?</span><br><span class="z-meta">5. August</span></span><span class="z-status">nur für dich</span></a>
+      <a class="zeile" href="gespraech.html"><span><span class="z-titel">Wie läuft mein Geschäft?</span><br><span class="z-meta">Montag, 9:12</span></span><span class="z-status" data-du="nur für dich" data-sie="nur für Sie">nur für dich</span></a>
+      <a class="zeile" href="gespraech.html"><span><span class="z-titel">Was bringt mir das Preismodell?</span><br><span class="z-meta">5. August</span></span><span class="z-status" data-du="nur für dich" data-sie="nur für Sie">nur für dich</span></a>
     </div>
   </section>
 
@@ -308,7 +312,7 @@ section{margin-top:52px}
     </div>
     <div class="zeilen">
       <a class="zeile" href="unterlagen.html"><div class="mit-blatt"><div class="blatt"></div><span><span class="z-titel">Preismodell Benchmark</span><br><span class="z-meta">12 Seiten · gestern · Fassung 1</span></span></div><span class="z-status geteilt">neu</span></a>
-      <a class="zeile" href="unterlagen.html"><div class="mit-blatt"><div class="blatt"></div><span><span class="z-titel">Rahmenvertrag Stahl</span><br><span class="z-meta">Fassung 2 · von deiner Beratung</span></span></div><span class="z-status">geteilt am 4. August</span></a>
+      <a class="zeile" href="unterlagen.html"><div class="mit-blatt"><div class="blatt"></div><span><span class="z-titel">Rahmenvertrag Stahl</span><br><span class="z-meta" data-du="Fassung 2 · von deiner Beratung" data-sie="Fassung 2 · von Ihrer Beratung">Fassung 2 · von deiner Beratung</span></span></div><span class="z-status">geteilt am 4. August</span></a>
     </div>
   </section>
 
@@ -324,6 +328,7 @@ section{margin-top:52px}
 <script>
 (function(){
   'use strict';
+  window.Marke.anwenden();
   var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function zufall(a, b){ return a + Math.random() * (b - a); }
   /* Der Stift zieht seinen Anstrich, die Karten belichten gestaffelt */
@@ -400,7 +405,7 @@ section{margin-top:52px}
     a.addEventListener('click', function(e){ e.preventDefault(); demoHinweis('Diese Fläche entsteht gerade.'); });
   });
   document.querySelector('nav .ab').addEventListener('click', function(){
-    demoHinweis('Die Anmeldung entsteht gerade — in der Vorführung bleibst du drin.');
+    demoHinweis(window.Marke.rede('Die Anmeldung entsteht gerade — in der Vorführung bleibst du drin.', 'Die Anmeldung entsteht gerade — in der Vorführung bleiben Sie drin.'));
   });
 
   /* Die Glocke lebt: Neuigkeiten führen zu ihrem Abschnitt */

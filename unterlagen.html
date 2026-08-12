@@ -6,7 +6,7 @@
 <title>Dein Berater · Unterlagen</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Unterlagen: alles, was die Beratung freigegeben hat · Marker: UNTERLAGEN-V1 */
+/* quoroai-plattform-design · Unterlagen: alles, was die Beratung freigegeben hat · Marker: UNTERLAGEN-V2 (Weißmarke + Anrede) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -37,7 +37,10 @@ nav{
   padding:0 max(24px,calc((100vw - 880px)/2));
   background:linear-gradient(var(--papier) 55%, color-mix(in srgb, var(--papier) 1%, transparent));
 }
-nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em}
+nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .marke-logo{height:26px;width:auto;display:block}
+nav .wortmarke .marke-wechsel{cursor:pointer;pointer-events:auto}
+nav .wortmarke .marke-wechsel:hover{color:var(--blau)}
 nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
 nav .zurueck{
   padding:9px 16px;border-radius:999px;border:0.5px solid var(--linie);
@@ -143,11 +146,12 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
   nav .wortmarke small{display:none}
 }
 </style>
+<script src="marke.js"></script>
 </head>
 <body>
 
 <nav>
-  <div class="wortmarke">Nordholm &amp; Partner<small>Beispielmarke deiner Beratung</small></div>
+  <div class="wortmarke"><img class="marke-logo" alt="" hidden><div><span data-marke-name data-logo-versteckt>Nordholm &amp; Partner</span><small class="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung · Beispielmarke wechseln</small></div></div>
   <a class="zurueck" href="uebersicht.html">← Zur Übersicht</a>
 </nav>
 <div id="demo-hinweis">Vorführung — hier läge die echte Datei.</div>
@@ -155,7 +159,7 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
 <main>
   <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
   <h1>Unterlagen</h1>
-  <p class="unter">Alles, was deine Beratung für dich freigegeben hat — mit jeder Fassung.</p>
+  <p class="unter" data-du="Alles, was deine Beratung für dich freigegeben hat — mit jeder Fassung." data-sie="Alles, was Ihre Beratung für Sie freigegeben hat — mit jeder Fassung.">Alles, was deine Beratung für dich freigegeben hat — mit jeder Fassung.</p>
 
   <div class="suche">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 17 a6.5 6.5 0 1 0 0-13 a6.5 6.5 0 0 0 0 13 Z M15.5 15.5 L20.5 20.5"/></svg>
@@ -164,12 +168,13 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
   <div class="treffer-zeile" id="treffer" aria-live="polite"></div>
 
   <div class="zeilen" id="liste"></div>
-  <p class="leer" id="leer" hidden><span class="handschrift">Nichts gefunden.</span>Such mit einem anderen Wort — oder frag deinen Berater danach, der kennt jede Seite.</p>
+  <p class="leer" id="leer" hidden><span class="handschrift">Nichts gefunden.</span><span data-du="Such mit einem anderen Wort — oder frag deinen Berater danach, der kennt jede Seite." data-sie="Suchen Sie mit einem anderen Wort — oder fragen Sie Ihren Berater danach, der kennt jede Seite.">Such mit einem anderen Wort — oder frag deinen Berater danach, der kennt jede Seite.</span></p>
 </main>
 
 <script>
 (function(){
   'use strict';
+  window.Marke.anwenden();
   var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function zufall(a, b){ return a + Math.random() * (b - a); }
 
@@ -203,14 +208,14 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
     {titel: 'Preismodell Benchmark', meta: '12 Seiten · gestern · Fassung 1', status: 'neu',
      text: 'Preisanpassung von vier Prozent auf die C-Kunden bringt 38.000 Euro im Jahr. Staffeln neu geschnitten, A- und B-Kunden unberührt. Branchenschnitt sechs Prozent darüber.',
      fassungen: []},
-    {titel: 'Rahmenvertrag Stahl', meta: 'Fassung 2 · 4. August · von deiner Beratung', status: 'Fassung 2',
+    {titel: 'Rahmenvertrag Stahl', meta: window.Marke.rede('Fassung 2 · 4. August · von deiner Beratung', 'Fassung 2 · 4. August · von Ihrer Beratung'), status: 'Fassung 2',
      text: 'Preisgleitklausel nach Ziffer 3.2 endet zum 30. September. Danach gilt der Tagespreis des Lieferanten, sofern kein neuer Rahmen vereinbart ist. Kündigungsfrist drei Monate.',
      fassungen: [{name: 'Fassung 1', meta: '12. Mai'}]},
     {titel: 'Jahresabschluss 2025, Entwurf', meta: '48 Seiten · 28. Juli', status: 'geteilt',
      text: 'Umsatzerlöse 4,1 Millionen Euro, Rohertrag 31,8 Prozent, Eigenkapitalquote 38 Prozent. Vorbehaltlich der Schlussbuchungen des Steuerbüros.',
      fassungen: []},
     {titel: 'Fotos Halle 2, Begehung', meta: '9 Bilder · 15. Juli', status: 'geteilt',
-     warnung: 'Aus diesen Bildern kann dein Berater nicht zitieren — sie enthalten keinen lesbaren Text.',
+     warnung: window.Marke.rede('Aus diesen Bildern kann dein Berater nicht zitieren — sie enthalten keinen lesbaren Text.', 'Aus diesen Bildern kann Ihr Berater nicht zitieren — sie enthalten keinen lesbaren Text.'),
      text: 'Begehung Halle zwei Fotos Anbau Brandschutz',
      fassungen: []},
     {titel: 'Benchmark Metallzulieferer 2025', meta: '22 Seiten · 2. Juli', status: 'geteilt',
