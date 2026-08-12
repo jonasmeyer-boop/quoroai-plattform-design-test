@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V24 (V23 + Zeit an den Kapiteln, Aufzählungen im Schreibfluss) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V26 (V25 + Anrede als Marken-Regler: Du oder Sie je Beratung) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -49,14 +49,14 @@ nav{
 }
 nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
 nav .wortmarke img{height:28px;width:auto;display:block}
-nav .wortmarke small{display:block;font-size:10px;font-weight:500;color:var(--grau)}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
 nav .wortmarke small[role="button"]{pointer-events:auto;cursor:pointer}
 nav .wortmarke small[role="button"]:hover{color:var(--blau)}
 nav .hinweis{font-size:12px;color:var(--grau)}
 nav .griffe{display:flex;align-items:center;gap:8px}
 #glocke{
   pointer-events:auto;cursor:pointer;position:relative;
-  width:36px;height:36px;border-radius:999px;border:0.5px solid var(--linie);
+  width:44px;height:44px;border-radius:999px;border:0.5px solid var(--linie);
   background:#fff;display:inline-flex;align-items:center;justify-content:center;
   transition:border-color .2s ease;
 }
@@ -66,7 +66,7 @@ nav .griffe{display:flex;align-items:center;gap:8px}
 #glocke .glocke-zahl{
   position:absolute;top:-4px;right:-4px;
   min-width:16px;height:16px;padding:0 4px;border-radius:999px;
-  background:var(--blau);color:#fff;font-size:10px;font-weight:800;
+  background:var(--blau);color:#fff;font-size:11px;font-weight:800;
   display:inline-flex;align-items:center;justify-content:center;
 }
 #glocke-liste{
@@ -159,6 +159,21 @@ body.gespraeche-offen{overflow:hidden}
   color:var(--blau);
 }
 #freigabe.geteilt .punkt-f{background:var(--blau)}
+#freigabe-frage{
+  position:fixed;top:58px;right:max(24px,calc((100vw - 760px)/2));z-index:56;
+  width:min(320px,calc(100vw - 32px));
+  background:#fff;border:0.5px solid var(--linie);border-radius:16px;
+  box-shadow:0 18px 50px rgba(16,19,26,.16);padding:16px 18px;
+}
+#freigabe-frage p{font-size:13.5px;line-height:1.5}
+#freigabe-frage p strong{font-weight:800}
+#freigabe-frage .ff-knoepfe{display:flex;gap:8px;margin-top:12px}
+#freigabe-frage button{
+  padding:9px 16px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;
+  border:0.5px solid var(--linie);background:#fff;transition:border-color .2s;
+}
+#freigabe-frage button:hover{border-color:var(--blau)}
+#freigabe-frage button.ja{background:var(--tinte);color:#fff;border-color:var(--tinte)}
 #akte-griff{
   pointer-events:auto;cursor:pointer;
   display:inline-flex;align-items:center;gap:8px;
@@ -541,7 +556,7 @@ body.blatt-offen{overflow:hidden}
   border:0.5px solid var(--linie);background:#fff;text-align:center;
 }
 .termin-blatt .tb-tag{
-  font-size:9.5px;font-weight:800;letter-spacing:.06em;color:#fff;
+  font-size:11px;font-weight:800;letter-spacing:.06em;color:#fff;
   background:var(--blau);padding:3px 0;
 }
 .termin-blatt .tb-zeit{font-size:15px;font-weight:800;padding-top:7px;font-variant-numeric:tabular-nums}
@@ -619,9 +634,16 @@ body.blatt-offen{overflow:hidden}
   background:linear-gradient(color-mix(in srgb, var(--papier) 1%, transparent), var(--papier) 40%);
 }
 #eingabe .zeile{position:relative}
+#warte-hinweis{
+  position:absolute;left:0;right:0;top:-34px;text-align:center;pointer-events:none;
+  font-family:'Caveat',cursive;font-size:20px;font-weight:700;color:var(--stift);
+  opacity:0;translate:0 5px;rotate:-1deg;
+  transition:opacity .3s ease,translate .3s var(--feder);
+}
+#warte-hinweis.da{opacity:.95;translate:none}
 #anhang-knopf{
-  position:absolute;left:7px;top:50%;translate:0 -50%;z-index:1;
-  width:40px;height:40px;border-radius:999px;border:none;background:transparent;
+  position:absolute;left:5px;top:50%;translate:0 -50%;z-index:1;
+  width:44px;height:44px;border-radius:999px;border:none;background:transparent;
   cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
   transition:background .2s ease;
 }
@@ -646,8 +668,8 @@ body.blatt-offen{overflow:hidden}
 }
 .anlage .groesse{color:var(--grau);font-weight:500}
 .anlage button{
-  width:20px;height:20px;border-radius:999px;border:none;cursor:pointer;
-  background:rgba(16,19,26,.08);color:var(--tinte);font-size:12px;line-height:1;
+  width:28px;height:28px;border-radius:999px;border:none;cursor:pointer;
+  background:rgba(16,19,26,.08);color:var(--tinte);font-size:14px;line-height:1;
   transition:background .15s,color .15s;
 }
 .anlage button:hover{background:var(--tinte);color:#fff}
@@ -676,7 +698,7 @@ body.blatt-offen{overflow:hidden}
 #blatt-blick .bogen-inhalt img.gross{width:100%;border-radius:12px;margin-top:16px;display:block}
 
 #frage{
-  width:100%;min-height:54px;padding:0 62px 0 56px;border-radius:999px;
+  width:100%;min-height:54px;padding:0 56px 0 54px;border-radius:999px;
   border:0.5px solid var(--linie);background:#fff;
   font-family:inherit;font-size:16px;color:var(--tinte);outline:none;
   box-shadow:0 8px 30px rgba(16,19,26,.07);
@@ -684,8 +706,8 @@ body.blatt-offen{overflow:hidden}
 }
 #frage:focus{border-color:var(--blau)}
 #senden{
-  position:absolute;right:7px;top:50%;translate:0 -50%;
-  width:40px;height:40px;border-radius:999px;border:none;cursor:pointer;
+  position:absolute;right:5px;top:50%;translate:0 -50%;
+  width:44px;height:44px;border-radius:999px;border:none;cursor:pointer;
   background:var(--tinte);display:inline-flex;align-items:center;justify-content:center;
   transition:background .2s ease,scale .12s ease;
 }
@@ -744,7 +766,7 @@ body.blatt-offen{overflow:hidden}
 <body>
 
 <nav>
-  <div class="wortmarke"><img id="marke-logo" alt="" hidden><div><span id="marke-name">Nordholm &amp; Partner</span><small id="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Beispielmarke deiner Beratung · wechseln</small></div></div>
+  <div class="wortmarke"><img id="marke-logo" alt="" hidden><div><span id="marke-name">Nordholm &amp; Partner</span><small id="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung · Beispielmarke wechseln</small></div></div>
   <span id="hirn-lampe">Hirn an</span>
   <div class="griffe">
     <button id="glocke" type="button" aria-label="Benachrichtigungen" title="Benachrichtigungen">
@@ -761,12 +783,20 @@ body.blatt-offen{overflow:hidden}
 
 <div id="regal" aria-hidden="true">
   <div class="innen">
-    <h2>Deine Akte</h2>
+    <h2 data-du="Deine Akte" data-sie="Ihre Akte">Deine Akte</h2>
     <p class="unter">Alles, was das Gespräch bisher gebaut hat, aufgeräumt nach Fragen.</p>
     <div id="regal-inhalt"></div>
   </div>
 </div>
 <button id="regal-zu" type="button" hidden>Zurück ins Gespräch</button>
+
+<div id="freigabe-frage" hidden>
+  <p><strong id="ff-marke">Nordholm &amp; Partner</strong> kann dann <strong>dieses eine Gespräch</strong> lesen — samt Karten und Dokumenten. Andere Gespräche bleiben privat. Du kannst das jederzeit zurücknehmen.</p>
+  <div class="ff-knoepfe">
+    <button type="button" class="ja" id="ff-ja">Freigeben</button>
+    <button type="button" id="ff-nein">Lieber nicht</button>
+  </div>
+</div>
 
 <div id="glocke-liste" hidden>
   <h3>Neuigkeiten</h3>
@@ -775,7 +805,7 @@ body.blatt-offen{overflow:hidden}
 
 <div id="gespraechsliste" aria-hidden="true">
   <div class="innen">
-    <h2>Deine Gespräche</h2>
+    <h2 data-du="Deine Gespräche" data-sie="Ihre Gespräche">Deine Gespräche</h2>
     <p class="unter">Jedes Gespräch hat seinen eigenen Raum — mit Akte, Karten und Rechenwegen.</p>
     <button id="neues-gespraech" type="button">+ Neues Gespräch</button>
     <div id="gespraeche-einträge"></div>
@@ -807,14 +837,15 @@ body.blatt-offen{overflow:hidden}
 <div id="ablage" aria-hidden="true">
   <div class="rahmen">
     <svg class="strichrahmen" aria-hidden="true"></svg>
-    <div class="ablage-text">Leg es auf den Tisch</div>
-    <div class="ablage-unter">Verträge, Auswertungen, Fotos — dein Berater liest alles mit.</div>
+    <div class="ablage-text" data-du="Leg es auf den Tisch" data-sie="Legen Sie es auf den Tisch">Leg es auf den Tisch</div>
+    <div class="ablage-unter" data-du="Verträge, Auswertungen, Fotos — dein Berater liest alles mit." data-sie="Verträge, Auswertungen, Fotos — Ihr Berater liest alles mit.">Verträge, Auswertungen, Fotos — dein Berater liest alles mit.</div>
   </div>
 </div>
 
 <div id="eingabe">
   <div id="anlagen" hidden></div>
   <div class="zeile">
+    <div id="warte-hinweis" aria-live="polite">Einen Moment — ich schreibe noch.</div>
     <button id="anhang-knopf" type="button" aria-label="Unterlage anhängen" title="Unterlage anhängen">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 12.5 L15.5 5.5 a3.1 3.1 0 0 1 4.4 4.4 L10.6 19.2 a4.9 4.9 0 0 1 -6.9 -6.9 L13 3"/></svg>
     </button>
@@ -823,7 +854,7 @@ body.blatt-offen{overflow:hidden}
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5 V6 M6.5 11.5 L12 5.5 L17.5 11.5"/></svg>
     </button>
   </div>
-  <p id="ki-hinweis">Du sprichst mit dem KI-Berater von <span id="ki-hinweis-name">Nordholm &amp; Partner</span>. Er ersetzt keine Rechts- oder Steuerberatung.</p>
+  <p id="ki-hinweis"><span id="ki-hinweis-vor">Du sprichst mit dem KI-Berater von </span><span id="ki-hinweis-name">Nordholm &amp; Partner</span>. Er ersetzt keine Rechts- oder Steuerberatung.</p>
   <input type="file" id="datei-wahl" multiple hidden>
 </div>
 
@@ -831,6 +862,11 @@ body.blatt-offen{overflow:hidden}
 (function(){
   'use strict';
   var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* Anrede ist ein Marken-Regler: die Beratung entscheidet, ob ihre Kunden
+     geduzt oder gesiezt werden. Statische Texte laufen über rede(du, sie);
+     die Antworten des Beraters regelt im Produkt der Modell-Prompt. */
+  var anredeSie = false;
+  function rede(du, sie){ return anredeSie ? sie : du; }
   var akte = document.getElementById('akte');
   var beschaeftigt = false;
 
@@ -1323,11 +1359,11 @@ body.blatt-offen{overflow:hidden}
         notiz.textContent = 'die 4 % halten!';
         notiz.hidden = false;
         fuss.innerHTML = '<span>Seite 1 von 12</span><span>Das vollständige Dokument liegt in deiner Akte</span>';
-      } else if (/^von dir/.test(metaText)) {
+      } else if (/^von (dir|Ihnen)/.test(metaText)) {
         inhalt.innerHTML =
-          '<h4>Deine Unterlage</h4>' +
-          '<p>Dein Berater hat sie gelesen und in deine Akte gelegt. Im echten Produkt öffnet sie sich hier im Original.</p>';
-        fuss.innerHTML = '<span>von dir abgelegt</span><span>liegt in deiner Akte</span>';
+          '<h4>' + rede('Deine Unterlage', 'Ihre Unterlage') + '</h4>' +
+          '<p>' + rede('Dein Berater hat sie gelesen und in deine Akte gelegt.', 'Ihr Berater hat sie gelesen und in Ihre Akte gelegt.') + ' Im echten Produkt öffnet sie sich hier im Original.</p>';
+        fuss.innerHTML = '<span>' + rede('von dir abgelegt', 'von Ihnen abgelegt') + '</span><span>' + rede('liegt in deiner Akte', 'liegt in Ihrer Akte') + '</span>';
         if (eigeneUrls[name]) setzeLadbar({url: eigeneUrls[name], name: name});
       } else if (/entsteht|in arbeit/i.test(name + ' ' + metaText)) {
         inhalt.innerHTML =
@@ -1377,7 +1413,7 @@ body.blatt-offen{overflow:hidden}
       im.src = url;
       im.alt = name;
       inhalt.appendChild(im);
-      fuss.innerHTML = '<span>von dir abgelegt</span><span>liegt in deiner Akte</span>';
+      fuss.innerHTML = '<span>' + rede('von dir abgelegt', 'von Ihnen abgelegt') + '</span><span>' + rede('liegt in deiner Akte', 'liegt in Ihrer Akte') + '</span>';
       zeige();
     }
     function schliesse(){
@@ -1399,7 +1435,7 @@ body.blatt-offen{overflow:hidden}
     }
     document.getElementById('akte').addEventListener('click', greife);
     document.getElementById('regal-inhalt').addEventListener('click', greife);
-    return {offen: function(){ return blick.classList.contains('offen'); }, schliesse: schliesse, oeffneQuelle: oeffneQuelle};
+    return {offen: function(){ return blick.classList.contains('offen'); }, schliesse: schliesse, oeffne: oeffne, oeffneQuelle: oeffneQuelle};
   })();
 
   /* Beleg-Chips: die Antwort stützt sich sichtbar auf Stellen aus Akte und Wissen */
@@ -1529,7 +1565,7 @@ body.blatt-offen{overflow:hidden}
     requestAnimationFrame(function(){ box.classList.add('da'); });
     var lebt = true;
 
-    var saetze = ['Liest deine Zahlen …', 'Zerlegt die Frage …', 'Rechnet nach …', 'Prüft den Rechenweg …', 'Wägt die Hebel ab …', 'Skizziert die Antwort …'];
+    var saetze = [rede('Liest deine Zahlen …', 'Liest Ihre Zahlen …'), 'Zerlegt die Frage …', 'Rechnet nach …', 'Prüft den Rechenweg …', 'Wägt die Hebel ab …', 'Skizziert die Antwort …'];
     var idx = Math.floor(zufall(0, saetze.length));
     wort.textContent = saetze[idx];
     var wechsel = setInterval(function(){
@@ -1776,15 +1812,34 @@ body.blatt-offen{overflow:hidden}
     function male(){
       knopf.classList.toggle('geteilt', geteilt);
       knopf.setAttribute('aria-pressed', String(geteilt));
-      text.textContent = geteilt ? 'Deine Beratung liest mit' : 'Nur für dich';
+      text.textContent = geteilt
+        ? rede('Deine Beratung liest mit', 'Ihre Beratung liest mit')
+        : rede('Nur für dich', 'Nur für Sie');
       knopf.title = geteilt
-        ? 'Deine Beratung kann dieses Gespräch lesen. Klicken nimmt die Freigabe zurück.'
-        : 'Niemand außer dir sieht dieses Gespräch. Klicken gibt es für deine Beratung frei.';
+        ? rede('Deine Beratung kann dieses Gespräch lesen. Klicken nimmt die Freigabe zurück.', 'Ihre Beratung kann dieses Gespräch lesen. Klicken nimmt die Freigabe zurück.')
+        : rede('Niemand außer dir sieht dieses Gespräch. Klicken gibt es für deine Beratung frei.', 'Niemand außer Ihnen sieht dieses Gespräch. Klicken gibt es für Ihre Beratung frei.');
     }
-    knopf.addEventListener('click', function(){
-      geteilt = !geteilt;
+    document.addEventListener('anrede', male);
+    /* Einschalten fragt einmal nach — Ausschalten geht sofort */
+    var frage = document.getElementById('freigabe-frage');
+    function setze(neu){
+      geteilt = neu;
       try { sessionStorage.setItem('freigabe', geteilt ? '1' : '0'); } catch (e) {}
       male();
+    }
+    knopf.addEventListener('click', function(e){
+      e.stopPropagation();
+      if (geteilt) { setze(false); return; }
+      document.getElementById('ff-marke').textContent = document.getElementById('marke-name').textContent;
+      frage.hidden = !frage.hidden;
+    });
+    document.getElementById('ff-ja').addEventListener('click', function(){ frage.hidden = true; setze(true); });
+    document.getElementById('ff-nein').addEventListener('click', function(){ frage.hidden = true; });
+    document.addEventListener('click', function(e){
+      if (!frage.hidden && !frage.contains(e.target)) frage.hidden = true;
+    });
+    window.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && !frage.hidden) frage.hidden = true;
     });
     male();
   })();
@@ -1795,10 +1850,20 @@ body.blatt-offen{overflow:hidden}
     var liste = document.getElementById('glocke-liste');
     var lage = document.getElementById('glocke-eintraege');
     var zahl = glocke.querySelector('.glocke-zahl');
+    /* Jede Neuigkeit führt zu ihrem Ziel — nicht nur zum Schließen */
     var NEUES = [
-      {titel: 'Dein Termin steht', text: 'Donnerstag, 10:00 mit Dr. Anna Vogelsang — sie hat deine Anfrage angenommen.', zeit: 'gerade eben', neu: true},
-      {titel: 'Neues Dokument für dich', text: 'Preismodell Benchmark liegt in deinen Unterlagen.', zeit: 'vor 2 Stunden', neu: true},
-      {titel: 'Antwort auf deine Anfrage', text: 'Das Jahresgespräch ist bestätigt.', zeit: 'gestern', neu: false}
+      {titel: function(){ return rede('Dein Termin steht', 'Ihr Termin steht'); },
+        text: function(){ return rede('Donnerstag, 10:00 mit Dr. Anna Vogelsang — sie hat deine Anfrage angenommen.', 'Donnerstag, 10:00 mit Dr. Anna Vogelsang — sie hat Ihre Anfrage angenommen.'); },
+        zeit: 'gerade eben', neu: true,
+        tue: function(){ frageStellen('Welche Termine stehen an?'); }},
+      {titel: function(){ return rede('Neues Dokument für dich', 'Neues Dokument für Sie'); },
+        text: function(){ return rede('Preismodell Benchmark liegt in deinen Unterlagen.', 'Preismodell Benchmark liegt in Ihren Unterlagen.'); },
+        zeit: 'vor 2 Stunden', neu: true,
+        tue: function(){ blattBlick.oeffne('Preismodell Benchmark', '12 Seiten · eben erstellt'); }},
+      {titel: function(){ return rede('Antwort auf deine Anfrage', 'Antwort auf Ihre Anfrage'); },
+        text: function(){ return 'Das Jahresgespräch ist bestätigt.'; },
+        zeit: 'gestern', neu: false,
+        tue: function(){ frageStellen('Welche Termine stehen an?'); }}
     ];
     function ungelesen(){ return NEUES.filter(function(n){ return n.neu; }).length; }
     function maleZahl(){
@@ -1812,10 +1877,13 @@ body.blatt-offen{overflow:hidden}
         var e = document.createElement('div');
         e.className = 'glocke-eintrag' + (n.neu ? '' : ' gelesen');
         e.innerHTML = '<span class="ge-punkt"></span><div><div class="ge-titel"></div><div class="ge-text"></div><div class="ge-zeit"></div></div>';
-        e.querySelector('.ge-titel').textContent = n.titel;
-        e.querySelector('.ge-text').textContent = n.text;
+        e.querySelector('.ge-titel').textContent = typeof n.titel === 'function' ? n.titel() : n.titel;
+        e.querySelector('.ge-text').textContent = typeof n.text === 'function' ? n.text() : n.text;
         e.querySelector('.ge-zeit').textContent = n.zeit;
-        e.addEventListener('click', schliesse);
+        e.addEventListener('click', function(){
+          schliesse();
+          if (n.tue) n.tue();
+        });
         lage.appendChild(e);
       });
     }
@@ -1886,7 +1954,7 @@ body.blatt-offen{overflow:hidden}
       jetzt.addEventListener('click', schliesse);
       eintraege.appendChild(jetzt);
       FRUEHERE.forEach(function(g){
-        var z = zeile(g.frage, g.zeit, g.geteilt ? 'freigegeben' : 'nur für dich', g.geteilt ? 'geteilt' : '');
+        var z = zeile(g.frage, g.zeit, g.geteilt ? 'freigegeben' : rede('nur für dich', 'nur für Sie'), g.geteilt ? 'geteilt' : '');
         z.addEventListener('click', function(){
           try { sessionStorage.setItem('starte-frage', g.frage); sessionStorage.removeItem('freigabe'); } catch (e) {}
           location.reload();
@@ -2034,9 +2102,9 @@ body.blatt-offen{overflow:hidden}
       k = karteAus('<div class="dokument"><div class="blatt"></div><div><div class="name"></div><div class="meta"></div></div></div>');
     }
     k.dataset.doku = a.datei.name;
-    k.dataset.dokuMeta = 'von dir · ' + groesse(a.datei.size);
+    k.dataset.dokuMeta = rede('von dir · ', 'von Ihnen · ') + groesse(a.datei.size);
     k.querySelector('.name').textContent = a.datei.name;
-    k.querySelector('.meta').textContent = 'von dir · ' + groesse(a.datei.size);
+    k.querySelector('.meta').textContent = rede('von dir · ', 'von Ihnen · ') + groesse(a.datei.size);
     return k;
   }
 
@@ -2361,7 +2429,7 @@ body.blatt-offen{overflow:hidden}
     ]};
 
   function waehleSlot(karte, knopf, slot){
-    if (beschaeftigt) return;
+    if (beschaeftigt) { zeigeGeduld(); return; }
     karte.querySelectorAll('.slots button').forEach(function(b){ b.disabled = true; });
     knopf.classList.add('gewaehlt');
     var kapitel = aktuellesKapitel;
@@ -2699,8 +2767,17 @@ body.blatt-offen{overflow:hidden}
     runter();
   }
 
+  /* Kein stummes Verweigern: wer mitten in der Antwort sendet, bekommt ein Wort */
+  var geduldTimer = null;
+  function zeigeGeduld(){
+    var h = document.getElementById('warte-hinweis');
+    h.classList.add('da');
+    clearTimeout(geduldTimer);
+    geduldTimer = setTimeout(function(){ h.classList.remove('da'); }, 2200);
+  }
+
   function frageStellen(text){
-    if (beschaeftigt) return;
+    if (beschaeftigt) { zeigeGeduld(); return; }
     var t = text.trim();
     if (!t && !wartendeAnlagen.length) return;
     if (!t) t = 'Schau dir das mal an.';
@@ -2787,11 +2864,11 @@ body.blatt-offen{overflow:hidden}
      Im Produkt kommen diese Werte aus dem Mandanten-Profil der Beratung. */
   (function(){
     var MARKEN = [
-      {name:'Nordholm & Partner',  blau:'#2b5fe3', stift:'#1d46c9', tinte:'#10131a', papier:'#fafaf7'},
-      {name:'Waldmann Consulting', blau:'#0e7a5a', stift:'#0a5f46', tinte:'#101613', papier:'#f8faf7'},
-      {name:'Steinbach & Cie.',    blau:'#9c3948', stift:'#7c2d3a', tinte:'#171114', papier:'#fbf9f7'},
+      {name:'Nordholm & Partner',  anrede:'du',  blau:'#2b5fe3', stift:'#1d46c9', tinte:'#10131a', papier:'#fafaf7'},
+      {name:'Waldmann Consulting', anrede:'sie', blau:'#0e7a5a', stift:'#0a5f46', tinte:'#101613', papier:'#f8faf7'},
+      {name:'Steinbach & Cie.',    anrede:'sie', blau:'#9c3948', stift:'#7c2d3a', tinte:'#171114', papier:'#fbf9f7'},
       /* echtes Logo als Sehprobe (Jonas, 2026-08-12) — zeigt den logo_url-Platz der Weißmarke */
-      {name:'currily',             blau:'#7047EA', stift:'#5636b8', tinte:'#081B4A', papier:'#fbfafd', logo:'bilder/currily-logo.svg'}
+      {name:'currily',             anrede:'du',  blau:'#7047EA', stift:'#5636b8', tinte:'#081B4A', papier:'#fbfafd', logo:'bilder/currily-logo.svg'}
     ];
     var idx = 0;
     try { idx = parseInt(sessionStorage.getItem('marke') || '0', 10) % MARKEN.length || 0; } catch (e) {}
@@ -2803,6 +2880,19 @@ body.blatt-offen{overflow:hidden}
       s.setProperty('--papier', m.papier);
       document.getElementById('marke-name').textContent = m.name;
       document.getElementById('ki-hinweis-name').textContent = m.name;
+      anredeSie = m.anrede === 'sie';
+      document.getElementById('frage').placeholder = rede('Frag deine Beratung', 'Fragen Sie Ihre Beratung');
+      document.getElementById('ki-hinweis-vor').textContent = rede('Du sprichst mit dem KI-Berater von ', 'Sie sprechen mit dem KI-Berater von ');
+      document.querySelectorAll('[data-du]').forEach(function(el){
+        el.textContent = anredeSie ? el.dataset.sie : el.dataset.du;
+      });
+      var griff = document.getElementById('akte-griff');
+      griff.childNodes[0].nodeValue = rede('Deine Akte ', 'Ihre Akte ');
+      document.querySelector('#freigabe-frage p').innerHTML =
+        '<strong id="ff-marke"></strong> ' +
+        rede('kann dann <strong>dieses eine Gespräch</strong> lesen — samt Karten und Dokumenten. Andere Gespräche bleiben privat. Du kannst das jederzeit zurücknehmen.',
+             'kann dann <strong>dieses eine Gespräch</strong> lesen — samt Karten und Dokumenten. Andere Gespräche bleiben privat. Sie können das jederzeit zurücknehmen.');
+      document.dispatchEvent(new CustomEvent('anrede'));
       var logo = document.getElementById('marke-logo');
       var name = document.getElementById('marke-name');
       if (m.logo) {
@@ -2834,7 +2924,7 @@ body.blatt-offen{overflow:hidden}
   /* ---------- Auftakt ---------- */
   (function(){
     var gruss = document.getElementById('gruss');
-    var ziel = 'Womit ringst du gerade?';
+    var ziel = rede('Womit ringst du gerade?', 'Womit ringen Sie gerade?');
     var el = document.getElementById('gruss-text');
     var vorgruss = document.getElementById('vorgruss');
     var startChips = ['Wie läuft mein Geschäft?', 'Warum schrumpft meine Marge?', 'Buch mir einen Menschen'];
@@ -2853,6 +2943,7 @@ body.blatt-offen{overflow:hidden}
 
     function chipsRein(){
       var lage = document.getElementById('start-chips');
+      if (!lage) return; /* Begrüßung wurde von einer ungeduldigen Frage überholt */
       startChips.forEach(function(c, i){
         var b = document.createElement('button');
         b.type = 'button'; b.textContent = c;
@@ -2880,6 +2971,7 @@ body.blatt-offen{overflow:hidden}
     setTimeout(function(){ gruss.classList.add('da'); vorgruss.classList.add('da'); }, 450);
     var i = 0;
     setTimeout(function tippe(){
+      if (!document.getElementById('gruss')) return; /* schon im Gespräch — von einer Frage überholt */
       el.textContent = ziel.slice(0, ++i);
       if (i < ziel.length) setTimeout(tippe, 42 + Math.random() * 40);
       else { chipsRein(); document.getElementById('frage').focus(); }

@@ -6,7 +6,7 @@
 <title>Dein Berater · Übersicht</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V1 */
+/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V3 (V2 + Glocke lebt, nichts sieht mehr bedienbar aus, das nichts tut) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -46,10 +46,10 @@ nav{
   pointer-events:none;
 }
 nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em}
-nav .wortmarke small{display:block;font-size:10px;font-weight:500;color:var(--grau)}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
 nav .griffe{display:flex;align-items:center;gap:8px;pointer-events:auto}
 nav .griffe .glocke{
-  position:relative;width:36px;height:36px;border-radius:999px;
+  position:relative;width:44px;height:44px;border-radius:999px;
   border:0.5px solid var(--linie);background:#fff;cursor:pointer;
   display:inline-flex;align-items:center;justify-content:center;
 }
@@ -57,13 +57,45 @@ nav .griffe .glocke svg{width:19px;height:19px}
 nav .griffe .glocke svg path{fill:none;stroke:var(--tinte);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 nav .griffe .glocke .zahl{
   position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px;
-  border-radius:999px;background:var(--blau);color:#fff;font-size:10px;font-weight:800;
+  border-radius:999px;background:var(--blau);color:#fff;font-size:11px;font-weight:800;
   display:inline-flex;align-items:center;justify-content:center;
 }
 nav .griffe .ab{
   padding:8px 14px;border-radius:999px;border:0.5px solid var(--linie);
   background:#fff;font-size:12.5px;font-weight:700;color:var(--grau);cursor:pointer;
 }
+
+/* Glocken-Fenster */
+#glocke-liste{
+  position:fixed;top:58px;right:max(24px,calc((100vw - 880px)/2));z-index:55;
+  width:min(340px,calc(100vw - 32px));
+  background:#fff;border:0.5px solid var(--linie);border-radius:16px;
+  box-shadow:0 18px 50px rgba(16,19,26,.16);padding:16px 18px;
+}
+#glocke-liste h3{font-size:12px;font-weight:800;color:var(--grau)}
+.glocke-eintrag{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-top:0.5px solid var(--linie);cursor:pointer}
+#glocke-eintraege .glocke-eintrag:nth-child(1){border-top:none;margin-top:8px}
+.glocke-eintrag .ge-punkt{width:7px;height:7px;border-radius:999px;background:var(--blau);flex-shrink:0;margin-top:6px;transition:opacity .4s ease}
+.glocke-eintrag.gelesen .ge-punkt{opacity:.15}
+.glocke-eintrag .ge-titel{font-size:13.5px;font-weight:800}
+.glocke-eintrag .ge-text{font-size:12.5px;color:var(--grau);margin-top:2px}
+.glocke-eintrag .ge-zeit{font-size:11px;color:var(--grau);opacity:.8;margin-top:3px}
+
+/* Demo-Hinweis in Handschrift, wenn eine Fläche noch entsteht */
+#demo-hinweis{
+  position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:60;pointer-events:none;
+  font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--stift);
+  opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--feder);
+}
+#demo-hinweis.da{opacity:.95;translate:-50% 0}
+
+/* Nur echte Türen zeigen den Klick-Zeiger */
+div.zeile{cursor:default}
+div.zeile:hover{border-color:var(--linie);translate:none}
+.kopfzeile a.bald,.fuss-links a.bald{color:var(--grau);opacity:.75}
+.kopfzeile a.bald:hover{text-decoration:none}
+.fuss-links a.bald:hover{border-color:var(--linie)}
+.bald small.dazu{color:var(--grau);font-weight:600}
 
 main{max-width:880px;margin:0 auto;padding:108px 24px 96px}
 
@@ -84,8 +116,8 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
 }
 .tuer input:focus{border-color:var(--blau)}
 .tuer a.los{
-  position:absolute;right:7px;top:50%;translate:0 -50%;
-  width:40px;height:40px;border-radius:999px;background:var(--tinte);
+  position:absolute;right:5px;top:50%;translate:0 -50%;
+  width:44px;height:44px;border-radius:999px;background:var(--tinte);
   display:inline-flex;align-items:center;justify-content:center;text-decoration:none;
   transition:background .2s ease;
 }
@@ -113,9 +145,10 @@ section{margin-top:52px}
 .karte{
   background:var(--karte);border:0.5px solid var(--linie);border-radius:var(--radius);
   padding:18px 20px;box-shadow:0 10px 30px rgba(16,19,26,.06);
-  opacity:0;translate:0 10px;
+  opacity:0;translate:0 10px;cursor:pointer;
 }
-.karte.da{opacity:1;translate:none;transition:opacity .5s ease,translate .5s var(--feder)}
+.karte.da{opacity:1;translate:none;transition:opacity .5s ease,translate .5s var(--feder),border-color .2s ease}
+.karte.da:hover{border-color:var(--blau)}
 .karte .wert{font-size:26px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .karte .wert.blau{color:var(--blau)}
 .karte .label{font-size:12.5px;color:var(--grau);margin-top:2px}
@@ -150,7 +183,7 @@ section{margin-top:52px}
   width:46px;height:52px;flex-shrink:0;border-radius:10px;overflow:hidden;
   border:0.5px solid var(--linie);background:#fff;text-align:center;
 }
-.termin-blatt .tb-tag{font-size:9.5px;font-weight:800;letter-spacing:.06em;color:#fff;background:var(--blau);padding:3px 0}
+.termin-blatt .tb-tag{font-size:11px;font-weight:800;letter-spacing:.06em;color:#fff;background:var(--blau);padding:3px 0}
 .termin-blatt .tb-zeit{font-size:15px;font-weight:800;padding-top:7px;font-variant-numeric:tabular-nums}
 .termin-wann{font-size:14.5px;font-weight:800;letter-spacing:-.01em}
 .termin-mit{font-size:12.5px;color:var(--grau);margin-top:2px}
@@ -206,6 +239,12 @@ section{margin-top:52px}
   </div>
 </nav>
 
+<div id="glocke-liste" hidden>
+  <h3>Neuigkeiten</h3>
+  <div id="glocke-eintraege"></div>
+</div>
+<div id="demo-hinweis">Diese Fläche entsteht gerade.</div>
+
 <main>
   <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
   <div class="vorgruss">Guten Tag, Herr Petersen.</div>
@@ -226,12 +265,11 @@ section{margin-top:52px}
   <section>
     <div class="kopfzeile">
       <h2>Aus deinen Gesprächen</h2>
-      <a href="gespraech.html">Ganze Akte ansehen</a>
     </div>
     <div class="reihe">
-      <div class="karte"><div class="wert blau">+38.000 €</div><div class="label">Preismodell, rechnerisch im Jahr</div><div class="delta">ab Woche 6 wirksam</div><div class="quelle">aus „Was bringt mir das Preismodell?"</div></div>
-      <div class="karte"><div class="wert">30,4 %</div><div class="label">Marge heute</div><div class="delta amber">fällt seit April</div><div class="quelle">aus „Warum schrumpft meine Marge?"</div></div>
-      <div class="karte"><div class="wert">20.550 €</div><div class="label">offene Forderungen</div><div class="delta amber">eine Rechnung seit 9 Tagen</div><div class="quelle">aus „Wie läuft mein Geschäft?"</div></div>
+      <div class="karte" data-frage="Was bringt mir das Preismodell?"><div class="wert blau">+38.000 €</div><div class="label">Preismodell, rechnerisch im Jahr</div><div class="delta">ab Woche 6 wirksam</div><div class="quelle">aus „Was bringt mir das Preismodell?"</div></div>
+      <div class="karte" data-frage="Warum schrumpft meine Marge?"><div class="wert">30,4 %</div><div class="label">Marge heute</div><div class="delta amber">fällt seit April</div><div class="quelle">aus „Warum schrumpft meine Marge?"</div></div>
+      <div class="karte" data-frage="Wie läuft mein Geschäft?"><div class="wert">20.550 €</div><div class="label">offene Forderungen</div><div class="delta amber">eine Rechnung seit 9 Tagen</div><div class="quelle">aus „Wie läuft mein Geschäft?"</div></div>
     </div>
   </section>
 
@@ -266,7 +304,7 @@ section{margin-top:52px}
   <section>
     <div class="kopfzeile">
       <h2>Unterlagen</h2>
-      <a href="#">Alle durchsuchen</a>
+      <a href="#" class="bald">Alle durchsuchen · entsteht gerade</a>
     </div>
     <div class="zeilen">
       <div class="zeile"><div class="mit-blatt"><div class="blatt"></div><span><span class="z-titel">Preismodell Benchmark</span><br><span class="z-meta">12 Seiten · gestern · Fassung 1</span></span></div><span class="z-status geteilt">neu</span></div>
@@ -277,8 +315,8 @@ section{margin-top:52px}
   <section>
     <div class="kopfzeile"><h2>Zusammenarbeit</h2></div>
     <div class="fuss-links">
-      <a href="#">Leistungsnachweis<small>14,5 Std. im August</small></a>
-      <a href="#">Rechnungen<small>eine offen</small></a>
+      <a href="#" class="bald">Leistungsnachweis<small>14,5 Std. im August · entsteht gerade</small></a>
+      <a href="#" class="bald">Rechnungen<small>eine offen · entsteht gerade</small></a>
     </div>
   </section>
 </main>
@@ -307,11 +345,115 @@ section{margin-top:52px}
   document.querySelectorAll('.karte').forEach(function(k, i){
     setTimeout(function(){ k.classList.add('da'); }, reduziert ? 0 : 250 + i * 140);
   });
-  /* Eingabe führt ins Gespräch — die Übersicht ist nur die Tür */
+
+  /* Die Brücke ins Gespräch: was man hier anfasst, kommt dort AN.
+     Das Gespräch liest 'starte-frage' beim Laden und stellt sie sofort. */
+  function geheZuGespraech(frage){
+    try {
+      if (frage) sessionStorage.setItem('starte-frage', frage);
+      else sessionStorage.removeItem('starte-frage');
+    } catch (e) {}
+    location.href = 'gespraech.html';
+  }
   var feld = document.querySelector('.tuer input');
   feld.addEventListener('keydown', function(e){
-    if (e.key === 'Enter' && feld.value.trim()) location.href = 'gespraech.html';
+    if (e.key === 'Enter' && feld.value.trim()) geheZuGespraech(feld.value.trim());
   });
+  document.querySelector('.tuer a.los').addEventListener('click', function(e){
+    e.preventDefault();
+    if (feld.value.trim()) geheZuGespraech(feld.value.trim());
+    else feld.focus();
+  });
+  document.querySelectorAll('.chips a').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      geheZuGespraech(a.textContent.trim());
+    });
+  });
+  document.querySelectorAll('a.zeile').forEach(function(z){
+    z.addEventListener('click', function(e){
+      e.preventDefault();
+      var t = z.querySelector('.z-titel');
+      geheZuGespraech(t ? t.textContent.trim() : null);
+    });
+  });
+  document.querySelectorAll('.karte[data-frage]').forEach(function(k){
+    k.addEventListener('click', function(){ geheZuGespraech(k.dataset.frage); });
+  });
+  document.querySelectorAll('.kopfzeile a').forEach(function(a){
+    if (a.textContent.indexOf('Neues Gespräch') !== -1) {
+      a.addEventListener('click', function(e){ e.preventDefault(); geheZuGespraech(null); });
+    }
+  });
+
+  /* Ehrlichkeit: was noch entsteht, sagt das — statt tot zu sein */
+  var hinweisTimer = null;
+  function demoHinweis(text){
+    var h = document.getElementById('demo-hinweis');
+    h.textContent = text;
+    h.classList.add('da');
+    clearTimeout(hinweisTimer);
+    hinweisTimer = setTimeout(function(){ h.classList.remove('da'); }, 2200);
+  }
+  document.querySelectorAll('a.bald').forEach(function(a){
+    a.addEventListener('click', function(e){ e.preventDefault(); demoHinweis('Diese Fläche entsteht gerade.'); });
+  });
+  document.querySelector('nav .ab').addEventListener('click', function(){
+    demoHinweis('Die Anmeldung entsteht gerade — in der Vorführung bleibst du drin.');
+  });
+
+  /* Die Glocke lebt: Neuigkeiten führen zu ihrem Abschnitt */
+  (function(){
+    var glocke = document.querySelector('nav .glocke');
+    var liste = document.getElementById('glocke-liste');
+    var lage = document.getElementById('glocke-eintraege');
+    var zahl = glocke.querySelector('.zahl');
+    function springe(ueberschrift){
+      var ziel = Array.from(document.querySelectorAll('.kopfzeile h2')).find(function(h){ return h.textContent === ueberschrift; });
+      if (ziel) ziel.closest('section').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'start'});
+    }
+    var NEUES = [
+      {titel: 'Dein Termin steht', text: 'Donnerstag, 10:00 mit Dr. Anna Vogelsang.', zeit: 'gerade eben', neu: true, tue: function(){ springe('Termine'); }},
+      {titel: 'Neues Dokument für dich', text: 'Preismodell Benchmark liegt in deinen Unterlagen.', zeit: 'vor 2 Stunden', neu: true, tue: function(){ springe('Unterlagen'); }},
+      {titel: 'Antwort auf deine Anfrage', text: 'Das Jahresgespräch ist bestätigt.', zeit: 'gestern', neu: false, tue: function(){ springe('Anfragen'); }}
+    ];
+    function maleZahl(){
+      var n = NEUES.filter(function(x){ return x.neu; }).length;
+      zahl.hidden = !n;
+      zahl.textContent = String(n);
+    }
+    function schliesse(){ liste.hidden = true; }
+    function oeffne(){
+      lage.innerHTML = '';
+      NEUES.forEach(function(n){
+        var e = document.createElement('div');
+        e.className = 'glocke-eintrag' + (n.neu ? '' : ' gelesen');
+        e.innerHTML = '<span class="ge-punkt"></span><div><div class="ge-titel"></div><div class="ge-text"></div><div class="ge-zeit"></div></div>';
+        e.querySelector('.ge-titel').textContent = n.titel;
+        e.querySelector('.ge-text').textContent = n.text;
+        e.querySelector('.ge-zeit').textContent = n.zeit;
+        e.addEventListener('click', function(){ schliesse(); n.tue(); });
+        lage.appendChild(e);
+      });
+      liste.hidden = false;
+      setTimeout(function(){
+        NEUES.forEach(function(n){ n.neu = false; });
+        lage.querySelectorAll('.glocke-eintrag').forEach(function(e){ e.classList.add('gelesen'); });
+        maleZahl();
+      }, 900);
+    }
+    glocke.addEventListener('click', function(e){
+      e.stopPropagation();
+      if (liste.hidden) oeffne(); else schliesse();
+    });
+    document.addEventListener('click', function(e){
+      if (!liste.hidden && !liste.contains(e.target)) schliesse();
+    });
+    window.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && !liste.hidden) schliesse();
+    });
+    maleZahl();
+  })();
 })();
 </script>
 </body>
