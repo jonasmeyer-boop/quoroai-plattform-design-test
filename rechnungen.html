@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dein Berater · Rechnungen</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
+<style>
+/* quoroai-plattform-design · Rechnungen: Liste, Beleg, PDF · Marker: RECHNUNGEN-V1 */
+@font-face{font-family:'Manrope';src:url('schriften/manrope.woff2') format('woff2');font-weight:200 800;font-display:swap}
+@font-face{font-family:'Caveat';src:url('schriften/caveat.woff2') format('woff2');font-weight:400 700;font-display:swap}
+:root{
+  --papier:#fafaf7;--tinte:#10131a;--grau:#636c7d;--blau:#2b5fe3;--stift:#1d46c9;
+  --linie:rgba(16,19,26,.1);--radius:16px;--feder:cubic-bezier(.22,.9,.24,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--papier);color:var(--tinte);font-family:'Manrope',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:10;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 max(24px,calc((100vw - 880px)/2));
+  background:linear-gradient(var(--papier) 55%, color-mix(in srgb, var(--papier) 1%, transparent));
+}
+nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
+nav .zurueck{padding:9px 16px;border-radius:999px;border:0.5px solid var(--linie);background:#fff;font-size:12.5px;font-weight:700;color:var(--tinte);text-decoration:none;transition:border-color .2s}
+nav .zurueck:hover{border-color:var(--blau)}
+main{max-width:880px;margin:0 auto;padding:108px 24px 96px}
+.anstrich{width:96px;height:12px;display:block;overflow:visible;margin-bottom:16px}
+.anstrich path{fill:none;stroke:var(--stift);stroke-width:2.5;stroke-linecap:round;opacity:.85}
+h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-height:1.15}
+.unter{color:var(--grau);font-size:15px;margin-top:4px}
+.zeilen{margin-top:24px;display:flex;flex-direction:column;gap:10px}
+.rechnung{
+  display:flex;align-items:center;gap:16px;width:100%;text-align:left;
+  padding:16px 20px;border-radius:var(--radius);cursor:pointer;
+  border:0.5px solid var(--linie);background:#fff;
+  box-shadow:0 6px 20px rgba(16,19,26,.05);
+  transition:border-color .2s ease,translate .2s var(--feder);
+}
+.rechnung:hover{border-color:var(--blau);translate:0 -1px}
+.rechnung .nr{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.rechnung .datum{font-size:12.5px;color:var(--grau);margin-top:2px}
+.rechnung .betrag{margin-left:auto;font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rechnung .status{
+  flex-shrink:0;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap;
+  color:var(--grau);background:rgba(16,19,26,.05);
+}
+.rechnung .status.offen{color:#a06008;background:rgba(178,109,10,.12)}
+.rechnung .status.bezahlt{color:var(--blau);background:color-mix(in srgb, var(--blau) 10%, transparent)}
+.fuss{font-size:12.5px;color:var(--grau);margin-top:28px}
+
+/* Beleg-Blick */
+#beleg-blick{
+  position:fixed;inset:0;z-index:24;overflow-y:auto;
+  background:color-mix(in srgb, var(--tinte) 16%, transparent);
+  backdrop-filter:blur(10px) saturate(120%);
+  -webkit-backdrop-filter:blur(10px) saturate(120%);
+  opacity:0;pointer-events:none;transition:opacity .3s ease;
+}
+#beleg-blick.offen{opacity:1;pointer-events:auto}
+#beleg-blick .bogen{
+  position:relative;max-width:640px;margin:76px auto 96px;
+  background:#fff;border-radius:20px;padding:44px 48px 36px;
+  box-shadow:0 30px 80px rgba(16,19,26,.28);
+  translate:0 30px;scale:.96;
+  transition:translate .5s var(--feder),scale .5s var(--feder);
+}
+#beleg-blick.offen .bogen{translate:none;scale:none}
+#beleg-blick .b-titel{font-size:clamp(22px,3.4vw,30px);font-weight:800;letter-spacing:-.03em}
+#beleg-blick .b-meta{font-size:13px;color:var(--grau);margin-top:4px;padding-bottom:18px;border-bottom:1px solid var(--linie)}
+#beleg-blick table{width:100%;border-collapse:collapse;margin-top:16px;font-size:14.5px}
+#beleg-blick th{text-align:left;font-size:12px;color:var(--grau);font-weight:700;padding:6px 0;border-bottom:1px solid var(--linie)}
+#beleg-blick th:last-child,#beleg-blick td:last-child{text-align:right}
+#beleg-blick td{padding:10px 0;border-bottom:0.5px solid var(--linie);font-variant-numeric:tabular-nums;vertical-align:top}
+#beleg-blick td .p-wer{font-size:12px;color:var(--grau)}
+#beleg-blick .summen{margin-top:14px;display:flex;flex-direction:column;gap:5px;align-items:flex-end;font-size:14px}
+#beleg-blick .summen .gesamt{font-size:18px;font-weight:800;color:var(--blau);border-top:1.5px solid var(--tinte);padding-top:8px;margin-top:4px}
+#beleg-blick .b-aktion{margin-top:24px}
+#beleg-blick .b-aktion button{
+  padding:9px 18px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:border-color .2s,color .2s;
+}
+#beleg-blick .b-aktion button:hover{border-color:var(--blau);color:var(--blau)}
+#beleg-zu{
+  position:fixed;top:16px;right:max(24px,calc((100vw - 640px)/2));z-index:25;
+  padding:10px 18px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:14px;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 16px rgba(16,19,26,.15);
+}
+body.beleg-offen{overflow:hidden}
+@media (max-width:700px){
+  nav .wortmarke small{display:none}
+  .rechnung{flex-wrap:wrap}
+  .rechnung .betrag{margin-left:0}
+  #beleg-blick .bogen{margin:64px 12px 80px;padding:28px 22px 26px}
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="wortmarke">Nordholm &amp; Partner<small>Beispielmarke deiner Beratung</small></div>
+  <a class="zurueck" href="uebersicht.html">← Zur Übersicht</a>
+</nav>
+
+<main>
+  <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
+  <h1>Rechnungen</h1>
+  <p class="unter">Jede gestellte Rechnung, mit Beleg und PDF.</p>
+  <div class="zeilen" id="liste"></div>
+  <p class="fuss">Fragen zu einer Rechnung? Sag es deinem Berater — er kennt jede Position.</p>
+</main>
+
+<div id="beleg-blick" aria-hidden="true">
+  <article class="bogen" role="dialog" aria-modal="true" aria-label="Rechnungsbeleg">
+    <div class="b-titel"></div>
+    <div class="b-meta"></div>
+    <table>
+      <thead><tr><th>Position</th><th>Betrag</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="summen">
+      <span class="netto"></span>
+      <span class="steuer"></span>
+      <span class="gesamt"></span>
+    </div>
+    <div class="b-aktion"><button type="button" id="pdf">↓ Als PDF</button></div>
+  </article>
+</div>
+<button id="beleg-zu" type="button" hidden>Schließen</button>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function zufall(a, b){ return a + Math.random() * (b - a); }
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.querySelector('.anstrich');
+  var d = 'M2 6';
+  for (var i = 1; i <= 6; i++) d += ' L' + (2 + 92 * i / 6) + ' ' + (6 + zufall(-2, 2));
+  var p = document.createElementNS(NS, 'path');
+  p.setAttribute('d', d);
+  svg.appendChild(p);
+  if (!reduziert) {
+    var len = p.getTotalLength();
+    p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+    p.style.transition = 'stroke-dashoffset .55s cubic-bezier(.45,.05,.55,.95) .1s';
+    void p.getBoundingClientRect();
+    p.style.strokeDashoffset = 0;
+  }
+
+  var RECHNUNGEN = [
+    {nr: 'RE-2026-084', datum: '1. August 2026', ziel: 'zahlbar bis 15. August', status: 'offen',
+     posten: [
+       {was: 'Beratung Preis und Marge, Juli', wer: 'Dr. Anna Vogelsang · 8,0 Std.', betrag: '1.520,00 €'},
+       {was: 'Benchmark-Auswertung Metallzulieferer', wer: 'Pauschale', betrag: '480,00 €'}
+     ], netto: '2.000,00 €', steuer: '380,00 €', gesamt: '2.380,00 €'},
+    {nr: 'RE-2026-071', datum: '1. Juli 2026', ziel: 'bezahlt am 9. Juli', status: 'bezahlt',
+     posten: [
+       {was: 'Beratung Jahresabschluss, Juni', wer: 'J. Brandt · 6,5 Std.', betrag: '1.105,00 €'}
+     ], netto: '1.105,00 €', steuer: '209,95 €', gesamt: '1.314,95 €'},
+    {nr: 'RE-2026-058', datum: '1. Juni 2026', ziel: 'bezahlt am 12. Juni', status: 'bezahlt',
+     posten: [
+       {was: 'Laufende Beratung, Mai', wer: 'Dr. Anna Vogelsang · 5,0 Std.', betrag: '950,00 €'},
+       {was: 'Unterlagen-Aufbereitung Akte', wer: 'Pauschale', betrag: '150,00 €'}
+     ], netto: '1.100,00 €', steuer: '209,00 €', gesamt: '1.309,00 €'}
+  ];
+
+  var blick = document.getElementById('beleg-blick');
+  var zu = document.getElementById('beleg-zu');
+  var offen = null;
+  function oeffne(r){
+    offen = r;
+    blick.querySelector('.b-titel').textContent = 'Rechnung ' + r.nr;
+    blick.querySelector('.b-meta').textContent = r.datum + ' · ' + r.ziel;
+    var tb = blick.querySelector('tbody');
+    tb.innerHTML = '';
+    r.posten.forEach(function(po){
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><div class="p-was"></div><div class="p-wer"></div></td><td></td>';
+      tr.querySelector('.p-was').textContent = po.was;
+      tr.querySelector('.p-wer').textContent = po.wer;
+      tr.lastElementChild.textContent = po.betrag;
+      tb.appendChild(tr);
+    });
+    blick.querySelector('.netto').textContent = 'Netto ' + r.netto;
+    blick.querySelector('.steuer').textContent = '19 % USt. ' + r.steuer;
+    blick.querySelector('.gesamt').textContent = r.gesamt;
+    blick.classList.add('offen');
+    blick.setAttribute('aria-hidden', 'false');
+    blick.scrollTop = 0;
+    zu.hidden = false;
+    document.body.classList.add('beleg-offen');
+  }
+  function schliesse(){
+    blick.classList.remove('offen');
+    blick.setAttribute('aria-hidden', 'true');
+    zu.hidden = true;
+    document.body.classList.remove('beleg-offen');
+  }
+  zu.addEventListener('click', schliesse);
+  blick.addEventListener('click', function(e){
+    if (!blick.querySelector('.bogen').contains(e.target)) schliesse();
+  });
+  window.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && blick.classList.contains('offen')) schliesse();
+  });
+  document.getElementById('pdf').addEventListener('click', function(){
+    if (!offen) return;
+    var zeilen = ['Rechnung ' + offen.nr, offen.datum + ' · ' + offen.ziel, ''];
+    offen.posten.forEach(function(po){ zeilen.push(po.was + ' (' + po.wer + '): ' + po.betrag); });
+    zeilen.push('', 'Netto ' + offen.netto, '19 % USt. ' + offen.steuer, 'Gesamt ' + offen.gesamt, '', '— Vorführung, Demo-Daten; im Produkt ein echtes PDF');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([zeilen.join('\n')], {type: 'text/plain'}));
+    a.download = offen.nr + '.txt';
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+  });
+
+  var liste = document.getElementById('liste');
+  RECHNUNGEN.forEach(function(r){
+    var z = document.createElement('button');
+    z.type = 'button';
+    z.className = 'rechnung';
+    z.innerHTML = '<span><span class="nr"></span><br><span class="datum"></span></span><span class="status"></span><span class="betrag"></span>';
+    z.querySelector('.nr').textContent = r.nr;
+    z.querySelector('.datum').textContent = r.datum + ' · ' + r.ziel;
+    var st = z.querySelector('.status');
+    st.textContent = r.status;
+    st.classList.add(r.status);
+    z.querySelector('.betrag').textContent = r.gesamt;
+    z.addEventListener('click', function(){ oeffne(r); });
+    liste.appendChild(z);
+  });
+})();
+</script>
+</body>
+</html>

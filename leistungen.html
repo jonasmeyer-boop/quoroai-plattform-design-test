@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dein Berater · Leistungsnachweis</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
+<style>
+/* quoroai-plattform-design · Leistungsnachweis: was die Beratung gearbeitet hat · Marker: LEISTUNGEN-V1 */
+@font-face{font-family:'Manrope';src:url('schriften/manrope.woff2') format('woff2');font-weight:200 800;font-display:swap}
+@font-face{font-family:'Caveat';src:url('schriften/caveat.woff2') format('woff2');font-weight:400 700;font-display:swap}
+:root{
+  --papier:#fafaf7;--tinte:#10131a;--grau:#636c7d;--blau:#2b5fe3;--stift:#1d46c9;
+  --linie:rgba(16,19,26,.1);--radius:16px;--feder:cubic-bezier(.22,.9,.24,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--papier);color:var(--tinte);font-family:'Manrope',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:10;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 max(24px,calc((100vw - 880px)/2));
+  background:linear-gradient(var(--papier) 55%, color-mix(in srgb, var(--papier) 1%, transparent));
+}
+nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
+nav .zurueck{padding:9px 16px;border-radius:999px;border:0.5px solid var(--linie);background:#fff;font-size:12.5px;font-weight:700;color:var(--tinte);text-decoration:none;transition:border-color .2s}
+nav .zurueck:hover{border-color:var(--blau)}
+main{max-width:880px;margin:0 auto;padding:108px 24px 96px}
+.anstrich{width:96px;height:12px;display:block;overflow:visible;margin-bottom:16px}
+.anstrich path{fill:none;stroke:var(--stift);stroke-width:2.5;stroke-linecap:round;opacity:.85}
+h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-height:1.15}
+.unter{color:var(--grau);font-size:15px;margin-top:4px}
+.summe{
+  display:inline-flex;align-items:baseline;gap:10px;margin-top:20px;
+  padding:14px 22px;border-radius:var(--radius);border:0.5px solid var(--linie);
+  background:#fff;box-shadow:0 8px 24px rgba(16,19,26,.06);
+}
+.summe .zahl{font-size:30px;font-weight:800;letter-spacing:-.02em;color:var(--blau);font-variant-numeric:tabular-nums}
+.summe .wofuer{font-size:13px;color:var(--grau)}
+section{margin-top:44px}
+h2{font-size:13px;font-weight:800;color:var(--grau)}
+.mandat-summe{font-size:12.5px;color:var(--grau);font-weight:600}
+.kopfzeile{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
+.karte{
+  margin-top:14px;border:0.5px solid var(--linie);background:#fff;border-radius:var(--radius);
+  box-shadow:0 6px 20px rgba(16,19,26,.05);padding:6px 20px;
+}
+.posten{
+  display:flex;align-items:baseline;gap:14px;padding:13px 0;
+  border-top:0.5px solid var(--linie);
+}
+.posten:first-child{border-top:none}
+.posten .was{font-size:14.5px;font-weight:700;min-width:0}
+.posten .wer{font-size:12.5px;color:var(--grau);margin-top:2px}
+.posten .dauer{margin-left:auto;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.posten .frei{font-size:11px;font-weight:800;color:var(--grau);background:rgba(16,19,26,.05);padding:3px 9px;border-radius:999px;white-space:nowrap}
+.fuss{font-size:12.5px;color:var(--grau);margin-top:28px;max-width:60ch}
+@media (max-width:700px){
+  nav .wortmarke small{display:none}
+  .posten{flex-wrap:wrap}
+  .posten .dauer{margin-left:0}
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="wortmarke">Nordholm &amp; Partner<small>Beispielmarke deiner Beratung</small></div>
+  <a class="zurueck" href="uebersicht.html">← Zur Übersicht</a>
+</nav>
+<main>
+  <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
+  <h1>Leistungsnachweis</h1>
+  <p class="unter">Was deine Beratung für dich gearbeitet hat — Stunde für Stunde.</p>
+
+  <div class="summe"><span class="zahl">14,5 Std.</span><span class="wofuer">im August · davon 2,0 Std. ohne Berechnung</span></div>
+
+  <section>
+    <div class="kopfzeile"><h2>Preis und Marge</h2><span class="mandat-summe">9,5 Std.</span></div>
+    <div class="karte">
+      <div class="posten"><div><div class="was">Preismodell durchgerechnet, Staffeln neu geschnitten</div><div class="wer">Dr. Anna Vogelsang · 11. August</div></div><span class="dauer">4,0 Std.</span></div>
+      <div class="posten"><div><div class="was">Benchmark Metallzulieferer ausgewertet</div><div class="wer">Dr. Anna Vogelsang · 8. August</div></div><span class="dauer">3,0 Std.</span></div>
+      <div class="posten"><div><div class="was">Rückfrage zur Preisgleitklausel geprüft</div><div class="wer">J. Brandt · 7. August</div></div><span class="frei">ohne Berechnung</span><span class="dauer">1,0 Std.</span></div>
+      <div class="posten"><div><div class="was">Erstgespräch Marge, Unterlagen gesichtet</div><div class="wer">Dr. Anna Vogelsang · 5. August</div></div><span class="dauer">1,5 Std.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kopfzeile"><h2>Jahresabschluss 2025</h2><span class="mandat-summe">5,0 Std.</span></div>
+    <div class="karte">
+      <div class="posten"><div><div class="was">Entwurf mit dem Steuerbüro abgestimmt</div><div class="wer">J. Brandt · 12. August</div></div><span class="dauer">2,5 Std.</span></div>
+      <div class="posten"><div><div class="was">Rückstellungen geprüft und dokumentiert</div><div class="wer">J. Brandt · 6. August</div></div><span class="dauer">1,5 Std.</span></div>
+      <div class="posten"><div><div class="was">Kurzabstimmung am Telefon</div><div class="wer">Dr. Anna Vogelsang · 4. August</div></div><span class="frei">ohne Berechnung</span><span class="dauer">1,0 Std.</span></div>
+    </div>
+  </section>
+
+  <p class="fuss">Jede Stunde erscheint hier, sobald sie erfasst ist. Berechnet wird nur, was nicht als „ohne Berechnung" gekennzeichnet ist — die Rechnung dazu findest du unter Rechnungen.</p>
+</main>
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function zufall(a, b){ return a + Math.random() * (b - a); }
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.querySelector('.anstrich');
+  var d = 'M2 6';
+  for (var i = 1; i <= 6; i++) d += ' L' + (2 + 92 * i / 6) + ' ' + (6 + zufall(-2, 2));
+  var p = document.createElementNS(NS, 'path');
+  p.setAttribute('d', d);
+  svg.appendChild(p);
+  if (!reduziert) {
+    var len = p.getTotalLength();
+    p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+    p.style.transition = 'stroke-dashoffset .55s cubic-bezier(.45,.05,.55,.95) .1s';
+    void p.getBoundingClientRect();
+    p.style.strokeDashoffset = 0;
+  }
+})();
+</script>
+</body>
+</html>

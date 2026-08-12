@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dein Berater · Anmelden</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
+<style>
+/* quoroai-plattform-design · Anmelden: die Tür zum Kundenbereich · Marker: ANMELDEN-V1 */
+@font-face{font-family:'Manrope';src:url('schriften/manrope.woff2') format('woff2');font-weight:200 800;font-display:swap}
+@font-face{font-family:'Caveat';src:url('schriften/caveat.woff2') format('woff2');font-weight:400 700;font-display:swap}
+:root{
+  --papier:#fafaf7;--tinte:#10131a;--grau:#636c7d;--blau:#2b5fe3;--stift:#1d46c9;
+  --linie:rgba(16,19,26,.1);--radius:16px;--feder:cubic-bezier(.22,.9,.24,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--papier);color:var(--tinte);
+  font-family:'Manrope',system-ui,sans-serif;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  min-height:100svh;display:flex;align-items:center;justify-content:center;padding:24px;
+}
+button,input{font-family:inherit}
+.buehne{width:min(420px,100%)}
+.wortmarke{font-weight:800;font-size:16px;letter-spacing:-.01em;text-align:center}
+.wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
+.karte{
+  margin-top:22px;background:#fff;border:0.5px solid var(--linie);border-radius:20px;
+  box-shadow:0 20px 60px rgba(16,19,26,.09);padding:34px 34px 30px;
+}
+.anstrich{width:76px;height:12px;display:block;overflow:visible;margin:0 auto}
+.anstrich path{fill:none;stroke:var(--stift);stroke-width:2.5;stroke-linecap:round;opacity:.85}
+.gruss{
+  font-family:'Caveat',cursive;font-size:30px;font-weight:700;color:var(--stift);
+  text-align:center;rotate:-1.5deg;margin-top:10px;
+}
+.zeile{margin-top:16px}
+label{display:block;font-size:12.5px;font-weight:700;color:var(--grau);margin-bottom:5px}
+input[type=email],input[type=password]{
+  width:100%;min-height:50px;padding:0 18px;border-radius:14px;
+  border:0.5px solid var(--linie);background:var(--papier);
+  font-size:15px;color:var(--tinte);outline:none;transition:border-color .2s;
+}
+input:focus{border-color:var(--blau)}
+.haupt{
+  width:100%;margin-top:22px;min-height:52px;border-radius:999px;border:none;cursor:pointer;
+  background:var(--tinte);color:#fff;font-size:15px;font-weight:800;
+  transition:background .2s ease,transform .1s ease;
+}
+.haupt:hover{background:var(--blau)}
+.haupt:active{transform:scale(.98)}
+.neben{
+  display:block;text-align:center;margin-top:16px;font-size:13px;font-weight:700;
+  color:var(--grau);text-decoration:none;cursor:pointer;background:none;border:none;width:100%;
+}
+.neben:hover{color:var(--blau)}
+.hinweis{font-size:12px;color:var(--grau);text-align:center;margin-top:18px}
+.schritt[hidden]{display:none}
+.erklaer{font-size:13.5px;color:var(--grau);text-align:center;margin-top:8px}
+.ziffern{display:flex;gap:8px;justify-content:center;margin-top:18px}
+.ziffern input{
+  width:46px;min-height:56px;text-align:center;font-size:22px;font-weight:800;
+  border-radius:14px;border:0.5px solid var(--linie);background:var(--papier);outline:none;
+  font-variant-numeric:tabular-nums;
+}
+.ziffern input:focus{border-color:var(--blau)}
+.gesendet{
+  text-align:center;margin-top:14px;padding:16px;border-radius:14px;
+  background:color-mix(in srgb, var(--blau) 6%, transparent);font-size:14px;
+}
+.gesendet .handschrift{font-family:'Caveat',cursive;font-size:24px;color:var(--stift);display:block;rotate:-1.5deg}
+.fehler{font-size:13px;color:#a06008;font-weight:700;text-align:center;margin-top:12px;min-height:1.2em}
+</style>
+</head>
+<body>
+<div class="buehne">
+  <div class="wortmarke">Nordholm &amp; Partner<small>Beispielmarke deiner Beratung</small></div>
+  <div class="karte">
+    <svg class="anstrich" viewBox="0 0 76 12" aria-hidden="true"></svg>
+
+    <!-- Schritt 1: Anmelden -->
+    <div class="schritt" id="s-anmelden">
+      <div class="gruss">Willkommen zurück.</div>
+      <div class="zeile"><label for="email">E-Mail</label><input id="email" type="email" autocomplete="email" placeholder="du@deine-firma.de"></div>
+      <div class="zeile"><label for="pass">Passwort</label><input id="pass" type="password" autocomplete="current-password" placeholder="••••••••••"></div>
+      <div class="fehler" id="f1" aria-live="polite"></div>
+      <button class="haupt" id="anmelden" type="button">Anmelden</button>
+      <button class="neben" id="zu-vergessen" type="button">Passwort vergessen?</button>
+    </div>
+
+    <!-- Schritt 2: Zwei-Faktor -->
+    <div class="schritt" id="s-zwei" hidden>
+      <div class="gruss">Fast drin.</div>
+      <p class="erklaer">Tipp die sechs Ziffern aus deiner Codes-App ein — der zweite Schlüssel zu deinem Bereich.</p>
+      <div class="ziffern" id="ziffern">
+        <input inputmode="numeric" maxlength="1" aria-label="Ziffer 1">
+        <input inputmode="numeric" maxlength="1" aria-label="Ziffer 2">
+        <input inputmode="numeric" maxlength="1" aria-label="Ziffer 3">
+        <input inputmode="numeric" maxlength="1" aria-label="Ziffer 4">
+        <input inputmode="numeric" maxlength="1" aria-label="Ziffer 5">
+        <input inputmode="numeric" maxlength="1" aria-label="Ziffer 6">
+      </div>
+      <div class="fehler" id="f2" aria-live="polite"></div>
+      <button class="haupt" id="pruefen" type="button">Weiter</button>
+      <button class="neben" id="zurueck-1" type="button">Zurück</button>
+    </div>
+
+    <!-- Schritt 3: Passwort vergessen -->
+    <div class="schritt" id="s-vergessen" hidden>
+      <div class="gruss">Kein Drama.</div>
+      <p class="erklaer">Sag uns deine E-Mail — wir schicken dir einen Link für ein neues Passwort.</p>
+      <div class="zeile"><label for="email2">E-Mail</label><input id="email2" type="email" autocomplete="email" placeholder="du@deine-firma.de"></div>
+      <div class="gesendet" id="gesendet" hidden><span class="handschrift">Ist unterwegs!</span>Schau in dein Postfach — der Link gilt eine Stunde.</div>
+      <button class="haupt" id="senden" type="button">Link schicken</button>
+      <button class="neben" id="zurueck-2" type="button">Zurück zur Anmeldung</button>
+    </div>
+  </div>
+  <p class="hinweis">Vorführung mit Demo-Daten — jede Eingabe funktioniert.</p>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function zufall(a, b){ return a + Math.random() * (b - a); }
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.querySelector('.anstrich');
+  var d = 'M2 6';
+  for (var i = 1; i <= 5; i++) d += ' L' + (2 + 72 * i / 5) + ' ' + (6 + zufall(-2, 2));
+  var p = document.createElementNS(NS, 'path');
+  p.setAttribute('d', d);
+  svg.appendChild(p);
+  if (!reduziert) {
+    var len = p.getTotalLength();
+    p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+    p.style.transition = 'stroke-dashoffset .55s cubic-bezier(.45,.05,.55,.95) .1s';
+    void p.getBoundingClientRect();
+    p.style.strokeDashoffset = 0;
+  }
+
+  function zeige(id){
+    ['s-anmelden', 's-zwei', 's-vergessen'].forEach(function(s){
+      document.getElementById(s).hidden = s !== id;
+    });
+  }
+  document.getElementById('anmelden').addEventListener('click', function(){
+    var email = document.getElementById('email').value.trim();
+    var pass = document.getElementById('pass').value;
+    var f = document.getElementById('f1');
+    if (!email || email.indexOf('@') === -1) { f.textContent = 'Die E-Mail sieht noch nicht richtig aus.'; return; }
+    if (!pass) { f.textContent = 'Ohne Passwort geht es nicht.'; return; }
+    f.textContent = '';
+    zeige('s-zwei');
+    document.querySelector('#ziffern input').focus();
+  });
+  document.getElementById('pass').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') document.getElementById('anmelden').click();
+  });
+  document.getElementById('zu-vergessen').addEventListener('click', function(){ zeige('s-vergessen'); });
+  document.getElementById('zurueck-1').addEventListener('click', function(){ zeige('s-anmelden'); });
+  document.getElementById('zurueck-2').addEventListener('click', function(){
+    document.getElementById('gesendet').hidden = true;
+    document.getElementById('senden').hidden = false;
+    zeige('s-anmelden');
+  });
+
+  /* Ziffernfelder: tippen springt weiter, Löschen springt zurück */
+  var felder = Array.prototype.slice.call(document.querySelectorAll('#ziffern input'));
+  felder.forEach(function(feld, i){
+    feld.addEventListener('input', function(){
+      feld.value = feld.value.replace(/\D/g, '').slice(0, 1);
+      if (feld.value && i < felder.length - 1) felder[i + 1].focus();
+    });
+    feld.addEventListener('keydown', function(e){
+      if (e.key === 'Backspace' && !feld.value && i > 0) felder[i - 1].focus();
+      if (e.key === 'Enter') document.getElementById('pruefen').click();
+    });
+  });
+  document.getElementById('pruefen').addEventListener('click', function(){
+    var code = felder.map(function(f){ return f.value; }).join('');
+    var f2 = document.getElementById('f2');
+    if (code.length < 6) { f2.textContent = 'Es fehlen noch Ziffern.'; return; }
+    f2.textContent = '';
+    location.href = 'uebersicht.html';
+  });
+
+  document.getElementById('senden').addEventListener('click', function(){
+    var email = document.getElementById('email2').value.trim();
+    if (!email || email.indexOf('@') === -1) return;
+    document.getElementById('gesendet').hidden = false;
+    document.getElementById('senden').hidden = true;
+  });
+})();
+</script>
+</body>
+</html>

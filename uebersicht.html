@@ -6,7 +6,7 @@
 <title>Dein Berater · Übersicht</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V3 (V2 + Glocke lebt, nichts sieht mehr bedienbar aus, das nichts tut) */
+/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V4 (V3 + Unterlagen, Leistungsnachweis und Rechnungen sind echte Türen) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -304,19 +304,19 @@ section{margin-top:52px}
   <section>
     <div class="kopfzeile">
       <h2>Unterlagen</h2>
-      <a href="#" class="bald">Alle durchsuchen · entsteht gerade</a>
+      <a href="unterlagen.html">Alle durchsuchen</a>
     </div>
     <div class="zeilen">
-      <div class="zeile"><div class="mit-blatt"><div class="blatt"></div><span><span class="z-titel">Preismodell Benchmark</span><br><span class="z-meta">12 Seiten · gestern · Fassung 1</span></span></div><span class="z-status geteilt">neu</span></div>
-      <div class="zeile"><div class="mit-blatt"><div class="blatt"></div><span><span class="z-titel">Rahmenvertrag Stahl</span><br><span class="z-meta">Fassung 2 · von deiner Beratung</span></span></div><span class="z-status">geteilt am 4. August</span></div>
+      <a class="zeile" href="unterlagen.html"><div class="mit-blatt"><div class="blatt"></div><span><span class="z-titel">Preismodell Benchmark</span><br><span class="z-meta">12 Seiten · gestern · Fassung 1</span></span></div><span class="z-status geteilt">neu</span></a>
+      <a class="zeile" href="unterlagen.html"><div class="mit-blatt"><div class="blatt"></div><span><span class="z-titel">Rahmenvertrag Stahl</span><br><span class="z-meta">Fassung 2 · von deiner Beratung</span></span></div><span class="z-status">geteilt am 4. August</span></a>
     </div>
   </section>
 
   <section>
     <div class="kopfzeile"><h2>Zusammenarbeit</h2></div>
     <div class="fuss-links">
-      <a href="#" class="bald">Leistungsnachweis<small>14,5 Std. im August · entsteht gerade</small></a>
-      <a href="#" class="bald">Rechnungen<small>eine offen · entsteht gerade</small></a>
+      <a href="leistungen.html">Leistungsnachweis<small>14,5 Std. im August</small></a>
+      <a href="rechnungen.html">Rechnungen<small>eine offen</small></a>
     </div>
   </section>
 </main>
@@ -371,6 +371,7 @@ section{margin-top:52px}
     });
   });
   document.querySelectorAll('a.zeile').forEach(function(z){
+    if (z.getAttribute('href') !== 'gespraech.html') return; /* Unterlagen-Zeilen führen zu ihrer Fläche */
     z.addEventListener('click', function(e){
       e.preventDefault();
       var t = z.querySelector('.z-titel');

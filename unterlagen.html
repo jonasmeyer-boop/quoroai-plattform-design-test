@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dein Berater · Unterlagen</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
+<style>
+/* quoroai-plattform-design · Unterlagen: alles, was die Beratung freigegeben hat · Marker: UNTERLAGEN-V1 */
+@font-face{
+  font-family:'Manrope';
+  src:url('schriften/manrope.woff2') format('woff2');
+  font-weight:200 800;
+  font-display:swap;
+}
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+:root{
+  --papier:#fafaf7;--tinte:#10131a;--grau:#636c7d;--blau:#2b5fe3;--stift:#1d46c9;
+  --linie:rgba(16,19,26,.1);--karte:#ffffff;--radius:16px;--feder:cubic-bezier(.22,.9,.24,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--papier);color:var(--tinte);
+  font-family:'Manrope',system-ui,sans-serif;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:10;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 max(24px,calc((100vw - 880px)/2));
+  background:linear-gradient(var(--papier) 55%, color-mix(in srgb, var(--papier) 1%, transparent));
+}
+nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
+nav .zurueck{
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:12.5px;font-weight:700;color:var(--tinte);
+  text-decoration:none;transition:border-color .2s;
+}
+nav .zurueck:hover{border-color:var(--blau)}
+
+main{max-width:880px;margin:0 auto;padding:108px 24px 96px}
+.anstrich{width:96px;height:12px;display:block;overflow:visible;margin-bottom:16px}
+.anstrich path{fill:none;stroke:var(--stift);stroke-width:2.5;stroke-linecap:round;opacity:.85}
+h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-height:1.15}
+.unter{color:var(--grau);font-size:15px;margin-top:4px}
+
+.suche{position:relative;margin-top:24px;max-width:560px}
+.suche input{
+  width:100%;min-height:50px;padding:0 22px 0 48px;border-radius:999px;
+  border:0.5px solid var(--linie);background:#fff;
+  font-family:inherit;font-size:15px;color:var(--tinte);outline:none;
+  box-shadow:0 8px 30px rgba(16,19,26,.06);
+}
+.suche input:focus{border-color:var(--blau)}
+.suche svg{position:absolute;left:18px;top:50%;translate:0 -50%;width:18px;height:18px}
+.suche svg path{fill:none;stroke:var(--grau);stroke-width:2;stroke-linecap:round}
+.treffer-zeile{font-size:12.5px;color:var(--grau);margin-top:10px;min-height:1.2em}
+
+.zeilen{margin-top:20px;display:flex;flex-direction:column;gap:10px}
+.dok{
+  border:0.5px solid var(--linie);background:#fff;border-radius:var(--radius);
+  box-shadow:0 6px 20px rgba(16,19,26,.05);overflow:hidden;
+}
+.dok.versteckt{display:none}
+.dok .kopf{
+  display:flex;align-items:center;gap:16px;padding:15px 20px;cursor:pointer;
+  transition:background .15s ease;
+}
+.dok .kopf:hover{background:rgba(16,19,26,.02)}
+.blatt{
+  width:34px;height:44px;flex-shrink:0;position:relative;
+  background:#fff;border:1px solid var(--linie);border-radius:4px;
+}
+.blatt::before{
+  content:'';position:absolute;right:-1px;top:-1px;border:8px solid transparent;
+  border-left-color:color-mix(in srgb, var(--blau) 25%, transparent);
+  border-bottom-color:color-mix(in srgb, var(--blau) 25%, transparent);
+  border-radius:0 0 0 4px;
+}
+.blatt::after{
+  content:'';position:absolute;left:6px;right:6px;top:13px;height:19px;
+  background:linear-gradient(var(--linie) 1.5px, transparent 1.5px);background-size:100% 6px;
+}
+.dok .titel{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.dok .titel mark{background:color-mix(in srgb, var(--blau) 18%, transparent);color:inherit;border-radius:3px;padding:0 2px}
+.dok .meta{font-size:12.5px;color:var(--grau);margin-top:2px}
+.dok .status{
+  flex-shrink:0;margin-left:auto;font-size:11px;font-weight:800;
+  padding:4px 10px;border-radius:999px;color:var(--grau);background:rgba(16,19,26,.05);white-space:nowrap;
+}
+.dok .status.neu{color:#fff;background:var(--blau)}
+.dok .auszug{
+  margin:0 20px 14px 70px;padding:10px 16px;font-size:13.5px;
+  border-left:3px solid var(--stift);border-radius:0 10px 10px 0;
+  background:color-mix(in srgb, var(--blau) 5%, transparent);max-width:56ch;
+}
+.dok .auszug mark{background:color-mix(in srgb, var(--blau) 18%, transparent);color:inherit;border-radius:3px;padding:0 2px}
+.dok .warnung{
+  margin:0 20px 14px 70px;font-size:12.5px;color:#a06008;font-weight:700;
+  display:flex;align-items:center;gap:7px;
+}
+.dok .warnung::before{content:'';width:7px;height:7px;border-radius:999px;background:#a06008;flex-shrink:0}
+.dok .fassungen{border-top:0.5px solid var(--linie);padding:10px 20px 12px 70px}
+.dok .fassungen[hidden]{display:none}
+.dok .fassung{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  font-size:13px;color:var(--grau);padding:6px 0;
+}
+.dok .fassung .f-name{font-weight:700;color:var(--tinte)}
+.dok .fassung button{
+  padding:6px 14px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:border-color .2s;
+}
+.dok .fassung button:hover{border-color:var(--blau)}
+.dok .aktionen{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.dok .aktionen button{
+  padding:8px 15px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:12.5px;font-weight:700;cursor:pointer;transition:border-color .2s,color .2s;
+}
+.dok .aktionen button:hover{border-color:var(--blau);color:var(--blau)}
+.leer{color:var(--grau);font-size:15px;margin-top:28px}
+.leer .handschrift{font-family:'Caveat',cursive;font-size:24px;color:var(--stift);display:block;rotate:-1.5deg;margin-bottom:4px}
+
+#demo-hinweis{
+  position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:60;pointer-events:none;
+  font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--stift);
+  opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--feder);
+}
+#demo-hinweis.da{opacity:.95;translate:-50% 0}
+
+@media (max-width:700px){
+  .dok .kopf{flex-wrap:wrap}
+  .dok .auszug,.dok .warnung{margin-left:20px}
+  .dok .fassungen{padding-left:20px}
+  nav .wortmarke small{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wortmarke">Nordholm &amp; Partner<small>Beispielmarke deiner Beratung</small></div>
+  <a class="zurueck" href="uebersicht.html">← Zur Übersicht</a>
+</nav>
+<div id="demo-hinweis">Vorführung — hier läge die echte Datei.</div>
+
+<main>
+  <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
+  <h1>Unterlagen</h1>
+  <p class="unter">Alles, was deine Beratung für dich freigegeben hat — mit jeder Fassung.</p>
+
+  <div class="suche">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 17 a6.5 6.5 0 1 0 0-13 a6.5 6.5 0 0 0 0 13 Z M15.5 15.5 L20.5 20.5"/></svg>
+    <input id="suchfeld" type="text" placeholder="In allen Unterlagen suchen" aria-label="In allen Unterlagen suchen">
+  </div>
+  <div class="treffer-zeile" id="treffer" aria-live="polite"></div>
+
+  <div class="zeilen" id="liste"></div>
+  <p class="leer" id="leer" hidden><span class="handschrift">Nichts gefunden.</span>Such mit einem anderen Wort — oder frag deinen Berater danach, der kennt jede Seite.</p>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function zufall(a, b){ return a + Math.random() * (b - a); }
+
+  /* Anstrich */
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.querySelector('.anstrich');
+  var d = 'M2 6';
+  for (var i = 1; i <= 6; i++) d += ' L' + (2 + 92 * i / 6) + ' ' + (6 + zufall(-2, 2));
+  var p = document.createElementNS(NS, 'path');
+  p.setAttribute('d', d);
+  svg.appendChild(p);
+  if (!reduziert) {
+    var len = p.getTotalLength();
+    p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+    p.style.transition = 'stroke-dashoffset .55s cubic-bezier(.45,.05,.55,.95) .1s';
+    void p.getBoundingClientRect();
+    p.style.strokeDashoffset = 0;
+  }
+
+  var hinweisTimer = null;
+  function demoHinweis(text){
+    var h = document.getElementById('demo-hinweis');
+    h.textContent = text;
+    h.classList.add('da');
+    clearTimeout(hinweisTimer);
+    hinweisTimer = setTimeout(function(){ h.classList.remove('da'); }, 2200);
+  }
+
+  /* Demo-Bestand: Titel, Meta, Fassungen, Volltext für die Suche */
+  var DOKUMENTE = [
+    {titel: 'Preismodell Benchmark', meta: '12 Seiten · gestern · Fassung 1', status: 'neu',
+     text: 'Preisanpassung von vier Prozent auf die C-Kunden bringt 38.000 Euro im Jahr. Staffeln neu geschnitten, A- und B-Kunden unberührt. Branchenschnitt sechs Prozent darüber.',
+     fassungen: []},
+    {titel: 'Rahmenvertrag Stahl', meta: 'Fassung 2 · 4. August · von deiner Beratung', status: 'Fassung 2',
+     text: 'Preisgleitklausel nach Ziffer 3.2 endet zum 30. September. Danach gilt der Tagespreis des Lieferanten, sofern kein neuer Rahmen vereinbart ist. Kündigungsfrist drei Monate.',
+     fassungen: [{name: 'Fassung 1', meta: '12. Mai'}]},
+    {titel: 'Jahresabschluss 2025, Entwurf', meta: '48 Seiten · 28. Juli', status: 'geteilt',
+     text: 'Umsatzerlöse 4,1 Millionen Euro, Rohertrag 31,8 Prozent, Eigenkapitalquote 38 Prozent. Vorbehaltlich der Schlussbuchungen des Steuerbüros.',
+     fassungen: []},
+    {titel: 'Fotos Halle 2, Begehung', meta: '9 Bilder · 15. Juli', status: 'geteilt',
+     warnung: 'Aus diesen Bildern kann dein Berater nicht zitieren — sie enthalten keinen lesbaren Text.',
+     text: 'Begehung Halle zwei Fotos Anbau Brandschutz',
+     fassungen: []},
+    {titel: 'Benchmark Metallzulieferer 2025', meta: '22 Seiten · 2. Juli', status: 'geteilt',
+     text: 'Zulieferer mit 20 bis 80 Mitarbeitenden erzielen im Median 35,9 Prozent Rohertragsmarge. Unteres Quartil 31,2 Prozent. Energiekosten je Tonne gestiegen.',
+     fassungen: []}
+  ];
+
+  var liste = document.getElementById('liste');
+  function baue(){
+    DOKUMENTE.forEach(function(dok){
+      var el = document.createElement('div');
+      el.className = 'dok';
+      el.innerHTML =
+        '<div class="kopf"><div class="blatt"></div>' +
+        '<div style="min-width:0"><div class="titel"></div><div class="meta"></div></div>' +
+        '<span class="status"></span>' +
+        '<span class="aktionen"><button type="button" class="laden">↓ Laden</button>' +
+        (dok.fassungen.length ? '<button type="button" class="ff">Fassungen</button>' : '') +
+        '</span></div>' +
+        '<div class="auszug" hidden></div>' +
+        (dok.warnung ? '<div class="warnung"></div>' : '') +
+        (dok.fassungen.length ? '<div class="fassungen" hidden></div>' : '');
+      el.querySelector('.titel').textContent = dok.titel;
+      el.querySelector('.meta').textContent = dok.meta;
+      var st = el.querySelector('.status');
+      st.textContent = dok.status;
+      if (dok.status === 'neu') st.classList.add('neu');
+      if (dok.warnung) el.querySelector('.warnung').textContent = dok.warnung;
+      if (dok.fassungen.length) {
+        var lage = el.querySelector('.fassungen');
+        dok.fassungen.forEach(function(f){
+          var z = document.createElement('div');
+          z.className = 'fassung';
+          z.innerHTML = '<span><span class="f-name"></span> · <span class="f-meta"></span></span><button type="button">↓ Laden</button>';
+          z.querySelector('.f-name').textContent = f.name;
+          z.querySelector('.f-meta').textContent = f.meta;
+          z.querySelector('button').addEventListener('click', function(){ demoHinweis('Vorführung — hier läge ' + f.name 	+ '.'); });
+          lage.appendChild(z);
+        });
+        el.querySelector('.ff').addEventListener('click', function(e){
+          e.stopPropagation();
+          lage.hidden = !lage.hidden;
+        });
+      }
+      el.querySelector('.laden').addEventListener('click', function(e){
+        e.stopPropagation();
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob(['# ' + dok.titel + '\n\n' + dok.text + '\n\n— Vorführung, Demo-Daten\n'], {type: 'text/markdown'}));
+        a.download = dok.titel.replace(/[^\wäöüÄÖÜß-]+/g, '-') + '.md';
+        a.click();
+        setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+      });
+      el.querySelector('.kopf').addEventListener('click', function(){
+        demoHinweis('Vorführung — im Produkt öffnet sich hier das Original.');
+      });
+      dok.el = el;
+      liste.appendChild(el);
+    });
+  }
+  baue();
+
+  /* Volltextsuche mit Trefferauszug — filtert sofort beim Tippen */
+  var feld = document.getElementById('suchfeld');
+  var treffer = document.getElementById('treffer');
+  var leer = document.getElementById('leer');
+  function markiere(text, wort){
+    var i = text.toLowerCase().indexOf(wort.toLowerCase());
+    if (i === -1) return null;
+    var von = Math.max(0, i - 60), bis = Math.min(text.length, i + wort.length + 90);
+    var stück = (von > 0 ? '… ' : '') + text.slice(von, bis) + (bis < text.length ? ' …' : '');
+    return stück.replace(new RegExp('(' + wort.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig'), '<mark>$1</mark>');
+  }
+  feld.addEventListener('input', function(){
+    var wort = feld.value.trim();
+    var gefunden = 0;
+    DOKUMENTE.forEach(function(dok){
+      var auszug = dok.el.querySelector('.auszug');
+      var titelEl = dok.el.querySelector('.titel');
+      if (!wort) {
+        dok.el.classList.remove('versteckt');
+        auszug.hidden = true;
+        titelEl.textContent = dok.titel;
+        gefunden++;
+        return;
+      }
+      var imTitel = markiere(dok.titel, wort);
+      var imText = markiere(dok.text, wort);
+      if (!imTitel && !imText) {
+        dok.el.classList.add('versteckt');
+        return;
+      }
+      gefunden++;
+      dok.el.classList.remove('versteckt');
+      titelEl.innerHTML = imTitel || dok.titel.replace(/</g, '&lt;');
+      if (imText) { auszug.innerHTML = imText; auszug.hidden = false; }
+      else auszug.hidden = true;
+    });
+    treffer.textContent = wort ? (gefunden === 1 ? 'Ein Dokument gefunden' : gefunden + ' Dokumente gefunden') : '';
+    leer.hidden = gefunden > 0;
+  });
+})();
+</script>
+</body>
+</html>
