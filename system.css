@@ -1,0 +1,95 @@
+/* quoroai-plattform-design · Das quoroAI-Designsystem, eine Quelle.
+   Weißer Grund, Logo-Lila #6f63e8, Schauschrift Clash Display (Jonas, 2026-08-12),
+   Lauftext General Sans. Gilt für quoroAI-gebrandete Flächen (Beratungsseite);
+   Kundenflächen bleiben White-Label über marke.js. Marker: SYSTEM-CSS-V1 */
+
+@font-face{font-family:'Clash Display';src:url('schriften/clash-display.woff2') format('woff2');font-weight:200 700;font-display:swap}
+@font-face{font-family:'General Sans';src:url('schriften/general-sans.woff2') format('woff2');font-weight:200 700;font-display:swap}
+
+:root{
+  /* Lila, alles aus #6f63e8 abgeleitet */
+  --lila-050:#f5f4fe; --lila-100:#ecebfd; --lila-200:#dcd9fb;
+  --lila-300:#c0bbf6; --lila-400:#9d93f1; --lila-500:#8478ec;
+  --lila-600:#6f63e8; /* die Marke, direkt aus dem Logo */
+  --lila-700:#5a4cd6; --lila-800:#483dae; --lila-900:#3b3486;
+
+  /* Nebel: Grau mit violettem Unterton */
+  --nebel-050:#fafafc; --nebel-100:#f4f4f9; --nebel-200:#e9e8f1;
+  --nebel-300:#d6d5e2; --nebel-400:#a8a6bb; --nebel-500:#7f7d93;
+  --nebel-600:#5d5b71; --nebel-700:#434153;
+
+  --tinte:#18152f;   /* Text: Schwarz mit einem Hauch Violett */
+  --grund:#fdfdfe;   /* Seite */
+  --flaeche:#ffffff; /* Karten und Felder */
+
+  /* Semantik, gedämpft, damit das Lila führt */
+  --gruen:#177452;     --gruen-fond:#e5f5ec;
+  --bernstein:#9a5b00; --bernstein-fond:#fdf2df;
+  --rot:#c03246;       --rot-fond:#fdeaec;
+
+  /* Radien: Karten 20, Innenflächen 12 (konzentrisch bei 8er-Polster), Knöpfe Kapsel */
+  --radius-karte:20px; --radius-innen:12px; --radius-kapsel:999px;
+
+  /* Schrift */
+  --schrift-schau:'Clash Display',sans-serif; --schau-gewicht:600; --schau-spur:-.02em;
+  --schrift-text:'General Sans',system-ui,sans-serif;
+
+  /* Bewegung: eine Kurve für alles */
+  --kurve:cubic-bezier(.16,1,.3,1);
+}
+
+/* ---------- Grundstimmung ---------- */
+body.quoro{
+  background:var(--grund);color:var(--tinte);
+  font-family:var(--schrift-text);font-size:17px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.quoro h1,.quoro h2,.quoro h3,.quoro .schau{
+  font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);
+  letter-spacing:var(--schau-spur);line-height:1.12;
+}
+.quoro a{color:var(--lila-600)}
+.quoro :focus-visible{outline:3px solid var(--lila-400);outline-offset:2px;border-radius:4px}
+
+/* ---------- Knöpfe ---------- */
+.knopf{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:46px;padding:0 24px;border-radius:var(--radius-kapsel);
+  font:inherit;font-size:16px;font-weight:600;cursor:pointer;border:0;
+  transition:transform .12s var(--kurve),background .18s var(--kurve),box-shadow .18s var(--kurve);
+}
+.knopf:active{transform:scale(.97)}
+.knopf.primaer{background:var(--lila-600);color:#fff;box-shadow:0 8px 20px rgba(111,99,232,.28)}
+.knopf.primaer:hover{background:var(--lila-700)}
+.knopf.sekundaer{background:var(--lila-100);color:var(--lila-800)}
+.knopf.sekundaer:hover{background:var(--lila-200)}
+.knopf.leise{background:transparent;color:var(--tinte);box-shadow:inset 0 0 0 1px var(--nebel-300)}
+.knopf.leise:hover{background:var(--nebel-100)}
+.knopf.gefahr{background:var(--rot-fond);color:var(--rot)}
+
+/* ---------- Zustände: Wort und Fläche, keine Deko-Punkte ---------- */
+.pille{display:inline-flex;align-items:center;min-height:28px;padding:2px 12px;border-radius:var(--radius-kapsel);font-size:13.5px;font-weight:600}
+.pille.aktiv{background:var(--gruen-fond);color:var(--gruen)}
+.pille.wartet{background:var(--bernstein-fond);color:var(--bernstein)}
+.pille.entwurf{background:var(--nebel-100);color:var(--nebel-600)}
+.pille.lila{background:var(--lila-100);color:var(--lila-800)}
+
+/* ---------- Eingabe: Name darüber, Hilfe darunter ---------- */
+.feld label{display:block;font-size:14px;font-weight:600;margin-bottom:6px}
+.feld input,.feld textarea{
+  width:100%;min-height:46px;padding:12px 14px;font:inherit;font-size:16px;color:var(--tinte);
+  background:var(--flaeche);border:1px solid var(--nebel-300);border-radius:var(--radius-innen);
+  transition:border-color .15s,box-shadow .15s;
+}
+.feld input{padding-top:0;padding-bottom:0}
+.feld input:focus,.feld textarea:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+.feld .hilfe{font-size:13px;color:var(--nebel-500);margin-top:6px}
+.feld .fehler{font-size:13px;color:var(--rot);margin-top:6px}
+
+/* ---------- Karte ---------- */
+.karte{background:var(--flaeche);border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);padding:20px}
+.karte.gehoben{box-shadow:0 10px 30px rgba(24,21,47,.06)}
+
+@media (prefers-reduced-motion:reduce){
+  .knopf,.feld input,.feld textarea{transition-duration:.01ms}
+}

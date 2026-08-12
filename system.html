@@ -1,63 +1,17 @@
 <!doctype html>
-<html lang="de" data-schrift="clash">
+<html lang="de">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>quoroAI · Designsystem</title>
 <link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
 <style>
-/* Marker: SYSTEM-V1 · Das quoroAI-Designsystem: weißer Grund, Logo-Lila #6f63e8.
-   Schrift ist noch offen: drei Kandidaten per Schalter oben rechts.
-   Gilt für quoroAI-gebrandete Flächen (Beratungsseite); Kundenflächen
-   bleiben White-Label über marke.js. */
-
-/* ---------- Schriften (variabel, selbst gehostet) ---------- */
-@font-face{font-family:'Clash Display';src:url('schriften/clash-display.woff2') format('woff2');font-weight:200 700;font-display:swap}
-@font-face{font-family:'Bricolage';src:url('schriften/bricolage.woff2') format('woff2');font-weight:200 800;font-display:swap}
-@font-face{font-family:'Chillax';src:url('schriften/chillax.woff2') format('woff2');font-weight:200 700;font-display:swap}
-@font-face{font-family:'General Sans';src:url('schriften/general-sans.woff2') format('woff2');font-weight:200 700;font-display:swap}
-
-/* ---------- Farbwelt: alles aus #6f63e8 abgeleitet ---------- */
-:root{
-  --lila-050:#f5f4fe; --lila-100:#ecebfd; --lila-200:#dcd9fb;
-  --lila-300:#c0bbf6; --lila-400:#9d93f1; --lila-500:#8478ec;
-  --lila-600:#6f63e8; /* die Marke, direkt aus dem Logo */
-  --lila-700:#5a4cd6; --lila-800:#483dae; --lila-900:#3b3486;
-
-  --nebel-050:#fafafc; --nebel-100:#f4f4f9; --nebel-200:#e9e8f1;
-  --nebel-300:#d6d5e2; --nebel-400:#a8a6bb; --nebel-500:#7f7d93;
-  --nebel-600:#5d5b71; --nebel-700:#434153;
-
-  --tinte:#18152f;          /* Text: Schwarz mit einem Hauch Violett */
-  --grund:#fdfdfe;          /* Seite */
-  --flaeche:#ffffff;        /* Karten und Felder */
-
-  --gruen:#177452;     --gruen-fond:#e5f5ec;
-  --bernstein:#9a5b00; --bernstein-fond:#fdf2df;
-  --rot:#c03246;       --rot-fond:#fdeaec;
-
-  /* Radien: Karten 20, Innenflächen 12 (konzentrisch bei 8er-Polster), Knöpfe Kapsel */
-  --radius-karte:20px; --radius-innen:12px; --radius-kapsel:999px;
-
-  --schrift-text:'General Sans',system-ui,sans-serif;
-  --kurve:cubic-bezier(.16,1,.3,1);
-}
-[data-schrift="clash"]{--schrift-schau:'Clash Display',sans-serif; --schau-spur:-.02em; --schau-gewicht:600}
-[data-schrift="bricolage"]{--schrift-schau:'Bricolage',sans-serif; --schau-spur:-.025em; --schau-gewicht:650}
-[data-schrift="chillax"]{--schrift-schau:'Chillax',sans-serif; --schau-spur:-.015em; --schau-gewicht:600}
+/* Marker: SYSTEM-V2 · Schauschrift entschieden: Clash Display (Jonas, 2026-08-12).
+   Tokens und Bausteine wohnen in system.css; hier nur das Schaufenster. */
 
 *{margin:0;padding:0;box-sizing:border-box}
-html{font-optical-sizing:auto}
-body{
-  background:var(--grund);color:var(--tinte);
-  font-family:var(--schrift-text);font-size:17px;line-height:1.6;
-  -webkit-font-smoothing:antialiased;
-}
 .rahmen{max-width:1080px;margin:0 auto;padding:0 24px}
-
-h1,h2,h3,.schau{font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);letter-spacing:var(--schau-spur);line-height:1.12}
-a{color:var(--lila-600)}
-:focus-visible{outline:3px solid var(--lila-400);outline-offset:2px;border-radius:4px}
 
 /* ---------- Kopfzeile ---------- */
 header{
@@ -70,16 +24,10 @@ header{
 header img{width:30px;height:30px;border-radius:7px}
 header .wortmarke{font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);font-size:19px;letter-spacing:-.01em}
 header .bereich{color:var(--nebel-500);font-size:15px;margin-left:2px}
-.schalter{margin-left:auto;display:flex;background:var(--nebel-100);border-radius:var(--radius-kapsel);padding:3px;gap:2px}
-.schalter button{
-  border:0;background:transparent;font:inherit;font-size:14px;font-weight:500;color:var(--nebel-600);
-  padding:6px 14px;border-radius:var(--radius-kapsel);cursor:pointer;min-height:32px;
-  transition:background .18s var(--kurve),color .18s var(--kurve);
-}
-.schalter button[aria-pressed="true"]{background:var(--flaeche);color:var(--tinte);box-shadow:0 1px 4px rgba(24,21,47,.12)}
+header .stand{margin-left:auto;font-size:14px;color:var(--nebel-500)}
 
 /* ---------- Bühne: das System in Aktion ---------- */
-.buehne{position:relative;overflow:hidden;padding:96px 0 80px;text-align:left}
+.buehne{position:relative;overflow:hidden;padding:96px 0 80px}
 .buehne::before{ /* der eine ruhige Glanzmoment der Seite */
   content:"";position:absolute;inset:-40% -20% auto auto;width:70%;height:120%;
   background:
@@ -92,22 +40,6 @@ header .bereich{color:var(--nebel-500);font-size:15px;margin-left:2px}
 .buehne h1 em{font-style:normal;color:var(--lila-600)}
 .buehne p{margin-top:18px;max-width:44ch;font-size:19px;color:var(--nebel-600)}
 .buehne .taten{margin-top:32px;display:flex;gap:12px;flex-wrap:wrap}
-
-/* ---------- Knöpfe ---------- */
-.knopf{
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  min-height:46px;padding:0 24px;border-radius:var(--radius-kapsel);
-  font:inherit;font-size:16px;font-weight:600;cursor:pointer;border:0;
-  transition:transform .12s var(--kurve),background .18s var(--kurve),box-shadow .18s var(--kurve);
-}
-.knopf:active{transform:scale(.97)}
-.knopf.primaer{background:var(--lila-600);color:#fff;box-shadow:0 8px 20px rgba(111,99,232,.28)}
-.knopf.primaer:hover{background:var(--lila-700)}
-.knopf.sekundaer{background:var(--lila-100);color:var(--lila-800)}
-.knopf.sekundaer:hover{background:var(--lila-200)}
-.knopf.leise{background:transparent;color:var(--tinte);box-shadow:inset 0 0 0 1px var(--nebel-300)}
-.knopf.leise:hover{background:var(--nebel-100)}
-.knopf.gefahr{background:var(--rot-fond);color:var(--rot)}
 
 /* ---------- Abschnitte ---------- */
 section{padding:56px 0;border-top:0.5px solid var(--nebel-200)}
@@ -141,23 +73,6 @@ section p.unter{color:var(--nebel-500);max-width:62ch;margin-bottom:32px}
 .baustein{background:var(--flaeche);border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);padding:24px}
 .baustein h3{font-size:17px;margin-bottom:18px}
 .baustein .satz{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-
-.pille{display:inline-flex;align-items:center;min-height:28px;padding:2px 12px;border-radius:var(--radius-kapsel);font-size:13.5px;font-weight:600}
-.pille.aktiv{background:var(--gruen-fond);color:var(--gruen)}
-.pille.wartet{background:var(--bernstein-fond);color:var(--bernstein)}
-.pille.entwurf{background:var(--nebel-100);color:var(--nebel-600)}
-.pille.lila{background:var(--lila-100);color:var(--lila-800)}
-
-.feld label{display:block;font-size:14px;font-weight:600;margin-bottom:6px}
-.feld input{
-  width:100%;min-height:46px;padding:0 14px;font:inherit;font-size:16px;color:var(--tinte);
-  background:var(--flaeche);border:1px solid var(--nebel-300);border-radius:var(--radius-innen);
-  transition:border-color .15s,box-shadow .15s;
-}
-.feld input:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
-.feld .hilfe{font-size:13px;color:var(--nebel-500);margin-top:6px}
-
-.karte-demo{background:var(--flaeche);border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);padding:20px;box-shadow:0 10px 30px rgba(24,21,47,.06)}
 .karte-demo .kopf{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .karte-demo .name{font-weight:600}
 .karte-demo .zahl{font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);font-size:40px;letter-spacing:var(--schau-spur);margin-top:10px}
@@ -175,21 +90,15 @@ section p.unter{color:var(--nebel-500);max-width:62ch;margin-bottom:32px}
 
 footer{padding:40px 0 64px;color:var(--nebel-500);font-size:14px}
 footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
-
-@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important}}
 </style>
 </head>
-<body>
+<body class="quoro">
 
 <header>
   <img src="bilder/quoro-icon.svg" alt="quoroAI">
   <span class="wortmarke">quoroAI</span>
   <span class="bereich">Designsystem</span>
-  <div class="schalter" role="group" aria-label="Schrift wählen">
-    <button type="button" data-wahl="clash" aria-pressed="true">Clash</button>
-    <button type="button" data-wahl="bricolage" aria-pressed="false">Bricolage</button>
-    <button type="button" data-wahl="chillax" aria-pressed="false">Chillax</button>
-  </div>
+  <span class="stand">Clash Display · entschieden am 12. August 2026</span>
 </header>
 
 <div class="buehne">
@@ -247,7 +156,7 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
 <section>
   <div class="rahmen">
     <h2>Schrift</h2>
-    <p class="unter">Lauftext ist immer General Sans. Die Schauschrift für Überschriften und große Zahlen wählst du oben rechts: Clash Display (präzise), Bricolage Grotesque (eigenwillig) oder Chillax (weich, wie die Logo-Rundungen).</p>
+    <p class="unter">Die Schauschrift für Überschriften und große Zahlen ist Clash Display, der Lauftext General Sans. Beide liegen als variable Schriften im Haus, nichts wird von fremden Servern geladen.</p>
     <div class="muster">
       <div class="zeile"><span class="mass">Schau 1 · 56</span><span class="schau schau-1">Zwölf Mandate, ein Berater.</span></div>
       <div class="zeile"><span class="mass">Schau 2 · 34</span><span class="schau schau-2">Die Morgenlage für Waldmann Consulting</span></div>
@@ -264,7 +173,7 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
 <section>
   <div class="rahmen">
     <h2>Bausteine</h2>
-    <p class="unter">Knöpfe als Kapseln, Zustand über Wort und Fläche statt Deko-Punkten, Felder mit Namen darüber.</p>
+    <p class="unter">Knöpfe als Kapseln, Zustand über Wort und Fläche statt Deko-Punkten, Felder mit Namen darüber. Alles hier kommt aus system.css.</p>
     <div class="bausteine">
       <div class="baustein">
         <h3>Knöpfe</h3>
@@ -294,7 +203,7 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
       </div>
       <div class="baustein" style="background:var(--nebel-050);border:0">
         <h3>Karte</h3>
-        <div class="karte-demo">
+        <div class="karte gehoben karte-demo">
           <div class="kopf"><span class="name">Nordholm &amp; Partner</span><span class="pille aktiv">Aktiv</span></div>
           <div class="zahl">18.240 €</div>
           <div class="deut">Beratungsleistung im August, 46 Gespräche</div>
@@ -327,24 +236,8 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
 </section>
 
 <footer>
-  <div class="rahmen">quoroAI-Designsystem, Arbeitsstand. Die Schauschrift ist noch nicht entschieden, der Schalter oben rechts merkt sich deine Wahl.</div>
+  <div class="rahmen">quoroAI-Designsystem. Tokens und Bausteine: system.css · Entscheidung vom 12. August 2026 in der Chronik.</div>
 </footer>
 
-<script>
-/* Schrift-Schalter: Wahl landet am <html> und im Speicher */
-(function(){
-  'use strict';
-  var knoepfe = document.querySelectorAll('.schalter button');
-  function setze(wahl){
-    document.documentElement.dataset.schrift = wahl;
-    knoepfe.forEach(function(k){ k.setAttribute('aria-pressed', String(k.dataset.wahl === wahl)); });
-    try { localStorage.setItem('quoro-schau-schrift', wahl); } catch (e) {}
-  }
-  knoepfe.forEach(function(k){ k.addEventListener('click', function(){ setze(k.dataset.wahl); }); });
-  var gemerkt = null;
-  try { gemerkt = localStorage.getItem('quoro-schau-schrift'); } catch (e) {}
-  if (gemerkt === 'clash' || gemerkt === 'bricolage' || gemerkt === 'chillax') setze(gemerkt);
-})();
-</script>
 </body>
 </html>
