@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>quoroAI Zustände</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* Marker: ZUSTAENDE-V1 · Fünf Vorschläge für Zustands-Anzeigen, weil die
+   Kapseln aus SYSTEM-V3 Jonas zu lang, klobig und ungleichmäßig sind.
+   Kurze Worte überall: Aktiv, Wartet, Entwurf, Vorschlag. */
+
+*{margin:0;padding:0;box-sizing:border-box}
+.rahmen{max-width:920px;margin:0 auto;padding:0 24px}
+
+header{
+  position:sticky;top:0;z-index:20;height:64px;
+  display:flex;align-items:center;gap:12px;padding:0 24px;
+  border-radius:0;border-left:0;border-right:0;border-top:0;
+}
+header img{width:30px;height:30px;border-radius:7px}
+header .wortmarke{font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);font-size:19px;letter-spacing:-.01em}
+header .bereich{color:var(--nebel-500);font-size:15px;margin-left:2px}
+header a{margin-left:auto;font-size:14px;font-weight:500;text-decoration:none}
+
+.kopf{padding:56px 0 8px}
+.kopf h1{font-size:clamp(30px,4vw,40px)}
+.kopf p{margin-top:10px;color:var(--nebel-600);max-width:58ch}
+
+section{padding:40px 0}
+section h2{font-size:24px}
+section h2 small{font-family:var(--schrift-text);font-weight:500;font-size:15px;color:var(--nebel-500);margin-left:10px}
+section p.deut{color:var(--nebel-500);font-size:15px;margin:6px 0 20px;max-width:58ch}
+
+.probe{background:var(--flaeche);border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);padding:24px}
+.zustandsreihe{display:flex;gap:24px;flex-wrap:wrap;align-items:center;padding-bottom:20px;border-bottom:0.5px solid var(--nebel-200)}
+.liste{margin-top:4px}
+.zeile{display:grid;grid-template-columns:1fr auto auto;gap:24px;align-items:center;padding:14px 0}
+.zeile + .zeile{border-top:0.5px solid var(--nebel-200)}
+.zeile .name{font-weight:600}
+.zeile .summe{font-variant-numeric:tabular-nums;color:var(--nebel-600)}
+@media (max-width:600px){.zeile{grid-template-columns:1fr auto}.zeile .summe{display:none}}
+
+/* ---------- A · Nur das Wort ---------- */
+.z-wort{font-size:14px;font-weight:650}
+.z-wort.aktiv{color:var(--gruen)}
+.z-wort.wartet{color:var(--bernstein)}
+.z-wort.entwurf{color:var(--nebel-500)}
+.z-wort.vorschlag{color:var(--lila-700)}
+
+/* ---------- B · Die Kante ---------- */
+.z-kante{display:inline-flex;align-items:center;gap:9px;font-size:14px;font-weight:500;color:var(--tinte)}
+.z-kante::before{content:"";width:3px;height:15px;border-radius:2px;background:var(--nebel-300)}
+.z-kante.aktiv::before{background:var(--gruen)}
+.z-kante.wartet::before{background:var(--bernstein)}
+.z-kante.entwurf::before{background:var(--nebel-400)}
+.z-kante.vorschlag::before{background:var(--lila-600)}
+
+/* ---------- C · Das Gleichmaß ---------- */
+.z-gleich{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:96px;height:26px;border-radius:var(--radius-kapsel);
+  font-size:12.5px;font-weight:600;
+}
+.z-gleich.aktiv{background:var(--gruen-fond);color:var(--gruen)}
+.z-gleich.wartet{background:var(--bernstein-fond);color:var(--bernstein)}
+.z-gleich.entwurf{background:var(--nebel-100);color:var(--nebel-600)}
+.z-gleich.vorschlag{background:var(--lila-100);color:var(--lila-800)}
+
+/* ---------- D · Das Siegel ---------- */
+.z-siegel{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:88px;height:26px;padding:0 12px;border-radius:8px;
+  font-size:12.5px;font-weight:600;color:#fff;
+}
+.z-siegel.aktiv{background:var(--gruen)}
+.z-siegel.wartet{background:var(--bernstein)}
+.z-siegel.entwurf{background:var(--nebel-500)}
+.z-siegel.vorschlag{background:var(--lila-600)}
+
+/* ---------- E · Der Textmarker ---------- */
+.z-marker{
+  font-size:14px;font-weight:600;color:var(--tinte);
+  background:linear-gradient(transparent 58%, var(--nebel-200) 58%);
+  padding:0 2px;
+}
+.z-marker.aktiv{background:linear-gradient(transparent 58%, #b7e6cc 58%)}
+.z-marker.wartet{background:linear-gradient(transparent 58%, #f7ddae 58%)}
+.z-marker.entwurf{background:linear-gradient(transparent 58%, var(--nebel-200) 58%)}
+.z-marker.vorschlag{background:linear-gradient(transparent 58%, var(--lila-200) 58%)}
+
+footer{padding:24px 0 64px;color:var(--nebel-500);font-size:14px}
+</style>
+</head>
+<body class="quoro">
+
+<header class="glas-dick">
+  <img src="bilder/quoro-icon.svg" alt="quoroAI">
+  <span class="wortmarke">quoroAI</span>
+  <span class="bereich">Zustände</span>
+  <a href="system.html">Zum Designsystem</a>
+</header>
+
+<div class="kopf rahmen">
+  <h1>Fünf Vorschläge für Zustände</h1>
+  <p>Gleiche vier Zustände, fünf völlig verschiedene Kleider. Die Worte sind überall kurz: Aktiv, Wartet, Entwurf, Vorschlag. Jede Probe zeigt die Reihe und darunter dieselbe Mandatsliste.</p>
+</div>
+
+<section>
+  <div class="rahmen">
+    <h2>A<small>Nur das Wort</small></h2>
+    <p class="deut">Kein Kasten, nichts drumherum: das Wort selbst trägt die Farbe. Das Leiseste, was geht, und nichts kann klobig werden.</p>
+    <div class="probe">
+      <div class="zustandsreihe">
+        <span class="z-wort aktiv">Aktiv</span>
+        <span class="z-wort wartet">Wartet</span>
+        <span class="z-wort entwurf">Entwurf</span>
+        <span class="z-wort vorschlag">Vorschlag</span>
+      </div>
+      <div class="liste">
+        <div class="zeile"><span class="name">Nordholm &amp; Partner</span><span class="summe">18.240 €</span><span class="z-wort aktiv">Aktiv</span></div>
+        <div class="zeile"><span class="name">Waldmann Consulting</span><span class="summe">9.120 €</span><span class="z-wort wartet">Wartet</span></div>
+        <div class="zeile"><span class="name">Steinbach &amp; Cie.</span><span class="summe">4.560 €</span><span class="z-wort vorschlag">Vorschlag</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="rahmen">
+    <h2>B<small>Die Kante</small></h2>
+    <p class="deut">Das Wort bleibt schwarz, die Farbe steckt in einer schmalen Kante davor. Ruhig wie ein Aktenreiter, funktioniert auch in dichten Listen.</p>
+    <div class="probe">
+      <div class="zustandsreihe">
+        <span class="z-kante aktiv">Aktiv</span>
+        <span class="z-kante wartet">Wartet</span>
+        <span class="z-kante entwurf">Entwurf</span>
+        <span class="z-kante vorschlag">Vorschlag</span>
+      </div>
+      <div class="liste">
+        <div class="zeile"><span class="name">Nordholm &amp; Partner</span><span class="summe">18.240 €</span><span class="z-kante aktiv">Aktiv</span></div>
+        <div class="zeile"><span class="name">Waldmann Consulting</span><span class="summe">9.120 €</span><span class="z-kante wartet">Wartet</span></div>
+        <div class="zeile"><span class="name">Steinbach &amp; Cie.</span><span class="summe">4.560 €</span><span class="z-kante vorschlag">Vorschlag</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="rahmen">
+    <h2>C<small>Das Gleichmaß</small></h2>
+    <p class="deut">Kapseln wie bisher, aber alle exakt gleich breit und flacher. Die Reihe steht wie ein Raster, nichts flattert.</p>
+    <div class="probe">
+      <div class="zustandsreihe">
+        <span class="z-gleich aktiv">Aktiv</span>
+        <span class="z-gleich wartet">Wartet</span>
+        <span class="z-gleich entwurf">Entwurf</span>
+        <span class="z-gleich vorschlag">Vorschlag</span>
+      </div>
+      <div class="liste">
+        <div class="zeile"><span class="name">Nordholm &amp; Partner</span><span class="summe">18.240 €</span><span class="z-gleich aktiv">Aktiv</span></div>
+        <div class="zeile"><span class="name">Waldmann Consulting</span><span class="summe">9.120 €</span><span class="z-gleich wartet">Wartet</span></div>
+        <div class="zeile"><span class="name">Steinbach &amp; Cie.</span><span class="summe">4.560 €</span><span class="z-gleich vorschlag">Vorschlag</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="rahmen">
+    <h2>D<small>Das Siegel</small></h2>
+    <p class="deut">Satte Farbe, weiße Schrift, kleine feste Ecken statt Kapsel. Am kräftigsten, gut wenn der Zustand die Hauptsache ist.</p>
+    <div class="probe">
+      <div class="zustandsreihe">
+        <span class="z-siegel aktiv">Aktiv</span>
+        <span class="z-siegel wartet">Wartet</span>
+        <span class="z-siegel entwurf">Entwurf</span>
+        <span class="z-siegel vorschlag">Vorschlag</span>
+      </div>
+      <div class="liste">
+        <div class="zeile"><span class="name">Nordholm &amp; Partner</span><span class="summe">18.240 €</span><span class="z-siegel aktiv">Aktiv</span></div>
+        <div class="zeile"><span class="name">Waldmann Consulting</span><span class="summe">9.120 €</span><span class="z-siegel wartet">Wartet</span></div>
+        <div class="zeile"><span class="name">Steinbach &amp; Cie.</span><span class="summe">4.560 €</span><span class="z-siegel vorschlag">Vorschlag</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="rahmen">
+    <h2>E<small>Der Textmarker</small></h2>
+    <p class="deut">Schwarzes Wort, die Farbe liegt wie ein Markerstrich hinter der unteren Hälfte. Menschlich, als hätte jemand im Dokument markiert.</p>
+    <div class="probe">
+      <div class="zustandsreihe">
+        <span class="z-marker aktiv">Aktiv</span>
+        <span class="z-marker wartet">Wartet</span>
+        <span class="z-marker entwurf">Entwurf</span>
+        <span class="z-marker vorschlag">Vorschlag</span>
+      </div>
+      <div class="liste">
+        <div class="zeile"><span class="name">Nordholm &amp; Partner</span><span class="summe">18.240 €</span><span class="z-marker aktiv">Aktiv</span></div>
+        <div class="zeile"><span class="name">Waldmann Consulting</span><span class="summe">9.120 €</span><span class="z-marker wartet">Wartet</span></div>
+        <div class="zeile"><span class="name">Steinbach &amp; Cie.</span><span class="summe">4.560 €</span><span class="z-marker vorschlag">Vorschlag</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="rahmen">Sobald einer gewinnt, wandert er als einzige Zustands-Form in system.css und die Kapseln von heute fliegen raus.</div>
+</footer>
+
+</body>
+</html>
