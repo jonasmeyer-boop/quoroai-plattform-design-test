@@ -10,7 +10,8 @@
    Ein fotorealistisches weißes Architekturmodell trägt das ganze Cockpit: jedes Mandat
    ein Gebäude, die Zentrale der KI-Berater. Ein Film zeigt den Aufbau, danach ist das
    Modell begehbar (Zoom je Bauplan begehbare-plattform), und der Stift kritzelt aufs
-   Foto wie in der Kundenwelt. · Marker: BERATUNG-F-MODELL-V1 */
+   Foto wie in der Kundenwelt. Chrome ist IMMER Quoro (Entscheidung 2026-08-12), die
+   Marke der Beratung erscheint nur als Inhalt. · Marker: BERATUNG-F-MODELL-V2 */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -52,12 +53,8 @@ nav{
   display:flex;align-items:center;justify-content:space-between;
   padding:0 24px;pointer-events:none;
 }
-nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
-nav .wortmarke .marke-logo{height:26px;width:auto;display:block}
-nav .wortmarke [data-marke-name]{display:block}
-nav .wortmarke .marke-wechsel{cursor:pointer;pointer-events:auto;display:inline-block}
-nav .wortmarke .marke-wechsel:hover{color:var(--blau)}
-nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
+nav .wortmarke{font-weight:800;font-size:17px;letter-spacing:-.02em}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau);letter-spacing:0}
 nav a.vorschlaege{
   pointer-events:auto;
   padding:8px 14px;border-radius:999px;border:0.5px solid var(--linie);
@@ -289,12 +286,11 @@ body.gezoomt #zonen{display:block}
   .karten{grid-template-columns:1fr}
 }
 </style>
-<script src="marke.js"></script>
 </head>
 <body>
 
 <nav>
-  <div class="wortmarke"><img class="marke-logo" alt="" hidden><div><span data-marke-name data-logo-versteckt>Nordholm &amp; Partner</span><small class="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung · Beispielmarke wechseln</small></div></div>
+  <div class="wortmarke">quoro<small>Cockpit der Beratung</small></div>
   <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
 </nav>
 
@@ -305,22 +301,22 @@ body.gezoomt #zonen{display:block}
   <div id="kamera">
     <img src="bilder/modell/modell-gross.jpg" width="2752" height="1536" alt="Weißes Architekturmodell der Beratung: fünf Gebäude auf einer Grundplatte">
     <svg id="stift-lage" aria-hidden="true"></svg>
-    <div class="stift-text" id="stift-mts" style="left:23.5%;top:51.5%">seit 3 Wochen still!</div>
-    <div class="stift-text blau" id="stift-cordes" style="left:44.5%;top:80%">Steuerfrage wartet!</div>
+    <div class="stift-text" id="stift-mts" style="left:13.5%;top:60.5%">seit 3 Wochen still!</div>
+    <div class="stift-text blau" id="stift-cordes" style="left:57%;top:66.5%">Steuerfrage wartet!</div>
 
-    <button class="zone" data-ziel="mts" style="--l:24.5%;--t:27%;--w:15.5%;--h:23%;--chipt:38%">
+    <button class="zone" data-ziel="mts" style="--l:13%;--t:35%;--w:20%;--h:22%;--chipt:42%">
       <span class="chip">MTS Maschinenbau<span class="zahl" data-zahl="0">0</span></span>
     </button>
-    <button class="zone" data-ziel="zentrale" style="--l:44%;--t:19%;--w:12%;--h:43%;--chipt:34%">
+    <button class="zone" data-ziel="zentrale" style="--l:34.5%;--t:13%;--w:21%;--h:41%;--chipt:32%">
       <span class="chip">Zentrale<span class="zahl" data-zahl="0">0</span></span>
     </button>
-    <button class="zone" data-ziel="petersen" style="--l:60%;--t:55%;--w:14.5%;--h:19%;--chipt:42%">
+    <button class="zone" data-ziel="petersen" style="--l:25%;--t:52%;--w:16.5%;--h:19%;--chipt:58%">
       <span class="chip">Petersen Stahlbau<span class="zahl" data-zahl="2">2</span></span>
     </button>
-    <button class="zone" data-ziel="cordes" style="--l:44.5%;--t:63%;--w:17.5%;--h:14%;--chipt:46%">
+    <button class="zone" data-ziel="cordes" style="--l:57%;--t:32%;--w:12%;--h:25%;--chipt:48%">
       <span class="chip">Cordes Logistik<span class="zahl" data-zahl="1">1</span></span>
     </button>
-    <button class="zone" data-ziel="freitag" style="--l:31%;--t:57%;--w:13%;--h:15%;--chipt:40%">
+    <button class="zone" data-ziel="freitag" style="--l:43.5%;--t:63%;--w:18%;--h:19%;--chipt:42%">
       <span class="chip">Bäckerei Freitag<span class="zahl" data-zahl="0">0</span></span>
     </button>
   </div>
@@ -435,7 +431,7 @@ body.gezoomt #zonen{display:block}
     </div>
     <h3>So tritt er auf</h3>
     <div class="karten">
-      <div class="karte"><div class="wert blau" style="font-size:18px" data-marke-name>Nordholm &amp; Partner</div><div class="label">Marke und Anrede</div><div class="proben" aria-label="Markenfarben"><span class="probe p-blau" title="Akzent"></span><span class="probe p-stift" title="Stift"></span><span class="probe p-tinte" title="Tinte"></span><span class="probe p-papier" title="Papier"></span><span class="anrede-wert" data-du="per Du" data-sie="per Sie">per Du</span></div></div>
+      <div class="karte"><div class="wert blau" style="font-size:18px">Nordholm &amp; Partner</div><div class="label">Marke und Anrede der Kundenflächen</div><div class="proben" aria-label="Markenfarben"><span class="probe p-blau" title="Akzent"></span><span class="probe p-stift" title="Stift"></span><span class="probe p-tinte" title="Tinte"></span><span class="probe p-papier" title="Papier"></span><span class="anrede-wert" data-du="per Du" data-sie="per Sie">per Du</span></div></div>
       <div class="karte"><div class="wert">34,0</div><div class="label">Std. im August, alle Mandate</div><div class="delta amber">3 Rechnungen offen · 12.400 €</div></div>
     </div>
     <div class="tueren">
@@ -455,8 +451,8 @@ body.gezoomt #zonen{display:block}
 <script>
 (function(){
   'use strict';
-  var Marke = window.Marke || {anwenden: function(){}, sie: false};
-  Marke.anwenden();
+  /* Quoro-Chrome: keine Mandanten-Marke auf Beratungs-Flächen (Entscheidung 2026-08-12).
+     Quoro spricht die Beratungen per Du; die data-du-Standardtexte gelten. */
   var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------- Ehrlichkeit ---------- */
@@ -480,20 +476,20 @@ body.gezoomt #zonen{display:block}
     stift.innerHTML = '';
     var W = kamera.clientWidth, H = kamera.clientHeight;
     if (!W) return;
-    /* Kringel um MTS (Zone: l 24.5 t 27 w 15.5 h 23) */
-    var cx = W * 0.3225, cy = H * 0.385, rx = W * 0.095, ry = H * 0.15;
+    /* Kringel um MTS (Zone: l 13 t 35 w 20 h 22) */
+    var cx = W * 0.23, cy = H * 0.455, rx = W * 0.115, ry = H * 0.145;
     var e = document.createElementNS(NS, 'path');
     e.setAttribute('d',
       'M' + (cx - rx) + ' ' + cy +
       ' C' + (cx - rx) + ' ' + (cy - ry * 1.25) + ' ' + (cx + rx * 0.9) + ' ' + (cy - ry * 1.15) + ' ' + (cx + rx) + ' ' + (cy - ry * 0.1) +
       ' C' + (cx + rx * 1.06) + ' ' + (cy + ry * 0.95) + ' ' + (cx - rx * 0.75) + ' ' + (cy + ry * 1.2) + ' ' + (cx - rx * 1.04) + ' ' + (cy + ry * 0.15));
     stift.appendChild(e);
-    /* Pfeil zur Cordes-Halle (Notiz sitzt bei 44.5/80, Halle bei ~53/70) */
-    var ax = W * 0.53, ay = H * 0.755;
+    /* Pfeil zur Cordes-Halle (Notiz sitzt bei 57/66.5, Halle endet bei ~63.5/57.5) */
+    var ax = W * 0.635, ay = H * 0.575;
     var a = document.createElementNS(NS, 'path');
     a.setAttribute('class', 'blau');
-    a.setAttribute('d', 'M' + (W * 0.475) + ' ' + (H * 0.815) + ' Q' + (W * 0.51) + ' ' + (H * 0.80) + ' ' + ax + ' ' + ay +
-      ' M' + (ax - W * 0.014) + ' ' + (ay + H * 0.004) + ' L' + ax + ' ' + ay + ' L' + (ax - W * 0.006) + ' ' + (ay + H * 0.022));
+    a.setAttribute('d', 'M' + (W * 0.585) + ' ' + (H * 0.655) + ' Q' + (W * 0.61) + ' ' + (H * 0.615) + ' ' + ax + ' ' + ay +
+      ' M' + (ax - W * 0.016) + ' ' + (ay + H * 0.006) + ' L' + ax + ' ' + ay + ' L' + (ax - W * 0.004) + ' ' + (ay + H * 0.026));
     stift.appendChild(a);
     if (!reduziert) {
       [e, a].forEach(function(pfad, i){
@@ -602,9 +598,9 @@ body.gezoomt #zonen{display:block}
     var tafel = film.querySelector('.tafel');
     var bilder = [], geladen = 0, gestartet = false, abgebrochen = false;
     var TAFELN = [
-      [0.02, Marke.sie ? 'Guten Morgen, Frau Vogelsang.' : 'Guten Morgen, Frau Vogelsang.'],
-      [0.28, Marke.sie ? 'Ihr KI-Berater hat gebaut.' : 'Dein KI-Berater hat gebaut.'],
-      [0.72, Marke.sie ? 'Ihre Beratung. Als Modell.' : 'Deine Beratung. Als Modell.']
+      [0.02, 'Guten Morgen, Frau Vogelsang.'],
+      [0.28, 'Dein KI-Berater hat gebaut.'],
+      [0.72, 'Deine Beratung. Als Modell.']
     ];
     function male(idx){
       var b = bilder[idx];
