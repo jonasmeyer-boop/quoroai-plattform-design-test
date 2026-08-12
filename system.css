@@ -3,7 +3,7 @@
    Lauftext General Sans, Glas als Material für Chrom, Zustände als Füllstand
    im Glas (Jonas, 2026-08-12). Gilt für quoroAI-gebrandete Flächen
    (Beratungsseite); Kundenflächen bleiben White-Label über marke.js.
-   Marker: SYSTEM-CSS-V3 */
+   Marker: SYSTEM-CSS-V5 */
 
 @font-face{font-family:'Clash Display';src:url('schriften/clash-display.woff2') format('woff2');font-weight:200 700;font-display:swap}
 @font-face{font-family:'General Sans';src:url('schriften/general-sans.woff2') format('woff2');font-weight:200 700;font-display:swap}
@@ -40,7 +40,11 @@
   --kurve:cubic-bezier(.16,1,.3,1);
 }
 
-/* ---------- Grundstimmung ---------- */
+/* ---------- Grundstimmung ----------
+   Text ist Tinte in zwei Gewichten: dick (600) für Titel, dünn (400) für
+   alles Lesbare (Jonas, 2026-08-12). Grau (nebel-500/600) nur für Meta:
+   Maße, Fußnoten, Legenden, Chrom. Farbe im Text nur, wenn sie etwas
+   bedeutet (Zustand, KI-Moment, Gefahr). */
 body.quoro{
   background:var(--grund);color:var(--tinte);
   font-family:var(--schrift-text);font-size:17px;line-height:1.6;
@@ -96,10 +100,18 @@ body.quoro{
     inset 0 1px 1px rgba(255,255,255,.55),  /* Glanz auf der Flüssigkeit */
     0 0 7px color-mix(in srgb, var(--fluid) 45%, transparent);
 }
-.zustand::after{ /* der Glanzstreifen oben im Glas */
-  content:"";position:absolute;left:7px;right:7px;top:2.5px;height:38%;
-  border-radius:var(--radius-kapsel);pointer-events:none;
-  background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,0));
+.zustand::after{ /* Glanzstreifen oben, plus Lichtlauf beim Überfahren */
+  content:"";position:absolute;inset:0;border-radius:var(--radius-kapsel);pointer-events:none;
+  background:
+    linear-gradient(105deg, transparent 30%, rgba(255,255,255,.9) 50%, transparent 70%) no-repeat -70px 0 / 60px 100%,
+    linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,0)) no-repeat 7px 2.5px / calc(100% - 14px) 38%;
+}
+@media (hover:hover){
+  .zustand:hover::after{animation:zustand-glanz 1.8s ease-in-out infinite}
+}
+@keyframes zustand-glanz{
+  0%{background-position:-70px 0, 7px 2.5px}
+  55%,100%{background-position:70px 0, 7px 2.5px}
 }
 .zustand.entwurf{--stand:.18;--fluid:var(--nebel-300);--fluid-tief:var(--nebel-400)}
 .zustand.wartet{--stand:.55;--fluid:#eebb59;--fluid-tief:#c88f28}
@@ -117,6 +129,7 @@ body.quoro{
 }
 @media (prefers-reduced-motion:reduce){
   .zustand.vorschlag::before{animation:none}
+  .zustand:hover::after{animation:none}
 }
 
 /* ---------- Eingabe: Name darüber, Hilfe darunter ---------- */
@@ -128,7 +141,7 @@ body.quoro{
 }
 .feld input{padding-top:0;padding-bottom:0}
 .feld input:focus,.feld textarea:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
-.feld .hilfe{font-size:13px;color:var(--nebel-500);margin-top:6px}
+.feld .hilfe{font-size:13px;color:var(--nebel-600);margin-top:6px}
 .feld .fehler{font-size:13px;color:var(--rot);margin-top:6px}
 
 /* ---------- Karte ---------- */

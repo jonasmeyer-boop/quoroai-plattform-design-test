@@ -7,7 +7,7 @@
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="system.css">
 <style>
-/* Marker: SYSTEM-V4 · Zustände als Füllstand im Glas; Glas-Look (Jonas, 2026-08-12): Apple-Glas als Material
+/* Marker: SYSTEM-V5 · Text in Tinte, dick und dünn; Zustände als Füllstand im Glas; Glas-Look (Jonas, 2026-08-12): Apple-Glas als Material
    für Chrom auf weißem Grund, das Lila leuchtet dahinter. Tokens in system.css. */
 
 *{margin:0;padding:0;box-sizing:border-box}
@@ -39,7 +39,7 @@ header .stand{margin-left:auto;font-size:14px;color:var(--nebel-500)}
 .buehne .rahmen{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
 .buehne h1{font-size:clamp(40px,5.8vw,64px);max-width:14ch}
 .buehne h1 em{font-style:normal;color:var(--lila-600)}
-.buehne .unterzeile{margin-top:18px;max-width:42ch;font-size:19px;color:var(--nebel-600)}
+.buehne .unterzeile{margin-top:18px;max-width:42ch;font-size:19px}
 .buehne .taten{margin-top:32px;display:flex;gap:12px;flex-wrap:wrap}
 
 /* die schwebende Glas-Komposition */
@@ -49,9 +49,9 @@ header .stand{margin-left:auto;font-size:14px;color:var(--nebel-500)}
   padding:24px;border-radius:var(--radius-karte);
   animation:schweben 7s ease-in-out infinite alternate;
 }
-.tafel .kicker{font-size:13.5px;font-weight:600;color:var(--nebel-600)}
+.tafel .kicker{font-size:13.5px;font-weight:600}
 .tafel .zahl{font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);letter-spacing:var(--schau-spur);font-size:44px;margin-top:10px}
-.tafel .deut{font-size:14px;color:var(--nebel-600);margin-top:2px}
+.tafel .deut{font-size:14px;margin-top:2px}
 .tafel .vorschlag{margin-top:18px;display:grid;gap:3px;padding:12px 14px;border-radius:var(--radius-innen)}
 .tafel .vorschlag .v-name{font-size:12.5px;font-weight:600;letter-spacing:.02em;color:var(--lila-800)}
 .tafel .vorschlag .v-text{font-size:14.5px}
@@ -78,7 +78,7 @@ header .stand{margin-left:auto;font-size:14px;color:var(--nebel-500)}
 /* ---------- Abschnitte ---------- */
 section{padding:56px 0;border-top:0.5px solid var(--nebel-200)}
 section h2{font-size:30px;margin-bottom:8px}
-section p.unter{color:var(--nebel-500);max-width:62ch;margin-bottom:32px}
+section p.unter{max-width:62ch;margin-bottom:32px}
 
 /* Material Glas: die Probe über Farbe */
 .glasprobe{
@@ -92,14 +92,14 @@ section p.unter{color:var(--nebel-500);max-width:62ch;margin-bottom:32px}
 }
 .glasprobe .probe{padding:20px;border-radius:16px}
 .glasprobe .probe b{display:block;font-size:15px}
-.glasprobe .probe span{font-size:13.5px;color:var(--nebel-600)}
+.glasprobe .probe span{font-size:13.5px}
 .glasregeln{margin-top:24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
 .glasregeln .regel{background:var(--nebel-050);border-radius:var(--radius-karte);padding:24px}
 .glasregeln h3{font-size:17px;margin-bottom:10px}
-.glasregeln p{font-size:15px;color:var(--nebel-600)}
+.glasregeln p{font-size:15px}
 
 /* Farben */
-.reihe-name{font-size:14px;font-weight:600;color:var(--nebel-600);margin:24px 0 10px}
+.reihe-name{font-size:14px;font-weight:600;margin:24px 0 10px}
 .farbreihe{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px}
 .chip{border-radius:var(--radius-innen);height:76px;display:flex;flex-direction:column;justify-content:flex-end;padding:8px 10px;border:0.5px solid rgba(24,21,47,.08)}
 .chip b{font-size:12px;font-weight:600}
@@ -128,15 +128,15 @@ section p.unter{color:var(--nebel-500);max-width:62ch;margin-bottom:32px}
 .karte-demo .kopf{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .karte-demo .name{font-weight:600}
 .karte-demo .zahl{font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);font-size:40px;letter-spacing:var(--schau-spur);margin-top:10px}
-.karte-demo .deut{font-size:14px;color:var(--nebel-500)}
+.karte-demo .deut{font-size:14px}
 
 /* Raster und Radien */
 .regeln{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
 .regeln .regel{background:var(--nebel-050);border-radius:var(--radius-karte);padding:24px}
 .regeln h3{font-size:17px;margin-bottom:10px}
-.regeln p{font-size:15px;color:var(--nebel-600)}
+.regeln p{font-size:15px}
 .radien-schau{margin-top:16px;background:var(--lila-100);border-radius:var(--radius-karte);padding:8px;width:fit-content}
-.radien-schau > div{background:var(--flaeche);border-radius:var(--radius-innen);padding:14px 22px;font-size:14px;color:var(--nebel-600)}
+.radien-schau > div{background:var(--flaeche);border-radius:var(--radius-innen);padding:14px 22px;font-size:14px}
 .punkte8{margin-top:16px;display:flex;gap:8px;align-items:flex-end}
 .punkte8 i{display:block;width:24px;background:var(--lila-300);border-radius:6px}
 
@@ -269,7 +269,7 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
 <section id="schrift">
   <div class="rahmen">
     <h2>Schrift</h2>
-    <p class="unter">Die Schauschrift für Überschriften und große Zahlen ist Clash Display, der Lauftext General Sans. Beide liegen als variable Schriften im Haus, nichts wird von fremden Servern geladen.</p>
+    <p class="unter">Die Schauschrift für Überschriften und große Zahlen ist Clash Display, der Lauftext General Sans. Text ist Tinte in zwei Gewichten: dick für Titel, dünn für alles Lesbare. Grau gibt es nur für Kleingedrucktes wie Maße und Fußnoten, Farbe nur, wenn sie etwas bedeutet.</p>
     <div class="muster">
       <div class="zeile"><span class="mass">Schau 1 (56)</span><span class="schau schau-1">Zwölf Mandate, ein Berater.</span></div>
       <div class="zeile"><span class="mass">Schau 2 (34)</span><span class="schau schau-2">Die Morgenlage für Waldmann Consulting</span></div>
@@ -305,7 +305,7 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
           <span style="display:grid;gap:7px;justify-items:center"><span class="zustand vorschlag" role="img" aria-label="Vorschlag" title="Vorschlag"></span><span class="zustand-wort">Vorschlag</span></span>
           <span style="display:grid;gap:7px;justify-items:center"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">Aktiv</span></span>
         </div>
-        <p style="margin-top:16px;font-size:14px;color:var(--nebel-500)">Der Füllstand im Glas ist die einzige Zustands-Form: fast leer ist Entwurf, halb voll wartet, voll und grün ist aktiv, der Vorschlag schimmert lila. Die grauen Worte stehen nur da, wo das Auge sie braucht.</p>
+        <p style="margin-top:16px;font-size:14px">Der Füllstand im Glas ist die einzige Zustands-Form: fast leer ist Entwurf, halb voll wartet, voll und grün ist aktiv, der Vorschlag schimmert lila. Die grauen Worte stehen nur da, wo das Auge sie braucht.</p>
       </div>
       <div class="baustein">
         <h3>Eingabe</h3>
