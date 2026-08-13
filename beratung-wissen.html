@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wissen der Beratung</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Wissen: sechster Raum hinter den Cockpit-Türen
+   (Paket 6, Reihenfolge-Entscheidung 2026-08-13). Die Wissensablage der
+   Beratung, für alle Mandate zugleich (Produkt: /wissen): Hochladen,
+   Bestand mit Einlesestatus als Füllstand-Kapsel (bereit / wird eingelesen /
+   fehlgeschlagen), Entfernen, Summenzeile mit einmaligen Einlese-Kosten.
+   Kern-Idee: das Einlesen ist sichtbar — beim Demo-Upload füllt sich die
+   Kapsel Abschnitt für Abschnitt, dann kippt sie auf bereit. Der
+   Branchenspiegel schließt den Kreis zum Mitlesen-Raum, wo der KI-Berater
+   ihn gestern zitiert hat. Chrome ist quoroAI (system.css), ruhige Fläche,
+   kein Kino — das Einlesen IST der Moment. Marker: BERATUNG-WISSEN-V1 */
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input{font-family:inherit}
+
+/* ========== quoroAI-Chrom ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+
+/* ========== Seite ========== */
+main{max-width:860px;margin:0 auto;padding:136px 24px 90px}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px;max-width:56ch}
+.kopf .z-fuell{display:flex;align-items:center;gap:8px;margin-top:8px}
+.kopf .z-fuell .zustand{width:40px;height:18px}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:30px}
+
+.tafel{
+  margin-top:12px;border-radius:var(--radius-karte);padding:22px 24px;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+
+/* ---------- Hochladen: die Ablage ---------- */
+#ablage{
+  display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;
+  width:100%;min-height:92px;padding:20px;cursor:pointer;
+  border:1.5px dashed var(--nebel-300);border-radius:var(--radius-innen);
+  background:rgba(255,255,255,.5);color:var(--tinte);
+  font-size:14.5px;transition:border-color .2s ease,background .2s ease;
+}
+#ablage:hover,#ablage.zieht{border-color:var(--lila-500);background:var(--lila-050)}
+#ablage .blatt-icon{rotate:-4deg}
+#ablage b{font-weight:600}
+#ablage .oder{color:var(--nebel-600)}
+#ablage .knopf{min-height:40px;padding:0 16px;font-size:13.5px;pointer-events:none}
+.klein{font-size:12.5px;color:var(--nebel-500);margin-top:12px;line-height:1.55}
+
+/* ---------- Bestand: jedes Dokument mit seinem Einlesestand ---------- */
+.doks{display:flex;flex-direction:column;gap:9px}
+.dok{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:13px 16px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 8px 24px rgba(16,19,26,.06);
+  transition:opacity .3s ease,translate .3s var(--kurve),box-shadow .6s ease;
+}
+.dok.neu{box-shadow:0 0 0 3px var(--lila-300), 0 8px 24px rgba(16,19,26,.06)}
+.dok.geht{opacity:0;translate:0 -6px}
+.blatt-icon{
+  width:34px;height:44px;flex-shrink:0;position:relative;
+  background:#fff;border:1px solid var(--nebel-200);border-radius:4px;
+}
+.blatt-icon::before{
+  content:'';position:absolute;right:-1px;top:-1px;border:8px solid transparent;
+  border-left-color:var(--lila-200);border-bottom-color:var(--lila-200);
+  border-radius:0 0 0 4px;
+}
+.blatt-icon::after{
+  content:'';position:absolute;left:6px;right:6px;top:14px;height:18px;
+  background:linear-gradient(var(--nebel-200) 1.5px, transparent 1.5px);background-size:100% 6px;
+}
+.dok .d-text{min-width:0;flex:1}
+.dok .d-name{font-size:14px;font-weight:600;letter-spacing:-.01em;line-height:1.4}
+.dok .d-meta{font-size:12px;color:var(--nebel-600);margin-top:2px}
+.dok .d-meta a{color:var(--lila-700)}
+.dok .d-recht{display:flex;align-items:center;gap:12px;margin-left:auto;flex-shrink:0}
+.dok .z-fuell{display:flex;align-items:center;gap:8px}
+.dok .zustand{width:40px;height:18px}
+.dok .zustand-wort{font-size:12px;font-weight:600;white-space:nowrap}
+.dok .entf{
+  border:0;background:none;cursor:pointer;padding:6px 8px;border-radius:8px;
+  font-size:12px;font-weight:600;color:var(--nebel-500);
+  opacity:0;transition:opacity .2s ease,color .2s ease;
+}
+.dok:hover .entf,.dok:focus-within .entf{opacity:1}
+.dok .entf:hover{color:var(--rot)}
+.dok.kaputt{border-style:dashed;background:var(--nebel-050)}
+.dok.kaputt .zustand-wort{color:var(--rot)}
+.dok .d-fehler{
+  flex-basis:100%;margin-left:50px;padding:9px 12px;border-radius:10px;
+  background:var(--rot-fond);font-size:12.5px;line-height:1.5;
+}
+.bestaetigt{
+  margin-top:12px;padding:11px 14px;border-radius:var(--radius-innen);
+  background:var(--gruen-fond);font-size:13.5px;line-height:1.5;
+}
+.bestaetigt.still{background:var(--nebel-100)}
+#summe{font-size:12.5px;color:var(--nebel-500);margin-top:14px;line-height:1.5}
+
+/* ---------- Fundstelle: so zitiert er daraus ---------- */
+.zitat .q-art{font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--lila-800);text-transform:uppercase}
+.zitat .q-name{font-size:14px;font-weight:600;letter-spacing:-.01em;margin-top:3px}
+.zitat .q-auszug{
+  margin-top:8px;padding-left:12px;border-left:2px solid var(--lila-300);
+  font-size:13.5px;color:var(--nebel-600);line-height:1.6;max-width:62ch;
+}
+.zitat .q-deut{font-size:13.5px;margin-top:14px;line-height:1.6;max-width:62ch}
+.zitat .q-deut a{color:var(--lila-700)}
+.zitat{position:relative}
+.zitat .hand{
+  position:absolute;right:22px;top:18px;
+  font-family:'Caveat',cursive;font-size:19px;font-weight:700;color:var(--lila-700);
+  rotate:-2deg;white-space:nowrap;
+}
+
+@media (prefers-reduced-motion: reduce){
+  main > *{animation:none;opacity:1;translate:none}
+  .dok{transition:none}
+}
+@media (max-width:760px){
+  nav{padding:0 18px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
+  .tafel{padding:18px 18px}
+  .dok .d-recht{margin-left:50px}
+  .dok .entf{opacity:1}
+  .dok .d-fehler{margin-left:0}
+  .zitat .hand{position:static;display:inline-block;margin-top:10px}
+}
+</style>
+</head>
+<body class="quoro">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Wissen</b></a>
+
+<main>
+  <div class="kopf">
+    <div>
+      <h1>Wissen</h1>
+      <div class="stand">Deine Methodik, deine Checklisten, deine Fälle — daraus antwortet dein KI-Berater, mit Fundstelle, in allen Mandaten zugleich. Was ein einzelner Kunde teilt, wohnt in seiner <a href="beratung-akte.html" style="color:var(--lila-700)">Kundenakte</a>.</div>
+    </div>
+    <span class="z-fuell" id="kopf-stand"><span class="zustand aktiv" role="img" aria-label="4 Dokumente bereit" title="4 Dokumente bereit"></span><span class="zustand-wort">4 Dokumente bereit</span></span>
+  </div>
+
+  <h3>Hochladen</h3>
+  <section class="tafel" aria-label="Hochladen">
+    <button id="ablage" type="button">
+      <span class="blatt-icon" aria-hidden="true"></span>
+      <span><b>Datei hierher ziehen</b> <span class="oder">oder</span></span>
+      <span class="knopf leise">Datei wählen</span>
+    </button>
+    <div class="klein">PDF, Text und Markdown, bis 20 MB je Datei. Aus eingescannten PDFs ohne Textebene kommt nichts heraus — die bestehen aus Bildern. Wissen pflegen Inhaber und Partner.</div>
+  </section>
+
+  <h3 id="bestand-kopf">Im Bestand</h3>
+  <section class="tafel" aria-label="Bestand">
+    <div class="doks" id="doks">
+      <div class="dok" data-abschnitte="41" data-cent="62">
+        <span class="blatt-icon" aria-hidden="true"></span>
+        <span class="d-text"><span class="d-name">Branchenspiegel Metallzulieferer 2025</span><br><span class="d-meta">41 Abschnitte, von dir, 14. Februar — <a href="beratung-mitlesen.html">gestern im Petersen-Gespräch zitiert</a></span></span>
+        <span class="d-recht"><span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="bereit" title="bereit"></span><span class="zustand-wort">bereit</span></span><button class="entf" type="button">Entfernen</button></span>
+      </div>
+      <div class="dok" data-abschnitte="58" data-cent="89">
+        <span class="blatt-icon" aria-hidden="true"></span>
+        <span class="d-text"><span class="d-name">Fallsammlung Margenprojekte 2019–2025</span><br><span class="d-meta">58 Abschnitte, von Dr. Vogelsang, 28. Juli</span></span>
+        <span class="d-recht"><span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="bereit" title="bereit"></span><span class="zustand-wort">bereit</span></span><button class="entf" type="button">Entfernen</button></span>
+      </div>
+      <div class="dok" data-abschnitte="34" data-cent="52">
+        <span class="blatt-icon" aria-hidden="true"></span>
+        <span class="d-text"><span class="d-name">Checkliste Kostenanalyse produzierendes Gewerbe</span><br><span class="d-meta">34 Abschnitte, von dir, 3. Juli</span></span>
+        <span class="d-recht"><span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="bereit" title="bereit"></span><span class="zustand-wort">bereit</span></span><button class="entf" type="button">Entfernen</button></span>
+      </div>
+      <div class="dok" data-abschnitte="21" data-cent="31">
+        <span class="blatt-icon" aria-hidden="true"></span>
+        <span class="d-text"><span class="d-name">Methodik Preisgespräch</span><br><span class="d-meta">21 Abschnitte, von dir, 12. Juni</span></span>
+        <span class="d-recht"><span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="bereit" title="bereit"></span><span class="zustand-wort">bereit</span></span><button class="entf" type="button">Entfernen</button></span>
+      </div>
+      <div class="dok kaputt" data-abschnitte="0" data-cent="6">
+        <span class="blatt-icon" aria-hidden="true"></span>
+        <span class="d-text"><span class="d-name">Vortragsfolien Restrukturierung, gescannt</span><br><span class="d-meta">von dir, 9. August</span></span>
+        <span class="d-recht"><span class="z-fuell"><span class="zustand" style="--stand:.14;--fluid:#d9556a;--fluid-tief:var(--rot)" role="img" aria-label="fehlgeschlagen" title="fehlgeschlagen"></span><span class="zustand-wort">fehlgeschlagen</span></span><button class="entf" type="button">Entfernen</button></span>
+        <span class="d-fehler">Aus dem Scan kam kein Text heraus — die Seiten sind Bilder. Lade die Textfassung hoch, dann klappt es.</span>
+      </div>
+    </div>
+    <div class="bestaetigt" id="meldung" hidden></div>
+    <div id="summe" aria-live="polite"></div>
+  </section>
+
+  <h3>So nennt er die Fundstelle</h3>
+  <section class="tafel zitat" aria-label="Fundstellen-Beispiel">
+    <span class="hand">bleibt bei dir.</span>
+    <div class="q-art">Wissen</div>
+    <div class="q-name">Branchenspiegel Metallzulieferer 2025, Abschnitt 5</div>
+    <div class="q-auszug">„Zulieferer mit 20 bis 80 Mitarbeitenden erzielen im Median 35,9 Prozent Rohertragsmarge; das untere Quartil liegt bei 31,2 Prozent."</div>
+    <div class="q-deut">Genau so hat er es gestern Herrn Petersen belegt, im <a href="beratung-mitlesen.html">freigegebenen Gespräch</a>. Dein Wissen bleibt dabei bei dir: keine andere Beratung findet darin je einen Satz.</div>
+  </section>
+</main>
+
+<div id="demo-hinweis" style="position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--lila-700);opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--kurve)">Diese Fläche entsteht gerade.</div>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('main > *').forEach(function(el, i){
+    el.style.setProperty('--verz', (i * 0.07) + 's');
+  });
+
+  var hinweisTimer = null;
+  function demoHinweis(text){
+    var h = document.getElementById('demo-hinweis');
+    h.textContent = text;
+    h.style.opacity = .95; h.style.translate = '-50% 0';
+    clearTimeout(hinweisTimer);
+    hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2600);
+  }
+
+  /* ---------- Die Summen haben eine Quelle: die Zeilen selbst ---------- */
+  var doks = document.getElementById('doks');
+  function euro(cent){
+    return (cent / 100).toFixed(2).replace('.', ',') + ' €';
+  }
+  function rechne(){
+    var zeilen = doks.querySelectorAll('.dok');
+    var stellen = 0, cent = 0, bereit = 0;
+    zeilen.forEach(function(z){
+      stellen += +z.dataset.abschnitte;
+      cent += +z.dataset.cent;
+      if (+z.dataset.abschnitte > 0 && !z.classList.contains('liest')) bereit++;
+    });
+    document.getElementById('bestand-kopf').textContent = 'Im Bestand (' + zeilen.length + ')';
+    document.getElementById('summe').textContent =
+      stellen + ' durchsuchbare Stellen. Einlesen kostet einmalig — bisher ' + euro(cent) + ' für alles zusammen.';
+    var kopf = document.getElementById('kopf-stand');
+    var wort = bereit + (bereit === 1 ? ' Dokument' : ' Dokumente') + ' bereit';
+    kopf.querySelector('.zustand-wort').textContent = wort;
+    var kapsel = kopf.querySelector('.zustand');
+    kapsel.setAttribute('aria-label', wort);
+    kapsel.setAttribute('title', wort);
+  }
+  rechne();
+
+  function meldung(text, still){
+    var m = document.getElementById('meldung');
+    m.className = 'bestaetigt' + (still ? ' still' : '');
+    m.textContent = text;
+    m.hidden = false;
+  }
+
+  /* ---------- Entfernen: die Abschnitte gehen mit ---------- */
+  doks.addEventListener('click', function(e){
+    var knopf = e.target.closest('.entf');
+    if (!knopf) return;
+    var zeile = knopf.closest('.dok');
+    var name = zeile.querySelector('.d-name').textContent;
+    var hatteAbschnitte = +zeile.dataset.abschnitte > 0;
+    zeile.classList.add('geht');
+    setTimeout(function(){
+      zeile.remove();
+      rechne();
+      meldung(hatteAbschnitte
+        ? '„' + name + '" ist weg, seine Abschnitte auch. Der KI-Berater kann ab sofort nicht mehr daraus zitieren.'
+        : '„' + name + '" ist weg.', true);
+    }, reduziert ? 0 : 280);
+  });
+
+  /* ---------- Der Moment: das Einlesen ist sichtbar ----------
+     Ein Zug, wie im Produkt: hochladen, zerlegen, einbetten. Die Kapsel
+     füllt sich Abschnitt für Abschnitt, dann kippt sie auf bereit. */
+  var ablage = document.getElementById('ablage');
+  var demoGeladen = false;
+  var DEMO = {name: 'Benchmark Stundensätze Beratung 2026', abschnitte: 27, cent: 41};
+
+  function liesEin(){
+    if (demoGeladen) {
+      demoHinweis('Die Vorführung hat eine Beispiel-Datei — im Produkt wählst du hier deine eigene.');
+      return;
+    }
+    demoGeladen = true;
+    var zeile = document.createElement('div');
+    zeile.className = 'dok neu liest';
+    zeile.dataset.abschnitte = '0';
+    zeile.dataset.cent = '0';
+    zeile.innerHTML =
+      '<span class="blatt-icon" aria-hidden="true"></span>' +
+      '<span class="d-text"><span class="d-name"></span><br><span class="d-meta" aria-live="polite">wird eingelesen …</span></span>' +
+      '<span class="d-recht"><span class="z-fuell"><span class="zustand" style="--stand:0;--fluid:#eebb59;--fluid-tief:#c88f28" role="img" aria-label="wird eingelesen" title="wird eingelesen"></span><span class="zustand-wort">wird eingelesen</span></span></span>';
+    zeile.querySelector('.d-name').textContent = DEMO.name;
+    doks.prepend(zeile);
+    rechne();
+
+    var meta = zeile.querySelector('.d-meta');
+    var kapsel = zeile.querySelector('.zustand');
+    var wort = zeile.querySelector('.zustand-wort');
+
+    function fertig(){
+      zeile.classList.remove('liest');
+      zeile.dataset.abschnitte = String(DEMO.abschnitte);
+      zeile.dataset.cent = String(DEMO.cent);
+      meta.textContent = DEMO.abschnitte + ' Abschnitte, von dir, gerade eben';
+      kapsel.className = 'zustand aktiv';
+      kapsel.style.cssText = '';
+      kapsel.setAttribute('aria-label', 'bereit');
+      kapsel.setAttribute('title', 'bereit');
+      wort.textContent = 'bereit';
+      zeile.querySelector('.d-recht').insertAdjacentHTML('beforeend',
+        '<button class="entf" type="button">Entfernen</button>');
+      rechne();
+      meldung('„' + DEMO.name + '" steht bereit — ' + DEMO.abschnitte + ' Abschnitte. Ab der nächsten Frage kann der KI-Berater daraus zitieren, in jedem Mandat.');
+      setTimeout(function(){ zeile.classList.remove('neu'); }, 900);
+    }
+
+    if (reduziert) { fertig(); return; }
+    var k = 0;
+    var takt = setInterval(function(){
+      k++;
+      if (k >= DEMO.abschnitte) { clearInterval(takt); fertig(); return; }
+      kapsel.style.setProperty('--stand', String(k / DEMO.abschnitte));
+      meta.textContent = 'liest Abschnitt ' + k + ' von ' + DEMO.abschnitte + ' …';
+    }, 140);
+  }
+
+  ablage.addEventListener('click', liesEin);
+  ablage.addEventListener('dragover', function(e){ e.preventDefault(); ablage.classList.add('zieht'); });
+  ablage.addEventListener('dragleave', function(){ ablage.classList.remove('zieht'); });
+  ablage.addEventListener('drop', function(e){ e.preventDefault(); ablage.classList.remove('zieht'); liesEin(); });
+})();
+</script>
+<script src="zeiger.js"></script>
+</body>
+</html>
