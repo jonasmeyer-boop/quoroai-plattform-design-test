@@ -6,7 +6,11 @@
 <title>Dein Berater · Anmelden</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Anmelden: die Tür zum Kundenbereich · Marker: ANMELDEN-V3 (Review-Fixes: Phantom-Logo, Klickfläche, Kern-Wächter, volle Texte) */
+/* quoroai-plattform-design · Anmelden: die Tür zum Kundenbereich · Marker: ANMELDEN-V4
+   (V4: alle sechs Abläufe der Tür sind gezeichnet — dazu kamen Einladung annehmen
+   (#zugang), Registrieren (#registrieren), Anmelde-Link (#link) und Passwort neu
+   setzen (#neu); Direkteinstieg je Ablauf über den Hash, im Produkt sind das
+   eigene Routen. Anfrage der Produkt-Session zu PR #125, 2026-08-13.) */
 @font-face{font-family:'Manrope';src:url('schriften/manrope.woff2') format('woff2');font-weight:200 800;font-display:swap}
 @font-face{font-family:'Caveat';src:url('schriften/caveat.woff2') format('woff2');font-weight:400 700;font-display:swap}
 :root{
@@ -39,7 +43,7 @@ button,input{font-family:inherit}
 }
 .zeile{margin-top:16px}
 label{display:block;font-size:12.5px;font-weight:700;color:var(--grau);margin-bottom:5px}
-input[type=email],input[type=password]{
+input[type=email],input[type=password],input[type=text]{
   width:100%;min-height:50px;padding:0 18px;border-radius:14px;
   border:0.5px solid var(--linie);background:var(--papier);
   font-size:15px;color:var(--tinte);outline:none;transition:border-color .2s;
@@ -89,7 +93,9 @@ input:focus{border-color:var(--blau)}
       <div class="zeile"><label for="pass">Passwort</label><input id="pass" type="password" autocomplete="current-password" placeholder="••••••••••"></div>
       <div class="fehler" id="f1" aria-live="polite"></div>
       <button class="haupt" id="anmelden" type="button">Anmelden</button>
+      <button class="neben" id="zu-link" type="button">Lieber per Anmelde-Link, ohne Passwort</button>
       <button class="neben" id="zu-vergessen" type="button">Passwort vergessen?</button>
+      <button class="neben" id="zu-registrieren" type="button">Neu hier? Konto anlegen</button>
     </div>
 
     <!-- Schritt 2: Zwei-Faktor -->
@@ -117,6 +123,50 @@ input:focus{border-color:var(--blau)}
       <div class="gesendet" id="gesendet" hidden><span class="handschrift">Ist unterwegs!</span><span data-du="Schau in dein Postfach — der Link gilt eine Stunde." data-sie="Schauen Sie in Ihr Postfach — der Link gilt eine Stunde.">Schau in dein Postfach — der Link gilt eine Stunde.</span></div>
       <button class="haupt" id="senden" type="button">Link schicken</button>
       <button class="neben" id="zurueck-2" type="button">Zurück zur Anmeldung</button>
+    </div>
+
+    <!-- Schritt 4: Anmelde-Link, anmelden ohne Passwort -->
+    <div class="schritt" id="s-link" hidden>
+      <div class="gruss">Ganz ohne Passwort.</div>
+      <p class="erklaer" data-du="Sag uns deine E-Mail, wir schicken dir einen Link. Ein Klick, und du bist drin." data-sie="Sagen Sie uns Ihre E-Mail, wir schicken Ihnen einen Link. Ein Klick, und Sie sind drin.">Sag uns deine E-Mail, wir schicken dir einen Link. Ein Klick, und du bist drin.</p>
+      <div class="zeile"><label for="email3">E-Mail</label><input id="email3" type="email" autocomplete="email" placeholder="du@deine-firma.de" data-du-ph="du@deine-firma.de" data-sie-ph="name@ihre-firma.de"></div>
+      <div class="gesendet" id="gesendet-link" hidden><span class="handschrift">Ist unterwegs!</span><span data-du="Schau in dein Postfach. Der Link gilt eine Stunde und genau einmal." data-sie="Schauen Sie in Ihr Postfach. Der Link gilt eine Stunde und genau einmal.">Schau in dein Postfach. Der Link gilt eine Stunde und genau einmal.</span></div>
+      <button class="haupt" id="link-senden" type="button">Anmelde-Link schicken</button>
+      <button class="neben" id="zurueck-3" type="button">Zurück zur Anmeldung</button>
+    </div>
+
+    <!-- Schritt 5: Einladung annehmen (Produkt: /zugang/[token]) -->
+    <div class="schritt" id="s-zugang" hidden>
+      <div class="gruss" data-du="Schön, dass du da bist." data-sie="Schön, dass Sie da sind.">Schön, dass du da bist.</div>
+      <p class="erklaer" data-du="Deine Beratung hat dir diesen Zugang eingerichtet, eingeladen als m.petersen@petersen-stahlbau.de. Sag uns noch deinen Namen und wähle ein Passwort." data-sie="Ihre Beratung hat Ihnen diesen Zugang eingerichtet, eingeladen als m.petersen@petersen-stahlbau.de. Sagen Sie uns noch Ihren Namen und wählen Sie ein Passwort.">Deine Beratung hat dir diesen Zugang eingerichtet, eingeladen als m.petersen@petersen-stahlbau.de. Sag uns noch deinen Namen und wähle ein Passwort.</p>
+      <div class="zeile"><label for="z-name">Name</label><input id="z-name" type="text" autocomplete="name" placeholder="Vor- und Nachname"></div>
+      <div class="zeile"><label for="z-pass" data-du="Dein Passwort" data-sie="Ihr Passwort">Dein Passwort</label><input id="z-pass" type="password" autocomplete="new-password" placeholder="mindestens 12 Zeichen"></div>
+      <div class="fehler" id="f-zugang" aria-live="polite"></div>
+      <button class="haupt" id="zugang-los" type="button">Zugang aktivieren</button>
+    </div>
+
+    <!-- Schritt 6: Registrieren (Produkt: /registrieren) -->
+    <div class="schritt" id="s-registrieren" hidden>
+      <div class="gruss">Legen wir los.</div>
+      <p class="erklaer" data-du="Sag uns, wer du bist. Nach der Bestätigung deiner E-Mail meldet sich deine Beratung bei dir." data-sie="Sagen Sie uns, wer Sie sind. Nach der Bestätigung Ihrer E-Mail meldet sich Ihre Beratung bei Ihnen.">Sag uns, wer du bist. Nach der Bestätigung deiner E-Mail meldet sich deine Beratung bei dir.</p>
+      <div class="zeile"><label for="r-name">Name</label><input id="r-name" type="text" autocomplete="name" placeholder="Vor- und Nachname"></div>
+      <div class="zeile"><label for="r-firma">Firma</label><input id="r-firma" type="text" autocomplete="organization" placeholder="Name der Firma"></div>
+      <div class="zeile"><label for="r-email">E-Mail</label><input id="r-email" type="email" autocomplete="email" placeholder="du@deine-firma.de" data-du-ph="du@deine-firma.de" data-sie-ph="name@ihre-firma.de"></div>
+      <div class="zeile"><label for="r-pass" data-du="Dein Passwort" data-sie="Ihr Passwort">Dein Passwort</label><input id="r-pass" type="password" autocomplete="new-password" placeholder="mindestens 12 Zeichen"></div>
+      <div class="gesendet" id="gesendet-reg" hidden><span class="handschrift">Post ist raus!</span><span data-du="Bestätige deine E-Mail, dann geht es hier weiter." data-sie="Bestätigen Sie Ihre E-Mail, dann geht es hier weiter.">Bestätige deine E-Mail, dann geht es hier weiter.</span></div>
+      <div class="fehler" id="f-reg" aria-live="polite"></div>
+      <button class="haupt" id="registrieren-los" type="button">Konto anlegen</button>
+      <button class="neben" id="zurueck-4" type="button">Zurück zur Anmeldung</button>
+    </div>
+
+    <!-- Schritt 7: Passwort neu setzen (Produkt: nach dem Link aus der Mail) -->
+    <div class="schritt" id="s-neu" hidden>
+      <div class="gruss">Fast geschafft.</div>
+      <p class="erklaer" data-du="Wähle ein neues Passwort, das alte gilt danach nicht mehr." data-sie="Wählen Sie ein neues Passwort, das alte gilt danach nicht mehr.">Wähle ein neues Passwort, das alte gilt danach nicht mehr.</p>
+      <div class="zeile"><label for="n-pass">Neues Passwort</label><input id="n-pass" type="password" autocomplete="new-password" placeholder="mindestens 12 Zeichen"></div>
+      <div class="zeile"><label for="n-pass2">Noch einmal, zur Sicherheit</label><input id="n-pass2" type="password" autocomplete="new-password" placeholder="••••••••••"></div>
+      <div class="fehler" id="f-neu" aria-live="polite"></div>
+      <button class="haupt" id="neu-speichern" type="button">Passwort speichern</button>
     </div>
   </div>
   <p class="hinweis">Vorführung mit Demo-Daten — jede Eingabe funktioniert.</p>
@@ -146,7 +196,7 @@ input:focus{border-color:var(--blau)}
   }
 
   function zeige(id){
-    ['s-anmelden', 's-zwei', 's-vergessen'].forEach(function(s){
+    ['s-anmelden', 's-zwei', 's-vergessen', 's-link', 's-zugang', 's-registrieren', 's-neu'].forEach(function(s){
       document.getElementById(s).hidden = s !== id;
     });
   }
@@ -197,6 +247,63 @@ input:focus{border-color:var(--blau)}
     document.getElementById('gesendet').hidden = false;
     document.getElementById('senden').hidden = true;
   });
+
+  /* ---------- die vier Abläufe aus V4 ---------- */
+  document.getElementById('zu-link').addEventListener('click', function(){ zeige('s-link'); });
+  document.getElementById('zu-registrieren').addEventListener('click', function(){ zeige('s-registrieren'); });
+  document.getElementById('zurueck-3').addEventListener('click', function(){
+    document.getElementById('gesendet-link').hidden = true;
+    document.getElementById('link-senden').hidden = false;
+    zeige('s-anmelden');
+  });
+  document.getElementById('zurueck-4').addEventListener('click', function(){
+    document.getElementById('gesendet-reg').hidden = true;
+    document.getElementById('registrieren-los').hidden = false;
+    zeige('s-anmelden');
+  });
+  document.getElementById('link-senden').addEventListener('click', function(){
+    var email = document.getElementById('email3').value.trim();
+    if (!email || email.indexOf('@') === -1) return;
+    document.getElementById('gesendet-link').hidden = false;
+    document.getElementById('link-senden').hidden = true;
+  });
+  document.getElementById('zugang-los').addEventListener('click', function(){
+    var name = document.getElementById('z-name').value.trim();
+    var pass = document.getElementById('z-pass').value;
+    var f = document.getElementById('f-zugang');
+    if (!name) { f.textContent = 'Ohne Namen geht es nicht.'; return; }
+    if (pass.length < 12) { f.textContent = 'Das Passwort braucht mindestens 12 Zeichen.'; return; }
+    f.textContent = '';
+    location.href = 'uebersicht.html';
+  });
+  document.getElementById('registrieren-los').addEventListener('click', function(){
+    var name = document.getElementById('r-name').value.trim();
+    var firma = document.getElementById('r-firma').value.trim();
+    var email = document.getElementById('r-email').value.trim();
+    var pass = document.getElementById('r-pass').value;
+    var f = document.getElementById('f-reg');
+    if (!name || !firma) { f.textContent = 'Name und Firma fehlen noch.'; return; }
+    if (!email || email.indexOf('@') === -1) { f.textContent = 'Die E-Mail sieht noch nicht richtig aus.'; return; }
+    if (pass.length < 12) { f.textContent = 'Das Passwort braucht mindestens 12 Zeichen.'; return; }
+    f.textContent = '';
+    document.getElementById('gesendet-reg').hidden = false;
+    document.getElementById('registrieren-los').hidden = true;
+  });
+  document.getElementById('neu-speichern').addEventListener('click', function(){
+    var p1 = document.getElementById('n-pass').value;
+    var p2 = document.getElementById('n-pass2').value;
+    var f = document.getElementById('f-neu');
+    if (p1.length < 12) { f.textContent = 'Das Passwort braucht mindestens 12 Zeichen.'; return; }
+    if (p1 !== p2) { f.textContent = 'Die beiden Passwörter sind nicht gleich.'; return; }
+    f.textContent = '';
+    zeige('s-anmelden');
+  });
+
+  /* Direkteinstieg über den Hash: im Produkt sind das eigene Routen
+     (/zugang/[token], /registrieren, Anmelde-Link, Passwort-neu-Link) */
+  var einstieg = {zugang: 's-zugang', registrieren: 's-registrieren', link: 's-link', neu: 's-neu'};
+  var hash = location.hash.slice(1);
+  if (einstieg[hash]) zeige(einstieg[hash]);
 })();
 </script>
 </body>
