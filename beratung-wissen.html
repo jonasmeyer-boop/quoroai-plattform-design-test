@@ -16,7 +16,9 @@
    Kapsel Abschnitt für Abschnitt, dann kippt sie auf bereit. Der
    Branchenspiegel schließt den Kreis zum Mitlesen-Raum, wo der KI-Berater
    ihn gestern zitiert hat. Chrome ist quoroAI (system.css), ruhige Fläche,
-   kein Kino — das Einlesen IST der Moment. Marker: BERATUNG-WISSEN-V1 */
+   kein Kino — das Einlesen IST der Moment. V2 (Review): die Kopf-Kapsel
+   füllt sich ehrlich mit dem Anteil bereiter Dokumente statt immer voll
+   zu stehen. Marker: BERATUNG-WISSEN-V2 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -290,6 +292,11 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     var kapsel = kopf.querySelector('.zustand');
     kapsel.setAttribute('aria-label', wort);
     kapsel.setAttribute('title', wort);
+    /* die Füllung sagt dasselbe wie der Text: Anteil bereiter Dokumente */
+    kapsel.className = 'zustand';
+    kapsel.style.cssText = bereit > 0
+      ? '--stand:' + Math.max(zeilen.length ? bereit / zeilen.length : 0, .18).toFixed(2) + ';--fluid:#43b384;--fluid-tief:#1e8a63'
+      : '--stand:.12';
   }
   rechne();
 

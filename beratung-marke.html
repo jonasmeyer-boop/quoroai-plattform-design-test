@@ -6,6 +6,15 @@
 <title>Marke der Beratung</title>
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="system.css">
+<script src="marke.js"></script>
+<script>
+/* marke.js färbt die Wurzel sofort für Kundenflächen ein — dieser Raum ist
+   quoroAI-Chrom, also nehmen wir die vier Regler-Variablen gleich wieder
+   zurück, bevor irgendetwas malt. Die Markenliste selbst bleibt nutzbar. */
+['--blau','--stift','--tinte','--papier'].forEach(function(p){
+  document.documentElement.style.removeProperty(p);
+});
+</script>
 <style>
 /* quoroai-plattform-design, Marke: siebter Raum hinter den Cockpit-Türen
    (Paket 7, Reihenfolge-Entscheidung 2026-08-13). Was die Kunden der
@@ -17,7 +26,11 @@
    Absender, Domain-Prüfung mit DNS-Einträgen (der Nachweis fällt, wenn
    die Domain wechselt), Postfach-Vorschau. Chrome ist quoroAI
    (system.css), ruhige Fläche — der Spiegel IST der Moment.
-   Marker: BERATUNG-MARKE-V1 */
+   V2 (Review): Statuszeile baut DOM statt innerHTML, Speichern schreibt
+   die gemeinsame Marken-Quelle (sessionStorage, marke.js), Sehproben
+   kommen aus window.Marke.MARKEN statt einer Handkopie, Absendername
+   mit Rückfall und lebender Statuszeile, Prüfen-Timer wird gecleart.
+   Marker: BERATUNG-MARKE-V2 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -83,7 +96,6 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
 /* ---------- Erscheinung: Regler links, Spiegel rechts ---------- */
 .zwei{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
-.feld + .feld{margin-top:16px}
 .farben{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
 .farbe label{display:block;font-size:12px;font-weight:600;margin-bottom:6px}
 .farbe input[type="color"]{
@@ -360,7 +372,12 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     document.getElementById('v-name').placeholder = n;
     malePostfach();
   }
-  document.getElementById('m-name').addEventListener('input', maleName);
+  document.getElementById('m-name').addEventListener('input', function(){
+    maleName();
+    /* die Statuszeile nennt den Absender — sie zieht mit, außer eine
+       Prüfung läuft gerade (deren Anzeige bleibt stehen) */
+    if (pruefTimer === null) pruefeAdresse();
+  });
 
   var logoFeld = document.getElementById('m-logo');
   var logoBild = document.getElementById('f-logo');
@@ -373,45 +390,74 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   }
   logoFeld.addEventListener('input', maleLogo);
 
-  /* Sehproben: dieselben Beispielmarken wie überall (marke.js) */
-  var MARKEN = [
-    {name: 'Nordholm & Partner',  anrede: 'du',  blau: '#2b5fe3', stift: '#1d46c9', tinte: '#10131a', papier: '#fafaf7', domain: 'nordholm-partner.de'},
-    {name: 'Waldmann Consulting', anrede: 'sie', blau: '#0e7a5a', stift: '#0a5f46', tinte: '#101613', papier: '#f8faf7', domain: 'waldmann-consulting.de'},
-    {name: 'Steinbach & Cie.',    anrede: 'sie', blau: '#9c3948', stift: '#7c2d3a', tinte: '#171114', papier: '#fbf9f7', domain: 'steinbach-cie.de'},
-    {name: 'currily',             anrede: 'du',  blau: '#7047EA', stift: '#5636b8', tinte: '#081B4A', papier: '#fbfafd', domain: 'currily.de', logo: 'bilder/currily-logo.svg'}
-  ];
+  /* Sehproben: window.Marke.MARKEN ist die eine Quelle (marke.js).
+     Nur die Domain je Marke wohnt hier — marke.js kennt keine Domains. */
+  var MARKEN = (window.Marke && window.Marke.MARKEN) || [];
+  var DOMAINS = {
+    'Nordholm & Partner': 'nordholm-partner.de',
+    'Waldmann Consulting': 'waldmann-consulting.de',
+    'Steinbach & Cie.': 'steinbach-cie.de',
+    'currily': 'currily.de'
+  };
+  function domainZu(mk){ return DOMAINS[mk.name] || 'deine-domain.de'; }
+
+  function trageMarke(mk){
+    document.getElementById('m-name').value = mk.name;
+    document.getElementById('f-blau').value = mk.blau.toLowerCase();
+    document.getElementById('f-stift').value = mk.stift.toLowerCase();
+    document.getElementById('f-tinte').value = mk.tinte.toLowerCase();
+    document.getElementById('f-papier').value = mk.papier.toLowerCase();
+    spiegel.style.setProperty('--m-blau', mk.blau);
+    spiegel.style.setProperty('--m-stift', mk.stift);
+    spiegel.style.setProperty('--m-tinte', mk.tinte);
+    spiegel.style.setProperty('--m-papier', mk.papier);
+    logoFeld.value = mk.logo || '';
+    maleLogo();
+    sie = mk.anrede === 'sie';
+    maleAnrede();
+    maleName();
+    document.getElementById('f-adresse').textContent = 'beratung.' + domainZu(mk);
+    document.getElementById('v-mail').value = 'beratung@' + domainZu(mk);
+    pruefeAdresse(true);
+  }
+
   var sehprobe = document.querySelector('.sehprobe');
   MARKEN.forEach(function(mk){
     var b = document.createElement('button');
     b.type = 'button';
-    b.innerHTML = '<span class="tupfer" style="background:' + mk.blau + '"></span>';
+    var tupfer = document.createElement('span');
+    tupfer.className = 'tupfer';
+    tupfer.style.background = mk.blau;
+    b.appendChild(tupfer);
     b.appendChild(document.createTextNode(mk.name));
-    b.addEventListener('click', function(){
-      document.getElementById('m-name').value = mk.name;
-      document.getElementById('f-blau').value = mk.blau;
-      document.getElementById('f-stift').value = mk.stift;
-      document.getElementById('f-tinte').value = mk.tinte;
-      document.getElementById('f-papier').value = mk.papier;
-      spiegel.style.setProperty('--m-blau', mk.blau);
-      spiegel.style.setProperty('--m-stift', mk.stift);
-      spiegel.style.setProperty('--m-tinte', mk.tinte);
-      spiegel.style.setProperty('--m-papier', mk.papier);
-      logoFeld.value = mk.logo || '';
-      maleLogo();
-      sie = mk.anrede === 'sie';
-      maleAnrede();
-      maleName();
-      document.getElementById('f-adresse').textContent = 'beratung.' + mk.domain;
-      document.getElementById('v-mail').value = 'beratung@' + mk.domain;
-      pruefeAdresse(true);
-    });
+    b.addEventListener('click', function(){ trageMarke(mk); });
     sehprobe.appendChild(b);
   });
 
   document.getElementById('speichern').addEventListener('click', function(){
     var m = document.getElementById('m-meldung');
     m.hidden = false;
-    m.textContent = 'Gespeichert. Jede Kundenfläche trägt die Marke ab sofort — und jede Mail den Absender.';
+    /* Passt der Stand zu einer Beispielmarke, wandert er in die gemeinsame
+       Quelle (sessionStorage), die marke.js auf jeder Kundenfläche liest —
+       erst dadurch ist "ab sofort" wahr. Eigene Regler-Werte hat die
+       Vorführung nicht als Quelle; das sagt die Meldung dann ehrlich. */
+    var passt = -1;
+    MARKEN.forEach(function(mk, i){
+      if (passt >= 0) return;
+      if (mk.name === document.getElementById('m-name').value.trim() &&
+          mk.blau.toLowerCase() === document.getElementById('f-blau').value.toLowerCase() &&
+          mk.stift.toLowerCase() === document.getElementById('f-stift').value.toLowerCase() &&
+          mk.tinte.toLowerCase() === document.getElementById('f-tinte').value.toLowerCase() &&
+          mk.papier.toLowerCase() === document.getElementById('f-papier').value.toLowerCase() &&
+          (mk.logo || '') === logoFeld.value.trim() &&
+          (mk.anrede === 'sie') === sie) passt = i;
+    });
+    if (passt >= 0) {
+      try { sessionStorage.setItem('marke', String(passt)); } catch (e) {}
+      m.textContent = 'Gespeichert. Jede Kundenfläche trägt die Marke ab sofort — und jede Mail den Absender.';
+    } else {
+      m.textContent = 'Gespeichert für diesen Raum. Die Kundenflächen der Vorführung tragen die vier Sehproben — eigene Regler-Werte kommen im Produkt aus deinem Profil.';
+    }
   });
 
   /* ---------- Versand: der Nachweis hängt an der Domain ----------
@@ -421,18 +467,31 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   var mail = document.getElementById('v-mail');
   var stand = document.getElementById('v-stand');
   var dns = document.getElementById('dns');
+  var pruefTimer = null;
 
   function domainVon(adresse){
     var t = adresse.split('@');
     return t.length === 2 && t[1].indexOf('.') > 0 ? t[1].toLowerCase().trim() : null;
   }
+  /* baut DOM statt innerHTML — Adresse, Domain und Name sind Nutzereingaben */
   function maleStand(art, titel, deut){
-    var kapsel =
-      art === 'gut'    ? '<span class="zustand aktiv" role="img" aria-label="geprüft" title="geprüft"></span>' :
-      art === 'wartet' ? '<span class="zustand wartet" role="img" aria-label="wird geprüft" title="wird geprüft"></span>' :
-      art === 'offen'  ? '<span class="zustand entwurf" role="img" aria-label="noch nicht geprüft" title="noch nicht geprüft"></span>' :
-                         '<span class="zustand entwurf" role="img" aria-label="kein Absender" title="kein Absender"></span>';
-    stand.innerHTML = kapsel + '<span class="v-text"><b>' + titel + '</b><small>' + deut + '</small></span>';
+    var kapsel = document.createElement('span');
+    kapsel.className = 'zustand ' + (art === 'gut' ? 'aktiv' : art === 'wartet' ? 'wartet' : 'entwurf');
+    var wort = art === 'gut' ? 'geprüft' : art === 'wartet' ? 'wird geprüft' : art === 'offen' ? 'noch nicht geprüft' : 'kein Absender';
+    kapsel.setAttribute('role', 'img');
+    kapsel.setAttribute('aria-label', wort);
+    kapsel.title = wort;
+    var text = document.createElement('span');
+    text.className = 'v-text';
+    var b = document.createElement('b');
+    b.textContent = titel;
+    var klein = document.createElement('small');
+    klein.textContent = deut;
+    text.appendChild(b);
+    text.appendChild(klein);
+    stand.textContent = '';
+    stand.appendChild(kapsel);
+    stand.appendChild(text);
   }
   function malePostfach(){
     var adresse = mail.value.trim();
@@ -447,7 +506,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       ? 'Ihr Termin am Donnerstag, 10:00 — bestätigt'
       : 'Dein Termin am Donnerstag, 10:00 — bestätigt';
   }
-  document.getElementById('v-name').addEventListener('input', malePostfach);
+  document.getElementById('v-name').addEventListener('input', function(){
+    if (pruefTimer === null) pruefeAdresse(); else malePostfach();
+  });
 
   function maleDns(domain){
     var zeilen = document.getElementById('dns-zeilen');
@@ -481,8 +542,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     }
     if (domain === gepruefteDomain) {
       dns.hidden = true;
+      var absender = document.getElementById('v-name').value.trim() || document.getElementById('m-name').value.trim() || 'Deine Beratung';
       maleStand('gut', domain + ' ist geprüft — verschickt wird unter ' + adresse + '.',
-        'Deine Kunden sehen als Absender „' + (document.getElementById('v-name').value.trim() || document.getElementById('m-name').value.trim()) + '". Antworten gehen an diese Adresse, nicht an quoroAI.');
+        'Deine Kunden sehen als Absender „' + absender + '". Antworten gehen an diese Adresse, nicht an quoroAI.');
       return;
     }
     maleDns(domain);
@@ -490,21 +552,30 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     maleStand('offen', domain + ' ist noch nicht geprüft.',
       'Die Domain ist neu — der bisherige Nachweis gilt für sie nicht. Drei DNS-Einträge, dann steht sie.');
   }
-  mail.addEventListener('input', function(){ pruefeAdresse(); });
+  mail.addEventListener('input', function(){
+    /* Adresswechsel bricht eine laufende Prüfung ab — der alte Timer darf
+       nicht später eine Domain freischalten, die niemand mehr sieht */
+    clearTimeout(pruefTimer);
+    pruefTimer = null;
+    pruefeAdresse();
+  });
 
   document.getElementById('pruefen').addEventListener('click', function(){
     var domain = domainVon(mail.value.trim());
     if (!domain) return;
+    clearTimeout(pruefTimer);
     maleStand('wartet', 'Wir sehen bei deiner Domain nach …', 'Das dauert einen Moment.');
-    setTimeout(function(){
-      gepruefteDomain = domain;
+    pruefTimer = setTimeout(function(){
+      pruefTimer = null;
+      if (domainVon(mail.value.trim()) === domain) gepruefteDomain = domain;
       pruefeAdresse();
     }, reduziert ? 0 : 1500);
   });
 
-  maleAnrede();
-  maleName();
-  pruefeAdresse();
+  /* Der Raum öffnet auf der Marke, die gerade gilt — dieselbe Quelle,
+     die auch jede Kundenfläche liest */
+  if (window.Marke && window.Marke.daten) trageMarke(window.Marke.daten);
+  else { maleAnrede(); maleName(); pruefeAdresse(); }
 })();
 </script>
 <script src="zeiger.js"></script>
