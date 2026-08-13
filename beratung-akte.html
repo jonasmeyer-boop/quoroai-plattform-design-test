@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kundenakte Petersen Stahlbau</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Kundenakte: vierter Raum hinter den Cockpit-Türen
+   (Reihenfolge-Entscheidung 2026-08-13), exemplarisch für Petersen Stahlbau
+   (Produkt: /kunden/[id]). Das dichteste Stück: Stammdaten, Dokumente mit
+   Freigabe, Kundenzugang, Tarif. Kern-Idee der Freigabe: jedes Dokument
+   trägt zwei anfassbare Füllstand-Kapseln — „Kunde sieht es" und „KI liest
+   es" — Zustand wird gekippt, nicht konfiguriert. Ein interner Vermerk
+   zeigt, wofür das gut ist (weder Kunde noch KI sehen ihn). Der Zugang
+   lässt sich sperren und wieder öffnen, das Kontingent wirkt ehrlich erst
+   ab dem nächsten Monat. Chrome ist quoroAI (system.css), ruhige Fläche,
+   kein Kino — die Kapseln SIND der Moment. Marker: BERATUNG-AKTE-V1 */
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input{font-family:inherit}
+
+/* ========== quoroAI-Chrom ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+
+/* ========== Seite ========== */
+main{max-width:860px;margin:0 auto;padding:136px 24px 90px}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px}
+.kopf .z-fuell{display:flex;align-items:center;gap:8px;margin-top:8px}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:30px}
+
+.tafel{
+  margin-top:12px;border-radius:var(--radius-karte);padding:22px 24px;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+
+/* ---------- Stammdaten: zwei ruhige Spalten ---------- */
+.stamm{display:grid;grid-template-columns:1fr 1fr;gap:14px 28px}
+.stamm .s-feld b{display:block;font-size:12px;font-weight:600;color:var(--nebel-600)}
+.stamm .s-feld span{font-size:15px;line-height:1.5}
+.tafel .fuss-griffe{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.tafel .fuss-griffe .knopf{min-height:40px;padding:0 16px;font-size:13.5px;text-decoration:none}
+
+/* ---------- Dokumente mit Freigabe ---------- */
+.doks{display:flex;flex-direction:column;gap:9px}
+.dok{
+  display:flex;align-items:center;gap:16px;
+  padding:13px 16px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 8px 24px rgba(16,19,26,.06);
+}
+.dok .blatt-icon{
+  width:34px;height:44px;flex-shrink:0;position:relative;
+  background:#fff;border:1px solid var(--nebel-200);border-radius:4px;
+}
+.dok .blatt-icon::before{
+  content:'';position:absolute;right:-1px;top:-1px;border:8px solid transparent;
+  border-left-color:var(--lila-200);border-bottom-color:var(--lila-200);
+  border-radius:0 0 0 4px;
+}
+.dok .blatt-icon::after{
+  content:'';position:absolute;left:6px;right:6px;top:14px;height:18px;
+  background:linear-gradient(var(--nebel-200) 1.5px, transparent 1.5px);background-size:100% 6px;
+}
+.dok .d-name{font-size:14px;font-weight:600;letter-spacing:-.01em;line-height:1.4}
+.dok .d-meta{font-size:12px;color:var(--nebel-600);margin-top:2px}
+.dok .frei{display:flex;gap:14px;margin-left:auto;flex-shrink:0}
+/* die Freigabe-Kapsel: ein Füllstand zum Kippen */
+.frei button{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:none;border:0;cursor:pointer;padding:2px 4px;border-radius:10px;
+}
+.frei button:focus-visible{outline:3px solid var(--lila-400);outline-offset:2px}
+.frei .zustand{width:40px;height:18px}
+.frei .zustand-wort{font-size:10.5px;font-weight:600;white-space:nowrap}
+.frei button[aria-pressed="false"] .zustand-wort{color:var(--nebel-400)}
+.dok.intern{border-style:dashed;background:var(--nebel-050)}
+.dok .hand{font-family:'Caveat',cursive;font-size:17px;font-weight:700;color:var(--lila-700);rotate:-1.5deg;white-space:nowrap}
+
+/* ---------- Kundenzugang & Tarif nebeneinander ---------- */
+.paar{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.paar .tafel{margin-top:0}
+.zugang-kopf{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.zugang-kopf b{font-size:15px;font-weight:600}
+.zugang-meta{font-size:13px;color:var(--nebel-600);margin-top:6px;line-height:1.6}
+.z-fuell{display:flex;align-items:center;gap:8px}
+.z-fuell .zustand{width:40px;height:18px}
+.bestaetigt{
+  margin-top:12px;padding:11px 14px;border-radius:var(--radius-innen);
+  background:var(--gruen-fond);font-size:13.5px;line-height:1.5;
+}
+.bestaetigt.gefahr{background:var(--rot-fond)}
+.tarif-gross{
+  font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);letter-spacing:var(--schau-spur);
+  font-size:30px;line-height:1.05;font-variant-numeric:tabular-nums;
+}
+.tarif-deut{font-size:13px;color:var(--nebel-600);margin-top:2px}
+.tarif-stand{display:flex;align-items:center;gap:10px;margin-top:14px}
+.kontingent-wahl{display:flex;gap:8px;margin-top:14px}
+.kontingent-wahl button{
+  padding:10px 16px;border-radius:12px;border:0.5px solid var(--nebel-300);
+  background:var(--flaeche);font-size:13.5px;font-weight:600;cursor:pointer;
+  transition:border-color .2s,background .2s;
+}
+.kontingent-wahl button:hover{border-color:var(--lila-500)}
+.kontingent-wahl button.gewaehlt{background:var(--tinte);color:#fff;border-color:var(--tinte)}
+.tarif-fuss{font-size:12.5px;color:var(--nebel-500);margin-top:12px;line-height:1.5}
+
+@media (prefers-reduced-motion: reduce){
+  main > *{animation:none;opacity:1;translate:none}
+}
+@media (max-width:760px){
+  nav{padding:0 18px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
+  .tafel{padding:18px 18px}
+  .stamm{grid-template-columns:1fr}
+  .paar{grid-template-columns:1fr}
+  .dok{flex-wrap:wrap}
+  .dok .frei{margin-left:50px}
+  .dok .hand{display:none}
+}
+</style>
+</head>
+<body class="quoro">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#petersen"><span class="zurueck">← Petersen Stahlbau</span><span>/</span><b>Kundenakte</b></a>
+
+<main>
+  <div class="kopf">
+    <div>
+      <h1>Kundenakte</h1>
+      <div class="stand">Petersen Stahlbau, Mandat seit März 2025, betreut von Dr. Anna Vogelsang</div>
+    </div>
+    <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Mandat aktiv" title="Mandat aktiv"></span><span class="zustand-wort">Mandat aktiv</span></span>
+  </div>
+
+  <h3>Stammdaten</h3>
+  <section class="tafel" aria-label="Stammdaten">
+    <div class="stamm">
+      <div class="s-feld"><b>Firma</b><span>Petersen Stahlbau GmbH, Stahlbau, 46 Mitarbeitende</span></div>
+      <div class="s-feld"><b>Ansprechpartner</b><span>Matthias Petersen, Geschäftsführer</span></div>
+      <div class="s-feld"><b>E-Mail</b><span>m.petersen@petersen-stahlbau.de</span></div>
+      <div class="s-feld"><b>Telefon</b><span>+49 4321 88 41 20</span></div>
+      <div class="s-feld"><b>Anschrift</b><span>Am Hafenkai 12, 24768 Rendsburg</span></div>
+      <div class="s-feld"><b>Schwerpunkt</b><span>Preis und Marge, seit April im Fokus</span></div>
+    </div>
+    <div class="fuss-griffe"><button class="bald knopf leise" type="button">Stammdaten bearbeiten</button></div>
+  </section>
+
+  <h3>Dokumente, und wer sie sieht</h3>
+  <section class="tafel" aria-label="Dokumente mit Freigabe">
+    <div class="doks">
+      <div class="dok">
+        <span class="blatt-icon" aria-hidden="true"></span>
+        <span><span class="d-name">Monatsauswertung Juli</span><br><span class="d-meta">8 Seiten, von dir hochgeladen am 4. August</span></span>
+        <span class="frei">
+          <button type="button" aria-pressed="true"><span class="zustand aktiv" aria-hidden="true"></span><span class="zustand-wort">Kunde sieht es</span></button>
+          <button type="button" aria-pressed="true"><span class="zustand vorschlag" aria-hidden="true"></span><span class="zustand-wort">KI liest es</span></button>
+        </span>
+      </div>
+      <div class="dok">
+        <span class="blatt-icon" aria-hidden="true"></span>
+        <span><span class="d-name">Rahmenvertrag Stahl</span><br><span class="d-meta">14 Seiten, vom Kunden hochgeladen am 12. Juni</span></span>
+        <span class="frei">
+          <button type="button" aria-pressed="true"><span class="zustand aktiv" aria-hidden="true"></span><span class="zustand-wort">Kunde sieht es</span></button>
+          <button type="button" aria-pressed="true"><span class="zustand vorschlag" aria-hidden="true"></span><span class="zustand-wort">KI liest es</span></button>
+        </span>
+      </div>
+      <div class="dok">
+        <span class="blatt-icon" aria-hidden="true"></span>
+        <span><span class="d-name">Preismodell Benchmark</span><br><span class="d-meta">12 Seiten, vom KI-Berater erstellt, gestern</span></span>
+        <span class="frei">
+          <button type="button" aria-pressed="true"><span class="zustand aktiv" aria-hidden="true"></span><span class="zustand-wort">Kunde sieht es</span></button>
+          <button type="button" aria-pressed="true"><span class="zustand vorschlag" aria-hidden="true"></span><span class="zustand-wort">KI liest es</span></button>
+        </span>
+      </div>
+      <div class="dok intern">
+        <span class="blatt-icon" aria-hidden="true"></span>
+        <span><span class="d-name">Honorar-Kalkulation 2026</span><br><span class="d-meta">2 Seiten, von dir, 28. Juli</span></span>
+        <span class="hand">bleibt intern.</span>
+        <span class="frei">
+          <button type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">nur Beratung</span></button>
+          <button type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">KI liest nicht</span></button>
+        </span>
+      </div>
+    </div>
+    <div class="fuss-griffe">
+      <button class="bald knopf leise" type="button">Dokument hochladen</button>
+      <div class="tarif-fuss" style="margin-top:8px;flex-basis:100%">Was die KI liest, kann sie dem Kunden im Gespräch zitieren, mit Fundstelle, wie im <a href="beratung-mitlesen.html" style="color:var(--lila-700)">freigegebenen Gespräch</a>.</div>
+    </div>
+  </section>
+
+  <div class="paar">
+    <section class="tafel" aria-label="Kundenzugang">
+      <div class="zugang-kopf"><b>Kundenzugang</b><span class="z-fuell" id="zugang-zustand"><span class="zustand aktiv" role="img" aria-label="Zugang aktiv" title="Zugang aktiv"></span><span class="zustand-wort">aktiv</span></span></div>
+      <div class="zugang-meta">Matthias Petersen, angemeldet mit m.petersen@petersen-stahlbau.de.<br>Zuletzt drin: gestern, 16:40, beim Freigeben seines Gesprächs.</div>
+      <div class="bestaetigt" id="zugang-meldung" hidden></div>
+      <div class="fuss-griffe">
+        <button class="knopf leise" id="link-schicken" type="button">Anmelde-Link schicken</button>
+        <button class="knopf gefahr" id="sperren" type="button">Zugang sperren</button>
+      </div>
+    </section>
+
+    <section class="tafel" aria-label="Tarif">
+      <div class="tarif-gross" id="tarif-zahl">40 Fragen</div>
+      <div class="tarif-deut">im Monat, an den KI-Berater</div>
+      <div class="tarif-stand">
+        <span class="zustand" id="tarif-kapsel" style="--stand:.43;--fluid:var(--lila-400);--fluid-tief:var(--lila-600)" role="img" aria-label="17 von 40 verbraucht" title="17 von 40 verbraucht"></span>
+        <span class="zustand-wort" id="tarif-wort">17 von 40 im August verbraucht</span>
+      </div>
+      <div class="kontingent-wahl" id="kontingent-wahl" hidden>
+        <button type="button" data-zahl="20">20</button>
+        <button type="button" data-zahl="40" class="gewaehlt">40</button>
+        <button type="button" data-zahl="80">80</button>
+      </div>
+      <div class="bestaetigt" id="tarif-meldung" hidden></div>
+      <div class="fuss-griffe"><button class="knopf leise" id="kontingent-aendern" type="button">Kontingent ändern</button></div>
+      <div class="tarif-fuss">Änderungen gelten ehrlich ab dem 1. September, der laufende Monat bleibt, wie er ist. Kosten dazu im Raum <a href="beratung-ki-berater.html" style="color:var(--lila-700)">Dein KI-Berater</a>.</div>
+    </section>
+  </div>
+</main>
+
+<div id="demo-hinweis" style="position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--lila-700);opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--kurve)">Diese Fläche entsteht gerade.</div>
+
+<script>
+(function(){
+  'use strict';
+  document.querySelectorAll('main > *').forEach(function(el, i){
+    el.style.setProperty('--verz', (i * 0.07) + 's');
+  });
+
+  var hinweisTimer = null;
+  function demoHinweis(){
+    var h = document.getElementById('demo-hinweis');
+    h.style.opacity = .95; h.style.translate = '-50% 0';
+    clearTimeout(hinweisTimer);
+    hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2200);
+  }
+  document.querySelectorAll('.bald').forEach(function(el){
+    el.addEventListener('click', demoHinweis);
+  });
+
+  /* ---------- Freigabe-Kapseln: Zustand wird gekippt ---------- */
+  document.querySelectorAll('.frei button').forEach(function(b){
+    var istKunde = b.querySelector('.zustand-wort').textContent.indexOf('K') === 0 &&
+                   b.querySelector('.zustand-wort').textContent.indexOf('KI') !== 0;
+    b.addEventListener('click', function(){
+      var an = b.getAttribute('aria-pressed') !== 'true';
+      b.setAttribute('aria-pressed', String(an));
+      var kapsel = b.querySelector('.zustand');
+      var wort = b.querySelector('.zustand-wort');
+      var kunde = wort.textContent.indexOf('KI') !== 0; /* sonst die KI-Kapsel */
+      if (kunde) {
+        kapsel.className = 'zustand ' + (an ? 'aktiv' : 'entwurf');
+        wort.textContent = an ? 'Kunde sieht es' : 'nur Beratung';
+      } else {
+        kapsel.className = 'zustand ' + (an ? 'vorschlag' : 'entwurf');
+        wort.textContent = an ? 'KI liest es' : 'KI liest nicht';
+      }
+    });
+  });
+
+  /* ---------- Kundenzugang ---------- */
+  var gesperrt = false;
+  var meldung = document.getElementById('zugang-meldung');
+  document.getElementById('link-schicken').addEventListener('click', function(){
+    if (gesperrt) return;
+    meldung.className = 'bestaetigt';
+    meldung.textContent = 'Ist unterwegs. Der Link gilt eine Stunde und genau einmal.';
+    meldung.hidden = false;
+  });
+  document.getElementById('sperren').addEventListener('click', function(){
+    gesperrt = !gesperrt;
+    var z = document.getElementById('zugang-zustand');
+    var knopf = document.getElementById('sperren');
+    if (gesperrt) {
+      z.innerHTML = '<span class="zustand entwurf" role="img" aria-label="Zugang gesperrt" title="Zugang gesperrt"></span><span class="zustand-wort">gesperrt</span>';
+      meldung.className = 'bestaetigt gefahr';
+      meldung.textContent = 'Gesperrt. Herr Petersen kommt nicht mehr hinein, bis du den Zugang wieder öffnest. Seine Daten bleiben unberührt.';
+      meldung.hidden = false;
+      knopf.textContent = 'Zugang wieder öffnen';
+    } else {
+      z.innerHTML = '<span class="zustand aktiv" role="img" aria-label="Zugang aktiv" title="Zugang aktiv"></span><span class="zustand-wort">aktiv</span>';
+      meldung.className = 'bestaetigt';
+      meldung.textContent = 'Wieder offen. Herr Petersen kann sich anmelden wie zuvor.';
+      knopf.textContent = 'Zugang sperren';
+    }
+  });
+
+  /* ---------- Tarif: Kontingent wählen, gilt ab nächstem Monat ---------- */
+  document.getElementById('kontingent-aendern').addEventListener('click', function(){
+    var wahl = document.getElementById('kontingent-wahl');
+    wahl.hidden = !wahl.hidden;
+  });
+  document.querySelectorAll('#kontingent-wahl button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('#kontingent-wahl button').forEach(function(x){ x.classList.remove('gewaehlt'); });
+      b.classList.add('gewaehlt');
+      var zahl = +b.dataset.zahl;
+      var m = document.getElementById('tarif-meldung');
+      if (zahl === 40) {
+        m.hidden = true;
+        document.getElementById('tarif-zahl').textContent = '40 Fragen';
+      } else {
+        document.getElementById('tarif-zahl').textContent = zahl + ' Fragen';
+        m.className = 'bestaetigt';
+        m.textContent = 'Ab 1. September: ' + zahl + ' Fragen im Monat. Der August läuft mit 40 weiter.';
+        m.hidden = false;
+      }
+    });
+  });
+})();
+</script>
+<script src="zeiger.js"></script>
+</body>
+</html>
