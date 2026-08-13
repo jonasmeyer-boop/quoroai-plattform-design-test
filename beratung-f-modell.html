@@ -23,7 +23,10 @@
    Komet (zeiger.js, Jonas 2026-08-13). V11: die Stadt erwacht — Abendlicht,
    warme Fenster in den Mandats-Gebäuden, die Zentrale als von innen glühende
    Glas-Laterne; der Aufbau-Film endet weiß, beim Ausblenden geht das Licht an.
-   Marker: BERATUNG-F-MODELL-V11 */
+   V12: die Ankunft ist ein Licht-Flug — Streifen-Tunnel statt Blitz, der Raum
+   zieht aus der Tiefenunschärfe scharf, das Laternen-Licht wäscht sich aus,
+   die Tafeln landen mit 3D-Kippung.
+   Marker: BERATUNG-F-MODELL-V12 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -167,19 +170,33 @@ body.gezoomt #wolken{opacity:0}
 }
 body.gezoomt #puls{opacity:0}
 
-/* Der Lichtdurchbruch: im Moment, in dem die Kamera die Fassade durchstößt,
-   blitzt es weich auf und das Bild kippt in den Raum */
-#blitz{
+/* Der Licht-Flug: im Moment, in dem die Kamera die glühende Fassade
+   durchstößt, reißt ein Tunnel aus Lichtstreifen auf — ein weißer Kern,
+   darum lila Strahlen, die an einem vorbeifliegen und verglühen */
+#kanal{
   position:fixed;inset:0;z-index:26;pointer-events:none;opacity:0;
-  background:radial-gradient(70% 70% at 50% 46%, rgba(255,255,255,.98), rgba(255,255,255,.4) 55%, transparent 80%);
+  display:grid;place-items:center;overflow:hidden;
 }
-body.drin #blitz{animation:durchbruch .6s ease-out}
-@keyframes durchbruch{0%{opacity:0}28%{opacity:.9}100%{opacity:0}}
+#kanal::before{ /* der weiße Kern des Durchbruchs */
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(52% 52% at 50% 46%, rgba(255,255,255,1), rgba(255,255,255,.5) 42%, transparent 72%);
+}
+#kanal i{ /* der Streifen-Tunnel */
+  position:absolute;width:165vmax;height:165vmax;border-radius:50%;flex-shrink:0;
+  background:repeating-conic-gradient(rgba(111,99,232,.4) 0 2.5deg, transparent 2.5deg 11deg);
+  -webkit-mask-image:radial-gradient(circle, transparent 16%, #000 34%, transparent 60%);
+  mask-image:radial-gradient(circle, transparent 16%, #000 34%, transparent 60%);
+}
+body.drin #kanal{animation:kanal-auf .72s ease-out}
+body.drin #kanal i{animation:kanal-flug .72s cubic-bezier(.2,.7,.3,1)}
+@keyframes kanal-auf{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+@keyframes kanal-flug{from{transform:scale(.1) rotate(0deg)}to{transform:scale(1) rotate(26deg)}}
 
 @media (prefers-reduced-motion: reduce){
   #wolken i{animation:none}
   #puls::after{animation:none;opacity:0}
-  body.drin #blitz{animation:none}
+  body.drin #kanal{animation:none}
+  body.drin #kanal i{animation:none}
 }
 
 /* Der Stift kritzelt aufs Foto: zoomt mit der Kamera mit */
@@ -238,8 +255,8 @@ body.gezoomt #schleier{opacity:1}
    und Raum + Dashboard kommen im selben Moment an (~1,1 s nach dem Klick) ========== */
 #raum{
   position:fixed;inset:0;z-index:25;pointer-events:none;
-  opacity:0;transform:scale(1.09);
-  transition:opacity .55s ease,transform .75s var(--feder);
+  opacity:0;transform:scale(1.16);
+  transition:opacity .5s ease,transform .95s var(--feder);
 }
 #raum img{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
@@ -247,12 +264,25 @@ body.gezoomt #schleier{opacity:1}
      das leichte Aufziehen versteckt die weichen Bildränder */
   filter:blur(2.5px);transform:scale(1.03);
 }
+#raum::before{
+  /* das Licht der Laterne schwappt in den Raum und wäscht sich aus */
+  content:'';position:absolute;inset:0;z-index:1;opacity:0;
+  background:radial-gradient(62% 62% at 50% 44%, rgba(111,99,232,.3), transparent 72%);
+}
 #raum::after{
   /* sanfter Papierschleier von oben, damit Überschriften auf dem Raum sitzen */
   content:'';position:absolute;inset:0;
   background:linear-gradient(color-mix(in srgb, var(--papier) 55%, transparent), transparent 34%);
 }
 body.drin #raum{opacity:1;transform:scale(1)}
+/* die Ankunft zieht scharf: aus der Tiefenunschärfe in den Stand */
+body.drin #raum img{animation:raum-schaerfe 1.05s var(--feder)}
+@keyframes raum-schaerfe{
+  from{filter:blur(20px) saturate(.7)}
+  to{filter:blur(2.5px) saturate(1)}
+}
+body.drin #raum::before{animation:licht-wasch 1.2s ease-out}
+@keyframes licht-wasch{0%{opacity:1}100%{opacity:0}}
 
 /* ========== Dashboard-Bausteine je Mandat ==========
    Die Dashboards schweben über dem unscharfen Strategieraum, deshalb dürfen
@@ -321,6 +351,7 @@ svg.zieh.voll .fuell{opacity:1}
 /* ========== Zonen-Lage: die Inhalte, SIE scrollt ========== */
 #zonen{
   position:fixed;inset:0;z-index:30;overflow-y:auto;overscroll-behavior:contain;display:none;
+  perspective:1100px; /* die Tafeln landen mit leichter 3D-Kippung */
   /* Inhalt löst sich unter Kopfzeile und Brotkrume auf, statt hineinzukrachen */
   mask-image:linear-gradient(to bottom, transparent 56px, rgba(0,0,0,.5) 92px, #000 126px);
   -webkit-mask-image:linear-gradient(to bottom, transparent 56px, rgba(0,0,0,.5) 92px, #000 126px);
@@ -332,10 +363,11 @@ body.gezoomt #zonen{display:block}
    so dass die letzte exakt mit dem Raum-Blend fertig wird. Als Keyframe-Animation,
    weil Transitions nach dem display-Wechsel der Sektion nicht anlaufen. */
 .inhalt.offen > *{
-  opacity:0;translate:0 12px;
-  animation:ankunft .35s var(--feder) var(--verz,0s) forwards;
+  opacity:0;translate:0 26px;
+  transform:rotateX(9deg) scale(.985);transform-origin:50% 0;
+  animation:ankunft .5s var(--feder) var(--verz,0s) forwards;
 }
-@keyframes ankunft{to{opacity:1;translate:0 0}}
+@keyframes ankunft{to{opacity:1;translate:0 0;transform:rotateX(0) scale(1)}}
 .inhalt .kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .inhalt h2{font-size:clamp(24px,3.4vw,32px);font-weight:600;letter-spacing:-.03em;line-height:1.2}
 .inhalt .stand{font-size:13px;color:var(--grau);margin-top:2px}
@@ -418,7 +450,9 @@ body.gezoomt #zonen{display:block}
   #kamera{transition:none}
   #schleier{transition:none}
   #raum{transition:none}
-  .inhalt.offen > *{animation:none;opacity:1;translate:none}
+  body.drin #raum img{animation:none}
+  body.drin #raum::before{animation:none}
+  .inhalt.offen > *{animation:none;opacity:1;translate:none;transform:none}
 }
 
 /* ========== Mobil: das Modell ist breiter als der Schirm, man schaut sich um ========== */
@@ -524,7 +558,7 @@ body.gezoomt #zonen{display:block}
 <div id="schleier"></div>
 
 <div id="raum" aria-hidden="true"><img src="bilder/modell/strategieraum.jpg" alt=""></div>
-<div id="blitz" aria-hidden="true"></div>
+<div id="kanal" aria-hidden="true"><i></i></div>
 
 <div id="zonen">
   <section class="inhalt" data-raum="petersen">
