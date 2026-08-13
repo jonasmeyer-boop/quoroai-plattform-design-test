@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V36 (Beleg-Sorte Web: öffnet die Quelle im neuen Tab) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V37 (der Wasserfall trägt eine Einheit: format wie bei kpi/hero, Entscheidung 2026-08-13) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -1268,6 +1268,19 @@ body.blatt-offen{overflow:hidden}
   }
 
   function baueWasserfall(d){
+    /* Einheit wie bei kpi/hero: '%' , '€' oder weggelassen = nackte Zahl,
+       deutsch gruppiert (Entscheidung 2026-08-13). Feste Balken tragen die
+       Einheit, Schritte nur Vorzeichen und Zahl. */
+    var fmt = d.format;
+    function wfFest(v){
+      if (fmt === '%') return v.toFixed(1).replace('.', ',') + ' %';
+      if (fmt === '€') return euro(v);
+      return v.toLocaleString('de-DE');
+    }
+    function wfSchritt(v){
+      var zahl = fmt === '%' ? v.toFixed(1).replace('.', ',') : v.toLocaleString('de-DE');
+      return (v > 0 ? '+' : '') + zahl;
+    }
     var laufend = [d.start.wert], namen = [d.start.name], werte = [d.start.wert], arten = ['fest'];
     d.schritte.forEach(function(s){
       laufend.push(laufend[laufend.length-1] + s.wert);
@@ -1288,12 +1301,12 @@ body.blatt-offen{overflow:hidden}
       if (arten[i] === 'fest') {
         var v = (i === 0) ? d.start.wert : werte[i];
         top = yVon(v); hoehe = yVon(min) - top; farbe = 'color-mix(in srgb, var(--blau) 85%, transparent)';
-        wertText = v.toFixed(1).replace('.', ',') + ' %';
+        wertText = wfFest(v);
       } else {
         var von = laufend[i-1], nach = laufend[i];
         top = yVon(Math.max(von, nach)); hoehe = Math.abs(yVon(von) - yVon(nach));
         farbe = 'rgba(178,109,10,.75)';
-        wertText = (werte[i] > 0 ? '+' : '') + werte[i].toFixed(1).replace('.', ',');
+        wertText = wfSchritt(werte[i]);
       }
       if (vorher !== null) {
         svgTeile.push('<line class="verbinder" x1="' + (vorher.x + bw) + '" y1="' + vorher.y + '" x2="' + x + '" y2="' + vorher.y + '"/>');
@@ -2375,6 +2388,7 @@ body.blatt-offen{overflow:hidden}
       schritte: [
         {t: 'Ich habe sie zerlegt. Von 36,2 Prozent im letzten Jahr auf 30,4 heute, und der Verlust hat drei Adressen:'},
         {wasserfall: {
+          format: '%',
           start: {name:'2024', wert:36.2},
           schritte: [
             {name:'Preisdruck', wert:-3.1},
