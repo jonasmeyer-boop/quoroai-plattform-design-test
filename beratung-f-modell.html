@@ -29,8 +29,9 @@
    blendet ab statt hart zu schneiden (und der Blitz feuert neu), Kamera trägt
    das echte Seitenverhältnis von stadt.jpg (1,75). V15: die Mitlesen-Türen
    sind echt und führen nach beratung-mitlesen.html (erster Raum hinter den
-   Türen, Entscheidung 2026-08-13).
-   Marker: BERATUNG-F-MODELL-V15 */
+   Türen, Entscheidung 2026-08-13). V16: auch Termine & Übergabe ist echt —
+   Tisch-Zettel und Raum-Türen führen nach beratung-termine.html.
+   Marker: BERATUNG-F-MODELL-V16 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -516,18 +517,18 @@ body.gezoomt #zonen{display:block}
 <div id="tisch">
   <div class="t-titel" data-du="Auf deinem Tisch" data-sie="Auf Ihrem Tisch">Auf deinem Tisch</div>
   <div class="t-reihe">
-  <button class="t-zettel" type="button" data-zu="petersen">
+  <a class="t-zettel" href="beratung-termine.html#petersen">
     <span class="t-text"><b>Herr Petersen möchte ein Gespräch mit einem Menschen</b><span>Petersen Stahlbau, Wunsch: Freitag, 9:00</span></span>
     <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">liegt vor</span></span>
-  </button>
+  </a>
   <a class="t-zettel" href="beratung-mitlesen.html">
     <span class="t-text"><b>„Warum schrumpft meine Marge?" ist jetzt freigegeben</b><span>Petersen Stahlbau, gestern, 16:40</span></span>
     <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">zum Mitlesen</span></span>
   </a>
-  <button class="t-zettel" type="button" data-zu="cordes">
+  <a class="t-zettel" href="beratung-termine.html#cordes">
     <span class="t-text"><b data-du="Der KI-Berater hat dir eine Steuerfrage übergeben" data-sie="Der KI-Berater hat Ihnen eine Steuerfrage übergeben">Der KI-Berater hat dir eine Steuerfrage übergeben</b><span>Cordes Logistik, heute, 8:12</span></span>
     <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">wartet auf Antwort</span></span>
-  </button>
+  </a>
   </div>
 </div>
 
@@ -565,7 +566,7 @@ body.gezoomt #zonen{display:block}
     </div>
     <h3>Was wartet</h3>
     <div class="zeilen">
-      <button class="zeile bald" type="button"><span><span class="z-titel">Gespräch mit einem Menschen</span><br><span class="z-meta">Wunsch: Freitag, 9:00, über den KI-Berater</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">Zeit bestätigen</span></span></button>
+      <a class="zeile" href="beratung-termine.html#petersen"><span><span class="z-titel">Gespräch mit einem Menschen</span><br><span class="z-meta">Wunsch: Freitag, 9:00, über den KI-Berater</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">Zeit bestätigen</span></span></a>
       <a class="zeile" href="beratung-mitlesen.html"><span><span class="z-titel">„Warum schrumpft meine Marge?"</span><br><span class="z-meta">freigegeben gestern, 16:40</span></span><span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">mitlesen</span></span></a>
     </div>
     <h3>Gespräche und Unterlagen</h3>
@@ -600,7 +601,7 @@ body.gezoomt #zonen{display:block}
         <span class="v-name">Übergabe des KI-Beraters</span>
         <span class="v-satz">Die Steuerfrage von 8:12 liegt außerhalb meines Rahmens.</span>
         <span class="v-hand">die gehört dir.</span>
-        <button class="bald knopf primaer" type="button">Frage beantworten</button>
+        <a class="knopf primaer" href="beratung-termine.html#cordes" style="text-decoration:none">Frage beantworten</a>
       </div>
     </div>
     <div class="kpis">
@@ -609,7 +610,7 @@ body.gezoomt #zonen{display:block}
     </div>
     <h3>Was wartet</h3>
     <div class="zeilen">
-      <button class="zeile bald" type="button"><span><span class="z-titel">Steuerfrage, übergeben um 8:12</span><br><span class="z-meta">außerhalb des Rahmens des KI-Beraters</span><br><span class="z-hand">die gehört dir.</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">wartet auf Antwort</span></span></button>
+      <a class="zeile" href="beratung-termine.html#cordes"><span><span class="z-titel">Steuerfrage, übergeben um 8:12</span><br><span class="z-meta">außerhalb des Rahmens des KI-Beraters</span><br><span class="z-hand">die gehört dir.</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">wartet auf Antwort</span></span></a>
     </div>
     <h3>Gespräche und Unterlagen</h3>
     <div class="zeilen">
@@ -617,7 +618,7 @@ body.gezoomt #zonen{display:block}
       <button class="zeile bald" type="button"><span><span class="z-titel">Fuhrpark-Übersicht 2026</span><br><span class="z-meta">Fassung 1, vom Kunden hochgeladen</span></span><span class="z-typ">Unterlage</span></button>
     </div>
     <div class="tueren">
-      <button class="bald knopf leise" type="button">Frage beantworten</button>
+      <a class="knopf leise" href="beratung-termine.html#cordes">Frage beantworten</a>
       <button class="bald knopf leise" type="button">Unterlagen</button>
     </div>
   </section>
