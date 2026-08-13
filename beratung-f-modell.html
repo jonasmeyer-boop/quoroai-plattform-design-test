@@ -27,8 +27,10 @@
    bleibt die weiche Raumblende mit Lichtblitz.
    V14 nach Code-Review: Raumbilder laden immer sofort vor, Raum-zu-Raum-Wechsel
    blendet ab statt hart zu schneiden (und der Blitz feuert neu), Kamera trägt
-   das echte Seitenverhältnis von stadt.jpg (1,75).
-   Marker: BERATUNG-F-MODELL-V14 */
+   das echte Seitenverhältnis von stadt.jpg (1,75). V15: die Mitlesen-Türen
+   sind echt und führen nach beratung-mitlesen.html (erster Raum hinter den
+   Türen, Entscheidung 2026-08-13).
+   Marker: BERATUNG-F-MODELL-V15 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -215,6 +217,7 @@ body.drin #blitz{animation:durchbruch .6s ease-out}
 #tisch .t-reihe{display:flex;flex-direction:column;gap:8px}
 #tisch .t-zettel{
   display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;
+  text-decoration:none;color:var(--tinte);
   padding:10px 15px;border-radius:13px;border:0.5px solid var(--linie);
   background:rgba(255,255,255,.78);backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);
   cursor:pointer;box-shadow:0 10px 26px rgba(16,19,26,.1);
@@ -347,8 +350,10 @@ body.gezoomt #zonen{display:block}
 .inhalt .kopf .z-fuell{margin-top:8px}
 .inhalt h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--grau);margin-top:26px}
 .zeilen{margin-top:10px;display:flex;flex-direction:column;gap:9px}
+.zeile,a.zeile,#tisch a.t-zettel{color:var(--tinte)}
 .zeile{
   display:flex;align-items:center;justify-content:space-between;gap:14px;text-align:left;
+  text-decoration:none;
   padding:13px 18px;border-radius:var(--radius);
   border:0.5px solid var(--linie);background:#fff;
   box-shadow:0 8px 24px rgba(16,19,26,.07);cursor:pointer;
@@ -386,7 +391,7 @@ body.gezoomt #zonen{display:block}
   color:var(--blau);background:color-mix(in srgb, var(--blau) 10%, transparent);
 }
 .tueren{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
-.tueren .knopf{min-height:40px;padding:0 18px;font-size:13.5px}
+.tueren .knopf{min-height:40px;padding:0 18px;font-size:13.5px;text-decoration:none}
 
 /* ========== Demo-Hinweis ========== */
 #demo-hinweis{
@@ -515,10 +520,10 @@ body.gezoomt #zonen{display:block}
     <span class="t-text"><b>Herr Petersen möchte ein Gespräch mit einem Menschen</b><span>Petersen Stahlbau, Wunsch: Freitag, 9:00</span></span>
     <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">liegt vor</span></span>
   </button>
-  <button class="t-zettel" type="button" data-zu="petersen">
+  <a class="t-zettel" href="beratung-mitlesen.html">
     <span class="t-text"><b>„Warum schrumpft meine Marge?" ist jetzt freigegeben</b><span>Petersen Stahlbau, gestern, 16:40</span></span>
     <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">zum Mitlesen</span></span>
-  </button>
+  </a>
   <button class="t-zettel" type="button" data-zu="cordes">
     <span class="t-text"><b data-du="Der KI-Berater hat dir eine Steuerfrage übergeben" data-sie="Der KI-Berater hat Ihnen eine Steuerfrage übergeben">Der KI-Berater hat dir eine Steuerfrage übergeben</b><span>Cordes Logistik, heute, 8:12</span></span>
     <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">wartet auf Antwort</span></span>
@@ -561,7 +566,7 @@ body.gezoomt #zonen{display:block}
     <h3>Was wartet</h3>
     <div class="zeilen">
       <button class="zeile bald" type="button"><span><span class="z-titel">Gespräch mit einem Menschen</span><br><span class="z-meta">Wunsch: Freitag, 9:00, über den KI-Berater</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">Zeit bestätigen</span></span></button>
-      <button class="zeile bald" type="button"><span><span class="z-titel">„Warum schrumpft meine Marge?"</span><br><span class="z-meta">freigegeben gestern, 16:40</span></span><span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">mitlesen</span></span></button>
+      <a class="zeile" href="beratung-mitlesen.html"><span><span class="z-titel">„Warum schrumpft meine Marge?"</span><br><span class="z-meta">freigegeben gestern, 16:40</span></span><span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">mitlesen</span></span></a>
     </div>
     <h3>Gespräche und Unterlagen</h3>
     <div class="zeilen">
@@ -570,7 +575,7 @@ body.gezoomt #zonen{display:block}
       <button class="zeile bald" type="button"><span><span class="z-titel">Termin Donnerstag, 10:00</span><br><span class="z-meta">Dr. Anna Vogelsang, Preis und Marge</span></span><span class="z-typ">Videocall</span></button>
     </div>
     <div class="tueren">
-      <button class="bald knopf leise" type="button">Gespräche mitlesen</button>
+      <a class="knopf leise" href="beratung-mitlesen.html">Gespräche mitlesen</a>
       <button class="bald knopf leise" type="button">Unterlagen</button>
       <button class="bald knopf leise" type="button">Leistungsnachweis</button>
     </div>

@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mitlesen, Petersen Stahlbau</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Mitlesen: der erste Raum hinter den Cockpit-Türen
+   (Entscheidung 2026-08-13, Mitlesen zuerst). Die Beratung liest ein
+   freigegebenes Kundengespräch, nur lesend, mit Quellen und Kosten.
+   Chrome ist quoroAI (system.css); das Gespräch selbst liegt als Abschrift-
+   Blatt in der Marke des Mandanten (Nordholm) auf dem Tisch, in Manrope wie
+   auf der Kundenfläche. Rechts trägt eine Glas-Leiste, worauf sich die
+   Antworten stützen und was das Gespräch kostet; beim Scrollen leuchtet die
+   Quelle auf, deren Fundstelle gerade im Blick ist.
+   Marker: BERATUNG-MITLESEN-V1 */
+@font-face{
+  font-family:'Manrope';
+  src:url('schriften/manrope.woff2') format('woff2');
+  font-weight:200 800;
+  font-display:swap;
+}
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button{font-family:inherit}
+
+/* ========== quoroAI-Chrom ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+
+/* ========== Seite ========== */
+main{max-width:1160px;margin:0 auto;padding:136px 24px 90px}
+/* Ankunfts-Staffel wie im Cockpit: Kopf, Freigabe-Leiste, Blatt, Leiste */
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px}
+
+/* Die Freigabe-Leiste: warum die Beratung hier lesen darf */
+#freigabe-leiste{
+  margin-top:18px;--verz:.08s;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:14px 20px;border-radius:var(--radius-karte);
+}
+#freigabe-leiste .fl-text{font-size:14px;line-height:1.5;flex:1;min-width:260px}
+#freigabe-leiste .fl-text b{font-weight:600}
+#freigabe-leiste .z-fuell{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+/* ========== Zwei Spalten: das Blatt und die Leiste ========== */
+#lage{
+  display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:26px;
+  align-items:start;margin-top:22px;--verz:.16s;
+}
+
+/* ---------- Die Abschrift: das Blatt des Mandanten ----------
+   Hier gilt die Marke des Mandanten als INHALT (Nordholm), nicht als Chrom:
+   eigenes Papier, eigene Schrift (Manrope), eigener Stift. */
+#blatt{
+  --m-blau:#2b5fe3; --m-stift:#1d46c9; --m-tinte:#10131a;
+  --m-papier:#fafaf7; --m-grau:#636c7d; --m-linie:rgba(16,19,26,.1);
+  background:var(--m-papier);color:var(--m-tinte);
+  font-family:'Manrope',system-ui,sans-serif;
+  border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);
+  box-shadow:0 24px 70px rgba(24,21,47,.12);
+  padding:34px 40px 38px;
+}
+#blatt .blatt-kopf{
+  display:flex;align-items:center;gap:10px;
+  padding-bottom:16px;border-bottom:0.5px solid var(--m-linie);
+  font-size:12.5px;font-weight:700;color:var(--m-grau);
+}
+#blatt .blatt-kopf .punkt{width:10px;height:10px;border-radius:999px;background:var(--m-blau);flex-shrink:0}
+#blatt .blatt-kopf b{color:var(--m-tinte);font-weight:800}
+/* Im Blatt gilt die Schrift des Mandanten, nie die Schauschrift von quoroAI */
+#blatt h2,#blatt h3{font-family:'Manrope',system-ui,sans-serif;letter-spacing:-.015em}
+
+.kapitel{margin-top:30px}
+/* Die Frage ist eine Sprecherzeile des Kunden, kein zweiter Seitentitel:
+   Manrope wie das ganze Blatt, mit Kante in der Mandanten-Farbe */
+.kapitel .frage{
+  font-family:'Manrope',system-ui,sans-serif;
+  display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  padding:10px 16px;border-left:3px solid var(--m-blau);border-radius:0 12px 12px 0;
+  background:color-mix(in srgb, var(--m-blau) 5%, transparent);
+  font-size:17px;font-weight:800;letter-spacing:-.015em;line-height:1.4;
+}
+.kapitel .frage .zeit{flex-shrink:0;font-size:12px;font-weight:600;color:var(--m-grau);font-variant-numeric:tabular-nums}
+.kapitel .frage .zeit b{font-weight:700;color:var(--m-grau)}
+.kapitel p{font-size:15.5px;line-height:1.65;margin-top:16px;max-width:62ch}
+.kapitel p em{font-style:normal;font-weight:800;box-shadow:inset 0 -0.45em color-mix(in srgb, var(--m-blau) 16%, transparent)}
+
+/* Karten im Blatt: die Bausteine der Kundenfläche, ruhiggestellt */
+.b-karte{
+  background:#fff;border:0.5px solid var(--m-linie);border-radius:16px;
+  padding:18px 20px;margin-top:16px;
+  box-shadow:0 10px 30px rgba(16,19,26,.06);
+}
+.hebel-reihe{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.hebel-reihe .b-karte{margin-top:0;padding:16px 18px}
+.hebel-reihe h3{font-size:14.5px;font-weight:800;letter-spacing:-.01em}
+.hebel-reihe .impact{font-size:20px;font-weight:800;color:var(--m-blau);margin-top:8px;font-variant-numeric:tabular-nums}
+.hebel-reihe .notiz-t{font-size:12.5px;color:var(--m-grau);margin-top:4px;line-height:1.5}
+.pill{
+  display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;
+  font-size:11.5px;font-weight:700;margin-bottom:10px;
+  background:color-mix(in srgb, var(--m-blau) 10%, transparent);color:var(--m-blau);
+}
+
+/* Wasserfall */
+#wasserfall svg{width:100%;height:auto;display:block;margin-top:6px}
+#wasserfall text{font-family:'Manrope',sans-serif;font-size:9px;fill:var(--m-grau)}
+#wasserfall text.wert-t{font-weight:800;fill:var(--m-tinte)}
+#wasserfall rect{transform:scaleY(0);transform-box:fill-box;transform-origin:center bottom}
+#wasserfall.wach rect{transform:scaleY(1);transition:transform .7s var(--kurve)}
+#wasserfall rect:nth-of-type(2){transition-delay:.12s}
+#wasserfall rect:nth-of-type(3){transition-delay:.24s}
+#wasserfall rect:nth-of-type(4){transition-delay:.36s}
+#wasserfall rect:nth-of-type(5){transition-delay:.48s}
+#wasserfall line{stroke:rgba(16,19,26,.25);stroke-dasharray:3 3;stroke-width:1}
+.hand-notiz{
+  font-family:'Caveat',cursive;font-size:19px;font-weight:700;
+  color:var(--m-stift);rotate:-1.2deg;margin-top:10px;display:inline-block;
+}
+
+/* Rechenweg */
+.formel .zeile-f{display:flex;align-items:baseline;gap:10px;font-size:14.5px;padding:7px 0}
+.formel .op{width:18px;color:var(--m-grau);font-weight:700;text-align:center;flex-shrink:0}
+.formel .fuellung{flex:1;border-bottom:1.5px dotted rgba(16,19,26,.2);translate:0 -4px}
+.formel .wert-f{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.formel .zeile-f.ergebnis{border-top:1.5px solid var(--m-tinte);margin-top:6px;padding-top:12px;font-size:16px}
+.formel .zeile-f.ergebnis .wert-f{color:var(--m-blau);font-size:19px}
+/* der Stift des Beraters hat das Ergebnis eingekreist */
+.ergebnis-fang{position:relative;display:inline-block}
+.ergebnis-fang svg{
+  position:absolute;inset:-9px -14px;width:calc(100% + 28px);height:calc(100% + 18px);
+  pointer-events:none;overflow:visible;
+}
+.ergebnis-fang svg path{
+  fill:none;stroke:var(--m-stift);stroke-width:2;stroke-linecap:round;opacity:.85;
+  stroke-dasharray:220;stroke-dashoffset:220;
+}
+.wach .ergebnis-fang svg path{stroke-dashoffset:0;transition:stroke-dashoffset .8s .5s cubic-bezier(.45,.05,.55,.95)}
+
+/* Belege im Text: Griffe zur Quellen-Leiste */
+.belege{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px}
+.belege .belege-wort{font-size:11.5px;font-weight:700;color:var(--m-grau)}
+.beleg{
+  display:inline-flex;align-items:center;gap:8px;padding:7px 12px;
+  border-radius:999px;border:0.5px solid var(--m-linie);background:#fff;
+  font-size:12.5px;font-weight:700;color:var(--m-tinte);cursor:pointer;
+  transition:border-color .2s ease;
+}
+.beleg:hover{border-color:var(--m-blau)}
+.beleg .beleg-art{font-size:10.5px;font-weight:800;color:var(--m-blau)}
+
+/* Dokument */
+.dokument{display:flex;align-items:center;gap:16px}
+.dokument .blatt-icon{
+  width:40px;height:52px;flex-shrink:0;position:relative;
+  background:#fff;border:1px solid var(--m-linie);border-radius:4px;
+}
+.dokument .blatt-icon::before{
+  content:'';position:absolute;right:-1px;top:-1px;border:9px solid transparent;
+  border-left-color:color-mix(in srgb, var(--m-blau) 25%, transparent);
+  border-bottom-color:color-mix(in srgb, var(--m-blau) 25%, transparent);
+  border-radius:0 0 0 4px;
+}
+.dokument .blatt-icon::after{
+  content:'';position:absolute;left:7px;right:7px;top:16px;height:22px;
+  background:linear-gradient(var(--m-linie) 1.5px, transparent 1.5px);background-size:100% 7px;
+}
+.dokument .name{font-weight:800;font-size:15px}
+.dokument .meta{font-size:12.5px;color:var(--m-grau)}
+
+/* Die Anfrage, mit der das Gespräch endet */
+.anfrage-kopf{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.anfrage-kopf h3{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.anfrage-status{
+  flex-shrink:0;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;
+  color:#a06008;background:rgba(178,109,10,.12);
+}
+.anfrage-zeile{font-size:13.5px;color:var(--m-grau);margin-top:8px;line-height:1.55}
+
+/* Ende der Abschrift */
+.blatt-fuss{
+  margin-top:30px;padding-top:16px;border-top:0.5px solid var(--m-linie);
+  font-size:13px;color:var(--m-grau);line-height:1.6;
+}
+.blatt-fuss b{color:var(--m-tinte);font-weight:800}
+
+/* ---------- Die Leiste rechts: Quellen und Kosten, quoroAI ---------- */
+#leiste{position:sticky;top:96px;display:grid;gap:14px}
+#leiste h2{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600)}
+.quelle{
+  border-radius:var(--radius-karte);padding:15px 18px;cursor:pointer;text-align:left;font:inherit;
+  background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.65);
+  backdrop-filter:blur(16px) saturate(170%);-webkit-backdrop-filter:blur(16px) saturate(170%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 10px 30px rgba(24,21,47,.08);
+  transition:box-shadow .3s ease,background .3s ease,translate .25s var(--kurve);
+}
+.quelle .q-art{font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--lila-800);text-transform:uppercase}
+.quelle .q-name{font-size:14px;font-weight:600;letter-spacing:-.01em;margin-top:3px}
+.quelle .q-auszug{
+  font-size:12.5px;line-height:1.55;color:var(--nebel-600);margin-top:8px;
+  padding-left:10px;border-left:2px solid var(--nebel-200);
+}
+/* Beim Scrollen leuchtet die Quelle, deren Fundstelle gerade im Blick ist */
+.quelle.liest{
+  background:color-mix(in srgb, var(--lila-600) 10%, rgba(255,255,255,.5));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), inset 0 0 0 1px var(--lila-300), 0 14px 40px rgba(59,52,134,.18);
+}
+.quelle.liest .q-auszug{border-left-color:var(--lila-400);color:var(--nebel-700)}
+.quelle.puls{translate:0 -3px}
+
+#kosten{
+  border-radius:var(--radius-karte);padding:18px 20px;
+  background:rgba(255,255,255,.58);border:1px solid rgba(255,255,255,.65);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+#kosten .gross{
+  font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);letter-spacing:var(--schau-spur);
+  font-size:34px;line-height:1.05;font-variant-numeric:tabular-nums;
+}
+#kosten .deut{font-size:13px;color:var(--nebel-600);margin-top:2px}
+#kosten .k-zeilen{margin-top:14px;display:grid;gap:8px;font-size:13.5px;line-height:1.5}
+#kosten .k-zeilen div{display:flex;justify-content:space-between;gap:12px}
+#kosten .k-zeilen span:last-child{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+#kosten .kontingent{
+  margin-top:16px;padding-top:14px;border-top:0.5px solid var(--nebel-200);
+  display:flex;align-items:center;gap:10px;
+}
+#kosten .fuss{font-size:12px;color:var(--nebel-500);margin-top:14px;line-height:1.5}
+
+@media (prefers-reduced-motion: reduce){
+  main > *{animation:none;opacity:1;translate:none}
+  #wasserfall rect,#wasserfall.wach rect{transform:scaleY(1);transition:none}
+  .ergebnis-fang svg path,.wach .ergebnis-fang svg path{stroke-dashoffset:0;transition:none}
+  .quelle{transition:none}
+}
+
+/* ========== Mobil: erst das Blatt, darunter Quellen und Kosten ========== */
+@media (max-width:960px){
+  #lage{grid-template-columns:1fr}
+  #leiste{position:static}
+}
+@media (max-width:700px){
+  nav{padding:0 18px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
+  #blatt{padding:24px 20px 28px}
+  .hebel-reihe{grid-template-columns:1fr}
+  .kapitel .frage{flex-direction:column;gap:2px}
+}
+</style>
+</head>
+<body class="quoro">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#petersen"><span class="zurueck">← Petersen Stahlbau</span><span>/</span><b>Mitlesen</b></a>
+
+<main>
+  <div class="kopf">
+    <h1>„Warum schrumpft meine Marge?"</h1>
+    <div class="stand">Gespräch zwischen Herrn Petersen und dem KI-Berater, gestern ab 16:02</div>
+  </div>
+
+  <div id="freigabe-leiste" class="glas-lila">
+    <div class="fl-text"><b>Nur Mitlesen.</b> Herr Petersen hat dieses Gespräch gestern um 16:40 für seine Beratung freigegeben. Du liest eine Abschrift, schreiben kann hier niemand. Seine anderen Gespräche bleiben privat, bis er sie freigibt.</div>
+    <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Freigegeben" title="Freigegeben"></span><span class="zustand-wort">freigegeben</span></span>
+  </div>
+
+  <div id="lage">
+    <article id="blatt" aria-label="Abschrift des freigegebenen Gesprächs">
+      <div class="blatt-kopf"><span class="punkt" aria-hidden="true"></span><span>So liest Herr Petersen sein Gespräch, bei <b>Nordholm &amp; Partner</b></span></div>
+
+      <section class="kapitel">
+        <h2 class="frage"><span>„Warum schrumpft meine Marge?"</span><span class="zeit"><b>Herr Petersen</b>, 16:02</span></h2>
+        <p>Ich habe sie zerlegt. Von 36,2 Prozent im letzten Jahr auf 30,4 heute, und der Verlust hat drei Adressen:</p>
+
+        <div class="b-karte" id="wasserfall">
+          <svg viewBox="0 0 300 148" role="img" aria-label="Wasserfall: die Marge fällt von 36,2 auf 30,4 Prozent, durch Preisdruck, Stahlpreis und Ausschuss">
+            <text class="wert-t" x="30" y="16" text-anchor="middle">36,2</text>
+            <text class="wert-t" x="88" y="16" text-anchor="middle">−3,1</text>
+            <text class="wert-t" x="146" y="53" text-anchor="middle">−1,8</text>
+            <text class="wert-t" x="204" y="75" text-anchor="middle">−0,9</text>
+            <text class="wert-t" x="262" y="86" text-anchor="middle">30,4</text>
+            <rect x="10" y="21.6" width="40" height="98.4" rx="3" fill="#2b5fe3"></rect>
+            <rect x="68" y="21.6" width="40" height="37.2" rx="3" fill="#e3a02b" opacity=".85"></rect>
+            <rect x="126" y="58.8" width="40" height="21.6" rx="3" fill="#e3a02b" opacity=".85"></rect>
+            <rect x="184" y="80.4" width="40" height="10.8" rx="3" fill="#e3a02b" opacity=".85"></rect>
+            <rect x="242" y="91.2" width="40" height="28.8" rx="3" fill="#2b5fe3"></rect>
+            <line x1="50" y1="21.6" x2="68" y2="21.6"></line>
+            <line x1="108" y1="58.8" x2="126" y2="58.8"></line>
+            <line x1="166" y1="80.4" x2="184" y2="80.4"></line>
+            <line x1="224" y1="91.2" x2="242" y2="91.2"></line>
+            <text x="30" y="134" text-anchor="middle">2024</text>
+            <text x="88" y="134" text-anchor="middle">Preisdruck</text>
+            <text x="146" y="134" text-anchor="middle">Stahlpreis</text>
+            <text x="204" y="134" text-anchor="middle">Ausschuss</text>
+            <text x="262" y="134" text-anchor="middle">Heute</text>
+          </svg>
+          <span class="hand-notiz">der größte Hebel zuerst</span>
+        </div>
+
+        <p>Drei Hebel, der Größe nach:</p>
+        <div class="hebel-reihe">
+          <div class="b-karte"><span class="pill">empfohlen</span><h3>Preismodell</h3><div class="impact">+38.000&nbsp;€</div><div class="notiz-t">4 % auf C-Kunden, Staffeln neu geschnitten</div></div>
+          <div class="b-karte"><h3>Einkauf Stahl</h3><div class="impact">+21.000&nbsp;€</div><div class="notiz-t">Rahmenvertrag läuft aus, neu verhandeln</div></div>
+          <div class="b-karte"><h3>Ausschuss Linie 2</h3><div class="impact">+12.000&nbsp;€</div><div class="notiz-t">1,8 Punkte über dem Branchenwert</div></div>
+        </div>
+
+        <p>Der erste Hebel, einmal ehrlich durchgerechnet:</p>
+        <div class="b-karte formel" id="rechenweg">
+          <div class="zeile-f"><span class="op"></span><span>Umsatz mit C-Kunden</span><span class="fuellung"></span><span class="wert-f">218.000&nbsp;€</span></div>
+          <div class="zeile-f"><span class="op">×</span><span>Preiserhöhung</span><span class="fuellung"></span><span class="wert-f">4&nbsp;%</span></div>
+          <div class="zeile-f"><span class="op">−</span><span>erwartbarer Mengenverlust</span><span class="fuellung"></span><span class="wert-f">5&nbsp;%</span></div>
+          <div class="zeile-f ergebnis"><span class="op">=</span><span>Ergebnisplus im Jahr</span><span class="fuellung"></span><span class="ergebnis-fang"><svg aria-hidden="true" viewBox="0 0 120 44" preserveAspectRatio="none"><path d="M8 22 C6 8 38 3 62 4 C96 5 116 10 114 23 C112 37 84 41 56 40 C26 39 9 34 10 20"/></svg><span class="wert-f">+38.000&nbsp;€</span></span></div>
+        </div>
+
+        <div class="belege" data-fund="rahmenvertrag branchenspiegel">
+          <span class="belege-wort">Worauf sich das stützt</span>
+          <button class="beleg" type="button" data-quelle="rahmenvertrag"><span class="beleg-art">Akte</span>Rahmenvertrag Stahl, Abschnitt 3</button>
+          <button class="beleg" type="button" data-quelle="branchenspiegel"><span class="beleg-art">Wissen</span>Branchenspiegel 2025, Abschnitt 5</button>
+        </div>
+
+        <p>Den vollen Rechenweg habe ich dir in die Akte gelegt:</p>
+        <div class="b-karte" data-fund="benchmark">
+          <button class="dokument" type="button" data-quelle="benchmark" style="background:none;border:0;cursor:pointer;text-align:left;width:100%;color:inherit">
+            <span class="blatt-icon" aria-hidden="true"></span>
+            <span><span class="name">Preismodell Benchmark</span><br><span class="meta">12 Seiten, in diesem Gespräch erstellt, liegt in der Akte</span></span>
+          </button>
+        </div>
+      </section>
+
+      <section class="kapitel">
+        <h2 class="frage"><span>„Buch mir einen Menschen."</span><span class="zeit"><b>Herr Petersen</b>, 16:31</span></h2>
+        <p>Gern. Für Preis und Marge ist Dr. Anna Vogelsang die Richtige. Ich lege ihr eine Anfrage hin, gib ihr ein Wunschfenster mit:</p>
+        <div class="b-karte">
+          <div class="anfrage-kopf"><h3>Gespräch mit Dr. Anna Vogelsang</h3><span class="anfrage-status">angefragt</span></div>
+          <div class="anfrage-zeile">Wunschfenster von Herrn Petersen: Freitag, 9:00. Die Anfrage liegt auf deinem Tisch im Cockpit.</div>
+        </div>
+      </section>
+
+      <div class="blatt-fuss">Um <b>16:40</b> hat Herr Petersen dieses Gespräch freigegeben. Ende der Abschrift, 2 Fragen zwischen 16:02 und 16:40.</div>
+    </article>
+
+    <aside id="leiste" aria-label="Quellen und Kosten">
+      <h2>Worauf sich die Antworten stützen</h2>
+      <button class="quelle" type="button" data-q="rahmenvertrag">
+        <div class="q-art">Akte des Mandats</div>
+        <div class="q-name">Rahmenvertrag Stahl, Abschnitt 3</div>
+        <div class="q-auszug">„Die Preisgleitklausel nach Ziffer 3.2 endet zum 30. September; danach gilt der Tagespreis des Lieferanten, sofern kein neuer Rahmen vereinbart ist."</div>
+      </button>
+      <button class="quelle" type="button" data-q="branchenspiegel">
+        <div class="q-art">quoroAI-Wissen</div>
+        <div class="q-name">Branchenspiegel Metallzulieferer 2025, Abschnitt 5</div>
+        <div class="q-auszug">„Zulieferer mit 20 bis 80 Mitarbeitenden erzielen im Median 35,9 Prozent Rohertragsmarge; das untere Quartil liegt bei 31,2 Prozent."</div>
+      </button>
+      <button class="quelle" type="button" data-q="benchmark">
+        <div class="q-art">In diesem Gespräch erstellt</div>
+        <div class="q-name">Preismodell Benchmark, 12 Seiten</div>
+        <div class="q-auszug">Der volle Rechenweg zum Preismodell, vom KI-Berater erstellt und in die Akte des Mandats gelegt.</div>
+      </button>
+
+      <h2>Was dieses Gespräch kostet</h2>
+      <div id="kosten">
+        <div class="gross">0,84&nbsp;€</div>
+        <div class="deut">KI-Verbrauch, geht auf das Kontingent des Mandats</div>
+        <div class="k-zeilen">
+          <div><span>Fragen</span><span>2</span></div>
+          <div><span>Gelesene Seiten aus Akte und Wissen</span><span>38</span></div>
+          <div><span>Erstellte Dokumente</span><span>1</span></div>
+        </div>
+        <div class="kontingent">
+          <span class="zustand" style="--stand:.42;--fluid:var(--lila-400);--fluid-tief:var(--lila-600)" role="img" aria-label="Kontingent zu 42 Prozent verbraucht" title="Kontingent zu 42 Prozent verbraucht"></span>
+          <span class="zustand-wort">17 von 40 Fragen im August</span>
+        </div>
+        <div class="fuss">Diese Zahlen sieht nur deine Beratung, nie der Kunde.</div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<div id="demo-hinweis" style="position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--lila-700);opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--kurve)">Diese Fläche entsteht gerade.</div>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Ankunfts-Staffel: jede Hauptgruppe ihre Verzögerung */
+  document.querySelectorAll('main > *').forEach(function(el, i){
+    el.style.setProperty('--verz', (i * 0.08) + 's');
+  });
+
+  /* Der Wasserfall und der Stift-Kreis wachen auf, sobald sie im Blick sind */
+  if ('IntersectionObserver' in window && !reduziert) {
+    var wecker = new IntersectionObserver(function(eintraege){
+      eintraege.forEach(function(e){
+        if (e.isIntersecting) { e.target.classList.add('wach'); wecker.unobserve(e.target); }
+      });
+    }, {threshold:.4});
+    wecker.observe(document.getElementById('wasserfall'));
+    wecker.observe(document.getElementById('rechenweg'));
+  } else {
+    document.getElementById('wasserfall').classList.add('wach');
+    document.getElementById('rechenweg').classList.add('wach');
+  }
+
+  /* Beim Scrollen leuchtet in der Leiste die Quelle, deren Fundstelle
+     gerade im Blick ist */
+  var leiste = document.getElementById('leiste');
+  function quellen(namen){
+    leiste.querySelectorAll('.quelle').forEach(function(q){
+      q.classList.toggle('liest', namen.indexOf(q.dataset.q) !== -1);
+    });
+  }
+  if ('IntersectionObserver' in window) {
+    var sichtbar = new Set();
+    var spaeher = new IntersectionObserver(function(eintraege){
+      eintraege.forEach(function(e){
+        e.target.dataset.fund.split(' ').forEach(function(n){
+          if (e.isIntersecting) sichtbar.add(n); else sichtbar.delete(n);
+        });
+      });
+      quellen(Array.from(sichtbar));
+    }, {rootMargin:'-15% 0px -25% 0px'});
+    document.querySelectorAll('[data-fund]').forEach(function(el){ spaeher.observe(el); });
+  }
+
+  /* Ein Beleg im Text greift zur Quelle in der Leiste */
+  document.querySelectorAll('[data-quelle]').forEach(function(chip){
+    chip.addEventListener('click', function(){
+      var ziel = leiste.querySelector('.quelle[data-q="' + chip.dataset.quelle + '"]');
+      if (!ziel) return;
+      ziel.scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block:'center'});
+      ziel.classList.add('liest','puls');
+      setTimeout(function(){ ziel.classList.remove('puls'); }, 600);
+    });
+  });
+
+  /* Ehrlichkeit: die Quelle selbst öffnet sich erst im Produkt */
+  var hinweisTimer = null;
+  document.querySelectorAll('.quelle').forEach(function(q){
+    q.addEventListener('click', function(){
+      var h = document.getElementById('demo-hinweis');
+      h.style.opacity = .95; h.style.translate = '-50% 0';
+      clearTimeout(hinweisTimer);
+      hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2200);
+    });
+  });
+})();
+</script>
+<script src="zeiger.js"></script>
+</body>
+</html>
