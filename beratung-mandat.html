@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mandat Petersen Stahlbau</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Mandat: fünfter Raum hinter den Cockpit-Türen
+   (Reihenfolge-Entscheidung 2026-08-13), exemplarisch Petersen Stahlbau
+   (Produkt: /mandate/[id]). Meilensteine, Aufgaben, Zeiterfassung.
+   Der Meilenstein-Pfad zeichnet sich bei der Ankunft und trägt den Stift:
+   die Stationen sitzen auf dem Fahrplan aus dem Kundengespräch (Analyse,
+   Preismodell, Staffeln, wirksam ab Woche 6). Aufgaben kippen per Kapsel
+   auf erledigt und tragen ihre Zuständigkeit (du, der KI-Berater), die
+   Zeiterfassung hat ein Schnell-Erfassen mit Dauer-Chips, die Summe fließt
+   in den Leistungsnachweis. Chrome ist quoroAI (system.css).
+   Marker: BERATUNG-MANDAT-V1 */
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input{font-family:inherit}
+
+/* ========== quoroAI-Chrom ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+
+/* ========== Seite ========== */
+main{max-width:860px;margin:0 auto;padding:136px 24px 90px}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px}
+.kopf .z-fuell{display:flex;align-items:center;gap:8px;margin-top:8px}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:30px}
+
+.tafel{
+  margin-top:12px;border-radius:var(--radius-karte);padding:22px 24px;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+
+/* ---------- Meilensteine: der Pfad zeichnet sich ---------- */
+#pfad{width:100%;height:auto;display:block;overflow:visible}
+#pfad .grund{fill:none;stroke:var(--nebel-300);stroke-width:2;stroke-dasharray:5 6;stroke-linecap:round}
+#pfad .voran{fill:none;stroke:var(--lila-600);stroke-width:2.6;stroke-linecap:round}
+#pfad circle.station{fill:#fff;stroke:var(--nebel-300);stroke-width:2}
+#pfad circle.station.geschafft{fill:var(--lila-600);stroke:var(--lila-600)}
+#pfad circle.station.jetzt{fill:#fff;stroke:var(--lila-600);stroke-width:3}
+#pfad circle.hof{fill:none;stroke:rgba(111,99,232,.45);stroke-width:1.5}
+#pfad text{font-family:var(--schrift-text);font-size:9.5px;fill:var(--nebel-600)}
+#pfad text.m-name{font-weight:600;fill:var(--tinte);font-size:10.5px}
+#pfad text.geschafft-t{fill:var(--nebel-500)}
+.pfad-hand{font-family:'Caveat',cursive;font-size:19px;font-weight:700;color:var(--lila-700);rotate:-1.2deg;display:inline-block;margin-top:8px;margin-left:calc(36% - 46px)}
+@media (max-width:700px){.pfad-hand{margin-left:calc(36% - 40px)}}
+@keyframes hofpuls{0%{r:9;opacity:.8}100%{r:20;opacity:0}}
+#pfad circle.hof{animation:hofpuls 2.8s var(--kurve) infinite}
+
+/* ---------- Aufgaben ---------- */
+.aufgaben{display:flex;flex-direction:column;gap:9px}
+.aufgabe{
+  display:flex;align-items:center;gap:14px;
+  padding:12px 16px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 8px 24px rgba(16,19,26,.06);
+}
+.aufgabe button.kippe{
+  display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;
+  background:none;border:0;cursor:pointer;padding:2px 4px;border-radius:10px;
+}
+.aufgabe button.kippe:focus-visible{outline:3px solid var(--lila-400);outline-offset:2px}
+.aufgabe .zustand{width:40px;height:18px}
+.aufgabe .zustand-wort{font-size:10.5px;font-weight:600;white-space:nowrap;color:var(--nebel-500)}
+.aufgabe .a-text b{display:block;font-size:14px;font-weight:600;letter-spacing:-.01em;line-height:1.4}
+.aufgabe .a-text span{font-size:12px;color:var(--nebel-600)}
+.aufgabe.erledigt .a-text b{color:var(--nebel-500);text-decoration:line-through;text-decoration-thickness:1px}
+.aufgabe .wer{
+  margin-left:auto;flex-shrink:0;font-size:11px;font-weight:600;
+  padding:4px 10px;border-radius:999px;color:var(--nebel-600);background:var(--nebel-100);
+}
+.aufgabe .wer.ki{color:var(--lila-800);background:var(--lila-100)}
+.aufgaben-stand{font-size:12.5px;color:var(--nebel-500);margin-top:12px}
+
+/* ---------- Zeiterfassung ---------- */
+.zeit-kopf{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.zeit-kopf .gross{
+  font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);letter-spacing:var(--schau-spur);
+  font-size:34px;line-height:1.05;font-variant-numeric:tabular-nums;
+}
+.zeit-kopf .deut{font-size:13.5px;color:var(--nebel-600)}
+.erfassen{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:16px}
+.erfassen .dauer{display:flex;gap:6px}
+.erfassen .dauer button{
+  padding:9px 13px;border-radius:12px;border:0.5px solid var(--nebel-300);
+  background:var(--flaeche);font-size:13px;font-weight:600;cursor:pointer;
+  font-variant-numeric:tabular-nums;
+  transition:border-color .2s,background .2s;
+}
+.erfassen .dauer button.gewaehlt{background:var(--tinte);color:#fff;border-color:var(--tinte)}
+.erfassen input{
+  flex:1;min-width:200px;min-height:42px;padding:0 14px;font:inherit;font-size:14px;
+  background:var(--flaeche);border:0.5px solid var(--nebel-300);border-radius:12px;color:var(--tinte);
+}
+.erfassen input:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+.erfassen .knopf{min-height:42px;padding:0 18px;font-size:13.5px}
+.zeiten{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.zeit-zeile{
+  display:flex;align-items:center;gap:14px;
+  padding:11px 15px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 6px 18px rgba(16,19,26,.05);
+}
+.zeit-zeile .dauer-wert{
+  flex-shrink:0;min-width:64px;font-weight:600;font-variant-numeric:tabular-nums;font-size:14px;
+}
+.zeit-zeile .z-was{font-size:13.5px;line-height:1.5}
+.zeit-zeile .z-wann{margin-left:auto;flex-shrink:0;font-size:12px;color:var(--nebel-500);white-space:nowrap}
+.zeit-zeile.neu{
+  opacity:0;translate:0 -12px;
+  animation:einreihen .5s var(--kurve) .1s forwards;
+  box-shadow:0 6px 18px rgba(16,19,26,.05), inset 0 0 0 1.5px var(--lila-300);
+}
+@keyframes einreihen{to{opacity:1;translate:0 0}}
+.zeit-fuss{font-size:12.5px;color:var(--nebel-500);margin-top:12px}
+
+@media (prefers-reduced-motion: reduce){
+  main > *{animation:none;opacity:1;translate:none}
+  .zeit-zeile.neu{animation:none;opacity:1;translate:none}
+  #pfad circle.hof{animation:none;opacity:0}
+}
+@media (max-width:700px){
+  nav{padding:0 18px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
+  .tafel{padding:18px 18px}
+  .aufgabe{flex-wrap:wrap}
+  .aufgabe .wer{margin-left:54px}
+  .zeit-zeile{flex-wrap:wrap}
+  .zeit-zeile .z-wann{margin-left:78px}
+  .erfassen .knopf{flex:1 1 auto}
+}
+</style>
+</head>
+<body class="quoro">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#petersen"><span class="zurueck">← Petersen Stahlbau</span><span>/</span><b>Mandat</b></a>
+
+<main>
+  <div class="kopf">
+    <div>
+      <h1>Preis und Marge</h1>
+      <div class="stand">Das Mandat bei Petersen Stahlbau, seit März 2025. Ziel: die Marge zurück über 33 Prozent.</div>
+    </div>
+    <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Mandat läuft" title="Mandat läuft"></span><span class="zustand-wort">läuft</span></span>
+  </div>
+
+  <h3>Meilensteine</h3>
+  <section class="tafel" aria-label="Meilensteine">
+    <svg id="pfad" viewBox="0 0 720 96" role="img" aria-label="Vier Meilensteine: Analyse geschafft, Preismodell läuft, Staffeln ab September, wirksam ab Woche 6">
+      <line class="grund" x1="60" y1="38" x2="660" y2="38"></line>
+      <line class="voran" id="voran" x1="60" y1="38" x2="260" y2="38"></line>
+      <circle class="station geschafft" cx="60" cy="38" r="7"></circle>
+      <circle class="station geschafft" cx="260" cy="38" r="7"></circle>
+      <circle class="hof" cx="260" cy="38" r="9"></circle>
+      <circle class="station" cx="460" cy="38" r="7"></circle>
+      <circle class="station" cx="660" cy="38" r="7"></circle>
+      <text class="m-name" x="60" y="66" text-anchor="middle">Analyse</text>
+      <text class="geschafft-t" x="60" y="80" text-anchor="middle">Juli, geschafft</text>
+      <text class="m-name" x="260" y="66" text-anchor="middle">Preismodell</text>
+      <text x="260" y="80" text-anchor="middle">liegt beim Kunden</text>
+      <text class="m-name" x="460" y="66" text-anchor="middle">Staffeln umsetzen</text>
+      <text x="460" y="80" text-anchor="middle">ab September</text>
+      <text class="m-name" x="660" y="66" text-anchor="middle">Wirksam</text>
+      <text x="660" y="80" text-anchor="middle">Woche 6, Oktober</text>
+    </svg>
+    <span class="pfad-hand">hier stehst du.</span>
+  </section>
+
+  <h3>Aufgaben</h3>
+  <section class="tafel" aria-label="Aufgaben">
+    <div class="aufgaben">
+      <div class="aufgabe erledigt">
+        <button class="kippe" type="button" aria-pressed="true"><span class="zustand aktiv" aria-hidden="true"></span><span class="zustand-wort">erledigt</span></button>
+        <span class="a-text"><b>Marge zerlegen und Hebel rechnen</b><span>gestern, im Gespräch entstanden</span></span>
+        <span class="wer ki">KI-Berater</span>
+      </div>
+      <div class="aufgabe">
+        <button class="kippe" type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">offen</span></button>
+        <span class="a-text"><b>Staffeln neu schneiden</b><span>Woche 1 des Fahrplans, A- und B-Kunden bleiben unberührt</span></span>
+        <span class="wer">du</span>
+      </div>
+      <div class="aufgabe">
+        <button class="kippe" type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">offen</span></button>
+        <span class="a-text"><b>Preisliste durchrechnen</b><span>übernimmt der KI-Berater, sobald die Staffeln stehen</span></span>
+        <span class="wer ki">KI-Berater</span>
+      </div>
+      <div class="aufgabe">
+        <button class="kippe" type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">offen</span></button>
+        <span class="a-text"><b>C-Kunden-Anschreiben entwerfen</b><span>Woche 3, vier Wochen vor der Umstellung</span></span>
+        <span class="wer">du</span>
+      </div>
+    </div>
+    <div class="aufgaben-stand" id="aufgaben-stand">1 von 4 erledigt.</div>
+  </section>
+
+  <h3>Zeit</h3>
+  <section class="tafel" aria-label="Zeiterfassung">
+    <div class="zeit-kopf"><span class="gross" id="zeit-summe">9,2 Std.</span><span class="deut">im August auf diesem Mandat</span></div>
+    <div class="erfassen">
+      <div class="dauer" role="group" aria-label="Dauer wählen">
+        <button type="button" data-std="0.25">0,25</button>
+        <button type="button" data-std="0.5" class="gewaehlt">0,5</button>
+        <button type="button" data-std="1">1,0</button>
+      </div>
+      <input id="zeit-was" type="text" placeholder="Woran hast du gearbeitet?">
+      <button class="knopf primaer" id="zeit-erfassen" type="button">Erfassen</button>
+    </div>
+    <div class="zeiten" id="zeiten">
+      <div class="zeit-zeile"><span class="dauer-wert">1,2 Std.</span><span class="z-was">Preismodell geprüft und mitgerechnet</span><span class="z-wann">gestern</span></div>
+      <div class="zeit-zeile"><span class="dauer-wert">0,4 Std.</span><span class="z-was">Freigegebenes Gespräch mitgelesen</span><span class="z-wann">gestern</span></div>
+      <div class="zeit-zeile"><span class="dauer-wert">1,0 Std.</span><span class="z-was">Monatsauswertung Juli besprochen</span><span class="z-wann">4. August</span></div>
+    </div>
+    <div class="zeit-fuss">Alles hier fließt in den Leistungsnachweis August. Ältere Einträge stehen dort.</div>
+  </section>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll('main > *').forEach(function(el, i){
+    el.style.setProperty('--verz', (i * 0.07) + 's');
+  });
+
+  /* ---------- der Pfad zeichnet sich bei der Ankunft ---------- */
+  var voran = document.getElementById('voran');
+  if (!reduziert) {
+    voran.style.strokeDasharray = 200;
+    voran.style.strokeDashoffset = 200;
+    voran.style.transition = 'stroke-dashoffset .9s cubic-bezier(.45,.05,.55,.95) .4s';
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      voran.style.strokeDashoffset = 0;
+    }); });
+  }
+
+  /* ---------- Aufgaben kippen ---------- */
+  function standNeu(){
+    var alle = document.querySelectorAll('.aufgabe').length;
+    var fertig = document.querySelectorAll('.aufgabe.erledigt').length;
+    document.getElementById('aufgaben-stand').textContent =
+      fertig + ' von ' + alle + ' erledigt.';
+  }
+  document.querySelectorAll('.aufgabe .kippe').forEach(function(b){
+    b.addEventListener('click', function(){
+      var zeile = b.closest('.aufgabe');
+      var an = !zeile.classList.contains('erledigt');
+      zeile.classList.toggle('erledigt', an);
+      b.setAttribute('aria-pressed', String(an));
+      b.querySelector('.zustand').className = 'zustand ' + (an ? 'aktiv' : 'entwurf');
+      b.querySelector('.zustand-wort').textContent = an ? 'erledigt' : 'offen';
+      standNeu();
+    });
+  });
+
+  /* ---------- Zeit erfassen ---------- */
+  var stunden = 9.2, dauer = 0.5;
+  var fmt = function(n){ return n.toLocaleString('de-DE', {minimumFractionDigits:1, maximumFractionDigits:2}); };
+  document.querySelectorAll('.dauer button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.dauer button').forEach(function(x){ x.classList.remove('gewaehlt'); });
+      b.classList.add('gewaehlt');
+      dauer = +b.dataset.std;
+    });
+  });
+  function erfasse(){
+    var was = document.getElementById('zeit-was').value.trim();
+    if (!was) { document.getElementById('zeit-was').focus(); return; }
+    var zeile = document.createElement('div');
+    zeile.className = 'zeit-zeile neu';
+    zeile.innerHTML = '<span class="dauer-wert">' + fmt(dauer) + '&nbsp;Std.</span><span class="z-was"></span><span class="z-wann">heute</span>';
+    zeile.querySelector('.z-was').textContent = was;
+    document.getElementById('zeiten').prepend(zeile);
+    stunden += dauer;
+    document.getElementById('zeit-summe').textContent = fmt(stunden) + ' Std.';
+    document.getElementById('zeit-was').value = '';
+  }
+  document.getElementById('zeit-erfassen').addEventListener('click', erfasse);
+  document.getElementById('zeit-was').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') erfasse();
+  });
+})();
+</script>
+<script src="zeiger.js"></script>
+</body>
+</html>
