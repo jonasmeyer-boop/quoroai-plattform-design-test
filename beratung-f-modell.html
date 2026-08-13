@@ -25,7 +25,10 @@
    Glas-Laterne; der Aufbau-Film endet weiß, beim Ausblenden geht das Licht an.
    V12 (Licht-Flug) wurde von Jonas verworfen und zurückgebaut: die Ankunft
    bleibt die weiche Raumblende mit Lichtblitz.
-   Marker: BERATUNG-F-MODELL-V13 */
+   V14 nach Code-Review: Raumbilder laden immer sofort vor, Raum-zu-Raum-Wechsel
+   blendet ab statt hart zu schneiden (und der Blitz feuert neu), Kamera trägt
+   das echte Seitenverhältnis von stadt.jpg (1,75).
+   Marker: BERATUNG-F-MODELL-V14 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -93,8 +96,8 @@ body.gezoomt nav{
 #buehne{position:fixed;inset:0;z-index:1;overflow:hidden}
 #kamera{
   position:absolute;
-  width:min(100vw, calc(100svh * 1.7917));
-  aspect-ratio:2752/1536;
+  width:min(100vw, calc(100svh * 1.75)); /* Seitenverhältnis von stadt.jpg (5376x3072) */
+  aspect-ratio:5376/3072;
   left:50%;top:50%;translate:-50% -50%;
   transition:transform 1s var(--feder);
 }
@@ -475,7 +478,7 @@ body.gezoomt #zonen{display:block}
 
 <div id="buehne">
   <div id="kamera">
-    <img src="bilder/modell/stadt.jpg" width="2752" height="1536" alt="Architekturmodell der Beratung im Abendlicht: fünf Gebäude auf einer Grundplatte, die Zentrale glüht als Glas-Laterne">
+    <img src="bilder/modell/stadt.jpg" width="5376" height="3072" alt="Architekturmodell der Beratung im Abendlicht: fünf Gebäude auf einer Grundplatte, die Zentrale glüht als Glas-Laterne">
     <div id="wolken" aria-hidden="true"><i></i><i></i></div>
     <div id="puls" aria-hidden="true"></div>
     <svg id="stift-lage" aria-hidden="true"></svg>
@@ -816,6 +819,9 @@ body.gezoomt #zonen{display:block}
     zentrale: 'bilder/modell/raum-zentrale.jpg'
   };
   var raumBild = document.querySelector('#raum img');
+  /* sofort leise vorladen — auch Direktlinks und Wiederkehrer zoomen sonst
+     auf ein noch ladendes Bild (Review-Fund) */
+  Object.keys(RAUM_BILDER).forEach(function(z){ new Image().src = RAUM_BILDER[z]; });
   var krume = document.getElementById('krume');
   var krumeZiel = document.getElementById('krume-ziel');
   var zonenLage = document.getElementById('zonen');
@@ -886,9 +892,19 @@ body.gezoomt #zonen{display:block}
   var raumTimer = null;
   function oeffne(ziel, sofort){
     if (!ZONEN_NAMEN[ziel]) return;
+    var vorher = offen;
     offen = ziel;
     var bild = RAUM_BILDER[ziel] || 'bilder/modell/strategieraum.jpg';
-    if (!raumBild.src.endsWith(bild)) raumBild.src = bild;
+    if (vorher && vorher !== ziel && !sofort && !reduziert && document.body.classList.contains('drin')) {
+      /* Raum-zu-Raum (Flotte, Hash): erst abblenden, das Bild im Verborgenen
+         tauschen; der Raum-Timer unten blendet wieder auf, der Blitz feuert neu */
+      document.body.classList.remove('drin');
+      setTimeout(function(){
+        if (offen === ziel && !raumBild.src.endsWith(bild)) raumBild.src = bild;
+      }, 260);
+    } else if (!raumBild.src.endsWith(bild)) {
+      raumBild.src = bild;
+    }
     zoomeZu(ziel, sofort);
     document.body.classList.add('gezoomt');
     var offeneSection = null;
@@ -973,8 +989,6 @@ body.gezoomt #zonen{display:block}
     try { sessionStorage.setItem('modell-film', '1'); } catch (e) {}
     setTimeout(function(){ film.hidden = true; }, 750);
     kritzle();
-    /* die Strategieräume leise vorladen, damit der Zoom nie auf ein Bild wartet */
-    Object.keys(RAUM_BILDER).forEach(function(z){ new Image().src = RAUM_BILDER[z]; });
   }
 
   function starteFilm(){

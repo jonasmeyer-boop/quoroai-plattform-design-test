@@ -6,7 +6,11 @@
    Bewegung bleibt der Systemzeiger, über Textfeldern weicht er dem Textzeiger.
    Rückfalllinie, falls der Komet im Alltag stört: das Instrument (Vorschlag E).
    Kundenflächen (White-Label) binden dieses Modul NICHT ein.
-   Marker: ZEIGER-KOMET-V1 */
+   V2 nach Code-Review: Stift (pen) führt den Kometen wie die Maus; Farben und
+   Kurve kommen aus den system.css-Tokens; pointercancel löst den Drück-Zustand;
+   der Schweif reißt beim Fensterwechsel ab statt quer durchzuziehen; Glow ohne
+   shadowBlur; Hover-Zustand wird auch beim Scrollen nachgeführt.
+   Marker: ZEIGER-KOMET-V2 */
 (function(){
   'use strict';
   if (!window.matchMedia('(pointer:fine) and (hover:hover)').matches) return;
@@ -22,9 +26,9 @@
     '#komet-schweif{position:fixed;inset:0;z-index:998;pointer-events:none}' +
     '#komet-kopf{position:fixed;left:0;top:0;z-index:999;pointer-events:none;opacity:0;' +
       'width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:999px;' +
-      'background:radial-gradient(circle at 35% 35%, #fff 0%, #8478ec 35%, #5a4cd6 100%);' +
+      'background:radial-gradient(circle at 35% 35%, #fff 0%, var(--lila-500, #8478ec) 35%, var(--lila-700, #5a4cd6) 100%);' +
       'box-shadow:0 0 12px rgba(' + LILA + ',.8), 0 0 34px rgba(' + LILA + ',.35);' +
-      'transition:scale .18s cubic-bezier(.16,1,.3,1),opacity .25s ease}' +
+      'transition:scale .18s var(--kurve, cubic-bezier(.16,1,.3,1)),opacity .25s ease}' +
     'html.komet-fasst #komet-kopf{scale:1.7}' +
     'html.komet-drueckt #komet-kopf{scale:.8}' +
     'html.komet-schreibt #komet-kopf,html.komet-schreibt #komet-schweif{opacity:0!important}';
@@ -57,7 +61,7 @@
   }
 
   document.addEventListener('pointermove', function(e){
-    if (e.pointerType && e.pointerType !== 'mouse') return;
+    if (e.pointerType === 'touch') return; /* Maus und Stift führen den Kometen */
     mx = e.clientX; my = e.clientY;
     if (!da) { da = true; kopf.style.opacity = 1; }
     spur.push({x: mx, y: my, t: performance.now()});
@@ -66,25 +70,41 @@
   }, {passive: true});
 
   document.addEventListener('pointerdown', function(e){
-    if (e.pointerType && e.pointerType !== 'mouse') return;
+    if (e.pointerType === 'touch') return;
     document.documentElement.classList.add('komet-drueckt');
   }, {passive: true});
-  document.addEventListener('pointerup', function(){
-    document.documentElement.classList.remove('komet-drueckt');
-  }, {passive: true});
+  function loese(){ document.documentElement.classList.remove('komet-drueckt'); }
+  document.addEventListener('pointerup', loese, {passive: true});
+  /* nativer Drag oder Systemgeste: der Browser schickt cancel statt up */
+  document.addEventListener('pointercancel', loese, {passive: true});
+  document.addEventListener('lostpointercapture', loese, {passive: true});
 
   /* Der Kern wächst auf Klickbarem; über Textfeldern weicht der Komet */
-  document.addEventListener('pointerover', function(e){
+  function pruefeZiel(el){
     var wurzel = document.documentElement;
-    var el = e.target instanceof Element ? e.target : null;
     wurzel.classList.toggle('komet-schreibt',
       !!(el && el.closest('input,textarea,select,[contenteditable]')));
     wurzel.classList.toggle('komet-fasst',
       !!(el && el.closest('a,button,[role="button"],label,summary,.zone')));
+  }
+  document.addEventListener('pointerover', function(e){
+    pruefeZiel(e.target instanceof Element ? e.target : null);
   }, {passive: true});
+  /* Scrollt oder wechselt die Seite unter ruhendem Zeiger, altert der
+     Hover-Zustand sonst: beim Scrollen einmal pro Frame neu nachsehen */
+  var scrollPruefung = false;
+  window.addEventListener('scroll', function(){
+    if (scrollPruefung || !da) return;
+    scrollPruefung = true;
+    requestAnimationFrame(function(){
+      scrollPruefung = false;
+      pruefeZiel(document.elementFromPoint(mx, my));
+    });
+  }, {passive: true, capture: true});
 
   document.addEventListener('mouseleave', function(){
     kopf.style.opacity = 0; da = false;
+    spur.length = 0; /* sonst zieht der Wiedereintritt einen Strich quer durchs Bild */
   });
   window.addEventListener('blur', function(){ spur.length = 0; });
 
@@ -96,19 +116,18 @@
     ctx.clearRect(0, 0, innerWidth, innerHeight);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
+    /* Glow ohne shadowBlur (Review: der langsamste Canvas-Pfad): erst ein
+       breiter, dünner Hof, dann der Kern — zwei billige Strokes je Segment */
     for (var i = 1; i < spur.length; i++) {
       var a = spur[i - 1], b = spur[i];
       var p = 1 - (jetzt - b.t) / SCHWEIF_DAUER;   /* jung = kräftig */
+      ctx.strokeStyle = 'rgba(' + LILA + ',' + (0.16 * p * p).toFixed(3) + ')';
+      ctx.lineWidth = 14 * p;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       ctx.strokeStyle = 'rgba(' + LILA + ',' + (0.5 * p * p).toFixed(3) + ')';
       ctx.lineWidth = 6 * p;
-      ctx.shadowColor = 'rgba(' + LILA + ',' + (0.5 * p).toFixed(3) + ')';
-      ctx.shadowBlur = 10 * p;
-      ctx.beginPath();
-      ctx.moveTo(a.x, a.y);
-      ctx.lineTo(b.x, b.y);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
     }
-    ctx.shadowBlur = 0;
 
     if (spur.length) {
       requestAnimationFrame(male);
