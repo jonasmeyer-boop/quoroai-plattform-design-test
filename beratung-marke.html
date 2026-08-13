@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Marke der Beratung</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Marke: siebter Raum hinter den Cockpit-Türen
+   (Paket 7, Reihenfolge-Entscheidung 2026-08-13). Was die Kunden der
+   Beratung sehen — im Fenster und im Postfach (Produkt: /marke).
+   Kern-Idee: die Marke hängt an vier Reglern (Entscheidung 2026-08-12),
+   und die Regler sind anfassbar — daneben hängt der Spiegel, ein
+   Miniatur-Kundenfenster, das sofort umfärbt, den Namen trägt und die
+   Anrede spricht. Der Versand ist die zweite Hälfte derselben Marke:
+   Absender, Domain-Prüfung mit DNS-Einträgen (der Nachweis fällt, wenn
+   die Domain wechselt), Postfach-Vorschau. Chrome ist quoroAI
+   (system.css), ruhige Fläche — der Spiegel IST der Moment.
+   Marker: BERATUNG-MARKE-V1 */
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+@font-face{
+  font-family:'Manrope';
+  src:url('schriften/manrope.woff2') format('woff2');
+  font-weight:200 800;
+  font-display:swap;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input{font-family:inherit}
+
+/* ========== quoroAI-Chrom ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+
+/* ========== Seite ========== */
+main{max-width:920px;margin:0 auto;padding:136px 24px 90px}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px;max-width:60ch}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:30px}
+
+.tafel{
+  margin-top:12px;border-radius:var(--radius-karte);padding:22px 24px;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+
+/* ---------- Erscheinung: Regler links, Spiegel rechts ---------- */
+.zwei{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
+.feld + .feld{margin-top:16px}
+.farben{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.farbe label{display:block;font-size:12px;font-weight:600;margin-bottom:6px}
+.farbe input[type="color"]{
+  appearance:none;-webkit-appearance:none;width:100%;height:46px;padding:0;
+  border:1px solid var(--nebel-300);border-radius:var(--radius-innen);
+  background:none;cursor:pointer;
+}
+.farbe input[type="color"]::-webkit-color-swatch-wrapper{padding:4px}
+.farbe input[type="color"]::-webkit-color-swatch{border:0.5px solid rgba(16,19,26,.12);border-radius:8px}
+.farbe input[type="color"]::-moz-color-swatch{border:0.5px solid rgba(16,19,26,.12);border-radius:8px}
+.farbe input[type="color"]:focus-visible{outline:3px solid var(--lila-400);outline-offset:2px}
+.anrede-wahl{display:flex;align-items:center;gap:8px;margin-top:16px}
+.anrede-wahl .wort{font-size:14px;font-weight:600;margin-right:4px}
+.anrede-wahl button{
+  padding:10px 18px;border-radius:12px;border:0.5px solid var(--nebel-300);
+  background:var(--flaeche);font-size:13.5px;font-weight:600;cursor:pointer;
+  transition:border-color .2s,background .2s;
+}
+.anrede-wahl button:hover{border-color:var(--lila-500)}
+.anrede-wahl button.gewaehlt{background:var(--tinte);color:#fff;border-color:var(--tinte)}
+.anrede-deut{font-size:12.5px;color:var(--nebel-500);margin-top:8px;line-height:1.5}
+.sehprobe{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:18px}
+.sehprobe .wort{font-size:12px;font-weight:600;color:var(--nebel-600)}
+.sehprobe button{
+  padding:7px 13px;border-radius:999px;border:0.5px solid var(--nebel-300);
+  background:var(--flaeche);font-size:12.5px;font-weight:600;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;
+  transition:border-color .2s;
+}
+.sehprobe button:hover{border-color:var(--lila-500)}
+.sehprobe .tupfer{width:12px;height:12px;border-radius:4px;border:0.5px solid rgba(16,19,26,.12)}
+
+/* Der Spiegel: ein Miniatur-Kundenfenster, das die Regler sofort tragen */
+#spiegel{
+  --m-blau:#2b5fe3; --m-stift:#1d46c9; --m-tinte:#10131a; --m-papier:#fafaf7;
+  position:sticky;top:96px;
+  border-radius:16px;overflow:hidden;
+  border:0.5px solid var(--nebel-300);
+  box-shadow:0 22px 60px rgba(24,21,47,.16);
+  transition:box-shadow .3s ease;
+}
+#spiegel .f-leiste{
+  display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;
+  background:var(--nebel-100);border-bottom:0.5px solid var(--nebel-200);
+}
+#spiegel .f-leiste i{width:9px;height:9px;border-radius:999px;background:var(--nebel-300)}
+#spiegel .f-leiste .f-adresse{
+  margin-left:8px;flex:1;text-align:center;
+  font-size:10.5px;color:var(--nebel-500);
+  background:var(--flaeche);border-radius:999px;padding:3px 10px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#spiegel .f-blatt{
+  background:var(--m-papier);color:var(--m-tinte);
+  font-family:'Manrope',system-ui,sans-serif;
+  padding:18px 20px 22px;
+  transition:background .25s ease;
+}
+#spiegel .f-kopfzeile{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#spiegel .f-marke{font-size:13px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+#spiegel .f-marke img{height:18px;width:auto;display:block}
+#spiegel .f-ab{font-size:10.5px;font-weight:700;color:color-mix(in srgb, var(--m-tinte) 55%, var(--m-papier));border:0.5px solid color-mix(in srgb, var(--m-tinte) 14%, transparent);border-radius:999px;padding:3px 9px}
+#spiegel .f-gruss{font-size:19px;font-weight:800;letter-spacing:-.02em;margin-top:20px;line-height:1.25}
+#spiegel .f-eingabe{
+  margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  border:0.5px solid color-mix(in srgb, var(--m-tinte) 16%, transparent);
+  background:color-mix(in srgb, #ffffff 72%, var(--m-papier));
+  border-radius:999px;padding:9px 9px 9px 16px;
+  font-size:12.5px;color:color-mix(in srgb, var(--m-tinte) 55%, var(--m-papier));
+}
+#spiegel .f-eingabe .f-los{
+  width:26px;height:26px;border-radius:999px;background:var(--m-blau);
+  display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  color:#fff;font-size:13px;font-weight:800;transition:background .25s ease;
+}
+#spiegel .f-hand{
+  font-family:'Caveat',cursive;font-size:17px;font-weight:700;
+  color:var(--m-stift);rotate:-1.5deg;margin-top:14px;display:inline-block;
+  transition:color .25s ease;
+}
+#spiegel .f-hinweis{font-size:10.5px;color:color-mix(in srgb, var(--m-tinte) 50%, var(--m-papier));margin-top:14px;line-height:1.5}
+.spiegel-wort{font-size:12px;color:var(--nebel-500);margin-top:10px;text-align:center}
+
+/* ---------- Versand ---------- */
+.v-felder{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.v-stand{display:flex;align-items:flex-start;gap:10px;margin-top:18px}
+.v-stand .zustand{width:40px;height:18px;flex-shrink:0;margin-top:2px}
+.v-stand .v-text{font-size:13.5px;line-height:1.55}
+.v-stand .v-text b{font-weight:600}
+.v-stand .v-text small{display:block;color:var(--nebel-600);font-size:12.5px;margin-top:3px}
+#dns{margin-top:14px}
+#dns .dns-deut{font-size:12.5px;color:var(--nebel-600);line-height:1.55;max-width:64ch}
+#dns .dns-rollen{margin-top:10px;overflow-x:auto;border:0.5px solid var(--nebel-200);border-radius:var(--radius-innen);background:var(--flaeche)}
+#dns table{border-collapse:collapse;width:100%;min-width:520px}
+#dns th{font-size:11px;font-weight:600;color:var(--nebel-600);text-align:left;padding:9px 12px;border-bottom:0.5px solid var(--nebel-200)}
+#dns td{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11.5px;padding:8px 12px;border-bottom:0.5px solid var(--nebel-100);white-space:nowrap}
+#dns tr:last-child td{border-bottom:0}
+.bestaetigt{
+  margin-top:14px;padding:11px 14px;border-radius:var(--radius-innen);
+  background:var(--gruen-fond);font-size:13.5px;line-height:1.5;
+}
+.postfach{
+  margin-top:18px;padding:13px 16px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 8px 24px rgba(16,19,26,.06);
+}
+.postfach .p-wort{font-size:11px;font-weight:600;color:var(--nebel-600)}
+.postfach .p-von{font-size:13.5px;font-weight:600;margin-top:6px}
+.postfach .p-von span{color:var(--nebel-500);font-weight:400}
+.postfach .p-betreff{font-size:13px;color:var(--nebel-700);margin-top:2px}
+.fuss-griffe{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.fuss-griffe .knopf{min-height:40px;padding:0 16px;font-size:13.5px}
+
+@media (prefers-reduced-motion: reduce){
+  main > *{animation:none;opacity:1;translate:none}
+}
+@media (max-width:820px){
+  nav{padding:0 18px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
+  .tafel{padding:18px 18px}
+  .zwei{grid-template-columns:1fr}
+  #spiegel{position:static}
+  .farben{grid-template-columns:repeat(2,1fr)}
+  .v-felder{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body class="quoro">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Marke</b></a>
+
+<main>
+  <div class="kopf">
+    <h1>Marke</h1>
+    <div class="stand">Was deine Kunden sehen — im Fenster und in ihrem Postfach. Beides ist dieselbe Marke: deine. Dass quoroAI dahintersteht, erfahren sie an keiner der beiden Stellen.</div>
+  </div>
+
+  <h3>Erscheinung</h3>
+  <section class="tafel" aria-label="Erscheinung">
+    <div class="zwei">
+      <div>
+        <div class="feld">
+          <label for="m-name">Name</label>
+          <input id="m-name" type="text" value="Nordholm &amp; Partner" autocomplete="off">
+          <div class="hilfe">Der Name, unter dem deine Kunden dich kennen.</div>
+        </div>
+        <div class="farben" role="group" aria-label="Die vier Farbregler">
+          <div class="farbe"><label for="f-blau">Akzent</label><input id="f-blau" type="color" value="#2b5fe3"></div>
+          <div class="farbe"><label for="f-stift">Stift</label><input id="f-stift" type="color" value="#1d46c9"></div>
+          <div class="farbe"><label for="f-tinte">Tinte</label><input id="f-tinte" type="color" value="#10131a"></div>
+          <div class="farbe"><label for="f-papier">Papier</label><input id="f-papier" type="color" value="#fafaf7"></div>
+        </div>
+        <div class="feld" style="margin-top:16px">
+          <label for="m-logo">Logo, Adresse eines Bildes</label>
+          <input id="m-logo" type="text" placeholder="https://" autocomplete="off">
+          <div class="hilfe">Ohne Logo steht der Name. Mit Logo steht das Logo — wie bei der Sehprobe currily.</div>
+        </div>
+        <div class="anrede-wahl" role="group" aria-label="Anrede der Kunden">
+          <span class="wort">Anrede</span>
+          <button type="button" id="an-du" class="gewaehlt" aria-pressed="true">Du</button>
+          <button type="button" id="an-sie" aria-pressed="false">Sie</button>
+        </div>
+        <div class="anrede-deut">So sprechen der KI-Berater, die Flächen und die Mails deine Kunden an.</div>
+        <div class="sehprobe" aria-label="Beispielmarken">
+          <span class="wort">Sehprobe:</span>
+        </div>
+      </div>
+      <div>
+        <div id="spiegel" aria-label="Vorschau der Kundenfläche">
+          <div class="f-leiste" aria-hidden="true"><i></i><i></i><i></i><span class="f-adresse" id="f-adresse">beratung.nordholm-partner.de</span></div>
+          <div class="f-blatt">
+            <div class="f-kopfzeile">
+              <span class="f-marke"><img id="f-logo" alt="" hidden><span id="f-name">Nordholm &amp; Partner</span></span>
+              <span class="f-ab">Abmelden</span>
+            </div>
+            <div class="f-gruss" id="f-gruss">Womit ringst du gerade?</div>
+            <div class="f-eingabe"><span id="f-ph">Frag deine Beratung</span><span class="f-los" aria-hidden="true">→</span></div>
+            <span class="f-hand">die Marge zuerst.</span>
+            <div class="f-hinweis"><span id="f-hinweis-satz">Du sprichst mit dem KI-Berater von</span> <b id="f-name2">Nordholm &amp; Partner</b>. Er ersetzt keine Rechts- oder Steuerberatung.</div>
+          </div>
+        </div>
+        <div class="spiegel-wort">Der Spiegel: so sieht dein Kunde die Übersicht, mit jedem Regler sofort.</div>
+      </div>
+    </div>
+    <div class="fuss-griffe">
+      <button class="knopf primaer" id="speichern" type="button">Speichern</button>
+    </div>
+    <div class="bestaetigt" id="m-meldung" hidden></div>
+  </section>
+
+  <h3>Versand</h3>
+  <section class="tafel" aria-label="Versand">
+    <div class="v-felder">
+      <div class="feld">
+        <label for="v-mail">Absenderadresse</label>
+        <input id="v-mail" type="email" value="beratung@nordholm-partner.de" autocomplete="off">
+        <div class="hilfe">Antworten deiner Kunden gehen an diese Adresse, nicht an quoroAI.</div>
+      </div>
+      <div class="feld">
+        <label for="v-name">Absendername</label>
+        <input id="v-name" type="text" placeholder="Nordholm &amp; Partner" autocomplete="off">
+        <div class="hilfe">Leer? Dann steht der Markenname im Postfach.</div>
+      </div>
+    </div>
+
+    <div class="v-stand" id="v-stand"></div>
+
+    <div id="dns" hidden>
+      <div class="dns-deut">Damit deine Mails ankommen und nicht im Spam landen, muss deine Domain bestätigen, dass in deinem Namen verschickt werden darf. Gib diese drei Einträge deinem IT-Dienstleister — er trägt sie im DNS ein. Je nach Anbieter dauert das Minuten bis Stunden.</div>
+      <div class="dns-rollen">
+        <table>
+          <thead><tr><th>Typ</th><th>Name</th><th>Wert</th></tr></thead>
+          <tbody id="dns-zeilen"></tbody>
+        </table>
+      </div>
+      <div class="fuss-griffe"><button class="knopf leise" id="pruefen" type="button">Prüfen</button></div>
+    </div>
+
+    <div class="postfach" id="postfach">
+      <div class="p-wort">So liegt es im Postfach deines Kunden</div>
+      <div class="p-von" id="p-von">Nordholm &amp; Partner <span>&lt;beratung@nordholm-partner.de&gt;</span></div>
+      <div class="p-betreff" id="p-betreff">Dein Termin am Donnerstag, 10:00 — bestätigt</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('main > *').forEach(function(el, i){
+    el.style.setProperty('--verz', (i * 0.07) + 's');
+  });
+
+  /* ---------- Die vier Regler und der Spiegel ---------- */
+  var spiegel = document.getElementById('spiegel');
+  var REGLER = [
+    {id: 'f-blau',   var: '--m-blau'},
+    {id: 'f-stift',  var: '--m-stift'},
+    {id: 'f-tinte',  var: '--m-tinte'},
+    {id: 'f-papier', var: '--m-papier'}
+  ];
+  REGLER.forEach(function(r){
+    document.getElementById(r.id).addEventListener('input', function(e){
+      spiegel.style.setProperty(r.var, e.target.value);
+    });
+  });
+
+  var sie = false;
+  function maleAnrede(){
+    document.getElementById('f-gruss').textContent = sie ? 'Womit ringen Sie gerade?' : 'Womit ringst du gerade?';
+    document.getElementById('f-ph').textContent = sie ? 'Fragen Sie Ihre Beratung' : 'Frag deine Beratung';
+    document.getElementById('f-hinweis-satz').textContent = sie ? 'Sie sprechen mit dem KI-Berater von' : 'Du sprichst mit dem KI-Berater von';
+    document.getElementById('an-du').classList.toggle('gewaehlt', !sie);
+    document.getElementById('an-du').setAttribute('aria-pressed', String(!sie));
+    document.getElementById('an-sie').classList.toggle('gewaehlt', sie);
+    document.getElementById('an-sie').setAttribute('aria-pressed', String(sie));
+    malePostfach();
+  }
+  document.getElementById('an-du').addEventListener('click', function(){ sie = false; maleAnrede(); });
+  document.getElementById('an-sie').addEventListener('click', function(){ sie = true; maleAnrede(); });
+
+  function maleName(){
+    var n = document.getElementById('m-name').value.trim() || 'Deine Beratung';
+    document.getElementById('f-name').textContent = n;
+    document.getElementById('f-name2').textContent = n;
+    document.getElementById('v-name').placeholder = n;
+    malePostfach();
+  }
+  document.getElementById('m-name').addEventListener('input', maleName);
+
+  var logoFeld = document.getElementById('m-logo');
+  var logoBild = document.getElementById('f-logo');
+  logoBild.addEventListener('error', function(){ logoBild.hidden = true; document.getElementById('f-name').hidden = false; });
+  logoBild.addEventListener('load', function(){ logoBild.hidden = false; document.getElementById('f-name').hidden = true; });
+  function maleLogo(){
+    var u = logoFeld.value.trim();
+    if (u) { logoBild.src = u; }
+    else { logoBild.hidden = true; logoBild.removeAttribute('src'); document.getElementById('f-name').hidden = false; }
+  }
+  logoFeld.addEventListener('input', maleLogo);
+
+  /* Sehproben: dieselben Beispielmarken wie überall (marke.js) */
+  var MARKEN = [
+    {name: 'Nordholm & Partner',  anrede: 'du',  blau: '#2b5fe3', stift: '#1d46c9', tinte: '#10131a', papier: '#fafaf7', domain: 'nordholm-partner.de'},
+    {name: 'Waldmann Consulting', anrede: 'sie', blau: '#0e7a5a', stift: '#0a5f46', tinte: '#101613', papier: '#f8faf7', domain: 'waldmann-consulting.de'},
+    {name: 'Steinbach & Cie.',    anrede: 'sie', blau: '#9c3948', stift: '#7c2d3a', tinte: '#171114', papier: '#fbf9f7', domain: 'steinbach-cie.de'},
+    {name: 'currily',             anrede: 'du',  blau: '#7047EA', stift: '#5636b8', tinte: '#081B4A', papier: '#fbfafd', domain: 'currily.de', logo: 'bilder/currily-logo.svg'}
+  ];
+  var sehprobe = document.querySelector('.sehprobe');
+  MARKEN.forEach(function(mk){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.innerHTML = '<span class="tupfer" style="background:' + mk.blau + '"></span>';
+    b.appendChild(document.createTextNode(mk.name));
+    b.addEventListener('click', function(){
+      document.getElementById('m-name').value = mk.name;
+      document.getElementById('f-blau').value = mk.blau;
+      document.getElementById('f-stift').value = mk.stift;
+      document.getElementById('f-tinte').value = mk.tinte;
+      document.getElementById('f-papier').value = mk.papier;
+      spiegel.style.setProperty('--m-blau', mk.blau);
+      spiegel.style.setProperty('--m-stift', mk.stift);
+      spiegel.style.setProperty('--m-tinte', mk.tinte);
+      spiegel.style.setProperty('--m-papier', mk.papier);
+      logoFeld.value = mk.logo || '';
+      maleLogo();
+      sie = mk.anrede === 'sie';
+      maleAnrede();
+      maleName();
+      document.getElementById('f-adresse').textContent = 'beratung.' + mk.domain;
+      document.getElementById('v-mail').value = 'beratung@' + mk.domain;
+      pruefeAdresse(true);
+    });
+    sehprobe.appendChild(b);
+  });
+
+  document.getElementById('speichern').addEventListener('click', function(){
+    var m = document.getElementById('m-meldung');
+    m.hidden = false;
+    m.textContent = 'Gespeichert. Jede Kundenfläche trägt die Marke ab sofort — und jede Mail den Absender.';
+  });
+
+  /* ---------- Versand: der Nachweis hängt an der Domain ----------
+     Wie im Produkt: geprüft wird die Domain, nicht das Postfach. Wechselt
+     die Domain, fällt der Nachweis, und die drei DNS-Einträge liegen bereit. */
+  var gepruefteDomain = 'nordholm-partner.de';
+  var mail = document.getElementById('v-mail');
+  var stand = document.getElementById('v-stand');
+  var dns = document.getElementById('dns');
+
+  function domainVon(adresse){
+    var t = adresse.split('@');
+    return t.length === 2 && t[1].indexOf('.') > 0 ? t[1].toLowerCase().trim() : null;
+  }
+  function maleStand(art, titel, deut){
+    var kapsel =
+      art === 'gut'    ? '<span class="zustand aktiv" role="img" aria-label="geprüft" title="geprüft"></span>' :
+      art === 'wartet' ? '<span class="zustand wartet" role="img" aria-label="wird geprüft" title="wird geprüft"></span>' :
+      art === 'offen'  ? '<span class="zustand entwurf" role="img" aria-label="noch nicht geprüft" title="noch nicht geprüft"></span>' :
+                         '<span class="zustand entwurf" role="img" aria-label="kein Absender" title="kein Absender"></span>';
+    stand.innerHTML = kapsel + '<span class="v-text"><b>' + titel + '</b><small>' + deut + '</small></span>';
+  }
+  function malePostfach(){
+    var adresse = mail.value.trim();
+    var n = document.getElementById('v-name').value.trim() || document.getElementById('m-name').value.trim() || 'Deine Beratung';
+    document.getElementById('postfach').hidden = !adresse || !domainVon(adresse);
+    var von = document.getElementById('p-von');
+    von.textContent = n + ' ';
+    var klein = document.createElement('span');
+    klein.textContent = '<' + adresse + '>';
+    von.appendChild(klein);
+    document.getElementById('p-betreff').textContent = sie
+      ? 'Ihr Termin am Donnerstag, 10:00 — bestätigt'
+      : 'Dein Termin am Donnerstag, 10:00 — bestätigt';
+  }
+  document.getElementById('v-name').addEventListener('input', malePostfach);
+
+  function maleDns(domain){
+    var zeilen = document.getElementById('dns-zeilen');
+    zeilen.innerHTML = '';
+    ['k1', 'k2', 'k3'].forEach(function(k){
+      var tr = document.createElement('tr');
+      ['CNAME', k + '._domainkey.' + domain, k + '.dkim.mail-eu.net'].forEach(function(w){
+        var td = document.createElement('td');
+        td.textContent = w;
+        tr.appendChild(td);
+      });
+      zeilen.appendChild(tr);
+    });
+  }
+
+  function pruefeAdresse(frisch){
+    var adresse = mail.value.trim();
+    var domain = domainVon(adresse);
+    if (frisch === true) gepruefteDomain = domain;
+    malePostfach();
+    if (!adresse) {
+      dns.hidden = true;
+      maleStand('leer', 'Ohne Absenderadresse verschicken wir für dich nichts.',
+        'Einladungen und Terminbestätigungen gibst du dann selbst weiter — den Link findest du jeweils daneben.');
+      return;
+    }
+    if (!domain) {
+      dns.hidden = true;
+      maleStand('offen', 'Das ist noch keine E-Mail-Adresse.', 'Etwas wie beratung@deine-domain.de.');
+      return;
+    }
+    if (domain === gepruefteDomain) {
+      dns.hidden = true;
+      maleStand('gut', domain + ' ist geprüft — verschickt wird unter ' + adresse + '.',
+        'Deine Kunden sehen als Absender „' + (document.getElementById('v-name').value.trim() || document.getElementById('m-name').value.trim()) + '". Antworten gehen an diese Adresse, nicht an quoroAI.');
+      return;
+    }
+    maleDns(domain);
+    dns.hidden = false;
+    maleStand('offen', domain + ' ist noch nicht geprüft.',
+      'Die Domain ist neu — der bisherige Nachweis gilt für sie nicht. Drei DNS-Einträge, dann steht sie.');
+  }
+  mail.addEventListener('input', function(){ pruefeAdresse(); });
+
+  document.getElementById('pruefen').addEventListener('click', function(){
+    var domain = domainVon(mail.value.trim());
+    if (!domain) return;
+    maleStand('wartet', 'Wir sehen bei deiner Domain nach …', 'Das dauert einen Moment.');
+    setTimeout(function(){
+      gepruefteDomain = domain;
+      pruefeAdresse();
+    }, reduziert ? 0 : 1500);
+  });
+
+  maleAnrede();
+  maleName();
+  pruefeAdresse();
+})();
+</script>
+<script src="zeiger.js"></script>
+</body>
+</html>
