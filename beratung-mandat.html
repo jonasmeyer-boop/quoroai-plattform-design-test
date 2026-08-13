@@ -16,7 +16,13 @@
    auf erledigt und tragen ihre Zuständigkeit (du, der KI-Berater), die
    Zeiterfassung hat ein Schnell-Erfassen mit Dauer-Chips, die Summe fließt
    in den Leistungsnachweis. Chrome ist quoroAI (system.css).
-   Marker: BERATUNG-MANDAT-V1 */
+   V2 nach Code-Review: die aktuelle Station heißt jetzt auch so (jetzt statt
+   geschafft), der Pfad rollt auf schmalen Schirmen statt zu schrumpfen, der
+   Lila-Ring neuer Zeilen fällt wieder ab, Kippknöpfe und Dauer-Chips sprechen
+   ARIA, die Summe hat eine Quelle (das Markup), getTotalLength statt harter
+   200, Enter wacht über isComposing, Kopf-Kapsel in Geschwistergröße; die
+   Posten decken sich mit LEISTUNGEN-V5.
+   Marker: BERATUNG-MANDAT-V2 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -66,6 +72,7 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
 .kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
 .kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px}
 .kopf .z-fuell{display:flex;align-items:center;gap:8px;margin-top:8px}
+.kopf .z-fuell .zustand{width:40px;height:18px}
 h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:30px}
 
 .tafel{
@@ -77,7 +84,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 }
 
 /* ---------- Meilensteine: der Pfad zeichnet sich ---------- */
-#pfad{width:100%;height:auto;display:block;overflow:visible}
+/* Auf schmalen Schirmen rollt der Pfad, statt zu schrumpfen — sonst
+   werden die Beschriftungen zu 4px-Schmier (Review-Fund) */
+.pfad-rolle{overflow-x:auto;-webkit-overflow-scrolling:touch}
+#pfad{width:100%;min-width:620px;height:auto;display:block;overflow:visible}
 #pfad .grund{fill:none;stroke:var(--nebel-300);stroke-width:2;stroke-dasharray:5 6;stroke-linecap:round}
 #pfad .voran{fill:none;stroke:var(--lila-600);stroke-width:2.6;stroke-linecap:round}
 #pfad circle.station{fill:#fff;stroke:var(--nebel-300);stroke-width:2}
@@ -198,11 +208,11 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
   <h3>Meilensteine</h3>
   <section class="tafel" aria-label="Meilensteine">
-    <svg id="pfad" viewBox="0 0 720 96" role="img" aria-label="Vier Meilensteine: Analyse geschafft, Preismodell läuft, Staffeln ab September, wirksam ab Woche 6">
+    <div class="pfad-rolle"><svg id="pfad" viewBox="0 0 720 96" role="img" aria-label="Vier Meilensteine: Analyse geschafft, Preismodell läuft, Staffeln ab September, wirksam ab Woche 6">
       <line class="grund" x1="60" y1="38" x2="660" y2="38"></line>
       <line class="voran" id="voran" x1="60" y1="38" x2="260" y2="38"></line>
       <circle class="station geschafft" cx="60" cy="38" r="7"></circle>
-      <circle class="station geschafft" cx="260" cy="38" r="7"></circle>
+      <circle class="station jetzt" cx="260" cy="38" r="7"></circle>
       <circle class="hof" cx="260" cy="38" r="9"></circle>
       <circle class="station" cx="460" cy="38" r="7"></circle>
       <circle class="station" cx="660" cy="38" r="7"></circle>
@@ -214,7 +224,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       <text x="460" y="80" text-anchor="middle">ab September</text>
       <text class="m-name" x="660" y="66" text-anchor="middle">Wirksam</text>
       <text x="660" y="80" text-anchor="middle">Woche 6, Oktober</text>
-    </svg>
+    </svg></div>
     <span class="pfad-hand">hier stehst du.</span>
   </section>
 
@@ -222,23 +232,23 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   <section class="tafel" aria-label="Aufgaben">
     <div class="aufgaben">
       <div class="aufgabe erledigt">
-        <button class="kippe" type="button" aria-pressed="true"><span class="zustand aktiv" aria-hidden="true"></span><span class="zustand-wort">erledigt</span></button>
-        <span class="a-text"><b>Marge zerlegen und Hebel rechnen</b><span>gestern, im Gespräch entstanden</span></span>
+        <button class="kippe" type="button" aria-pressed="true" aria-labelledby="a1"><span class="zustand aktiv" aria-hidden="true"></span><span class="zustand-wort">erledigt</span></button>
+        <span class="a-text"><b id="a1">Marge zerlegen und Hebel rechnen</b><span>gestern, im Gespräch entstanden</span></span>
         <span class="wer ki">KI-Berater</span>
       </div>
       <div class="aufgabe">
-        <button class="kippe" type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">offen</span></button>
-        <span class="a-text"><b>Staffeln neu schneiden</b><span>Woche 1 des Fahrplans, A- und B-Kunden bleiben unberührt</span></span>
+        <button class="kippe" type="button" aria-pressed="false" aria-labelledby="a2"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">offen</span></button>
+        <span class="a-text"><b id="a2">Staffeln neu schneiden</b><span>Woche 1 des Fahrplans, A- und B-Kunden bleiben unberührt</span></span>
         <span class="wer">du</span>
       </div>
       <div class="aufgabe">
-        <button class="kippe" type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">offen</span></button>
-        <span class="a-text"><b>Preisliste durchrechnen</b><span>übernimmt der KI-Berater, sobald die Staffeln stehen</span></span>
+        <button class="kippe" type="button" aria-pressed="false" aria-labelledby="a3"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">offen</span></button>
+        <span class="a-text"><b id="a3">Preisliste durchrechnen</b><span>übernimmt der KI-Berater, sobald die Staffeln stehen</span></span>
         <span class="wer ki">KI-Berater</span>
       </div>
       <div class="aufgabe">
-        <button class="kippe" type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">offen</span></button>
-        <span class="a-text"><b>C-Kunden-Anschreiben entwerfen</b><span>Woche 3, vier Wochen vor der Umstellung</span></span>
+        <button class="kippe" type="button" aria-pressed="false" aria-labelledby="a4"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">offen</span></button>
+        <span class="a-text"><b id="a4">C-Kunden-Anschreiben entwerfen</b><span>Woche 3, vier Wochen vor der Umstellung</span></span>
         <span class="wer">du</span>
       </div>
     </div>
@@ -250,9 +260,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     <div class="zeit-kopf"><span class="gross" id="zeit-summe">9,2 Std.</span><span class="deut">im August auf diesem Mandat</span></div>
     <div class="erfassen">
       <div class="dauer" role="group" aria-label="Dauer wählen">
-        <button type="button" data-std="0.25">0,25</button>
-        <button type="button" data-std="0.5" class="gewaehlt">0,5</button>
-        <button type="button" data-std="1">1,0</button>
+        <button type="button" data-std="0.25" aria-pressed="false">0,25</button>
+        <button type="button" data-std="0.5" class="gewaehlt" aria-pressed="true">0,5</button>
+        <button type="button" data-std="1" aria-pressed="false">1,0</button>
       </div>
       <input id="zeit-was" type="text" placeholder="Woran hast du gearbeitet?">
       <button class="knopf primaer" id="zeit-erfassen" type="button">Erfassen</button>
@@ -278,8 +288,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   /* ---------- der Pfad zeichnet sich bei der Ankunft ---------- */
   var voran = document.getElementById('voran');
   if (!reduziert) {
-    voran.style.strokeDasharray = 200;
-    voran.style.strokeDashoffset = 200;
+    var voranLaenge = voran.getTotalLength();
+    voran.style.strokeDasharray = voranLaenge;
+    voran.style.strokeDashoffset = voranLaenge;
     voran.style.transition = 'stroke-dashoffset .9s cubic-bezier(.45,.05,.55,.95) .4s';
     requestAnimationFrame(function(){ requestAnimationFrame(function(){
       voran.style.strokeDashoffset = 0;
@@ -306,12 +317,19 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   });
 
   /* ---------- Zeit erfassen ---------- */
-  var stunden = 9.2, dauer = 0.5;
+  /* eine Quelle für die Summe: das Markup führt, das Skript liest sie */
+  var summeEl = document.getElementById('zeit-summe');
+  var stunden = parseFloat(summeEl.textContent.replace(',', '.')) || 0;
+  var dauer = 0.5;
   var fmt = function(n){ return n.toLocaleString('de-DE', {minimumFractionDigits:1, maximumFractionDigits:2}); };
   document.querySelectorAll('.dauer button').forEach(function(b){
     b.addEventListener('click', function(){
-      document.querySelectorAll('.dauer button').forEach(function(x){ x.classList.remove('gewaehlt'); });
+      document.querySelectorAll('.dauer button').forEach(function(x){
+        x.classList.remove('gewaehlt');
+        x.setAttribute('aria-pressed', 'false');
+      });
       b.classList.add('gewaehlt');
+      b.setAttribute('aria-pressed', 'true');
       dauer = +b.dataset.std;
     });
   });
@@ -323,13 +341,15 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     zeile.innerHTML = '<span class="dauer-wert">' + fmt(dauer) + '&nbsp;Std.</span><span class="z-was"></span><span class="z-wann">heute</span>';
     zeile.querySelector('.z-was').textContent = was;
     document.getElementById('zeiten').prepend(zeile);
+    /* der Lila-Ring gehört nur dem jüngsten Eintrag, danach fällt er ab */
+    setTimeout(function(){ zeile.classList.remove('neu'); }, 1200);
     stunden += dauer;
-    document.getElementById('zeit-summe').textContent = fmt(stunden) + ' Std.';
+    summeEl.textContent = fmt(stunden) + ' Std.';
     document.getElementById('zeit-was').value = '';
   }
   document.getElementById('zeit-erfassen').addEventListener('click', erfasse);
   document.getElementById('zeit-was').addEventListener('keydown', function(e){
-    if (e.key === 'Enter') erfasse();
+    if (e.key === 'Enter' && !e.isComposing) erfasse();
   });
 })();
 </script>
