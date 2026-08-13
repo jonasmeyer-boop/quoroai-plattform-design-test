@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dein KI-Berater</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, KI-Berater einstellen: dritter Raum hinter den
+   Cockpit-Türen (Reihenfolge-Entscheidung 2026-08-13). Persona als zwei
+   Regler (Tonlage, Antwortlänge) — der Regler ist ein Füllstand im Glas
+   zum Anfassen, und der Live-Satz darunter spricht sofort in der neuen
+   Stimme. Das Probegespräch antwortet mit denselben Reglern; die Probe
+   kostet nichts und erreicht keinen Kunden. Der Rahmen erklärt, was er
+   immer übergibt (die Cordes-Steuerfrage ist das lebende Beispiel).
+   Verbrauch je Mandat mit Kontingent-Füllständen, Kosten führt der Euro.
+   Chrome ist quoroAI (system.css). Marker: BERATUNG-KI-BERATER-V1 */
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,textarea{font-family:inherit}
+
+/* ========== quoroAI-Chrom (wie Mitlesen und Termine) ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+
+/* ========== Seite ========== */
+main{max-width:860px;margin:0 auto;padding:136px 24px 90px}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:30px}
+
+.tafel{
+  margin-top:12px;border-radius:var(--radius-karte);padding:22px 24px;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+
+/* ---------- Persona: Regler sind Füllstände zum Anfassen ---------- */
+.regler-lage{display:grid;grid-template-columns:1fr 1fr;gap:20px 28px}
+.regler label{display:block;font-size:13px;font-weight:600;margin-bottom:8px}
+.regler .spur{position:relative}
+.regler input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:26px;margin:0;
+  border-radius:var(--radius-kapsel);outline:none;cursor:pointer;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--lila-400) 55%, #fff) 0%, var(--lila-400) 45%, var(--lila-600) 100%)
+      no-repeat 0 0 / var(--voll,50%) 100%,
+    linear-gradient(180deg, rgba(24,21,47,.05), rgba(255,255,255,.4) 55%);
+  border:1px solid rgba(255,255,255,.8);
+  box-shadow:
+    inset 0 1.5px 3px rgba(24,21,47,.18),
+    inset 0 -1px 1px rgba(255,255,255,.7),
+    0 1px 0 rgba(255,255,255,.9),
+    0 5px 12px rgba(59,52,134,.12);
+}
+.regler input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:30px;height:30px;border-radius:999px;
+  background:linear-gradient(180deg,#fff,var(--nebel-100));
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:inset 0 1px 0 #fff, inset 0 0 0 1px var(--nebel-200), 0 4px 12px rgba(59,52,134,.28);
+}
+.regler input[type=range]::-moz-range-thumb{
+  width:30px;height:30px;border-radius:999px;
+  background:linear-gradient(180deg,#fff,var(--nebel-100));
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:inset 0 1px 0 #fff, inset 0 0 0 1px var(--nebel-200), 0 4px 12px rgba(59,52,134,.28);
+}
+.regler input[type=range]:focus-visible{outline:3px solid var(--lila-400);outline-offset:2px}
+.regler .pole{display:flex;justify-content:space-between;font-size:12px;color:var(--nebel-500);margin-top:6px}
+.regler .pole b{font-weight:600;color:var(--nebel-600)}
+
+/* der Live-Satz: so klingt er gerade */
+.live-satz{
+  margin-top:20px;padding:16px 18px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 8px 24px rgba(16,19,26,.07);
+  font-size:15.5px;line-height:1.6;
+}
+.live-satz .ls-text{transition:opacity .18s ease}
+.live-satz.wechselt .ls-text{opacity:0}
+.hand{font-family:'Caveat',cursive;font-size:19px;font-weight:700;color:var(--lila-700);rotate:-1.2deg;display:inline-block;margin-top:10px}
+
+/* ---------- Rahmen ---------- */
+.rahmen p{font-size:14.5px;line-height:1.6;max-width:62ch}
+.rahmen p a{color:var(--lila-700)}
+.rahmen .merk{font-size:13px;color:var(--nebel-600);margin-top:10px}
+
+/* ---------- Probegespräch ---------- */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.chips button{
+  padding:9px 15px;border-radius:999px;border:0.5px solid var(--nebel-300);
+  background:var(--flaeche);font-size:13.5px;font-weight:600;cursor:pointer;
+  transition:border-color .2s,background .2s;
+}
+.chips button:hover{border-color:var(--lila-500)}
+.probe-frage{
+  margin-top:16px;padding:10px 16px;border-left:3px solid var(--lila-500);
+  border-radius:0 12px 12px 0;background:var(--lila-050);
+  font-size:15px;font-weight:600;
+}
+.probe-antwort{
+  margin-top:12px;padding:16px 18px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 8px 24px rgba(16,19,26,.07);
+  font-size:15px;line-height:1.65;
+  opacity:0;translate:0 8px;
+}
+.probe-antwort.da{opacity:1;translate:0 0;transition:opacity .4s ease,translate .4s var(--kurve)}
+.probe-fuss{font-size:12.5px;color:var(--nebel-500);margin-top:10px}
+
+/* ---------- Verbrauch ---------- */
+.verbrauch-kopf{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.verbrauch-kopf .gross{
+  font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);letter-spacing:var(--schau-spur);
+  font-size:38px;line-height:1.05;font-variant-numeric:tabular-nums;
+}
+.verbrauch-kopf .deut{font-size:13.5px;color:var(--nebel-600)}
+.mandate{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+.mandat{
+  display:flex;align-items:center;gap:16px;
+  padding:12px 16px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 8px 24px rgba(16,19,26,.06);
+}
+.mandat b{font-size:14px;font-weight:600;letter-spacing:-.01em;min-width:150px}
+.mandat .z-fuell{display:flex;align-items:center;gap:8px;flex:1}
+.mandat .z-fuell .zustand{width:44px;height:19px}
+.mandat .kosten{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;margin-left:auto}
+.mandat .zustand-wort.amber{color:var(--bernstein)}
+.verbrauch-fuss{font-size:12.5px;color:var(--nebel-500);margin-top:12px}
+
+@media (prefers-reduced-motion: reduce){
+  main > *{animation:none;opacity:1;translate:none}
+  .probe-antwort,.probe-antwort.da{transition:none;opacity:1;translate:none}
+}
+@media (max-width:700px){
+  nav{padding:0 18px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
+  .tafel{padding:18px 18px}
+  .regler-lage{grid-template-columns:1fr}
+  .mandat{flex-wrap:wrap;gap:8px 14px}
+  .mandat b{min-width:0}
+  .mandat .kosten{margin-left:0;width:100%}
+}
+</style>
+</head>
+<body class="quoro">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Dein KI-Berater</b></a>
+
+<main>
+  <div class="kopf">
+    <h1>Dein KI-Berater</h1>
+    <div class="stand">Er arbeitet für 4 Mandate, unter der Marke Nordholm &amp; Partner. Hier stellst du ein, wie er klingt.</div>
+  </div>
+
+  <h3>So spricht er</h3>
+  <section class="tafel" aria-label="Persona einstellen">
+    <div class="regler-lage">
+      <div class="regler">
+        <label for="ton">Tonlage</label>
+        <div class="spur"><input id="ton" type="range" min="0" max="2" step="1" value="1" aria-valuetext="ausgewogen"></div>
+        <div class="pole"><b>nüchtern</b><b>nahbar</b></div>
+      </div>
+      <div class="regler">
+        <label for="laenge">Antwortlänge</label>
+        <div class="spur"><input id="laenge" type="range" min="0" max="1" step="1" value="0" aria-valuetext="knapp"></div>
+        <div class="pole"><b>knapp</b><b>ausführlich</b></div>
+      </div>
+    </div>
+    <div class="live-satz"><span class="ls-text" id="live-satz"></span></div>
+    <span class="hand">so klingt er gerade.</span>
+  </section>
+
+  <h3>Sein Rahmen</h3>
+  <section class="tafel rahmen" aria-label="Rahmen des KI-Beraters">
+    <p>Zahlen, Auswertungen und Rechenwege beantwortet er selbst, immer mit Quellen aus Akte und Wissen. <b>Steuer- und Rechtsfragen übergibt er dir grundsätzlich</b>, mit deiner Antwort geht es zurück ins Gespräch, so wie heute Morgen bei der <a href="beratung-termine.html#cordes">Steuerfrage von Herrn Cordes</a>.</p>
+    <div class="merk">Der Rahmen gilt für alle Mandate gleich. Was er nicht weiß, sagt er ehrlich.</div>
+  </section>
+
+  <h3>Probier ihn aus</h3>
+  <section class="tafel" aria-label="Probegespräch">
+    <div class="chips">
+      <button type="button" data-frage="lage">Wie läuft mein Geschäft?</button>
+      <button type="button" data-frage="kosten">Was kostet mich der Dieselpreis?</button>
+    </div>
+    <div class="probe-frage" id="probe-frage" hidden></div>
+    <div class="probe-antwort" id="probe-antwort"></div>
+    <div class="probe-fuss">Die Probe antwortet mit deinen Reglern von oben. Sie kostet nichts und erreicht keinen Kunden.</div>
+  </section>
+
+  <h3>Was er verbraucht</h3>
+  <section class="tafel" aria-label="Verbrauch im August">
+    <div class="verbrauch-kopf"><span class="gross">38,40&nbsp;€</span><span class="deut">KI-Kosten im August, alle Mandate</span></div>
+    <div class="mandate">
+      <div class="mandat"><b>Petersen Stahlbau</b><span class="z-fuell"><span class="zustand" style="--stand:.43;--fluid:var(--lila-400);--fluid-tief:var(--lila-600)" role="img" aria-label="17 von 40 Fragen" title="17 von 40 Fragen"></span><span class="zustand-wort">17 von 40 Fragen</span></span><span class="kosten">16,80&nbsp;€</span></div>
+      <div class="mandat"><b>Cordes Logistik</b><span class="z-fuell"><span class="zustand" style="--stand:.23;--fluid:var(--lila-400);--fluid-tief:var(--lila-600)" role="img" aria-label="9 von 40 Fragen" title="9 von 40 Fragen"></span><span class="zustand-wort">9 von 40 Fragen</span></span><span class="kosten">13,20&nbsp;€</span></div>
+      <div class="mandat"><b>Bäckerei Freitag</b><span class="z-fuell"><span class="zustand" style="--stand:.3;--fluid:var(--lila-400);--fluid-tief:var(--lila-600)" role="img" aria-label="6 von 20 Fragen" title="6 von 20 Fragen"></span><span class="zustand-wort">6 von 20 Fragen</span></span><span class="kosten">8,40&nbsp;€</span></div>
+      <div class="mandat"><b>MTS Maschinenbau</b><span class="z-fuell"><span class="zustand entwurf" role="img" aria-label="0 von 40 Fragen" title="0 von 40 Fragen"></span><span class="zustand-wort amber">0 von 40 Fragen, seit 3 Wochen still</span></span><span class="kosten">0,00&nbsp;€</span></div>
+    </div>
+    <div class="verbrauch-fuss">Kontingente stellst du je Mandat in der Kundenakte ein. Diese Zahlen sieht nur deine Beratung, nie der Kunde.</div>
+  </section>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll('main > *').forEach(function(el, i){
+    el.style.setProperty('--verz', (i * 0.07) + 's');
+  });
+
+  /* ---------- Persona: die Regler sprechen sofort ---------- */
+  var ton = document.getElementById('ton');
+  var laenge = document.getElementById('laenge');
+  var TON_WORT = ['nüchtern', 'ausgewogen', 'nahbar'];
+
+  /* Der Live-Satz: dieselbe Auskunft in drei Tonlagen, knapp oder ausführlich */
+  var SATZ = [
+    'Die Marge liegt bei 30,4 Prozent, 3,1 Punkte unter Vorjahr. Größter Treiber ist das Preismodell.',
+    'Deine Marge liegt bei 30,4 Prozent, das sind 3,1 Punkte weniger als im Vorjahr. Der größte Hebel ist das Preismodell.',
+    'Kurz gesagt: Deine Marge ist auf 30,4 Prozent gerutscht. Keine Panik, der größte Hebel liegt schon auf dem Tisch, das Preismodell.'
+  ];
+  var SATZ_MEHR = [
+    ' Preisdruck kostet 3,1 Punkte, Stahlpreis 1,8, Ausschuss 0,9.',
+    ' Im Einzelnen: Preisdruck kostet 3,1 Punkte, der Stahlpreis 1,8 und der Ausschuss 0,9.',
+    ' Wenn du magst, zerlege ich dir das: Preisdruck 3,1 Punkte, Stahlpreis 1,8, Ausschuss 0,9.'
+  ];
+
+  var liveSatz = document.getElementById('live-satz');
+  var liveKarte = document.querySelector('.live-satz');
+  var wechselTimer = null;
+  function baueSatz(){
+    var t = +ton.value, l = +laenge.value;
+    return SATZ[t] + (l ? SATZ_MEHR[t] : '');
+  }
+  function sprich(){
+    ton.setAttribute('aria-valuetext', TON_WORT[+ton.value]);
+    laenge.setAttribute('aria-valuetext', +laenge.value ? 'ausführlich' : 'knapp');
+    fuelle(ton); fuelle(laenge);
+    if (reduziert) { liveSatz.textContent = baueSatz(); probeNeu(); return; }
+    liveKarte.classList.add('wechselt');
+    clearTimeout(wechselTimer);
+    wechselTimer = setTimeout(function(){
+      liveSatz.textContent = baueSatz();
+      liveKarte.classList.remove('wechselt');
+    }, 180);
+    probeNeu();
+  }
+  /* die Spur füllt sich bis zum Griff, wie ein Füllstand */
+  function fuelle(r){
+    var p = (r.value - r.min) / (r.max - r.min);
+    r.style.setProperty('--voll', 'calc(' + (p * 100) + '% - ' + ((p - 0.5) * 30) + 'px + 15px)');
+  }
+  ton.addEventListener('input', sprich);
+  laenge.addEventListener('input', sprich);
+  liveSatz.textContent = baueSatz();
+  fuelle(ton); fuelle(laenge);
+  ton.setAttribute('aria-valuetext', TON_WORT[+ton.value]);
+
+  /* ---------- Probegespräch: antwortet mit den Reglern ---------- */
+  var FRAGEN = {
+    lage: 'Wie läuft mein Geschäft?',
+    kosten: 'Was kostet mich der Dieselpreis?'
+  };
+  var ANTWORT = {
+    lage: [
+      'Umsatz Q3 hochgerechnet 412.000 €, 8 Prozent über Plan. Auslastung 82 Prozent. Offene Forderungen 20.550 €, eine Rechnung seit 9 Tagen.',
+      'Insgesamt gut: Der Umsatz liegt hochgerechnet bei 412.000 €, 8 Prozent über Plan, die Auslastung bei 82 Prozent. Offen sind 20.550 €, eine Rechnung wartet seit 9 Tagen.',
+      'Läuft ordentlich! Umsatz Richtung 412.000 €, das ist 8 Prozent über Plan. Ein Wermutstropfen: 20.550 € stehen noch offen, eine Rechnung schon seit 9 Tagen.'
+    ],
+    lageMehr: [
+      ' Die Marge fällt seit April, dort würde ich ansetzen.',
+      ' Auffällig ist nur die Marge, sie fällt seit April. Dort würde ich als Nächstes ansetzen.',
+      ' Ein Punkt für dein Radar: Die Marge rutscht seit April. Da lohnt sich der nächste Blick.'
+    ],
+    kosten: [
+      'Diesel kostet dich aktuell 11.900 € im Monat, 14 Prozent der Frachtkosten. Sensitivität: plus 10 Cent je Liter kosten 640 € monatlich.',
+      'Der Diesel schlägt aktuell mit 11.900 € im Monat zu Buche, das sind 14 Prozent deiner Frachtkosten. Steigt der Liter um 10 Cent, kostet dich das 640 € mehr.',
+      'Gute Frage: Rund 11.900 € im Monat gehen für Diesel drauf, etwa jeder siebte Frachtkosten-Euro. Jeder 10-Cent-Sprung an der Säule kostet dich 640 € extra.'
+    ],
+    kostenMehr: [
+      ' Eine Preisgleitklausel würde 70 Prozent des Risikos an die Kunden weitergeben.',
+      ' Mit einer Preisgleitklausel in den Frachtverträgen würdest du rund 70 Prozent dieses Risikos an die Kunden weitergeben.',
+      ' Wenn du das Risiko loswerden willst: Eine Preisgleitklausel gibt rund 70 Prozent davon an deine Kunden weiter, das rechne ich dir gern durch.'
+    ]
+  };
+  var probeFrage = document.getElementById('probe-frage');
+  var probeAntwort = document.getElementById('probe-antwort');
+  var aktiveFrage = null;
+  function probe(f){
+    aktiveFrage = f;
+    probeFrage.hidden = false;
+    probeFrage.textContent = '„' + FRAGEN[f] + '"';
+    probeAntwort.classList.remove('da');
+    var t = +ton.value, l = +laenge.value;
+    var text = ANTWORT[f][t] + (l ? ANTWORT[f + 'Mehr'][t] : '');
+    setTimeout(function(){
+      probeAntwort.textContent = text;
+      probeAntwort.classList.add('da');
+    }, reduziert ? 0 : 200);
+  }
+  function probeNeu(){ if (aktiveFrage) probe(aktiveFrage); }
+  document.querySelectorAll('.chips button').forEach(function(b){
+    b.addEventListener('click', function(){ probe(b.dataset.frage); });
+  });
+})();
+</script>
+<script src="zeiger.js"></script>
+</body>
+</html>
