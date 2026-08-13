@@ -8,98 +8,313 @@
 <link rel="stylesheet" href="system.css">
 <style>
 /* quoroai-plattform-design · Registrieren ist die quoroAI-Tür der Beratung
-   (Klarstellung Produkt-Session, 2026-08-13): auf der nackten Adresse gründet
-   eine BERATUNG ihr Konto bei quoroAI — kein Kunde registriert sich hier,
-   Kunden kommen nur über die Einladung (/zugang). Deshalb quoroAI-Marke und
-   system.css statt marke.js, und die Felder des Produkts: Name, E-Mail,
-   Passwort. quoroAI spricht Beratungen per Du. Marker: REGISTRIEREN-V1 */
+   (Chronik 2026-08-13) — und die Tür baut: jedes gültige Feld ist eine echte
+   Baustufe des Modells (Machart nach currily Entwurf C, Jonas 2026-08-13;
+   nur die Machart — Bilder, Farben, Schrift sind quoroAI). Die Stufen sitzen
+   auf auf Sicht geprüften Phasen des Aufbau-Films: 12 Grundplatte, 40 Rohbau,
+   72 Gebäude, 104 bezugsfertig. Beim Anlegen geht das Abendlicht an
+   (stadt.jpg, dieselbe Szene im selben Seitenverhältnis). Der Umschalter
+   trägt auch das Anmelden: dort steht die Stadt fertig, und der Eintritt
+   führt mit angehendem Licht direkt ins Cockpit (der Aufbau-Film wird
+   übersprungen, die Ankunft ist das erleuchtete Modell).
+   Der Baustand ist ein Füllstand im Glas (Systemregel).
+   Felder wie im Produkt: Name, E-Mail, Passwort (mind. 12 Zeichen).
+   Marker: REGISTRIEREN-V2 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input{font-family:inherit}
-body{
-  min-height:100svh;display:flex;align-items:center;justify-content:center;
-  padding:24px;
-  /* ein Hauch Lila-Licht auf dem weißen Grund, damit das Glas etwas hat, worüber es schwebt */
-  background:
-    radial-gradient(60% 50% at 18% 8%, var(--lila-100), transparent 70%),
-    radial-gradient(50% 42% at 88% 92%, var(--lila-050), transparent 70%),
-    var(--grund);
+html,body{height:100%}
+body{overflow:hidden;background:var(--grund)}
+
+.lage{
+  height:100svh;display:grid;grid-template-columns:minmax(400px,460px) 1fr;
+  align-items:center;gap:0;
 }
-.buehne{width:min(440px,100%)}
+
+/* ---------- linke Spalte: die Tür ---------- */
+.spalte{padding:24px 12px 24px 40px;max-height:100svh;overflow-y:auto}
 .wortmarke{
-  display:flex;align-items:center;justify-content:center;gap:10px;
+  display:flex;align-items:center;gap:10px;
   font-family:var(--schrift-schau);font-size:18px;letter-spacing:-.02em;
 }
 .wortmarke img{width:30px;height:30px;display:block}
 .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;font-family:var(--schrift-text)}
 .karte-tuer{
-  margin-top:22px;border-radius:var(--radius-karte);padding:34px 34px 30px;
+  margin-top:18px;border-radius:var(--radius-karte);padding:28px 30px 26px;
   background:rgba(255,255,255,.62);
   backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);
   border:1px solid rgba(255,255,255,.6);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.75), 0 20px 50px rgba(59,52,134,.16);
 }
-h1{font-size:26px;text-align:center}
-.erklaer{font-size:14px;color:var(--nebel-600);text-align:center;margin-top:8px;line-height:1.55}
-.feld{margin-top:16px}
-.knopf{width:100%;margin-top:22px}
-.fehler{font-size:13px;color:var(--rot);font-weight:600;text-align:center;margin-top:12px;min-height:1.2em}
+.umschalter{
+  display:inline-flex;gap:4px;padding:4px;border-radius:var(--radius-kapsel);
+  background:rgba(24,21,47,.05);
+}
+.umschalter button{
+  border:0;background:none;cursor:pointer;border-radius:var(--radius-kapsel);
+  padding:7px 16px;font-size:13px;font-weight:600;color:var(--nebel-600);
+  transition:background .2s ease,color .2s ease;
+}
+.umschalter button.hier{background:var(--tinte);color:#fff}
+h1{font-size:24px;margin-top:16px}
+.erklaer{font-size:14px;color:var(--nebel-600);margin-top:6px;line-height:1.55}
+.feld{margin-top:14px}
+.knopf{width:100%;margin-top:20px}
+.fehler{font-size:13px;color:var(--rot);font-weight:600;margin-top:10px;min-height:1.2em}
 .gesendet{
-  text-align:center;margin-top:16px;padding:16px;border-radius:var(--radius-innen);
+  margin-top:16px;padding:16px;border-radius:var(--radius-innen);
   background:var(--gruen-fond);color:var(--tinte);font-size:14px;line-height:1.55;
 }
 .gesendet b{font-weight:600}
 .neben{
-  display:block;text-align:center;margin-top:16px;font-size:13px;font-weight:600;
+  display:block;text-align:center;margin-top:14px;font-size:13px;font-weight:600;
   color:var(--nebel-600);background:none;border:none;width:100%;cursor:pointer;
 }
 .neben:hover{color:var(--lila-700)}
-.hinweis{font-size:12px;color:var(--nebel-500);text-align:center;margin-top:18px}
-#demo-hinweis{
-  position:fixed;top:24px;left:50%;translate:-50% 6px;pointer-events:none;
-  font-size:14px;font-weight:600;color:var(--lila-700);
-  opacity:0;transition:opacity .3s ease,translate .3s var(--kurve);
+.hinweis{font-size:12px;color:var(--nebel-500);margin-top:14px}
+
+/* ---------- rechte Spalte: die Bau-Bühne ---------- */
+.buehne{position:relative;height:100svh;overflow:hidden}
+.buehne canvas,.buehne #licht{
+  position:absolute;inset:0;width:100%;height:100%;
+  mix-blend-mode:multiply;
+}
+.buehne canvas{filter:brightness(1.02)}
+#licht{
+  object-fit:contain;filter:brightness(1.065);
+  opacity:0;transition:opacity 1.3s ease;
+}
+body.erwacht #licht{opacity:1}
+body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
+.baustand{
+  position:absolute;left:50%;bottom:clamp(16px,5svh,44px);translate:-50% 0;
+  display:flex;align-items:center;gap:10px;white-space:nowrap;
+  padding:9px 16px;border-radius:var(--radius-kapsel);
+  background:rgba(255,255,255,.6);
+  backdrop-filter:blur(16px) saturate(170%);-webkit-backdrop-filter:blur(16px) saturate(170%);
+  border:1px solid rgba(255,255,255,.6);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75), 0 10px 30px rgba(59,52,134,.12);
+}
+.baustand .zustand{--fluid:var(--lila-400);--fluid-tief:var(--lila-600)}
+.baustand .zustand-wort{font-weight:600}
+
+@media (prefers-reduced-motion:reduce){
+  #licht,body.erwacht .buehne canvas{transition-duration:.01ms}
+}
+@media (max-width:900px){
+  body{overflow:auto}
+  .lage{grid-template-columns:1fr;height:auto;min-height:100svh;align-items:start}
+  .buehne{order:-1;height:36svh}
+  .baustand{bottom:10px}
+  .spalte{padding:8px 18px calc(28px + env(safe-area-inset-bottom));max-height:none;overflow:visible}
+  .wortmarke{justify-content:center}
 }
 </style>
 </head>
 <body class="quoro">
-<div class="buehne">
-  <div class="wortmarke"><img src="bilder/quoro-icon.svg" alt="" width="30" height="30"><div>quoroAI<small>White-Label-Plattform</small></div></div>
-  <div class="karte-tuer">
-    <h1>Leg deine Beratung an.</h1>
-    <p class="erklaer">Name, E-Mail, Passwort, mehr braucht es nicht. Marke, KI-Berater und Mandate richtest du danach in deiner Zentrale ein.</p>
-    <div class="feld"><label for="name">Name</label><input id="name" type="text" autocomplete="name" placeholder="Vor- und Nachname"></div>
-    <div class="feld"><label for="email">E-Mail</label><input id="email" type="email" autocomplete="email" placeholder="du@deine-beratung.de"></div>
-    <div class="feld"><label for="pass">Dein Passwort</label><input id="pass" type="password" autocomplete="new-password" placeholder="mindestens 12 Zeichen"></div>
-    <div class="fehler" id="fehler" aria-live="polite"></div>
-    <div class="gesendet" id="gesendet" hidden><b>Post ist raus.</b> Bestätige deine E-Mail, dann geht es weiter in deine Zentrale.</div>
-    <button class="knopf primaer" id="anlegen" type="button">Beratung anlegen</button>
-    <button class="neben" id="schon-dabei" type="button">Schon dabei? Anmelden</button>
+<div class="lage">
+  <div class="spalte">
+    <div class="wortmarke"><img src="bilder/quoro-icon.svg" alt="" width="30" height="30"><div>quoroAI<small>White-Label-Plattform</small></div></div>
+    <div class="karte-tuer">
+      <div class="umschalter" role="tablist">
+        <button type="button" id="u-neu" class="hier" role="tab" aria-selected="true">Beratung anlegen</button>
+        <button type="button" id="u-an" role="tab" aria-selected="false">Anmelden</button>
+      </div>
+
+      <!-- Konto anlegen: jedes gültige Feld baut das Modell weiter -->
+      <div id="f-neu">
+        <h1>Leg deine Beratung an.</h1>
+        <p class="erklaer">Name, E-Mail, Passwort, mehr braucht es nicht. Dein Modell baut mit, Feld für Feld.</p>
+        <div class="feld"><label for="name">Name</label><input id="name" type="text" autocomplete="name" placeholder="Vor- und Nachname"></div>
+        <div class="feld"><label for="email">E-Mail</label><input id="email" type="email" autocomplete="email" placeholder="du@deine-beratung.de"></div>
+        <div class="feld"><label for="pass">Dein Passwort</label><input id="pass" type="password" autocomplete="new-password" placeholder="mindestens 12 Zeichen"></div>
+        <div class="fehler" id="fehler-neu" aria-live="polite"></div>
+        <div class="gesendet" id="gesendet" hidden><b>Post ist raus, und das Licht ist an.</b> Bestätige deine E-Mail, dann geht es weiter in deine Zentrale.</div>
+        <button class="knopf primaer" id="anlegen" type="button">Beratung anlegen</button>
+      </div>
+
+      <!-- Anmelden: die Stadt steht schon, der Eintritt macht das Licht an -->
+      <div id="f-an" hidden>
+        <h1>Willkommen zurück.</h1>
+        <p class="erklaer">Dein Modell steht schon. Beim Eintreten geht das Licht an.</p>
+        <div class="feld"><label for="an-email">E-Mail</label><input id="an-email" type="email" autocomplete="email" placeholder="du@deine-beratung.de"></div>
+        <div class="feld"><label for="an-pass">Passwort</label><input id="an-pass" type="password" autocomplete="current-password" placeholder="••••••••••"></div>
+        <div class="fehler" id="fehler-an" aria-live="polite"></div>
+        <button class="knopf primaer" id="eintreten" type="button">Eintreten</button>
+        <button class="neben" id="vergessen" type="button">Passwort vergessen?</button>
+      </div>
+    </div>
+    <p class="hinweis">Vorführung mit Demo-Daten, jede Eingabe funktioniert.</p>
   </div>
-  <p class="hinweis">Vorführung mit Demo-Daten, jede Eingabe funktioniert.</p>
+
+  <div class="buehne" aria-hidden="true">
+    <canvas id="bau"></canvas>
+    <img id="licht" src="bilder/modell/stadt.jpg" alt="">
+    <div class="baustand">
+      <span class="zustand" id="bau-stand" style="--stand:.12" role="img" aria-label="Baustand"></span>
+      <span class="zustand-wort" id="bau-wort">Deine Grundplatte liegt.</span>
+    </div>
+  </div>
 </div>
-<div id="demo-hinweis">Diese Fläche entsteht gerade.</div>
+
+<div id="demo-hinweis" style="position:fixed;top:20px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-size:14px;font-weight:600;color:var(--lila-700);opacity:0;transition:opacity .3s ease,translate .3s var(--kurve)">Diese Fläche entsteht gerade.</div>
+
 <script>
 (function(){
   'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- die Bau-Bühne: Baustufen sitzen auf echten Film-Phasen ---------- */
+  var cv = document.getElementById('bau');
+  var ctx = cv.getContext('2d');
+  var PFAD = 'bilder/modell/aufbau/f_';
+  /* jedes 2. Bild reicht für flüssige Mini-Filme je Stufe; die Dateien
+     teilen sich mit dem Aufbau-Film des Cockpits */
+  var NUMMERN = [];
+  for (var n = 1; n <= 109; n += 2) NUMMERN.push(n);
+  NUMMERN.push(111);
+  var N = NUMMERN.length;
+  var frames = new Array(N);
+  /* das Fertig-Bild lädt zuerst: wer anmeldet, sieht sofort die ganze Stadt */
+  var reihenfolge = [N - 1, 5, 0];
+  for (var r = 0; r < N; r++) if (reihenfolge.indexOf(r) === -1) reihenfolge.push(r);
+  reihenfolge.forEach(function(i){
+    var im = new Image();
+    im.onload = function(){ if (!laeuft) male(ist); };
+    im.src = PFAD + String(NUMMERN[i]).padStart(3, '0') + '.jpg';
+    frames[i] = im;
+  });
+
+  function messe(){
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = cv.clientWidth * dpr;
+    cv.height = cv.clientHeight * dpr;
+    letzter = -1;
+    male(ist);
+  }
+  var letzter = -1;
+  function male(idx){
+    idx = Math.round(idx);
+    while (idx > 0 && !(frames[idx] && frames[idx].complete && frames[idx].naturalWidth)) idx--;
+    var im = frames[idx];
+    if (!(im && im.complete && im.naturalWidth) || idx === letzter) return;
+    letzter = idx;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    /* einpassen ohne Beschnitt, mittig — deckungsgleich mit #licht (object-fit:contain) */
+    var s = Math.min(cv.width / im.naturalWidth, cv.height / im.naturalHeight);
+    var w = im.naturalWidth * s, h = im.naturalHeight * s;
+    ctx.drawImage(im, (cv.width - w) / 2, (cv.height - h) / 2, w, h);
+  }
+  function idxZuFrame(nr){
+    var best = 0;
+    for (var i = 0; i < N; i++) if (Math.abs(NUMMERN[i] - nr) < Math.abs(NUMMERN[best] - nr)) best = i;
+    return best;
+  }
+
+  /* Stufen auf Sicht geprüft: 12 Grundplatte, 40 Rohbau, 72 Gebäude, 104 fertig */
+  var STUFEN = [
+    { frame: 12,  stand: .12, text: 'Deine Grundplatte liegt.' },
+    { frame: 40,  stand: .42, text: 'Der Rohbau steht.' },
+    { frame: 72,  stand: .72, text: 'Die Gebäude stehen.' },
+    { frame: 104, stand: 1,   text: 'Bezugsfertig.' }
+  ];
+  var standKapsel = document.getElementById('bau-stand');
+  var standWort = document.getElementById('bau-wort');
+
+  var felder = [document.getElementById('name'), document.getElementById('email'), document.getElementById('pass')];
+  function gueltig(f){
+    if (f.id === 'name') return f.value.trim() !== '';
+    if (f.id === 'email') return f.value.indexOf('@') !== -1;
+    return f.value.length >= 12;
+  }
+  /* ein Feld zählt erst, wenn es wirklich gültig ist — nicht beim ersten Buchstaben */
+  function stufe(){
+    if (anmeldeSeite) return STUFEN.length - 1;
+    var voll = 0;
+    felder.forEach(function(f){ if (gueltig(f)) voll++; });
+    return Math.min(voll, STUFEN.length - 1);
+  }
+
+  var ist = idxZuFrame(STUFEN[0].frame), ziel = ist, laeuft = false;
+  function tick(){
+    var schritt = 0.62; /* konstantes Bautempo */
+    if (ist < ziel) ist = Math.min(ziel, ist + schritt);
+    else if (ist > ziel) ist = Math.max(ziel, ist - schritt);
+    male(ist);
+    if (ist === ziel) { laeuft = false; return; }
+    requestAnimationFrame(tick);
+  }
+  function baustand(sofort){
+    var s = STUFEN[stufe()];
+    ziel = idxZuFrame(s.frame);
+    standKapsel.style.setProperty('--stand', s.stand);
+    standWort.textContent = s.text;
+    if (reduziert || sofort === true) { ist = ziel; laeuft = false; male(ist); return; }
+    if (!laeuft) { laeuft = true; requestAnimationFrame(tick); }
+  }
+  felder.forEach(function(f){
+    f.addEventListener('input', function(){ baustand(); });
+    f.addEventListener('change', function(){ baustand(); });
+  });
+  window.addEventListener('resize', messe);
+  messe();
+
+  /* ---------- das Licht geht an ---------- */
+  function lichtAn(wort){
+    document.body.classList.add('erwacht');
+    standKapsel.className = 'zustand aktiv';
+    standKapsel.style.removeProperty('--stand');
+    standWort.textContent = wort;
+  }
+
+  /* ---------- Umschalter ---------- */
+  var anmeldeSeite = false;
+  var uNeu = document.getElementById('u-neu'), uAn = document.getElementById('u-an');
+  function schalte(an){
+    anmeldeSeite = an;
+    document.getElementById('f-neu').hidden = an;
+    document.getElementById('f-an').hidden = !an;
+    uNeu.classList.toggle('hier', !an); uNeu.setAttribute('aria-selected', String(!an));
+    uAn.classList.toggle('hier', an); uAn.setAttribute('aria-selected', String(an));
+    /* beim Tab-Wechsel steht der Bau einfach da — gebaut wird nur beim Tippen */
+    baustand(true);
+    if (!an) standWort.textContent = STUFEN[stufe()].text;
+    else standWort.textContent = 'Dein Modell steht. Tritt ein.';
+  }
+  uNeu.addEventListener('click', function(){ schalte(false); });
+  uAn.addEventListener('click', function(){ schalte(true); });
+  if (location.hash === '#anmelden') schalte(true);
+
+  /* ---------- Konto anlegen ---------- */
+  document.getElementById('anlegen').addEventListener('click', function(){
+    var f = document.getElementById('fehler-neu');
+    if (felder[0].value.trim() === '') { f.textContent = 'Ohne Namen geht es nicht.'; return; }
+    if (felder[1].value.indexOf('@') === -1) { f.textContent = 'Die E-Mail sieht noch nicht richtig aus.'; return; }
+    if (felder[2].value.length < 12) { f.textContent = 'Das Passwort braucht mindestens 12 Zeichen.'; return; }
+    f.textContent = '';
+    document.getElementById('gesendet').hidden = false;
+    document.getElementById('anlegen').hidden = true;
+    lichtAn('Deine Beratung. Als Modell.');
+  });
+
+  /* ---------- Anmelden: Licht an, dann ins Cockpit ---------- */
+  document.getElementById('eintreten').addEventListener('click', function(){
+    var f = document.getElementById('fehler-an');
+    if (document.getElementById('an-email').value.indexOf('@') === -1) { f.textContent = 'Die E-Mail sieht noch nicht richtig aus.'; return; }
+    if (!document.getElementById('an-pass').value) { f.textContent = 'Ohne Passwort geht es nicht.'; return; }
+    f.textContent = '';
+    lichtAn('Willkommen zurück.');
+    /* die Ankunft IST das erleuchtete Modell — der Aufbau-Film läuft nicht doppelt */
+    try { sessionStorage.setItem('modell-film', '1'); } catch (e) {}
+    setTimeout(function(){ location.href = 'beratung-f-modell.html'; }, reduziert ? 150 : 1500);
+  });
+
   var hinweisTimer = null;
-  document.getElementById('schon-dabei').addEventListener('click', function(){
+  document.getElementById('vergessen').addEventListener('click', function(){
     var h = document.getElementById('demo-hinweis');
     h.style.opacity = .95; h.style.translate = '-50% 0';
     clearTimeout(hinweisTimer);
     hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2200);
-  });
-  document.getElementById('anlegen').addEventListener('click', function(){
-    var name = document.getElementById('name').value.trim();
-    var email = document.getElementById('email').value.trim();
-    var pass = document.getElementById('pass').value;
-    var f = document.getElementById('fehler');
-    if (!name) { f.textContent = 'Ohne Namen geht es nicht.'; return; }
-    if (!email || email.indexOf('@') === -1) { f.textContent = 'Die E-Mail sieht noch nicht richtig aus.'; return; }
-    if (pass.length < 12) { f.textContent = 'Das Passwort braucht mindestens 12 Zeichen.'; return; }
-    f.textContent = '';
-    document.getElementById('gesendet').hidden = false;
-    document.getElementById('anlegen').hidden = true;
   });
 })();
 </script>
