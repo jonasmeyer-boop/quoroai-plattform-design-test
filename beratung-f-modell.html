@@ -17,7 +17,10 @@
    kommen im selben Moment an. Trägt das quoroAI-Designsystem aus system.css
    (Entscheidung 2026-08-12): Lila, Clash Display, Glas, Füllstände, Glasknöpfe,
    Tinte in zwei Gewichten. Die alten Orts-Namen (--blau, --stift, --papier) bleiben
-   als Aliasse und zeigen auf System-Tokens., Marker: BERATUNG-F-MODELL-V7 */
+   als Aliasse und zeigen auf System-Tokens. V8: je Mandat ein eigener
+   Strategieraum (Fensterblick als weißes Modell), Wolkenschatten und KI-Puls
+   auf der Totale, Lichtdurchbruch beim Raumwechsel, Stift-Cursor.
+   Marker: BERATUNG-F-MODELL-V8 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -120,6 +123,61 @@ body.gezoomt .zone .chip,body.gezoomt .stift-text,body.gezoomt #stift-lage{opaci
   display:inline-flex;align-items:center;justify-content:center;
 }
 .zone .chip .zahl[data-zahl="0"]{display:none}
+
+/* Wolkenschatten ziehen über das Modell: zwei weiche Schattenfelder wandern
+   sehr langsam, multipliziert wie das Foto selbst. Beim Zoom blenden sie ab,
+   ihr Maßstab gehört zur Totale. */
+#wolken{
+  position:absolute;inset:0;pointer-events:none;overflow:hidden;
+  transition:opacity .4s ease;
+}
+#wolken i{
+  position:absolute;inset:-30%;display:block;mix-blend-mode:multiply;
+  background:
+    radial-gradient(38% 30% at 30% 35%, rgba(59,52,134,.075), transparent 70%),
+    radial-gradient(30% 24% at 72% 62%, rgba(59,52,134,.055), transparent 70%);
+  animation:wolkenzug 90s ease-in-out infinite alternate;
+}
+#wolken i + i{
+  background:radial-gradient(26% 20% at 55% 20%, rgba(59,52,134,.05), transparent 70%);
+  animation:wolkenzug 124s ease-in-out infinite alternate-reverse;
+}
+@keyframes wolkenzug{from{translate:-6% -3%}to{translate:5% 4%}}
+body.gezoomt #wolken{opacity:0}
+
+/* Der KI-Puls: auf dem Dach der Zentrale atmet die Arbeit des KI-Beraters */
+#puls{
+  position:absolute;left:48.5%;top:15.5%;width:14px;height:14px;margin:-7px 0 0 -7px;
+  pointer-events:none;border-radius:999px;
+  background:radial-gradient(circle, rgba(111,99,232,.95), rgba(111,99,232,0) 70%);
+  transition:opacity .4s ease;
+}
+#puls::after{
+  content:'';position:absolute;inset:0;border-radius:999px;
+  border:1.5px solid rgba(111,99,232,.55);
+  animation:puls-halo 3.6s var(--feder) infinite;
+}
+@keyframes puls-halo{
+  0%{transform:scale(.6);opacity:0}
+  22%{opacity:.85}
+  100%{transform:scale(3.4);opacity:0}
+}
+body.gezoomt #puls{opacity:0}
+
+/* Der Lichtdurchbruch: im Moment, in dem die Kamera die Fassade durchstößt,
+   blitzt es weich auf und das Bild kippt in den Raum */
+#blitz{
+  position:fixed;inset:0;z-index:26;pointer-events:none;opacity:0;
+  background:radial-gradient(70% 70% at 50% 46%, rgba(255,255,255,.98), rgba(255,255,255,.4) 55%, transparent 80%);
+}
+body.drin #blitz{animation:durchbruch .6s ease-out}
+@keyframes durchbruch{0%{opacity:0}28%{opacity:.9}100%{opacity:0}}
+
+@media (prefers-reduced-motion: reduce){
+  #wolken i{animation:none}
+  #puls::after{animation:none;opacity:0}
+  body.drin #blitz{animation:none}
+}
 
 /* Der Stift kritzelt aufs Foto: zoomt mit der Kamera mit */
 #stift-lage{position:absolute;inset:0;pointer-events:none;overflow:visible}
@@ -413,6 +471,8 @@ body.gezoomt #zonen{display:block}
 <div id="buehne">
   <div id="kamera">
     <img src="bilder/modell/modell-gross.jpg" width="2752" height="1536" alt="Weißes Architekturmodell der Beratung: fünf Gebäude auf einer Grundplatte">
+    <div id="wolken" aria-hidden="true"><i></i><i></i></div>
+    <div id="puls" aria-hidden="true"></div>
     <svg id="stift-lage" aria-hidden="true"></svg>
     <div class="stift-text" id="stift-mts" style="left:13.5%;top:60.5%">seit 3 Wochen still!</div>
     <div class="stift-text blau" id="stift-cordes" style="left:57%;top:66.5%">Steuerfrage wartet!</div>
@@ -461,6 +521,7 @@ body.gezoomt #zonen{display:block}
 <div id="schleier"></div>
 
 <div id="raum" aria-hidden="true"><img src="bilder/modell/strategieraum.jpg" alt=""></div>
+<div id="blitz" aria-hidden="true"></div>
 
 <div id="zonen">
   <section class="inhalt" data-raum="petersen">
@@ -739,6 +800,17 @@ body.gezoomt #zonen{display:block}
 
   /* ---------- Zoom-Navigation (Bauplan begehbare-plattform) ---------- */
   var ZONEN_NAMEN = {petersen: 'Petersen Stahlbau', cordes: 'Cordes Logistik', freitag: 'Bäckerei Freitag', mts: 'MTS Maschinenbau', zentrale: 'Zentrale'};
+  /* Jedes Mandat hat seinen eigenen Strategieraum: gleiche Kamera, aber durchs
+     Fenster sieht man die Welt des Mandats als weißes Modell; die Zentrale
+     blickt von oben auf die ganze Modellstadt */
+  var RAUM_BILDER = {
+    petersen: 'bilder/modell/raum-petersen.jpg',
+    cordes: 'bilder/modell/raum-cordes.jpg',
+    freitag: 'bilder/modell/raum-freitag.jpg',
+    mts: 'bilder/modell/raum-mts.jpg',
+    zentrale: 'bilder/modell/raum-zentrale.jpg'
+  };
+  var raumBild = document.querySelector('#raum img');
   var krume = document.getElementById('krume');
   var krumeZiel = document.getElementById('krume-ziel');
   var zonenLage = document.getElementById('zonen');
@@ -810,6 +882,8 @@ body.gezoomt #zonen{display:block}
   function oeffne(ziel, sofort){
     if (!ZONEN_NAMEN[ziel]) return;
     offen = ziel;
+    var bild = RAUM_BILDER[ziel] || 'bilder/modell/strategieraum.jpg';
+    if (!raumBild.src.endsWith(bild)) raumBild.src = bild;
     zoomeZu(ziel, sofort);
     document.body.classList.add('gezoomt');
     var offeneSection = null;
@@ -894,6 +968,8 @@ body.gezoomt #zonen{display:block}
     try { sessionStorage.setItem('modell-film', '1'); } catch (e) {}
     setTimeout(function(){ film.hidden = true; }, 750);
     kritzle();
+    /* die Strategieräume leise vorladen, damit der Zoom nie auf ein Bild wartet */
+    Object.keys(RAUM_BILDER).forEach(function(z){ new Image().src = RAUM_BILDER[z]; });
   }
 
   function starteFilm(){
@@ -962,5 +1038,6 @@ body.gezoomt #zonen{display:block}
   }
 })();
 </script>
+<script src="stift-cursor.js"></script>
 </body>
 </html>
