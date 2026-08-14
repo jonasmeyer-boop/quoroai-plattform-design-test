@@ -25,17 +25,25 @@
    genügt der Deckungsbeitrag plus der eigene Satz, um den des anderen
    auszurechnen. Halb offenlegen geht nicht.
 
-   Der Balken trägt in jeder Sicht GENAU EINE Bedeutung, und die Spalte sagt
-   sie an: in der Inhaber-Sicht „von 100 € Honorar" (grau die Kosten, lila
-   was bleibt), in der Berater-Sicht „vom Listensatz angekommen". Nicht zwei
-   Lesarten im selben Bild.
+   Der Balken trägt GENAU EINE Bedeutung: „von 100 € Honorar" — grau die
+   Kosten, lila was bleibt. Die gibt es nur in der Inhaber-Sicht; in der
+   Berater-Sicht läuft der graue Teil aus und die Röhre blendet ab. Ein
+   Balken mit zwei Lesarten wäre eine Falle, und ein Balken, der in einer
+   Sicht nichts unterscheidet, behauptet trotzdem etwas (siehe V2).
 
    Die Zahlen decken sich mit der Kundenliste (beratung-kunden.html: 30,4 /
    12,1 / 31,0 / 26,8 Prozent) — sie werden hier aus Stunden, Sätzen und
    Honoraren gerechnet, nicht abgeschrieben. Der Tarifverlauf deckt sich mit
    beratung-abrechnung.html (Eröffnungsdaten und Tarife der vier Zugänge).
 
-   Marker: BERATUNG-MARGE-V1 */
+   V2 (Code-Review): Fremde Mandate waren nur optisch weg — mit der
+   Tabulatortaste erreichbar und für den Screenreader lesbar, samt der
+   Zahlen, die diese Sicht verbergen soll. Der Balken der Berater-Sicht lag
+   überall bei 99 bis 100 Prozent und ist deshalb ganz weg. Krume führt
+   zurück in die Zentrale wie bei den Geschwistern, der Fokusring liegt
+   innerhalb der Karte, und alle Texte, die beim Sichtwechsel umspringen,
+   blenden jetzt gemeinsam über.
+   Marker: BERATUNG-MARGE-V2 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -136,11 +144,26 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
 .roehre .kosten{background:linear-gradient(180deg, var(--nebel-300) 0%, var(--nebel-400) 100%)}
 .roehre .bleibt{background:linear-gradient(180deg, var(--lila-400) 0%, var(--lila-600) 100%);
   box-shadow:inset 0 1px 1px rgba(255,255,255,.5), 0 0 8px rgba(111,99,232,.35)}
+/* Blendet erst ab, wenn der Füllstand ausgelaufen ist. Zurück kommt sie
+   sofort, damit der Lauf danach zu sehen ist. */
+.roehre{transition:opacity .25s ease}
+.roehre.weg{opacity:0;transition:opacity .35s ease .4s}
 .roehre::after{ /* Glanz oben, wie bei jedem Füllstand */
   content:"";position:absolute;inset:0;border-radius:var(--radius-kapsel);pointer-events:none;
   background:linear-gradient(180deg, rgba(255,255,255,.8), rgba(255,255,255,0)) no-repeat 9px 2.5px / calc(100% - 18px) 38%;
 }
-.gesamt .roehre{height:34px;margin-top:18px}
+/* Die große Röhre zieht sich nach dem Abblenden auch zusammen — sonst
+   bliebe in der Karte ein weißes Loch. In den Mandatszeilen liegt der Platz
+   zwischen Name und Zahl und fällt nicht auf; dort bleibt er stehen, damit
+   die Zahlenspalte nicht wandert. */
+.gesamt .roehre{
+  height:34px;margin-top:18px;
+  transition:opacity .25s ease,height .3s var(--kurve),margin-top .3s var(--kurve);
+}
+.gesamt .roehre.weg{
+  height:0;margin-top:0;border-width:0;
+  transition:opacity .35s ease .4s,height .3s var(--kurve) .7s,margin-top .3s var(--kurve) .7s,border-width 0s linear .7s;
+}
 .g-legende{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px}
 .g-legende div{font-size:12.5px;color:var(--nebel-600);line-height:1.5}
 .g-legende b{display:block;font-size:16px;font-weight:600;color:var(--tinte);letter-spacing:-.01em}
@@ -165,14 +188,25 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
   transition:max-height .45s var(--kurve),opacity .3s ease,margin .3s ease;
 }
 /* Ein Mandat, das in dieser Sicht nichts zu suchen hat, fällt zusammen —
-   es verschwindet nicht einfach, man sieht, dass es geht. */
-.mandat.fort{max-height:0;opacity:0;margin-top:-8px;border-width:0;box-shadow:none;pointer-events:none}
+   es verschwindet nicht einfach, man sieht, dass es geht. Nur unsichtbar
+   genügt nicht: ohne `visibility` (und das `inert` aus dem Skript) bliebe
+   die Zeile mit der Tabulatortaste erreichbar und der Screenreader läse
+   genau die Zahlen vor, die diese Sicht verbergen soll. */
+.mandat.fort{
+  max-height:0;opacity:0;margin-top:-8px;border-width:0;box-shadow:none;
+  pointer-events:none;visibility:hidden;
+  transition:max-height .45s var(--kurve),opacity .3s ease,margin .3s ease,visibility 0s linear .45s;
+}
 .mandat > .zeile{
   display:grid;grid-template-columns:minmax(0,1fr) 220px 108px;align-items:center;gap:18px;
   width:100%;min-height:66px;padding:12px 16px;
   background:none;border:0;cursor:pointer;text-align:left;transition:background .15s ease;
 }
 @media (hover:hover){.mandat > .zeile:hover{background:var(--lila-050)}}
+/* Die Karte schneidet ab (sie muss, damit sie zusammenfallen kann), und der
+   Knopf füllt sie ganz aus — ein Fokusring nach außen läge außerhalb und
+   wäre unsichtbar. Also nach innen. */
+.mandat > .zeile:focus-visible{outline-offset:-4px}
 .mandat .m-name{font-size:15.5px;font-weight:600;letter-spacing:-.01em;display:block}
 .mandat .m-meta{font-size:12.5px;color:var(--nebel-600);margin-top:2px;display:block}
 .mandat .m-mass{text-align:right}
@@ -249,7 +283,10 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
   #krume{left:18px;top:70px}
   main{padding:132px 18px calc(140px + env(safe-area-inset-bottom))}
   .gesamt{padding:18px 16px 16px}
-  .mass-kopf{display:flex;justify-content:flex-end;padding:0 4px}
+  /* Auf dem Handy liegt der Balken als eigene Zeile unter dem Namen — die
+     Überschrift steht dann mittig über der ganzen Karte, nicht rechts über
+     der Wertspalte, die sie gar nicht meint. */
+  .mass-kopf{display:block;text-align:center;padding:0 14px}
   .mass-kopf .mk-wort{grid-column:auto}
   .mandat > .zeile{grid-template-columns:minmax(0,1fr) 92px;gap:12px;padding:13px 14px}
   .mandat .m-roehre{grid-column:1 / -1;order:3}
@@ -269,12 +306,12 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
   <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
 </nav>
 
-<a id="krume" href="beratung-f-modell.html"><span class="zurueck">← Modell</span><span>/</span><b>Marge und Sätze</b></a>
+<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Marge und Sätze</b></a>
 
 <main>
   <div class="kopf">
     <h1>Marge und Sätze</h1>
-    <div class="stand">Was von einem Honorar übrig bleibt, nachdem die Stunden bezahlt sind. Seit Jahresbeginn, über die vier Mandate des Modells.</div>
+    <div class="stand weich" id="stand"></div>
   </div>
 
   <div class="sicht">
@@ -285,26 +322,26 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
     </div>
   </div>
 
-  <h3 id="titel-gesamt">Die Beratung, seit Jahresbeginn</h3>
+  <h3 class="weich" id="titel-gesamt">Die Beratung, seit Jahresbeginn</h3>
   <section class="gesamt" aria-labelledby="titel-gesamt">
-    <div class="g-zahl zahl" id="g-zahl"></div>
-    <div class="g-wort" id="g-wort"></div>
+    <div class="g-zahl zahl weich" id="g-zahl"></div>
+    <div class="g-wort weich" id="g-wort"></div>
     <div class="roehre" id="g-roehre" role="img" aria-label="">
       <div class="fluss kosten" id="g-kosten"></div>
       <div class="fluss bleibt" id="g-bleibt"></div>
     </div>
-    <div class="g-legende" id="g-legende"></div>
+    <div class="g-legende weich" id="g-legende"></div>
   </section>
 
   <h3>Je Mandat</h3>
-  <p class="was" id="was-mandate"></p>
-  <div class="mass-kopf" id="mass-kopf"><span class="mk-wort"></span></div>
+  <p class="was weich" id="was-mandate"></p>
+  <div class="mass-kopf weich" id="mass-kopf"><span class="mk-wort"></span></div>
   <div class="mandate" id="mandate"></div>
 
   <h3>Sätze</h3>
-  <p class="was" id="was-saetze"></p>
+  <p class="was weich" id="was-saetze"></p>
   <div class="saetze" id="saetze"></div>
-  <p class="regel" id="regel-saetze"></p>
+  <p class="regel weich" id="regel-saetze"></p>
 
   <h3>Tarifverlauf der Kundenzugänge</h3>
   <p class="was">Auf welchem Tarif ein Kunde wann lag — die Grundlage jeder Rechnung, die quoroAI der Beratung stellt.</p>
@@ -413,6 +450,15 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
 
   function zahlwort(z){ return (Math.round(z * 10) / 10).toString().replace(".", ","); }
 
+  /* Im Fließtext steht „zwei Mandate", nicht „2 Mandate" — gezählt wird
+     trotzdem, damit der Satz stimmt, wenn sich die Daten ändern. */
+  var WORTE = ['null','ein','zwei','drei','vier','fünf','sechs','sieben','acht','neun','zehn','elf','zwölf'];
+  function anzahlWort(n){ return WORTE[n] || String(n); }
+  function anzahlWortGross(n){
+    var w = anzahlWort(n);
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }
+
   /* ================= Die Sicht =================
      Die Zeilen werden EINMAL gebaut und beim Sichtwechsel an Ort und Stelle
      geändert. Würden sie neu gebaut, spränge der Balken auf seinen neuen
@@ -440,14 +486,23 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
   knopfInhaberin.addEventListener('click', function(){ setzeSicht('inhaberin'); });
   knopfBeraterin.addEventListener('click', function(){ setzeSicht('beraterin'); });
 
-  /* Eine Röhre, eine Bedeutung je Sicht — die Spalte darüber sagt sie an:
-     Inhaberin — grau die Kosten, lila was von 100 € Honorar bleibt.
-     Beraterin — lila, wie viel vom Listensatz je Stunde angekommen ist. */
+  /* Die Röhre trägt genau eine Aussage: was von 100 € Honorar bleibt. Diese
+     Aussage gibt es nur in der Inhaber-Sicht.
+
+     Der erste Entwurf ließ sie in der Berater-Sicht „vom Listensatz
+     angekommen" zeigen. Gemessen lagen dort alle Werte zwischen 99 und 100
+     Prozent — ein voller Balken neben einem vollen Balken, und der einzige
+     interessante Fall (bei Freitag kam mehr an als der Satz verspricht)
+     wurde vom Deckel bei 100 Prozent unsichtbar. Ein Balken, der nichts
+     unterscheidet, behauptet trotzdem etwas. Also geht er weg: erst läuft
+     der graue Kostenteil aus, dann blendet die Röhre ab. Genau das ist die
+     Aussage — die Kostenseite ist für dich nicht da. */
   function stelleRoehre(el, d){
     var kosten = el.querySelector('.kosten');
     var bleibt = el.querySelector('.bleibt');
     if (darfKosten()) {
       var anteil = Math.max(0, Math.min(1, d.kosten / d.honorar));
+      el.classList.remove('weg');
       kosten.style.opacity = 1;
       kosten.style.left  = '2.5px';
       kosten.style.width = 'calc((100% - 5px) * ' + anteil.toFixed(4) + ')';
@@ -456,13 +511,12 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
       el.setAttribute('aria-label',
         'Von ' + euro(d.honorar) + ' Honorar sind ' + euro(d.kosten) + ' Kosten, ' + euro(d.db) + ' bleiben.');
     } else {
-      var quote = Math.max(0, Math.min(1, d.real / d.listen));
       kosten.style.opacity = 0;
       kosten.style.width = '0';
       bleibt.style.left  = '2.5px';
-      bleibt.style.width = 'calc((100% - 5px) * ' + quote.toFixed(4) + ')';
-      el.setAttribute('aria-label',
-        'Vom Listensatz ' + eurokomma(d.listen) + ' je Stunde sind ' + eurokomma(d.real) + ' angekommen.');
+      bleibt.style.width = 'calc(100% - 5px)';
+      el.classList.add('weg');
+      el.removeAttribute('aria-label');
     }
   }
   function bezug(){ return darfKosten() ? SUMME : MEINE; }
@@ -502,8 +556,10 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
 
   var fremdHinweis = document.createElement('p');
   fremdHinweis.className = 'regel weich';
-  fremdHinweis.innerHTML = 'Zwei von vier Mandaten der Beratung — an den anderen beiden arbeitest du nicht, deshalb stehen sie hier nicht. ' +
-    'Was die Beratung an einem Mandat verdient, sieht nur die Leitung: an einem Mandat mit zwei Köpfen wäre daraus der Satz des anderen zu errechnen.';
+  /* Gezählt, nicht behauptet: wer MANDATE oder ICH ändert, soll hier keine
+     falsche Zahl stehen lassen. */
+  fremdHinweis.innerHTML = anzahlWortGross(MEINE.anzahl) + ' von ' + anzahlWort(SUMME.anzahl) + ' Mandaten der Beratung — an den übrigen arbeitest du nicht, ' +
+    'deshalb stehen sie hier nicht. Was die Beratung an einem Mandat verdient, sieht nur die Leitung: an einem Mandat mit zwei Köpfen wäre daraus der Satz des anderen zu errechnen.';
   listeEl.appendChild(fremdHinweis);
 
   var saetzeEl = document.getElementById('saetze');
@@ -528,6 +584,11 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
     var kann = darfKosten();
 
     /* --- Die Beratung im Ganzen --- */
+    document.getElementById('stand').textContent = kann
+      ? 'Was von einem Honorar übrig bleibt, nachdem die Stunden bezahlt sind. Seit Jahresbeginn, über die ' +
+        anzahlWort(SUMME.anzahl) + ' Mandate des Modells.'
+      : 'Was je Stunde ankommt, gegen das, was die Sätze versprechen. Seit Jahresbeginn, über die ' +
+        anzahlWort(MEINE.anzahl) + ' Mandate, an denen du arbeitest.';
     document.getElementById('titel-gesamt').textContent =
       kann ? 'Die Beratung, seit Jahresbeginn' : 'Deine Mandate, seit Jahresbeginn';
     if (kann) {
@@ -543,7 +604,7 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
       document.getElementById('g-wort').textContent =
         'kommen auf deinen Mandaten im Schnitt je Stunde an. Die Sätze versprechen ' + eurokomma(MEINE.listen) + '.';
       document.getElementById('g-legende').innerHTML =
-        '<div class="marke-bleibt"><b>' + euro(MEINE.honorar) + '</b>Honorar auf deinen ' + MEINE.anzahl + ' Mandaten</div>' +
+        '<div class="marke-bleibt"><b>' + euro(MEINE.honorar) + '</b>Honorar auf deinen ' + anzahlWort(MEINE.anzahl) + ' Mandaten</div>' +
         '<div><b>' + std(MEINE.std) + '</b>dort erfasste Stunden, deine und die der anderen</div>';
     }
 
@@ -551,11 +612,16 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
     document.getElementById('was-mandate').textContent = kann
       ? 'Antippen zeigt, wessen Stunden darin stecken und was sie gekostet haben.'
       : 'Die zwei Mandate, an denen du arbeitest. Antippen zeigt, wessen Stunden darin stecken.';
-    document.querySelector('#mass-kopf .mk-wort').textContent =
-      kann ? 'von 100 € Honorar' : 'vom Listensatz angekommen';
+    /* Ohne Balken keine Balken-Überschrift. */
+    document.querySelector('#mass-kopf .mk-wort').textContent = kann ? 'von 100 € Honorar' : '';
 
     MANDATE.forEach(function(m){
-      m.el.classList.toggle('fort', !kann && !m.meins);
+      var fort = !kann && !m.meins;
+      m.el.classList.toggle('fort', fort);
+      /* Aus dem Fokus und aus dem Vorlesebaum nehmen, nicht nur aus dem Bild. */
+      if (fort) { m.el.setAttribute('inert', ''); } else { m.el.removeAttribute('inert'); }
+      m.el.setAttribute('aria-hidden', fort ? 'true' : 'false');
+      m.el.querySelector('.zeile').tabIndex = fort ? -1 : 0;
       m.el.classList.toggle('duenn', kann && m.dbProz < 20);
       m.el.querySelector('.m-wert').textContent = kann ? proz(m.dbProz) : eurokomma(m.real);
       m.el.querySelector('.m-wort').textContent = kann ? 'bleiben' : 'je Stunde';
