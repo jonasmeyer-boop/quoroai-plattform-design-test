@@ -51,7 +51,16 @@
    erklären sollte, und ist weg. Der Verlauf in Bild 5 lief bei jedem
    Verlust rückwärts, der Schlusssatz behauptete eine Richtung, statt sie
    abzulesen, und das Rechnungsdatum brach hinter dem Tag um.
-   Marker: BERATUNG-AUSWERTUNGEN-V2 */
+
+   V3 (Code-Review): Die Schnitt-Linie in Bild 1 lag HINTER den Säulen —
+   positionierte Geschwister ohne z-index malen in Baumreihenfolge, und die
+   Röhren kommen später. Sichtbar blieb sie nur in den Lücken und
+   verschwand ausgerechnet über März und April, den Monaten, deren
+   Füllstand sie kreuzt. Außerdem: alle vier Maßstäbe wachsen jetzt mit den
+   Daten, statt still zu deckeln (eine Rechnung mit 25 Tagen sah aus wie
+   eine mit 20 — der Fall, für den es Bild 4 gibt), und die Sätze in Bild 4
+   beugen den Einzahl-Fall, statt „ein von drei Rechnungen sind" zu sagen.
+   Marker: BERATUNG-AUSWERTUNGEN-V3 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -170,9 +179,17 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
     var(--lila-300) 0 5px, var(--lila-100) 5px 10px);
   box-shadow:inset 0 1px 1px rgba(255,255,255,.6);
 }
+/* Die Linie liegt ÜBER den Säulen. Ohne z-index malen positionierte
+   Geschwister in Baumreihenfolge, und die Röhren kommen später — die Linie
+   überlebte dann nur in den Lücken und verschwand ausgerechnet über März
+   und April, den beiden Monaten, deren Füllstand sie kreuzt.
+   Das Maß rechnet dasselbe Innenmaß wie die Flüssigkeit (2,5px Rand,
+   Rest dazwischen); gegen die volle Kastenhöhe gerechnet läge sie 1,6px
+   unter der Säule, die genau im Schnitt liegt. */
 .m-schnitt{
-  position:absolute;left:0;right:0;bottom:calc(var(--stand,0) * 100%);
-  border-top:1px dashed var(--nebel-400);pointer-events:none;
+  position:absolute;left:0;right:0;z-index:2;
+  bottom:calc(2.5px + (100% - 5px) * var(--stand,0));
+  border-top:1px dashed var(--nebel-500);pointer-events:none;
 }
 /* Die Linie trägt KEIN Etikett mehr. Rechts lag es unter dem Betrag des
    laufenden Monats, links deckte es die Januar-Säule genau dort zu, wo
@@ -519,7 +536,6 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
     var w = wort(n);
     return w.charAt(0).toUpperCase() + w.slice(1);
   }
-  function tage(n){ return n === 1 ? 'einen Tag' : wort(n) + ' Tage'; }
 
   /* Die Füllstände stehen zuerst auf null und laufen dann hoch. Der Lauf ist
      der einzige Bewegungsmoment dieser Fläche; er wartet einen Bildaufbau
@@ -565,7 +581,11 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
     var schnitt = voll.reduce(function(s, m){ return s + m.wert; }, 0) / voll.length;
     var hoechster = voll.reduce(function(a, m){ return m.wert > a.wert ? m : a; }, voll[0]);
     var letzterVoll = voll[voll.length - 1];
-    var deckel = 14000;   /* Maß der Röhre; über dem höchsten Monat, damit kein Glas randvoll steht */
+    /* Das Maß der Röhre wächst mit den Daten: ein festes Maß deckelt still,
+       sobald ein Monat darüber liegt, und zwei verschiedene Monate sähen
+       gleich voll aus. 14.000 € ist nur der untere Anschlag, damit der
+       stärkste Monat nicht randvoll steht. */
+    var deckel = Math.max(14000, Math.ceil(Math.max.apply(null, monate.map(function(m){ return m.wert; })) / 1000) * 1000 * 1.1);
 
     var werteEl = document.getElementById('m-werte');
     var glaeserEl = document.getElementById('m-glaeser');
@@ -604,14 +624,18 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
       'Die gestrichelte Linie ist der Schnitt der ' + wort(voll.length) + ' vollen Monate. ' +
       'Der August ist schraffiert, weil er noch läuft: ' + HEUTE_TAG + ' von ' + TAGE_IM_AUGUST +
       ' Tagen sind vorbei, die beiden Pauschalen stehen aber schon voll darin. ' +
-      'Gezählt wird nach dem Monat der Leistung, nicht nach dem Tag der Rechnung; ' +
-      'Pauschalmandate stehen mit ihrer Monatsrate.';
+      'Gezählt wird nach dem Monat der Leistung, nicht nach dem Tag der Rechnung. ' +
+      '<b>Pauschalmandate stehen allein mit ihrer Monatsrate</b> — was daneben einzeln gestellt wird, ' +
+      'etwa die Frachtmarge von Cordes im Juli, ist in dieser Kurve nicht zu sehen.';
   })();
 
   /* ================= 2 · Woran hängen wir? ================= */
   (function(){
     var sortiert = MANDATE.slice().sort(function(a, b){ return b.anteil - a.anteil; });
-    var deckel = 0.5;          /* Maß des Balkens */
+    /* Wie in Bild 1: das Maß folgt den Daten, sonst deckelt es still. Ein
+       Kunde mit 60 Prozent sähe sonst aus wie einer mit 50. */
+    var groesstesTeil = Math.max.apply(null, MANDATE.map(function(m){ return m.anteil; }));
+    var deckel = Math.max(0.5, groesstesTeil * 1.15);
     var SCHWELLE = 1 / 3;      /* Faustregel, kein Gesetz — steht so auch daneben */
     var el = document.getElementById('anteile');
 
@@ -662,7 +686,7 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
       return {kopf:k, teile:teile, std:summe};
     }).sort(function(a, b){ return b.std - a.std; });
 
-    var deckel = 240;
+    var deckel = Math.max(240, Math.max.apply(null, koepfe.map(function(p){ return p.std; })) * 1.12);
     var legende = document.getElementById('legende-3');
     nachGroesse.forEach(function(m){
       var d = document.createElement('div');
@@ -723,9 +747,13 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
 
   /* ================= 4 · Kommt das Geld pünktlich? ================= */
   (function(){
-    var deckel = 20;   /* Tage, das Maß des Balkens */
     var el = document.getElementById('forderungen');
     var offen = FORDERUNGEN.slice().sort(function(a, b){ return b.tage - a.tage; });
+    /* Hier wiegt das stille Deckeln am schwersten: eine Rechnung, die 25
+       Tage liegt, sähe bei festem Maß aus wie eine mit 20 — und das ist
+       genau der Fall, für den es dieses Bild gibt. Das Maß wächst mit der
+       ältesten Rechnung und lässt die Frist immer sichtbar. */
+    var deckel = Math.max(20, Math.max.apply(null, FORDERUNGEN.map(function(f){ return f.tage; })) * 1.25);
     var summe = offen.reduce(function(s, f){ return s + f.brutto; }, 0);
     var aelteste = offen[0];
     var ueberfaellig = offen.filter(function(f){ return f.tage > ZIEL_TAGE; });
@@ -752,12 +780,20 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
     });
     el.appendChild(kante(ZIEL_TAGE / deckel));
 
+    /* Beide Zweige zählen und beugen, statt eine Lage zu behaupten: „ein von
+       drei Rechnungen sind" und „null Tage bleiben ihr" sind Sätze, die
+       jeder für einen Fehler hält — zu Recht. */
+    var rest = ZIEL_TAGE - aelteste.tage;
     document.getElementById('antwort-4').innerHTML = ueberfaellig.length === 0
       ? '<b>' + euro(summe) + '</b> stehen offen, verteilt auf ' + wort(offen.length) +
-        ' Rechnungen. <b>Keine ist überfällig</b> — die älteste liegt seit ' + aelteste.tage +
-        ' Tagen, ' + tage(ZIEL_TAGE - aelteste.tage) + ' bleiben ihr.'
-      : '<b class="warn">' + wort(ueberfaellig.length) + ' von ' + wort(offen.length) +
-        ' Rechnungen sind über der Frist</b>, zusammen ' +
+        (offen.length === 1 ? ' Rechnung' : ' Rechnungen') + '. <b>Keine ist überfällig</b> — die älteste liegt seit ' +
+        aelteste.tage + ' Tagen und ist ' +
+        /* „in zwei Tagen", nicht „in zwei Tage" — nach „in" steht der Dativ. */
+        (rest === 0 ? 'heute fällig.' : 'in ' + wort(rest) + (rest === 1 ? ' Tag' : ' Tagen') + ' fällig.')
+      : '<b class="warn">' + (ueberfaellig.length === 1
+          ? 'Eine von ' + wort(offen.length) + ' Rechnungen ist über der Frist'
+          : anzahlWortGross(ueberfaellig.length) + ' von ' + wort(offen.length) + ' Rechnungen sind über der Frist') +
+        '</b>, zusammen ' +
         euro(ueberfaellig.reduce(function(s, f){ return s + f.brutto; }, 0)) + ' von ' + euro(summe) + '.';
     document.getElementById('marke-4').innerHTML =
       'Die Kante ist das Zahlungsziel der Beratung, <b>' + ZIEL_TAGE + ' Tage</b>. Rechts davon wird eine Rechnung bernsteinfarben.';
