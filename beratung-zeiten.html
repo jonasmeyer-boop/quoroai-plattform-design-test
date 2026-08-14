@@ -30,7 +30,11 @@
    laufen jetzt durch den Baustein statt durch ein Array dieser Seite — sonst
    waren sie nach dem nächsten Seitenwechsel weg, während die Uhr im Dock
    ihn überlebte. Der Minutenschlag hängt nicht mehr an einem exakten Tick.
-   Marker: BERATUNG-ZEITEN-V4 */
+   V5 (Häppchen B5): Auslagen haben hier ihren Ort — sie entstehen unterwegs,
+   also werden sie dort erfasst, wo der Tag ohnehin eingetragen wird. Ob eine
+   Auslage weiterberechnet werden darf, entscheidet die Abrede des Mandats;
+   berechnet wird sie im Rechnungsentwurf.
+   Marker: BERATUNG-ZEITEN-V5 (Auslagen) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -162,6 +166,39 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
 .nachtrag .schritt:first-of-type{margin-top:0}
 .nachtrag .zeile{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .nachtrag .knopf{margin-top:18px;width:100%}
+
+/* ---------- Auslagen: derselbe Chip-Weg, plus ein Betrag ----------
+   Getippt wird nur die Zahl. Alles andere ist ein Daumen-Ziel, weil eine
+   Auslage im Zug entsteht und nicht am Schreibtisch. */
+.nachtrag input.betrag{
+  width:100%;min-height:46px;padding:0 14px;font-size:16px;color:var(--tinte);
+  background:var(--flaeche);border:1px solid var(--nebel-200);border-radius:14px;
+}
+.nachtrag input.betrag:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+.nachtrag .haken{
+  display:flex;align-items:center;gap:12px;font-size:14.5px;line-height:1.45;margin-top:12px;cursor:pointer;
+  /* Das Kästchen ist 18px, das Ziel ist die ganze Zeile — und die muss auf
+     dem Handy 44px hoch sein wie jeder andere Griff hier. */
+  min-height:44px;padding:2px 0;
+}
+.nachtrag .haken input{width:18px;height:18px;flex-shrink:0;margin-top:2px;accent-color:var(--lila-600)}
+.nachtrag .regelchen{font-size:12.5px;color:var(--nebel-500);margin-top:8px;line-height:1.55}
+.nachtrag .regelchen.deckt{color:var(--bernstein)}
+.auslagen{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.auslage{
+  display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:var(--radius-innen);
+  border:0.5px solid var(--nebel-200);background:var(--flaeche);
+  box-shadow:0 8px 24px rgba(16,19,26,.06);
+}
+.auslage.frisch{animation:einreihen .45s var(--kurve) forwards}
+.auslage .a-text{min-width:0;flex:1}
+.auslage .a-was{font-size:14.5px;font-weight:600;letter-spacing:-.01em;display:block}
+.auslage .a-meta{font-size:12.5px;color:var(--nebel-600);margin-top:2px;display:block}
+.auslage .a-meta .ohne{color:var(--bernstein);font-weight:600}
+.auslage .a-betrag{
+  flex-shrink:0;font-size:16px;font-weight:600;letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum";
+}
 
 /* ---------- Im Team: nur lesen ---------- */
 .team{margin-top:10px;display:flex;flex-direction:column;gap:8px}
@@ -317,6 +354,29 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
       <button class="chip" type="button" data-min="120">120</button>
     </div>
     <button class="knopf primaer" type="button" id="nachtragen">Eintragen</button>
+  </div>
+
+  <h3>Auslagen</h3>
+  <p class="was">Fahrtkosten, Bahn, Hotel, Material — was du für ein Mandat auslegst. Was weiterberechnet werden darf, steht beim nächsten Rechnungsentwurf von selbst darin.</p>
+  <div class="auslagen" id="auslagen"></div>
+  <div class="nachtrag">
+    <div class="schritt">Für wen</div>
+    <div class="zeile" id="auslage-mandate"></div>
+    <div class="schritt">Wofür</div>
+    <div class="zeile" id="auslage-art">
+      <button class="chip gewaehlt" type="button" data-art="Fahrtkosten">Fahrt</button>
+      <button class="chip" type="button" data-art="Bahnfahrt">Bahn</button>
+      <button class="chip" type="button" data-art="Übernachtung">Hotel</button>
+      <button class="chip" type="button" data-art="Bewirtung">Bewirtung</button>
+      <button class="chip" type="button" data-art="Material">Material</button>
+    </div>
+    <div class="schritt"><label for="auslage-betrag">Wie viel</label></div>
+    <div class="zeile"><input class="betrag" id="auslage-betrag" inputmode="decimal" placeholder="48,60 €"></div>
+    <label class="haken"><input type="checkbox" id="auslage-beleg" checked> Beleg ist da — ohne ihn fehlt der Beratung der Vorsteuerabzug</label>
+    <label class="haken"><input type="checkbox" id="auslage-weiter" checked> An den Kunden weiterberechnen</label>
+    <div class="regelchen" id="auslage-regel"></div>
+    <div class="regelchen deckt" id="auslage-fehler" hidden></div>
+    <button class="knopf primaer" type="button" id="auslage-eintragen">Eintragen</button>
   </div>
 
   <h3>Im Team läuft gerade</h3>
@@ -565,6 +625,145 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
     var neu = listeEl.querySelector('.eintrag.frisch');
     if (neu) neu.scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block:'center'});
   });
+
+  /* ---------- Auslagen ----------
+     Sie hängen am Mandat, nicht am Tag: erfasst wird hier, weil sie unterwegs
+     entstehen — weiterberechnet werden sie im Rechnungsentwurf
+     (beratung-rechnungen.html). Ob das überhaupt geht, entscheidet die Abrede
+     des Mandats: eine Pauschale deckt Auslagen ab, dann bleiben sie bei der
+     Beratung und stehen nur in ihrer eigenen Kostenrechnung. */
+  var DECKT = {
+    cordes: 'Die Monatspauschale von Cordes deckt Auslagen ab — diese bleibt bei der Beratung.',
+    intern: 'Eigene Beratung: es gibt niemanden, dem sich das berechnen ließe.'
+  };
+  var AUSLAGEN = [
+    {mandat: 'Bäckerei Freitag', was: 'Warenanalyse, Laborkosten', cent: 21500, am: '04.08.2026', weiter: true,  beleg: true},
+    {mandat: 'Cordes Logistik',  was: 'Fahrtkosten Bremen',        cent:  2880, am: '06.08.2026', weiter: false, beleg: true},
+    {mandat: 'Bäckerei Freitag', was: 'Übernachtung Wilhelmshaven', cent: 8900, am: '07.08.2026', weiter: true,  beleg: false},
+    {mandat: 'Petersen Stahlbau', was: 'Bahnfahrt Oldenburg und zurück', cent: 9840, am: '11.08.2026', weiter: true, beleg: true}
+  ];
+  function euro(cent){
+    return (cent / 100).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
+  }
+  var auslagenEl = document.getElementById('auslagen');
+  var frischeAuslage = null;
+  function maleAuslagen(){
+    auslagenEl.textContent = '';
+    if (AUSLAGEN.length === 0){
+      var leer = document.createElement('div');
+      leer.className = 'auslage';
+      leer.style.cssText = 'justify-content:center;color:var(--nebel-600);font-size:14px';
+      leer.textContent = 'Diesen Monat nichts ausgelegt.';
+      auslagenEl.appendChild(leer);
+      return;
+    }
+    AUSLAGEN.slice().reverse().forEach(function(a){
+      var z = document.createElement('div');
+      z.className = 'auslage' + (a === frischeAuslage ? ' frisch' : '');
+      var text = document.createElement('div');
+      text.className = 'a-text';
+      var was = document.createElement('b');
+      was.className = 'a-was';
+      was.textContent = a.was;
+      var meta = document.createElement('span');
+      meta.className = 'a-meta';
+      meta.textContent = a.mandat + ', ' + a.am + ' — ' +
+        (a.weiter ? 'wird weiterberechnet' : 'bleibt bei der Beratung');
+      /* Bernstein trägt nur das Fehlende, nicht die ganze Zeile — sonst
+         sieht auch der Kundenname nach Problem aus. */
+      if (!a.beleg){
+        var ohne = document.createElement('span');
+        ohne.className = 'ohne';
+        ohne.textContent = ', kein Beleg';
+        meta.appendChild(ohne);
+      }
+      text.appendChild(was); text.appendChild(meta);
+      var betrag = document.createElement('span');
+      betrag.className = 'a-betrag';
+      betrag.textContent = euro(a.cent);
+      z.appendChild(text); z.appendChild(betrag);
+      auslagenEl.appendChild(z);
+    });
+    /* Das Einreihen gehört dem Augenblick: einmal gezeigt, nie wieder. */
+    frischeAuslage = null;
+  }
+
+  var auslageMandatReihe = document.getElementById('auslage-mandate');
+  var auslageMandat = null;
+  var weiterHaken = document.getElementById('auslage-weiter');
+  /* Zwei Zeilen, zwei Bedeutungen: die Abrede erklärt einen gesperrten Haken
+     und muss stehen bleiben, der Fehler gehört dem Augenblick. Auf einer
+     gemeinsamen Zeile löschte der Fehler die Erklärung — und ließ einen
+     gesperrten Haken ohne Grund zurück. */
+  var regelEl = document.getElementById('auslage-regel');
+  var fehlerEl = document.getElementById('auslage-fehler');
+  function fehler(text){
+    fehlerEl.textContent = text || '';
+    fehlerEl.hidden = !text;
+  }
+  function pruefeAbrede(){
+    var grund = DECKT[auslageMandat.id];
+    weiterHaken.disabled = !!grund;
+    if (grund) weiterHaken.checked = false;
+    regelEl.textContent = grund || '';
+    regelEl.className = 'regelchen' + (grund ? ' deckt' : '');
+  }
+  Uhr.mandate().forEach(function(m, i){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip' + (i === 0 ? ' gewaehlt' : '');
+    b.style.minWidth = '0';
+    b.style.fontSize = '14.5px';
+    b.textContent = m.name;
+    if (i === 0) auslageMandat = m;
+    b.addEventListener('click', function(){
+      auslageMandatReihe.querySelectorAll('.chip').forEach(function(x){ x.classList.remove('gewaehlt'); });
+      b.classList.add('gewaehlt');
+      auslageMandat = m;
+      if (!DECKT[m.id]) weiterHaken.checked = true;
+      pruefeAbrede();
+    });
+    auslageMandatReihe.appendChild(b);
+  });
+  pruefeAbrede();
+
+  var auslageArt = 'Fahrtkosten';
+  document.querySelectorAll('#auslage-art .chip').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('#auslage-art .chip').forEach(function(x){ x.classList.remove('gewaehlt'); });
+      b.classList.add('gewaehlt');
+      auslageArt = b.dataset.art;
+    });
+  });
+
+  var betragEl = document.getElementById('auslage-betrag');
+  betragEl.addEventListener('input', function(){ fehler(''); });
+  document.getElementById('auslage-eintragen').addEventListener('click', function(){
+    /* „48,60" und „48.60" meinen dasselbe; ein Tausenderpunkt fliegt raus. */
+    var roh = betragEl.value.trim().replace(/[€\s]/g, '').replace(/\.(?=\d{3}\b)/g, '').replace(',', '.');
+    var cent = Math.round(parseFloat(roh) * 100);
+    if (!isFinite(cent) || cent <= 0){
+      betragEl.focus();
+      fehler('Ein Betrag über null gehört dazu — sonst ist es keine Auslage.');
+      return;
+    }
+    fehler('');
+    var neu = {
+      mandat: auslageMandat.name,
+      was: auslageArt,
+      cent: cent,
+      am: '14.08.2026',
+      weiter: weiterHaken.checked,
+      beleg: document.getElementById('auslage-beleg').checked
+    };
+    AUSLAGEN.push(neu);
+    frischeAuslage = neu;
+    betragEl.value = '';
+    maleAuslagen();
+    var z = auslagenEl.querySelector('.auslage.frisch');
+    if (z) z.scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'center'});
+  });
+  maleAuslagen();
 
   male();
 })();

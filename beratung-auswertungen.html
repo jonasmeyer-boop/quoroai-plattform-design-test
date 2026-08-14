@@ -34,7 +34,7 @@
    sind so gewählt, dass sie sich zu genau diesen Honoraren aufaddieren (das
    Skript prüft das und meldet sich in der Konsole, wenn jemand eine Zahl
    ändert, ohne die andere mitzurechnen). Die drei offenen Rechnungen sind
-   dieselben wie in beratung-rechnungen.html und ergeben die 11.900 €, die
+   dieselben wie in beratung-rechnungen.html und ergeben die 12.376 €, die
    das Modell in der Zentrale nennt.
 
    Die Bilder sind aus demselben Glas wie alles andere: jede Säule und jeder
@@ -68,7 +68,12 @@
    es Wort und Ziffer („Zwei von 13"). Alle sechs Zustände sind mit Kopien
    der Fläche im Browser nachgestellt: leer, heute gestellt, gestern
    gestellt, ein Tag Restfrist, eine überfällige, dreizehn überfällige.
-   Marker: BERATUNG-AUSWERTUNGEN-V4 */
+   V5 (Häppchen B5): die Abreden sind jetzt durchgerechnet — Cordes' und
+   MTS' offene Rechnungen sind ihre Monatspauschale und ihr achter Abschlag,
+   nicht mehr Einzelrechnungen neben einer Pauschale, die für sie keinen Platz
+   hatte (Issue #48). Bild 4 rechnet in Cent, sonst wichen die Balken um einen
+   Euro von ihrer Summe ab.
+   Marker: BERATUNG-AUSWERTUNGEN-V5 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -458,7 +463,7 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
      Pauschalen sind gerechnet, nicht getippt: acht Monate zu 2.750 € sind
      Cordes' 22.000 €, ein Zwölftel von 27.000 € achtmal ist MTS' 18.000 €.
      Die Juli-Zahl von Petersen (5.400 €) und die Juni-Zahl von Freitag
-     (1.650 €) sind genau die Rechnungen 2026-0084 und 2026-0081 aus
+     (1.650 €) sind genau die Rechnungen 2026-0086 und 2026-0083 aus
      beratung-rechnungen.html. */
   var PAUSCHALE = {cordes: 2750, mts: 27000 / 12};
   var MANDATE = [
@@ -472,7 +477,7 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
      abrede:'nach Aufwand und Auslagen', stunden:[['miriam',58],['sabine',24]],
      monate:[1100, 980, 1650, 1320, 1500, 1650, 1410, 1150]},
     {id:'mts', name:'MTS Maschinenbau', honorar:18000,
-     abrede:'Jahrespauschale, 27.000 €', stunden:[['anna',26],['tarek',88],['sabine',18]],
+     abrede:'Jahrespauschale, 27.000 € in zwölf Abschlägen', stunden:[['anna',26],['tarek',88],['sabine',18]],
      pauschale:'mts'}
   ];
   var MONATSNAMEN = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug'];
@@ -511,18 +516,23 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
   MANDATE.forEach(function(m){ m.anteil = m.honorar / HONORAR; });
 
   /* Die drei offenen Rechnungen aus beratung-rechnungen.html, brutto wie auf
-     dem Papier. Zusammen 11.900 € — die Zahl, die das Modell in der Zentrale
-     nennt. `tage` ist das Alter am 14.08.2026, `ziel` das Zahlungsziel der
-     Beratung. */
+     dem Papier. Zusammen 12.376 € — die Zahl, die das Modell in der Zentrale
+     nennt. Zwei davon sind Raten einer Abrede: MTS' achter Abschlag auf die
+     Jahrespauschale (2.250 € netto) und Cordes' Monatspauschale August
+     (2.750 € netto). `tage` ist das Alter am 14.08.2026, `ziel` das
+     Zahlungsziel der Beratung.
+     Die Beträge tragen Cent, deshalb rechnet dieses Bild mit eurokomma und
+     nicht mit euro — sonst wichen die drei Balken zusammen um einen Euro von
+     ihrer eigenen Summe ab. */
   var ZIEL_TAGE = 14;
   var FORDERUNGEN = [
-    {nummer:'2026-0082', kunde:'MTS Maschinenbau',   brutto:4284, gestellt:'2.\u00a0August',  tage:12},
-    {nummer:'2026-0083', kunde:'Cordes Logistik',    brutto:1190, gestellt:'3.\u00a0August',  tage:11},
-    {nummer:'2026-0084', kunde:'Petersen Stahlbau',  brutto:6426, gestellt:'5.\u00a0August',  tage: 9}
+    {nummer:'2026-0084', kunde:'MTS Maschinenbau',   brutto:2677.50, gestellt:'2.\u00a0August',  tage:12},
+    {nummer:'2026-0085', kunde:'Cordes Logistik',    brutto:3272.50, gestellt:'3.\u00a0August',  tage:11},
+    {nummer:'2026-0086', kunde:'Petersen Stahlbau',  brutto:6426,    gestellt:'5.\u00a0August',  tage: 9}
   ];
-  /* Die letzte bezahlte Rechnung, ebenfalls von dort: 2026-0081, gestellt am
+  /* Die letzte bezahlte Rechnung, ebenfalls von dort: 2026-0083, gestellt am
      8. Juli, bezahlt am 21. Juli. */
-  var ZULETZT_BEZAHLT = {nummer:'2026-0081', kunde:'Bäckerei Freitag', brutto:1963.50, tage:13};
+  var ZULETZT_BEZAHLT = {nummer:'2026-0083', kunde:'Bäckerei Freitag', brutto:1963.50, tage:13};
 
   /* ================= Zahlen in Worte ================= */
   function euro(betrag){
@@ -633,8 +643,8 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
       'Der August ist schraffiert, weil er noch läuft: ' + HEUTE_TAG + ' von ' + TAGE_IM_AUGUST +
       ' Tagen sind vorbei, die beiden Pauschalen stehen aber schon voll darin. ' +
       'Gezählt wird nach dem Monat der Leistung, nicht nach dem Tag der Rechnung. ' +
-      '<b>Pauschalmandate stehen allein mit ihrer Monatsrate</b> — was daneben einzeln gestellt wird, ' +
-      'etwa die Frachtmarge von Cordes im Juli, ist in dieser Kurve nicht zu sehen.';
+      '<b>Pauschalmandate stehen mit ihrer Monatsrate</b> — und nur damit: eine Pauschale deckt ' +
+      'die Stunden ab, neben ihr wird nichts einzeln gestellt.';
   })();
 
   /* ================= 2 · Woran hängen wir? ================= */
@@ -778,10 +788,10 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
         '</div>' +
         '<div class="b-wert zahl"></div>';
       z.querySelector('.b-name').innerHTML = f.kunde + '<small>' + f.nummer + ', gestellt am ' + f.gestellt + '</small>';
-      z.querySelector('.b-wert').innerHTML = euro(f.brutto) +
+      z.querySelector('.b-wert').innerHTML = eurokomma(f.brutto) +
         '<small>' + f.tage + ' Tage offen</small>';
       var rohr = z.querySelector('.rohr');
-      rohr.setAttribute('aria-label', f.kunde + ', ' + f.nummer + ': ' + euro(f.brutto) + ', seit ' +
+      rohr.setAttribute('aria-label', f.kunde + ', ' + f.nummer + ': ' + eurokomma(f.brutto) + ', seit ' +
         f.tage + ' Tagen offen' + (spaet ? ', überfällig' : ', im Ziel'));
       fuellen(rohr, f.tage / deckel, i);
       el.appendChild(z);
@@ -808,7 +818,7 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
     } else {
       var rest = ZIEL_TAGE - aelteste.tage;
       antwort4.innerHTML = ueberfaellig.length === 0
-        ? '<b>' + euro(summe) + '</b> stehen offen, verteilt auf ' +
+        ? '<b>' + eurokomma(summe) + '</b> stehen offen, verteilt auf ' +
           /* „eine Rechnung", nicht „ein Rechnung" — wort() kennt kein
              Geschlecht, und Rechnung ist weiblich. */
           (offen.length === 1 ? 'eine Rechnung' : wort(offen.length) + ' Rechnungen') +
@@ -825,7 +835,7 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
               ' von ' + vonWie + ' Rechnungen sind über der Frist';
           })() +
           '</b>, zusammen ' +
-          euro(ueberfaellig.reduce(function(s, f){ return s + f.brutto; }, 0)) + ' von ' + euro(summe) + '.';
+          eurokomma(ueberfaellig.reduce(function(s, f){ return s + f.brutto; }, 0)) + ' von ' + eurokomma(summe) + '.';
     }
     /* Ohne Balken keine Kante — ein Satz über eine Linie, die nicht da ist,
        schickt das Auge auf die Suche. */

@@ -41,7 +41,10 @@
    je Tastendruck. Die Griff-Zahlen rechnen Suche und die anderen Griffe mit.
    Der Buchstabenstreifen rollt, statt seine Knöpfe zu quetschen, und springt
    über weite Strecken hart statt weich.
-   Marker: BERATUNG-KUNDEN-V2 */
+   V3 (Häppchen B5): die offenen Beträge von Cordes und MTS sind ihre Raten
+   aus der Abrede, nicht mehr Einzelrechnungen — und die Zelle zeigt Cent,
+   wenn welche da sind.
+   Marker: BERATUNG-KUNDEN-V3 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -355,20 +358,21 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
      dieselbe Liste zeigen — sonst ist kein Bild mit dem nächsten vergleichbar. */
   /* Orte und Beträge kommen aus beratung-rechnungen.html — dort stehen die
      Anschriften, die auf dem Papier landen, und die drei offenen Rechnungen,
-     die das Modell mit 11.900 € zusammenzählt (6.426 + 4.284 + 1.190). Wer
+     die das Modell mit 12.376 € zusammenzählt (6.426 + 2.677,50 + 3.272,50).
+     Zwei davon sind Raten einer Abrede, kein Aufwand. Wer
      hier eigene Zahlen erfindet, baut zwei Wahrheiten auf einen Klickweg. */
   var AUS_DEM_MODELL = [
     {name:'Petersen Stahlbau', branche:'Stahlbau', ort:'Oldenburg', seit:2025,
      marge:30.4, offen:6426, still:4, zugang:'ok', modell:'petersen',
      klemmt:'Marge fällt, das Preismodell liegt beim Kunden'},
     {name:'Cordes Logistik', branche:'Spedition', ort:'Bremen', seit:2021,
-     marge:12.1, offen:1190, still:0, zugang:'ok', modell:'cordes',
-     klemmt:'Steuerfrage wartet auf dich, Rechnung seit 11 Tagen offen'},
+     marge:12.1, offen:3272.50, still:0, zugang:'ok', modell:'cordes',
+     klemmt:'Steuerfrage wartet auf dich, Monatspauschale seit 11 Tagen offen'},
     {name:'Bäckerei Freitag', branche:'Bäckerei', ort:'Wilhelmshaven', seit:2018,
      marge:31.0, offen:0, still:2, zugang:'ok', modell:'freitag',
      klemmt:'Personalquote im Ziel, läuft ruhig'},
     {name:'MTS Maschinenbau', branche:'Maschinenbau', ort:'Cloppenburg', seit:2022,
-     marge:26.8, offen:4284, still:22, zugang:'abgelaufen', modell:'mts',
+     marge:26.8, offen:2677.50, still:22, zugang:'abgelaufen', modell:'mts',
      klemmt:'Seit drei Wochen still, Anruf vorgeschlagen'}
   ];
 
@@ -474,7 +478,15 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
          + (zugangHeisst(k) ? 20 : 0);
   }
 
-  var euro = new Intl.NumberFormat('de-DE', {style:'currency', currency:'EUR', maximumFractionDigits:0});
+  /* Die erfundenen Kunden tragen runde Beträge, die vier aus dem Modell nicht:
+     eine Monatspauschale endet auf 50 Cent. Deshalb zeigt die Zelle Cent nur
+     dann, wenn welche da sind — sonst stünde in der Liste eine andere Zahl als
+     auf der Rechnung, auf die sie zeigt. */
+  var euroGanz = new Intl.NumberFormat('de-DE', {style:'currency', currency:'EUR', maximumFractionDigits:0});
+  var euroCent = new Intl.NumberFormat('de-DE', {style:'currency', currency:'EUR', minimumFractionDigits:2, maximumFractionDigits:2});
+  var euro = {format: function(wert){
+    return (Math.round(wert * 100) % 100 === 0 ? euroGanz : euroCent).format(wert);
+  }};
   var zahlF = new Intl.NumberFormat('de-DE');
   function prozent(n){ return n.toLocaleString('de-DE', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' %'; }
 
