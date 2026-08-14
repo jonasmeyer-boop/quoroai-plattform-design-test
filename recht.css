@@ -1,0 +1,96 @@
+/* quoroai-plattform-design · Die Rechtsflächen von quoroAI: eine Lesefläche,
+   zwei Dokumente (Impressum, Datenschutz). Ergänzt system.css, ersetzt es nie —
+   hier stehen nur die Regeln, die eine reine Lesefläche braucht und die es
+   sonst nirgends gibt. Marker: RECHT-CSS-V1
+
+   Haltung: Recht ist eine funktionale Fläche. Kein Fancy-Moment, keine
+   Bewegung, kein Glas über dem Text. Was hier zählt, ist Lesbarkeit:
+   eine Spalte in Lesebreite, Zwischenüberschriften, die man beim Überfliegen
+   findet, und ein Stand, dem man glaubt. */
+
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+
+/* ---------- Kopfband: dasselbe Glas wie überall ---------- */
+.recht-kopf{
+  position:fixed;top:0;left:0;right:0;z-index:10;height:60px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:0 max(22px,calc((100vw - 760px)/2));
+  border-radius:0;border-left:0;border-right:0;border-top:0;
+}
+.recht-kopf .wortmarke{
+  display:flex;align-items:center;gap:9px;text-decoration:none;color:inherit;
+  font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);
+  font-size:16px;letter-spacing:var(--schau-spur);
+}
+.recht-kopf .wortmarke img{width:26px;height:26px;display:block}
+.recht-kopf nav{display:flex;align-items:center;gap:4px}
+.recht-kopf nav a{
+  padding:8px 14px;border-radius:var(--radius-kapsel);
+  font-size:13.5px;font-weight:600;text-decoration:none;color:var(--nebel-600);
+  transition:background .15s var(--kurve),color .15s var(--kurve);
+}
+.recht-kopf nav a:hover{background:var(--lila-050);color:var(--lila-700)}
+.recht-kopf nav a[aria-current="page"]{background:var(--lila-100);color:var(--lila-800)}
+/* Am Finger braucht jedes Ziel 44px, auch wenn es nur zwei Wörter trägt */
+@media (pointer:coarse){
+  .recht-kopf nav a{min-height:44px;display:inline-flex;align-items:center}
+}
+
+/* ---------- Die Lesespalte ---------- */
+.recht{max-width:760px;margin:0 auto;padding:96px 22px 110px}
+.recht h1{font-size:clamp(30px,5vw,44px)}
+.recht .stand{font-size:14px;color:var(--nebel-500);margin-top:12px}
+.recht .vorspann{font-size:18px;color:var(--nebel-700);margin-top:20px;line-height:1.6;max-width:60ch}
+
+.recht h2{
+  font-size:20px;margin-top:52px;padding-top:22px;
+  border-top:0.5px solid var(--nebel-200);
+}
+.recht h3{font-size:16px;margin-top:26px}
+.recht p{margin-top:12px;max-width:66ch}
+.recht ul{margin-top:12px;max-width:66ch;padding-left:22px}
+.recht li{margin-top:7px}
+.recht .anschrift{margin-top:12px;line-height:1.75}
+
+/* Der Merkkasten: getöntes Glas trägt genau einen Satz, den man nicht
+   überlesen darf. Höchstens einer pro Dokument. */
+.recht .merk{
+  margin-top:22px;padding:18px 20px;border-radius:var(--radius-karte);
+  font-size:16px;line-height:1.6;
+}
+.recht .merk b{font-weight:600}
+
+/* Empfänger stehen als Tabelle, nicht als Fließtext — man sucht darin */
+.recht .tabelle{
+  margin-top:16px;border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);
+  overflow:hidden;background:var(--flaeche);
+}
+.recht .tabelle .zeile{
+  display:grid;grid-template-columns:1fr 1.5fr auto;gap:14px;align-items:baseline;
+  padding:13px 18px;border-top:0.5px solid var(--nebel-200);font-size:15px;
+}
+.recht .tabelle .zeile:first-child{border-top:0}
+.recht .tabelle .zeile.titel{
+  font-size:12.5px;font-weight:600;color:var(--nebel-500);
+  background:var(--nebel-050);
+}
+.recht .tabelle .wer{font-weight:600}
+.recht .tabelle .wo{color:var(--nebel-600);white-space:nowrap}
+
+.recht .hinweis{
+  margin-top:44px;padding-top:22px;border-top:0.5px solid var(--nebel-200);
+  font-size:13.5px;color:var(--nebel-500);line-height:1.6;max-width:66ch;
+}
+
+@media (max-width:640px){
+  /* 96px, nicht 84: das Kopfband ist 60px hoch, und die Schauschrift braucht
+     Luft darunter, sonst klebt die Überschrift am Glasrand */
+  .recht{padding:96px 18px 90px}
+  .recht-kopf{padding:0 18px}
+  .recht-kopf nav a{padding:8px 11px}
+  .recht h2{margin-top:40px}
+  .recht .tabelle .zeile{grid-template-columns:1fr;gap:3px}
+  .recht .tabelle .zeile.titel{display:none}
+  .recht .tabelle .wo{white-space:normal}
+}

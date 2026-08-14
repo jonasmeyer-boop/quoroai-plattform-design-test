@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Impressum</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="recht-kunde.css">
+<style>
+/* quoroai-plattform-design · Das Impressum der Beratung (White-Label) ·
+   Marker: IMPRESSUM-V1
+
+   Die Adresse gehört der Beratung, also gehört ihr auch das Impressum.
+   quoroAI steht hier nur als Satz am Ende: wer die Software stellt. Alle
+   Pflichtangaben nach § 5 DDG kommen aus dem Marken-Kern (marke.js, `recht`)
+   — im Produkt sind das Felder am Mandanten, die die Beratung ausfüllen muss,
+   bevor ihre Adresse öffentlich wird. Beim Markenwechsel unten im Bild
+   wechselt hier alles mit.
+   Ruhige Fläche: der Anstrich ist die einzige Bewegung. */
+</style>
+<script src="marke.js"></script>
+</head>
+<body>
+
+<nav class="kopf">
+  <div class="wortmarke">
+    <img class="marke-logo" alt="" hidden>
+    <div>
+      <span data-marke-name data-logo-versteckt>Nordholm &amp; Partner</span>
+      <small class="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung · Beispielmarke wechseln</small>
+    </div>
+  </div>
+  <div class="wege">
+    <a href="impressum.html" aria-current="page">Impressum</a>
+    <a href="datenschutz.html">Datenschutz</a>
+  </div>
+</nav>
+
+<main class="recht">
+  <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
+  <h1>Impressum</h1>
+  <p class="stand">Angaben nach § 5 DDG</p>
+
+  <h2>Anbieter</h2>
+  <p class="anschrift" data-marke-recht="anschrift">Nordholm &amp; Partner Unternehmensberatung GmbH
+Große Elbstraße 145
+22767 Hamburg</p>
+
+  <h2>Vertretungsberechtigte</h2>
+  <p>Geschäftsführung: <span data-marke-recht="vertretung">Dr. Anna Vogelsang, Jens Brandt</span></p>
+
+  <h2>Kontakt</h2>
+  <p class="anschrift">Telefon: <span data-marke-recht="telefon">+49 40 5544120</span>
+E-Mail: <span data-marke-recht="mail">kontakt@nordholm-partner.de</span></p>
+
+  <h2>Registereintrag</h2>
+  <p data-marke-recht="register">Amtsgericht Hamburg, HRB 148920</p>
+
+  <h2>Umsatzsteuer-Identifikationsnummer</h2>
+  <p>Nach § 27 a Umsatzsteuergesetz: <span data-marke-recht="ust">DE812345678</span></p>
+
+  <h2>Verbraucherstreitbeilegung</h2>
+  <p>
+    Wir sind weder verpflichtet noch bereit, an einem Streitbeilegungsverfahren vor einer
+    Verbraucherschlichtungsstelle teilzunehmen.
+  </p>
+
+  <h2>Die Software hinter dieser Seite</h2>
+  <p>
+    Der Berater auf dieser Seite läuft auf der Plattform der Quoro Advisory GmbH, Bahnhofstraße 38,
+    99084 Erfurt. Sie verarbeitet die Daten ausschließlich in unserem Auftrag; verantwortlich
+    bleiben wir. Was das für
+    <span data-du="deine" data-sie="Ihre">deine</span> Daten heißt, steht in der
+    <a href="datenschutz.html">Datenschutzerklärung</a>.
+  </p>
+
+  <p class="hinweis">
+    Vorführung mit Demo-Daten: Anschrift, Register und Nummern gehören zu einer erfundenen
+    Beispielmarke. Im Betrieb trägt hier jede Beratung ihre eigenen Angaben ein.
+  </p>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  /* Ohne Kern bleibt die Seite lesbar — dann eben in Standardmarke und Du-Form */
+  var Marke = window.Marke || {anwenden: function(){}, rede: function(du){ return du; }};
+  Marke.anwenden();
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function zufall(a, b){ return a + Math.random() * (b - a); }
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.querySelector('.anstrich');
+  var d = 'M2 6';
+  for (var i = 1; i <= 6; i++) d += ' L' + (2 + 92 * i / 6) + ' ' + (6 + zufall(-2, 2));
+  var p = document.createElementNS(NS, 'path');
+  p.setAttribute('d', d);
+  svg.appendChild(p);
+  if (!reduziert) {
+    var len = p.getTotalLength();
+    p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+    p.style.transition = 'stroke-dashoffset .55s cubic-bezier(.45,.05,.55,.95) .1s';
+    void p.getBoundingClientRect();
+    p.style.strokeDashoffset = 0;
+  }
+})();
+</script>
+</body>
+</html>

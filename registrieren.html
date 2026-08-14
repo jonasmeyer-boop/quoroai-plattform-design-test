@@ -19,7 +19,14 @@
    übersprungen, die Ankunft ist das erleuchtete Modell).
    Der Baustand ist ein Füllstand im Glas (Systemregel).
    Felder wie im Produkt: Name, E-Mail, Passwort (mind. 12 Zeichen).
-   Marker: REGISTRIEREN-V3 */
+   V4: Die dritte Tür — die Einladung ins Team einer Beratung
+   (Produkt-Route /einladung/[token]). Sie steht bewusst nicht im
+   Umschalter: man wählt sie nicht, man kommt über den Link aus der Mail.
+   Vier Lagen, wie sie das Produkt kennt: kein Konto, angemeldet als der
+   Eingeladene, angemeldet als jemand anders, abgelaufen. Die abgelaufene
+   Einladung war im Produkt eine Sackgasse ohne Weg; hier hat sie einen.
+   Direkteinstieg über #einladung.
+   Marker: REGISTRIEREN-V4 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input{font-family:inherit}
@@ -78,6 +85,27 @@ h1{font-size:24px;margin-top:16px}
 .neben:hover{color:var(--lila-700)}
 .hinweis{font-size:12px;color:var(--nebel-500);margin-top:14px}
 
+/* ---------- die dritte Tür: die Einladung ---------- */
+/* Wer einlädt, steht ganz oben — vor allem anderen. Eine Einladung ohne
+   Absender ist ein Phishing-Formular. */
+.einlader{
+  display:flex;align-items:center;gap:11px;
+  padding-bottom:16px;margin-bottom:4px;
+  border-bottom:0.5px solid var(--nebel-200);
+}
+.einlader .initial{
+  width:36px;height:36px;flex-shrink:0;border-radius:10px;display:grid;place-items:center;
+  background:var(--lila-100);color:var(--lila-800);
+  font-family:var(--schrift-schau);font-size:17px;font-weight:var(--schau-gewicht);
+}
+.einlader b{
+  display:block;font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);
+  font-size:16px;letter-spacing:var(--schau-spur);word-spacing:1.5px;line-height:1.2;
+}
+.einlader span{display:block;font-size:13px;color:var(--nebel-600)}
+.ein-lage h1{margin-top:14px}
+.ein-lage .erklaer b{font-weight:600;color:var(--tinte)}
+
 /* ---------- rechte Spalte: die Bau-Bühne ---------- */
 .buehne{position:relative;height:100svh;overflow:hidden}
 .buehne canvas,.buehne #licht{
@@ -103,6 +131,17 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
 .baustand .zustand{--fluid:var(--lila-400);--fluid-tief:var(--lila-600)}
 .baustand .zustand-wort{font-weight:600}
 
+.vorfuehrung{
+  position:fixed;right:22px;top:20px;z-index:30;
+  display:flex;align-items:center;gap:10px;
+  padding:6px 6px 6px 14px;border-radius:var(--radius-kapsel);
+}
+.vorfuehrung > span{font-size:12px;color:var(--nebel-600);white-space:nowrap}
+.vorfuehrung .umschalter button{padding:6px 12px;font-size:12.5px}
+@media (pointer:coarse){
+  .vorfuehrung .umschalter button{min-height:44px}
+}
+
 @media (prefers-reduced-motion:reduce){
   #licht,body.erwacht .buehne canvas{transition-duration:.01ms}
 }
@@ -113,6 +152,19 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
   .baustand{bottom:10px}
   .spalte{padding:8px 18px calc(28px + env(safe-area-inset-bottom));max-height:none;overflow:visible}
   .wortmarke{justify-content:center}
+  /* gestapelt liegt oben rechts das Modell — die Vorführung geht nach unten */
+  .vorfuehrung{
+    right:auto;left:50%;top:auto;translate:-50% 0;
+    bottom:calc(12px + env(safe-area-inset-bottom));
+    padding-left:10px;gap:6px;max-width:calc(100vw - 24px);
+  }
+  .vorfuehrung > span{display:none}
+  /* eine Zeile, notfalls zum Schieben — umgebrochen wird die Vorführung zu
+     einem Klotz, der über dem Formular liegt */
+  .vorfuehrung .umschalter{flex-wrap:nowrap;overflow-x:auto;max-width:100%}
+  .vorfuehrung .umschalter button{white-space:nowrap;flex:0 0 auto}
+  .vorfuehrung .umschalter button{padding:6px 10px;font-size:12px}
+  body.einladung .spalte{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 }
 </style>
 </head>
@@ -121,7 +173,7 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
   <div class="spalte">
     <div class="wortmarke"><img src="bilder/quoro-icon.svg" alt="" width="30" height="30"><div>quoroAI<small>White-Label-Plattform</small></div></div>
     <div class="karte-tuer">
-      <div class="umschalter" role="tablist">
+      <div class="umschalter" role="tablist" id="tueren">
         <button type="button" id="u-neu" class="hier" role="tab" aria-selected="true">Beratung anlegen</button>
         <button type="button" id="u-an" role="tab" aria-selected="false">Anmelden</button>
       </div>
@@ -148,6 +200,50 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
         <button class="knopf primaer" id="eintreten" type="button">Eintreten</button>
         <button class="neben" id="vergessen" type="button">Passwort vergessen?</button>
       </div>
+
+      <!-- Die dritte Tür: eine Einladung ins Team einer Beratung.
+           Produkt-Route /einladung/[token]. Sie steht nicht im Umschalter —
+           man wählt sie nicht, man kommt über den Link aus der Mail. -->
+      <div id="f-ein" hidden>
+        <div class="einlader">
+          <span class="initial" aria-hidden="true">N</span>
+          <div><b>Nordholm &amp; Partner</b><span>lädt dich als Beraterin ins Team ein</span></div>
+        </div>
+
+        <!-- 1: noch kein Konto — es entsteht hier, nicht auf einem Umweg -->
+        <div class="ein-lage" id="e-neu">
+          <h1>Willkommen im Team.</h1>
+          <p class="erklaer">Die Einladung ging an <b>a.vogelsang@nordholm-partner.de</b>. Name und Passwort, mehr fehlt nicht.</p>
+          <div class="feld"><label for="e-name">Name</label><input id="e-name" type="text" autocomplete="name" placeholder="Vor- und Nachname"></div>
+          <div class="feld"><label for="e-pass">Dein Passwort</label><input id="e-pass" type="password" autocomplete="new-password" placeholder="mindestens 12 Zeichen"></div>
+          <div class="fehler" id="fehler-ein" aria-live="polite"></div>
+          <button class="knopf primaer" id="beitreten" type="button">Konto anlegen und beitreten</button>
+          <button class="neben" id="schon-konto" type="button">Ich habe schon ein Konto</button>
+        </div>
+
+        <!-- 2: angemeldet als der Eingeladene — ein Knopf, sonst nichts -->
+        <div class="ein-lage" id="e-passt" hidden>
+          <h1>Nur noch annehmen.</h1>
+          <p class="erklaer">Du bist als <b>a.vogelsang@nordholm-partner.de</b> angemeldet — genau die Adresse, an die diese Einladung ging.</p>
+          <button class="knopf primaer" id="annehmen" type="button">Einladung annehmen</button>
+        </div>
+
+        <!-- 3: angemeldet als jemand anders — der Weg heraus ist der Weg hinein -->
+        <div class="ein-lage" id="e-anderes" hidden>
+          <h1>Diese Einladung gehört einem anderen Konto.</h1>
+          <p class="erklaer">Du bist als <b>jens.brandt@brandt-consulting.de</b> angemeldet, die Einladung ging an <b>a.vogelsang@nordholm-partner.de</b>. Ein fremdes Konto kann sie nicht einlösen.</p>
+          <button class="knopf primaer" id="abmelden-weiter" type="button">Abmelden und hier weitermachen</button>
+        </div>
+
+        <!-- 4: abgelaufen oder schon eingelöst — heute eine Sackgasse -->
+        <div class="ein-lage" id="e-tot" hidden>
+          <h1>Diese Einladung gilt nicht mehr.</h1>
+          <p class="erklaer">Sie ist abgelaufen oder wurde schon eingelöst. Eine neue dauert bei <b>Nordholm &amp; Partner</b> keine Minute — wir fragen für dich nach.</p>
+          <div class="gesendet" id="neu-angefragt" hidden><b>Ist unterwegs.</b> Nordholm &amp; Partner weiß Bescheid. Sobald die neue Einladung da ist, kommt sie an dieselbe Adresse.</div>
+          <button class="knopf primaer" id="neue-bitten" type="button">Neue Einladung anfragen</button>
+          <button class="neben" id="zur-anmeldung" type="button">Ich habe schon ein Konto</button>
+        </div>
+      </div>
     </div>
     <p class="hinweis">Vorführung mit Demo-Daten, jede Eingabe funktioniert.</p>
   </div>
@@ -159,6 +255,18 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
       <span class="zustand" id="bau-stand" style="--stand:.12" role="img" aria-label="Baustand"></span>
       <span class="zustand-wort" id="bau-wort">Deine Grundplatte liegt.</span>
     </div>
+  </div>
+</div>
+
+<!-- Nur in der Einladungs-Tür: die vier Lagen, die das Produkt an
+     /einladung/[token] kennt, zum Durchschalten -->
+<div class="vorfuehrung glas-dick" id="vorfuehrung" hidden>
+  <span>Vorführung</span>
+  <div class="umschalter" role="tablist" aria-label="Lage der Einladung">
+    <button type="button" id="v-neu" class="hier" role="tab" aria-selected="true">Kein Konto</button>
+    <button type="button" id="v-passt" role="tab" aria-selected="false">Angemeldet</button>
+    <button type="button" id="v-anderes" role="tab" aria-selected="false">Falsches Konto</button>
+    <button type="button" id="v-tot" role="tab" aria-selected="false">Abgelaufen</button>
   </div>
 </div>
 
@@ -234,7 +342,8 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
   }
   /* ein Feld zählt erst, wenn es wirklich gültig ist — nicht beim ersten Buchstaben */
   function stufe(){
-    if (anmeldeSeite) return STUFEN.length - 1;
+    /* Anmelden und Einladung bauen nichts: dort steht das Modell schon */
+    if (anmeldeSeite || einladungSeite) return STUFEN.length - 1;
     var voll = 0;
     felder.forEach(function(f){ if (gueltig(f)) voll++; });
     return Math.min(voll, STUFEN.length - 1);
@@ -273,7 +382,7 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
   }
 
   /* ---------- Umschalter ---------- */
-  var anmeldeSeite = false;
+  var anmeldeSeite = false, einladungSeite = false;
   var uNeu = document.getElementById('u-neu'), uAn = document.getElementById('u-an');
   function schalte(an){
     anmeldeSeite = an;
@@ -288,7 +397,83 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
   }
   uNeu.addEventListener('click', function(){ schalte(false); });
   uAn.addEventListener('click', function(){ schalte(true); });
+
+  /* ---------- die dritte Tür: die Einladung ----------
+     Sie steht nicht im Umschalter — man wählt sie nicht, man kommt über den
+     Link aus der Mail. Das Modell der einladenden Beratung steht bereits und
+     ist beleuchtet: dieses Haus lebt, du bekommst nur den Schlüssel. */
+  var fEin = document.getElementById('f-ein');
+  var vorfuehrung = document.getElementById('vorfuehrung');
+  var LAGEN = ['neu', 'passt', 'anderes', 'tot'];
+
+  function einladungsLage(name){
+    LAGEN.forEach(function(k){
+      var an = k === name;
+      document.getElementById('e-' + k).hidden = !an;
+      var b = document.getElementById('v-' + k);
+      b.classList.toggle('hier', an);
+      b.setAttribute('aria-selected', an ? 'true' : 'false');
+    });
+    /* Eine tote Einladung öffnet kein Haus — dann bleibt das Licht aus. */
+    if (name === 'tot') {
+      document.body.classList.remove('erwacht');
+      standKapsel.className = 'zustand';
+      standKapsel.style.setProperty('--stand', .18);
+      standWort.textContent = 'Diese Tür ist zu.';
+    } else {
+      lichtAn('Nordholm & Partner. Dein neues Haus.');
+    }
+  }
+
+  function zeigeEinladung(){
+    einladungSeite = true;
+    document.body.classList.add('einladung');
+    document.getElementById('f-neu').hidden = true;
+    document.getElementById('f-an').hidden = true;
+    fEin.hidden = false;
+    document.getElementById('tueren').hidden = true;
+    vorfuehrung.hidden = false;
+    baustand(true);
+    einladungsLage('neu');
+  }
+  LAGEN.forEach(function(k){
+    document.getElementById('v-' + k).addEventListener('click', function(){ einladungsLage(k); });
+  });
+
+  document.getElementById('beitreten').addEventListener('click', function(){
+    var f = document.getElementById('fehler-ein');
+    if (document.getElementById('e-name').value.trim() === '') { f.textContent = 'Ohne Namen geht es nicht.'; return; }
+    if (document.getElementById('e-pass').value.length < 12) { f.textContent = 'Das Passwort braucht mindestens 12 Zeichen.'; return; }
+    f.textContent = '';
+    eintritt();
+  });
+  document.getElementById('annehmen').addEventListener('click', eintritt);
+  /* „Abmelden und hier weitermachen" wirft das falsche Konto raus und stellt
+     dieselbe Einladung wieder hin — die erste Lage, nur ohne Anmeldung. */
+  document.getElementById('abmelden-weiter').addEventListener('click', function(){ einladungsLage('neu'); });
+  document.getElementById('neue-bitten').addEventListener('click', function(){
+    document.getElementById('neu-angefragt').hidden = false;
+    document.getElementById('neue-bitten').hidden = true;
+  });
+  document.getElementById('schon-konto').addEventListener('click', zurAnmeldung);
+  document.getElementById('zur-anmeldung').addEventListener('click', zurAnmeldung);
+
+  function zurAnmeldung(){
+    einladungSeite = false;
+    document.body.classList.remove('einladung');
+    fEin.hidden = true;
+    vorfuehrung.hidden = true;
+    document.getElementById('tueren').hidden = false;
+    schalte(true);
+  }
+  function eintritt(){
+    lichtAn('Willkommen im Team.');
+    try { sessionStorage.setItem('modell-film', '1'); } catch (e) {}
+    setTimeout(function(){ location.href = 'beratung-f-modell.html'; }, reduziert ? 150 : 1500);
+  }
+
   if (location.hash === '#anmelden') schalte(true);
+  else if (location.hash === '#einladung') zeigeEinladung();
 
   /* ---------- Konto anlegen ---------- */
   document.getElementById('anlegen').addEventListener('click', function(){
