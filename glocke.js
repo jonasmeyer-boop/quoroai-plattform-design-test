@@ -14,7 +14,13 @@
    Aufruf: <span data-glocke></span> ins Chrom setzen, danach
    Glocke.baue({eintraege: [{titel, text, zeit, neu, tue}]}).
 
-   Marker: GLOCKE-V1 */
+   V2 (Review): das Fenster erbt kein nowrap mehr aus der Kopfzeile (im
+   Gespräch lief der Text sonst aus der Karte); ein Klick auf einen Eintrag
+   gibt den Fokus an das ab, wohin er führt, statt ihn auf die Glocke hinter
+   der neuen Fläche zurückzuholen; ein Klick daneben lässt den Fokus, wo er
+   hingeht; gelesene Einträge sagen dem Screenreader nicht mehr „neu“; eine
+   frische Lage über setze() räumt den laufenden Gelesen-Timer ab.
+   Marker: GLOCKE-V2 */
 window.Glocke = (function () {
   'use strict';
 
@@ -52,7 +58,9 @@ window.Glocke = (function () {
          nicht jede Fläche bringt ein globales [hidden]{display:none} mit */
       '.glocke-knopf .zahl[hidden],.glocke-fenster[hidden]{display:none}' +
       '.glocke-fenster{position:absolute;top:calc(100% + 10px);right:0;z-index:60;' +
-        'width:min(340px,calc(100vw - 32px));text-align:left;' +
+        /* eigene Zeilenführung: die Kopfzeilen, in denen die Glocke hängt,
+           setzen oft white-space:nowrap — geerbt liefe der Text aus der Karte */
+        'width:min(340px,calc(100vw - 32px));text-align:left;white-space:normal;' +
         'background:#fff;border:0.5px solid ' + linie + ';border-radius:16px;' +
         'box-shadow:0 18px 50px rgba(16,19,26,.16);padding:16px 18px}' +
       '.glocke-fenster h3{font-size:12px;font-weight:800;color:' + grau + ';margin:0}' +
@@ -141,7 +149,9 @@ window.Glocke = (function () {
         if (n.neu) e.querySelector('.ge-neu').textContent = 'neu, ';
         e.querySelector('.ge-zeit').appendChild(document.createTextNode(n.zeit));
         e.addEventListener('click', function () {
-          schliesse();
+          /* Der Eintrag führt woanders hin — dort gehört der Fokus hin, nicht
+             zurück auf die Glocke hinter der Fläche, die sich gerade öffnet. */
+          schliesse(true);
           if (typeof n.tue === 'function') n.tue();
         });
         liste.appendChild(e);
@@ -149,13 +159,13 @@ window.Glocke = (function () {
     }
 
     var alsGelesen = null;
-    function schliesse() {
+    function schliesse(fokusAbgeben) {
       if (fenster.hidden) return;
       if (alsGelesen) { clearTimeout(alsGelesen); alsGelesen = null; }
       /* Den Fokus nur zurückholen, wenn er noch im Fenster liegt. Sonst
          reißt ein Klick ins Eingabefeld daneben ihn auf die Glocke zurück
          und das Getippte läuft ins Nichts. */
-      var drin = fenster.contains(document.activeElement);
+      var drin = !fokusAbgeben && fenster.contains(document.activeElement);
       fenster.hidden = true;
       knopf.setAttribute('aria-expanded', 'false');
       if (drin) knopf.focus();
