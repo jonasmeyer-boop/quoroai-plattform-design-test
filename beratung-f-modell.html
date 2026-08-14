@@ -41,7 +41,10 @@
    beratung-rechnungen.html, die MTS-Türen zur offenen Rechnung ebenso,
    und die Rechnungsbeträge kommen jetzt aus dem Rechnungs-Raum
    (4.284 € MTS, 6.426 € Petersen, zusammen 11.900 € offen).
-   Marker: BERATUNG-F-MODELL-V23 */
+   V24: die Zentrale-Tür „Verwaltung" führt nach beratung-verwaltung.html,
+   und daneben steht der Nachweis-Stand des Teams (3 von 5 unterwiesen,
+   deiner fehlt) — der Hinweis bleibt im Cockpit stehen, bis bestätigt ist.
+   Marker: BERATUNG-F-MODELL-V24 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -375,7 +378,7 @@ body.gezoomt #zonen{display:block}
 .zeile .z-meta{font-size:12px;color:var(--grau);margin-top:2px}
 .zeile .z-typ{flex-shrink:0;font-size:11px;font-weight:600;color:var(--nebel-500);white-space:nowrap}
 .zeile .z-hand{font-family:'Caveat',cursive;font-size:18px;font-weight:700;color:var(--stift);rotate:-1deg;margin-top:4px}
-.karten{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.karten{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:10px}
 .karte{
   background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.65);
   border-radius:var(--radius-karte);padding:15px 18px;
@@ -709,7 +712,7 @@ body.gezoomt #zonen{display:block}
 
   <section class="inhalt" data-raum="zentrale">
     <div class="kopf">
-      <div><h2 data-du="Deine Zentrale" data-sie="Ihre Zentrale">Deine Zentrale</h2><div class="stand">der KI-Berater, das Wissen, die Marke, die Abrechnung</div></div>
+      <div><h2 data-du="Deine Zentrale" data-sie="Ihre Zentrale">Deine Zentrale</h2><div class="stand">der KI-Berater, das Wissen, die Marke, die Abrechnung, das Team</div></div>
     </div>
     <div class="held">
       <div class="tafel-glas">
@@ -753,6 +756,7 @@ body.gezoomt #zonen{display:block}
     <div class="karten">
       <div class="karte"><div class="wert" style="font-size:18px;color:#2b5fe3">Nordholm &amp; Partner</div><div class="label">Marke und Anrede der Kundenflächen</div><div class="proben" aria-label="Markenfarben"><span class="probe p-blau" title="Akzent"></span><span class="probe p-stift" title="Stift"></span><span class="probe p-tinte" title="Tinte"></span><span class="probe p-papier" title="Papier"></span><span class="anrede-wert" data-du="per Du" data-sie="per Sie">per Du</span></div></div>
       <div class="karte"><div class="wert">34,0</div><div class="label">Std. im August, alle Mandate</div><div class="delta amber">3 Rechnungen offen, 11.900 €</div></div>
+      <div class="karte"><div class="wert">3 von 5</div><div class="label">im Team sind KI-unterwiesen</div><div class="delta amber" data-du="deiner fehlt noch" data-sie="Ihrer fehlt noch">deiner fehlt noch</div></div>
     </div>
     <div class="tueren">
       <a class="knopf leise" href="beratung-ki-berater.html">Persona einstellen</a>
@@ -760,6 +764,7 @@ body.gezoomt #zonen{display:block}
       <a class="knopf leise" href="beratung-marke.html">Marke</a>
       <button class="bald knopf leise" type="button">Leistungsnachweise</button>
       <a class="knopf leise" href="beratung-rechnungen.html">Rechnungen</a>
+      <a class="knopf leise" href="beratung-verwaltung.html">Verwaltung</a>
     </div>
   </section>
 </div>

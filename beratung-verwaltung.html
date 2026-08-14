@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Verwaltung der Beratung</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Verwaltung: neunter Raum hinter den Cockpit-Türen
+   (Paket 9, Reihenfolge-Entscheidung 2026-08-13). Drei Dinge, die derselbe
+   Satz zusammenhält — wer darf hier arbeiten, wie ist sein Konto geschützt,
+   und ist er für den KI-Berater unterwiesen (Produkt: /team, /sicherheit,
+   /ki-kompetenz).
+   Kern-Idee: die Bereitschaft ist EIN Füllstand oben im Kopf. Jedes
+   Teammitglied trägt seine eigene kleine Kapsel; wer die Unterweisung unten
+   liest und bestätigt, sieht seine Zeile kippen und den großen Stand
+   steigen — der Nachweis ist keine Behauptung, sondern sichtbar.
+   Der letzte Inhaber lässt sich weder umstufen noch entfernen, sonst käme
+   niemand mehr an die Beratung. Der Versandvermerk sagt bei jeder Einladung
+   ehrlich, was aus der Mail wurde; kam sie nicht an, liegt der Link daneben.
+   Marker: BERATUNG-VERWALTUNG-V1 */
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,select{font-family:inherit}
+
+/* ========== quoroAI-Chrom ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+
+/* ========== Seite ========== */
+main{max-width:920px;margin:0 auto;padding:136px 24px 90px}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px;max-width:62ch}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:30px}
+section[id]{scroll-margin-top:150px}
+
+.tafel{
+  margin-top:12px;border-radius:var(--radius-karte);padding:22px 24px;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+
+/* Der Füllstand steigt sichtbar, wenn jemand bestätigt */
+.zustand::before{transition:width .7s var(--kurve)}
+@media (prefers-reduced-motion:reduce){ .zustand::before{transition:none} }
+
+/* ---------- Bereitschaft: der eine große Stand im Kopf ---------- */
+.bereit{
+  margin-top:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:14px 18px;border-radius:var(--radius-karte);
+  background:rgba(255,255,255,.5);
+  backdrop-filter:blur(16px) saturate(170%);-webkit-backdrop-filter:blur(16px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 10px 30px rgba(24,21,47,.08);
+}
+.bereit .zustand{width:148px;height:28px;--fluid:#43b384;--fluid-tief:#1e8a63}
+.bereit .b-text{font-size:14px;line-height:1.45}
+.bereit .b-text b{font-weight:600}
+.bereit .b-text small{display:block;font-size:12.5px;color:var(--nebel-600);margin-top:2px}
+.bereit a.b-hin{margin-left:auto;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
+.bereit a.b-hin:hover{text-decoration:underline}
+
+/* ---------- Sprungmarken ---------- */
+.spruenge{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.spruenge a{
+  padding:8px 15px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.7);font-size:13px;font-weight:600;
+  color:var(--tinte);text-decoration:none;transition:border-color .2s,background .2s;
+}
+.spruenge a:hover{border-color:var(--lila-500);background:#fff}
+
+/* ---------- Mitglieder ---------- */
+.liste{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.mitglied{
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);border-radius:var(--radius-innen);
+  padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  transition:box-shadow .3s var(--kurve),border-color .3s var(--kurve);
+}
+.mitglied.frisch{border-color:var(--gruen);box-shadow:0 0 0 4px var(--gruen-fond)}
+.mitglied .m-name{font-size:15px;font-weight:600}
+.mitglied .m-name span{font-weight:400;color:var(--nebel-500)}
+.mitglied .m-mail{font-size:13px;color:var(--nebel-600);margin-top:2px}
+.mitglied .m-nachweis{display:flex;align-items:center;gap:8px;margin-top:7px}
+.mitglied .m-nachweis .zustand{width:38px;height:17px}
+.mitglied .m-nachweis .n-wort{font-size:12.5px;color:var(--nebel-600)}
+.mitglied .m-nachweis .n-wort.offen{color:var(--rot)}
+.m-griffe{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+select.rolle{
+  min-height:40px;padding:0 12px;font-size:14px;color:var(--tinte);
+  background:var(--flaeche);border:1px solid var(--nebel-300);border-radius:var(--radius-innen);
+}
+select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
+.knopf.klein{min-height:40px;padding:0 15px;font-size:13.5px}
+.textknopf{
+  border:0;background:none;cursor:pointer;font-size:13.5px;color:var(--rot);
+  text-decoration:underline;text-underline-offset:4px;padding:4px;
+}
+.textknopf:disabled{color:var(--nebel-400);cursor:default;text-decoration:none}
+.fussnote{font-size:12.5px;color:var(--nebel-600);margin-top:12px;line-height:1.55;max-width:70ch}
+.fussnote a{font-weight:600}
+
+/* ---------- Einladungen ---------- */
+.einladung{
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);border-radius:var(--radius-innen);
+  padding:14px 16px;display:flex;flex-direction:column;gap:11px;
+}
+.e-kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.e-mail{font-size:15px;font-weight:600}
+.e-meta{font-size:13px;color:var(--nebel-600);margin-top:2px}
+.e-meta .kam-nicht{color:var(--rot)}
+.e-link{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.e-link code{
+  font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11.5px;word-break:break-all;
+  background:var(--nebel-050);border:0.5px solid var(--nebel-200);border-radius:8px;padding:6px 10px;
+}
+.leer{font-size:13.5px;color:var(--nebel-600);padding:4px 0}
+.form-tafel{
+  margin-top:14px;background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  border-radius:var(--radius-innen);padding:16px;
+}
+.form-tafel h4{font-family:var(--schrift-text);font-size:13.5px;font-weight:600}
+.zwei-felder{display:grid;grid-template-columns:1fr 220px;gap:14px;margin-top:12px;align-items:end}
+.zwei-felder select{
+  width:100%;min-height:46px;padding:0 14px;font-size:16px;color:var(--tinte);
+  background:var(--flaeche);border:1px solid var(--nebel-300);border-radius:var(--radius-innen);
+}
+.melde{margin-top:12px;font-size:13.5px;line-height:1.5;padding:10px 13px;border-radius:var(--radius-innen)}
+.melde.gut{background:var(--gruen-fond)}
+.melde.schlecht{background:var(--rot-fond);color:var(--rot)}
+
+/* ---------- Sicherheit ---------- */
+.zf-stand{display:flex;align-items:flex-start;gap:11px}
+.zf-stand .zustand{width:40px;height:18px;flex-shrink:0;margin-top:3px}
+.zf-stand .zf-text{font-size:14.5px;line-height:1.55}
+.zf-stand .zf-text b{font-weight:600}
+.zf-stand .zf-text small{display:block;color:var(--nebel-600);font-size:13px;margin-top:3px}
+.zf-griffe{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.qr-block{display:grid;grid-template-columns:auto 1fr;gap:22px;margin-top:18px;align-items:start}
+.qr-rahmen{background:#fff;padding:10px;border-radius:var(--radius-innen);border:0.5px solid var(--nebel-200);box-shadow:0 10px 26px rgba(24,21,47,.10)}
+.qr-rahmen svg{display:block;width:164px;height:164px}
+.qr-neben p{font-size:14px;line-height:1.6}
+.qr-neben .geheim{font-size:12.5px;color:var(--nebel-600);margin-top:10px}
+.qr-neben .geheim code{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12.5px;color:var(--tinte);user-select:all}
+#zf-code{max-width:190px;letter-spacing:.28em;font-family:ui-monospace,'SF Mono',Menlo,monospace}
+.zf-hinweis{font-size:12.5px;color:var(--nebel-600);margin-top:14px;line-height:1.55;max-width:70ch}
+
+/* ---------- KI-Kompetenz ---------- */
+.fassung{font-size:13px;color:var(--nebel-600)}
+.unterweisung{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+.kapitel{
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);border-radius:var(--radius-innen);
+  padding:16px 18px;
+}
+.kapitel h4{font-family:var(--schrift-text);font-size:15px;font-weight:600}
+.kapitel p{font-size:14.5px;line-height:1.65;margin-top:8px}
+.kapitel p:first-of-type{margin-top:6px}
+.gelesen-block{
+  margin-top:16px;background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  border-radius:var(--radius-innen);padding:16px;
+}
+.gelesen-block p{font-size:14px;line-height:1.6}
+.gelesen-block .knopf{margin-top:12px}
+.quittung{font-size:14px;line-height:1.6;padding:12px 15px;border-radius:var(--radius-innen);background:var(--gruen-fond)}
+
+@media (prefers-reduced-motion: reduce){
+  main > *{animation:none;opacity:1;translate:none}
+  .mitglied{transition:none}
+}
+@media (max-width:820px){
+  nav{padding:0 18px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
+  .tafel{padding:18px 18px}
+  .bereit a.b-hin{margin-left:0}
+  .mitglied{align-items:flex-start}
+  .m-griffe{width:100%}
+  .m-griffe select.rolle{flex:1}
+  .zwei-felder{grid-template-columns:1fr}
+  .qr-block{grid-template-columns:1fr}
+  .qr-rahmen{justify-self:center}
+}
+</style>
+</head>
+<body class="quoro">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Verwaltung</b></a>
+
+<main>
+  <div class="kopf">
+    <h1>Verwaltung</h1>
+    <div class="stand">Wer in deiner Beratung arbeiten darf, wie sein Konto geschützt ist und ob er für den KI-Berater unterwiesen wurde. Drei Dinge, ein Raum — sie hängen aneinander.</div>
+    <div class="bereit">
+      <span class="zustand" id="b-stand" role="img" aria-label="Bereitschaft"></span>
+      <span class="b-text"><b id="b-satz">3 von 5 im Team sind unterwiesen</b><small id="b-deut">Die Pflicht aus Art. 4 EU AI Act liegt bei deiner Beratung, nicht bei uns.</small></span>
+      <a class="b-hin" href="#ki-kompetenz" id="b-hin">Unterweisung lesen</a>
+    </div>
+    <div class="spruenge">
+      <a href="#team">Team</a>
+      <a href="#sicherheit">Sicherheit</a>
+      <a href="#ki-kompetenz">KI-Kompetenz</a>
+    </div>
+  </div>
+
+  <h3>Team</h3>
+  <section class="tafel" id="team" aria-label="Team">
+    <ul class="liste" id="mitglieder"></ul>
+    <div class="fussnote" id="letzter-inhaber" hidden>Der letzte Inhaber lässt sich weder umstufen noch entfernen — sonst käme niemand mehr an diese Beratung heran.</div>
+    <div class="fussnote">Inhaber und Partner sehen die ganze Beratung. Berater und Assistenz kommen nur über die Mandate an einen Kunden, denen sie zugewiesen sind. Wer mit dem KI-Berater arbeitet, muss unterwiesen sein — <a href="#ki-kompetenz">der Text steht unten</a>, die Zeile am Namen ist dein Nachweis.</div>
+    <div class="melde gut" id="team-melde" hidden></div>
+
+    <h3 style="margin-top:26px">Offene Einladungen</h3>
+    <ul class="liste" id="einladungen"></ul>
+    <div class="leer" id="einladungen-leer" hidden>Keine offenen Einladungen.</div>
+    <div class="fussnote">Steht dort „kam nicht an", gib den Link selbst weiter. Einlösen kann ihn nur, wer sich mit genau der eingeladenen Adresse anmeldet.</div>
+
+    <div class="form-tafel">
+      <h4>Jemanden einladen</h4>
+      <div class="zwei-felder">
+        <div class="feld">
+          <label for="ein-mail">E-Mail-Adresse</label>
+          <input id="ein-mail" type="email" placeholder="name@nordholm-partner.de" autocomplete="off">
+        </div>
+        <div class="feld">
+          <label for="ein-rolle">Rolle</label>
+          <select id="ein-rolle">
+            <option value="owner">Inhaber</option>
+            <option value="partner">Partner</option>
+            <option value="consultant" selected>Berater</option>
+            <option value="assistant">Assistenz</option>
+          </select>
+        </div>
+      </div>
+      <div class="melde schlecht" id="ein-fehler" hidden></div>
+      <button class="knopf primaer klein" id="einladen" type="button" style="margin-top:14px">Einladen</button>
+    </div>
+  </section>
+
+  <h3>Sicherheit</h3>
+  <section class="tafel" id="sicherheit" aria-label="Sicherheit">
+    <div class="zf-stand" id="zf-stand"></div>
+
+    <div id="zf-einrichtung" hidden>
+      <div class="qr-block">
+        <div class="qr-rahmen"><svg id="qr" viewBox="0 0 29 29" role="img" aria-label="QR-Code für die Authenticator-App"></svg></div>
+        <div class="qr-neben">
+          <p>Scanne den Code mit deiner Authenticator-App — 1Password, Google Authenticator oder Aegis — und tippe danach die sechs Ziffern ein, die sie anzeigt.</p>
+          <div class="geheim">Ohne Kamera: Geheimnis <code id="zf-geheim"></code> von Hand eintragen.</div>
+          <div class="feld" style="margin-top:16px">
+            <label for="zf-code">Code aus der App</label>
+            <input id="zf-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000">
+            <div class="fehler" id="zf-fehler" hidden>Der Code stimmt nicht. Prüf App und Uhrzeit, dann noch einmal.</div>
+          </div>
+          <div class="zf-griffe">
+            <button class="knopf primaer klein" id="zf-bestaetigen" type="button">Bestätigen</button>
+            <button class="knopf leise klein" id="zf-abbrechen" type="button">Abbrechen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="zf-griffe" id="zf-griffe"></div>
+    <div class="zf-hinweis">Der zweite Faktor gilt für dein Konto, nicht für die ganze Beratung — jeder richtet ihn selbst ein. Deine Kunden brauchen ihn nicht: sie kommen über den Anmelde-Link herein, nicht über ein Passwort.</div>
+  </section>
+
+  <h3>KI-Kompetenz</h3>
+  <section class="tafel" id="ki-kompetenz" aria-label="KI-Kompetenz">
+    <h2 style="font-size:21px">Der KI-Berater: was du wissen musst</h2>
+    <div class="fassung">Fassung vom 10. August 2026. Zehn Minuten, einmal.</div>
+    <div class="unterweisung" id="unterweisung"></div>
+    <div id="gelesen-bereich"></div>
+    <div class="fussnote">Diese Unterweisung steht als Seite da und nicht als Sperre vor der Anwendung: eine Unterweisung, die man wegklicken muss, um weiterzuarbeiten, wird weggeklickt.</div>
+  </section>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('main > *').forEach(function(el, i){
+    el.style.setProperty('--verz', (i * 0.07) + 's');
+  });
+
+  var ROLLEN = [
+    {wert:'owner',      wort:'Inhaber'},
+    {wert:'partner',    wort:'Partner'},
+    {wert:'consultant', wort:'Berater'},
+    {wert:'assistant',  wort:'Assistenz'}
+  ];
+  function rollenWort(w){
+    for (var i = 0; i < ROLLEN.length; i++) if (ROLLEN[i].wert === w) return ROLLEN[i].wort;
+    return w;
+  }
+  function datum(iso){
+    var t = iso.split('-');
+    var MONATE = ['Jan.','Feb.','März','Apr.','Mai','Juni','Juli','Aug.','Sep.','Okt.','Nov.','Dez.'];
+    return Number(t[2]) + '. ' + MONATE[Number(t[1]) - 1] + ' ' + t[0];
+  }
+
+  /* ---------- Team ----------
+     Anna Vogelsang ist die Inhaberin und sitzt vor dem Bildschirm (Modell,
+     Cockpit). Ihre eigene Unterweisung steht offen — deshalb ist die
+     Bestätigung unten in diesem Raum ein Moment und keine Behauptung. */
+  var ICH = 'a-vogelsang';
+  var TEAM = [
+    {id:'a-vogelsang', name:'Dr. Anna Vogelsang', mail:'anna.vogelsang@nordholm-partner.de', rolle:'owner',      unterwiesen:null},
+    {id:'j-nordholm',  name:'Jens Nordholm',      mail:'jens.nordholm@nordholm-partner.de',  rolle:'partner',    unterwiesen:'2026-08-12'},
+    {id:'m-krohn',     name:'Miriam Krohn',       mail:'miriam.krohn@nordholm-partner.de',   rolle:'consultant', unterwiesen:'2026-08-04'},
+    {id:'t-aydin',     name:'Tarek Aydin',        mail:'tarek.aydin@nordholm-partner.de',    rolle:'consultant', unterwiesen:null},
+    {id:'s-roettger',  name:'Sabine Röttger',     mail:'sabine.roettger@nordholm-partner.de',rolle:'assistant',  unterwiesen:'2026-07-22'}
+  ];
+
+  var EINLADUNGEN = [
+    {id:'e1', mail:'lukas.brede@nordholm-partner.de', rolle:'consultant', bis:'2026-08-21',
+     token:'r7Qk3mVzA2xN', versand:{art:'zugestellt', datum:'2026-08-14'}},
+    {id:'e2', mail:'p.hoffman@nordholm-partner.de',   rolle:'assistant',  bis:'2026-08-19',
+     token:'b4Ld9sTgW1pE', versand:{art:'kam-nicht', datum:'2026-08-12', grund:'550 5.1.1 user unknown'}}
+  ];
+
+  var mitgliederListe = document.getElementById('mitglieder');
+  var einladungsListe = document.getElementById('einladungen');
+  var teamMelde = document.getElementById('team-melde');
+
+  function inhaberZahl(){
+    var n = 0;
+    TEAM.forEach(function(m){ if (m.rolle === 'owner') n++; });
+    return n;
+  }
+
+  function meldung(text){
+    teamMelde.textContent = text;
+    teamMelde.hidden = false;
+  }
+
+  function maleTeam(frischId){
+    mitgliederListe.textContent = '';
+    var letzter = inhaberZahl() === 1;
+    document.getElementById('letzter-inhaber').hidden = !letzter;
+
+    TEAM.forEach(function(m){
+      var li = document.createElement('li');
+      li.className = 'mitglied';
+      if (m.id === frischId) li.classList.add('frisch');
+
+      var links = document.createElement('div');
+      var name = document.createElement('div');
+      name.className = 'm-name';
+      name.appendChild(document.createTextNode(m.name));
+      if (m.id === ICH) {
+        var du = document.createElement('span');
+        du.textContent = ', du';
+        name.appendChild(du);
+      }
+      var mail = document.createElement('div');
+      mail.className = 'm-mail';
+      mail.textContent = m.mail;
+
+      var nachweis = document.createElement('div');
+      nachweis.className = 'm-nachweis';
+      var kapsel = document.createElement('span');
+      kapsel.className = 'zustand ' + (m.unterwiesen ? 'aktiv' : 'entwurf');
+      kapsel.setAttribute('role', 'img');
+      var wortText = m.unterwiesen ? 'KI-Unterweisung am ' + datum(m.unterwiesen) : 'KI-Unterweisung offen';
+      kapsel.setAttribute('aria-label', m.unterwiesen ? 'unterwiesen' : 'nicht unterwiesen');
+      kapsel.title = m.unterwiesen ? 'unterwiesen' : 'nicht unterwiesen';
+      var wort = document.createElement('span');
+      wort.className = 'n-wort' + (m.unterwiesen ? '' : ' offen');
+      wort.textContent = wortText;
+      nachweis.appendChild(kapsel);
+      nachweis.appendChild(wort);
+
+      links.appendChild(name);
+      links.appendChild(mail);
+      links.appendChild(nachweis);
+
+      var gesperrt = letzter && m.rolle === 'owner';
+      var griffe = document.createElement('div');
+      griffe.className = 'm-griffe';
+
+      var wahl = document.createElement('select');
+      wahl.className = 'rolle';
+      wahl.disabled = gesperrt;
+      wahl.setAttribute('aria-label', 'Rolle von ' + m.name);
+      ROLLEN.forEach(function(r){
+        var o = document.createElement('option');
+        o.value = r.wert;
+        o.textContent = r.wort;
+        if (r.wert === m.rolle) o.selected = true;
+        wahl.appendChild(o);
+      });
+
+      var uebernehmen = document.createElement('button');
+      uebernehmen.type = 'button';
+      uebernehmen.className = 'knopf leise klein';
+      uebernehmen.textContent = 'Übernehmen';
+      uebernehmen.disabled = gesperrt;
+      uebernehmen.addEventListener('click', function(){
+        if (wahl.value === m.rolle) { meldung(m.name + ' ist schon ' + rollenWort(m.rolle) + '.'); return; }
+        /* Auf 0 Inhaber kann es nicht laufen: ist nur einer da, sind seine
+           beiden Griffe gesperrt. */
+        m.rolle = wahl.value;
+        meldung(m.name + ' ist jetzt ' + rollenWort(m.rolle) + '.');
+        maleTeam(m.id);
+      });
+
+      var entfernen = document.createElement('button');
+      entfernen.type = 'button';
+      entfernen.className = 'textknopf';
+      entfernen.textContent = 'Entfernen';
+      entfernen.disabled = gesperrt;
+      entfernen.addEventListener('click', function(){
+        TEAM = TEAM.filter(function(x){ return x.id !== m.id; });
+        meldung(m.name + ' hat keinen Zugang mehr. Die Arbeit an den Mandaten bleibt stehen, nur der Zugriff ist weg.');
+        maleTeam();
+        maleBereitschaft();
+        maleGelesen();
+      });
+
+      griffe.appendChild(wahl);
+      griffe.appendChild(uebernehmen);
+      griffe.appendChild(entfernen);
+
+      li.appendChild(links);
+      li.appendChild(griffe);
+      mitgliederListe.appendChild(li);
+    });
+  }
+
+  function versandVermerk(v){
+    var span = document.createElement('span');
+    if (!v) { span.textContent = 'nicht verschickt'; return span; }
+    if (v.art === 'zugestellt') { span.textContent = 'zugestellt am ' + datum(v.datum); return span; }
+    if (v.art === 'kam-nicht') {
+      span.className = 'kam-nicht';
+      span.textContent = 'kam nicht an (' + datum(v.datum) + ')';
+      if (v.grund) span.title = v.grund;
+      return span;
+    }
+    span.textContent = 'verschickt am ' + datum(v.datum);
+    return span;
+  }
+
+  function maleEinladungen(){
+    einladungsListe.textContent = '';
+    document.getElementById('einladungen-leer').hidden = EINLADUNGEN.length > 0;
+
+    EINLADUNGEN.forEach(function(e){
+      var li = document.createElement('li');
+      li.className = 'einladung';
+
+      var kopf = document.createElement('div');
+      kopf.className = 'e-kopf';
+      var links = document.createElement('div');
+      var adresse = document.createElement('div');
+      adresse.className = 'e-mail';
+      adresse.textContent = e.mail;
+      var meta = document.createElement('div');
+      meta.className = 'e-meta';
+      meta.appendChild(document.createTextNode('Als ' + rollenWort(e.rolle) + ', gültig bis ' + datum(e.bis) + ', '));
+      meta.appendChild(versandVermerk(e.versand));
+      links.appendChild(adresse);
+      links.appendChild(meta);
+
+      var griffe = document.createElement('div');
+      griffe.className = 'm-griffe';
+      if (e.versand && e.versand.art === 'kam-nicht') {
+        var nochmal = document.createElement('button');
+        nochmal.type = 'button';
+        nochmal.className = 'knopf leise klein';
+        nochmal.textContent = 'Erneut verschicken';
+        nochmal.addEventListener('click', function(){
+          e.versand = {art:'verschickt', datum:'2026-08-14'};
+          maleEinladungen();
+        });
+        griffe.appendChild(nochmal);
+      }
+      var zurueck = document.createElement('button');
+      zurueck.type = 'button';
+      zurueck.className = 'textknopf';
+      zurueck.textContent = 'Zurückziehen';
+      zurueck.addEventListener('click', function(){
+        EINLADUNGEN = EINLADUNGEN.filter(function(x){ return x.id !== e.id; });
+        maleEinladungen();
+      });
+      griffe.appendChild(zurueck);
+
+      kopf.appendChild(links);
+      kopf.appendChild(griffe);
+
+      var linkZeile = document.createElement('div');
+      linkZeile.className = 'e-link';
+      var url = 'https://app.quoroai.de/einladung/' + e.token;
+      var code = document.createElement('code');
+      code.textContent = url;
+      var kopieren = document.createElement('button');
+      kopieren.type = 'button';
+      kopieren.className = 'knopf sekundaer klein';
+      kopieren.textContent = 'Kopieren';
+      kopieren.addEventListener('click', function(){
+        if (navigator.clipboard) navigator.clipboard.writeText(url);
+        kopieren.textContent = 'Kopiert';
+        setTimeout(function(){ kopieren.textContent = 'Kopieren'; }, 1600);
+      });
+      linkZeile.appendChild(code);
+      linkZeile.appendChild(kopieren);
+
+      li.appendChild(kopf);
+      li.appendChild(linkZeile);
+      einladungsListe.appendChild(li);
+    });
+  }
+
+  /* Einladen: dieselben Prüfungen wie im Produkt, nur ohne Server */
+  var einFehler = document.getElementById('ein-fehler');
+  document.getElementById('einladen').addEventListener('click', function(){
+    var feld = document.getElementById('ein-mail');
+    var adresse = feld.value.trim().toLowerCase();
+    var rolle = document.getElementById('ein-rolle').value;
+    einFehler.hidden = true;
+
+    function fehler(text){ einFehler.textContent = text; einFehler.hidden = false; }
+    if (!adresse) return fehler('Bitte eine E-Mail-Adresse eingeben.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adresse)) return fehler('Das ist keine gültige E-Mail-Adresse.');
+    var schonDrin = TEAM.some(function(m){ return m.mail.toLowerCase() === adresse; });
+    if (schonDrin) return fehler('Diese Adresse gehört schon zum Team.');
+    var schonEingeladen = EINLADUNGEN.some(function(e){ return e.mail.toLowerCase() === adresse; });
+    if (schonEingeladen) return fehler('Für diese Adresse ist schon eine Einladung offen.');
+
+    EINLADUNGEN.unshift({
+      id: 'e' + (Date.now()),
+      mail: adresse,
+      rolle: rolle,
+      bis: '2026-08-21',
+      token: zufallsWort(12),
+      versand: {art:'verschickt', datum:'2026-08-14'}
+    });
+    feld.value = '';
+    maleEinladungen();
+  });
+
+  function zufallsWort(n){
+    var z = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var s = '';
+    for (var i = 0; i < n; i++) s += z.charAt(Math.floor(Math.random() * z.length));
+    return s;
+  }
+
+  /* ---------- Bereitschaft: ein Füllstand für das ganze Team ---------- */
+  function maleBereitschaft(){
+    var gesamt = TEAM.length;
+    var fertig = 0;
+    TEAM.forEach(function(m){ if (m.unterwiesen) fertig++; });
+    var stand = document.getElementById('b-stand');
+    var anteil = gesamt ? fertig / gesamt : 0;
+    stand.style.setProperty('--stand', String(anteil));
+    stand.setAttribute('aria-label', fertig + ' von ' + gesamt + ' unterwiesen');
+    stand.title = fertig + ' von ' + gesamt + ' unterwiesen';
+    if (fertig < gesamt) {
+      stand.style.setProperty('--fluid', '#eebb59');
+      stand.style.setProperty('--fluid-tief', '#c88f28');
+    } else {
+      stand.style.setProperty('--fluid', '#43b384');
+      stand.style.setProperty('--fluid-tief', '#1e8a63');
+    }
+    document.getElementById('b-satz').textContent = fertig === gesamt
+      ? 'Alle ' + gesamt + ' im Team sind unterwiesen'
+      : fertig + ' von ' + gesamt + ' im Team sind unterwiesen';
+    document.getElementById('b-deut').textContent = fertig === gesamt
+      ? 'Der Nachweis steht. Ändert sich die Fassung, fängt er von vorn an.'
+      : 'Die Pflicht aus Art. 4 EU AI Act liegt bei deiner Beratung, nicht bei uns.';
+  }
+  function meineZeile(){
+    for (var i = 0; i < TEAM.length; i++) if (TEAM[i].id === ICH) return TEAM[i];
+    return null;
+  }
+
+  /* ---------- Sicherheit: der zweite Faktor ---------- */
+  var zfAn = false;
+  var GEHEIM = 'K7QM 4T2Z X9RB WD3F';
+  var zfStand = document.getElementById('zf-stand');
+  var zfGriffe = document.getElementById('zf-griffe');
+  var zfEinrichtung = document.getElementById('zf-einrichtung');
+
+  function maleZf(){
+    zfStand.textContent = '';
+    var kapsel = document.createElement('span');
+    kapsel.className = 'zustand ' + (zfAn ? 'aktiv' : 'entwurf');
+    kapsel.setAttribute('role', 'img');
+    kapsel.setAttribute('aria-label', zfAn ? 'eingerichtet' : 'nicht eingerichtet');
+    kapsel.title = zfAn ? 'eingerichtet' : 'nicht eingerichtet';
+    var text = document.createElement('span');
+    text.className = 'zf-text';
+    var b = document.createElement('b');
+    b.textContent = zfAn ? 'Der zweite Faktor steht.' : 'Kein zweiter Faktor eingerichtet.';
+    var klein = document.createElement('small');
+    klein.textContent = zfAn
+      ? 'Bei jeder Anmeldung fragt die Anwendung zusätzlich den Code aus deiner Authenticator-App. Ein gestohlenes Passwort allein liest jetzt nichts mehr.'
+      : 'Dein Konto hängt allein an deinem Passwort. Wer es kennt, sieht alles, was du siehst.';
+    text.appendChild(b);
+    text.appendChild(klein);
+    zfStand.appendChild(kapsel);
+    zfStand.appendChild(text);
+
+    zfGriffe.textContent = '';
+    if (zfEinrichtung.hidden) {
+      var knopf = document.createElement('button');
+      knopf.type = 'button';
+      knopf.className = zfAn ? 'knopf leise klein' : 'knopf primaer klein';
+      knopf.textContent = zfAn ? 'Zweiten Faktor entfernen' : 'Zweiten Faktor einrichten';
+      knopf.addEventListener('click', function(){
+        if (zfAn) { zfAn = false; maleZf(); return; }
+        maleQr();
+        document.getElementById('zf-code').value = '';
+        document.getElementById('zf-fehler').hidden = true;
+        zfEinrichtung.hidden = false;
+        maleZf();
+        document.getElementById('zf-code').focus();
+      });
+      zfGriffe.appendChild(knopf);
+    }
+  }
+
+  /* Ein Muster, das aussieht wie ein QR-Code und keiner ist — der echte
+     entsteht im Produkt beim Anmeldeserver. Fest gewürfelt aus dem
+     Geheimnis, damit er bei jedem Blick derselbe ist. */
+  function maleQr(){
+    var svg = document.getElementById('qr');
+    svg.textContent = '';
+    var N = 29, saat = 0, i;
+    for (i = 0; i < GEHEIM.length; i++) saat = (saat * 31 + GEHEIM.charCodeAt(i)) % 100000;
+    function naechste(){ saat = (saat * 1103515245 + 12345) % 2147483648; return saat / 2147483648; }
+    function block(x, y, w, h){
+      var r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      r.setAttribute('x', x); r.setAttribute('y', y);
+      r.setAttribute('width', w); r.setAttribute('height', h);
+      r.setAttribute('fill', '#18152f');
+      svg.appendChild(r);
+    }
+    function auge(x, y){
+      block(x, y, 7, 1); block(x, y + 6, 7, 1);
+      block(x, y, 1, 7); block(x + 6, y, 1, 7);
+      block(x + 2, y + 2, 3, 3);
+    }
+    function imAuge(x, y){
+      return (x < 8 && y < 8) || (x > N - 9 && y < 8) || (x < 8 && y > N - 9);
+    }
+    for (var y = 0; y < N; y++) {
+      for (var x = 0; x < N; x++) {
+        if (imAuge(x, y)) continue;
+        if (naechste() > 0.52) block(x, y, 1, 1);
+      }
+    }
+    auge(0, 0); auge(N - 7, 0); auge(0, N - 7);
+    document.getElementById('zf-geheim').textContent = GEHEIM;
+  }
+
+  document.getElementById('zf-abbrechen').addEventListener('click', function(){
+    zfEinrichtung.hidden = true;
+    maleZf();
+  });
+  document.getElementById('zf-bestaetigen').addEventListener('click', function(){
+    var code = document.getElementById('zf-code').value.trim();
+    if (!/^[0-9]{6}$/.test(code)) {
+      document.getElementById('zf-fehler').hidden = false;
+      return;
+    }
+    document.getElementById('zf-fehler').hidden = true;
+    zfAn = true;
+    zfEinrichtung.hidden = true;
+    maleZf();
+  });
+
+  /* ---------- KI-Kompetenz: die Unterweisung ----------
+     Wortlaut aus dem Produkt (lib/agency/ki-kompetenz.ts), in der Anrede
+     dieses Hauses. Ändert sich der Text, ändert sich die Fassung — und
+     jeder Nachweis fängt von vorn an. */
+  var KAPITEL = [
+    {titel:'Was der Berater ist', absaetze:[
+      'Der Berater ist ein Sprachmodell. Er sagt nicht nach, was in einer Datenbank steht, sondern setzt Wort für Wort das wahrscheinlich nächste — deshalb klingt jede Antwort gleich sicher, die richtige wie die falsche.',
+      'Er hat kein Wissen über eure laufenden Mandate, außer ihr habt es ihm gegeben, und keines über die Zukunft. Zahlen, Fristen und Rechtsstände prüft, wer sie weitergibt.',
+      'Er merkt sich nichts über Gespräche hinweg. Was in einem Gespräch stand, ist im nächsten weg.'
+    ]},
+    {titel:'Woher seine Antworten kommen', absaetze:[
+      'Er antwortet aus dem Wissen, das eure Beratung hinterlegt hat, und nennt dabei seine Quelle. Steht dort nichts, antwortet er aus dem, was im Modell steckt — allgemein und ohne Bezug zu eurer Methodik.',
+      'Schlechtes Wissen wird dadurch nicht besser, sondern nur überzeugender vorgetragen. Was ihr hinterlegt, sagt euer Berater euren Kunden.'
+    ]},
+    {titel:'Worüber er nicht urteilt', absaetze:[
+      'Über keinen benannten Menschen. Also keine Bewertung, Auswahl oder Rangfolge von Personen, keine Empfehlung zu Einstellung, Beförderung, Kündigung, Aufgabenzuweisung oder Vergütung, keine Leistungs- oder Verhaltensüberwachung, keine Einschätzung von Gefühlslagen, keine Bonitätsbewertung.',
+      'Der Grund ist der EU AI Act: solche Systeme gelten als Hochrisiko, und das Ableiten von Gefühlslagen bei Beschäftigten ist bereits verboten. Die Grenze verläuft an der benannten Person, nicht am Thema — über Personalarbeit, ihre Verfahren, Kriterien und Struktur berät er uneingeschränkt weiter.',
+      'Die Grenze steht in seiner Anweisung und lässt sich nicht wegschreiben. Versuch es nicht: was in der Persona steht, verantwortet ihr.'
+    ]},
+    {titel:'Was ihr verantwortet', absaetze:[
+      'Die Persona eures Beraters schreibt ihr. Sie geht ungeprüft in jede Antwort ein, die eure Kunden lesen — sie ist euer Wort, nicht unseres.',
+      'Was der Berater erarbeitet, prüft ein Mensch aus eurem Haus, bevor es beim Kunden landet. Der Kunde hat euch beauftragt, nicht eine Maschine.',
+      'Alles, was Geld oder Verbindlichkeit erzeugt — Termine, Zusagen, Angebote — entscheidet ein Mensch. Der Berater kann anfragen, nie bestätigen.'
+    ]},
+    {titel:'Personendaten im Gespräch', absaetze:[
+      'Was in ein Gespräch geschrieben wird, wird verarbeitet. Namen, Gehälter, Krankheitsgeschichten und Bewerbungsunterlagen gehören dort nur hinein, wenn es einen Grund dafür gibt — und dann so sparsam wie möglich.',
+      'Das Gespräch gehört dem Menschen, der es führt. Ihr lest es erst, wenn euer Kunde es ausdrücklich für euch freigibt. Das ist keine Einstellung, sondern in der Datenbank festgelegt.'
+    ]},
+    {titel:'Wenn etwas schiefgeht', absaetze:[
+      'Eine Antwort, die falsch, verletzend oder über eine Person urteilend ist, meldet ihr eurer Leitung — und die uns. Ein Vorfall, den niemand meldet, wiederholt sich.',
+      'Diese Unterweisung ist eine Maßnahme nach Art. 4 EU AI Act. Die Pflicht, für KI-Kompetenz in eurem Haus zu sorgen, bleibt bei eurer Beratung — wir stellen den Text und den Nachweis bereit, mehr können wir euch nicht abnehmen.'
+    ]}
+  ];
+
+  var unterweisung = document.getElementById('unterweisung');
+  KAPITEL.forEach(function(k){
+    var box = document.createElement('section');
+    box.className = 'kapitel';
+    var h = document.createElement('h4');
+    h.textContent = k.titel;
+    box.appendChild(h);
+    k.absaetze.forEach(function(a){
+      var p = document.createElement('p');
+      p.textContent = a;
+      box.appendChild(p);
+    });
+    unterweisung.appendChild(box);
+  });
+
+  var gelesenBereich = document.getElementById('gelesen-bereich');
+  function maleGelesen(){
+    gelesenBereich.textContent = '';
+    var ich = meineZeile();
+    if (!ich) {
+      var weg = document.createElement('div');
+      weg.className = 'fussnote';
+      weg.textContent = 'Du hast dich selbst aus dem Team genommen — hier gibt es dann nichts mehr zu bestätigen.';
+      gelesenBereich.appendChild(weg);
+      return;
+    }
+    if (ich.unterwiesen) {
+      var q = document.createElement('div');
+      q.className = 'quittung';
+      q.textContent = 'Du hast diese Fassung am ' + datum(ich.unterwiesen) + ' zur Kenntnis genommen. Die Zeile an deinem Namen oben ist der Nachweis.';
+      gelesenBereich.appendChild(q);
+      return;
+    }
+    var block = document.createElement('div');
+    block.className = 'gelesen-block';
+    var p = document.createElement('p');
+    p.textContent = 'Mit dem Knopf halten wir fest, dass du diese Fassung gelesen hast. Er behauptet nicht, dass du sie verstanden hast — nur, dass sie dir vorgelegen hat, und genau das ist der Nachweis, den Art. 4 verlangt.';
+    var knopf = document.createElement('button');
+    knopf.type = 'button';
+    knopf.className = 'knopf primaer';
+    knopf.textContent = 'Gelesen';
+    knopf.addEventListener('click', function(){
+      ich.unterwiesen = '2026-08-14';
+      maleTeam(ich.id);
+      maleBereitschaft();
+      maleGelesen();
+      if (!reduziert) {
+        setTimeout(function(){
+          var frisch = document.querySelector('.mitglied.frisch');
+          if (frisch) frisch.classList.remove('frisch');
+        }, 2600);
+      }
+    });
+    block.appendChild(p);
+    block.appendChild(knopf);
+    gelesenBereich.appendChild(block);
+  }
+
+  maleTeam();
+  maleEinladungen();
+  maleBereitschaft();
+  maleZf();
+  maleGelesen();
+})();
+</script>
+<script src="zeiger.js"></script>
+</body>
+</html>
