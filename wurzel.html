@@ -21,7 +21,8 @@
    stadt-weiss.jpg: stadt.jpg mit ffmpeg auf reines Weiß gezogen
    (colorlevels 0.93), sonst zeichnet multiply ein graues Rechteck auf die
    weiße Seite.
-   Marker: WURZEL-V2 (Review-Fixes: die Seite darf scrollen, die Vorführung weicht früher, das Licht geht auch ohne Bild an) */
+   Marker: WURZEL-V3 (die Abrechnung führt jetzt in den gezeichneten
+   Plattformbereich, plattform.html — Block C ist gebaut) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -147,7 +148,7 @@ body.erwacht .modell .aurora{opacity:1}
       <div class="wege">
         <a class="knopf primaer" href="registrieren.html">Beratung anlegen</a>
         <a class="knopf sekundaer" href="registrieren.html#anmelden">Anmelden</a>
-        <button class="knopf leise" id="abrechnung" type="button" hidden>Abrechnung</button>
+        <a class="knopf leise" id="abrechnung" href="plattform.html" hidden>Abrechnung</a>
       </div>
       <p class="leiser-hinweis" id="hinweis" aria-live="polite"></p>
     </div>
@@ -234,12 +235,6 @@ body.erwacht .modell .aurora{opacity:1}
   }
   Object.keys(knoepfe).forEach(function(k){
     knoepfe[k].addEventListener('click', function(){ zeige(k); });
-  });
-
-  /* Der Plattformbereich ist Block C und noch nicht gezeichnet — der Knopf
-     sagt das ehrlich, statt ins Leere zu führen. */
-  abrechnung.addEventListener('click', function(){
-    hinweis.textContent = 'Der quoroAI-Plattformbereich entsteht noch.';
   });
 
   zeige('fremde');

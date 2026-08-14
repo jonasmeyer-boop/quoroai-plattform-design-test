@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Abrechnung der Beratungen</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design · Der quoroAI-Plattformbereich (Block C, letztes
+   Paket der Reihenfolge-Entscheidung 2026-08-13). Die einzige Fläche der
+   Anwendung, die über alle Beratungen hinwegsieht: was sie uns diesen Monat
+   schulden, was offen ist, und der Abschluss eines vergangenen Monats.
+   Inhalt aus dem Produkt (../quoroai-plattform/src/app/plattform/**,
+   lib/platform/{preise,abrechnung,ansicht,monat}.ts): Listenpreise je Tarif,
+   Wholesale-Staffel, Plattformgebühr, tagegenaue Teilung, Abschluss /
+   Bezahlt / Verwerfen.
+   Kern-Idee: Der laufende Monat ist flüssig — er wächst bis heute und steht
+   in Glas. Der Abschluss friert ihn ein: ein Frost läuft über die Aufstellung,
+   das Glas wird fest, und ab da ändert sich an dem Blatt nichts mehr.
+   Neu gegenüber dem Produkt: der Abschluss zeigt, WAS er einfriert (die
+   gerechnete Aufstellung des Vormonats), und das Verwerfen fragt nach.
+   Marker: PLATTFORM-V1 */
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,select{font-family:inherit}
+
+/* ========== quoroAI-Chrom ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0}
+nav .rechts{display:flex;align-items:center;gap:10px}
+nav a.vorschlaege,nav button.abmelden{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;cursor:pointer;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover,nav button.abmelden:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+
+/* ========== Seite ========== */
+body{position:relative}
+/* die Lila-Aurora, über der das Glas schwebt */
+body::before{
+  content:"";position:fixed;inset:-10% -10% auto -10%;height:70vh;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(60% 55% at 22% 0%, rgba(111,99,232,.20), transparent 70%),
+    radial-gradient(50% 50% at 88% 12%, rgba(157,147,241,.16), transparent 72%);
+  filter:blur(10px);
+}
+main{max-width:880px;margin:0 auto;padding:136px 24px 90px}
+/* Die Ansicht kommt gestaffelt an — und zwar jedes Mal, wenn sie gezeigt wird,
+   nicht nur beim ersten Laden. */
+main > div > *{opacity:0;translate:0 12px}
+main > div.zeigt > *{animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:6px;max-width:62ch}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:30px}
+
+.tafel{
+  margin-top:12px;border-radius:var(--radius-karte);padding:22px 24px;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+.klein{font-size:12.5px;color:var(--nebel-500);margin-top:14px;line-height:1.55}
+.knopf{min-height:40px;padding:0 16px;font-size:13.5px}
+.knopf[disabled]{opacity:.45;cursor:not-allowed}
+.zurueck-zeile{
+  display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;
+  font-size:13px;font-weight:600;color:var(--nebel-600);text-decoration:none;
+}
+.zurueck-zeile:hover{color:var(--lila-600)}
+
+/* ---------- Lage-Tafel: die eine Zahl ---------- */
+.lage{
+  margin-top:18px;display:flex;align-items:flex-end;justify-content:space-between;gap:28px;flex-wrap:wrap;
+  border-radius:var(--radius-karte);padding:26px 28px;
+  background:color-mix(in srgb, var(--lila-600) 11%, rgba(255,255,255,.42));
+  backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid rgba(255,255,255,.55);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 18px 46px rgba(59,52,134,.16);
+}
+.lage .zahl{
+  font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);letter-spacing:-.03em;
+  font-size:clamp(38px,6.4vw,60px);line-height:1;font-variant-numeric:tabular-nums;
+}
+.lage .unter{font-size:13px;color:var(--nebel-600);margin-top:8px}
+.lage .offen{text-align:right;font-size:13px;color:var(--nebel-600)}
+.lage .offen b{display:block;font-size:22px;font-weight:600;color:var(--tinte);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.lage .offen.nichts b{color:var(--gruen)}
+
+/* ---------- Zeilen (Beratungen, offene Abrechnungen, Monate) ---------- */
+.zeilen{display:flex;flex-direction:column;gap:9px}
+a.zeile{
+  display:flex;align-items:center;gap:16px;width:100%;text-align:left;cursor:pointer;
+  text-decoration:none;color:var(--tinte);
+  padding:13px 16px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 8px 24px rgba(16,19,26,.06);
+  transition:border-color .2s ease,translate .2s var(--kurve);
+}
+a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
+.zeile .z-text{min-width:0;flex:1}
+.zeile .z-titel{display:block;font-size:14px;font-weight:600;letter-spacing:-.01em;line-height:1.4}
+.zeile .z-meta{display:block;font-size:12px;color:var(--nebel-600);margin-top:2px;line-height:1.5}
+.zeile .z-meta .warnt{color:var(--bernstein);font-weight:600}
+.zeile .z-recht{margin-left:auto;flex-shrink:0;display:flex;align-items:center;gap:14px}
+.zeile .z-betrag{font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.zeile .zustand{width:40px;height:18px}
+.leer{font-size:13.5px;color:var(--nebel-600)}
+
+/* ---------- Die Aufstellung ---------- */
+.aufstellung{position:relative;overflow:hidden}
+.aufstellung .posten{display:flex;flex-direction:column;font-size:13.5px}
+.aufstellung .p{
+  display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  padding:8px 2px;border-top:0.5px solid var(--nebel-200);
+}
+.aufstellung .p:first-child{border-top:0;padding-top:0}
+.aufstellung .p .p-wer{min-width:0}
+.aufstellung .p .p-her{color:var(--nebel-500)}
+.aufstellung .p .p-betrag,.summen dd{font-variant-numeric:tabular-nums;white-space:nowrap}
+.summen{margin-top:16px;border-top:1px solid var(--nebel-300);padding-top:12px;font-size:13.5px}
+.summen div{display:flex;justify-content:space-between;gap:24px;padding:3px 0}
+.summen dt,.summen .was{color:var(--nebel-600)}
+.summen .gesamt{font-weight:700;border-top:1px solid var(--nebel-300);margin-top:6px;padding-top:9px}
+.summen .gesamt .was{color:var(--tinte)}
+.nur-gebuehr{font-size:13.5px;color:var(--nebel-600)}
+
+/* der Abschluss: aus Glas wird Eis ---------------------------------------- */
+.aufstellung.fest{
+  background:var(--flaeche);
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  border:0.5px solid var(--nebel-200);
+  box-shadow:0 1px 2px rgba(16,19,26,.05), 0 16px 44px rgba(24,21,47,.10);
+}
+.aufstellung .frost{
+  position:absolute;inset:0;pointer-events:none;border-radius:var(--radius-karte);
+  background:linear-gradient(105deg, transparent 34%, rgba(255,255,255,.96) 50%, transparent 66%) no-repeat;
+  background-size:220% 100%;background-position:-120% 0;opacity:0;
+}
+.aufstellung.friert .frost{animation:frost .95s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes frost{
+  0%{opacity:0;background-position:-120% 0}
+  18%{opacity:1}
+  100%{opacity:0;background-position:120% 0}
+}
+.aufstellung.friert{animation:setzen .95s var(--kurve) forwards}
+@keyframes setzen{0%{scale:1}22%{scale:.994}100%{scale:1}}
+.eingefroren{
+  margin-top:14px;font-size:12.5px;color:var(--nebel-600);
+  display:flex;align-items:center;gap:8px;
+}
+.eingefroren::before{
+  content:"";width:7px;height:7px;border-radius:2px;flex-shrink:0;
+  background:var(--lila-300);rotate:45deg;
+}
+
+/* Abschluss-Karte */
+.griffe{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:18px}
+.meldung{
+  margin-top:12px;padding:11px 14px;border-radius:var(--radius-innen);
+  background:var(--gruen-fond);font-size:13.5px;line-height:1.5;
+}
+.meldung.warnt{background:var(--bernstein-fond)}
+
+/* Kopf einer Beratung / einer Abrechnung */
+.raum-kopf h2{font-size:clamp(21px,2.8vw,28px);line-height:1.2}
+.raum-kopf .meta{font-size:13px;color:var(--nebel-600);margin-top:4px}
+.abschnitt-kopf{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:30px}
+.abschnitt-kopf h3{margin-top:0}
+.abschnitt-kopf .laeuft{font-size:12.5px;color:var(--nebel-500)}
+
+@media (prefers-reduced-motion: reduce){
+  main > div > *{animation:none;opacity:1;translate:none}
+  .aufstellung.friert{animation:none}
+  .aufstellung.friert .frost{animation:none}
+}
+@media (max-width:760px){
+  nav{padding:0 18px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
+  .tafel{padding:18px 18px}
+  .lage{padding:20px 18px;align-items:flex-start}
+  .lage .offen{text-align:left}
+}
+@media (max-width:520px){
+  /* Das Entwurfs-Chrom weicht als Erstes: „Abmelden" gehört zum Produkt,
+     der Weg zu den Vorschlägen ist nur Gerüst. */
+  nav a.vorschlaege{display:none}
+  .zeile{gap:10px;padding:12px 14px}
+  .zeile .z-recht{gap:10px}
+}
+</style>
+</head>
+<body class="quoro">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Plattform</small></div></div>
+  <div class="rechts">
+    <button class="abmelden" type="button" id="abmelden">Abmelden</button>
+    <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+  </div>
+</nav>
+
+<a id="krume" href="wurzel.html"><span class="zurueck">← quoroAI</span><span>/</span><b>Abrechnung</b></a>
+
+<main>
+  <!-- ============ Ansicht: alle Beratungen ============ -->
+  <div id="ansicht-liste">
+    <div class="kopf">
+      <h1>Abrechnung</h1>
+      <div class="stand">Was alle Beratungen uns schulden. Der laufende Monat wird bis heute gezählt, nicht bis zum Monatsende — hier steht kein Geld, das noch nicht verdient ist.</div>
+    </div>
+
+    <section class="lage" aria-label="Der laufende Monat">
+      <div>
+        <div class="zahl" id="lage-zahl">0,00 €</div>
+        <div class="unter" id="lage-unter"></div>
+      </div>
+      <div class="offen" id="lage-offen"></div>
+    </section>
+
+    <h3>Beratungen</h3>
+    <section class="tafel" aria-label="Alle Beratungen">
+      <div class="zeilen" id="liste-beratungen"></div>
+      <div class="klein">Listenpreis je Kunde und vollem Monat: Basis 19,00 €, Standard 59,00 €, Plus 149,00 €. Davon geht der Wholesale-Rabatt ab — 25 %, ab 25 Zugängen 35 %, ab 100 Zugängen 45 %. Dazu kommt die Plattformgebühr von 149,00 € je Beratung und Monat; angebrochene Monate werden tagegenau geteilt.</div>
+    </section>
+
+    <h3>Offen</h3>
+    <section class="tafel" aria-label="Offene Abrechnungen">
+      <div class="zeilen" id="liste-offen"></div>
+      <div class="klein">Offen heißt: abgeschlossen und noch nicht bezahlt. Eine bezahlte Abrechnung taucht hier nicht mehr auf.</div>
+    </section>
+  </div>
+
+  <!-- ============ Ansicht: eine Beratung ============ -->
+  <div id="ansicht-beratung" hidden>
+    <a class="zurueck-zeile" href="#">← Alle Beratungen</a>
+    <div id="beratung-inhalt"></div>
+  </div>
+
+  <!-- ============ Ansicht: eine abgeschlossene Abrechnung ============ -->
+  <div id="ansicht-abrechnung" hidden>
+    <a class="zurueck-zeile" id="zur-beratung" href="#">← Zurück</a>
+    <div id="abrechnung-inhalt"></div>
+  </div>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ================= Die Zahlen aus dem Produkt =================
+     src/lib/plans.ts (Listenpreise) und src/lib/platform/preise.ts
+     (Staffel, Plattformgebühr). Sie stehen hier genau einmal. */
+  var TARIFE = {
+    basis:    {label:'Basis',    cent:1900},
+    standard: {label:'Standard', cent:5900},
+    plus:     {label:'Plus',     cent:14900}
+  };
+  var STAFFEL = [{ab:0,proz:25},{ab:25,proz:35},{ab:100,proz:45}];
+  var GEBUEHR = 14900;
+  var HEUTE = '2026-08-14';
+
+  function rabattFuer(zugaenge){
+    var p = 0;
+    STAFFEL.forEach(function(stufe){ if (zugaenge >= stufe.ab) p = stufe.proz; });
+    return p;
+  }
+
+  /* ================= Kalender, ohne Bibliothek ================= */
+  var MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August',
+                'September','Oktober','November','Dezember'];
+  function teile(iso){ var t = iso.split('-'); return {j:+t[0], m:+t[1], t:+t[2]}; }
+  function tagesZahl(iso){ var d = teile(iso); return Date.UTC(d.j, d.m-1, d.t) / 86400000; }
+  function tageImMonat(monat){ var d = teile(monat); return new Date(Date.UTC(d.j, d.m, 0)).getUTCDate(); }
+  function monatsEnde(monat){
+    var d = teile(monat);
+    return d.j + '-' + ('0'+d.m).slice(-2) + '-' + ('0'+tageImMonat(monat)).slice(-2);
+  }
+  function monatsLabel(monat){ var d = teile(monat); return MONATE[d.m-1] + ' ' + d.j; }
+  function vormonat(monat){
+    var d = teile(monat);
+    var j = d.m === 1 ? d.j-1 : d.j, m = d.m === 1 ? 12 : d.m-1;
+    return j + '-' + ('0'+m).slice(-2) + '-01';
+  }
+  function monatsBeginn(iso){ return iso.slice(0,7) + '-01'; }
+  function datum(iso){ var d = teile(iso); return ('0'+d.t).slice(-2)+'.'+('0'+d.m).slice(-2)+'.'+d.j; }
+  /* Wie viele Tage eines Zeitraums in [von, bis] liegen — beide Enden zählen mit. */
+  function tageIn(von, bis, start, ende){
+    var a = Math.max(tagesZahl(von), tagesZahl(start));
+    var b = Math.min(bis ? tagesZahl(bis) : Infinity, tagesZahl(ende));
+    return b < a ? 0 : (b - a + 1);
+  }
+  function euro(cent){
+    var minus = cent < 0, v = Math.abs(Math.round(cent));
+    var ganz = String(Math.floor(v/100)).replace(/\B(?=(\d{3})+$)/g, '.');
+    return (minus ? '−' : '') + ganz + ',' + ('0' + (v % 100)).slice(-2) + ' €';
+  }
+
+  /* ================= Die Welt: vier Beratungen =================
+     „Heute" ist der 14. August 2026 — derselbe Tag wie in den anderen
+     Entwürfen. Nordholm & Partner ist die Beratung, die überall sonst in
+     diesen Entwürfen arbeitet; hier ist sie eine von vieren. */
+  function kunde(name, tarif, seit, bis){ return {name:name, tarif:tarif, seit:seit, bis:bis||null}; }
+
+  var ACKERMANN_KUNDEN = [
+    ['Hansen Elektrotechnik','standard','2026-03-12'], ['Lorenz Bau','plus','2026-03-12'],
+    ['Weber Kunststoff','standard','2026-03-12'],      ['Brandt Spedition','standard','2026-03-12'],
+    ['Kessler Metall','basis','2026-03-12'],           ['Dorn Präzision','plus','2026-03-12'],
+    ['Ahrens Gartenbau','basis','2026-03-12'],         ['Sievers Fenster','standard','2026-03-12'],
+    ['Rohde Textil','basis','2026-03-12'],             ['Piper Verpackung','standard','2026-04-01'],
+    ['Krause Sanitär','basis','2026-04-01'],           ['Tholen Fischerei','basis','2026-04-01'],
+    ['Baumann Werkzeug','standard','2026-04-01'],      ['Gerdes Landtechnik','plus','2026-04-15'],
+    ['Nolte Möbel','standard','2026-04-15'],           ['Iversen Reederei','plus','2026-05-01'],
+    ['Struck Dachdecker','basis','2026-05-01'],        ['Hellwig Chemie','standard','2026-05-18'],
+    ['Rauch Getränke','basis','2026-06-01'],           ['Bergmann Guss','standard','2026-06-01'],
+    ['Timm Softwarehaus','plus','2026-06-15'],         ['Wendt Pflege','basis','2026-06-15'],
+    ['Ohlsen Fleischerei','basis','2026-07-01'],       ['Faber Optik','standard','2026-07-01'],
+    ['Radtke Solar','standard','2026-08-01']
+  ].map(function(k){ return kunde(k[0], k[1], k[2]); });
+
+  var BERATUNGEN = [
+    {
+      id:'nordholm', name:'Nordholm & Partner', adresse:'nordholm-partner.de', seit:'2026-05-18',
+      kunden:[
+        kunde('Petersen Stahlbau','plus','2026-05-18'),
+        kunde('Cordes Logistik','standard','2026-06-01'),
+        kunde('Bäckerei Freitag','basis','2026-07-14'),
+        kunde('MTS Maschinenbau','standard','2026-07-14')
+      ],
+      /* Monat → wann abgeschlossen, wann bezahlt (null = offen) */
+      abschluesse:[
+        {monat:'2026-05-01', abgeschlossen:'2026-06-01', bezahlt:'2026-06-09'},
+        {monat:'2026-06-01', abgeschlossen:'2026-07-01', bezahlt:'2026-07-08'},
+        {monat:'2026-07-01', abgeschlossen:'2026-08-01', bezahlt:null}
+      ]
+    },
+    {
+      id:'ackermann', name:'Ackermann Consulting', adresse:'ackermann-consulting.de', seit:'2026-03-12',
+      kunden:ACKERMANN_KUNDEN,
+      /* Der Juli fehlt mit Absicht: an ihm hängt der Abschluss. */
+      abschluesse:[
+        {monat:'2026-03-01', abgeschlossen:'2026-04-01', bezahlt:'2026-04-07'},
+        {monat:'2026-04-01', abgeschlossen:'2026-05-01', bezahlt:'2026-05-06'},
+        {monat:'2026-05-01', abgeschlossen:'2026-06-01', bezahlt:'2026-06-05'},
+        {monat:'2026-06-01', abgeschlossen:'2026-07-01', bezahlt:'2026-07-06'}
+      ]
+    },
+    {
+      id:'steinbach', name:'Steinbach Beratung', adresse:'steinbach-beratung.de', seit:'2026-07-02',
+      kunden:[
+        kunde('Möller Haustechnik','standard','2026-07-02'),
+        kunde('Vogt Zerspanung','basis','2026-08-05')
+      ],
+      abschluesse:[
+        {monat:'2026-07-01', abgeschlossen:'2026-08-01', bezahlt:'2026-08-04'}
+      ]
+    },
+    {
+      id:'marwitz', name:'Marwitz & Kollegen', adresse:'marwitz-kollegen.de', seit:'2026-06-20',
+      /* Alle drei Zugänge sind zum Monatsende ausgelaufen — im August bleibt
+         es bei der Plattformgebühr. */
+      kunden:[
+        kunde('Sander Immobilien','standard','2026-06-20','2026-07-31'),
+        kunde('Prahl Handel','basis','2026-06-20','2026-07-31'),
+        kunde('Lührs Beratungshaus','basis','2026-07-01','2026-07-31')
+      ],
+      abschluesse:[
+        {monat:'2026-06-01', abgeschlossen:'2026-07-01', bezahlt:'2026-07-11'},
+        {monat:'2026-07-01', abgeschlossen:'2026-08-01', bezahlt:null}
+      ]
+    }
+  ];
+
+  /* ================= Die Rechnung, eine Stelle =================
+     Im Produkt rechnet das die Datenbank (agency_billing_month), damit
+     Vorschau und Abschluss nie zwei Wahrheiten sind. Hier steht sie einmal
+     und beide Ansichten lesen daraus. */
+  function rechne(beratung, monat, bis){
+    var start = monat, ende = bis || monatsEnde(monat);
+    if (tagesZahl(ende) < tagesZahl(start)) return null;
+    var tage = tageImMonat(monat);
+    var zeilen = [];
+    beratung.kunden.forEach(function(k){
+      var d = tageIn(k.seit, k.bis, start, ende);
+      if (d <= 0) return;
+      var preis = TARIFE[k.tarif].cent;
+      zeilen.push({
+        name:k.name, tarif:k.tarif, tage:d, tageImMonat:tage,
+        einzelpreis:preis, betrag:Math.round(preis * d / tage)
+      });
+    });
+    var zwischensumme = zeilen.reduce(function(s,z){ return s + z.betrag; }, 0);
+    var zugaenge = zeilen.length;
+    var proz = rabattFuer(zugaenge);
+    var rabatt = Math.round(zwischensumme * proz / 100);
+    /* Die Gebühr wird tagegenau geteilt: eine Beratung, die am 18. anfängt,
+       zahlt für den angebrochenen Monat nicht den vollen Satz. */
+    var eigeneTage = tageIn(beratung.seit, null, start, ende);
+    var gebuehr = Math.round(GEBUEHR * eigeneTage / tage);
+    return {
+      monat:monat, gezaehltBis:ende, tageImMonat:tage,
+      zeilen:zeilen, zugaenge:zugaenge,
+      zwischensumme:zwischensumme, rabattProzent:proz, rabatt:rabatt,
+      gebuehr:gebuehr, gesamt:zwischensumme - rabatt + gebuehr
+    };
+  }
+
+  /* Der laufende Monat: gezählt bis heute. */
+  function laufend(beratung){ return rechne(beratung, monatsBeginn(HEUTE), HEUTE); }
+
+  /* Beim Start wird jeder Abschluss einmal gerechnet und dann eingefroren —
+     danach wird an ihm nicht mehr gerechnet, nur noch gelesen. */
+  BERATUNGEN.forEach(function(b){
+    b.abschluesse.forEach(function(a){
+      a.daten = rechne(b, a.monat);
+      a.id = b.id + '-' + a.monat.slice(0,7);
+    });
+  });
+
+  function beratungMit(id){
+    for (var i = 0; i < BERATUNGEN.length; i++) if (BERATUNGEN[i].id === id) return BERATUNGEN[i];
+    return null;
+  }
+  function abschlussMit(beratung, monat){
+    for (var i = 0; i < beratung.abschluesse.length; i++) {
+      if (beratung.abschluesse[i].monat === monat) return beratung.abschluesse[i];
+    }
+    return null;
+  }
+  /* Welcher Vormonat noch offen ist. Angeboten wird nur der Vormonat —
+     ältere Lücken schließt man von dort aus rückwärts. */
+  function offenerAbschluss(beratung){
+    var m = vormonat(monatsBeginn(HEUTE));
+    if (tagesZahl(monatsEnde(m)) < tagesZahl(beratung.seit)) return null;
+    return abschlussMit(beratung, m) ? null : m;
+  }
+  function zugaengeWort(n){
+    if (n === 0) return 'kein Kundenzugang';
+    return n === 1 ? '1 aktiver Kundenzugang' : n + ' aktive Kundenzugänge';
+  }
+
+  /* ================= Bausteine der Ansicht ================= */
+  function h(text){
+    return String(text).replace(/[&<>"]/g, function(z){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[z];
+    });
+  }
+
+  /* Die Aufstellung — dieselbe Form für die Vorschau und für das
+     eingefrorene Blatt. Wer beide nebeneinanderlegt, soll dieselbe Rechnung
+     sehen und nicht zwei Darstellungen davon. */
+  function aufstellung(daten, klasse){
+    var posten = daten.zeilen.length === 0
+      ? '<p class="nur-gebuehr">Kein Kunde mit Zugang in diesem Monat — es bleibt bei der Plattformgebühr.</p>'
+      : '<div class="posten">' + daten.zeilen.map(function(z){
+          var her = z.tage < z.tageImMonat
+            ? z.tage + ' von ' + z.tageImMonat + ' Tagen à ' + euro(z.einzelpreis)
+            : 'ganzer Monat';
+          return '<div class="p"><span class="p-wer">' + h(z.name) +
+                 ' <span class="p-her">' + TARIFE[z.tarif].label + ', ' + her + '</span></span>' +
+                 '<span class="p-betrag">' + euro(z.betrag) + '</span></div>';
+        }).join('') + '</div>';
+
+    return '<section class="tafel aufstellung ' + (klasse||'') + '" aria-label="Aufstellung">' +
+      '<span class="frost" aria-hidden="true"></span>' + posten +
+      '<dl class="summen">' +
+        '<div><dt>Listenpreise, ' + zugaengeWort(daten.zugaenge) + '</dt><dd>' + euro(daten.zwischensumme) + '</dd></div>' +
+        /* Ohne Zugänge gibt es nichts zu rabattieren — die Zeile bliebe eine
+           Prozentzahl ohne Gegenstand. */
+        (daten.zwischensumme > 0
+          ? '<div><dt>Wholesale-Rabatt ' + daten.rabattProzent + ' %</dt><dd>' + euro(-daten.rabatt) + '</dd></div>'
+          : '') +
+        '<div><dt>Plattformgebühr</dt><dd>' + euro(daten.gebuehr) + '</dd></div>' +
+        '<div class="gesamt"><dt class="was">Zu zahlen</dt><dd>' + euro(daten.gesamt) + '</dd></div>' +
+      '</dl></section>';
+  }
+
+  /* ================= Ansicht 1: alle Beratungen ================= */
+  var lageZahl = document.getElementById('lage-zahl');
+  var lageUnter = document.getElementById('lage-unter');
+  var lageOffen = document.getElementById('lage-offen');
+
+  function offeneAbrechnungen(){
+    var raus = [];
+    BERATUNGEN.forEach(function(b){
+      b.abschluesse.forEach(function(a){ if (!a.bezahlt) raus.push({beratung:b, abschluss:a}); });
+    });
+    return raus.sort(function(x,y){ return x.abschluss.monat < y.abschluss.monat ? 1 : -1; });
+  }
+
+  function zeichneListe(){
+    var summe = 0, zugaenge = 0;
+    var reihen = BERATUNGEN.map(function(b){
+      var m = laufend(b);
+      summe += m ? m.gesamt : 0;
+      zugaenge += m ? m.zugaenge : 0;
+      /* Bei null Zugängen wäre „Rabatt 25 %" eine Zahl ohne Gegenstand — dann
+         steht da, was wirklich passiert. */
+      var meta = b.adresse + (!m ? ' — keine Zahlen'
+        : m.zugaenge === 0 ? ' — kein Kundenzugang, nur die Plattformgebühr'
+        : ' — ' + zugaengeWort(m.zugaenge) + ', Rabatt ' + m.rabattProzent + ' %');
+      var offen = offenerAbschluss(b);
+      if (offen) meta += ' <span class="warnt">' + monatsLabel(offen) + ' noch nicht abgeschlossen</span>';
+      return '<a class="zeile" href="#b/' + b.id + '">' +
+        '<span class="z-text"><span class="z-titel">' + h(b.name) + '</span>' +
+        '<span class="z-meta">' + meta + '</span></span>' +
+        '<span class="z-recht"><span class="z-betrag">' + euro(m ? m.gesamt : 0) + '</span></span></a>';
+    }).join('');
+    document.getElementById('liste-beratungen').innerHTML = reihen;
+
+    var offen = offeneAbrechnungen();
+    var offenerBetrag = offen.reduce(function(s,o){ return s + o.abschluss.daten.gesamt; }, 0);
+    document.getElementById('liste-offen').innerHTML = offen.length === 0
+      ? '<p class="leer">Nichts offen — jede abgeschlossene Abrechnung ist bezahlt.</p>'
+      : offen.map(function(o){
+          return '<a class="zeile" href="#a/' + o.beratung.id + '/' + o.abschluss.monat + '">' +
+            '<span class="z-text"><span class="z-titel">' + h(o.beratung.name) + ', ' + monatsLabel(o.abschluss.monat) + '</span>' +
+            '<span class="z-meta">abgeschlossen am ' + datum(o.abschluss.abgeschlossen) + '</span></span>' +
+            '<span class="z-recht"><span class="z-betrag">' + euro(o.abschluss.daten.gesamt) + '</span></span></a>';
+        }).join('');
+
+    lageUnter.textContent = monatsLabel(monatsBeginn(HEUTE)) + ' bis heute, ' +
+      BERATUNGEN.length + ' Beratungen, ' + zugaengeWort(zugaenge);
+    lageOffen.className = 'offen' + (offen.length === 0 ? ' nichts' : '');
+    lageOffen.innerHTML = offen.length === 0
+      ? '<b>nichts offen</b>'
+      : '<b>' + euro(offenerBetrag) + '</b>offen aus ' + offen.length + (offen.length === 1 ? ' Abrechnung' : ' Abrechnungen');
+    zaehleHoch(summe);
+  }
+
+  /* Die eine Zahl zählt beim Ankommen hoch — einmal, nicht bei jedem
+     Neuzeichnen. */
+  var hochgezaehlt = false;
+  function zaehleHoch(ziel){
+    if (reduziert || hochgezaehlt) { lageZahl.textContent = euro(ziel); hochgezaehlt = true; return; }
+    hochgezaehlt = true;
+    var start = null, dauer = 900;
+    function schritt(zeit){
+      if (start === null) start = zeit;
+      var p = Math.min((zeit - start) / dauer, 1);
+      var e = 1 - Math.pow(1 - p, 3);
+      lageZahl.textContent = euro(Math.round(ziel * e));
+      if (p < 1) requestAnimationFrame(schritt);
+    }
+    requestAnimationFrame(schritt);
+  }
+
+  /* ================= Ansicht 2: eine Beratung ================= */
+  var beratungInhalt = document.getElementById('beratung-inhalt');
+
+  function zeichneBeratung(b){
+    var m = laufend(b);
+    var offen = offenerAbschluss(b);
+    var html = '<div class="raum-kopf"><h2>' + h(b.name) + '</h2>' +
+      '<div class="meta">' + b.adresse + ', Kunde seit ' + datum(b.seit) + '</div></div>';
+
+    html += '<div class="abschnitt-kopf"><h3>' + monatsLabel(monatsBeginn(HEUTE)) + '</h3>' +
+            '<span class="laeuft">läuft noch, gezählt bis ' + datum(HEUTE) + '</span></div>';
+    html += m ? aufstellung(m) : '<section class="tafel"><p class="leer">Keine Zahlen.</p></section>';
+
+    if (offen) {
+      var vorschau = rechne(b, offen);
+      html += '<h3>' + monatsLabel(offen) + ' ist noch offen</h3>' +
+        '<section class="tafel" id="abschluss-karte" aria-label="Monat abschließen">' +
+        '<div class="klein" style="margin-top:0">Der Monat ist vorbei. Der Abschluss friert ihn ein. Danach ändert sich an ihm nichts mehr — auch dann nicht, wenn sich später Preise oder Rabattstaffel ändern. Das hier ist, was eingefroren wird:</div>' +
+        (vorschau ? aufstellung(vorschau) : '') +
+        '<div class="griffe"><button class="knopf primaer" type="button" id="abschliessen" data-monat="' + offen + '">' +
+        monatsLabel(offen) + ' abschließen</button></div>' +
+        '<div class="meldung" id="abschluss-meldung" hidden></div></section>';
+    }
+
+    html += '<h3>Abgeschlossen</h3><section class="tafel" aria-label="Abgeschlossene Monate">';
+    if (b.abschluesse.length === 0) {
+      html += '<p class="leer">Noch kein Monat abgerechnet.</p>';
+    } else {
+      var sortiert = b.abschluesse.slice().sort(function(x,y){ return x.monat < y.monat ? 1 : -1; });
+      html += '<div class="zeilen">' + sortiert.map(function(a){
+        return '<a class="zeile" href="#a/' + b.id + '/' + a.monat + '">' +
+          '<span class="z-text"><span class="z-titel">' + monatsLabel(a.monat) + '</span>' +
+          '<span class="z-meta">' + (a.bezahlt ? 'bezahlt am ' + datum(a.bezahlt) : '<span class="warnt">offen</span>') +
+          ', ' + zugaengeWort(a.daten.zugaenge) + '</span></span>' +
+          '<span class="z-recht">' +
+          '<span class="zustand ' + (a.bezahlt ? 'aktiv' : 'wartet') + '" role="img" aria-label="' +
+          (a.bezahlt ? 'bezahlt' : 'offen') + '" title="' + (a.bezahlt ? 'bezahlt' : 'offen') + '"></span>' +
+          '<span class="z-betrag">' + euro(a.daten.gesamt) + '</span></span></a>';
+      }).join('') + '</div>';
+    }
+    html += '</section>';
+    beratungInhalt.innerHTML = html;
+
+    var knopf = document.getElementById('abschliessen');
+    if (knopf) knopf.addEventListener('click', function(){ friereEin(b, knopf.dataset.monat, knopf); });
+  }
+
+  /* Der eine Moment: aus Glas wird Eis. ------------------------------------
+     Der Frost läuft über die Aufstellung, das Glas wird fest, und erst danach
+     wandert das Blatt in die Liste der abgeschlossenen Monate. */
+  function friereEin(b, monat, knopf){
+    var karte = document.getElementById('abschluss-karte');
+    var blatt = karte ? karte.querySelector('.aufstellung') : null;
+    knopf.disabled = true;
+    knopf.textContent = 'Friert ein…';
+
+    var eintrag = {
+      monat:monat, abgeschlossen:HEUTE, bezahlt:null,
+      daten:rechne(b, monat), id:b.id + '-' + monat.slice(0,7)
+    };
+    b.abschluesse.push(eintrag);
+
+    function fertig(){
+      zeigeAbrechnung(b, monat);
+    }
+    if (!blatt || reduziert) { fertig(); return; }
+    blatt.classList.add('friert');
+    setTimeout(function(){ blatt.classList.add('fest'); }, 420);
+    setTimeout(fertig, 1050);
+  }
+
+  /* ================= Ansicht 3: eine Abrechnung ================= */
+  var abrechnungInhalt = document.getElementById('abrechnung-inhalt');
+  var zurBeratung = document.getElementById('zur-beratung');
+
+  function zeichneAbrechnung(b, a){
+    zurBeratung.href = '#b/' + b.id;
+    zurBeratung.textContent = '← ' + b.name;
+
+    var html = '<div class="raum-kopf"><h2>' + monatsLabel(a.monat) + '</h2>' +
+      '<div class="meta">' + h(b.name) + ', abgeschlossen am ' + datum(a.abgeschlossen) + ', ' +
+      (a.bezahlt ? 'bezahlt am ' + datum(a.bezahlt) : 'noch offen') + '</div></div>';
+
+    html += aufstellung(a.daten, 'fest');
+    html += '<div class="eingefroren">Eingefroren am ' + datum(a.abgeschlossen) +
+            '. Hier wird nichts nachgerechnet — die Zahlen stehen, wie sie an dem Tag galten.</div>';
+
+    if (!a.bezahlt) {
+      html += '<div class="griffe">' +
+        '<button class="knopf primaer" type="button" id="bezahlt">Bezahlt</button>' +
+        '<button class="knopf gefahr" type="button" id="verwerfen">Verwerfen</button></div>' +
+        '<div class="meldung warnt" id="abr-meldung" hidden></div>' +
+        '<div class="klein">Verworfen wird nur, was falsch gerechnet wurde — und nur, solange nichts geflossen ist. Der Monat ist danach wieder offen und kann neu abgeschlossen werden.</div>';
+    } else {
+      html += '<div class="klein" style="margin-top:20px">Bezahlt am ' + datum(a.bezahlt) + '. Eine bezahlte Abrechnung wird nicht mehr verworfen.</div>';
+    }
+    abrechnungInhalt.innerHTML = html;
+
+    var bezahlt = document.getElementById('bezahlt');
+    if (bezahlt) bezahlt.addEventListener('click', function(){
+      a.bezahlt = HEUTE;
+      zeichneAbrechnung(b, a);
+      zeichneListe();
+    });
+
+    var verwerfen = document.getElementById('verwerfen');
+    if (verwerfen) {
+      var sicher = false;
+      verwerfen.addEventListener('click', function(){
+        var meldung = document.getElementById('abr-meldung');
+        if (!sicher) {
+          sicher = true;
+          verwerfen.textContent = 'Wirklich verwerfen';
+          meldung.hidden = false;
+          meldung.textContent = 'Die Abrechnung verschwindet, und ' + monatsLabel(a.monat) + ' ist wieder offen. Noch einmal klicken, wenn das stimmt.';
+          return;
+        }
+        b.abschluesse = b.abschluesse.filter(function(x){ return x !== a; });
+        zeichneListe();
+        location.hash = '#b/' + b.id;
+      });
+    }
+  }
+
+  /* ================= Wege zwischen den Ansichten ================= */
+  var ansichten = {
+    liste: document.getElementById('ansicht-liste'),
+    beratung: document.getElementById('ansicht-beratung'),
+    abrechnung: document.getElementById('ansicht-abrechnung')
+  };
+  function zeige(welche){
+    Object.keys(ansichten).forEach(function(k){
+      ansichten[k].hidden = k !== welche;
+      ansichten[k].classList.remove('zeigt');
+    });
+    var an = ansichten[welche];
+    Array.prototype.forEach.call(an.children, function(el, i){
+      el.style.setProperty('--verz', (i * 0.06) + 's');
+    });
+    void an.offsetWidth; /* erzwingt den Neustart der Ankunft */
+    an.classList.add('zeigt');
+    window.scrollTo(0, 0);
+  }
+
+  function zeigeAbrechnung(b, monat){
+    var a = abschlussMit(b, monat);
+    if (!a) { location.hash = '#b/' + b.id; return; }
+    zeichneAbrechnung(b, a);
+    zeige('abrechnung');
+    document.title = monatsLabel(monat) + ', ' + b.name;
+    /* Ohne Hash-Wechsel bliebe der Zurück-Knopf des Browsers stumm; ein
+       Wechsel würde den Router noch einmal zeichnen lassen — deshalb still. */
+    if (location.hash !== '#a/' + b.id + '/' + monat) {
+      stillerHash = true;
+      location.hash = '#a/' + b.id + '/' + monat;
+    }
+  }
+
+  var stillerHash = false;
+  function route(){
+    if (stillerHash) { stillerHash = false; return; }
+    var teile = location.hash.replace(/^#/, '').split('/');
+    if (teile[0] === 'b' && beratungMit(teile[1])) {
+      var b = beratungMit(teile[1]);
+      zeichneBeratung(b);
+      zeige('beratung');
+      document.title = 'Abrechnung, ' + b.name;
+      return;
+    }
+    if (teile[0] === 'a' && beratungMit(teile[1])) {
+      var b2 = beratungMit(teile[1]);
+      var a = abschlussMit(b2, teile[2]);
+      if (a) { zeichneAbrechnung(b2, a); zeige('abrechnung');
+               document.title = monatsLabel(a.monat) + ', ' + b2.name; return; }
+      location.hash = '#b/' + b2.id;
+      return;
+    }
+    zeichneListe();
+    zeige('liste');
+    document.title = 'Abrechnung der Beratungen';
+  }
+  window.addEventListener('hashchange', route);
+
+  document.querySelector('#ansicht-beratung .zurueck-zeile').addEventListener('click', function(e){
+    e.preventDefault();
+    location.hash = '';
+  });
+
+  document.getElementById('abmelden').addEventListener('click', function(){
+    location.href = 'wurzel.html';
+  });
+
+  route();
+})();
+</script>
+<script src="zeiger.js"></script>
+</body>
+</html>
