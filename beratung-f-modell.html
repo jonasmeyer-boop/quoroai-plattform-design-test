@@ -45,8 +45,12 @@
    und daneben steht der Nachweis-Stand des Teams (3 von 5 unterwiesen,
    deiner fehlt) — der Hinweis bleibt im Cockpit stehen, bis bestätigt ist.
    V26: die Uhr (uhr.js) liegt als Dock über der Fläche, die Zentrale hat eine
-   Tür „Zeiten", und am schmalen Fenster rückt der Tisch über das Dock.
-   Marker: BERATUNG-F-MODELL-V26 */
+   Tür „Zeiten", und bis 880px rückt der Tisch über das Dock (162px: mit sichtbarem Beleg ist das Dock 130 hoch). V27 (Code-Review):
+   das Band 701–880px war nicht abgedeckt — dort lagen Tisch-Zettel unter dem
+   Dock; und die Raum-Spalten melden sich jetzt mit data-uhr-polster, damit der
+   Baustein ihnen sein Unten unterlegt (diese Fläche hat kein <main>, die
+   letzte Tür lag sonst unerreichbar unter dem Dock).
+   Marker: BERATUNG-F-MODELL-V27 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -227,10 +231,12 @@ body.drin #blitz{animation:durchbruch .6s ease-out}
 #auftakt h1{font-size:clamp(22px,3vw,32px);font-weight:600;letter-spacing:-.03em;line-height:1.15;margin-top:2px}
 
 /* Der Tisch: was wartet, als Glas-Ablage unten ========== */
-/* Am schmalen Fenster nimmt das Uhr-Dock (uhr.js) die volle Breite unten —
-   der Tisch rückt darüber, sonst läge er darunter begraben. */
-@media (max-width:700px){
-  #tisch{bottom:calc(96px + env(safe-area-inset-bottom))!important}
+/* Das Uhr-Dock (uhr.js) sitzt unten rechts und ist bis zu 400px breit; unter
+   700px nimmt es die volle Breite. Der Tisch steht links unten und ist bis zu
+   430px breit — bis etwa 880px Fensterbreite treffen sich beide. Er rückt
+   deshalb im ganzen Band darüber, nicht erst auf dem Handy. */
+@media (max-width:880px){
+  #tisch{bottom:calc(162px + env(safe-area-inset-bottom))!important}
 }
 #tisch{
   position:fixed;left:24px;bottom:20px;z-index:10;
@@ -561,7 +567,7 @@ body.gezoomt #zonen{display:block}
 <div id="blitz" aria-hidden="true"></div>
 
 <div id="zonen">
-  <section class="inhalt" data-raum="petersen">
+  <section class="inhalt" data-uhr-polster data-raum="petersen">
     <div class="kopf">
       <div><h2>Petersen Stahlbau</h2><div class="stand">3 Gespräche diese Woche, Termin Donnerstag, 10:00</div></div>
       <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">1 Gespräch freigegeben</span></span>
@@ -606,7 +612,7 @@ body.gezoomt #zonen{display:block}
     </div>
   </section>
 
-  <section class="inhalt" data-raum="cordes">
+  <section class="inhalt" data-uhr-polster data-raum="cordes">
     <div class="kopf">
       <div><h2>Cordes Logistik</h2><div class="stand">letzte Frage heute, 8:12</div></div>
       <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">Übergabe offen</span></span>
@@ -647,7 +653,7 @@ body.gezoomt #zonen{display:block}
     </div>
   </section>
 
-  <section class="inhalt" data-raum="freitag">
+  <section class="inhalt" data-uhr-polster data-raum="freitag">
     <div class="kopf">
       <div><h2>Bäckerei Freitag</h2><div class="stand">6 Gespräche im Juli, keines freigegeben</div></div>
       <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">läuft ruhig</span></span>
@@ -682,7 +688,7 @@ body.gezoomt #zonen{display:block}
     </div>
   </section>
 
-  <section class="inhalt" data-raum="mts">
+  <section class="inhalt" data-uhr-polster data-raum="mts">
     <div class="kopf">
       <div><h2>MTS Maschinenbau</h2><div class="stand">letzte Frage am 22. Juli, davor wöchentlich</div></div>
       <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">seit 3 Wochen still</span></span>
@@ -720,7 +726,7 @@ body.gezoomt #zonen{display:block}
     </div>
   </section>
 
-  <section class="inhalt" data-raum="zentrale">
+  <section class="inhalt" data-uhr-polster data-raum="zentrale">
     <div class="kopf">
       <div><h2 data-du="Deine Zentrale" data-sie="Ihre Zentrale">Deine Zentrale</h2><div class="stand">der KI-Berater, das Wissen, die Marke, die Abrechnung, das Team</div></div>
     </div>

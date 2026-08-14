@@ -22,7 +22,16 @@
    braucht (die Zeiten-Fläche), hört auf das Ereignis `uhr:gebucht` und liest
    `Uhr.buchungen()`.
 
-   Marker: UHR-V1 */
+   V2 (Code-Review): die Mandatsliste deckte am großen Fenster das Dock zu —
+   ein Klick auf „Anhalten" traf eine Mandatszeile und wechselte still; sie
+   setzt sich jetzt über die gemessene Oberkante. Das Polster gilt auch
+   Flächen ohne <main> (über data-uhr-polster) und rechnet mit dem sichtbaren
+   Beleg. aria-expanded und der Fokus sitzen an dem Knopf, der die Liste
+   geöffnet hat, nicht am versteckten. Eine Auffangfläche schließt sie auch
+   dort, wo Klicks nicht bis zum document steigen. Korrekturen und Nachträge
+   der Zeiten-Fläche laufen über sichere()/entferne()/trage() in dieselbe
+   Ablage wie die Uhr-Läufe.
+   Marker: UHR-V2 */
 window.Uhr = (function () {
   'use strict';
 
@@ -37,8 +46,6 @@ window.Uhr = (function () {
     { id: 'freitag',  name: 'Bäckerei Freitag' },
     { id: 'intern',   name: 'Eigene Beratung, nicht abrechenbar' }
   ];
-
-  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------- Ablage ---------- */
   function lies(schluessel, ersatz) {
@@ -60,8 +67,8 @@ window.Uhr = (function () {
     /* Was der Vormittag schon gebracht hat — damit die Fläche nicht leer
        startet und man den Wochenstand glauben kann. */
     buchungen = [
-      { name: 'Cordes Logistik',   was: 'Fuhrpark und Finanzierung',      von: '8:15',  bis: '9:05',  dauer: 3000, quelle: 'uhr' },
-      { name: 'Petersen Stahlbau', was: 'Marge, Vorbereitung des Termins', von: '9:20',  bis: '10:12', dauer: 3120, quelle: 'uhr' }
+      { id: 'v1', name: 'Cordes Logistik',   was: 'Fuhrpark und Finanzierung',      von: '8:15', bis: '9:05',  dauer: 3000, quelle: 'uhr' },
+      { id: 'v2', name: 'Petersen Stahlbau', was: 'Marge, Vorbereitung des Termins', von: '9:20', bis: '10:12', dauer: 3120, quelle: 'uhr' }
     ];
     schreib(SCHLUESSEL_BUCH, buchungen);
   }
@@ -208,9 +215,11 @@ window.Uhr = (function () {
       /* Auf dem Handy nimmt das Dock die volle Breite: der Daumen erreicht
          alles, ohne dass die Hand wandert. */
       '@media (max-width:700px){' +
-        '.uhr-dock,.uhr-liste{right:12px;left:12px;width:auto;bottom:calc(12px + env(safe-area-inset-bottom))}' +
+        /* Kein eigener bottom-Wert mehr für die Liste: sie setzt sich beim
+           Öffnen über die gemessene Oberkante des Docks, an jedem Fenster. */
+        '.uhr-dock,.uhr-liste{right:12px;left:12px;width:auto}' +
+        '.uhr-dock{bottom:calc(12px + env(safe-area-inset-bottom))}' +
         '.uhr-dock.ruht{left:auto}' +
-        '.uhr-liste{bottom:calc(84px + env(safe-area-inset-bottom))}' +
         '.uhr-zeit{font-size:20px}' +
         '.uhr-tat{padding:0 16px}' +
       '}' +
@@ -230,7 +239,7 @@ window.Uhr = (function () {
 
   /* ---------- Der Aufbau ---------- */
   var dock, reihe, werKnopf, glas, nameEl, seitEl, zeitEl, tatKnopf, belegEl, ruf;
-  var liste = null, ticker = null, belegTimer = null;
+  var liste = null, schleier = null, oeffner = null, ticker = null, belegTimer = null;
 
   function baue() {
     stil();
@@ -277,7 +286,7 @@ window.Uhr = (function () {
       if (liste && !liste.contains(e.target) && !dock.contains(e.target)) listeZu();
     });
     window.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && liste) { listeZu(); werKnopf.focus(); }
+      if (e.key === 'Escape' && liste) { var z = oeffner; listeZu(); if (z) z.focus(); }
     });
     /* Kommt der Rechner aus dem Schlaf, ist die Anzeige alt — die Rechnung
        hängt am Startzeitpunkt, nicht am Zähler, also genügt ein Neumalen. */
@@ -291,12 +300,14 @@ window.Uhr = (function () {
   /* Das Dock schwebt über der Fläche — die letzten Zeilen einer scrollenden
      Seite lägen sonst darunter begraben. Wer selbst genug Polster mitbringt
      (die Zeiten-Fläche), behält seines; alle anderen bekommen den Rest
-     dazugelegt. Flächen ohne <main> (das Modell) bauen ihr Unten selbst. */
+     dazugelegt. Flächen ohne <main> (das Modell) markieren ihre Inhaltsspalte mit
+     data-uhr-polster. 162 Pixel, nicht 118: mit sichtbarem Beleg ist das Dock
+     130 hoch, und genau dann steht etwas darin, das man lesen soll. */
   function machPlatz() {
-    var m = document.querySelector('main');
-    if (!m) return;
-    var da = parseFloat(getComputedStyle(m).paddingBottom) || 0;
-    if (da < 118) m.style.paddingBottom = 'calc(118px + env(safe-area-inset-bottom))';
+    document.querySelectorAll('main, [data-uhr-polster]').forEach(function (m) {
+      var da = parseFloat(getComputedStyle(m).paddingBottom) || 0;
+      if (da < 162) m.style.paddingBottom = 'calc(162px + env(safe-area-inset-bottom))';
+    });
   }
 
   /* ---------- Anzeige ---------- */
@@ -355,6 +366,15 @@ window.Uhr = (function () {
   function listeUm() { if (liste) listeZu(); else listeAuf(); }
 
   function listeAuf() {
+    /* Ein Tipp neben die Liste schließt sie. Der Zuhörer auf `document`
+       allein genügt nicht: auf iOS steigen Klicks von nicht-interaktiven
+       Elementen dort nicht an. Die Auffangfläche liegt unter der Liste,
+       aber unter dem Dock — „Anhalten" bleibt erreichbar. */
+    schleier = document.createElement('div');
+    schleier.className = 'uhr-schleier';
+    schleier.addEventListener('click', function (e) { e.stopPropagation(); listeZu(); });
+    document.body.appendChild(schleier);
+
     liste = document.createElement('div');
     liste.className = 'uhr-liste uhr-auf';
     liste.setAttribute('role', 'dialog');
@@ -381,16 +401,25 @@ window.Uhr = (function () {
     });
 
     document.body.appendChild(liste);
+    /* Die Liste darf das Dock nicht zudecken — sonst trifft ein Klick dorthin,
+       wo eben „Anhalten" saß, eine Mandatszeile und wechselt still das Mandat.
+       Sie setzt sich deshalb über die tatsächliche Oberkante des Docks. */
+    liste.style.bottom = Math.round(window.innerHeight - dock.getBoundingClientRect().top + 8) + 'px';
     var erster = liste.querySelector('.uhr-wahl:not([disabled])');
     if (erster) erster.focus();
-    werKnopf.setAttribute('aria-expanded', 'true');
+    /* Geöffnet wird die Liste in der Ruhelage vom Tat-Knopf, sonst vom Namen.
+       aria-expanded und der Fokus gehören an den, der sie geöffnet hat — in
+       der Ruhelage ist werKnopf versteckt, dort fiele der Fokus ins Leere. */
+    oeffner = lauf ? werKnopf : tatKnopf;
+    oeffner.setAttribute('aria-expanded', 'true');
   }
 
   function listeZu() {
     if (!liste) return;
     liste.remove();
     liste = null;
-    werKnopf.setAttribute('aria-expanded', 'false');
+    if (schleier) { schleier.remove(); schleier = null; }
+    if (oeffner) { oeffner.setAttribute('aria-expanded', 'false'); }
   }
 
   /* ---------- Starten, Wechseln, Anhalten ----------
@@ -457,7 +486,8 @@ window.Uhr = (function () {
       bis: uhrzeit(bis),
       dauer: dauer,
       quelle: 'uhr',
-      sortier: bis
+      sortier: bis,
+      id: 'u' + bis
     };
     eintrag.dauerWort = dauerWort(dauer);
     eintrag.gebucht = dauer >= 30;
@@ -489,10 +519,21 @@ window.Uhr = (function () {
     trage: function (eintrag) {
       eintrag.dauerWort = dauerWort(eintrag.dauer);
       if (!eintrag.sortier) eintrag.sortier = Date.now();
+      if (!eintrag.id) eintrag.id = 'e' + eintrag.sortier + '-' + buchungen.length;
       buchungen.unshift(eintrag);
       schreib(SCHLUESSEL_BUCH, buchungen);
       window.dispatchEvent(new CustomEvent('uhr:gebucht', { detail: eintrag }));
       return eintrag;
+    },
+    /* Nach einer Korrektur an einem Eintrag: sonst steht die alte Dauer nach
+       dem nächsten Seitenwechsel wieder da, und das sieht aus wie Datenverlust. */
+    sichere: function () {
+      buchungen.forEach(function (e) { e.dauerWort = dauerWort(e.dauer); });
+      schreib(SCHLUESSEL_BUCH, buchungen);
+    },
+    entferne: function (id) {
+      buchungen = buchungen.filter(function (e) { return e.id !== id; });
+      schreib(SCHLUESSEL_BUCH, buchungen);
     },
     dauerWort: dauerWort,
     ziffern: ziffern

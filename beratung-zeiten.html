@@ -26,7 +26,11 @@
    V2 (der Rundgang-Film hat es gezeigt): Einträge ohne Uhr trugen ein
    angehängtes „nachgetragen", auch wenn sie aus einem Vorschlag kamen — die
    Zeile nennt jetzt nur noch, was stimmt.
-   Marker: BERATUNG-ZEITEN-V2 */
+   V3 (Code-Review): Nachträge, übernommene Vorschläge und Korrekturen
+   laufen jetzt durch den Baustein statt durch ein Array dieser Seite — sonst
+   waren sie nach dem nächsten Seitenwechsel weg, während die Uhr im Dock
+   ihn überlebte. Der Minutenschlag hängt nicht mehr an einem exakten Tick.
+   Marker: BERATUNG-ZEITEN-V3 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -361,13 +365,14 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
 
   /* ---------- Heute erfasst ---------- */
   var listeEl = document.getElementById('eintraege');
-  var eigene = [];   /* Nachträge und übernommene Vorschläge dieser Sitzung */
   var frischeNamen = {};
 
   function alle(){
-    /* Der Baustein führt die Uhr-Buchungen, diese Fläche die von Hand
-       gesetzten. Zusammen ergeben sie den Tag. */
-    return Uhr.buchungen().concat(eigene).sort(function(a,b){
+    /* Eine einzige Ablage: der Baustein. Führte diese Fläche ihre eigene
+       Liste, wäre ein Nachtrag nach dem nächsten Seitenwechsel weg — und
+       das sähe aus wie Datenverlust, gerade weil die Uhr im Dock ihn
+       überlebt. */
+    return Uhr.buchungen().sort(function(a,b){
       return (b.sortier||0) - (a.sortier||0);
     });
   }
@@ -425,17 +430,16 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
         b.addEventListener('click', function(){
           e.dauer = Math.max(900, e.dauer + parseInt(b.dataset.schub, 10));
           el.querySelector('.e-dauer').textContent = Uhr.dauerWort(e.dauer);
+          Uhr.sichere();   /* sonst steht nach dem Seitenwechsel die alte Dauer da */
           summe();
         });
       });
       korr.querySelector('[data-loesch]').addEventListener('click', function(){
-        e.geloescht = true;
+        Uhr.entferne(e.id);
         el.style.transition = 'opacity .25s ease';
         el.style.opacity = 0;
         setTimeout(function(){ male(); }, reduziert ? 0 : 250);
       });
-
-      if (e.geloescht) el.hidden = true;
       listeEl.appendChild(el);
     });
 
@@ -446,7 +450,7 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
   function summe(){
     var laeuft = Uhr.laeuft();
     var sek = (laeuft ? laeuft.dauer : 0);
-    alle().forEach(function(e){ if (!e.geloescht) sek += e.dauer; });
+    alle().forEach(function(e){ sek += e.dauer; });
     var h = Math.floor(sek/3600), m = Math.round((sek%3600)/60);
     if (m === 60) { h += 1; m = 0; }
     document.getElementById('summe-heute').textContent = h + ':' + (m<10?'0':'') + m;
@@ -468,13 +472,19 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
 
   /* Die laufende Sekunde nur in der einen Zeile nachziehen, statt die
      ganze Liste jede Sekunde neu zu bauen. */
+  var letzteMinute = -1;
   setInterval(function(){
     var laeuft = Uhr.laeuft();
     var el = document.getElementById('laufende-dauer');
     if (laeuft && el) {
       el.textContent = Uhr.ziffern(laeuft.dauer);
-      if (laeuft.dauer % 60 === 0) summe();
+      /* Nicht `dauer % 60 === 0`: setInterval driftet und wird im
+         Hintergrund-Tab gedrosselt. Wird die volle Minute übersprungen,
+         fröre die Tagessumme ein, während die Zeile weiterzählt. */
+      var m = Math.floor(laeuft.dauer / 60);
+      if (m !== letzteMinute) { letzteMinute = m; summe(); }
     } else if (!!laeuft !== !!el) {
+      letzteMinute = -1;
       male();
     }
   }, 1000);
@@ -483,17 +493,13 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
   window.addEventListener('uhr:lage', function(){ male(); });
 
   /* ---------- Die Vorschläge ---------- */
-  var lfd = 0;
   function nimm(zettel){
-    var e = {
-      id: 'e' + (++lfd),
+    var e = Uhr.trage({
       name: zettel.dataset.mandat,
       was: zettel.dataset.was + ', übernommen',
       dauer: parseInt(zettel.dataset.dauer, 10),
-      sortier: Date.now(),
       quelle: 'vorschlag'
-    };
-    eigene.push(e);
+    });
     frischeNamen[e.id] = true;
     weg(zettel);
     male();
@@ -540,15 +546,12 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
   });
 
   document.getElementById('nachtragen').addEventListener('click', function(){
-    var e = {
-      id: 'e' + (++lfd),
+    var e = Uhr.trage({
       name: gewaehltesMandat.name,
       was: 'von Hand nachgetragen',
       dauer: gewaehlteMinuten * 60,
-      sortier: Date.now(),
       quelle: 'hand'
-    };
-    eigene.push(e);
+    });
     frischeNamen[e.id] = true;
     male();
     var neu = listeEl.querySelector('.eintrag.frisch');
