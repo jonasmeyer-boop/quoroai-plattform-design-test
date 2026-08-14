@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="recht-kunde.css">
 <style>
 /* quoroai-plattform-design · Die Datenschutzerklärung der Beratung
-   (White-Label) · Marker: DATENSCHUTZ-V1
+   (White-Label) · Marker: DATENSCHUTZ-V2
 
    Verantwortlich ist die Beratung, nicht quoroAI — das ist der Merksatz und
    die Trennlinie zur quoroAI-Fassung (quoro-datenschutz.html). quoroAI kommt
@@ -18,6 +18,10 @@
    Gespräch bleibt beim Kunden, bis er es freigibt (Mitlese-Schalter, Chronik
    2026-08-12). Steht das hier anders als im Code, ist das ein Befund — nicht
    ein Stilfehler.
+
+   V2 nach Code-Review: die Cookie-Liste nannte Cookies, die es nicht gibt;
+   die Websuche und lexware fehlten, obwohl beide Daten des Endkunden
+   berühren; AWS SES als zweiter Mailweg fehlte.
 
    Entwurf: der Text ist vollständig gezeichnet, juristisch nicht abgenommen.
    Im Betrieb liefert die Beratung ihre eigene Fassung; diese Fläche ist die
@@ -45,7 +49,7 @@
   <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
   <h1>Datenschutz</h1>
   <p class="stand">Stand: 14. August 2026</p>
-  <p class="vorspann" data-du="Welche Daten hier anfallen, wofür sie gebraucht werden, wie lange sie bleiben und wer sie sonst noch sieht." data-sie="Welche Daten hier anfallen, wofür sie gebraucht werden, wie lange sie bleiben und wer sie sonst noch sieht.">Welche Daten hier anfallen, wofür sie gebraucht werden, wie lange sie bleiben und wer sie sonst noch sieht.</p>
+  <p class="vorspann">Welche Daten hier anfallen, wofür sie gebraucht werden, wie lange sie bleiben und wer sie sonst noch sieht.</p>
 
   <div class="merk">
     <b data-du="Dein Gespräch mit dem Berater gehört dir." data-sie="Ihr Gespräch mit dem Berater gehört Ihnen.">Dein Gespräch mit dem Berater gehört dir.</b>
@@ -103,6 +107,9 @@ E-Mail: <span data-marke-recht="mail">kontakt@nordholm-partner.de</span></p>
     <li>Die Inhalte werden <b>nicht zum Training</b> von Modellen verwendet.</li>
     <li>Der Berater trifft <b>keine Entscheidung mit rechtlicher Wirkung</b>. Er antwortet und
       schlägt vor; entschieden wird von einem Menschen in der Beratung.</li>
+    <li>Sucht er für eine Antwort im Netz, läuft die Anfrage über eine Suchinstanz auf dem Server
+      der Plattform. Sie fragt von dort aus gängige Suchmaschinen — die Suchbegriffe verlassen
+      also den Server, die IP-Adresse und das Profil der fragenden Person nicht.</li>
     <li>Ist eine Frage zu heikel oder zu weit weg vom Mandat, übergibt er an einen Menschen,
       statt zu raten.</li>
   </ul>
@@ -118,12 +125,13 @@ E-Mail: <span data-marke-recht="mail">kontakt@nordholm-partner.de</span></p>
     <div class="zeile"><span class="wer">Supabase</span><span>Datenbank, Anmeldung, Dateispeicher</span><span class="wo">Frankfurt</span></div>
     <div class="zeile"><span class="wer">Hetzner</span><span>Server, auf dem die Plattform läuft</span><span class="wo">Falkenstein</span></div>
     <div class="zeile"><span class="wer">AWS Bedrock</span><span>Sprachmodell des Beraters</span><span class="wo">EU</span></div>
-    <div class="zeile"><span class="wer">Scaleway</span><span>Versand der E-Mails dieser Seite</span><span class="wo">EU</span></div>
+    <div class="zeile"><span class="wer">Scaleway und AWS SES</span><span>Versand der E-Mails dieser Seite</span><span class="wo">EU</span></div>
     <div class="zeile"><span class="wer">Cloudflare</span><span>Adressauflösung der Domain</span><span class="wo">EU</span></div>
+    <div class="zeile"><span class="wer">lexware office</span><span>Belege in unsere Buchhaltung</span><span class="wo">Deutschland</span></div>
   </div>
   <p>
-    Belege gehen zusätzlich in unsere Buchhaltung. Darüber hinaus wird nichts weitergegeben — nicht
-    an Werbenetzwerke, nicht an Datenhändler, an Behörden nur bei gesetzlicher Pflicht.
+    Darüber hinaus wird nichts weitergegeben — nicht an Werbenetzwerke, nicht an Datenhändler, an
+    Behörden nur bei gesetzlicher Pflicht.
   </p>
   <p>
     Die Verarbeitung findet in der Europäischen Union statt. Wo ein Anbieter zu einem Konzern mit
@@ -143,10 +151,9 @@ E-Mail: <span data-marke-recht="mail">kontakt@nordholm-partner.de</span></p>
 
   <h2>Cookies</h2>
   <p>
-    Gesetzt wird nur, was der Betrieb braucht: ein Anmelde-Cookie, ein Schutz gegen
-    Formularfälschung und die Wahl der Ansicht. Kein Tracking, keine Reichweitenmessung, keine
-    Werbepixel, keine fremden Schriften oder Karten. Deshalb steht hier kein Einwilligungsbanner —
-    es gäbe nichts einzuwilligen.
+    Gesetzt wird genau ein Cookie: das der Anmeldung, damit die Sitzung von Seite zu Seite hält.
+    Kein Tracking, keine Reichweitenmessung, keine Werbepixel, keine fremden Schriften oder
+    Karten. Deshalb steht hier kein Einwilligungsbanner — es gäbe nichts einzuwilligen.
   </p>
 
   <h2 data-du="Deine Rechte" data-sie="Ihre Rechte">Deine Rechte</h2>

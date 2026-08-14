@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="recht.css">
 <style>
 /* quoroai-plattform-design · Die Datenschutzerklärung von quoroAI selbst ·
-   Marker: QUORO-DATENSCHUTZ-V1
+   Marker: QUORO-DATENSCHUTZ-V2
 
    Adressat ist die Beratung, die bei uns Kundin ist — nicht deren Endkunde.
    Für dessen Daten sind wir Auftragsverarbeiter; das ist der eine Satz, der
@@ -19,6 +19,11 @@
    ../quoroai-plattform/docs/wissen/fremdsysteme.md (Stand 2026-08-14). Jeder
    Dienst, der dort steht und Personendaten berührt, steht hier — und
    umgekehrt. Ändert sich dort etwas, ist das hier ein Befund.
+
+   V2 nach Code-Review: drei Stellen behauptet, was der Code nicht tut —
+   Cookies, die es nicht gibt (nur das der Anmeldung), SearXNG als
+   Suchmaschine statt als Vermittler zu fremden, und AWS SES fehlte in der
+   Empfängerliste, obwohl es der voreingestellte Mailweg ist.
 
    Entwurf: der Text ist vollständig gezeichnet, aber juristisch nicht
    abgenommen. Vor dem Livegang liest ein Anwalt drüber. */
@@ -108,8 +113,9 @@
       antwortet, schlägt vor, rechnet — die Entscheidung trifft ein Mensch in der Beratung.</li>
     <li>Dass du mit einer KI sprichst, sagen wir dir an jeder Stelle, an der sie antwortet. Wir
       verstecken sie nicht hinter einem Vornamen.</li>
-    <li>Stellt der Berater eine Websuche, geht die Suchanfrage an unsere eigene Suchinstanz auf
-      unserem Server — nicht an eine fremde Suchmaschine mit deinem Profil.</li>
+    <li>Sucht der Berater im Netz, läuft die Anfrage über unsere eigene Suchinstanz auf unserem
+      Server. Sie fragt von dort aus gängige Suchmaschinen — die Suchbegriffe verlassen also den
+      Server, deine IP-Adresse und dein Profil nicht.</li>
   </ul>
 
   <h2>Wer die Daten sonst noch verarbeitet</h2>
@@ -123,6 +129,7 @@
     <div class="zeile"><span class="wer">Hetzner</span><span>Server, auf dem die Plattform läuft</span><span class="wo">Falkenstein</span></div>
     <div class="zeile"><span class="wer">AWS Bedrock</span><span>Sprachmodell des KI-Beraters, Einbettungen des Wissens</span><span class="wo">EU</span></div>
     <div class="zeile"><span class="wer">Scaleway</span><span>Versand unserer E-Mails</span><span class="wo">EU</span></div>
+    <div class="zeile"><span class="wer">AWS SES</span><span>Versand unserer E-Mails, der zweite Weg</span><span class="wo">EU</span></div>
     <div class="zeile"><span class="wer">Cloudflare</span><span>Adressauflösung der Domain</span><span class="wo">EU</span></div>
     <div class="zeile"><span class="wer">lexware office</span><span>Belege in die Buchhaltung, wenn die Beratung das einschaltet</span><span class="wo">Deutschland</span></div>
   </div>
@@ -156,10 +163,9 @@
 
   <h2>Cookies</h2>
   <p>
-    Wir setzen nur, was für den Betrieb nötig ist: ein Anmelde-Cookie, ein Schutz gegen
-    Formularfälschung und die Wahl der Sprache. Kein Tracking, keine Reichweitenmessung, keine
-    Werbepixel, keine fremden Schriften oder Karten. Deshalb steht hier auch kein Banner: Es gibt
-    nichts, worin man einwilligen müsste.
+    Gesetzt wird genau ein Cookie: das der Anmeldung, damit die Sitzung von Seite zu Seite hält.
+    Kein Tracking, keine Reichweitenmessung, keine Werbepixel, keine fremden Schriften oder
+    Karten. Deshalb steht hier auch kein Banner: Es gibt nichts, worin man einwilligen müsste.
   </p>
 
   <h2>Deine Rechte</h2>

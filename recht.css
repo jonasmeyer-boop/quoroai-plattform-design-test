@@ -1,7 +1,7 @@
 /* quoroai-plattform-design · Die Rechtsflächen von quoroAI: eine Lesefläche,
    zwei Dokumente (Impressum, Datenschutz). Ergänzt system.css, ersetzt es nie —
    hier stehen nur die Regeln, die eine reine Lesefläche braucht und die es
-   sonst nirgends gibt. Marker: RECHT-CSS-V1
+   sonst nirgends gibt. Marker: RECHT-CSS-V2
 
    Haltung: Recht ist eine funktionale Fläche. Kein Fancy-Moment, keine
    Bewegung, kein Glas über dem Text. Was hier zählt, ist Lesbarkeit:
@@ -15,7 +15,10 @@
 .recht-kopf{
   position:fixed;top:0;left:0;right:0;z-index:10;height:60px;
   display:flex;align-items:center;justify-content:space-between;gap:16px;
-  padding:0 max(22px,calc((100vw - 760px)/2));
+  /* 716px, nicht 760: die Lesespalte ist 760 breit INKLUSIVE ihrer 22px
+     Polster, ihr Text beginnt also 22px weiter innen. Rechnet das Kopfband
+     mit 760, steht die Wortmarke einen Daumen links vom Text darunter. */
+  padding:0 max(22px,calc((100% - 716px)/2));
   border-radius:0;border-left:0;border-right:0;border-top:0;
 }
 .recht-kopf .wortmarke{

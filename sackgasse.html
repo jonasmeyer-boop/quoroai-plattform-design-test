@@ -7,7 +7,7 @@
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="system.css">
 <style>
-/* quoroai-plattform-design · Die Sackgassen des Cockpits · Marker: SACKGASSE-V1
+/* quoroai-plattform-design · Die Sackgassen des Cockpits · Marker: SACKGASSE-V2
 
    Eine Fläche, drei Lagen — im Produkt sind es drei Zweige derselben Route
    (src/app/(beratung)/cockpit/page.tsx): das Konto gehört nicht hierher, es
@@ -18,8 +18,11 @@
    Zustand.** Jede Lage nennt, wer man gerade ist, warum es hier nicht
    weitergeht, und mindestens einen Ausgang.
 
+   V2 nach Code-Review: der Hash wird mit hasOwnProperty geprüft, und das
+   Raster nennt seine vierte Zeile, statt sich auf die implizite zu verlassen.
+
    Das Modell steht dahinter, aber unbelichtet — dieselbe Sprache wie auf der
-   Wurzel (WURZEL-V4): Licht heißt, hier arbeitet jemand für dich. Hier
+   Wurzel (WURZEL-V5): Licht heißt, hier arbeitet jemand für dich. Hier
    nicht. Das ist der einzige Effekt der Seite; sie bleibt sonst ruhig. */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
@@ -29,7 +32,7 @@ body{background:var(--grund)}
 
 .raum{
   min-height:100svh;display:grid;
-  grid-template-rows:auto minmax(0,1fr) auto;
+  grid-template-rows:auto minmax(0,1fr) auto auto;
   padding:clamp(18px,3svh,30px) 22px calc(10px + env(safe-area-inset-bottom));
   gap:clamp(10px,2svh,20px);
 }
@@ -223,8 +226,11 @@ a.haus .rein{font-size:14px;font-weight:600;color:var(--lila-700);white-space:no
   Object.keys(LAGEN).forEach(function(k){
     document.getElementById(LAGEN[k].knopf).addEventListener('click', function(){ zeige(k); });
   });
-  /* Direkteinstieg über den Hash — im Produkt sind es Zweige derselben Route */
-  zeige(LAGEN[location.hash.slice(1)] ? location.hash.slice(1) : 'fremd');
+  /* Direkteinstieg über den Hash — im Produkt sind es Zweige derselben Route.
+     hasOwnProperty, nicht bloß Wahrheitswert: sonst schlüpft #constructor
+     durch und blendet alle drei Lagen aus, die Seite bliebe leer. */
+  var ausHash = location.hash.slice(1);
+  zeige(Object.prototype.hasOwnProperty.call(LAGEN, ausHash) ? ausHash : 'fremd');
 })();
 </script>
 <script src="zeiger.js"></script>

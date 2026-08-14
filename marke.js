@@ -1,6 +1,6 @@
 /* quoroai-plattform-design · Der Marken-Kern: eine Quelle für alle Flächen.
    Vier Farbregler + Anrede je Beratung; im Produkt kommt beides aus dem
-   Mandanten-Profil (agency_branding). Marker: MARKE-KERN-V4
+   Mandanten-Profil (agency_branding). Marker: MARKE-KERN-V5
 
    V4: Jede Marke trägt ihre Anbieterkennzeichnung (`recht`). Sie ist kein
    Design-Regler, sondern eine Pflichtangabe: Impressum und Datenschutz der
@@ -8,29 +8,34 @@
    könnte quoroAI die beiden Seiten gar nicht ausliefern. Im Produkt sind das
    Spalten am Mandanten, und die Beratung muss sie ausfüllen, bevor ihre
    Adresse öffentlich erreichbar wird.
-   Die Werte hier sind Vorführungs-Platzhalter für erfundene Beispielmarken. */
+   Die Werte hier sind Vorführungs-Platzhalter für erfundene Beispielmarken.
+
+   V5 nach Code-Review: auch die Bezeichnung der Vertretung kommt aus der
+   Marke (`vertretungRolle`). Eine KG hat keinen Geschäftsführer, sondern
+   einen persönlich haftenden Gesellschafter — steht das Wort fest im
+   Markup, macht das Impressum die Rechtsform falsch. */
 window.Marke = (function () {
   'use strict';
   var MARKEN = [
     {name: 'Nordholm & Partner',  anrede: 'du',  blau: '#2b5fe3', stift: '#1d46c9', tinte: '#10131a', papier: '#fafaf7',
      recht: {anschrift: 'Nordholm & Partner Unternehmensberatung GmbH\nGroße Elbstraße 145\n22767 Hamburg',
-             vertretung: 'Dr. Anna Vogelsang, Jens Brandt', telefon: '+49 40 5544120',
+             vertretungRolle: 'Geschäftsführung', vertretung: 'Dr. Anna Vogelsang, Jens Brandt', telefon: '+49 40 5544120',
              mail: 'kontakt@nordholm-partner.de', register: 'Amtsgericht Hamburg, HRB 148920',
              ust: 'DE812345678', aufsicht: 'Der Hamburgische Beauftragte für Datenschutz und Informationsfreiheit'}},
     {name: 'Waldmann Consulting', anrede: 'sie', blau: '#0e7a5a', stift: '#0a5f46', tinte: '#101613', papier: '#f8faf7',
      recht: {anschrift: 'Waldmann Consulting GmbH\nKönigsallee 62\n40212 Düsseldorf',
-             vertretung: 'Martin Waldmann', telefon: '+49 211 8820140',
+             vertretungRolle: 'Geschäftsführung', vertretung: 'Martin Waldmann', telefon: '+49 211 8820140',
              mail: 'info@waldmann-consulting.de', register: 'Amtsgericht Düsseldorf, HRB 74210',
              ust: 'DE298374611', aufsicht: 'Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen'}},
     {name: 'Steinbach & Cie.',    anrede: 'sie', blau: '#9c3948', stift: '#7c2d3a', tinte: '#171114', papier: '#fbf9f7',
      recht: {anschrift: 'Steinbach & Cie. Unternehmensberatung KG\nMaximilianstraße 13\n80539 München',
-             vertretung: 'Friedrich Steinbach', telefon: '+49 89 2420380',
+             vertretungRolle: 'Persönlich haftender Gesellschafter', vertretung: 'Friedrich Steinbach', telefon: '+49 89 2420380',
              mail: 'kanzlei@steinbach-cie.de', register: 'Amtsgericht München, HRA 96140',
              ust: 'DE165920873', aufsicht: 'Bayerisches Landesamt für Datenschutzaufsicht'}},
     /* echtes Logo als Sehprobe (Jonas, 2026-08-12) — zeigt den logo_url-Platz */
     {name: 'currily',             anrede: 'du',  blau: '#7047EA', stift: '#5636b8', tinte: '#081B4A', papier: '#fbfafd', logo: 'bilder/currily-logo.svg',
      recht: {anschrift: 'currily GmbH\nFriedrichstraße 68\n10117 Berlin',
-             vertretung: 'Lena Kortmann', telefon: '+49 30 20889140',
+             vertretungRolle: 'Geschäftsführung', vertretung: 'Lena Kortmann', telefon: '+49 30 20889140',
              mail: 'hallo@currily.de', register: 'Amtsgericht Berlin-Charlottenburg, HRB 231470',
              ust: 'DE347118206', aufsicht: 'Berliner Beauftragte für Datenschutz und Informationsfreiheit'}}
   ];

@@ -2,7 +2,7 @@
    Dieselbe Lesefläche wie bei quoroAI, aber in der Marke der Beratung:
    Manrope auf Papier, die Markenfarbe nur als Akzent. system.css wird hier
    bewusst NICHT eingebunden — das ist die Grenze zwischen den zwei Welten.
-   Marker: RECHT-KUNDE-CSS-V1
+   Marker: RECHT-KUNDE-CSS-V2
 
    Recht ist funktional: kein Fancy-Moment, keine Bewegung außer dem Anstrich,
    den alle Kundenflächen tragen. Was zählt, ist Lesbarkeit. */
@@ -25,7 +25,10 @@ body{
 nav.kopf{
   position:fixed;top:0;left:0;right:0;z-index:10;height:60px;
   display:flex;align-items:center;justify-content:space-between;gap:16px;
-  padding:0 max(22px,calc((100vw - 760px)/2));
+  /* 716px, nicht 760: die Lesespalte ist 760 breit INKLUSIVE ihrer 22px
+     Polster, ihr Text beginnt also 22px weiter innen. Rechnet das Kopfband
+     mit 760, steht die Wortmarke einen Daumen links vom Text darunter. */
+  padding:0 max(22px,calc((100% - 716px)/2));
   background:linear-gradient(var(--papier) 55%, color-mix(in srgb, var(--papier) 1%, transparent));
 }
 nav.kopf .wortmarke{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px;letter-spacing:-.01em}
@@ -105,6 +108,7 @@ main.recht :focus-visible{outline:3px solid var(--blau);outline-offset:2px;borde
     display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
   nav.kopf .wege a{padding:8px 10px}
+  nav.kopf{padding:0 18px}
   main.recht{padding:84px 18px 90px}
   main.recht h2{margin-top:38px}
   .tabelle .zeile{grid-template-columns:1fr;gap:3px}

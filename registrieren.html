@@ -26,7 +26,12 @@
    Eingeladene, angemeldet als jemand anders, abgelaufen. Die abgelaufene
    Einladung war im Produkt eine Sackgasse ohne Weg; hier hat sie einen.
    Direkteinstieg über #einladung.
-   Marker: REGISTRIEREN-V4 */
+   V5 nach Code-Review: das Licht folgt jetzt wirklich der Regel. Es bleibt
+   auch beim falschen Konto aus, nicht nur bei der abgelaufenen Einladung;
+   die Kapsel steht dabei voll und grau statt auf 18 % Baustand (das Haus ist
+   fertig, es gehört nur nicht dir); und wer von der Einladung zur Anmeldung
+   wechselt, landet nicht mehr in der schon erleuchteten Stadt.
+   Marker: REGISTRIEREN-V5 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input{font-family:inherit}
@@ -378,6 +383,9 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
     document.body.classList.add('erwacht');
     standKapsel.className = 'zustand aktiv';
     standKapsel.style.removeProperty('--stand');
+    /* die Grautöne aus lichtAus() müssen weg, sonst bleibt das Glas trüb */
+    standKapsel.style.removeProperty('--fluid');
+    standKapsel.style.removeProperty('--fluid-tief');
     standWort.textContent = wort;
   }
 
@@ -414,15 +422,25 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
       b.classList.toggle('hier', an);
       b.setAttribute('aria-selected', an ? 'true' : 'false');
     });
-    /* Eine tote Einladung öffnet kein Haus — dann bleibt das Licht aus. */
-    if (name === 'tot') {
-      document.body.classList.remove('erwacht');
-      standKapsel.className = 'zustand';
-      standKapsel.style.setProperty('--stand', .18);
-      standWort.textContent = 'Diese Tür ist zu.';
+    /* Licht heißt: hier arbeitet jemand für dich. Eine tote Einladung und ein
+       fremdes Konto öffnen kein Haus — dann bleibt es aus. Das Haus steht
+       trotzdem fertig da, es gehört nur (noch) nicht dir: die Kapsel bleibt
+       deshalb voll und wird grau, nicht leer. Ein Baustand von 18 % würde das
+       Gegenteil behaupten. */
+    if (name === 'tot' || name === 'anderes') {
+      lichtAus(name === 'tot' ? 'Diese Tür ist zu.' : 'Nicht mit diesem Konto.');
     } else {
       lichtAn('Nordholm & Partner. Dein neues Haus.');
     }
+  }
+
+  function lichtAus(wort){
+    document.body.classList.remove('erwacht');
+    standKapsel.className = 'zustand';
+    standKapsel.style.setProperty('--stand', 1);
+    standKapsel.style.setProperty('--fluid', 'var(--nebel-300)');
+    standKapsel.style.setProperty('--fluid-tief', 'var(--nebel-400)');
+    standWort.textContent = wort;
   }
 
   function zeigeEinladung(){
@@ -464,6 +482,13 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
     fEin.hidden = true;
     vorfuehrung.hidden = true;
     document.getElementById('tueren').hidden = false;
+    /* Das Licht der Einladung muss aus, sonst steht man auf der Anmeldemaske
+       schon in der erleuchteten Stadt — der Ankunft, ohne angekommen zu sein. */
+    document.body.classList.remove('erwacht');
+    standKapsel.className = 'zustand';
+    standKapsel.style.removeProperty('--stand');
+    standKapsel.style.removeProperty('--fluid');
+    standKapsel.style.removeProperty('--fluid-tief');
     schalte(true);
   }
   function eintritt(){
