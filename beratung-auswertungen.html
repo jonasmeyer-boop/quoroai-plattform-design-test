@@ -60,7 +60,15 @@
    Daten, statt still zu deckeln (eine Rechnung mit 25 Tagen sah aus wie
    eine mit 20 — der Fall, für den es Bild 4 gibt), und die Sätze in Bild 4
    beugen den Einzahl-Fall, statt „ein von drei Rechnungen sind" zu sagen.
-   Marker: BERATUNG-AUSWERTUNGEN-V3 */
+
+   V4 (Code-Review): Bild 4 kannte seine Grenzfälle nicht. Ohne offene
+   Rechnung warf es und ließ die halbe Karte leer; bei einem Tag Restfrist
+   sagte es „in ein Tag fällig", bei einer Rechnung „auf ein Rechnung",
+   bei gestern gestellt „seit 1 Tagen", und über zwölf Rechnungen mischte
+   es Wort und Ziffer („Zwei von 13"). Alle sechs Zustände sind mit Kopien
+   der Fläche im Browser nachgestellt: leer, heute gestellt, gestern
+   gestellt, ein Tag Restfrist, eine überfällige, dreizehn überfällige.
+   Marker: BERATUNG-AUSWERTUNGEN-V4 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -780,26 +788,59 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
     });
     el.appendChild(kante(ZIEL_TAGE / deckel));
 
-    /* Beide Zweige zählen und beugen, statt eine Lage zu behaupten: „ein von
-       drei Rechnungen sind" und „null Tage bleiben ihr" sind Sätze, die
-       jeder für einen Fehler hält — zu Recht. */
-    var rest = ZIEL_TAGE - aelteste.tage;
-    document.getElementById('antwort-4').innerHTML = ueberfaellig.length === 0
-      ? '<b>' + euro(summe) + '</b> stehen offen, verteilt auf ' + wort(offen.length) +
-        (offen.length === 1 ? ' Rechnung' : ' Rechnungen') + '. <b>Keine ist überfällig</b> — die älteste liegt seit ' +
-        aelteste.tage + ' Tagen und ist ' +
-        /* „in zwei Tagen", nicht „in zwei Tage" — nach „in" steht der Dativ. */
-        (rest === 0 ? 'heute fällig.' : 'in ' + wort(rest) + (rest === 1 ? ' Tag' : ' Tagen') + ' fällig.')
-      : '<b class="warn">' + (ueberfaellig.length === 1
-          ? 'Eine von ' + wort(offen.length) + ' Rechnungen ist über der Frist'
-          : anzahlWortGross(ueberfaellig.length) + ' von ' + wort(offen.length) + ' Rechnungen sind über der Frist') +
-        '</b>, zusammen ' +
-        euro(ueberfaellig.reduce(function(s, f){ return s + f.brutto; }, 0)) + ' von ' + euro(summe) + '.';
-    document.getElementById('marke-4').innerHTML =
+    /* Alle Fälle zählen und beugen, statt eine Lage zu behaupten: „ein von
+       drei Rechnungen sind", „null Tage bleiben ihr", „seit 1 Tagen" und
+       „in ein Tag fällig" sind Sätze, die jeder für einen Fehler hält — zu
+       Recht. Zwei Beugungen, die nur Deutsch kennt: nach „seit" und „in"
+       steht der Dativ, also „seit einem Tag" und „in einem Tag". */
+    function seitTagen(n){
+      return n === 0 ? 'liegt seit heute' : n === 1 ? 'liegt seit einem Tag' : 'liegt seit ' + n + ' Tagen';
+    }
+    function inTagen(n){
+      return n === 0 ? 'heute fällig' : n === 1 ? 'morgen fällig' : 'in ' + wort(n) + ' Tagen fällig';
+    }
+    var antwort4 = document.getElementById('antwort-4');
+    if (!offen.length) {
+      /* Alles bezahlt ist ein Zustand, den diese Fläche zeigen können muss —
+         und nicht der Grund, warum die halbe Karte leer bleibt. */
+      antwort4.innerHTML = '<b>Keine Rechnung steht offen.</b> Zuletzt bezahlt: ' +
+        ZULETZT_BEZAHLT.kunde + ', ' + ZULETZT_BEZAHLT.nummer + ' nach ' + ZULETZT_BEZAHLT.tage + ' Tagen.';
+    } else {
+      var rest = ZIEL_TAGE - aelteste.tage;
+      antwort4.innerHTML = ueberfaellig.length === 0
+        ? '<b>' + euro(summe) + '</b> stehen offen, verteilt auf ' +
+          /* „eine Rechnung", nicht „ein Rechnung" — wort() kennt kein
+             Geschlecht, und Rechnung ist weiblich. */
+          (offen.length === 1 ? 'eine Rechnung' : wort(offen.length) + ' Rechnungen') +
+          '. <b>Keine ist überfällig</b> — die älteste ' +
+          seitTagen(aelteste.tage) + ' und ist ' + inTagen(rest) + '.'
+        /* Entweder beide Zahlen als Wort oder beide als Ziffer: „Zwei von 13"
+           ist ein Satz mit zwei Schriften. Über zwölf hat wort() kein Wort
+           mehr, also fallen dann beide auf Ziffern zurück. */
+        : '<b class="warn">' + (function(){
+            var beideWorte = ueberfaellig.length <= 12 && offen.length <= 12;
+            var vonWie = beideWorte ? wort(offen.length) : String(offen.length);
+            if (ueberfaellig.length === 1) return 'Eine von ' + vonWie + ' Rechnungen ist über der Frist';
+            return (beideWorte ? anzahlWortGross(ueberfaellig.length) : String(ueberfaellig.length)) +
+              ' von ' + vonWie + ' Rechnungen sind über der Frist';
+          })() +
+          '</b>, zusammen ' +
+          euro(ueberfaellig.reduce(function(s, f){ return s + f.brutto; }, 0)) + ' von ' + euro(summe) + '.';
+    }
+    /* Ohne Balken keine Kante — ein Satz über eine Linie, die nicht da ist,
+       schickt das Auge auf die Suche. */
+    var markeEl = document.getElementById('marke-4');
+    markeEl.hidden = !offen.length;
+    markeEl.innerHTML =
       'Die Kante ist das Zahlungsziel der Beratung, <b>' + ZIEL_TAGE + ' Tage</b>. Rechts davon wird eine Rechnung bernsteinfarben.';
+    /* Der letzte Zahlungseingang steht in der Antwort, sobald nichts offen
+       ist; dann gehört er nicht ein zweites Mal in die Fußzeile. */
     document.getElementById('fuss-4').textContent =
-      'Zuletzt bezahlt: ' + ZULETZT_BEZAHLT.kunde + ', ' + ZULETZT_BEZAHLT.nummer + ' nach ' +
-      ZULETZT_BEZAHLT.tage + ' Tagen. Entwürfe zählen hier nicht mit; offen ist, was gestellt und nicht bezahlt ist.';
+      (offen.length
+        ? 'Zuletzt bezahlt: ' + ZULETZT_BEZAHLT.kunde + ', ' + ZULETZT_BEZAHLT.nummer + ' nach ' +
+          ZULETZT_BEZAHLT.tage + ' Tagen. '
+        : '') +
+      'Entwürfe zählen hier nicht mit; offen ist, was gestellt und nicht bezahlt ist.';
   })();
 
   /* ================= 5 · Setzen wir unsere Preise durch? ================= */
