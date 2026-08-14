@@ -7,7 +7,7 @@
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="system.css">
 <style>
-/* Marker: SYSTEM-V9 · Der Zeiger ist der Komet (zeiger.js); Knöpfe sind Glaskörper; Text in Tinte, dick und dünn; Zustände als Füllstand im Glas; Glas-Look (Jonas, 2026-08-12): Apple-Glas als Material
+/* Marker: SYSTEM-V10 · Der Zeiger ist der Komet (zeiger.js); Knöpfe sind Glaskörper; Text in Tinte, dick und dünn; Zustände als Füllstand im Glas; Glas-Look (Jonas, 2026-08-12): Apple-Glas als Material
    für Chrom auf weißem Grund, das Lila leuchtet dahinter. Tokens in system.css. */
 
 *{margin:0;padding:0;box-sizing:border-box}
@@ -315,6 +315,16 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
           <div class="hilfe">So erscheint das Mandat später im Modell.</div>
         </div>
       </div>
+      <div class="baustein">
+        <h3>Die Glocke</h3>
+        <div class="satz" style="justify-content:flex-end"><span data-glocke></span></div>
+        <p style="margin-top:16px;font-size:14px">Was seit dem letzten Blick passiert ist, und der Weg dorthin: jeder Eintrag führt an die Stelle, um die es geht. Dass einer neu ist, sagt das Wort „neu" vor der Zeit — kein farbiger Punkt, der nichts erklärt. Wer sie öffnet, hat gelesen; kurz danach geht die Zahl aus. Der Baustein liegt in <code>glocke.js</code> und nimmt seine Farben von der Fläche, auf der er hängt: hier das Lila, auf Kundenflächen die Farbe der Beratung.</p>
+      </div>
+      <div class="baustein">
+        <h3>Der Versandvermerk</h3>
+        <ul style="list-style:none;display:grid;gap:10px;font-size:15px" id="vermerk-schau"></ul>
+        <p style="margin-top:16px;font-size:14px">Er steht überall, wo die Software jemandem etwas geschickt hat, und beantwortet die Frage, auf die es ankommt: ist sie angekommen? Was schiefging, steht in Rot, und der technische Grund hängt im Titel — an „550 5.1.1 user unknown" erkennt der Leser seinen Tippfehler. Der Baustein liegt in <code>vermerk.js</code>.</p>
+      </div>
       <div class="baustein" style="background:var(--nebel-050);border:0">
         <h3>Karte</h3>
         <div class="karte gehoben karte-demo">
@@ -353,6 +363,30 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
   <div class="rahmen">quoroAI-Designsystem. Tokens und Bausteine in system.css, die Entscheidungen dazu in der Chronik.</div>
 </footer>
 
+<script src="glocke.js"></script>
+<script src="vermerk.js"></script>
+<script>
+(function(){
+  'use strict';
+  Glocke.baue({ziel: document.querySelector('[data-glocke]'), eintraege: [
+    {titel: 'Neue Freigabe', text: 'Herr Petersen hat „Warum schrumpft meine Marge?" freigegeben.', zeit: 'gestern, 16:40', neu: true},
+    {titel: 'Übergabe vom KI-Berater', text: 'Cordes Logistik: eine Steuerfrage wartet auf Antwort.', zeit: 'heute, 8:12', neu: true},
+    {titel: 'Rechnung beglichen', text: 'Bäckerei Freitag hat die Juli-Rechnung bezahlt.', zeit: 'gestern', neu: false}
+  ]});
+
+  var schau = document.getElementById('vermerk-schau');
+  [null,
+   {art:'verschickt', datum:'2026-08-14'},
+   {art:'zugestellt', datum:'2026-08-14'},
+   {art:'kam-nicht', datum:'2026-08-12', grund:'550 5.1.1 user unknown'},
+   {art:'spam', datum:'2026-08-11'}
+  ].forEach(function(v){
+    var li = document.createElement('li');
+    li.appendChild(Vermerk.zeichne(v));
+    schau.appendChild(li);
+  });
+})();
+</script>
 <script src="zeiger.js"></script>
 </body>
 </html>

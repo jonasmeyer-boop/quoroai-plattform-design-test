@@ -6,6 +6,7 @@
 <title>Verwaltung der Beratung</title>
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="system.css">
+<script src="vermerk.js"></script>
 <style>
 /* quoroai-plattform-design, Verwaltung: neunter Raum hinter den Cockpit-Türen
    (Paket 9, Reihenfolge-Entscheidung 2026-08-13). Drei Dinge, die derselbe
@@ -26,7 +27,9 @@
    bleibt in Reihenfolge; „Kopiert" sagt der Knopf erst, wenn wirklich
    kopiert wurde; erneutes Verschicken verlängert die Frist mit; eine
    gewählte, aber nicht übernommene Rolle überlebt das Neuzeichnen.
-   Marker: BERATUNG-VERWALTUNG-V2 */
+   V3: der Versandvermerk ist der Baustein vermerk.js (Paket 10), nicht
+   mehr eine eigene Funktion in dieser Datei.
+   Marker: BERATUNG-VERWALTUNG-V3 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -146,7 +149,6 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
 .e-kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .e-mail{font-size:15px;font-weight:600}
 .e-meta{font-size:13px;color:var(--nebel-600);margin-top:2px}
-.e-meta .kam-nicht{color:var(--rot)}
 .e-link{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .e-link code{
   font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11.5px;word-break:break-all;
@@ -492,20 +494,6 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
     });
   }
 
-  function versandVermerk(v){
-    var span = document.createElement('span');
-    if (!v) { span.textContent = 'nicht verschickt'; return span; }
-    if (v.art === 'zugestellt') { span.textContent = 'zugestellt am ' + datum(v.datum); return span; }
-    if (v.art === 'kam-nicht') {
-      span.className = 'kam-nicht';
-      span.textContent = 'kam nicht an (' + datum(v.datum) + ')';
-      if (v.grund) span.title = v.grund;
-      return span;
-    }
-    span.textContent = 'verschickt am ' + datum(v.datum);
-    return span;
-  }
-
   function maleEinladungen(){
     einladungsListe.textContent = '';
     document.getElementById('einladungen-leer').hidden = EINLADUNGEN.length > 0;
@@ -523,13 +511,13 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
       var meta = document.createElement('div');
       meta.className = 'e-meta';
       meta.appendChild(document.createTextNode('Als ' + rollenWort(e.rolle) + ', gültig bis ' + datum(e.bis) + ', '));
-      meta.appendChild(versandVermerk(e.versand));
+      meta.appendChild(Vermerk.zeichne(e.versand));
       links.appendChild(adresse);
       links.appendChild(meta);
 
       var griffe = document.createElement('div');
       griffe.className = 'm-griffe';
-      if (e.versand && e.versand.art === 'kam-nicht') {
+      if (Vermerk.schiefgegangen(e.versand)) {
         var nochmal = document.createElement('button');
         nochmal.type = 'button';
         nochmal.className = 'knopf leise klein';

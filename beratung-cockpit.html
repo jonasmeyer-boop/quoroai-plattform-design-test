@@ -6,7 +6,9 @@
 <title>Cockpit der Beratung</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Cockpit der Beratung: was wartet, die Mandate, der KI-Berater · Marker: BERATUNG-COCKPIT-V1 */
+/* quoroai-plattform-design · Cockpit der Beratung: was wartet, die Mandate, der KI-Berater.
+   V2: die Glocke ist der Baustein glocke.js, nicht mehr eine Kopie im Kopf dieser Datei.
+   Marker: BERATUNG-COCKPIT-V2 */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -59,39 +61,10 @@ nav .griffe .kundensicht{
   text-decoration:none;transition:border-color .2s ease,color .2s ease;
 }
 nav .griffe .kundensicht:hover{border-color:var(--blau);color:var(--tinte)}
-nav .griffe .glocke{
-  /* exakt Pillenhöhe, damit die Reihe eine Linie bildet */
-  position:relative;width:35px;height:35px;border-radius:999px;
-  border:0.5px solid var(--linie);background:#fff;cursor:pointer;
-  display:inline-flex;align-items:center;justify-content:center;
-}
-nav .griffe .glocke svg{width:18px;height:18px}
-nav .griffe .glocke svg path{fill:none;stroke:var(--tinte);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-nav .griffe .glocke .zahl{
-  position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px;
-  border-radius:999px;background:var(--blau);color:#fff;font-size:11px;font-weight:800;
-  display:inline-flex;align-items:center;justify-content:center;
-}
 nav .griffe .ab{
   padding:8px 14px;border-radius:999px;border:0.5px solid var(--linie);
   background:#fff;font-size:12.5px;font-weight:700;color:var(--grau);cursor:pointer;
 }
-
-/* Glocken-Fenster */
-#glocke-liste{
-  position:fixed;top:58px;right:max(24px,calc((100vw - 880px)/2));z-index:55;
-  width:min(340px,calc(100vw - 32px));
-  background:#fff;border:0.5px solid var(--linie);border-radius:16px;
-  box-shadow:0 18px 50px rgba(16,19,26,.16);padding:16px 18px;
-}
-#glocke-liste h3{font-size:12px;font-weight:800;color:var(--grau)}
-.glocke-eintrag{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-top:0.5px solid var(--linie);cursor:pointer}
-#glocke-eintraege .glocke-eintrag:nth-child(1){border-top:none;margin-top:8px}
-.glocke-eintrag .ge-punkt{width:7px;height:7px;border-radius:999px;background:var(--blau);flex-shrink:0;margin-top:6px;transition:opacity .4s ease}
-.glocke-eintrag.gelesen .ge-punkt{opacity:.15}
-.glocke-eintrag .ge-titel{font-size:13.5px;font-weight:800}
-.glocke-eintrag .ge-text{font-size:12.5px;color:var(--grau);margin-top:2px}
-.glocke-eintrag .ge-zeit{font-size:11px;color:var(--grau);opacity:.8;margin-top:3px}
 
 /* Demo-Hinweis in Handschrift, wenn eine Fläche noch entsteht */
 #demo-hinweis{
@@ -201,18 +174,11 @@ section.auftakt-liste{margin-top:22px}
   <div class="wortmarke"><img class="marke-logo" alt="" hidden><div><span data-marke-name data-logo-versteckt>Nordholm &amp; Partner</span><small class="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung · Beispielmarke wechseln</small></div></div>
   <div class="griffe">
     <a class="kundensicht" href="uebersicht.html" title="Die Plattform so sehen, wie ein Kunde sie sieht">Kundensicht</a>
-    <button class="glocke" type="button" aria-label="Benachrichtigungen">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17 L18 17 C16.8 15.6 16.4 14.6 16.2 12.2 C16 9.2 14.6 7 12 7 C9.4 7 8 9.2 7.8 12.2 C7.6 14.6 7.2 15.6 6 17 Z M10.4 19.5 a1.8 1.8 0 0 0 3.2 0"/></svg>
-      <span class="zahl">2</span>
-    </button>
+    <span data-glocke></span>
     <button class="ab" type="button">Abmelden</button>
   </div>
 </nav>
 
-<div id="glocke-liste" hidden>
-  <h3>Neuigkeiten</h3>
-  <div id="glocke-eintraege"></div>
-</div>
 <div id="demo-hinweis">Diese Fläche entsteht gerade.</div>
 
 <main>
@@ -262,6 +228,7 @@ section.auftakt-liste{margin-top:22px}
   </section>
 </main>
 
+<script src="glocke.js"></script>
 <script>
 (function(){
   'use strict';
@@ -306,58 +273,17 @@ section.auftakt-liste{margin-top:22px}
     location.href = 'anmelden.html';
   });
 
-  /* Die Glocke lebt: Neuigkeiten führen zu ihrem Abschnitt */
-  (function(){
-    var glocke = document.querySelector('nav .glocke');
-    var liste = document.getElementById('glocke-liste');
-    var lage = document.getElementById('glocke-eintraege');
-    var zahl = glocke.querySelector('.zahl');
-    function springe(id){
-      var ziel = document.getElementById(id);
-      if (ziel) ziel.scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'start'});
-    }
-    var NEUES = [
-      {titel: 'Neue Freigabe', text: 'Herr Petersen hat „Warum schrumpft meine Marge?" freigegeben.', zeit: 'gestern, 16:40', neu: true, tue: function(){ springe('wartendes'); }},
-      {titel: 'Übergabe vom KI-Berater', text: 'Cordes Logistik: eine Steuerfrage wartet auf Antwort.', zeit: 'heute, 8:12', neu: true, tue: function(){ springe('wartendes'); }},
-      {titel: 'Rechnung beglichen', text: 'Bäckerei Freitag hat die Juli-Rechnung bezahlt.', zeit: 'gestern', neu: false, tue: function(){ springe('abrechnung'); }}
-    ];
-    function maleZahl(){
-      var n = NEUES.filter(function(x){ return x.neu; }).length;
-      zahl.hidden = !n;
-      zahl.textContent = String(n);
-    }
-    function schliesse(){ liste.hidden = true; }
-    function oeffne(){
-      lage.innerHTML = '';
-      NEUES.forEach(function(n){
-        var e = document.createElement('div');
-        e.className = 'glocke-eintrag' + (n.neu ? '' : ' gelesen');
-        e.innerHTML = '<span class="ge-punkt"></span><div><div class="ge-titel"></div><div class="ge-text"></div><div class="ge-zeit"></div></div>';
-        e.querySelector('.ge-titel').textContent = n.titel;
-        e.querySelector('.ge-text').textContent = n.text;
-        e.querySelector('.ge-zeit').textContent = n.zeit;
-        e.addEventListener('click', function(){ schliesse(); n.tue(); });
-        lage.appendChild(e);
-      });
-      liste.hidden = false;
-      setTimeout(function(){
-        NEUES.forEach(function(n){ n.neu = false; });
-        lage.querySelectorAll('.glocke-eintrag').forEach(function(e){ e.classList.add('gelesen'); });
-        maleZahl();
-      }, 900);
-    }
-    glocke.addEventListener('click', function(e){
-      e.stopPropagation();
-      if (liste.hidden) oeffne(); else schliesse();
-    });
-    document.addEventListener('click', function(e){
-      if (!liste.hidden && !liste.contains(e.target)) schliesse();
-    });
-    window.addEventListener('keydown', function(e){
-      if (e.key === 'Escape' && !liste.hidden) schliesse();
-    });
-    maleZahl();
-  })();
+  /* Die Glocke ist ein Baustein (glocke.js): Neuigkeiten führen zu ihrem Abschnitt */
+  Glocke.baue({eintraege: [
+    {titel: 'Neue Freigabe', text: 'Herr Petersen hat „Warum schrumpft meine Marge?" freigegeben.', zeit: 'gestern, 16:40', neu: true, tue: function(){ springe('wartendes'); }},
+    {titel: 'Übergabe vom KI-Berater', text: 'Cordes Logistik: eine Steuerfrage wartet auf Antwort.', zeit: 'heute, 8:12', neu: true, tue: function(){ springe('wartendes'); }},
+    {titel: 'Rechnung beglichen', text: 'Bäckerei Freitag hat die Juli-Rechnung bezahlt.', zeit: 'gestern', neu: false, tue: function(){ springe('abrechnung'); }}
+  ]});
+
+  function springe(id){
+    var ziel = document.getElementById(id);
+    if (ziel) ziel.scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'start'});
+  }
 })();
 </script>
 </body>
