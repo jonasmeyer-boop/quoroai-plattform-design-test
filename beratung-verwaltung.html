@@ -19,7 +19,14 @@
    Der letzte Inhaber lässt sich weder umstufen noch entfernen, sonst käme
    niemand mehr an die Beratung. Der Versandvermerk sagt bei jeder Einladung
    ehrlich, was aus der Mail wurde; kam sie nicht an, liegt der Link daneben.
-   Marker: BERATUNG-VERWALTUNG-V1 */
+   V2 (Review): der grüne Ring an der geänderten Zeile geht von selbst
+   wieder, auch bei reduzierter Bewegung; die Team-Meldung ist neutral
+   statt grün und wird angesagt (aria-live), ebenso die Fehler beim
+   Einladen und beim zweiten Faktor; die Gliederung der Überschriften
+   bleibt in Reihenfolge; „Kopiert" sagt der Knopf erst, wenn wirklich
+   kopiert wurde; erneutes Verschicken verlängert die Frist mit; eine
+   gewählte, aber nicht übernommene Rolle überlebt das Neuzeichnen.
+   Marker: BERATUNG-VERWALTUNG-V2 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -156,7 +163,7 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
   width:100%;min-height:46px;padding:0 14px;font-size:16px;color:var(--tinte);
   background:var(--flaeche);border:1px solid var(--nebel-300);border-radius:var(--radius-innen);
 }
-.melde{margin-top:12px;font-size:13.5px;line-height:1.5;padding:10px 13px;border-radius:var(--radius-innen)}
+.melde{margin-top:12px;font-size:13.5px;line-height:1.5;padding:10px 13px;border-radius:var(--radius-innen);background:var(--nebel-100)}
 .melde.gut{background:var(--gruen-fond)}
 .melde.schlecht{background:var(--rot-fond);color:var(--rot)}
 
@@ -244,11 +251,11 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
     <ul class="liste" id="mitglieder"></ul>
     <div class="fussnote" id="letzter-inhaber" hidden>Der letzte Inhaber lässt sich weder umstufen noch entfernen — sonst käme niemand mehr an diese Beratung heran.</div>
     <div class="fussnote">Inhaber und Partner sehen die ganze Beratung. Berater und Assistenz kommen nur über die Mandate an einen Kunden, denen sie zugewiesen sind. Wer mit dem KI-Berater arbeitet, muss unterwiesen sein — <a href="#ki-kompetenz">der Text steht unten</a>, die Zeile am Namen ist dein Nachweis.</div>
-    <div class="melde gut" id="team-melde" hidden></div>
+    <div class="melde" id="team-melde" role="status" aria-live="polite" hidden></div>
 
     <h3 style="margin-top:26px">Offene Einladungen</h3>
     <ul class="liste" id="einladungen"></ul>
-    <div class="leer" id="einladungen-leer" hidden>Keine offenen Einladungen.</div>
+    <div class="leer" id="einladungen-leer" aria-live="polite" hidden>Keine offenen Einladungen.</div>
     <div class="fussnote">Steht dort „kam nicht an", gib den Link selbst weiter. Einlösen kann ihn nur, wer sich mit genau der eingeladenen Adresse anmeldet.</div>
 
     <div class="form-tafel">
@@ -268,7 +275,7 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
           </select>
         </div>
       </div>
-      <div class="melde schlecht" id="ein-fehler" hidden></div>
+      <div class="melde schlecht" id="ein-fehler" role="alert" aria-live="assertive" hidden></div>
       <button class="knopf primaer klein" id="einladen" type="button" style="margin-top:14px">Einladen</button>
     </div>
   </section>
@@ -286,7 +293,7 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
           <div class="feld" style="margin-top:16px">
             <label for="zf-code">Code aus der App</label>
             <input id="zf-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000">
-            <div class="fehler" id="zf-fehler" hidden>Der Code stimmt nicht. Prüf App und Uhrzeit, dann noch einmal.</div>
+            <div class="fehler" id="zf-fehler" role="alert" aria-live="assertive" hidden>Der Code stimmt nicht. Prüf App und Uhrzeit, dann noch einmal.</div>
           </div>
           <div class="zf-griffe">
             <button class="knopf primaer klein" id="zf-bestaetigen" type="button">Bestätigen</button>
@@ -302,7 +309,7 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
 
   <h3>KI-Kompetenz</h3>
   <section class="tafel" id="ki-kompetenz" aria-label="KI-Kompetenz">
-    <h2 style="font-size:21px">Der KI-Berater: was du wissen musst</h2>
+    <div class="schau" style="font-size:21px">Der KI-Berater: was du wissen musst</div>
     <div class="fassung">Fassung vom 10. August 2026. Zehn Minuten, einmal.</div>
     <div class="unterweisung" id="unterweisung"></div>
     <div id="gelesen-bereich"></div>
@@ -364,6 +371,18 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
     return n;
   }
 
+  /* Der grüne Ring zeigt, welche Zeile sich gerade geändert hat, und geht
+     von selbst wieder — auch bei reduzierter Bewegung, nur schneller. */
+  var frischTimer = null;
+  var offeneWahl = {};
+  function zeigeFrisch(li){
+    li.classList.add('frisch');
+    clearTimeout(frischTimer);
+    frischTimer = setTimeout(function(){
+      li.classList.remove('frisch');
+    }, reduziert ? 900 : 2600);
+  }
+
   function meldung(text){
     teamMelde.textContent = text;
     teamMelde.hidden = false;
@@ -377,7 +396,7 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
     TEAM.forEach(function(m){
       var li = document.createElement('li');
       li.className = 'mitglied';
-      if (m.id === frischId) li.classList.add('frisch');
+      if (m.id === frischId) zeigeFrisch(li);
 
       var links = document.createElement('div');
       var name = document.createElement('div');
@@ -425,6 +444,14 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
         if (r.wert === m.rolle) o.selected = true;
         wahl.appendChild(o);
       });
+      /* Eine gewählte, aber noch nicht übernommene Rolle überlebt jedes
+         Neuzeichnen — sonst verschwindet die halbe Änderung stumm, sobald
+         nebenan irgendetwas passiert. */
+      if (offeneWahl[m.id] && offeneWahl[m.id] !== m.rolle) wahl.value = offeneWahl[m.id];
+      wahl.addEventListener('change', function(){
+        if (wahl.value === m.rolle) delete offeneWahl[m.id];
+        else offeneWahl[m.id] = wahl.value;
+      });
 
       var uebernehmen = document.createElement('button');
       uebernehmen.type = 'button';
@@ -436,6 +463,7 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
         /* Auf 0 Inhaber kann es nicht laufen: ist nur einer da, sind seine
            beiden Griffe gesperrt. */
         m.rolle = wahl.value;
+        delete offeneWahl[m.id];
         meldung(m.name + ' ist jetzt ' + rollenWort(m.rolle) + '.');
         maleTeam(m.id);
       });
@@ -447,6 +475,7 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
       entfernen.disabled = gesperrt;
       entfernen.addEventListener('click', function(){
         TEAM = TEAM.filter(function(x){ return x.id !== m.id; });
+        delete offeneWahl[m.id];
         meldung(m.name + ' hat keinen Zugang mehr. Die Arbeit an den Mandaten bleibt stehen, nur der Zugriff ist weg.');
         maleTeam();
         maleBereitschaft();
@@ -506,7 +535,10 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
         nochmal.className = 'knopf leise klein';
         nochmal.textContent = 'Erneut verschicken';
         nochmal.addEventListener('click', function(){
+          /* Die Frist wandert mit: eine Mail, deren Link beim Empfänger
+             schon tot ist, ist keine Einladung. */
           e.versand = {art:'verschickt', datum:'2026-08-14'};
+          e.bis = '2026-08-21';
           maleEinladungen();
         });
         griffe.appendChild(nochmal);
@@ -534,9 +566,16 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
       kopieren.className = 'knopf sekundaer klein';
       kopieren.textContent = 'Kopieren';
       kopieren.addEventListener('click', function(){
-        if (navigator.clipboard) navigator.clipboard.writeText(url);
-        kopieren.textContent = 'Kopiert';
-        setTimeout(function(){ kopieren.textContent = 'Kopieren'; }, 1600);
+        /* „Kopiert" erst sagen, wenn es wirklich kopiert wurde. Ohne
+           sicheren Kontext gibt es die Zwischenablage nicht — dann bleibt
+           der Link zum Markieren stehen, statt dass der Knopf lügt. */
+        if (!navigator.clipboard) { kopieren.textContent = 'Von Hand kopieren'; return; }
+        navigator.clipboard.writeText(url).then(function(){
+          kopieren.textContent = 'Kopiert';
+          setTimeout(function(){ kopieren.textContent = 'Kopieren'; }, 1600);
+        }, function(){
+          kopieren.textContent = 'Von Hand kopieren';
+        });
       });
       linkZeile.appendChild(code);
       linkZeile.appendChild(kopieren);
@@ -787,12 +826,6 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
       maleTeam(ich.id);
       maleBereitschaft();
       maleGelesen();
-      if (!reduziert) {
-        setTimeout(function(){
-          var frisch = document.querySelector('.mitglied.frisch');
-          if (frisch) frisch.classList.remove('frisch');
-        }, 2600);
-      }
     });
     block.appendChild(p);
     block.appendChild(knopf);
