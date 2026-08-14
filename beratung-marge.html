@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Marge und Sätze</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Marge und Sätze (Häppchen B2, Issue #30).
+
+   Drei Dinge, die im Produkt fertig in der Datenbank liegen und nirgends zu
+   sehen sind: der Kostensatz neben dem Stundensatz (member_rates,
+   time_entry_costs), der Deckungsbeitrag je Mandat, und der Tarifverlauf
+   eines Kunden (client_plan_changes).
+
+   Der heikle Teil: der Kostensatz eines Menschen IST eine Gehaltsangabe.
+   Deshalb hat diese Fläche zwei Sichten, und die Regel ist eine einzige:
+   Zahlen, aus denen sich ein Gehalt zurückrechnen lässt, sehen nur Inhaber
+   und Partner. Berater und Assistenz sehen die Verkaufsseite — Stunden,
+   Honorar, Sätze — und ihren EIGENEN Kostensatz, sonst keinen. Wer nur an
+   zwei Mandaten arbeitet, sieht auch nur diese zwei.
+
+   Warum kein Deckungsbeitrag für Berater: an einem Mandat mit zwei Köpfen
+   genügt der Deckungsbeitrag plus der eigene Satz, um den des anderen
+   auszurechnen. Halb offenlegen geht nicht.
+
+   Der Balken trägt in jeder Sicht GENAU EINE Bedeutung, und die Spalte sagt
+   sie an: in der Inhaber-Sicht „von 100 € Honorar" (grau die Kosten, lila
+   was bleibt), in der Berater-Sicht „vom Listensatz angekommen". Nicht zwei
+   Lesarten im selben Bild.
+
+   Die Zahlen decken sich mit der Kundenliste (beratung-kunden.html: 30,4 /
+   12,1 / 31,0 / 26,8 Prozent) — sie werden hier aus Stunden, Sätzen und
+   Honoraren gerechnet, nicht abgeschrieben. Der Tarifverlauf deckt sich mit
+   beratung-abrechnung.html (Eröffnungsdaten und Tarife der vier Zugänge).
+
+   Marker: BERATUNG-MARGE-V1 */
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button{font-family:inherit}
+
+/* ========== quoroAI-Chrom (wie in den anderen Cockpit-Räumen) ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;word-spacing:2px}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+/* Unter 1320px reicht die Krume in die Inhaltsspalte — dann wird sie die
+   zweite Zeile des Kopfbands (Entscheidung 2026-08-14). */
+@media (max-width:1320px){
+  nav{height:118px;padding-bottom:58px}
+  #krume{z-index:90}
+}
+
+/* ========== Seite ========== */
+main{max-width:880px;margin:0 auto;padding:136px 24px calc(150px + env(safe-area-inset-bottom))}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px;max-width:56ch}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:34px}
+h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;max-width:62ch}
+.zahl{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+/* ---------- Die Sicht-Wahl ---------- */
+.sicht{
+  margin-top:22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 16px;border-radius:var(--radius-karte);
+  background:rgba(255,255,255,.5);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 12px 34px rgba(24,21,47,.09);
+}
+.sicht .frage{font-size:13px;color:var(--nebel-600);flex:1 1 220px;line-height:1.5}
+.sicht .waehler{display:flex;gap:8px;flex-wrap:wrap}
+.sicht button{
+  min-height:44px;padding:0 16px;border-radius:14px;
+  border:0.5px solid var(--nebel-300);background:var(--flaeche);
+  font-size:14.5px;font-weight:600;color:var(--tinte);cursor:pointer;
+  transition:border-color .15s ease,background .15s ease,color .15s ease;
+}
+@media (hover:hover){.sicht button:hover{border-color:var(--lila-500)}}
+.sicht button[aria-pressed="true"]{background:var(--tinte);color:#fff;border-color:var(--tinte)}
+
+/* ---------- Die Beratung: das große Glas ---------- */
+.gesamt{
+  margin-top:10px;padding:22px 24px 20px;border-radius:var(--radius-karte);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 12px 34px rgba(24,21,47,.06);
+}
+.gesamt .g-zahl{font-size:clamp(30px,5vw,44px);font-weight:600;letter-spacing:-.025em;line-height:1}
+.gesamt .g-wort{font-size:13.5px;color:var(--nebel-600);margin-top:6px}
+
+/* Die Röhre: dasselbe Glas wie überall, nur liegend und geteilt. */
+.roehre{
+  display:block;position:relative;height:26px;border-radius:var(--radius-kapsel);overflow:hidden;
+  background:linear-gradient(180deg, rgba(24,21,47,.05), rgba(255,255,255,.4) 55%);
+  border:1px solid rgba(255,255,255,.8);
+  box-shadow:
+    inset 0 1.5px 3px rgba(24,21,47,.18),
+    inset 0 -1px 1px rgba(255,255,255,.7),
+    0 1px 0 rgba(255,255,255,.9),
+    0 5px 14px rgba(59,52,134,.12);
+}
+.roehre .fluss{
+  position:absolute;top:2.5px;bottom:2.5px;left:2.5px;
+  border-radius:var(--radius-kapsel);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.55);
+  transition:width .55s var(--kurve),left .55s var(--kurve),opacity .3s ease;
+}
+.roehre .kosten{background:linear-gradient(180deg, var(--nebel-300) 0%, var(--nebel-400) 100%)}
+.roehre .bleibt{background:linear-gradient(180deg, var(--lila-400) 0%, var(--lila-600) 100%);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.5), 0 0 8px rgba(111,99,232,.35)}
+.roehre::after{ /* Glanz oben, wie bei jedem Füllstand */
+  content:"";position:absolute;inset:0;border-radius:var(--radius-kapsel);pointer-events:none;
+  background:linear-gradient(180deg, rgba(255,255,255,.8), rgba(255,255,255,0)) no-repeat 9px 2.5px / calc(100% - 18px) 38%;
+}
+.gesamt .roehre{height:34px;margin-top:18px}
+.g-legende{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px}
+.g-legende div{font-size:12.5px;color:var(--nebel-600);line-height:1.5}
+.g-legende b{display:block;font-size:16px;font-weight:600;color:var(--tinte);letter-spacing:-.01em}
+.g-legende .marke-kosten b{color:var(--nebel-700)}
+.g-legende .marke-bleibt b{color:var(--lila-700)}
+
+/* ---------- Je Mandat ---------- */
+/* Die Überschrift steht über dem Balken, den sie erklärt — deshalb dasselbe
+   Raster wie die Zeile darunter, nicht einfach rechtsbündig. */
+.mass-kopf{
+  display:grid;grid-template-columns:minmax(0,1fr) 220px 108px;gap:18px;
+  font-size:11.5px;font-weight:600;color:var(--nebel-500);
+  margin-top:14px;padding:0 16px;letter-spacing:.01em;
+}
+.mass-kopf .mk-wort{grid-column:2;text-align:center}
+.mandate{margin-top:8px;display:flex;flex-direction:column;gap:8px}
+.mandat{
+  border-radius:var(--radius-innen);
+  border:0.5px solid var(--nebel-200);background:var(--flaeche);
+  box-shadow:0 8px 24px rgba(16,19,26,.06);overflow:hidden;
+  max-height:1200px;
+  transition:max-height .45s var(--kurve),opacity .3s ease,margin .3s ease;
+}
+/* Ein Mandat, das in dieser Sicht nichts zu suchen hat, fällt zusammen —
+   es verschwindet nicht einfach, man sieht, dass es geht. */
+.mandat.fort{max-height:0;opacity:0;margin-top:-8px;border-width:0;box-shadow:none;pointer-events:none}
+.mandat > .zeile{
+  display:grid;grid-template-columns:minmax(0,1fr) 220px 108px;align-items:center;gap:18px;
+  width:100%;min-height:66px;padding:12px 16px;
+  background:none;border:0;cursor:pointer;text-align:left;transition:background .15s ease;
+}
+@media (hover:hover){.mandat > .zeile:hover{background:var(--lila-050)}}
+.mandat .m-name{font-size:15.5px;font-weight:600;letter-spacing:-.01em;display:block}
+.mandat .m-meta{font-size:12.5px;color:var(--nebel-600);margin-top:2px;display:block}
+.mandat .m-mass{text-align:right}
+.mandat .m-wert{font-size:19px;font-weight:600;letter-spacing:-.02em;display:block}
+.mandat .m-wort{font-size:11px;color:var(--nebel-500);display:block;margin-top:1px}
+.mandat.duenn .m-wert{color:var(--bernstein)}
+
+.aufriss{border-top:0.5px solid var(--nebel-200);padding:16px;background:var(--nebel-050)}
+.koepfe{display:flex;flex-direction:column;gap:1px;background:var(--nebel-200);
+  border-radius:10px;overflow:hidden;border:0.5px solid var(--nebel-200)}
+.kopfzeile{display:grid;grid-template-columns:minmax(0,1fr) repeat(3,minmax(64px,84px));
+  gap:10px;padding:10px 12px;background:var(--flaeche);font-size:13.5px;align-items:baseline}
+.kopfzeile.titel{background:var(--nebel-100);font-size:11.5px;font-weight:600;color:var(--nebel-600)}
+/* nur die Spalten rechtsbündig, nicht die Rollenzeile im Namensfeld */
+.kopfzeile > span:not(:first-child){text-align:right}
+.kopfzeile .k-name{font-weight:600;letter-spacing:-.01em}
+.kopfzeile .k-rolle{font-weight:400;color:var(--nebel-500);font-size:12px;display:block}
+.kopfzeile .k-selbst{color:var(--lila-700);font-size:12px;font-weight:600}
+.satzsatz{font-size:13px;color:var(--nebel-600);margin-top:12px;line-height:1.6}
+.satzsatz b{color:var(--tinte);font-weight:600}
+.satzsatz.warnung b{color:var(--bernstein)}
+.aufriss .tuer{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.aufriss .tuer .knopf{min-height:44px;padding:0 16px;font-size:14px;text-decoration:none}
+
+/* ---------- Sätze ---------- */
+.saetze{margin-top:10px;border-radius:var(--radius-karte);border:0.5px solid var(--nebel-200);
+  background:var(--flaeche);overflow:hidden}
+.s-zeile{display:grid;grid-template-columns:minmax(0,1fr) repeat(3,minmax(66px,96px));
+  gap:12px;padding:13px 18px;align-items:baseline;border-top:0.5px solid var(--nebel-200)}
+.s-zeile:first-child{border-top:0}
+.s-zeile.titel{background:var(--nebel-100);font-size:11.5px;font-weight:600;color:var(--nebel-600)}
+.s-zeile > span:not(:first-child){text-align:right}
+.s-zeile .s-name{font-size:14.5px;font-weight:600;letter-spacing:-.01em}
+.s-zeile .s-rolle{display:block;font-size:12px;font-weight:400;color:var(--nebel-500);margin-top:1px}
+.s-zeile .s-wert{font-size:14.5px}
+.s-zeile .s-bleibt{font-weight:600}
+.s-zeile .s-verdeckt{color:var(--nebel-400)}
+.s-zeile.du{background:var(--lila-050)}
+.regel{font-size:12.5px;color:var(--nebel-500);margin-top:12px;line-height:1.6;max-width:66ch}
+.regel b{color:var(--nebel-700);font-weight:600}
+
+/* ---------- Tarifverlauf: der Strang ---------- */
+.strang{margin-top:10px;padding:6px 0 2px}
+.ereignis{display:grid;grid-template-columns:104px 1fr;gap:0;align-items:stretch}
+.ereignis .e-datum{
+  font-size:12.5px;color:var(--nebel-600);padding:14px 14px 14px 4px;text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+.ereignis .e-strang{position:relative;padding:14px 0 14px 22px;border-left:1px solid var(--nebel-200)}
+.ereignis:last-child .e-strang{border-left-color:transparent}
+.ereignis .e-strang::before{ /* die Kerbe: ein Stück Glas auf dem Strang, kein Punkt */
+  content:"";position:absolute;left:-2.5px;top:20px;width:5px;height:14px;border-radius:3px;
+  background:linear-gradient(180deg, var(--lila-400), var(--lila-600));
+  box-shadow:0 0 6px rgba(111,99,232,.45);
+}
+.ereignis.geplant .e-strang{border-left-style:dashed}
+.ereignis.geplant .e-strang::before{background:linear-gradient(180deg, var(--nebel-300), var(--nebel-400));box-shadow:none}
+.ereignis.geplant .e-datum{color:var(--nebel-500)}
+.ereignis .e-titel{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.ereignis .e-folge{font-size:13px;color:var(--nebel-600);margin-top:3px;line-height:1.55}
+.ereignis .e-folge .betrag{font-weight:600;color:var(--tinte);font-variant-numeric:tabular-nums}
+.strang-fuss{font-size:12.5px;color:var(--nebel-500);margin-top:10px;line-height:1.6;max-width:66ch}
+
+.weich{transition:opacity .3s ease}
+.weich.aus{opacity:0}
+
+@media (prefers-reduced-motion: reduce){
+  main > *{animation:none;opacity:1;translate:none}
+  .roehre .fluss,.weich,.mandat{transition:none}
+}
+@media (max-width:760px){
+  nav{padding:0 18px;padding-bottom:58px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(140px + env(safe-area-inset-bottom))}
+  .gesamt{padding:18px 16px 16px}
+  .mass-kopf{display:flex;justify-content:flex-end;padding:0 4px}
+  .mass-kopf .mk-wort{grid-column:auto}
+  .mandat > .zeile{grid-template-columns:minmax(0,1fr) 92px;gap:12px;padding:13px 14px}
+  .mandat .m-roehre{grid-column:1 / -1;order:3}
+  /* Feste schmale Zahlenspalten: sonst frisst das Raster den Namen auf und
+     „Sabine Röttger" bricht um. */
+  .s-zeile,.kopfzeile{grid-template-columns:minmax(0,1fr) repeat(3,54px);gap:5px;padding:12px 14px}
+  .s-zeile .s-wert,.s-zeile .s-name,.kopfzeile{font-size:13px}
+  .ereignis{grid-template-columns:88px 1fr}
+  .ereignis .e-strang{padding-left:16px}
+}
+</style>
+</head>
+<body class="quoro">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html"><span class="zurueck">← Modell</span><span>/</span><b>Marge und Sätze</b></a>
+
+<main>
+  <div class="kopf">
+    <h1>Marge und Sätze</h1>
+    <div class="stand">Was von einem Honorar übrig bleibt, nachdem die Stunden bezahlt sind. Seit Jahresbeginn, über die vier Mandate des Modells.</div>
+  </div>
+
+  <div class="sicht">
+    <div class="frage">Ein Kostensatz ist eine Gehaltsangabe. Sieh dir an, was diese Fläche einem anderen im Team zeigt.</div>
+    <div class="waehler" role="group" aria-label="Sicht wählen">
+      <button type="button" id="sicht-inhaberin" aria-pressed="true">Als Inhaberin</button>
+      <button type="button" id="sicht-beraterin" aria-pressed="false">Als Beraterin</button>
+    </div>
+  </div>
+
+  <h3 id="titel-gesamt">Die Beratung, seit Jahresbeginn</h3>
+  <section class="gesamt" aria-labelledby="titel-gesamt">
+    <div class="g-zahl zahl" id="g-zahl"></div>
+    <div class="g-wort" id="g-wort"></div>
+    <div class="roehre" id="g-roehre" role="img" aria-label="">
+      <div class="fluss kosten" id="g-kosten"></div>
+      <div class="fluss bleibt" id="g-bleibt"></div>
+    </div>
+    <div class="g-legende" id="g-legende"></div>
+  </section>
+
+  <h3>Je Mandat</h3>
+  <p class="was" id="was-mandate"></p>
+  <div class="mass-kopf" id="mass-kopf"><span class="mk-wort"></span></div>
+  <div class="mandate" id="mandate"></div>
+
+  <h3>Sätze</h3>
+  <p class="was" id="was-saetze"></p>
+  <div class="saetze" id="saetze"></div>
+  <p class="regel" id="regel-saetze"></p>
+
+  <h3>Tarifverlauf der Kundenzugänge</h3>
+  <p class="was">Auf welchem Tarif ein Kunde wann lag — die Grundlage jeder Rechnung, die quoroAI der Beratung stellt.</p>
+  <div class="strang" id="strang"></div>
+  <p class="strang-fuss">Die Beträge sind Listenpreise je Monat, vor der Mengenstaffel. Was daraus jeden Monat wirklich wird, steht unter <a href="beratung-abrechnung.html">Was quoroAI berechnet</a>.</p>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll('main > *').forEach(function(el, i){
+    el.style.setProperty('--verz', (i * 0.05) + 's');
+  });
+
+  /* ================= Das Team =================
+     Dieselben fünf wie in beratung-verwaltung.html, mit ihren Sätzen.
+     verkauf = was der Kunde je Stunde zahlt (Listensatz).
+     kosten  = Vollkostensatz: Gehalt plus alles, was daran hängt. Das ist
+               die Zahl, die niemand außerhalb der Leitung sehen darf. */
+  var TEAM = [
+    {id:'anna',   name:'Dr. Anna Vogelsang', rolle:'Inhaberin', verkauf:210, kosten:145},
+    {id:'jens',   name:'Jens Nordholm',      rolle:'Partner',   verkauf:195, kosten:132},
+    {id:'miriam', name:'Miriam Krohn',       rolle:'Beraterin', verkauf:150, kosten:104},
+    {id:'tarek',  name:'Tarek Aydin',        rolle:'Berater',   verkauf:140, kosten: 95},
+    {id:'sabine', name:'Sabine Röttger',     rolle:'Assistenz', verkauf: 85, kosten: 58}
+  ];
+  function mensch(id){
+    for (var i = 0; i < TEAM.length; i++) if (TEAM[i].id === id) return TEAM[i];
+    return null;
+  }
+
+  /* ================= Die vier Mandate =================
+     honorar = was der Beratung seit Jahresbeginn zugeflossen ist (gestellte
+     Rechnungen und Pauschalen), nicht Stunden mal Satz. Genau darin steckt
+     die Geschichte: bei Cordes läuft eine Pauschale, in die zu viele Stunden
+     geflossen sind. Die Prozentsätze, die daraus fallen, sind dieselben wie
+     in der Kundenliste (beratung-kunden.html).
+
+     Die Beträge müssen zur Abrede passen: acht Monatspauschalen zu 2.750 €
+     sind 22.000 €, acht Zwölftel einer Jahrespauschale von 27.000 € sind
+     18.000 €. Wer hier eine Zahl ändert, rechnet die Abrede mit. */
+  var MANDATE = [
+    {id:'petersen', name:'Petersen Stahlbau', seit:'seit März 2025', honorar:38350,
+     abrede:'nach Aufwand', stunden:[['anna',62],['miriam',148],['sabine',40]]},
+    {id:'cordes', name:'Cordes Logistik', seit:'seit 2021', honorar:22000,
+     abrede:'Pauschale, 2.750 € im Monat', stunden:[['jens',33],['tarek',126],['sabine',52]]},
+    {id:'freitag', name:'Bäckerei Freitag', seit:'seit 2018', honorar:10760,
+     abrede:'nach Aufwand und Auslagen', stunden:[['miriam',58],['sabine',24]]},
+    {id:'mts', name:'MTS Maschinenbau', seit:'seit 2022', honorar:18000,
+     abrede:'Jahrespauschale, 27.000 €', stunden:[['anna',26],['tarek',88],['sabine',18]]}
+  ];
+
+  /* Wer diese Fläche als Beraterin ansieht: Miriam Krohn. Sie arbeitet an
+     Petersen und Freitag — die beiden anderen Mandate gehören nicht zu ihr
+     und tauchen in ihrer Sicht gar nicht erst auf. */
+  var ICH = 'miriam';
+
+  MANDATE.forEach(function(m){
+    m.kosten = 0; m.std = 0; m.listenwert = 0;
+    m.stunden.forEach(function(p){
+      var k = mensch(p[0]);
+      m.kosten     += k.kosten  * p[1];
+      m.listenwert += k.verkauf * p[1];
+      m.std        += p[1];
+    });
+    m.db      = m.honorar - m.kosten;
+    m.dbProz  = m.db / m.honorar * 100;
+    m.real    = m.honorar / m.std;       /* was je Stunde angekommen ist */
+    m.listen  = m.listenwert / m.std;    /* was die Sätze versprochen hätten */
+    m.meins   = m.stunden.some(function(p){ return p[0] === ICH; });
+  });
+
+  /* Die Summe oben zählt genau das zusammen, was darunter auch steht —
+     sonst stünde in der Berater-Sicht das Honorar von vier Mandaten über
+     einer Liste mit zweien. */
+  function summiere(feld){
+    var s = feld.reduce(function(s, m){
+      s.honorar += m.honorar; s.kosten += m.kosten; s.std += m.std; s.listenwert += m.listenwert;
+      return s;
+    }, {honorar:0, kosten:0, std:0, listenwert:0, anzahl:feld.length});
+    s.db     = s.honorar - s.kosten;
+    s.dbProz = s.db / s.honorar * 100;
+    s.real   = s.honorar / s.std;
+    s.listen = s.listenwert / s.std;
+    return s;
+  }
+  var SUMME = summiere(MANDATE);
+  var MEINE = summiere(MANDATE.filter(function(m){ return m.meins; }));
+
+  /* ================= Zahlen in Worte ================= */
+  function euro(betrag){
+    var v = Math.round(betrag);
+    return String(v).replace(/\B(?=(\d{3})+$)/g, '.') + ' €';
+  }
+  function eurokomma(betrag){
+    var v = Math.round(betrag * 100);
+    var ganz = String(Math.floor(v / 100)).replace(/\B(?=(\d{3})+$)/g, '.');
+    return ganz + ',' + ('0' + (v % 100)).slice(-2) + ' €';
+  }
+  /* Immer eine Nachkommastelle: „31 %" neben „30,4 %" liest sich wie eine
+     andere Genauigkeit, obwohl es dieselbe ist. */
+  function proz(p){ return p.toFixed(1).replace('.', ',') + ' %'; }
+  function std(h){ return (Math.round(h * 10) / 10).toString().replace('.', ',') + ' Std.'; }
+
+  function zahlwort(z){ return (Math.round(z * 10) / 10).toString().replace(".", ","); }
+
+  /* ================= Die Sicht =================
+     Die Zeilen werden EINMAL gebaut und beim Sichtwechsel an Ort und Stelle
+     geändert. Würden sie neu gebaut, spränge der Balken auf seinen neuen
+     Stand, statt dorthin zu laufen — und genau dieser Lauf ist der einzige
+     Bewegungsmoment dieser Fläche. */
+  var sicht = 'inhaberin';
+  function darfKosten(){ return sicht === 'inhaberin'; }
+
+  var knopfInhaberin = document.getElementById('sicht-inhaberin');
+  var knopfBeraterin = document.getElementById('sicht-beraterin');
+
+  function setzeSicht(neu){
+    if (neu === sicht) return;
+    sicht = neu;
+    knopfInhaberin.setAttribute('aria-pressed', sicht === 'inhaberin' ? 'true' : 'false');
+    knopfBeraterin.setAttribute('aria-pressed', sicht === 'beraterin' ? 'true' : 'false');
+    roehrenStellen();                 /* die Röhren laufen sofort los */
+    if (reduziert) { texteStellen(); return; }
+    document.querySelectorAll('.weich').forEach(function(el){ el.classList.add('aus'); });
+    setTimeout(function(){
+      texteStellen();
+      document.querySelectorAll('.weich').forEach(function(el){ el.classList.remove('aus'); });
+    }, 300);
+  }
+  knopfInhaberin.addEventListener('click', function(){ setzeSicht('inhaberin'); });
+  knopfBeraterin.addEventListener('click', function(){ setzeSicht('beraterin'); });
+
+  /* Eine Röhre, eine Bedeutung je Sicht — die Spalte darüber sagt sie an:
+     Inhaberin — grau die Kosten, lila was von 100 € Honorar bleibt.
+     Beraterin — lila, wie viel vom Listensatz je Stunde angekommen ist. */
+  function stelleRoehre(el, d){
+    var kosten = el.querySelector('.kosten');
+    var bleibt = el.querySelector('.bleibt');
+    if (darfKosten()) {
+      var anteil = Math.max(0, Math.min(1, d.kosten / d.honorar));
+      kosten.style.opacity = 1;
+      kosten.style.left  = '2.5px';
+      kosten.style.width = 'calc((100% - 5px) * ' + anteil.toFixed(4) + ')';
+      bleibt.style.left  = 'calc(2.5px + (100% - 5px) * ' + anteil.toFixed(4) + ')';
+      bleibt.style.width = 'calc((100% - 5px) * ' + (1 - anteil).toFixed(4) + ')';
+      el.setAttribute('aria-label',
+        'Von ' + euro(d.honorar) + ' Honorar sind ' + euro(d.kosten) + ' Kosten, ' + euro(d.db) + ' bleiben.');
+    } else {
+      var quote = Math.max(0, Math.min(1, d.real / d.listen));
+      kosten.style.opacity = 0;
+      kosten.style.width = '0';
+      bleibt.style.left  = '2.5px';
+      bleibt.style.width = 'calc((100% - 5px) * ' + quote.toFixed(4) + ')';
+      el.setAttribute('aria-label',
+        'Vom Listensatz ' + eurokomma(d.listen) + ' je Stunde sind ' + eurokomma(d.real) + ' angekommen.');
+    }
+  }
+  function bezug(){ return darfKosten() ? SUMME : MEINE; }
+  function roehrenStellen(){
+    stelleRoehre(document.getElementById('g-roehre'), bezug());
+    MANDATE.forEach(function(m){ stelleRoehre(m.roehre, m); });
+  }
+
+  /* ================= Einmal bauen ================= */
+  var listeEl = document.getElementById('mandate');
+
+  MANDATE.forEach(function(m){
+    var el = document.createElement('div');
+    el.className = 'mandat';
+    el.innerHTML =
+      '<button class="zeile" type="button" aria-expanded="false">' +
+        '<span class="m-was"><span class="m-name"></span><span class="m-meta"></span></span>' +
+        '<span class="m-roehre"><span class="roehre">' +
+          '<span class="fluss kosten"></span><span class="fluss bleibt"></span>' +
+        '</span></span>' +
+        '<span class="m-mass weich"><span class="m-wert zahl"></span><span class="m-wort"></span></span>' +
+      '</button>' +
+      '<div class="aufriss weich" hidden></div>';
+    el.querySelector('.m-name').textContent = m.name;
+    el.querySelector('.m-meta').textContent = m.abrede + ', ' + std(m.std) + ', ' + euro(m.honorar) + ' Honorar';
+    m.el      = el;
+    m.roehre  = el.querySelector('.roehre');
+    m.aufriss = el.querySelector('.aufriss');
+    var knopf = el.querySelector('.zeile');
+    knopf.addEventListener('click', function(){
+      var auf = m.aufriss.hidden;
+      m.aufriss.hidden = !auf;
+      knopf.setAttribute('aria-expanded', auf ? 'true' : 'false');
+    });
+    listeEl.appendChild(el);
+  });
+
+  var fremdHinweis = document.createElement('p');
+  fremdHinweis.className = 'regel weich';
+  fremdHinweis.innerHTML = 'Zwei von vier Mandaten der Beratung — an den anderen beiden arbeitest du nicht, deshalb stehen sie hier nicht. ' +
+    'Was die Beratung an einem Mandat verdient, sieht nur die Leitung: an einem Mandat mit zwei Köpfen wäre daraus der Satz des anderen zu errechnen.';
+  listeEl.appendChild(fremdHinweis);
+
+  var saetzeEl = document.getElementById('saetze');
+  saetzeEl.innerHTML =
+    '<div class="s-zeile titel"><span>Wer</span><span>Satz</span><span>Kosten</span><span>bleibt</span></div>';
+  TEAM.forEach(function(k){
+    var z = document.createElement('div');
+    z.className = 's-zeile';
+    z.innerHTML =
+      '<span><span class="s-name"></span><span class="s-rolle"></span></span>' +
+      '<span class="s-wert zahl"></span>' +
+      '<span class="s-wert s-kosten zahl weich"></span>' +
+      '<span class="s-wert s-bleibt zahl weich"></span>';
+    z.querySelector('.s-name').textContent = k.name;
+    z.querySelector('.s-wert').textContent = euro(k.verkauf);
+    k.zeile = z;
+    saetzeEl.appendChild(z);
+  });
+
+  /* ================= Texte je Sicht ================= */
+  function texteStellen(){
+    var kann = darfKosten();
+
+    /* --- Die Beratung im Ganzen --- */
+    document.getElementById('titel-gesamt').textContent =
+      kann ? 'Die Beratung, seit Jahresbeginn' : 'Deine Mandate, seit Jahresbeginn';
+    if (kann) {
+      document.getElementById('g-zahl').textContent = euro(SUMME.db);
+      document.getElementById('g-wort').textContent =
+        'bleiben von ' + euro(SUMME.honorar) + ' Honorar, das sind ' + proz(SUMME.dbProz) + '.';
+      document.getElementById('g-legende').innerHTML =
+        '<div class="marke-kosten"><b>' + euro(SUMME.kosten) + '</b>Stunden, zum Vollkostensatz gerechnet</div>' +
+        '<div class="marke-bleibt"><b>' + euro(SUMME.db) + '</b>Deckungsbeitrag, davon gehen Miete, Software und jede Stunde ohne Mandat ab</div>' +
+        '<div><b>' + std(SUMME.std) + '</b>auf den vier Mandaten erfasst</div>';
+    } else {
+      document.getElementById('g-zahl').textContent = eurokomma(MEINE.real);
+      document.getElementById('g-wort').textContent =
+        'kommen auf deinen Mandaten im Schnitt je Stunde an. Die Sätze versprechen ' + eurokomma(MEINE.listen) + '.';
+      document.getElementById('g-legende').innerHTML =
+        '<div class="marke-bleibt"><b>' + euro(MEINE.honorar) + '</b>Honorar auf deinen ' + MEINE.anzahl + ' Mandaten</div>' +
+        '<div><b>' + std(MEINE.std) + '</b>dort erfasste Stunden, deine und die der anderen</div>';
+    }
+
+    /* --- Je Mandat --- */
+    document.getElementById('was-mandate').textContent = kann
+      ? 'Antippen zeigt, wessen Stunden darin stecken und was sie gekostet haben.'
+      : 'Die zwei Mandate, an denen du arbeitest. Antippen zeigt, wessen Stunden darin stecken.';
+    document.querySelector('#mass-kopf .mk-wort').textContent =
+      kann ? 'von 100 € Honorar' : 'vom Listensatz angekommen';
+
+    MANDATE.forEach(function(m){
+      m.el.classList.toggle('fort', !kann && !m.meins);
+      m.el.classList.toggle('duenn', kann && m.dbProz < 20);
+      m.el.querySelector('.m-wert').textContent = kann ? proz(m.dbProz) : eurokomma(m.real);
+      m.el.querySelector('.m-wort').textContent = kann ? 'bleiben' : 'je Stunde';
+      m.aufriss.innerHTML = aufrissInhalt(m);
+    });
+    fremdHinweis.hidden = kann;
+
+    /* --- Sätze --- */
+    document.getElementById('was-saetze').textContent = kann
+      ? 'Was der Kunde je Stunde zahlt, was die Stunde kostet, und was dazwischen bleibt.'
+      : 'Was der Kunde je Stunde zahlt. Was eine Stunde kostet, ist eine Gehaltsangabe — deine eigene siehst du.';
+    TEAM.forEach(function(k){
+      var selbst = (k.id === ICH && !kann);
+      var zeigen = kann || selbst;
+      k.zeile.classList.toggle('du', selbst);
+      k.zeile.querySelector('.s-rolle').textContent = k.rolle + (selbst ? ' — das bist du' : '');
+      var kostenEl = k.zeile.querySelector('.s-kosten');
+      var bleibtEl = k.zeile.querySelector('.s-bleibt');
+      kostenEl.textContent = zeigen ? euro(k.kosten) : 'verdeckt';
+      bleibtEl.textContent = zeigen ? proz((k.verkauf - k.kosten) / k.verkauf * 100) : '—';
+      kostenEl.classList.toggle('s-verdeckt', !zeigen);
+      bleibtEl.classList.toggle('s-verdeckt', !zeigen);
+    });
+
+    document.getElementById('regel-saetze').innerHTML = kann
+      ? 'Der Kostensatz ist ein Vollkostensatz: Gehalt und alles, was daran hängt. <b>Nur Inhaber und Partner sehen ihn</b> — für Berater und Assistenz steht dort ihr eigener und sonst keiner.'
+      : '<b>Zahlen, aus denen sich ein Gehalt zurückrechnen lässt, sehen nur Inhaber und Partner.</b> Das gilt für Kostensätze und für den Deckungsbeitrag eines Mandats, an dem mehr als ein Kopf gearbeitet hat.';
+  }
+
+  function aufrissInhalt(m){
+    var kann = darfKosten();
+    var reihen = '<div class="kopfzeile titel"><span>Wer</span><span>Std.</span><span>Satz</span><span>Kosten</span></div>';
+    m.stunden.forEach(function(p){
+      var k = mensch(p[0]);
+      var selbst = (k.id === ICH && !kann);
+      reihen +=
+        '<div class="kopfzeile">' +
+          '<span><span class="k-name">' + k.name + '</span>' +
+            '<span class="k-rolle">' + k.rolle + (selbst ? ' <span class="k-selbst">— das bist du</span>' : '') + '</span></span>' +
+          '<span class="zahl">' + zahlwort(p[1]) + '</span>' +
+          '<span class="zahl">' + euro(k.verkauf) + '</span>' +
+          '<span class="zahl' + (kann || selbst ? '' : ' s-verdeckt') + '">' +
+            (kann || selbst ? euro(k.kosten * p[1]) : 'verdeckt') + '</span>' +
+        '</div>';
+    });
+
+    var satz = kann
+      ? '<p class="satzsatz' + (m.dbProz < 20 ? ' warnung' : '') + '">' +
+          'Die Sätze versprechen <b>' + eurokomma(m.listen) + '</b> je Stunde. Angekommen sind <b>' + eurokomma(m.real) + '</b>. ' +
+          'Nach Kosten von ' + euro(m.kosten) + ' bleiben <b>' + euro(m.db) + '</b>, also ' + proz(m.dbProz) + '.</p>'
+      : '<p class="satzsatz">Die Sätze versprechen <b>' + eurokomma(m.listen) + '</b> je Stunde. Angekommen sind <b>' + eurokomma(m.real) + '</b>. ' +
+          'Was die Stunden gekostet haben, sieht nur die Leitung.</p>';
+
+    return '<div class="koepfe">' + reihen + '</div>' + satz +
+      '<div class="tuer">' +
+        '<a class="knopf leise" href="beratung-mandat.html">Mandat öffnen</a>' +
+        '<a class="knopf leise" href="beratung-zeiten.html">Zeiten</a>' +
+        '<a class="knopf leise" href="beratung-rechnungen.html">Rechnungen</a>' +
+      '</div>';
+  }
+
+  /* ================= Tarifverlauf =================
+     Deckt sich mit beratung-abrechnung.html: dort sind es die vier
+     Kundenzugänge mit ihrem Tarif und dem Tag, an dem sie eröffnet wurden.
+     Der Wechsel zum 1. September liegt in der Zukunft und rührt deshalb an
+     keinem abgeschlossenen Monat. */
+  var LISTENPREIS = {basis:19, standard:59, plus:149};
+  var VERLAUF = [
+    {datum:'18.05.2026', titel:'Petersen Stahlbau bekommt einen Zugang', tarif:'plus',
+     folge:'Tarif Plus. Ab diesem Tag anteilig auf der Rechnung.'},
+    {datum:'01.06.2026', titel:'Cordes Logistik bekommt einen Zugang', tarif:'standard',
+     folge:'Tarif Standard, ab dem Ersten also ein voller Monat.'},
+    {datum:'14.07.2026', titel:'Bäckerei Freitag bekommt einen Zugang', tarif:'basis',
+     folge:'Tarif Basis. Der Juli zählt ab dem 14. anteilig.'},
+    {datum:'14.07.2026', titel:'MTS Maschinenbau bekommt einen Zugang', tarif:'standard',
+     folge:'Tarif Standard. Mit dem vierten Zugang greift die Mengenstaffel weiterhin bei 25 Prozent.'},
+    {datum:'01.09.2026', titel:'Bäckerei Freitag wechselt auf Standard', tarif:'standard', geplant:true,
+     vorher:'basis', folge:'Vorgemerkt. Der August bleibt Basis; gerechnet wird der neue Tarif erst ab dem Ersten.'}
+  ];
+  (function(){
+    var el = document.getElementById('strang');
+    VERLAUF.forEach(function(e){
+      var d = document.createElement('div');
+      d.className = 'ereignis' + (e.geplant ? ' geplant' : '');
+      var delta = e.vorher
+        ? '+ ' + (LISTENPREIS[e.tarif] - LISTENPREIS[e.vorher]) + ' €'
+        : '+ ' + LISTENPREIS[e.tarif] + ' €';
+      d.innerHTML =
+        '<div class="e-datum">' + e.datum + '</div>' +
+        '<div class="e-strang">' +
+          '<div class="e-titel"></div>' +
+          '<div class="e-folge"><span class="betrag">' + delta + ' im Monat</span> — <span class="was"></span></div>' +
+        '</div>';
+      d.querySelector('.e-titel').textContent = e.titel;
+      d.querySelector('.e-folge .was').textContent = e.folge;
+      el.appendChild(d);
+    });
+  })();
+
+  texteStellen();
+  roehrenStellen();
+})();
+</script>
+<script src="uhr.js"></script>
+<script src="zeiger.js"></script>
+</body>
+</html>
