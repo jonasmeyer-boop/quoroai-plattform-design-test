@@ -33,7 +33,11 @@
    Verrechnung der Abschläge in der Schlussrechnung. Auf einem Pauschalmandat
    sind Stunden gedeckt und nicht einzeln berechenbar — genau das löst den
    Widerspruch, den die Beispieldaten vorher trugen.
-   Marker: BERATUNG-RECHNUNGEN-V6 (Pauschalen, Abschläge, Auslagen) */
+   V7 (Nach-Review): die Sperren erkennen die Schlussrechnung an der
+   Jahrespauschale statt an der Verrechnung, die sechs Abschläge vor dem
+   Stapel gelten als gestellt, und ein schlussgerechnetes Jahr fordert keine
+   Rate mehr.
+   Marker: BERATUNG-RECHNUNGEN-V7 (Pauschalen, Abschläge, Auslagen) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -478,7 +482,7 @@ a.beleg-zeile{
                   Juli und August stehen als 2026-0081 und 2026-0084 unten
                   drin und werden gezählt, nicht geschätzt. Das Jahr steht
                   dabei — der Stichtag darf in jedem Jahr liegen. */
-               frueherJahr: '2026', frueher: 6, frueherCent: 1350000}
+               frueherJahr: '2026', frueherBis: '2026-06', frueher: 6, frueherCent: 1350000}
   };
   /* Offene berechenbare Stunden je Kunde. satz = null heißt: das Mandat hat
      keinen Stundensatz, es bleibt liegen statt den Lauf abzubrechen.
@@ -679,8 +683,18 @@ a.beleg-zeile{
     return MONATSNAMEN[Number(t[1]) - 1] + ' ' + t[0];
   }
   /* Trägt schon ein Beleg die Rate dieses Monats? Ein Entwurf zählt mit —
-     sonst legte man sie zweimal an und merkte es erst beim Stellen. */
+     sonst legte man sie zweimal an und merkte es erst beim Stellen.
+
+     Der Stapel ist nicht die ganze Wahrheit: die Abschläge Januar bis Juni
+     liegen vor ihm und stehen nur als Zahl in der Abrede. Wer sie hier
+     überginge, könnte den März ein zweites Mal stellen — die Zusage „dieselbe
+     Rate holt sich kein zweiter Beleg" gölte dann für ein halbes Jahr nicht.
+     Deshalb antwortet die Funktion für diese Monate mit dem Wort 'frueher'
+     statt mit einem Beleg; jeder Aufrufer muss beide Fälle tragen. */
   function rateBeleg(kunde, monat){
+    var a = ABREDEN[kunde];
+    if (a.frueherBis && String(monat) <= a.frueherBis
+        && String(monat).slice(0, 4) === a.frueherJahr) return 'frueher';
     for (var i = 0; i < BELEGE.length; i++){
       var b = BELEGE[i];
       if (b.kunde !== kunde || b.art !== 'rechnung' || b.status === 'cancelled') continue;
@@ -692,15 +706,20 @@ a.beleg-zeile{
     return null;
   }
   /* Trägt schon ein Beleg die Schlussrechnung dieses Jahres? Dieselbe Frage
-     wie bei der Rate, dieselbe Antwort am Stapel — sonst stellte man die
-     Jahrespauschale zweimal, und die Verrechnung merkte es nicht, weil sie
-     nur Abschläge zählt. */
+     wie bei der Rate, dieselbe Antwort am Stapel.
+
+     Erkannt wird sie an der Jahrespauschale, nicht an der Verrechnung: die
+     Verrechnung fehlt, solange kein Abschlag gestellt ist, und sie lässt sich
+     einzeln herausnehmen. Dann stünde die Jahrespauschale allein da und die
+     Sperre wäre blind — ein zweiter Klick legte 27.000 € ein zweites Mal auf
+     dasselbe Blatt. */
   function schlussBeleg(kunde, jahr){
     for (var i = 0; i < BELEGE.length; i++){
       var b = BELEGE[i];
       if (b.kunde !== kunde || b.art !== 'rechnung' || b.status === 'cancelled') continue;
       for (var j = 0; j < b.positionen.length; j++){
-        if (b.positionen[j].art === 'verrechnung' && b.positionen[j].jahr === jahr) return b;
+        var p = b.positionen[j];
+        if (p.art === 'pauschale' && p.monat === jahr + '-schluss') return b;
       }
     }
     return null;
@@ -733,6 +752,13 @@ a.beleg-zeile{
     });
     return summe;
   }
+  /* rateBeleg antwortet mit einem Beleg oder mit 'frueher' — dieser Satz
+     trägt beide Fälle, damit ihn nicht jeder Aufrufer neu erfindet. */
+  function rateWoher(schon){
+    if (schon === 'frueher') return 'Schon gestellt, vor dem sichtbaren Stapel. Der Stichtag entscheidet den Monat.';
+    if (schon.status === 'draft') return 'Liegt schon auf einem anderen Entwurf für diesen Kunden.';
+    return 'Schon gestellt am ' + schon.gestellt + ' mit ' + schon.nummer + '. Der Stichtag entscheidet den Monat.';
+  }
   function ratePosition(kunde, monat){
     var a = ABREDEN[kunde];
     if (a.art === 'monatspauschale'){
@@ -755,7 +781,7 @@ a.beleg-zeile{
                   her: 'Nach Abrede, das ganze Jahr', cent: a.cent}];
     /* Eine Verrechnung über null gehört nicht aufs Papier — sie behauptete
        eine Rechnung, die es nicht gibt. */
-    if (g.cent !== 0){
+    if (g.anzahl !== 0){
       liste.push({was: 'Verrechnung der Abschläge', art: 'verrechnung', jahr: jahr,
                   her: g.anzahl + (g.anzahl === 1 ? ' bereits gestellter Abschlag' : ' bereits gestellte Abschläge')
                        + (g.gutgeschrieben ? ', abzüglich ' + euro(g.gutgeschrieben) + ' Gutschrift' : '')
@@ -768,7 +794,7 @@ a.beleg-zeile{
   function schlussSatz(kunde, jahr){
     var a = ABREDEN[kunde];
     var g = abschlaege(kunde, jahr);
-    if (g.cent === 0) return euro(a.cent) + ' Jahrespauschale, für ' + jahr + ' ist noch kein Abschlag gestellt. Erst zum Jahresende fällig.';
+    if (g.anzahl === 0) return euro(a.cent) + ' Jahrespauschale, für ' + jahr + ' ist noch kein Abschlag gestellt. Erst zum Jahresende fällig.';
     return euro(a.cent) + ' Jahrespauschale, abzüglich '
       + (g.anzahl === 1 ? 'eines gestellten Abschlags' : g.anzahl + ' gestellter Abschläge')
       + (g.gutgeschrieben
@@ -1066,18 +1092,25 @@ a.beleg-zeile{
            die Schlussrechnung verrechnet, was gestellt ist — eine Rate, die
            daneben auf demselben Blatt steht, wäre nicht darunter und würde
            ihren Monat ein zweites Mal fordern. */
-        var hatSchluss = b.positionen.some(function(p){ return p.art === 'verrechnung'; });
+        var hatSchluss = b.positionen.some(function(p){
+          return p.art === 'verrechnung' || (p.art === 'pauschale' && p.monat === jahr + '-schluss');
+        });
         var hatRate = b.positionen.some(function(p){
           return (p.art === 'pauschale' || p.art === 'abschlag') && p.monat && p.monat.indexOf('-schluss') < 0;
         });
+        /* Ist das Jahr schon schlussgerechnet, ist auch keine Rate mehr offen —
+           sonst forderte ein Abschlag Geld für ein abgerechnetes Jahr. */
+        var schlussSchon = schlussBeleg(b.kunde, jahr);
         if (schon === b){
           zeile(g, rate.was, 'Steht auf diesem Entwurf.', {gedeckt: true});
         } else if (hatSchluss){
           zeile(g, rate.was, 'Nicht neben der Schlussrechnung auf demselben Beleg — sie verrechnet nur, was schon gestellt ist.', {gedeckt: true});
         } else if (schon){
-          zeile(g, rate.was, schon.status === 'draft'
-            ? 'Liegt schon auf einem anderen Entwurf für diesen Kunden.'
-            : 'Schon gestellt am ' + schon.gestellt + ' mit ' + schon.nummer + '. Der Stichtag entscheidet den Monat.',
+          zeile(g, rate.was, rateWoher(schon), {gedeckt: true});
+        } else if (schlussSchon && schlussSchon !== b){
+          zeile(g, rate.was, schlussSchon.status === 'draft'
+            ? 'Die Schlussrechnung ' + jahr + ' liegt auf einem anderen Entwurf — solange sie steht, ist keine Rate mehr offen.'
+            : 'Die Schlussrechnung ' + jahr + ' ist mit ' + schlussSchon.nummer + ' gestellt. Für dieses Jahr ist nichts mehr offen.',
             {gedeckt: true});
         } else {
           zeile(g, rate.was, rate.her, {betrag: rate.cent, knopf: 'Rate holen', tun: function(){
@@ -1173,10 +1206,17 @@ a.beleg-zeile{
         if (b.positionen.length === 0 && ABREDEN[b.kunde].art !== 'aufwand'){
           var m = String(b.stichtag || '2026-08-14').slice(0, 7);
           var laeuft = rateBeleg(b.kunde, m);
-          if (laeuft && laeuft !== b){
-            fehltKarte.appendChild(document.createTextNode(' ' + ratePosition(b.kunde, m).was + ' steht schon auf '
-              + (laeuft.nummer ? laeuft.nummer : 'einem anderen Entwurf')
-              + ' — für einen weiteren Beleg setz den Stichtag in einen anderen Monat.'));
+          var schlussDa = schlussBeleg(b.kunde, m.slice(0, 4));
+          if (!laeuft && schlussDa && schlussDa !== b){
+            fehltKarte.appendChild(document.createTextNode(' Die Schlussrechnung ' + m.slice(0, 4) + ' ist gestellt'
+              + (schlussDa.nummer ? ' mit ' + schlussDa.nummer : '') + ' — für dieses Jahr ist nichts mehr offen.'));
+          } else if (laeuft && laeuft !== b){
+            /* Der Stichtag steht nur im Formular „Entwurf anlegen" und ist an
+               einem bestehenden Entwurf nicht mehr zu ändern — der Rat muss
+               auf den Weg zeigen, den es wirklich gibt. */
+            fehltKarte.appendChild(document.createTextNode(' ' + ratePosition(b.kunde, m).was + ' ist schon gestellt'
+              + (laeuft !== 'frueher' && laeuft.nummer ? ' mit ' + laeuft.nummer : '')
+              + ' — für einen anderen Monat verwirf diesen Entwurf und leg einen neuen mit passendem Stichtag an.'));
           }
         }
         stellen.disabled = true;
@@ -1521,16 +1561,17 @@ a.beleg-zeile{
     if (abrede.art !== 'aufwand'){
       var monat = stichtag.slice(0, 7);
       var schon = rateBeleg(kunde, monat);
+      var schluss = schlussBeleg(kunde, monat.slice(0, 4));
       var rate = ratePosition(kunde, monat);
-      if (!schon){
+      if (!schon && !schluss){
         neu.positionen.push(rate);
         neu.historie.push({wann: HEUTE + ', jetzt', wer: 'System', was: 'Position angelegt: ' + rate.was + ', ' + euro(rate.cent)});
       } else {
         /* Sonst entsteht hier ein leerer Entwurf, der nicht sagt warum. Die
            Begründung steht zwar unten in der Gruppe „Nach der Abrede" — der
            Weg, auf dem er entstand, muss sie aber auch tragen. */
-        neu.historie.push({wann: HEUTE + ', jetzt', wer: 'System', was: rate.was + ' steht schon auf '
-          + (schon.nummer ? schon.nummer : 'einem anderen Entwurf') + ' und kommt deshalb nicht mit'});
+        neu.historie.push({wann: HEUTE + ', jetzt', wer: 'System', was: rate.was + ' kommt nicht mit: '
+          + (schon ? 'die Rate ist schon gestellt' : 'die Schlussrechnung ' + monat.slice(0, 4) + ' steht bereits')});
       }
     } else {
       var pool = STUNDEN[kunde];
