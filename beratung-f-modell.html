@@ -37,8 +37,11 @@
    führt nach beratung-mandat.html. V20: die Zentrale-Tür „Wissen" führt
    nach beratung-wissen.html. V21: die Zentrale-Tür „Marke" führt nach
    beratung-marke.html. V22 (Review): der Zentrale-Untertitel nennt auch
-   das Wissen.
-   Marker: BERATUNG-F-MODELL-V22 */
+   das Wissen. V23: die Zentrale-Tür „Rechnungen" führt nach
+   beratung-rechnungen.html, die MTS-Türen zur offenen Rechnung ebenso,
+   und die Rechnungsbeträge kommen jetzt aus dem Rechnungs-Raum
+   (4.284 € MTS, 6.426 € Petersen, zusammen 11.900 € offen).
+   Marker: BERATUNG-F-MODELL-V23 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -568,7 +571,7 @@ body.gezoomt #zonen{display:block}
       </div>
     </div>
     <div class="kpis">
-      <div class="karte"><div class="wert" data-zaehl>20.550 €</div><div class="label">offene Forderungen</div><div class="delta amber">eine Rechnung seit 9 Tagen</div></div>
+      <div class="karte"><div class="wert" data-zaehl>6.426 €</div><div class="label">offene Forderungen</div><div class="delta amber">eine Rechnung seit 9 Tagen</div></div>
       <div class="karte"><div class="wert" data-zaehl>3</div><div class="label">Gespräche diese Woche</div><div class="delta">eines freigegeben</div></div>
     </div>
     <h3>Was wartet</h3>
@@ -690,17 +693,17 @@ body.gezoomt #zonen{display:block}
       </div>
     </div>
     <div class="kpis">
-      <div class="karte"><div class="wert" data-zaehl>4.200 €</div><div class="label">offene Rechnung</div><div class="delta amber">seit 12 Tagen</div></div>
+      <div class="karte"><div class="wert" data-zaehl>4.284 €</div><div class="label">offene Rechnung</div><div class="delta amber">seit 12 Tagen</div></div>
       <div class="karte"><div class="wert" data-zaehl>11,2</div><div class="label">Std. im Juli</div><div class="delta">Halbjahresblick kam gut an</div></div>
     </div>
     <h3>Was wartet</h3>
     <div class="zeilen">
-      <button class="zeile bald" type="button"><span><span class="z-titel">Offene Rechnung</span><br><span class="z-meta">4.200 €, seit 12 Tagen</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">erinnern</span></span></button>
+      <a class="zeile" href="beratung-rechnungen.html#b-r82"><span><span class="z-titel">Offene Rechnung 2026-0082</span><br><span class="z-meta">4.284 €, seit 12 Tagen</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">erinnern</span></span></a>
       <button class="zeile bald" type="button"><span><span class="z-titel">Vorschlag des KI-Beraters</span><br><span class="z-meta">Halbjahresblick anbieten, das kam zuletzt gut an</span><br><span class="z-hand">vielleicht anrufen?</span></span><span class="z-fuell"><span class="zustand vorschlag" role="img" aria-label="Vorschlag" title="Vorschlag"></span><span class="zustand-wort">Vorschlag</span></span></button>
     </div>
     <div class="tueren">
       <button class="bald knopf leise" type="button">Gespräche ansehen</button>
-      <button class="bald knopf leise" type="button">Rechnung ansehen</button>
+      <a class="knopf leise" href="beratung-rechnungen.html#b-r82">Rechnung ansehen</a>
     </div>
   </section>
 
@@ -749,14 +752,14 @@ body.gezoomt #zonen{display:block}
     <h3>So tritt er auf</h3>
     <div class="karten">
       <div class="karte"><div class="wert" style="font-size:18px;color:#2b5fe3">Nordholm &amp; Partner</div><div class="label">Marke und Anrede der Kundenflächen</div><div class="proben" aria-label="Markenfarben"><span class="probe p-blau" title="Akzent"></span><span class="probe p-stift" title="Stift"></span><span class="probe p-tinte" title="Tinte"></span><span class="probe p-papier" title="Papier"></span><span class="anrede-wert" data-du="per Du" data-sie="per Sie">per Du</span></div></div>
-      <div class="karte"><div class="wert">34,0</div><div class="label">Std. im August, alle Mandate</div><div class="delta amber">3 Rechnungen offen, 12.400 €</div></div>
+      <div class="karte"><div class="wert">34,0</div><div class="label">Std. im August, alle Mandate</div><div class="delta amber">3 Rechnungen offen, 11.900 €</div></div>
     </div>
     <div class="tueren">
       <a class="knopf leise" href="beratung-ki-berater.html">Persona einstellen</a>
       <a class="knopf leise" href="beratung-wissen.html">Wissen</a>
       <a class="knopf leise" href="beratung-marke.html">Marke</a>
       <button class="bald knopf leise" type="button">Leistungsnachweise</button>
-      <button class="bald knopf leise" type="button">Rechnungen</button>
+      <a class="knopf leise" href="beratung-rechnungen.html">Rechnungen</a>
     </div>
   </section>
 </div>

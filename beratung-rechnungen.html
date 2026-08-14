@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rechnungen der Beratung</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Rechnungen: achter Raum hinter den Cockpit-Türen
+   (Paket 8, Fortschreibung der Reihenfolge-Entscheidung 2026-08-13).
+   Was die Beratung ihren Kunden stellt (Produkt: /rechnungen und
+   /rechnungsdaten — nicht die Kundenfläche rechnungen.html): Liste mit
+   Offenstand, Entwurf mit Werkzeugen, gestellter Beleg als Dokument,
+   Storno und Gutschrift als eigene Belege, dazu die Rechnungsdaten.
+   Kern-Idee: der Raum ist Glas, die Rechnung ist Papier — und das Stellen
+   ist der Moment, in dem der bewegliche Entwurf einfriert und die Nummer
+   aufgestempelt wird. Danach ändert sich an dem Blatt nichts mehr.
+   Chrome ist quoroAI (system.css), ruhige Fläche — der Stempel IST der
+   Moment. Marker: BERATUNG-RECHNUNGEN-V1 */
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,select,textarea{font-family:inherit}
+
+/* ========== quoroAI-Chrom ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+
+/* ========== Seite ========== */
+main{max-width:880px;margin:0 auto;padding:136px 24px 90px}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px;max-width:56ch}
+.kopf .z-fuell{display:flex;align-items:center;gap:8px;margin-top:8px}
+.kopf .z-fuell .zustand{width:40px;height:18px}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:30px}
+h3 .zu-daten{font-weight:600;color:var(--lila-700);text-decoration:none;margin-left:10px}
+
+.tafel{
+  margin-top:12px;border-radius:var(--radius-karte);padding:22px 24px;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+.klein{font-size:12.5px;color:var(--nebel-500);margin-top:12px;line-height:1.55}
+.bestaetigt{
+  margin-top:12px;padding:11px 14px;border-radius:var(--radius-innen);
+  background:var(--gruen-fond);font-size:13.5px;line-height:1.5;
+}
+.bestaetigt.still{background:var(--nebel-100)}
+.fuss-griffe{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;align-items:center}
+.knopf{min-height:40px;padding:0 16px;font-size:13.5px}
+.knopf[disabled]{opacity:.45;cursor:not-allowed}
+
+/* ---------- Neue Rechnung ---------- */
+#neu{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+#neu .feld{flex:1;min-width:180px;margin:0}
+#neu select,#neu input{
+  width:100%;min-height:44px;padding:0 14px;font-size:15px;color:var(--tinte);
+  background:var(--flaeche);border:1px solid var(--nebel-200);border-radius:var(--radius-innen);
+}
+#neu select:focus,#neu input:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+
+/* ---------- Liste ---------- */
+.belege{display:flex;flex-direction:column;gap:9px}
+.beleg-zeile{
+  display:flex;align-items:center;gap:16px;width:100%;text-align:left;cursor:pointer;
+  text-decoration:none;color:var(--tinte);
+  padding:13px 16px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 8px 24px rgba(16,19,26,.06);
+  transition:border-color .2s ease,translate .2s var(--kurve);
+}
+.beleg-zeile:hover{border-color:var(--lila-400);translate:0 -1px}
+.beleg-zeile .b-text{min-width:0;flex:1}
+.beleg-zeile .b-titel{font-size:14px;font-weight:600;letter-spacing:-.01em;line-height:1.4}
+.beleg-zeile .b-meta{font-size:12px;color:var(--nebel-600);margin-top:2px}
+.beleg-zeile .b-meta .frist{color:var(--bernstein);font-weight:600}
+.beleg-zeile .b-recht{margin-left:auto;flex-shrink:0;display:flex;align-items:center;gap:14px}
+.beleg-zeile .b-betrag{font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.beleg-zeile .b-betrag.minus{color:var(--nebel-600)}
+.beleg-zeile .zustand{width:40px;height:18px}
+.beleg-zeile .zustand-wort{font-size:12px;font-weight:600;white-space:nowrap}
+.beleg-zeile.storniert .b-titel{text-decoration:line-through;text-decoration-thickness:1px;color:var(--nebel-600)}
+
+/* ---------- Beleg-Ansicht ---------- */
+.beleg-kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.beleg-kopf h2{font-size:clamp(21px,2.8vw,27px);line-height:1.2}
+.beleg-kopf .b-stand{font-size:13px;color:var(--nebel-600);margin-top:4px;line-height:1.6;max-width:60ch}
+.beleg-kopf .b-stand a{color:var(--lila-700)}
+#zur-liste{
+  display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;
+  font-size:13px;font-weight:600;color:var(--nebel-600);text-decoration:none;
+}
+#zur-liste:hover{color:var(--lila-600)}
+
+/* Zum Stellen fehlt noch */
+.fehlt{
+  margin-top:12px;padding:13px 16px;border-radius:var(--radius-innen);
+  background:var(--bernstein-fond);font-size:13.5px;line-height:1.6;
+}
+.fehlt b{font-weight:600}
+
+/* Positionen im Entwurf */
+.posn{display:flex;flex-direction:column}
+.pos{
+  display:flex;align-items:baseline;gap:14px;padding:11px 2px;
+  border-bottom:0.5px solid var(--nebel-200);
+}
+.pos:last-child{border-bottom:0}
+.pos .p-text{min-width:0;flex:1}
+.pos .p-was{font-size:14px;font-weight:600;letter-spacing:-.01em}
+.pos .p-her{font-size:12px;color:var(--nebel-600);margin-top:2px}
+.pos .p-betrag{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pos .raus{
+  border:0;background:none;cursor:pointer;padding:4px 8px;border-radius:8px;
+  font-size:12px;font-weight:600;color:var(--nebel-500);
+}
+.pos .raus:hover{color:var(--rot)}
+.summen{margin-top:14px;margin-left:auto;max-width:280px;font-size:13.5px}
+.summen div{display:flex;justify-content:space-between;gap:24px;padding:3px 2px}
+.summen .gesamt{font-weight:700;border-top:1px solid var(--nebel-300);margin-top:4px;padding-top:8px}
+.summen span:last-child{font-variant-numeric:tabular-nums}
+
+/* Noch nicht berechnet */
+.offen-zeit{display:flex;flex-direction:column;gap:9px}
+.oz{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:11px 14px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+}
+.oz .oz-text{flex:1;min-width:0}
+.oz .oz-mandat{font-size:14px;font-weight:600}
+.oz .oz-meta{font-size:12px;color:var(--nebel-600);margin-top:2px}
+.oz .oz-meta.kein-satz{color:var(--bernstein)}
+
+/* Pauschale */
+#pauschale{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-top:16px}
+#pauschale .feld{margin:0}
+#pauschale .feld:first-child{flex:2;min-width:180px}
+#pauschale .feld:nth-child(2){flex:1;min-width:110px}
+#pauschale input{
+  width:100%;min-height:40px;padding:0 12px;font-size:14px;color:var(--tinte);
+  background:var(--flaeche);border:1px solid var(--nebel-200);border-radius:var(--radius-innen);
+}
+#pauschale input:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+#pauschale label{font-size:12.5px;font-weight:600;color:var(--nebel-600);display:block;margin-bottom:5px}
+
+/* Anschreiben */
+#anschreiben{
+  width:100%;min-height:74px;padding:12px 14px;font-size:14.5px;line-height:1.6;color:var(--tinte);
+  background:var(--flaeche);border:1px solid var(--nebel-200);border-radius:var(--radius-innen);resize:vertical;
+}
+#anschreiben:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+
+/* ---------- Das Papier ---------- */
+.papier{
+  margin-top:12px;border-radius:14px;padding:34px 38px;
+  background:#fff;
+  border:0.5px solid var(--nebel-200);
+  box-shadow:0 1px 2px rgba(16,19,26,.05), 0 18px 50px rgba(24,21,47,.12);
+  position:relative;line-height:1.6;
+}
+.papier .marke-zeile{font-family:var(--schrift-schau);font-size:19px;letter-spacing:-.01em;color:#2b5fe3}
+.papier .absender-klein{font-size:10.5px;color:var(--nebel-500);margin-top:14px;border-bottom:0.5px solid var(--nebel-200);padding-bottom:3px;max-width:340px}
+.papier .adress-block{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-top:10px}
+.papier .empfaenger{font-size:13.5px;line-height:1.55;min-width:200px}
+.papier .eckdaten{font-size:12.5px;color:var(--nebel-600);text-align:right;line-height:1.7}
+.papier .eckdaten b{color:var(--tinte);font-weight:600}
+.papier .titelzeile{margin-top:30px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.papier .titelzeile h4{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.papier .nummer{
+  display:inline-block;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;
+  color:var(--lila-800);padding:2px 10px;border:1.5px solid var(--lila-400);border-radius:8px;
+}
+.papier .nummer.frisch{animation:stempel .5s var(--kurve) both}
+@keyframes stempel{
+  0%{opacity:0;scale:1.7;rotate:-7deg}
+  62%{opacity:1;scale:.94;rotate:1.5deg}
+  100%{opacity:1;scale:1;rotate:-1deg}
+}
+.papier .intro{font-size:13.5px;margin-top:14px;max-width:62ch}
+.papier table{width:100%;border-collapse:collapse;margin-top:16px;font-size:13.5px}
+.papier th{text-align:left;font-size:11px;font-weight:600;color:var(--nebel-500);text-transform:uppercase;letter-spacing:.04em;padding:0 0 7px}
+.papier th:last-child,.papier td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.papier td{padding:8px 0;border-top:0.5px solid var(--nebel-200);vertical-align:top}
+.papier td .her{display:block;font-size:11.5px;color:var(--nebel-500)}
+.papier .p-summen{margin-left:auto;max-width:300px;font-size:13.5px;margin-top:12px}
+.papier .p-summen div{display:flex;justify-content:space-between;gap:24px;padding:2.5px 0}
+.papier .p-summen span:last-child{font-variant-numeric:tabular-nums}
+.papier .p-summen .gesamt{font-weight:700;border-top:1.5px solid var(--tinte);margin-top:5px;padding-top:7px}
+.papier .bankzeile{font-size:12.5px;margin-top:22px}
+.papier .fusszeile{font-size:10.5px;color:var(--nebel-500);margin-top:26px;border-top:0.5px solid var(--nebel-200);padding-top:10px}
+.papier.durchgestrichen::after{
+  content:'';position:absolute;inset:0;pointer-events:none;border-radius:14px;
+  background:linear-gradient(to top right, transparent 49.6%, var(--nebel-300) 49.6%, var(--nebel-300) 50.4%, transparent 50.4%);
+}
+.papier .hand{
+  position:absolute;right:26px;top:22px;
+  font-family:'Caveat',cursive;font-size:19px;font-weight:700;color:var(--lila-700);
+  rotate:-2deg;white-space:nowrap;
+}
+
+/* Gutschrift-Wahl auf dem Papier */
+.papier td .wahl{margin-right:10px;accent-color:var(--lila-600);width:15px;height:15px;vertical-align:-2px}
+
+/* Historie */
+.historie{display:flex;flex-direction:column}
+.historie .h-zeile{
+  display:flex;gap:14px;padding:8px 2px;font-size:13px;line-height:1.55;
+  border-bottom:0.5px solid var(--nebel-200);
+}
+.historie .h-zeile:last-child{border-bottom:0}
+.historie .h-wann{color:var(--nebel-500);white-space:nowrap;font-variant-numeric:tabular-nums;flex-shrink:0;width:130px}
+.historie .h-wer{color:var(--nebel-600);flex-shrink:0;width:120px}
+
+/* ---------- Rechnungsdaten ---------- */
+#ansicht-daten .feldreihe{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;margin-top:4px}
+#ansicht-daten .feld{margin:0}
+#ansicht-daten .feld.breit{grid-column:1 / -1}
+#ansicht-daten .feld input{width:100%;min-height:44px}
+#ansicht-daten .feld input[disabled]{background:var(--nebel-050);color:var(--nebel-500)}
+.haken{display:flex;align-items:center;gap:10px;font-size:14px;margin-top:14px;cursor:pointer}
+.haken input{width:17px;height:17px;accent-color:var(--lila-600)}
+
+@media (prefers-reduced-motion: reduce){
+  main > *{animation:none;opacity:1;translate:none}
+  .papier .nummer.frisch{animation:none}
+}
+@media (max-width:760px){
+  nav{padding:0 18px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
+  .tafel{padding:18px 18px}
+  .papier{padding:22px 18px}
+  .papier .eckdaten{text-align:left}
+  .beleg-zeile .b-recht{margin-left:50px}
+  #ansicht-daten .feldreihe{grid-template-columns:1fr}
+  .historie .h-wer{display:none}
+}
+</style>
+</head>
+<body class="quoro">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Rechnungen</b></a>
+
+<main>
+  <div class="kopf">
+    <div>
+      <h1>Rechnungen</h1>
+      <div class="stand">Was deine Beratung ihren Kunden stellt. Ein Entwurf ist beweglich — eine gestellte Rechnung ist ein Dokument, an dem sich nichts mehr ändert. Falsch gestellt? Stornieren und neu stellen, die Nummernfolge bleibt lückenlos.</div>
+    </div>
+    <span class="z-fuell" id="kopf-stand"><span class="zustand wartet" role="img" aria-label=""></span><span class="zustand-wort"></span></span>
+  </div>
+
+  <!-- ============ Ansicht: Liste ============ -->
+  <div id="ansicht-liste">
+    <h3>Neue Rechnung</h3>
+    <section class="tafel" aria-label="Neue Rechnung">
+      <div id="neu">
+        <div class="feld">
+          <label for="neu-kunde">Kunde</label>
+          <select id="neu-kunde">
+            <option value="petersen">Petersen Stahlbau</option>
+            <option value="cordes">Cordes Logistik</option>
+            <option value="freitag">Bäckerei Freitag</option>
+            <option value="mts">MTS Maschinenbau</option>
+          </select>
+        </div>
+        <div class="feld">
+          <label for="neu-stichtag">Stunden bis einschließlich</label>
+          <input id="neu-stichtag" type="date" value="2026-08-14">
+        </div>
+        <button class="knopf sekundaer" id="neu-anlegen" type="button">Entwurf anlegen</button>
+      </div>
+      <div class="klein">Der Entwurf holt sich die offenen berechenbaren Stunden gleich mit. Eine Nummer bekommt er erst beim Stellen — ein verworfener Entwurf reißt keine Lücke.</div>
+    </section>
+
+    <h3 id="liste-kopf">Alle Belege <a class="zu-daten" href="#daten">Rechnungsdaten ansehen →</a></h3>
+    <section class="tafel" aria-label="Alle Belege">
+      <div class="belege" id="belege"></div>
+      <div class="klein">Storno und Gutschrift sind eigene Belege mit eigener Nummer — sie fordern nichts und zählen nicht in den Offenstand.</div>
+    </section>
+  </div>
+
+  <!-- ============ Ansicht: ein Beleg ============ -->
+  <div id="ansicht-beleg" hidden>
+    <a id="zur-liste" href="#">← Alle Belege</a>
+    <div id="beleg-inhalt"></div>
+  </div>
+
+  <!-- ============ Ansicht: Rechnungsdaten ============ -->
+  <div id="ansicht-daten" hidden>
+    <a id="zur-liste-2" href="#" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;font-size:13px;font-weight:600;color:var(--nebel-600);text-decoration:none">← Alle Belege</a>
+
+    <h3 style="margin-top:0">Wer stellt die Rechnung</h3>
+    <section class="tafel" aria-label="Absender">
+      <div class="feldreihe">
+        <div class="feld breit"><label for="rd-firma">Firma</label><input id="rd-firma" value="Nordholm &amp; Partner GmbH"></div>
+        <div class="feld"><label for="rd-strasse">Straße und Nummer</label><input id="rd-strasse" value="Alsterufer 12"></div>
+        <div class="feld"><label for="rd-ort">PLZ und Ort</label><input id="rd-ort" value="20354 Hamburg"></div>
+      </div>
+    </section>
+
+    <h3>Steuer</h3>
+    <section class="tafel" aria-label="Steuer">
+      <div class="feldreihe">
+        <div class="feld"><label for="rd-ustid">USt-IdNr.</label><input id="rd-ustid" value="DE318245991"><div class="hilfe">USt-IdNr. oder Steuernummer — eines von beiden verlangt § 14 UStG.</div></div>
+        <div class="feld"><label for="rd-satz">Steuersatz in Prozent</label><input id="rd-satz" value="19" inputmode="numeric"></div>
+      </div>
+      <label class="haken"><input type="checkbox" id="rd-klein"> Kleinunternehmer nach § 19 UStG — dann ohne Umsatzsteuer, mit Pflichthinweis auf jeder Rechnung</label>
+    </section>
+
+    <h3>Wohin gezahlt wird</h3>
+    <section class="tafel" aria-label="Bankverbindung">
+      <div class="feldreihe">
+        <div class="feld"><label for="rd-iban">IBAN</label><input id="rd-iban" value="DE71 2005 0550 0123 4567 89"></div>
+        <div class="feld"><label for="rd-bic">BIC und Bank</label><input id="rd-bic" value="HANSDEHH0XX, Hanseatische Bank"></div>
+        <div class="feld"><label for="rd-ziel">Zahlungsziel in Tagen</label><input id="rd-ziel" value="14" inputmode="numeric"></div>
+      </div>
+    </section>
+
+    <h3>Fußzeile</h3>
+    <section class="tafel" aria-label="Fußzeile">
+      <div class="feldreihe">
+        <div class="feld breit"><label for="rd-fuss">Geschäftsführung, Registergericht</label><input id="rd-fuss" value="Geschäftsführung: Dr. Anna Vogelsang · Amtsgericht Hamburg HRB 118 245"></div>
+      </div>
+      <div class="fuss-griffe">
+        <button class="knopf primaer" id="rd-speichern" type="button">Speichern</button>
+      </div>
+      <div class="bestaetigt" id="rd-meldung" hidden></div>
+      <div class="klein">Solange hier etwas fehlt, lässt sich keine Rechnung stellen. Rechnungsdaten pflegen Inhaber und Partner.</div>
+    </section>
+  </div>
+</main>
+
+<div id="demo-hinweis" style="position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--lila-700);opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--kurve)">Diese Fläche entsteht gerade.</div>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('main > *').forEach(function(el, i){
+    el.style.setProperty('--verz', (i * 0.07) + 's');
+  });
+
+  var hinweisTimer = null;
+  function demoHinweis(text){
+    var h = document.getElementById('demo-hinweis');
+    h.textContent = text;
+    h.style.opacity = .95; h.style.translate = '-50% 0';
+    clearTimeout(hinweisTimer);
+    hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2800);
+  }
+
+  /* ---------- Die Welt: eine Beratung, vier Kunden, ein Stapel Belege ----------
+     „Heute" ist in dieser Vorführung der 14. August 2026 — derselbe Tag,
+     an dem im Stadtmodell die Rechnung von Bäckerei Freitag 12 Tage offen ist. */
+  var HEUTE = '14.08.2026';
+  var STEUERSATZ = 19;
+  var ABSENDER = {
+    firma: 'Nordholm & Partner GmbH',
+    anschrift: 'Alsterufer 12, 20354 Hamburg',
+    ustid: 'USt-IdNr. DE318245991',
+    bank: 'DE71 2005 0550 0123 4567 89, HANSDEHH0XX (Hanseatische Bank)',
+    fuss: 'Geschäftsführung: Dr. Anna Vogelsang · Amtsgericht Hamburg HRB 118 245',
+    zielTage: 14
+  };
+  var KUNDEN = {
+    petersen: {name: 'Petersen Stahlbau', anschrift: ['Petersen Stahlbau GmbH', 'Brookweg 14', '26123 Oldenburg'], ustid: 'USt-IdNr. DE812457733', mail: 'buchhaltung@petersen-stahlbau.de'},
+    cordes:   {name: 'Cordes Logistik',   anschrift: ['Cordes Logistik GmbH & Co. KG', 'Am Güterbahnhof 3', '28195 Bremen'], ustid: 'USt-IdNr. DE274811209', mail: 'rechnung@cordes-logistik.de'},
+    freitag:  {name: 'Bäckerei Freitag',  anschrift: ['Bäckerei Freitag e.K.', 'Marktstraße 9', '26382 Wilhelmshaven'], ustid: '', mail: 'post@baeckerei-freitag.de'},
+    mts:      {name: 'MTS Maschinenbau',  anschrift: ['MTS Maschinenbau GmbH', 'Industriering 22', '49661 Cloppenburg'], ustid: 'USt-IdNr. DE199034872', mail: 'buchhaltung@mts-maschinenbau.de'}
+  };
+  /* Offene berechenbare Stunden je Kunde: [Mandat, Satz in Cent (null = keiner), Minuten] */
+  var STUNDEN = {
+    petersen: [
+      {mandat: 'Zweitmeinung', satz: null, min: 90}
+    ],
+    cordes: [], freitag: [], mts: []
+  };
+
+  /* Positionen tragen Cent. Steuer entsteht auf die Summe, kaufmännisch gerundet —
+     eine Rundung je Rechnung, nicht je Position. */
+  var BELEGE = [
+    {id: 'e1', art: 'rechnung', status: 'draft', nummer: null, kunde: 'petersen',
+     intro: 'Für die Leistungen im August 2026 erlauben wir uns zu berechnen:',
+     positionen: [{was: 'Preis und Marge', her: '01.08.2026 bis 12.08.2026 · 6 Std. × 180,00 €', cent: 108000, zeit: {mandat: 'Preis und Marge', satz: 18000, min: 360}}],
+     historie: [
+       {wann: '12.08.2026, 17:41', wer: 'Dr. Vogelsang', was: 'Entwurf angelegt'},
+       {wann: '12.08.2026, 17:41', wer: 'System', was: 'Position angelegt: Preis und Marge · 6 Std. × 180,00 €'}
+     ]},
+    {id: 'r84', art: 'rechnung', status: 'issued', nummer: '2026-0084', kunde: 'petersen',
+     gestellt: '05.08.2026', faellig: '19.08.2026', tageOffen: 9,
+     intro: 'Für die Leistungen im Juli 2026 erlauben wir uns zu berechnen:',
+     positionen: [
+       {was: 'Preis und Marge', her: '01.07.2026 bis 31.07.2026 · 28 Std. × 180,00 €', cent: 504000},
+       {was: 'Reisekosten Oldenburg', her: 'Pauschale', cent: 36000}
+     ],
+     historie: [
+       {wann: '05.08.2026, 09:12', wer: 'Dr. Vogelsang', was: 'Entwurf angelegt'},
+       {wann: '05.08.2026, 09:14', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0084'},
+       {wann: '05.08.2026, 09:15', wer: 'System', was: 'Per Mail verschickt an buchhaltung@petersen-stahlbau.de'}
+     ]},
+    {id: 'r82', art: 'rechnung', status: 'issued', nummer: '2026-0082', kunde: 'mts',
+     gestellt: '02.08.2026', faellig: '16.08.2026', tageOffen: 12,
+     intro: 'Für den Halbjahresblick Januar bis Juni 2026 erlauben wir uns zu berechnen:',
+     positionen: [{was: 'Halbjahresblick', her: '24 Std. × 150,00 €', cent: 360000}],
+     historie: [
+       {wann: '02.08.2026, 11:03', wer: 'Dr. Vogelsang', was: 'Entwurf angelegt'},
+       {wann: '02.08.2026, 11:06', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0082'},
+       {wann: '02.08.2026, 11:06', wer: 'System', was: 'Per Mail verschickt an buchhaltung@mts-maschinenbau.de'}
+     ]},
+    {id: 'r83', art: 'rechnung', status: 'issued', nummer: '2026-0083', kunde: 'cordes',
+     gestellt: '03.08.2026', faellig: '17.08.2026', tageOffen: 11,
+     intro: 'Für die Leistungen im Juli 2026 erlauben wir uns zu berechnen:',
+     positionen: [{was: 'Frachtmarge', her: '01.07.2026 bis 31.07.2026 · 10 Std. × 100,00 €', cent: 100000}],
+     historie: [
+       {wann: '03.08.2026, 15:20', wer: 'Dr. Vogelsang', was: 'Entwurf angelegt'},
+       {wann: '03.08.2026, 15:22', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0083'},
+       {wann: '03.08.2026, 15:22', wer: 'System', was: 'Per Mail verschickt an rechnung@cordes-logistik.de'}
+     ]},
+    {id: 'r81', art: 'rechnung', status: 'paid', nummer: '2026-0081', kunde: 'freitag',
+     gestellt: '08.07.2026', faellig: '22.07.2026', bezahlt: '21.07.2026',
+     intro: 'Für die Leistungen im Juni 2026 erlauben wir uns zu berechnen:',
+     positionen: [{was: 'Personal und Kosten', her: '01.06.2026 bis 30.06.2026 · 11 Std. × 150,00 €', cent: 165000}],
+     historie: [
+       {wann: '08.07.2026, 10:30', wer: 'Dr. Vogelsang', was: 'Entwurf angelegt'},
+       {wann: '08.07.2026, 10:32', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0081'},
+       {wann: '21.07.2026, 08:15', wer: 'Dr. Vogelsang', was: 'Als bezahlt vermerkt'}
+     ]},
+    {id: 'r80', art: 'storno', status: 'issued', nummer: '2026-0080', kunde: 'petersen',
+     gestellt: '14.06.2026', reverses: 'r79',
+     intro: 'Storno zur Rechnung 2026-0079 vom 12.06.2026.',
+     positionen: [{was: 'Preis und Marge', her: '01.05.2026 bis 31.05.2026 · 8 Std. × 180,00 €', cent: -144000}],
+     historie: [{wann: '14.06.2026, 09:02', wer: 'Dr. Vogelsang', was: 'Als Stornorechnung 2026-0080 zur Rechnung 2026-0079 entstanden'}]},
+    {id: 'r79', art: 'rechnung', status: 'cancelled', nummer: '2026-0079', kunde: 'petersen',
+     gestellt: '12.06.2026', faellig: '26.06.2026',
+     intro: 'Für die Leistungen im Mai 2026 erlauben wir uns zu berechnen:',
+     positionen: [{was: 'Preis und Marge', her: '01.05.2026 bis 31.05.2026 · 8 Std. × 180,00 €', cent: 144000}],
+     historie: [
+       {wann: '12.06.2026, 14:00', wer: 'Dr. Vogelsang', was: 'Entwurf angelegt'},
+       {wann: '12.06.2026, 14:03', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0079'},
+       {wann: '14.06.2026, 09:02', wer: 'Dr. Vogelsang', was: 'Storniert — der Beleg dazu ist die Stornorechnung 2026-0080'}
+     ]}
+  ];
+  var naechsteNummer = 85;
+  var entwurfZaehler = 1;
+
+  function beleg(id){
+    for (var i = 0; i < BELEGE.length; i++) if (BELEGE[i].id === id) return BELEGE[i];
+    return null;
+  }
+  function euro(cent){
+    var minus = cent < 0;
+    var s = (Math.abs(cent) / 100).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    return (minus ? '−' : '') + s + ' €';
+  }
+  function netto(b){ return b.positionen.reduce(function(s, p){ return s + p.cent; }, 0); }
+  function steuer(b){ return Math.round(netto(b) * STEUERSATZ / 100); }
+  function brutto(b){ return netto(b) + steuer(b); }
+  function artWort(b){
+    return b.art === 'storno' ? 'Stornorechnung' : b.art === 'gutschrift' ? 'Gutschrift' : 'Rechnung';
+  }
+  function statusWort(b){
+    if (b.status === 'draft') return 'Entwurf';
+    if (b.status === 'paid') return 'Bezahlt';
+    if (b.status === 'cancelled') return 'Storniert';
+    return b.art === 'rechnung' ? 'Offen' : 'Gestellt';
+  }
+  function zustandFuer(b){
+    /* Füllstand-Vokabular von system.css: Entwurf grau-niedrig, offen amber, bezahlt grün-voll */
+    if (b.status === 'draft') return 'entwurf';
+    if (b.status === 'paid') return 'aktiv';
+    if (b.status === 'cancelled') return '';
+    return b.art === 'rechnung' ? 'wartet' : 'vorschlag';
+  }
+
+  /* ---------- Kopf-Kapsel: sagt und füllt dasselbe ---------- */
+  function maleKopf(){
+    var offene = BELEGE.filter(function(b){ return b.status === 'issued' && b.art === 'rechnung'; });
+    var gestellte = BELEGE.filter(function(b){ return b.status !== 'draft' && b.status !== 'cancelled' && b.art === 'rechnung'; });
+    var summe = offene.reduce(function(s, b){ return s + brutto(b); }, 0);
+    var wort = offene.length === 0 ? 'Nichts offen'
+      : offene.length + ' offen, zusammen ' + euro(summe);
+    var kopf = document.getElementById('kopf-stand');
+    kopf.querySelector('.zustand-wort').textContent = wort;
+    var kapsel = kopf.querySelector('.zustand');
+    kapsel.setAttribute('aria-label', wort);
+    kapsel.setAttribute('title', wort);
+    kapsel.className = 'zustand';
+    /* Die Füllung ist der Anteil offener unter den gestellten Rechnungen */
+    kapsel.style.cssText = offene.length === 0
+      ? '--stand:1;--fluid:#43b384;--fluid-tief:#1e8a63'
+      : '--stand:' + Math.max(offene.length / Math.max(gestellte.length, 1), .18).toFixed(2) + ';--fluid:#eebb59;--fluid-tief:#c88f28';
+  }
+
+  /* ---------- Liste ---------- */
+  function maleListe(){
+    var wurzel = document.getElementById('belege');
+    wurzel.textContent = '';
+    var sortiert = BELEGE.slice().sort(function(a, b){
+      if ((a.status === 'draft') !== (b.status === 'draft')) return a.status === 'draft' ? -1 : 1;
+      return (b.nummer || '9999').localeCompare(a.nummer || '9999');
+    });
+    sortiert.forEach(function(b){
+      var zeile = document.createElement('a');
+      zeile.className = 'beleg-zeile' + (b.status === 'cancelled' ? ' storniert' : '');
+      zeile.href = '#b-' + b.id;
+      var text = document.createElement('span'); text.className = 'b-text';
+      var titel = document.createElement('span'); titel.className = 'b-titel';
+      titel.textContent = (b.nummer || 'Entwurf') + ' · ' + KUNDEN[b.kunde].name;
+      var meta = document.createElement('span'); meta.className = 'b-meta';
+      var teile = [];
+      if (b.art !== 'rechnung') teile.push(artWort(b));
+      if (b.status === 'paid') teile.push('bezahlt am ' + b.bezahlt);
+      else if (b.status === 'cancelled') teile.push('storniert, Beleg dazu: Stornorechnung');
+      else if (b.status === 'draft') teile.push('noch ohne Nummer');
+      else if (b.art === 'rechnung') teile.push('zahlbar bis ' + b.faellig);
+      else teile.push('fordert nichts');
+      meta.textContent = teile.join(', ');
+      if (b.status === 'issued' && b.art === 'rechnung' && b.tageOffen >= 9){
+        meta.appendChild(document.createTextNode(', '));
+        var frist = document.createElement('span'); frist.className = 'frist';
+        frist.textContent = 'seit ' + b.tageOffen + ' Tagen offen';
+        meta.appendChild(frist);
+      }
+      text.appendChild(titel); text.appendChild(document.createElement('br')); text.appendChild(meta);
+      var recht = document.createElement('span'); recht.className = 'b-recht';
+      var betrag = document.createElement('span');
+      betrag.className = 'b-betrag' + (brutto(b) < 0 ? ' minus' : '');
+      betrag.textContent = euro(brutto(b));
+      var fuell = document.createElement('span'); fuell.className = 'z-fuell';
+      var kapsel = document.createElement('span');
+      kapsel.className = ('zustand ' + zustandFuer(b)).trim();
+      if (!zustandFuer(b)) kapsel.style.cssText = '--stand:.08';
+      kapsel.setAttribute('role', 'img');
+      kapsel.setAttribute('aria-label', statusWort(b));
+      kapsel.setAttribute('title', statusWort(b));
+      var wort = document.createElement('span'); wort.className = 'zustand-wort';
+      wort.textContent = statusWort(b);
+      fuell.appendChild(kapsel); fuell.appendChild(wort);
+      recht.appendChild(betrag); recht.appendChild(fuell);
+      zeile.appendChild(text); zeile.appendChild(recht);
+      wurzel.appendChild(zeile);
+    });
+    document.getElementById('liste-kopf').firstChild.textContent = 'Alle Belege (' + BELEGE.length + ') ';
+    maleKopf();
+  }
+
+  /* ---------- Hilfen für die Beleg-Ansicht ---------- */
+  function el(tag, klasse, text){
+    var e = document.createElement(tag);
+    if (klasse) e.className = klasse;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function abschnitt(titelText, arialabel){
+    var h = el('h3', null, titelText);
+    var s = el('section', 'tafel');
+    s.setAttribute('aria-label', arialabel || titelText);
+    return {h: h, s: s};
+  }
+
+  function maleSummen(b, wurzel){
+    wurzel.textContent = '';
+    var n = el('div'); n.appendChild(el('span', null, 'Netto')); n.appendChild(el('span', null, euro(netto(b))));
+    var s = el('div'); s.appendChild(el('span', null, 'Umsatzsteuer ' + STEUERSATZ + ' %')); s.appendChild(el('span', null, euro(steuer(b))));
+    var g = el('div', 'gesamt'); g.appendChild(el('span', null, 'Gesamt')); g.appendChild(el('span', null, euro(brutto(b))));
+    wurzel.appendChild(n); wurzel.appendChild(s); wurzel.appendChild(g);
+  }
+
+  /* ---------- Entwurf: beweglich, mit Werkzeugen ---------- */
+  function maleEntwurf(b, wurzel){
+    var kopf = el('div', 'beleg-kopf');
+    var links = el('div');
+    links.appendChild(el('h2', null, 'Entwurf · ' + KUNDEN[b.kunde].name));
+    links.appendChild(el('div', 'b-stand', 'Noch ohne Nummer, noch beweglich. Beim Stellen friert alles ein: Beträge, Anschriften, Steuersatz — und die nächste freie Nummer wird aufgestempelt.'));
+    kopf.appendChild(links);
+    var fuell = el('span', 'z-fuell');
+    var kapsel = el('span', 'zustand entwurf');
+    kapsel.setAttribute('role', 'img'); kapsel.setAttribute('aria-label', 'Entwurf'); kapsel.setAttribute('title', 'Entwurf');
+    fuell.appendChild(kapsel); fuell.appendChild(el('span', 'zustand-wort', 'Entwurf'));
+    kopf.appendChild(fuell);
+    wurzel.appendChild(kopf);
+
+    var fehltKarte = el('div', 'fehlt');
+    wurzel.appendChild(fehltKarte);
+
+    /* Positionen */
+    var pos = abschnitt('Positionen', 'Positionen des Entwurfs');
+    var posListe = el('div', 'posn');
+    var summen = el('div', 'summen');
+    pos.s.appendChild(posListe);
+    pos.s.appendChild(summen);
+
+    /* Pauschale */
+    var pForm = el('div'); pForm.id = 'pauschale';
+    var f1 = el('div', 'feld'); var l1 = el('label', null, 'Pauschale hinzufügen — wofür'); l1.setAttribute('for', 'p-was');
+    var i1 = document.createElement('input'); i1.id = 'p-was'; i1.placeholder = 'Reisekosten August';
+    f1.appendChild(l1); f1.appendChild(i1);
+    var f2 = el('div', 'feld'); var l2 = el('label', null, 'Betrag in Euro'); l2.setAttribute('for', 'p-betrag');
+    var i2 = document.createElement('input'); i2.id = 'p-betrag'; i2.placeholder = '450,00'; i2.inputMode = 'decimal';
+    f2.appendChild(l2); f2.appendChild(i2);
+    var pKnopf = el('button', 'knopf leise', 'Hinzufügen'); pKnopf.type = 'button';
+    pForm.appendChild(f1); pForm.appendChild(f2); pForm.appendChild(pKnopf);
+    pos.s.appendChild(pForm);
+    wurzel.appendChild(pos.h); wurzel.appendChild(pos.s);
+
+    /* Noch nicht berechnet */
+    var offen = abschnitt('Noch nicht berechnet', 'Offene Stunden');
+    var offenListe = el('div', 'offen-zeit');
+    offen.s.appendChild(offenListe);
+    offen.s.appendChild(el('div', 'klein', 'Eine berechnete Stunde ist gesperrt, auch auf einem Entwurf. Erst das Herausnehmen der Position gibt sie wieder frei. Ein Mandat ohne Stundensatz bleibt liegen, statt den Lauf abzubrechen.'));
+    wurzel.appendChild(offen.h); wurzel.appendChild(offen.s);
+
+    /* Anschreiben */
+    var an = abschnitt('Anschreiben', 'Anschreiben');
+    var ta = document.createElement('textarea'); ta.id = 'anschreiben';
+    ta.value = b.intro || '';
+    ta.placeholder = 'Für die Leistungen im August 2026 erlauben wir uns zu berechnen:';
+    ta.addEventListener('change', function(){
+      b.intro = ta.value.trim();
+      b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Anschreiben geändert'});
+    });
+    an.s.appendChild(ta);
+    wurzel.appendChild(an.h); wurzel.appendChild(an.s);
+
+    /* Griffe */
+    var griffe = el('div', 'fuss-griffe');
+    var stellen = el('button', 'knopf primaer', 'Rechnung stellen'); stellen.type = 'button';
+    var verwerfen = el('button', 'knopf gefahr', 'Entwurf verwerfen'); verwerfen.type = 'button';
+    griffe.appendChild(stellen); griffe.appendChild(verwerfen);
+    wurzel.appendChild(griffe);
+
+    function fehlt(){
+      var liste = [];
+      if (b.positionen.length === 0) liste.push('mindestens eine Position');
+      return liste;
+    }
+    function frisch(){
+      posListe.textContent = '';
+      if (b.positionen.length === 0){
+        posListe.appendChild(el('div', 'klein', 'Noch keine Position. Hol Stunden herein oder leg eine Pauschale an.'));
+      }
+      b.positionen.forEach(function(p, idx){
+        var zeile = el('div', 'pos');
+        var text = el('span', 'p-text');
+        text.appendChild(el('span', 'p-was', p.was));
+        text.appendChild(el('div', 'p-her', p.her));
+        var betrag = el('span', 'p-betrag', euro(p.cent));
+        var raus = el('button', 'raus', 'Herausnehmen'); raus.type = 'button';
+        raus.addEventListener('click', function(){
+          b.positionen.splice(idx, 1);
+          if (p.zeit){
+            STUNDEN[b.kunde].push(p.zeit);
+            b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Position herausgenommen: ' + p.was + ' — die Stunden sind wieder frei'});
+          } else {
+            b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Position herausgenommen: ' + p.was});
+          }
+          frisch();
+        });
+        zeile.appendChild(text); zeile.appendChild(betrag); zeile.appendChild(raus);
+        posListe.appendChild(zeile);
+      });
+      maleSummen(b, summen);
+
+      offenListe.textContent = '';
+      var pool = STUNDEN[b.kunde];
+      if (pool.length === 0){
+        offenListe.appendChild(el('div', 'klein', 'Alles Berechenbare ist auf dem Entwurf.'));
+      }
+      pool.forEach(function(z, idx){
+        var zeile = el('div', 'oz');
+        var text = el('span', 'oz-text');
+        text.appendChild(el('span', 'oz-mandat', z.mandat));
+        var std = (z.min / 60).toLocaleString('de-DE', {maximumFractionDigits: 1});
+        if (z.satz == null){
+          text.appendChild(el('div', 'oz-meta kein-satz', std + ' Std. — dieses Mandat hat keinen Stundensatz'));
+          zeile.appendChild(text);
+        } else {
+          text.appendChild(el('div', 'oz-meta', std + ' Std. × ' + euro(z.satz)));
+          zeile.appendChild(text);
+          var holen = el('button', 'knopf leise', 'Stunden holen'); holen.type = 'button';
+          holen.addEventListener('click', function(){
+            pool.splice(idx, 1);
+            var cent = Math.round(z.min / 60 * z.satz);
+            b.positionen.push({was: z.mandat, her: 'bis 14.08.2026 · ' + std + ' Std. × ' + euro(z.satz), cent: cent, zeit: z});
+            b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Position angelegt: ' + z.mandat + ' · ' + std + ' Std. × ' + euro(z.satz)});
+            frisch();
+          });
+          zeile.appendChild(holen);
+        }
+        offenListe.appendChild(zeile);
+      });
+
+      var f = fehlt();
+      if (f.length){
+        fehltKarte.hidden = false;
+        fehltKarte.textContent = '';
+        var b1 = el('b', null, 'Zum Stellen fehlt noch: ');
+        fehltKarte.appendChild(b1);
+        fehltKarte.appendChild(document.createTextNode(f.join(', ') + '.'));
+        stellen.disabled = true;
+      } else {
+        fehltKarte.hidden = true;
+        stellen.disabled = false;
+      }
+    }
+    frisch();
+
+    pKnopf.addEventListener('click', function(){
+      var was = i1.value.trim();
+      var wert = i2.value.trim().replace(/\./g, '').replace(',', '.');
+      var cent = Math.round(parseFloat(wert) * 100);
+      if (!was || !isFinite(cent) || cent <= 0){
+        demoHinweis('Wofür und ein Betrag über null — dann geht es.');
+        return;
+      }
+      b.positionen.push({was: was, her: 'Pauschale', cent: cent});
+      b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Position angelegt: ' + was + ' · Pauschale ' + euro(cent)});
+      i1.value = ''; i2.value = '';
+      frisch();
+    });
+
+    /* Der Moment: Stellen. Der Entwurf friert ein, die Nummer wird gestempelt. */
+    stellen.addEventListener('click', function(){
+      if (b.positionen.length === 0) return;
+      b.intro = document.getElementById('anschreiben').value.trim() || b.intro;
+      b.status = 'issued';
+      b.nummer = '2026-' + String(naechsteNummer++).padStart(4, '0');
+      b.gestellt = HEUTE; b.faellig = '28.08.2026'; b.tageOffen = 0;
+      b.positionen.forEach(function(p){ delete p.zeit; });
+      b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Gestellt als ' + b.nummer + ' — ab hier ändert sich nichts mehr'});
+      frischGestellt = b.id;
+      zeige('b-' + b.id);
+    });
+
+    verwerfen.addEventListener('click', function(){
+      b.positionen.forEach(function(p){ if (p.zeit) STUNDEN[b.kunde].push(p.zeit); });
+      BELEGE.splice(BELEGE.indexOf(b), 1);
+      location.hash = '';
+    });
+  }
+
+  /* ---------- Gestellter Beleg: ein Dokument ---------- */
+  var frischGestellt = null;
+  function malePapier(b, wurzel, gutschriftModus, angekreuzt){
+    var papier = el('div', 'papier' + (b.status === 'cancelled' ? ' durchgestrichen' : ''));
+    if (b.id === frischGestellt) papier.appendChild(el('span', 'hand', 'eingefroren.'));
+    papier.appendChild(el('div', 'marke-zeile', 'Nordholm & Partner'));
+    papier.appendChild(el('div', 'absender-klein', ABSENDER.firma + ' · ' + ABSENDER.anschrift));
+    var adressen = el('div', 'adress-block');
+    var empf = el('div', 'empfaenger');
+    KUNDEN[b.kunde].anschrift.forEach(function(z, i){
+      if (i) empf.appendChild(document.createElement('br'));
+      empf.appendChild(document.createTextNode(z));
+    });
+    if (KUNDEN[b.kunde].ustid){
+      empf.appendChild(document.createElement('br'));
+      empf.appendChild(el('span', null, KUNDEN[b.kunde].ustid)).style.cssText = 'font-size:11px;color:var(--nebel-500)';
+    }
+    var eck = el('div', 'eckdaten');
+    function eckzeile(label, wert){
+      eck.appendChild(document.createTextNode(label + ' '));
+      eck.appendChild(el('b', null, wert));
+      eck.appendChild(document.createElement('br'));
+    }
+    eckzeile('Datum', b.gestellt);
+    if (b.art === 'rechnung') eckzeile('Zahlbar bis', b.faellig);
+    eckzeile('', ABSENDER.ustid);
+    adressen.appendChild(empf); adressen.appendChild(eck);
+    papier.appendChild(adressen);
+
+    var titel = el('div', 'titelzeile');
+    titel.appendChild(el('h4', null, artWort(b)));
+    var nummer = el('span', 'nummer' + (b.id === frischGestellt ? ' frisch' : ''), b.nummer);
+    titel.appendChild(nummer);
+    papier.appendChild(titel);
+    if (b.intro) papier.appendChild(el('div', 'intro', b.intro));
+
+    var tabelle = document.createElement('table');
+    var kopfz = document.createElement('tr');
+    kopfz.appendChild(el('th', null, 'Leistung')); kopfz.appendChild(el('th', null, 'Betrag'));
+    tabelle.appendChild(kopfz);
+    b.positionen.forEach(function(p, idx){
+      var tr = document.createElement('tr');
+      var td1 = document.createElement('td');
+      if (gutschriftModus){
+        var box = document.createElement('input');
+        box.type = 'checkbox'; box.className = 'wahl'; box.dataset.idx = idx;
+        box.checked = angekreuzt.has(idx);
+        box.addEventListener('change', function(){
+          if (box.checked) angekreuzt.add(idx); else angekreuzt.delete(idx);
+        });
+        td1.appendChild(box);
+      }
+      td1.appendChild(document.createTextNode(p.was));
+      td1.appendChild(el('span', 'her', p.her));
+      tr.appendChild(td1);
+      tr.appendChild(el('td', null, euro(p.cent)));
+      tabelle.appendChild(tr);
+    });
+    papier.appendChild(tabelle);
+    var summen = el('div', 'p-summen');
+    maleSummen(b, summen);
+    papier.appendChild(summen);
+    if (b.art === 'rechnung' && b.status !== 'cancelled'){
+      papier.appendChild(el('div', 'bankzeile', 'Zahlbar auf ' + ABSENDER.bank + '.'));
+    }
+    if (b.art !== 'rechnung'){
+      papier.appendChild(el('div', 'bankzeile', 'Dieser Beleg fordert nichts — er ' + (b.art === 'storno' ? 'hebt die Rechnung ' + beleg(b.reverses).nummer + ' auf.' : 'schreibt die angekreuzten Positionen gut.')));
+    }
+    papier.appendChild(el('div', 'fusszeile', ABSENDER.firma + ' · ' + ABSENDER.anschrift + ' · ' + ABSENDER.fuss));
+    wurzel.appendChild(papier);
+  }
+
+  function maleGestellt(b, wurzel){
+    var kopf = el('div', 'beleg-kopf');
+    var links = el('div');
+    links.appendChild(el('h2', null, artWort(b) + ' ' + b.nummer));
+    var stand = el('div', 'b-stand');
+    var teile = [KUNDEN[b.kunde].name];
+    if (b.status === 'paid') teile.push('bezahlt am ' + b.bezahlt);
+    else if (b.status === 'cancelled') teile.push('storniert — die Nummer bleibt vergeben, die Stunden sind wieder frei');
+    else if (b.art === 'rechnung') teile.push('zahlbar bis ' + b.faellig);
+    stand.appendChild(document.createTextNode(teile.join(', ') + '. '));
+    if (b.reverses){
+      var ziel = beleg(b.reverses);
+      var link = el('a', null, 'Zur Rechnung ' + ziel.nummer);
+      link.href = '#b-' + ziel.id;
+      stand.appendChild(link);
+    }
+    BELEGE.forEach(function(k){
+      if (k.reverses === b.id){
+        var link2 = el('a', null, (k.art === 'storno' ? 'Stornorechnung ' : 'Gutschrift ') + k.nummer);
+        link2.href = '#b-' + k.id;
+        stand.appendChild(document.createTextNode('Beleg dazu: '));
+        stand.appendChild(link2);
+        stand.appendChild(document.createTextNode('. '));
+      }
+    });
+    links.appendChild(stand);
+    kopf.appendChild(links);
+    var fuell = el('span', 'z-fuell');
+    var kapsel = el('span', ('zustand ' + zustandFuer(b)).trim());
+    if (!zustandFuer(b)) kapsel.style.cssText = '--stand:.08';
+    kapsel.setAttribute('role', 'img'); kapsel.setAttribute('aria-label', statusWort(b)); kapsel.setAttribute('title', statusWort(b));
+    fuell.appendChild(kapsel); fuell.appendChild(el('span', 'zustand-wort', statusWort(b)));
+    kopf.appendChild(fuell);
+    wurzel.appendChild(kopf);
+
+    var gutschriftModus = false;
+    var angekreuzt = new Set();
+    var papierHalter = el('div');
+    wurzel.appendChild(papierHalter);
+    function malePapierNeu(){
+      papierHalter.textContent = '';
+      malePapier(b, papierHalter, gutschriftModus, angekreuzt);
+    }
+    malePapierNeu();
+
+    /* Griffe unter dem Papier */
+    var griffe = el('div', 'fuss-griffe');
+    var meldung = el('div', 'bestaetigt'); meldung.hidden = true;
+
+    var pdf = el('button', 'knopf leise', 'PDF ansehen'); pdf.type = 'button';
+    pdf.addEventListener('click', function(){
+      demoHinweis('Im Produkt öffnet hier das PDF — ' + artWort(b) + '-' + b.nummer + '.pdf.');
+    });
+    griffe.appendChild(pdf);
+
+    if (b.status !== 'cancelled'){
+      var mail = el('button', 'knopf sekundaer', 'Per Mail schicken'); mail.type = 'button';
+      mail.addEventListener('click', function(){
+        b.historie.push({wann: HEUTE + ', jetzt', wer: 'System', was: 'Per Mail verschickt an ' + KUNDEN[b.kunde].mail});
+        meldung.className = 'bestaetigt'; meldung.hidden = false;
+        meldung.textContent = 'Geht an ' + KUNDEN[b.kunde].mail + ' — mit dem PDF im Anhang, vom geprüften Absender deiner Marke.';
+        mail.textContent = 'Noch einmal schicken';
+        maleHistorie();
+      });
+      griffe.appendChild(mail);
+    }
+
+    if (b.status === 'issued' && b.art === 'rechnung'){
+      var bezahlt = el('button', 'knopf primaer', 'Als bezahlt vermerken'); bezahlt.type = 'button';
+      bezahlt.addEventListener('click', function(){
+        b.status = 'paid'; b.bezahlt = HEUTE;
+        b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Als bezahlt vermerkt'});
+        zeige('b-' + b.id);
+      });
+      griffe.appendChild(bezahlt);
+
+      var gut = el('button', 'knopf leise', 'Gutschrift'); gut.type = 'button';
+      gut.addEventListener('click', function(){
+        gutschriftModus = !gutschriftModus;
+        angekreuzt.clear();
+        gut.textContent = gutschriftModus ? 'Doch keine Gutschrift' : 'Gutschrift';
+        erstellen.hidden = !gutschriftModus;
+        meldung.className = 'bestaetigt still'; meldung.hidden = !gutschriftModus;
+        if (gutschriftModus) meldung.textContent = 'Kreuz die Positionen an, die du gutschreibst. Die Stunden bleiben berechnet — wer neu berechnen will, storniert die ganze Rechnung.';
+        malePapierNeu();
+      });
+      griffe.appendChild(gut);
+
+      var erstellen = el('button', 'knopf primaer', 'Gutschrift erstellen'); erstellen.type = 'button'; erstellen.hidden = true;
+      erstellen.addEventListener('click', function(){
+        if (angekreuzt.size === 0){ demoHinweis('Erst ankreuzen, was gutgeschrieben wird.'); return; }
+        var neu = {
+          id: 'g' + naechsteNummer, art: 'gutschrift', status: 'issued',
+          nummer: '2026-' + String(naechsteNummer++).padStart(4, '0'),
+          kunde: b.kunde, gestellt: HEUTE, reverses: b.id,
+          intro: 'Gutschrift zur Rechnung ' + b.nummer + ' vom ' + b.gestellt + '.',
+          positionen: [], historie: []
+        };
+        angekreuzt.forEach(function(idx){
+          var p = b.positionen[idx];
+          neu.positionen.push({was: p.was, her: p.her, cent: -p.cent});
+        });
+        neu.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Als Gutschrift ' + neu.nummer + ' zur Rechnung ' + b.nummer + ' entstanden'});
+        b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Gutschrift ' + neu.nummer + ' erstellt'});
+        BELEGE.unshift(neu);
+        frischGestellt = neu.id;
+        location.hash = 'b-' + neu.id;
+      });
+      griffe.appendChild(erstellen);
+
+      var storno = el('button', 'knopf gefahr', 'Stornieren'); storno.type = 'button';
+      storno.addEventListener('click', function(){
+        var neu = {
+          id: 's' + naechsteNummer, art: 'storno', status: 'issued',
+          nummer: '2026-' + String(naechsteNummer++).padStart(4, '0'),
+          kunde: b.kunde, gestellt: HEUTE, reverses: b.id,
+          intro: 'Storno zur Rechnung ' + b.nummer + ' vom ' + b.gestellt + '.',
+          positionen: b.positionen.map(function(p){ return {was: p.was, her: p.her, cent: -p.cent}; }),
+          historie: []
+        };
+        neu.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Als Stornorechnung ' + neu.nummer + ' zur Rechnung ' + b.nummer + ' entstanden'});
+        b.status = 'cancelled';
+        b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Storniert — der Beleg dazu ist die Stornorechnung ' + neu.nummer + '. Die Stunden sind wieder frei.'});
+        BELEGE.unshift(neu);
+        frischGestellt = neu.id;
+        location.hash = 'b-' + neu.id;
+      });
+      griffe.appendChild(storno);
+    }
+    wurzel.appendChild(griffe);
+    wurzel.appendChild(meldung);
+    if (b.id === frischGestellt && b.art === 'rechnung'){
+      meldung.className = 'bestaetigt'; meldung.hidden = false;
+      meldung.textContent = 'Gestellt als ' + b.nummer + '. Ab jetzt ändert sich an diesem Blatt nichts mehr — falsch wäre nur noch stornierbar, die Nummer bleibt vergeben.';
+    }
+
+    /* Historie */
+    var hist = abschnitt('Was geschah', 'Historie');
+    var histListe = el('div', 'historie');
+    hist.s.appendChild(histListe);
+    hist.s.appendChild(el('div', 'klein', 'Geschrieben von der Datenbank selbst, bei jeder Änderung.'));
+    wurzel.appendChild(hist.h); wurzel.appendChild(hist.s);
+    function maleHistorie(){
+      histListe.textContent = '';
+      b.historie.slice().reverse().forEach(function(h){
+        var zeile = el('div', 'h-zeile');
+        zeile.appendChild(el('span', 'h-wann', h.wann));
+        zeile.appendChild(el('span', 'h-wer', h.wer));
+        zeile.appendChild(el('span', null, h.was));
+        histListe.appendChild(zeile);
+      });
+    }
+    maleHistorie();
+  }
+
+  /* ---------- Ansichten schalten ---------- */
+  var ansichtListe = document.getElementById('ansicht-liste');
+  var ansichtBeleg = document.getElementById('ansicht-beleg');
+  var ansichtDaten = document.getElementById('ansicht-daten');
+  function zeige(ziel){
+    ansichtListe.hidden = ansichtBeleg.hidden = ansichtDaten.hidden = true;
+    maleKopf();
+    if (ziel && ziel.indexOf('b-') === 0){
+      var b = beleg(ziel.slice(2));
+      if (!b){ location.hash = ''; return; }
+      var wurzel = document.getElementById('beleg-inhalt');
+      wurzel.textContent = '';
+      if (b.status === 'draft') maleEntwurf(b, wurzel); else maleGestellt(b, wurzel);
+      ansichtBeleg.hidden = false;
+      window.scrollTo({top: 0, behavior: reduziert ? 'auto' : 'smooth'});
+    } else if (ziel === 'daten'){
+      ansichtDaten.hidden = false;
+      window.scrollTo({top: 0, behavior: reduziert ? 'auto' : 'smooth'});
+    } else {
+      maleListe();
+      ansichtListe.hidden = false;
+    }
+  }
+  window.addEventListener('hashchange', function(){
+    zeige(location.hash.replace('#', ''));
+    if (!location.hash) frischGestellt = null;
+  });
+
+  /* ---------- Neue Rechnung ---------- */
+  document.getElementById('neu-anlegen').addEventListener('click', function(){
+    var kunde = document.getElementById('neu-kunde').value;
+    var neu = {
+      id: 'e' + (++entwurfZaehler), art: 'rechnung', status: 'draft', nummer: null,
+      kunde: kunde, intro: '', positionen: [],
+      historie: [{wann: HEUTE + ', jetzt', wer: 'Du', was: 'Entwurf angelegt'}]
+    };
+    var pool = STUNDEN[kunde];
+    for (var i = pool.length - 1; i >= 0; i--){
+      var z = pool[i];
+      if (z.satz == null) continue;
+      pool.splice(i, 1);
+      var std = (z.min / 60).toLocaleString('de-DE', {maximumFractionDigits: 1});
+      neu.positionen.push({was: z.mandat, her: 'bis 14.08.2026 · ' + std + ' Std. × ' + euro(z.satz), cent: Math.round(z.min / 60 * z.satz), zeit: z});
+      neu.historie.push({wann: HEUTE + ', jetzt', wer: 'System', was: 'Position angelegt: ' + z.mandat + ' · ' + std + ' Std. × ' + euro(z.satz)});
+    }
+    BELEGE.unshift(neu);
+    location.hash = 'b-' + neu.id;
+  });
+
+  /* ---------- Rechnungsdaten ---------- */
+  document.getElementById('rd-klein').addEventListener('change', function(e){
+    var satz = document.getElementById('rd-satz');
+    satz.disabled = e.target.checked;
+    if (e.target.checked) satz.value = '0'; else satz.value = '19';
+  });
+  document.getElementById('rd-speichern').addEventListener('click', function(){
+    var m = document.getElementById('rd-meldung');
+    var iban = document.getElementById('rd-iban').value.replace(/\s/g, '').toUpperCase();
+    if (!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(iban)){
+      m.className = 'bestaetigt'; m.style.background = 'var(--rot-fond)';
+      m.textContent = 'Die IBAN sieht nicht nach einer IBAN aus — zwei Buchstaben, zwei Ziffern, dann die Kontokennung.';
+      m.hidden = false;
+      return;
+    }
+    m.className = 'bestaetigt'; m.style.background = '';
+    m.textContent = 'Gespeichert.';
+    m.hidden = false;
+  });
+
+  /* Direkteinstieg über den Hash, sonst die Liste */
+  zeige(location.hash.replace('#', ''));
+})();
+</script>
+<script src="zeiger.js"></script>
+</body>
+</html>
