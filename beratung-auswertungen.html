@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fünf Auswertungen</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Fünf feste Auswertungen (Häppchen B4, Issue #32).
+
+   Ausdrücklich KEIN Report-Baukasten: kein Zeitraumwähler, keine Auswahl von
+   Kennzahlen, keine Diagrammart zum Umschalten. Fünf Bilder, die immer da
+   sind und immer dasselbe beantworten. Wer etwas anderes wissen will, geht
+   in die Fläche, die es genau weiß — jedes Bild hat seine Tür.
+
+   Welche fünf: jedes beantwortet eine Frage, die eine Inhaberin wirklich
+   stellt, und keine, die eine andere Fläche schon beantwortet.
+     1. Kommt genug rein?        Honorar je Monat, der Verlauf.
+     2. Woran hängen wir?        Anteil je Kunde, das Klumpenrisiko.
+     3. Wer steckt worin?        Die Stunden auf Köpfe und Mandate.
+     4. Kommt das Geld pünktlich? Offene Forderungen nach Alter.
+     5. Setzen wir unsere Preise durch? Satz gegen das, was ankommt.
+
+   Was hier NICHT steht: der Deckungsbeitrag je Mandat und jeder Kostensatz.
+   Beides wohnt in „Marge und Sätze" und ist dort an die Sicht gebunden
+   (Entscheidung 2026-08-14, gehaltsnahe Zahlen). Diese Fläche als Ganzes
+   sehen Inhaber und Partner — sie braucht deshalb keinen Sicht-Schalter,
+   sondern eine Tür zu der Fläche, die einen hat.
+
+   Die Zahlen sind gerechnet, nicht abgeschrieben. TEAM und MANDATE tragen
+   dieselben Namen, Sätze, Stunden und Honorare wie in beratung-marge.html
+   (ohne die Kostensätze, die dort noch dazugehören); die Monatszahlen
+   sind so gewählt, dass sie sich zu genau diesen Honoraren aufaddieren (das
+   Skript prüft das und meldet sich in der Konsole, wenn jemand eine Zahl
+   ändert, ohne die andere mitzurechnen). Die drei offenen Rechnungen sind
+   dieselben wie in beratung-rechnungen.html und ergeben die 11.900 €, die
+   das Modell in der Zentrale nennt.
+
+   Die Bilder sind aus demselben Glas wie alles andere: jede Säule und jeder
+   Balken ist eine Röhre mit einem Füllstand darin (Entscheidung 2026-08-12).
+   Beim Ankommen laufen die Füllstände einmal hoch — der einzige
+   Bewegungsmoment dieser Fläche.
+
+   V2 (Code-Review): Die rechte Achsenbeschriftung von Bild 5 stand 110px
+   hinter dem Ende der Achse, also las sich jeder Punkt zu weit links. Die
+   hellste der vier Stufen war auf Weiß unsichtbar — Sabines vierter
+   Abschnitt fehlte, während daneben „vier Mandate" stand. Die Schwellen-
+   Kante war in Wahrheit eine gestrichelte Reihe und liegt jetzt als eigene
+   Lage über der Gruppe. Das Schnitt-Etikett deckte die Säule zu, die es
+   erklären sollte, und ist weg. Der Verlauf in Bild 5 lief bei jedem
+   Verlust rückwärts, der Schlusssatz behauptete eine Richtung, statt sie
+   abzulesen, und das Rechnungsdatum brach hinter dem Tag um.
+   Marker: BERATUNG-AUSWERTUNGEN-V2 */
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button{font-family:inherit}
+
+/* ========== quoroAI-Chrom (wie in den anderen Cockpit-Räumen) ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;word-spacing:2px}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+/* Unter 1320px reicht die Krume in die Inhaltsspalte — dann wird sie die
+   zweite Zeile des Kopfbands (Entscheidung 2026-08-14). */
+@media (max-width:1320px){
+  nav{height:118px;padding-bottom:58px}
+  #krume{z-index:90}
+}
+
+/* ========== Seite ========== */
+main{max-width:880px;margin:0 auto;padding:136px 24px calc(150px + env(safe-area-inset-bottom))}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:6px;max-width:60ch;line-height:1.6}
+.zahl{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+/* ---------- Ein Bild ---------- */
+.bild{
+  margin-top:16px;padding:22px 24px 20px;border-radius:var(--radius-karte);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 12px 34px rgba(24,21,47,.06);
+}
+.bild h2{font-size:21px;line-height:1.2}
+.bild .antwort{font-size:15px;color:var(--nebel-700);margin-top:7px;line-height:1.6;max-width:64ch}
+.bild .antwort b{color:var(--tinte);font-weight:600;font-variant-numeric:tabular-nums}
+.bild .antwort b.warn{color:var(--bernstein)}
+.bild .tuer{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.bild .tuer .knopf{min-height:44px;padding:0 16px;font-size:14px;text-decoration:none}
+.fuss-zeile{font-size:12.5px;color:var(--nebel-500);margin-top:12px;line-height:1.6;max-width:66ch}
+.fuss-zeile b{color:var(--nebel-700);font-weight:600}
+
+/* ---------- Die Röhre, liegend und stehend ----------
+   Dasselbe Glas wie der Füllstand in system.css, nur in zwei Lagen. Das
+   Innenmaß ist überall 2,5px, damit die Flüssigkeit die Kante nicht küsst. */
+.rohr{
+  /* display block, weil die liegenden Röhren <span> sind: inline hätten sie
+     keine Breite und lägen als Splitter am linken Rand. */
+  position:relative;display:block;border-radius:var(--radius-kapsel);overflow:hidden;
+  background:linear-gradient(180deg, rgba(24,21,47,.05), rgba(255,255,255,.4) 55%);
+  border:1px solid rgba(255,255,255,.8);
+  box-shadow:
+    inset 0 1.5px 3px rgba(24,21,47,.18),
+    inset 0 -1px 1px rgba(255,255,255,.7),
+    0 1px 0 rgba(255,255,255,.9),
+    0 5px 14px rgba(59,52,134,.12);
+}
+.rohr .fuell{
+  position:absolute;border-radius:var(--radius-kapsel);
+  background:linear-gradient(180deg, var(--lila-400) 0%, var(--lila-600) 100%);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.5), 0 0 8px rgba(111,99,232,.3);
+}
+/* stehend: die Flüssigkeit steht auf dem Boden */
+.rohr.steht .fuell{left:2.5px;right:2.5px;bottom:2.5px;height:calc((100% - 5px) * var(--stand,0));
+  transition:height .8s var(--kurve) var(--verz2,0s)}
+/* liegend: sie läuft von links */
+.rohr.liegt{height:26px}
+.rohr.liegt .fuell{top:2.5px;bottom:2.5px;left:2.5px;width:calc((100% - 5px) * var(--stand,0));
+  transition:width .8s var(--kurve) var(--verz2,0s)}
+.rohr::after{ /* Glanz, wie bei jedem Füllstand */
+  content:"";position:absolute;inset:0;border-radius:var(--radius-kapsel);pointer-events:none;
+  background:linear-gradient(180deg, rgba(255,255,255,.8), rgba(255,255,255,0)) no-repeat 8px 2.5px / calc(100% - 16px) 34%;
+}
+
+/* ---------- 1 · Kommt genug rein? ---------- */
+.monate{margin-top:20px}
+/* minmax(0,1fr), nicht 1fr: sonst wächst eine Spalte auf die Breite ihres
+   längsten Betrags, das Raster wird breiter als die Karte, und der letzte
+   Betrag steht halb außerhalb. */
+.m-reihe{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px}
+/* nowrap: „12.950 €" bricht in einer 35px-Spalte sonst hinter dem Betrag um
+   und schiebt die ganze Zeile auseinander. Die Nachbarn sind auf dem Handy
+   ohnehin verborgen, der Betrag darf über sie hinausragen. */
+.m-wert{font-size:12px;font-weight:600;text-align:center;color:var(--nebel-700);
+  font-variant-numeric:tabular-nums;margin-bottom:6px;white-space:nowrap}
+.m-wert.laufend{color:var(--lila-700)}
+.m-glaeser{position:relative;height:172px;align-items:end}
+.m-glaeser .rohr{height:100%;width:100%;max-width:38px;margin:0 auto}
+/* Der laufende Monat ist ein halber Monat. Die Flüssigkeit trägt deshalb
+   eine Schraffur: sie sagt „noch nicht fertig", ohne dass daneben ein
+   Wort stehen muss. */
+.rohr.laeuft .fuell{
+  background:repeating-linear-gradient(135deg,
+    var(--lila-300) 0 5px, var(--lila-100) 5px 10px);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.6);
+}
+.m-schnitt{
+  position:absolute;left:0;right:0;bottom:calc(var(--stand,0) * 100%);
+  border-top:1px dashed var(--nebel-400);pointer-events:none;
+}
+/* Die Linie trägt KEIN Etikett mehr. Rechts lag es unter dem Betrag des
+   laufenden Monats, links deckte es die Januar-Säule genau dort zu, wo
+   deren Füllstand die Linie schneidet — also über der Ablesung, die es
+   erklären sollte. Was die Linie ist, steht im Satz unter dem Bild. */
+.m-monat{font-size:12px;color:var(--nebel-600);text-align:center;margin-top:8px}
+.m-monat.laufend{color:var(--lila-700);font-weight:600}
+
+/* ---------- 2 · Woran hängen wir? / 4 · Kommt das Geld pünktlich? ---------- */
+.balken{position:relative;margin-top:18px;display:flex;flex-direction:column;gap:12px}
+.b-zeile{display:grid;grid-template-columns:160px minmax(0,1fr) 96px;gap:14px;align-items:center}
+.b-name{font-size:14.5px;font-weight:600;letter-spacing:-.01em}
+.b-name small{display:block;font-size:12px;font-weight:400;color:var(--nebel-500);margin-top:1px}
+.b-wert{font-size:15px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.b-wert small{display:block;font-size:12px;font-weight:400;color:var(--nebel-500);margin-top:1px}
+.b-spur{position:relative}
+/* Die Schwelle steht im Bild, nicht in der Legende: EINE Kante quer durch
+   alle Balken.
+   Zwei Umwege bis hierher. Erst stand sie nur in der ersten Zeile und sah
+   aus wie ein Kratzer im obersten Balken (im Rundgang-Film sofort zu
+   sehen). Dann stand ein Stück in jeder Zeile, mit 6px Überstand für die
+   12px Zeilenlücke — gemessen waren die Lücken aber 18 bis 52px groß, weil
+   die Zeilen unterschiedlich hoch sind und auf dem Handy der Balken eine
+   eigene Zeile bekommt. Aus der Linie wurde eine gestrichelte Reihe.
+   Jetzt liegt die Kante als eigene Lage über der ganzen Gruppe und trägt
+   dasselbe Raster wie die Zeilen darunter — dadurch steht sie in derselben
+   Spalte, ganz gleich wie hoch eine Zeile gerät. */
+.b-lage{position:absolute;inset:0;pointer-events:none;
+  display:grid;grid-template-columns:160px minmax(0,1fr) 96px;grid-template-rows:100%;gap:14px}
+.b-lage .spur{grid-column:2;position:relative}
+.b-marke{position:absolute;top:0;bottom:0;left:calc(var(--bei) * 100%);width:1px;
+  background:var(--nebel-400)}
+/* Der Lichtsaum: ohne ihn verschwindet die Kante dort, wo sie durch einen
+   bernsteinfarbenen Balken läuft — also genau da, wo sie gebraucht wird. */
+.b-marke.streng{background:var(--bernstein);opacity:.7;
+  box-shadow:0 0 0 .5px rgba(255,255,255,.75)}
+/* Am Handy steht jeder Balken in einer eigenen Zeile, mit seinem Namen
+   darüber. Eine durchgehende Linie schnitte dort die Namen von den Beträgen
+   ab wie ein Trennstrich. Deshalb liegt die Kante dort an jedem Balken
+   statt über der Gruppe — dieselbe Aussage, in der Form, die die Zeile
+   hergibt. */
+.zeilen-marke{display:none}
+.marke-wort{font-size:11.5px;color:var(--nebel-500);margin-top:10px;text-align:right}
+.marke-wort b{color:var(--nebel-700);font-weight:600}
+.rohr.knapp .fuell{background:linear-gradient(180deg, #eebb59 0%, #c88f28 100%);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.5), 0 0 8px rgba(200,143,40,.3)}
+
+/* ---------- 3 · Wer steckt worin? ---------- */
+.legende{display:flex;gap:14px;flex-wrap:wrap;margin-top:16px}
+.legende div{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--nebel-600)}
+.legende i{width:14px;height:14px;border-radius:5px;display:block;
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.45), inset 0 0 0 1px rgba(59,52,134,.55)}
+/* Ein Farbton in vier Stufen, nach Helligkeit getrennt. Vier eigene Farben
+   hätten aus einer Marke mit einer Akzentfarbe ein Tortendiagramm gemacht;
+   nach Helligkeit unterscheidet auch, wer Farben nicht trennt.
+   Die Stufen sind gemessen, nicht geschätzt: der erste Satz lag zwischen
+   den mittleren beiden bei ΔE 12,9 und war damit auch mit vollem Farbsehen
+   kaum zu trennen. Diese vier liegen bei mindestens 15,5 — auch unter
+   Protanopie und Tritanopie.
+   Vier Stufen eines Tons brauchen die ganze Helligkeitsspanne, also steht
+   die hellste zwangsläufig blass auf Weiß (1,5:1) und war im Review
+   unsichtbar: Sabines vierter Abschnitt fehlte, während die Zahl daneben
+   „vier Mandate" sagte. Der erste Rettungsversuch, eine Haarlinie mit 12
+   Prozent Tinte, kam auf 1,08:1 und tat gar nichts. Die Linie hat jetzt 55
+   Prozent Lila-Tinte und steht mit rund 3,5:1 auf Weiß — sie ist die
+   Kante, nicht die Fläche. */
+.f1{background:#2f2a6b} .f2{background:#5a4cd6} .f3{background:#9d93f1} .f4{background:#cfcbf9}
+.stapel .fuell{overflow:hidden;display:flex;gap:2px;background:none;box-shadow:none;padding:0}
+.stapel .stueck{height:100%;border-radius:2px;
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.4), inset 0 0 0 1px rgba(59,52,134,.55)}
+.stapel .stueck:first-child{border-top-left-radius:var(--radius-kapsel);border-bottom-left-radius:var(--radius-kapsel)}
+.stapel .stueck:last-child{border-top-right-radius:var(--radius-kapsel);border-bottom-right-radius:var(--radius-kapsel)}
+
+/* ---------- 5 · Setzen wir unsere Preise durch? ---------- */
+.schiene{margin-top:18px;display:flex;flex-direction:column;gap:14px}
+.s-zeile{display:grid;grid-template-columns:160px minmax(0,1fr) 96px;gap:14px;align-items:center}
+.s-spur{position:relative;height:26px}
+.s-gleis{position:absolute;left:0;right:0;top:12px;height:2px;background:var(--nebel-200);border-radius:2px}
+/* Der Weg vom Versprechen zum Angekommenen: das ist die Aussage, nicht die
+   beiden Punkte. Deshalb trägt er die Farbe, und die Punkte sind ruhig. */
+/* --bis mit Vorgabe 0: ohne sie ist die Breite beim ersten Bild ungültig
+   statt null, und der Übergang hat nichts, wovon er losläuft. */
+.s-weg{--bis:0;position:absolute;top:11px;height:4px;border-radius:2px;
+  left:calc(var(--von) * 100%);width:calc(var(--bis) * 100%);
+  background:linear-gradient(90deg, var(--nebel-300), var(--lila-500));
+  transition:width .8s var(--kurve) var(--verz2,0s)}
+.s-weg.verlust{background:linear-gradient(90deg, #eebb59, #c88f28)}
+/* Der Verlauf beginnt beim Versprechen und endet beim Angekommenen. Liegt
+   das Angekommene links — also immer dann, wenn weniger ankommt als
+   versprochen, und das ist der ganze Punkt dieses Bildes —, muss er
+   andersherum laufen. */
+.s-weg.rueck{background:linear-gradient(270deg, var(--nebel-300), var(--lila-500))}
+.s-weg.verlust.rueck{background:linear-gradient(270deg, #eebb59, #c88f28)}
+.s-punkt{position:absolute;top:7px;width:12px;height:12px;border-radius:50%;margin-left:-6px;
+  left:calc(var(--bei) * 100%);
+  background:var(--flaeche);border:2px solid var(--nebel-400);box-sizing:border-box}
+.s-punkt.ist{background:var(--lila-600);border-color:var(--lila-600);
+  box-shadow:0 0 0 2px var(--flaeche), 0 0 8px rgba(111,99,232,.4)}
+.s-punkt.ist.verlust{background:var(--bernstein);border-color:var(--bernstein);box-shadow:0 0 0 2px var(--flaeche)}
+.s-achse{display:flex;justify-content:space-between;font-size:11.5px;color:var(--nebel-500);
+  margin-top:2px;font-variant-numeric:tabular-nums}
+/* Die Achse muss über der Schiene stehen, nicht über der Zeile: links die
+   Namensspalte (160 + 14 Abstand), rechts die Wertspalte (96 + 14). Ohne
+   das rechte Maß stand „160 €" 110px hinter dem Ende der Achse — jeder
+   Punkt sah dann weiter links im Preisband aus, als er liegt. */
+.s-achse span:first-child{margin-left:174px}
+.s-achse span:last-child{margin-right:110px}
+
+@media (prefers-reduced-motion: reduce){
+  main > *{animation:none;opacity:1;translate:none}
+  .rohr .fuell,.s-weg{transition:none}
+}
+@media (max-width:760px){
+  nav{padding:0 18px;padding-bottom:58px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(140px + env(safe-area-inset-bottom))}
+  .bild{padding:18px 16px 16px}
+  .m-reihe{gap:5px}
+  .m-glaeser{height:140px}
+  /* Acht Beträge nebeneinander passen auf kein Handy. Beschriftet werden
+     der höchste Monat und der laufende — der Rest steht in der Antwort
+     darüber. */
+  .m-wert.klein-weg{visibility:hidden}
+  .m-wert{font-size:10.5px}
+  /* Der Betrag des laufenden Monats ist breiter als seine Spalte: mittig
+     hinge er über den Kartenrand hinaus. Er hängt deshalb rechts bündig
+     und ragt nach innen, wo die verborgene Nachbarspalte Platz lässt. */
+  .m-reihe .m-wert:last-child{text-align:right}
+  .m-reihe .m-wert:first-child{text-align:left}
+  .m-monat{font-size:11px}
+  .b-zeile,.s-zeile,.b-lage{grid-template-columns:minmax(0,1fr) 92px;row-gap:8px}
+  .b-spur,.s-spur{grid-column:1 / -1;order:3}
+  .b-lage{display:none}
+  .zeilen-marke{display:block;top:-3px;bottom:-3px}
+  .s-achse span:first-child{margin-left:0}
+  .s-achse span:last-child{margin-right:0}
+  .legende{gap:10px}
+  .legende div{font-size:12px}
+}
+</style>
+</head>
+<body class="quoro">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Fünf Auswertungen</b></a>
+
+<main>
+  <div class="kopf">
+    <h1>Fünf Auswertungen</h1>
+    <p class="stand" id="stand"></p>
+  </div>
+
+  <section class="bild" aria-labelledby="t1">
+    <h2 id="t1">Kommt genug rein?</h2>
+    <p class="antwort" id="antwort-1"></p>
+    <div class="monate">
+      <div class="m-reihe" id="m-werte"></div>
+      <div class="m-reihe m-glaeser" id="m-glaeser">
+        <div class="m-schnitt" id="m-schnitt"></div>
+      </div>
+      <div class="m-reihe" id="m-monate"></div>
+    </div>
+    <p class="fuss-zeile" id="fuss-1"></p>
+    <div class="tuer">
+      <a class="knopf leise" href="beratung-rechnungen.html">Rechnungen der Beratung</a>
+      <a class="knopf leise" href="beratung-marge.html">Marge und Sätze</a>
+    </div>
+  </section>
+
+  <section class="bild" aria-labelledby="t2">
+    <h2 id="t2">Woran hängen wir?</h2>
+    <p class="antwort" id="antwort-2"></p>
+    <div class="balken" id="anteile"></div>
+    <p class="marke-wort" id="marke-2"></p>
+    <div class="tuer">
+      <a class="knopf leise" href="beratung-kunden.html">Alle Kunden</a>
+    </div>
+  </section>
+
+  <section class="bild" aria-labelledby="t3">
+    <h2 id="t3">Wer steckt worin?</h2>
+    <p class="antwort" id="antwort-3"></p>
+    <div class="legende" id="legende-3"></div>
+    <div class="balken" id="koepfe"></div>
+    <p class="fuss-zeile" id="fuss-3"></p>
+    <div class="tuer">
+      <a class="knopf leise" href="beratung-zeiten.html">Zeiten</a>
+      <a class="knopf leise" href="beratung-verwaltung.html">Team</a>
+    </div>
+  </section>
+
+  <section class="bild" aria-labelledby="t4">
+    <h2 id="t4">Kommt das Geld pünktlich?</h2>
+    <p class="antwort" id="antwort-4"></p>
+    <div class="balken" id="forderungen"></div>
+    <p class="marke-wort" id="marke-4"></p>
+    <p class="fuss-zeile" id="fuss-4"></p>
+    <div class="tuer">
+      <a class="knopf leise" href="beratung-rechnungen.html">Rechnungen der Beratung</a>
+    </div>
+  </section>
+
+  <section class="bild" aria-labelledby="t5">
+    <h2 id="t5">Setzen wir unsere Preise durch?</h2>
+    <p class="antwort" id="antwort-5"></p>
+    <div class="schiene" id="preise"></div>
+    <div class="s-achse" id="preis-achse"></div>
+    <p class="fuss-zeile" id="fuss-5"></p>
+    <div class="tuer">
+      <a class="knopf leise" href="beratung-marge.html">Marge und Sätze</a>
+      <a class="knopf leise" href="beratung-mandat.html">Mandat öffnen</a>
+    </div>
+  </section>
+
+  <p class="fuss-zeile" style="margin-top:26px">Fünf Bilder, fest. <b>Kein Baukasten</b> — kein Zeitraum zum Wählen, keine Kennzahl zum Zusammenklicken. Wer eine andere Frage hat, geht durch die Tür unter dem Bild, das ihr am nächsten kommt.</p>
+</main>
+
+<script>
+(function(){
+  'use strict';
+
+  document.querySelectorAll('main > *').forEach(function(el, i){
+    el.style.setProperty('--verz', (i * 0.05) + 's');
+  });
+
+  /* ================= Die Welt =================
+     Heute ist der 14. August 2026 — derselbe Tag wie auf dem Rechnungspapier
+     und im Stadtmodell. Alles, was „seit Jahresbeginn" heißt, meint den
+     1. Januar bis heute. */
+  var HEUTE_TAG = 14, TAGE_IM_AUGUST = 31;
+
+  /* Dasselbe Team wie in beratung-marge.html und beratung-verwaltung.html,
+     mit denselben Namen, Rollen und Verkaufssätzen. Der Kostensatz, den
+     jene Datei zusätzlich führt, fehlt hier absichtlich: diese Fläche zeigt
+     keine Zahl, aus der sich ein Gehalt zurückrechnen lässt, und was nicht
+     in den Daten steht, kann auch nicht versehentlich ins Bild geraten. */
+  var TEAM = [
+    {id:'anna',   name:'Dr. Anna Vogelsang', rolle:'Inhaberin', verkauf:210},
+    {id:'jens',   name:'Jens Nordholm',      rolle:'Partner',   verkauf:195},
+    {id:'miriam', name:'Miriam Krohn',       rolle:'Beraterin', verkauf:150},
+    {id:'tarek',  name:'Tarek Aydin',        rolle:'Berater',   verkauf:140},
+    {id:'sabine', name:'Sabine Röttger',     rolle:'Assistenz', verkauf: 85}
+  ];
+  function mensch(id){
+    for (var i = 0; i < TEAM.length; i++) if (TEAM[i].id === id) return TEAM[i];
+    return null;
+  }
+
+  /* Die vier Mandate, ebenfalls aus beratung-marge.html. `monate` ist neu und
+     nur hier: was in jedem Monat seit Januar zugeflossen ist, nach dem Monat
+     der Leistung, nicht nach dem Tag der Rechnung — sonst zeigt der Verlauf,
+     wann jemand Rechnungen schreibt, statt wann gearbeitet wurde.
+     Pauschalen sind gerechnet, nicht getippt: acht Monate zu 2.750 € sind
+     Cordes' 22.000 €, ein Zwölftel von 27.000 € achtmal ist MTS' 18.000 €.
+     Die Juli-Zahl von Petersen (5.400 €) und die Juni-Zahl von Freitag
+     (1.650 €) sind genau die Rechnungen 2026-0084 und 2026-0081 aus
+     beratung-rechnungen.html. */
+  var PAUSCHALE = {cordes: 2750, mts: 27000 / 12};
+  var MANDATE = [
+    {id:'petersen', name:'Petersen Stahlbau', honorar:38350,
+     abrede:'nach Aufwand', stunden:[['anna',62],['miriam',148],['sabine',40]],
+     monate:[5200, 4860, 6300, 5940, 4320, 3780, 5400, 2550]},
+    {id:'cordes', name:'Cordes Logistik', honorar:22000,
+     abrede:'Pauschale, 2.750 € im Monat', stunden:[['jens',33],['tarek',126],['sabine',52]],
+     pauschale:'cordes'},
+    {id:'freitag', name:'Bäckerei Freitag', honorar:10760,
+     abrede:'nach Aufwand und Auslagen', stunden:[['miriam',58],['sabine',24]],
+     monate:[1100, 980, 1650, 1320, 1500, 1650, 1410, 1150]},
+    {id:'mts', name:'MTS Maschinenbau', honorar:18000,
+     abrede:'Jahrespauschale, 27.000 €', stunden:[['anna',26],['tarek',88],['sabine',18]],
+     pauschale:'mts'}
+  ];
+  var MONATSNAMEN = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug'];
+  /* Unter dem Balken steht die Abkürzung, im Satz der ganze Name: „der Mär"
+     ist kein Monat. */
+  var MONATE_LANG = ['Januar','Februar','März','April','Mai','Juni','Juli','August'];
+
+  MANDATE.forEach(function(m){
+    if (m.pauschale) {
+      m.monate = MONATSNAMEN.map(function(){ return PAUSCHALE[m.pauschale]; });
+    }
+    m.std = 0; m.listenwert = 0;
+    m.stunden.forEach(function(p){
+      var k = mensch(p[0]);
+      m.listenwert += k.verkauf * p[1];
+      m.std        += p[1];
+    });
+    m.real   = m.honorar / m.std;      /* was je Stunde angekommen ist */
+    m.listen = m.listenwert / m.std;   /* was die Sätze versprochen hätten */
+    m.anteil = 0;                      /* gleich, wenn die Summe steht */
+  });
+
+  /* Der Prüfstein: die Monatszahlen MÜSSEN das Jahreshonorar ergeben. Wer
+     eine Zahl ändert, ohne die andere mitzurechnen, sieht es hier — und
+     nicht erst, wenn zwei Flächen sich widersprechen. */
+  MANDATE.forEach(function(m){
+    var summe = m.monate.reduce(function(a, b){ return a + b; }, 0);
+    if (Math.round(summe) !== m.honorar) {
+      console.error('Auswertungen: ' + m.name + ' — Monate ergeben ' + Math.round(summe) +
+        ' €, das Honorar ist ' + m.honorar + ' €.');
+    }
+  });
+
+  var HONORAR = MANDATE.reduce(function(s, m){ return s + m.honorar; }, 0);
+  var STUNDEN = MANDATE.reduce(function(s, m){ return s + m.std; }, 0);
+  MANDATE.forEach(function(m){ m.anteil = m.honorar / HONORAR; });
+
+  /* Die drei offenen Rechnungen aus beratung-rechnungen.html, brutto wie auf
+     dem Papier. Zusammen 11.900 € — die Zahl, die das Modell in der Zentrale
+     nennt. `tage` ist das Alter am 14.08.2026, `ziel` das Zahlungsziel der
+     Beratung. */
+  var ZIEL_TAGE = 14;
+  var FORDERUNGEN = [
+    {nummer:'2026-0082', kunde:'MTS Maschinenbau',   brutto:4284, gestellt:'2.\u00a0August',  tage:12},
+    {nummer:'2026-0083', kunde:'Cordes Logistik',    brutto:1190, gestellt:'3.\u00a0August',  tage:11},
+    {nummer:'2026-0084', kunde:'Petersen Stahlbau',  brutto:6426, gestellt:'5.\u00a0August',  tage: 9}
+  ];
+  /* Die letzte bezahlte Rechnung, ebenfalls von dort: 2026-0081, gestellt am
+     8. Juli, bezahlt am 21. Juli. */
+  var ZULETZT_BEZAHLT = {nummer:'2026-0081', kunde:'Bäckerei Freitag', brutto:1963.50, tage:13};
+
+  /* ================= Zahlen in Worte ================= */
+  function euro(betrag){
+    var v = Math.round(betrag);
+    return String(v).replace(/\B(?=(\d{3})+$)/g, '.') + ' €';
+  }
+  function eurokomma(betrag){
+    var v = Math.round(betrag * 100);
+    var minus = v < 0 ? '−' : '';
+    v = Math.abs(v);
+    var ganz = String(Math.floor(v / 100)).replace(/\B(?=(\d{3})+$)/g, '.');
+    return minus + ganz + ',' + ('0' + (v % 100)).slice(-2) + ' €';
+  }
+  function proz(p){ return p.toFixed(1).replace('.', ',') + ' %'; }
+  function std(h){ return (Math.round(h * 10) / 10).toString().replace('.', ',') + ' Std.'; }
+  var WORTE = ['null','ein','zwei','drei','vier','fünf','sechs','sieben','acht','neun','zehn','elf','zwölf'];
+  function wort(n){ return WORTE[n] || String(n); }
+  function anzahlWortGross(n){
+    var w = wort(n);
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }
+  function tage(n){ return n === 1 ? 'einen Tag' : wort(n) + ' Tage'; }
+
+  /* Die Füllstände stehen zuerst auf null und laufen dann hoch. Der Lauf ist
+     der einzige Bewegungsmoment dieser Fläche; er wartet einen Bildaufbau
+     ab, sonst startet der Übergang gar nicht erst. */
+  var wartende = [];
+  function fuellen(el, stand, i){
+    el.style.setProperty('--verz2', (0.05 * (i || 0)) + 's');
+    wartende.push(function(){ el.style.setProperty('--stand', stand.toFixed(4)); });
+  }
+  /* Die Kante als eigene Lage über einer Balkengruppe. Sie steht im Baum
+     hinter den Zeilen, damit sie über ihnen liegt; für den Screenreader ist
+     sie nichts — was sie bedeutet, steht als Satz unter der Gruppe. */
+  function kante(bei){
+    var lage = document.createElement('div');
+    lage.className = 'b-lage';
+    lage.setAttribute('aria-hidden', 'true');
+    lage.innerHTML = '<span class="spur"><span class="b-marke streng" style="--bei:' +
+      bei.toFixed(4) + '"></span></span>';
+    return lage;
+  }
+
+  function laufen(){
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        wartende.forEach(function(f){ f(); });
+      });
+    });
+  }
+
+  /* ================= Der Kopf ================= */
+  document.getElementById('stand').innerHTML =
+    'Seit Jahresbeginn, Stand 14. August 2026. ' + euro(HONORAR) + ' Honorar auf ' +
+    wort(MANDATE.length) + ' Mandaten, ' + std(STUNDEN) + ' erfasst. ' +
+    'Diese Fläche sehen <b>Inhaber und Partner</b>.';
+
+  /* ================= 1 · Kommt genug rein? ================= */
+  (function(){
+    var monate = MONATSNAMEN.map(function(name, i){
+      var wert = MANDATE.reduce(function(s, m){ return s + m.monate[i]; }, 0);
+      return {name:name, lang:MONATE_LANG[i], wert:wert, laufend:(i === MONATSNAMEN.length - 1)};
+    });
+    var voll   = monate.filter(function(m){ return !m.laufend; });
+    var schnitt = voll.reduce(function(s, m){ return s + m.wert; }, 0) / voll.length;
+    var hoechster = voll.reduce(function(a, m){ return m.wert > a.wert ? m : a; }, voll[0]);
+    var letzterVoll = voll[voll.length - 1];
+    var deckel = 14000;   /* Maß der Röhre; über dem höchsten Monat, damit kein Glas randvoll steht */
+
+    var werteEl = document.getElementById('m-werte');
+    var glaeserEl = document.getElementById('m-glaeser');
+    var monateEl = document.getElementById('m-monate');
+
+    monate.forEach(function(m, i){
+      var w = document.createElement('div');
+      w.className = 'm-wert zahl' + (m.laufend ? ' laufend' : '') +
+        (m === hoechster || m.laufend ? '' : ' klein-weg');
+      w.textContent = euro(m.wert);
+      werteEl.appendChild(w);
+
+      var g = document.createElement('div');
+      g.className = 'rohr steht' + (m.laufend ? ' laeuft' : '');
+      g.setAttribute('role', 'img');
+      g.setAttribute('aria-label', m.name + ': ' + euro(m.wert) + (m.laufend ? ', Monat läuft noch' : ''));
+      g.innerHTML = '<span class="fuell"></span>';
+      glaeserEl.appendChild(g);
+      fuellen(g, Math.min(1, m.wert / deckel), i);
+
+      var n = document.createElement('div');
+      n.className = 'm-monat' + (m.laufend ? ' laufend' : '');
+      n.textContent = m.name;
+      monateEl.appendChild(n);
+    });
+
+    var schnittEl = document.getElementById('m-schnitt');
+    schnittEl.style.setProperty('--stand', (schnitt / deckel).toFixed(4));
+
+    var richtung = letzterVoll.wert >= schnitt ? 'darüber' : 'darunter';
+    document.getElementById('antwort-1').innerHTML =
+      anzahlWortGross(voll.length) + ' volle Monate, im Schnitt <b>' + euro(schnitt) +
+      '</b> im Monat. Der ' + letzterVoll.lang + ' liegt mit <b>' + euro(letzterVoll.wert) + '</b> ' +
+      richtung + ', der stärkste Monat war der ' + hoechster.lang + ' mit <b>' + euro(hoechster.wert) + '</b>.';
+    document.getElementById('fuss-1').innerHTML =
+      'Die gestrichelte Linie ist der Schnitt der ' + wort(voll.length) + ' vollen Monate. ' +
+      'Der August ist schraffiert, weil er noch läuft: ' + HEUTE_TAG + ' von ' + TAGE_IM_AUGUST +
+      ' Tagen sind vorbei, die beiden Pauschalen stehen aber schon voll darin. ' +
+      'Gezählt wird nach dem Monat der Leistung, nicht nach dem Tag der Rechnung; ' +
+      'Pauschalmandate stehen mit ihrer Monatsrate.';
+  })();
+
+  /* ================= 2 · Woran hängen wir? ================= */
+  (function(){
+    var sortiert = MANDATE.slice().sort(function(a, b){ return b.anteil - a.anteil; });
+    var deckel = 0.5;          /* Maß des Balkens */
+    var SCHWELLE = 1 / 3;      /* Faustregel, kein Gesetz — steht so auch daneben */
+    var el = document.getElementById('anteile');
+
+    sortiert.forEach(function(m, i){
+      var z = document.createElement('div');
+      z.className = 'b-zeile';
+      z.innerHTML =
+        '<div class="b-name"></div>' +
+        '<div class="b-spur"><span class="rohr liegt' + (m.anteil >= SCHWELLE ? ' knapp' : '') + '" role="img">' +
+          '<span class="fuell"></span></span>' +
+          '<span class="b-marke streng zeilen-marke" style="--bei:' + (SCHWELLE / deckel).toFixed(4) + '"></span>' +
+        '</div>' +
+        '<div class="b-wert zahl"></div>';
+      z.querySelector('.b-name').innerHTML = m.name + '<small>' + m.abrede + '</small>';
+      z.querySelector('.b-wert').innerHTML = proz(m.anteil * 100) + '<small>' + euro(m.honorar) + '</small>';
+      var rohr = z.querySelector('.rohr');
+      rohr.setAttribute('aria-label', m.name + ': ' + proz(m.anteil * 100) + ' des Honorars, ' + euro(m.honorar));
+      fuellen(rohr, m.anteil / deckel, i);
+      el.appendChild(z);
+    });
+    el.appendChild(kante(SCHWELLE / deckel));
+
+    var groesster = sortiert[0];
+    var zweiGroesste = sortiert[0].anteil + sortiert[1].anteil;
+    document.getElementById('antwort-2').innerHTML =
+      '<b class="warn">' + groesster.name + ' trägt ' + proz(groesster.anteil * 100) + '</b> des Honorars. ' +
+      'Mit ' + sortiert[1].name + ' zusammen sind es <b>' + proz(zweiGroesste * 100) + '</b> — fällt einer davon weg, ' +
+      'fehlt mehr, als die anderen auffangen.';
+    document.getElementById('marke-2').innerHTML =
+      'Die Kante liegt bei <b>einem Drittel</b>. Das ist eine Faustregel, kein Gesetz: darüber hängt zu viel an einem Namen.';
+  })();
+
+  /* ================= 3 · Wer steckt worin? ================= */
+  (function(){
+    /* Die Stufe trägt die Größe des Mandats: das größte ist die dunkelste.
+       Damit heißt dunkel überall dasselbe, statt nur „das erste im Feld". */
+    var STUFEN = ['f1','f2','f3','f4'];
+    var nachGroesse = MANDATE.slice().sort(function(a, b){ return b.honorar - a.honorar; });
+    nachGroesse.forEach(function(m, j){ m.stufe = STUFEN[j]; });
+
+    var koepfe = TEAM.map(function(k){
+      var teile = nachGroesse.map(function(m){
+        var s = 0;
+        m.stunden.forEach(function(p){ if (p[0] === k.id) s = p[1]; });
+        return {mandat:m, std:s, stufe:m.stufe};
+      }).filter(function(t){ return t.std > 0; });
+      var summe = teile.reduce(function(s, t){ return s + t.std; }, 0);
+      return {kopf:k, teile:teile, std:summe};
+    }).sort(function(a, b){ return b.std - a.std; });
+
+    var deckel = 240;
+    var legende = document.getElementById('legende-3');
+    nachGroesse.forEach(function(m){
+      var d = document.createElement('div');
+      d.innerHTML = '<i class="' + m.stufe + '"></i><span></span>';
+      d.querySelector('span').textContent = m.name;
+      legende.appendChild(d);
+    });
+
+    var el = document.getElementById('koepfe');
+    koepfe.forEach(function(p, i){
+      var z = document.createElement('div');
+      z.className = 'b-zeile';
+      var stuecke = p.teile.map(function(t){
+        return '<span class="stueck ' + t.stufe + '" style="flex:' + t.std + '"></span>';
+      }).join('');
+      z.innerHTML =
+        '<div class="b-name"></div>' +
+        '<div class="b-spur"><span class="rohr liegt stapel" role="img">' +
+          '<span class="fuell">' + stuecke + '</span></span></div>' +
+        '<div class="b-wert zahl"></div>';
+      z.querySelector('.b-name').innerHTML = p.kopf.name + '<small>' + p.kopf.rolle + '</small>';
+      z.querySelector('.b-wert').innerHTML = std(p.std) +
+        '<small>' + wort(p.teile.length) + (p.teile.length === 1 ? ' Mandat' : ' Mandate') + '</small>';
+      var rohr = z.querySelector('.rohr');
+      rohr.setAttribute('aria-label', p.kopf.name + ': ' + std(p.std) + ' — ' +
+        p.teile.map(function(t){ return t.mandat.name + ' ' + std(t.std); }).join(', '));
+      fuellen(rohr, p.std / deckel, i);
+      el.appendChild(z);
+    });
+
+    /* Gesucht wird nicht die größte Konzentration überhaupt — die hat immer
+       irgendwer und sie sagt nichts. Gesucht wird, wer am tiefsten in dem
+       Mandat steckt, bei dem je Stunde am wenigsten ankommt. Das ist die
+       Frage, die aus dem Bild eine Entscheidung macht. */
+    var duennstes = MANDATE.slice().sort(function(a, b){ return a.real - b.real; })[0];
+    var eng = null;
+    koepfe.forEach(function(p){
+      p.teile.forEach(function(t){
+        if (t.mandat !== duennstes) return;
+        /* Gewählt wird nach STUNDEN, nicht nach Anteil: wer dreißig Stunden
+           hat und alle dort, steht mit 100 Prozent da und meint nichts. */
+        if (!eng || t.std > eng.t.std) eng = {p:p, t:t, q:t.std / p.std};
+      });
+    });
+    /* Arbeitet niemand auf dem dünnsten Mandat, gibt es diesen Satz nicht —
+       dann steht da die Lage und keine erfundene Zuspitzung. */
+    document.getElementById('antwort-3').innerHTML =
+      std(STUNDEN) + ' auf ' + wort(MANDATE.length) + ' Mandaten. ' + (eng
+        ? '<b class="warn">' + eng.p.kopf.name + ' steckt zu ' + proz(eng.q * 100) + ' in ' +
+          duennstes.name + '</b> — dem Mandat, bei dem je Stunde am wenigsten ankommt (' +
+          eurokomma(duennstes.real) + ').'
+        : 'Auf ' + duennstes.name + ', dem Mandat mit dem geringsten Stundenertrag, liegen keine ' +
+          'erfassten Stunden.');
+    document.getElementById('fuss-3').textContent =
+      'Erfasste Stunden auf Mandaten, seit Jahresbeginn. Was jemand sonst tut — Akquise, Verwaltung, ' +
+      'die eigene Fortbildung — liegt auf keinem Mandat und steht deshalb in keinem dieser Balken.';
+  })();
+
+  /* ================= 4 · Kommt das Geld pünktlich? ================= */
+  (function(){
+    var deckel = 20;   /* Tage, das Maß des Balkens */
+    var el = document.getElementById('forderungen');
+    var offen = FORDERUNGEN.slice().sort(function(a, b){ return b.tage - a.tage; });
+    var summe = offen.reduce(function(s, f){ return s + f.brutto; }, 0);
+    var aelteste = offen[0];
+    var ueberfaellig = offen.filter(function(f){ return f.tage > ZIEL_TAGE; });
+
+    offen.forEach(function(f, i){
+      var spaet = f.tage > ZIEL_TAGE;
+      var z = document.createElement('div');
+      z.className = 'b-zeile';
+      z.innerHTML =
+        '<div class="b-name"></div>' +
+        '<div class="b-spur"><span class="rohr liegt' + (spaet ? ' knapp' : '') + '" role="img">' +
+          '<span class="fuell"></span></span>' +
+          '<span class="b-marke streng zeilen-marke" style="--bei:' + (ZIEL_TAGE / deckel).toFixed(4) + '"></span>' +
+        '</div>' +
+        '<div class="b-wert zahl"></div>';
+      z.querySelector('.b-name').innerHTML = f.kunde + '<small>' + f.nummer + ', gestellt am ' + f.gestellt + '</small>';
+      z.querySelector('.b-wert').innerHTML = euro(f.brutto) +
+        '<small>' + f.tage + ' Tage offen</small>';
+      var rohr = z.querySelector('.rohr');
+      rohr.setAttribute('aria-label', f.kunde + ', ' + f.nummer + ': ' + euro(f.brutto) + ', seit ' +
+        f.tage + ' Tagen offen' + (spaet ? ', überfällig' : ', im Ziel'));
+      fuellen(rohr, f.tage / deckel, i);
+      el.appendChild(z);
+    });
+    el.appendChild(kante(ZIEL_TAGE / deckel));
+
+    document.getElementById('antwort-4').innerHTML = ueberfaellig.length === 0
+      ? '<b>' + euro(summe) + '</b> stehen offen, verteilt auf ' + wort(offen.length) +
+        ' Rechnungen. <b>Keine ist überfällig</b> — die älteste liegt seit ' + aelteste.tage +
+        ' Tagen, ' + tage(ZIEL_TAGE - aelteste.tage) + ' bleiben ihr.'
+      : '<b class="warn">' + wort(ueberfaellig.length) + ' von ' + wort(offen.length) +
+        ' Rechnungen sind über der Frist</b>, zusammen ' +
+        euro(ueberfaellig.reduce(function(s, f){ return s + f.brutto; }, 0)) + ' von ' + euro(summe) + '.';
+    document.getElementById('marke-4').innerHTML =
+      'Die Kante ist das Zahlungsziel der Beratung, <b>' + ZIEL_TAGE + ' Tage</b>. Rechts davon wird eine Rechnung bernsteinfarben.';
+    document.getElementById('fuss-4').textContent =
+      'Zuletzt bezahlt: ' + ZULETZT_BEZAHLT.kunde + ', ' + ZULETZT_BEZAHLT.nummer + ' nach ' +
+      ZULETZT_BEZAHLT.tage + ' Tagen. Entwürfe zählen hier nicht mit; offen ist, was gestellt und nicht bezahlt ist.';
+  })();
+
+  /* ================= 5 · Setzen wir unsere Preise durch? ================= */
+  (function(){
+    var VON = 100, BIS = 160;   /* die Achse; kein Nullpunkt, weil hier zwei Punkte liegen und kein Balken misst */
+    function lage(wert){ return Math.max(0, Math.min(1, (wert - VON) / (BIS - VON))); }
+
+    var el = document.getElementById('preise');
+    var sortiert = MANDATE.slice().sort(function(a, b){ return (a.real - a.listen) - (b.real - b.listen); });
+
+    sortiert.forEach(function(m, i){
+      var delta = m.real - m.listen;
+      var verlust = delta < -5;
+      var a = lage(Math.min(m.listen, m.real)), b = lage(Math.max(m.listen, m.real));
+      var z = document.createElement('div');
+      z.className = 's-zeile';
+      z.innerHTML =
+        '<div class="b-name"></div>' +
+        '<div class="s-spur">' +
+          '<span class="s-gleis"></span>' +
+          '<span class="s-weg' + (verlust ? ' verlust' : '') + (delta < 0 ? ' rueck' : '') +
+            '" style="--von:' + a.toFixed(4) + '"></span>' +
+          '<span class="s-punkt soll" style="--bei:' + lage(m.listen).toFixed(4) + '"></span>' +
+          '<span class="s-punkt ist' + (verlust ? ' verlust' : '') + '" style="--bei:' + lage(m.real).toFixed(4) + '"></span>' +
+        '</div>' +
+        '<div class="b-wert zahl"></div>';
+      z.querySelector('.b-name').innerHTML = m.name + '<small>' + std(m.std) + '</small>';
+      z.querySelector('.b-wert').innerHTML = eurokomma(m.real) +
+        '<small>' + (delta >= 0 ? '+' : '') + eurokomma(delta) + '</small>';
+      z.querySelector('.s-spur').setAttribute('role', 'img');
+      z.querySelector('.s-spur').setAttribute('aria-label',
+        m.name + ': die Sätze versprechen ' + eurokomma(m.listen) + ' je Stunde, angekommen sind ' +
+        eurokomma(m.real) + '.');
+      var weg = z.querySelector('.s-weg');
+      weg.style.setProperty('--verz2', (0.05 * i) + 's');
+      wartende.push(function(){ weg.style.setProperty('--bis', (b - a).toFixed(4)); });
+      el.appendChild(z);
+    });
+
+    document.getElementById('preis-achse').innerHTML =
+      '<span>' + euro(VON) + ' je Stunde</span><span>' + euro(BIS) + '</span>';
+
+    /* Der Satz behauptet keine Richtung, er liest sie ab: hielten alle vier
+       ihren Satz, stünde hier sonst „−0,24 € weniger" und eine Warnung, die
+       keine ist. */
+    var schlimmstes = sortiert[0];
+    var luecke = schlimmstes.listen - schlimmstes.real;
+    document.getElementById('antwort-5').innerHTML = luecke <= 0
+      ? '<b>Alle ' + wort(sortiert.length) + ' Mandate setzen ihren Satz durch.</b> Am knappsten ' +
+        schlimmstes.name + ': ' + eurokomma(schlimmstes.real) + ' je Stunde gegen ' +
+        eurokomma(schlimmstes.listen) + ', die die Sätze versprechen.'
+      : 'Bei <b class="warn">' + schlimmstes.name + ' kommen ' + eurokomma(luecke) +
+        ' je Stunde weniger an</b>, als die Sätze versprechen. Auf ' + std(schlimmstes.std) +
+        ' sind das <b>' + euro(luecke * schlimmstes.std) + '</b>' +
+        (schlimmstes.pauschale ? ' — die Pauschale trägt die Stunden nicht mehr.' : '.');
+    document.getElementById('fuss-5').textContent =
+      'Der helle Punkt ist der Listensatz der Köpfe, die dort gearbeitet haben; der volle Punkt ist, was ' +
+      'nach Pauschalen, Nachlässen und nicht berechneten Stunden je Stunde angekommen ist. ' +
+      'Die Achse beginnt bei 100 €, weil hier zwei Punkte liegen und kein Balken misst.';
+  })();
+
+  laufen();
+})();
+</script>
+<script src="uhr.js"></script>
+<script src="zeiger.js"></script>
+</body>
+</html>
