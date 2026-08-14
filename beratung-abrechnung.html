@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Was quoroAI berechnet</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design · Was quoroAI berechnet (Häppchen B3, Issue #31).
+   Die Gegenseite von plattform.html: dieselbe Abrechnung, gesehen von der
+   Beratung, die sie bezahlt. Im Produkt steht in der Migration ausdrücklich
+   „für die Beratung vorerst nicht sichtbar" — genau diese Lücke schließt die
+   Fläche.
+   Die Rechenwege sind entschieden (Chronik 2026-08-14, „Der Abschluss friert
+   den Monat sichtbar ein"): Listenpreise je Tarif, Wholesale-Staffel,
+   Plattformgebühr, alles tagegenau geteilt. Die Zahlen stehen hier in
+   derselben Form wie in plattform.html und ergeben denselben Betrag —
+   zwei Rechenwege wären zwei Wahrheiten.
+   Kern-Idee: Der laufende Monat ist eine Strecke, kein Kontostand. Er wächst
+   jeden Tag, und die Beratung will nicht nur wissen, wo er heute steht,
+   sondern wo er landet und ob das mehr ist als im Vormonat. Deshalb der eine
+   Moment dieser Fläche: der Balken läuft beim Ankommen auf seinen Stand,
+   die Marke des Vormonats steht schon da. Kein zweiter Effekt — der Rest
+   ist Arbeitsfläche.
+   Unterschied zur Betreibersicht: hier gibt es kein „Bezahlt" und kein
+   „Verwerfen". Wer zahlt, stellt nicht selbst fest, dass gezahlt wurde.
+   Marker: BERATUNG-ABRECHNUNG-V1 */
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,select{font-family:inherit}
+
+/* ========== quoroAI-Chrom ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;word-spacing:2px}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+
+/* Die Krume ist ein Zettel neben der Seite — solange daneben Platz ist.
+   Wird das Fenster schmaler als 1440px, reicht sie in die Inhaltsspalte und
+   der Inhalt zöge beim Scrollen unter ihr durch. Dann wird sie die zweite
+   Zeile des Kopfbands (Chronik 2026-08-14). */
+@media (max-width:1440px){
+  nav{height:118px;padding-bottom:58px}
+  #krume{z-index:90}
+}
+
+/* ========== Seite ========== */
+body{position:relative}
+body::before{
+  content:"";position:fixed;inset:-10% -10% auto -10%;height:70vh;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(60% 55% at 22% 0%, rgba(111,99,232,.20), transparent 70%),
+    radial-gradient(50% 50% at 88% 12%, rgba(157,147,241,.16), transparent 72%);
+  filter:blur(10px);
+}
+main{max-width:880px;margin:0 auto;padding:136px 24px 90px}
+/* Die Ansicht kommt gestaffelt an, und zwar jedes Mal, wenn sie gezeigt wird. */
+main > div > *{opacity:0;translate:0 12px}
+main > div.zeigt > *{animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:6px;max-width:62ch}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:30px}
+
+.tafel{
+  margin-top:12px;border-radius:var(--radius-karte);padding:22px 24px;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+.klein{font-size:12.5px;color:var(--nebel-500);margin-top:14px;line-height:1.55}
+.knopf{min-height:40px;padding:0 16px;font-size:13.5px}
+.zurueck-zeile{
+  display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;
+  font-size:13px;font-weight:600;color:var(--nebel-600);text-decoration:none;
+}
+.zurueck-zeile:hover{color:var(--lila-600)}
+
+/* ---------- Lage-Tafel: die eine Zahl, und wohin sie läuft ---------- */
+.lage{
+  margin-top:18px;
+  border-radius:var(--radius-karte);padding:26px 28px;
+  background:color-mix(in srgb, var(--lila-600) 11%, rgba(255,255,255,.42));
+  backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid rgba(255,255,255,.55);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 18px 46px rgba(59,52,134,.16);
+}
+.lage .oben{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;flex-wrap:wrap}
+.lage .zahl{
+  font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);letter-spacing:-.03em;
+  font-size:clamp(38px,6.4vw,60px);line-height:1;font-variant-numeric:tabular-nums;
+}
+.lage .unter{font-size:13px;color:var(--nebel-600);margin-top:8px}
+.lage .offen{text-align:right;font-size:13px;color:var(--nebel-600)}
+.lage .offen b{display:block;font-size:22px;font-weight:600;color:var(--tinte);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.lage .offen.nichts b{color:var(--gruen)}
+/* Der offene Betrag ist der Griff zu seiner Abrechnung — er sieht aus wie
+   eine Zahl und verhält sich wie eine Tür. Die Hover-Fläche liegt als eigene
+   Er trägt keine eigene Fläche: jedes Polster um ihn herum — als Margin oder
+   als untergelegte Schicht — machte ihn breiter als seinen Kasten, und am
+   390er Fenster lief er dadurch 10px hinaus. Der Strich reicht. */
+.lage .offen a{display:block;color:inherit;text-decoration:none}
+.lage .offen a b{color:var(--bernstein)}
+.lage .offen a:hover b{text-decoration:underline;text-underline-offset:4px}
+
+/* Der eine Moment: die Strecke des Monats. Links steht, was bis heute
+   aufgelaufen ist, rechts, wo der Monat landet, wenn sich nichts ändert —
+   und die Kerbe zeigt, wo der Vormonat stand. Der Balken läuft beim
+   Ankommen einmal auf seinen Stand; danach ist die Fläche ruhig. */
+.strecke{margin-top:22px}
+.strecke .schiene{
+  position:relative;height:14px;border-radius:var(--radius-kapsel);overflow:hidden;
+  background:linear-gradient(180deg, rgba(24,21,47,.08), rgba(255,255,255,.45) 55%);
+  border:1px solid rgba(255,255,255,.75);
+  box-shadow:inset 0 1.5px 3px rgba(24,21,47,.16), inset 0 -1px 1px rgba(255,255,255,.6);
+}
+.strecke .fluss{
+  position:absolute;inset:2px auto 2px 2px;width:0;min-width:10px;
+  border-radius:var(--radius-kapsel);
+  background:linear-gradient(180deg, var(--lila-400) 0%, var(--lila-600) 55%, var(--lila-700) 100%);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.5), 0 0 8px rgba(111,99,232,.45);
+  transition:width .9s var(--kurve);
+}
+.strecke .kerbe{
+  position:absolute;top:-3px;bottom:-3px;width:2px;border-radius:2px;
+  background:var(--nebel-700);opacity:.55;
+}
+.strecke .marken{
+  display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+  margin-top:9px;font-size:12.5px;color:var(--nebel-600);
+}
+.strecke .marken b{font-weight:600;color:var(--tinte);font-variant-numeric:tabular-nums}
+.strecke .vormonat{margin-top:6px;font-size:12.5px;color:var(--nebel-600)}
+.strecke .vormonat b{font-weight:600;color:var(--tinte);font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){ .strecke .fluss{transition:none} }
+
+/* ---------- Zeilen ---------- */
+.zeilen{display:flex;flex-direction:column;gap:9px}
+a.zeile{
+  display:flex;align-items:center;gap:16px;width:100%;text-align:left;cursor:pointer;
+  text-decoration:none;color:var(--tinte);
+  padding:13px 16px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 8px 24px rgba(16,19,26,.06);
+  transition:border-color .2s ease,translate .2s var(--kurve);
+}
+a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
+.zeile .z-text{min-width:0;flex:1}
+.zeile .z-titel{display:block;font-size:14px;font-weight:600;letter-spacing:-.01em;line-height:1.4}
+.zeile .z-meta{display:block;font-size:12px;color:var(--nebel-600);margin-top:2px;line-height:1.5}
+.zeile .z-meta .warnt{color:var(--bernstein);font-weight:600}
+.zeile .z-recht{margin-left:auto;flex-shrink:0;display:flex;align-items:center;gap:14px}
+.zeile .z-betrag{font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.zeile .zustand{width:40px;height:18px}
+.leer{font-size:13.5px;color:var(--nebel-600)}
+
+/* ---------- Die Aufstellung ---------- */
+.aufstellung .posten{display:flex;flex-direction:column;font-size:13.5px}
+.aufstellung .p{
+  display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  padding:8px 2px;border-top:0.5px solid var(--nebel-200);
+}
+.aufstellung .p:first-child{border-top:0;padding-top:0}
+.aufstellung .p .p-wer{min-width:0}
+.aufstellung .p .p-her{color:var(--nebel-500)}
+.aufstellung .p .p-betrag,.summen dd{font-variant-numeric:tabular-nums;white-space:nowrap}
+.summen{margin-top:16px;border-top:1px solid var(--nebel-300);padding-top:12px;font-size:13.5px}
+.summen div{display:flex;justify-content:space-between;gap:24px;padding:3px 0}
+.summen dt,.summen .was{color:var(--nebel-600)}
+.summen .gesamt{font-weight:700;border-top:1px solid var(--nebel-300);margin-top:6px;padding-top:9px}
+.summen .gesamt .was{color:var(--tinte)}
+.nur-gebuehr{font-size:13.5px;color:var(--nebel-600)}
+.je-zugang{margin-top:12px;font-size:13px;color:var(--nebel-600)}
+.je-zugang b{font-weight:600;color:var(--tinte);font-variant-numeric:tabular-nums}
+
+/* Das eingefrorene Blatt: kein Glas mehr, sondern feste Fläche. */
+.aufstellung.fest{
+  background:var(--flaeche);
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  border:0.5px solid var(--nebel-200);
+  box-shadow:0 1px 2px rgba(16,19,26,.05), 0 16px 44px rgba(24,21,47,.10);
+}
+.eingefroren{
+  margin-top:14px;font-size:12.5px;color:var(--nebel-600);
+  display:flex;align-items:center;gap:8px;
+}
+.eingefroren::before{
+  content:"";width:7px;height:7px;border-radius:2px;flex-shrink:0;
+  background:var(--lila-300);rotate:45deg;
+}
+
+/* ---------- Die Staffel ---------- */
+.staffel{display:flex;flex-direction:column;gap:8px;margin-top:2px}
+.stufe{
+  display:flex;align-items:center;gap:14px;
+  padding:11px 14px;border-radius:var(--radius-innen);
+  border:0.5px solid var(--nebel-200);background:var(--flaeche);
+  font-size:13.5px;
+}
+.stufe .s-wo{flex:1;min-width:0}
+.stufe .s-satz{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.stufe .s-hier{font-size:12px;color:var(--nebel-600);display:block;margin-top:2px}
+.stufe.jetzt{
+  border:1px solid var(--lila-400);
+  background:var(--lila-050);
+  box-shadow:0 8px 22px rgba(111,99,232,.14);
+}
+.stufe.jetzt .s-satz{color:var(--lila-700)}
+.stufe.fern{opacity:.62}
+.naechste{margin-top:14px;font-size:13px;line-height:1.55}
+.naechste b{font-weight:600}
+
+.griffe{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:18px}
+.meldung{
+  margin-top:12px;padding:11px 14px;border-radius:var(--radius-innen);
+  background:var(--nebel-100);font-size:13.5px;line-height:1.5;
+}
+
+.raum-kopf h2{font-size:clamp(21px,2.8vw,28px);line-height:1.2}
+.raum-kopf .meta{font-size:13px;color:var(--nebel-600);margin-top:4px}
+.abschnitt-kopf{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:30px}
+.abschnitt-kopf h3{margin-top:0}
+.abschnitt-kopf .laeuft{font-size:12.5px;color:var(--nebel-500)}
+
+@media (prefers-reduced-motion: reduce){
+  main > div > *{animation:none;opacity:1;translate:none}
+}
+@media (max-width:760px){
+  nav{padding:0 18px;padding-bottom:58px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
+  .tafel{padding:18px 18px}
+  .lage{padding:20px 18px}
+  .lage .oben{align-items:flex-start}
+  .lage .offen{text-align:left}
+  .strecke .marken{flex-direction:column;gap:2px}
+}
+@media (max-width:520px){
+  /* Das Entwurfs-Chrom weicht als Erstes: der Weg zu den Vorschlägen ist Gerüst. */
+  nav a.vorschlaege{display:none}
+  a.zeile{gap:10px;padding:12px 14px}
+  .zeile .z-recht{gap:10px}
+}
+</style>
+</head>
+<body class="quoro">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Was quoroAI berechnet</b></a>
+
+<main>
+  <!-- ============ Ansicht: der laufende Monat und der Verlauf ============ -->
+  <div id="ansicht-stand">
+    <div class="kopf">
+      <h1>Was quoroAI berechnet</h1>
+      <div class="stand">Deine eigene Rechnung: was diese Plattform dich diesen Monat kostet, woraus sich der Betrag zusammensetzt und was davon noch offen ist. Gezählt wird bis heute, nicht bis zum Monatsende.</div>
+    </div>
+
+    <section class="lage" aria-label="Der laufende Monat">
+      <div class="oben">
+        <div>
+          <div class="zahl" id="lage-zahl">0,00 €</div>
+          <div class="unter" id="lage-unter"></div>
+        </div>
+        <div class="offen" id="lage-offen"></div>
+      </div>
+      <div class="strecke" id="strecke" hidden>
+        <div class="schiene" aria-hidden="true">
+          <span class="fluss" id="fluss"></span>
+          <span class="kerbe" id="kerbe" hidden></span>
+        </div>
+        <div class="marken">
+          <span>bis heute <b id="marke-heute"></b></span>
+          <span id="marke-ende"></span>
+        </div>
+        <div class="vormonat" id="marke-vormonat" hidden></div>
+      </div>
+    </section>
+
+    <div class="abschnitt-kopf"><h3>So kommt der Betrag zustande</h3><span class="laeuft" id="gezaehlt-bis"></span></div>
+    <div id="aufstellung-hier"></div>
+
+    <h3>Dein Rabatt</h3>
+    <section class="tafel" aria-label="Wholesale-Staffel">
+      <div class="staffel" id="staffel"></div>
+      <div class="naechste" id="naechste"></div>
+      <div class="klein">Der Rabatt gilt für die Listenpreise deiner Kundenzugänge, nicht für die Plattformgebühr. Gezählt wird, wie viele Zugänge im jeweiligen Monat aktiv waren — ein Zugang, der am 14. dazukommt, zählt für diesen Monat mit.</div>
+    </section>
+
+    <h3>Verlauf</h3>
+    <section class="tafel" aria-label="Abgeschlossene Monate">
+      <div class="zeilen" id="liste-monate"></div>
+      <div class="klein">Ein abgeschlossener Monat ist eingefroren. An ihm wird nichts nachgerechnet — auch dann nicht, wenn sich später Preise oder Staffel ändern. Bezahlt wird per Überweisung; sobald das Geld bei uns ankommt, steht am Monat das Datum.</div>
+    </section>
+  </div>
+
+  <!-- ============ Ansicht: ein abgeschlossener Monat ============ -->
+  <div id="ansicht-monat" hidden>
+    <a class="zurueck-zeile" href="#">← Was quoroAI berechnet</a>
+    <div id="monat-inhalt"></div>
+  </div>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ================= Die Zahlen, eine Stelle =================
+     Dieselben Werte wie in plattform.html und im Produkt
+     (src/lib/plans.ts, src/lib/platform/preise.ts). */
+  var TARIFE = {
+    basis:    {label:'Basis',    cent:1900},
+    standard: {label:'Standard', cent:5900},
+    plus:     {label:'Plus',     cent:14900}
+  };
+  var STAFFEL = [{ab:0,proz:25},{ab:25,proz:35},{ab:100,proz:45}];
+  var GEBUEHR = 14900;
+  var HEUTE = '2026-08-14';
+
+  function rabattFuer(zugaenge){
+    var p = 0;
+    STAFFEL.forEach(function(stufe){ if (zugaenge >= stufe.ab) p = stufe.proz; });
+    return p;
+  }
+
+  /* ================= Kalender, ohne Bibliothek ================= */
+  var MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August',
+                'September','Oktober','November','Dezember'];
+  function teile(iso){ var t = iso.split('-'); return {j:+t[0], m:+t[1], t:+t[2]}; }
+  function tagesZahl(iso){ var d = teile(iso); return Date.UTC(d.j, d.m-1, d.t) / 86400000; }
+  function tageImMonat(monat){ var d = teile(monat); return new Date(Date.UTC(d.j, d.m, 0)).getUTCDate(); }
+  function monatsEnde(monat){
+    var d = teile(monat);
+    return d.j + '-' + ('0'+d.m).slice(-2) + '-' + ('0'+tageImMonat(monat)).slice(-2);
+  }
+  function monatsLabel(monat){ var d = teile(monat); return MONATE[d.m-1] + ' ' + d.j; }
+  function vormonat(monat){
+    var d = teile(monat);
+    var j = d.m === 1 ? d.j-1 : d.j, m = d.m === 1 ? 12 : d.m-1;
+    return j + '-' + ('0'+m).slice(-2) + '-01';
+  }
+  function monatsBeginn(iso){ return iso.slice(0,7) + '-01'; }
+  function datum(iso){ var d = teile(iso); return ('0'+d.t).slice(-2)+'.'+('0'+d.m).slice(-2)+'.'+d.j; }
+  /* „1. bis 14. August 2026" — im Fließtext liest sich ein Zahlendatum wie ein Aktenzeichen. */
+  function tagImMonat(iso){ var d = teile(iso); return d.t + '. ' + MONATE[d.m-1] + ' ' + d.j; }
+  /* Wie viele Tage eines Zeitraums in [von, bis] liegen — beide Enden zählen mit. */
+  function tageIn(von, bis, start, ende){
+    var a = Math.max(tagesZahl(von), tagesZahl(start));
+    var b = Math.min(bis ? tagesZahl(bis) : Infinity, tagesZahl(ende));
+    return b < a ? 0 : (b - a + 1);
+  }
+  function euro(cent){
+    var minus = cent < 0, v = Math.abs(Math.round(cent));
+    var ganz = String(Math.floor(v/100)).replace(/\B(?=(\d{3})+$)/g, '.');
+    return (minus ? '−' : '') + ganz + ',' + ('0' + (v % 100)).slice(-2) + ' €';
+  }
+  function tageSeit(iso){ return tagesZahl(HEUTE) - tagesZahl(iso); }
+
+  /* ================= Die eigene Beratung =================
+     Nordholm & Partner, dieselben Daten wie in plattform.html — dort ist sie
+     eine von vieren, hier ist sie die, die zusieht. */
+  function kunde(name, tarif, seit, bis){ return {name:name, tarif:tarif, seit:seit, bis:bis||null}; }
+
+  var BERATUNG = {
+    name:'Nordholm & Partner', seit:'2026-05-18',
+    kunden:[
+      kunde('Petersen Stahlbau','plus','2026-05-18'),
+      kunde('Cordes Logistik','standard','2026-06-01'),
+      kunde('Bäckerei Freitag','basis','2026-07-14'),
+      kunde('MTS Maschinenbau','standard','2026-07-14')
+    ],
+    abschluesse:[
+      {monat:'2026-05-01', abgeschlossen:'2026-06-01', bezahlt:'2026-06-09'},
+      {monat:'2026-06-01', abgeschlossen:'2026-07-01', bezahlt:'2026-07-08'},
+      {monat:'2026-07-01', abgeschlossen:'2026-08-01', bezahlt:null}
+    ]
+  };
+
+  /* ================= Die Rechnung, eine Stelle ================= */
+  function rechne(monat, bis){
+    var start = monat, ende = bis || monatsEnde(monat);
+    if (tagesZahl(ende) < tagesZahl(start)) return null;
+    var tage = tageImMonat(monat);
+    var zeilen = [];
+    BERATUNG.kunden.forEach(function(k){
+      var d = tageIn(k.seit, k.bis, start, ende);
+      if (d <= 0) return;
+      var preis = TARIFE[k.tarif].cent;
+      zeilen.push({
+        name:k.name, tarif:k.tarif, tage:d, tageImMonat:tage,
+        einzelpreis:preis, betrag:Math.round(preis * d / tage)
+      });
+    });
+    var zwischensumme = zeilen.reduce(function(s,z){ return s + z.betrag; }, 0);
+    var zugaenge = zeilen.length;
+    var proz = rabattFuer(zugaenge);
+    var rabatt = Math.round(zwischensumme * proz / 100);
+    var eigeneTage = tageIn(BERATUNG.seit, null, start, ende);
+    var gebuehr = Math.round(GEBUEHR * eigeneTage / tage);
+    return {
+      monat:monat, gezaehltBis:ende, tageImMonat:tage,
+      zeilen:zeilen, zugaenge:zugaenge,
+      zwischensumme:zwischensumme, rabattProzent:proz, rabatt:rabatt,
+      gebuehr:gebuehr, gesamt:zwischensumme - rabatt + gebuehr
+    };
+  }
+
+  var DIESER_MONAT = monatsBeginn(HEUTE);
+  /* Jeder Abschluss wird einmal gerechnet und danach nur noch gelesen. */
+  BERATUNG.abschluesse.forEach(function(a){ a.daten = rechne(a.monat); });
+
+  function abschlussMit(monat){
+    for (var i = 0; i < BERATUNG.abschluesse.length; i++) {
+      if (BERATUNG.abschluesse[i].monat === monat) return BERATUNG.abschluesse[i];
+    }
+    return null;
+  }
+  function zugaengeWort(n){
+    if (n === 0) return 'kein Kundenzugang';
+    return n === 1 ? '1 aktiver Kundenzugang' : n + ' aktive Kundenzugänge';
+  }
+
+  function h(text){
+    return String(text).replace(/[&<>"]/g, function(z){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[z];
+    });
+  }
+
+  /* Die Aufstellung — dieselbe Form für den laufenden Monat und für das
+     eingefrorene Blatt. Wer beide nebeneinanderlegt, soll dieselbe Rechnung
+     sehen und nicht zwei Darstellungen davon. */
+  function aufstellung(daten, klasse){
+    var posten = daten.zeilen.length === 0
+      ? '<p class="nur-gebuehr">Kein Kundenzugang in diesem Monat — es bleibt bei der Plattformgebühr.</p>'
+      : '<div class="posten">' + daten.zeilen.map(function(z){
+          var her = z.tage < z.tageImMonat
+            ? z.tage + ' von ' + z.tageImMonat + ' Tagen à ' + euro(z.einzelpreis)
+            : 'ganzer Monat';
+          return '<div class="p"><span class="p-wer">' + h(z.name) +
+                 ' <span class="p-her">' + TARIFE[z.tarif].label + ', ' + her + '</span></span>' +
+                 '<span class="p-betrag">' + euro(z.betrag) + '</span></div>';
+        }).join('') + '</div>';
+
+    var jeZugang = daten.zugaenge > 0
+      ? '<p class="je-zugang">Das sind <b>' + euro(Math.round(daten.gesamt / daten.zugaenge)) +
+        '</b> je Kundenzugang, Plattformgebühr eingerechnet.</p>'
+      : '';
+
+    return '<section class="tafel aufstellung ' + (klasse||'') + '" aria-label="Aufstellung">' + posten +
+      '<dl class="summen">' +
+        '<div><dt>Listenpreise, ' + zugaengeWort(daten.zugaenge) + '</dt><dd>' + euro(daten.zwischensumme) + '</dd></div>' +
+        (daten.zwischensumme > 0
+          ? '<div><dt>Dein Wholesale-Rabatt ' + daten.rabattProzent + ' %</dt><dd>' + euro(-daten.rabatt) + '</dd></div>'
+          : '') +
+        '<div><dt>Plattformgebühr</dt><dd>' + euro(daten.gebuehr) + '</dd></div>' +
+        '<div class="gesamt"><dt class="was">Zu zahlen</dt><dd>' + euro(daten.gesamt) + '</dd></div>' +
+      '</dl>' + jeZugang + '</section>';
+  }
+
+  /* ================= Ansicht 1: Stand und Verlauf ================= */
+  var lageZahl = document.getElementById('lage-zahl');
+
+  function zeichneStand(){
+    var laufend = rechne(DIESER_MONAT, HEUTE);
+    var ganzer  = rechne(DIESER_MONAT);   /* wenn sich nichts mehr ändert */
+    var vorab   = abschlussMit(vormonat(DIESER_MONAT));
+
+    document.getElementById('lage-unter').textContent =
+      '1. bis ' + tagImMonat(HEUTE) + ', ' + zugaengeWort(laufend.zugaenge);
+
+    /* Offen: was abgeschlossen und noch nicht bezahlt ist. Es steht genau
+       hier — die Liste unten trägt denselben Monat schon, und derselbe Posten
+       an drei Stellen liest sich wie drei Posten. Bei mehreren offenen
+       Monaten führt der Griff an den ältesten. */
+    var offen = BERATUNG.abschluesse.filter(function(a){ return !a.bezahlt; })
+      .sort(function(x,y){ return x.monat < y.monat ? -1 : 1; });
+    var offenerBetrag = offen.reduce(function(s,a){ return s + a.daten.gesamt; }, 0);
+    var lageOffen = document.getElementById('lage-offen');
+    lageOffen.className = 'offen' + (offen.length === 0 ? ' nichts' : '');
+    lageOffen.innerHTML = offen.length === 0
+      ? '<b>nichts offen</b>jeder abgeschlossene Monat ist bezahlt'
+      : '<a href="#m/' + offen[0].monat + '"><b>' + euro(offenerBetrag) + '</b>' +
+        (offen.length === 1
+          ? monatsLabel(offen[0].monat) + ' offen, seit ' + tageSeit(offen[0].abgeschlossen) + ' Tagen'
+          : 'offen aus ' + offen.length + ' Abrechnungen') + '</a>';
+
+    /* Der eine Moment: die Strecke des Monats. */
+    var strecke = document.getElementById('strecke');
+    if (ganzer && ganzer.gesamt > 0) {
+      strecke.hidden = false;
+      document.getElementById('marke-heute').textContent = euro(laufend.gesamt);
+      document.getElementById('marke-ende').innerHTML =
+        'zum Monatsende rund <b>' + euro(ganzer.gesamt) + '</b>';
+      var anteil = Math.max(0, Math.min(1, laufend.gesamt / ganzer.gesamt));
+      /* Die Kerbe steht nur da, wo sie hinpasst: ein Vormonat, der über der
+         Hochrechnung liegt, hat auf dieser Schiene keinen Platz — dann sagt
+         die Zeile darunter es in Worten. */
+      var kerbe = document.getElementById('kerbe');
+      var zeile = document.getElementById('marke-vormonat');
+      if (vorab) {
+        var v = vorab.daten.gesamt / ganzer.gesamt;
+        if (v <= 1) {
+          kerbe.hidden = false;
+          kerbe.style.left = 'calc(' + (v * 100).toFixed(1) + '% - 1px)';
+        }
+        zeile.hidden = false;
+        zeile.innerHTML = 'Die Kerbe ist der ' + monatsLabel(vorab.monat) + ': <b>' +
+          euro(vorab.daten.gesamt) + '</b>. ' +
+          (ganzer.gesamt > vorab.daten.gesamt
+            ? 'Dieser Monat wird teurer, weil mehr Zugänge den ganzen Monat laufen.'
+            : ganzer.gesamt < vorab.daten.gesamt
+              ? 'Dieser Monat wird günstiger.'
+              : 'Dieser Monat kostet dasselbe.');
+      }
+      requestAnimationFrame(function(){
+        document.getElementById('fluss').style.width =
+          'calc((100% - 4px) * ' + anteil.toFixed(4) + ')';
+      });
+    }
+
+    document.getElementById('gezaehlt-bis').textContent =
+      monatsLabel(DIESER_MONAT) + ', gezählt bis zum ' + teile(HEUTE).t + '.';
+    document.getElementById('aufstellung-hier').innerHTML = aufstellung(laufend);
+
+    zeichneStaffel(laufend.zugaenge);
+
+    var sortiert = BERATUNG.abschluesse.slice().sort(function(x,y){
+      return x.monat === y.monat ? 0 : (x.monat < y.monat ? 1 : -1);
+    });
+    document.getElementById('liste-monate').innerHTML = sortiert.length === 0
+      ? '<p class="leer">Noch kein Monat abgerechnet — deiner ist der erste.</p>'
+      : sortiert.map(function(a){
+          return '<a class="zeile" href="#m/' + a.monat + '">' +
+            '<span class="z-text"><span class="z-titel">' + monatsLabel(a.monat) + '</span>' +
+            '<span class="z-meta">' + (a.bezahlt
+              ? 'bezahlt am ' + datum(a.bezahlt)
+              : '<span class="warnt">offen, seit ' + tageSeit(a.abgeschlossen) + ' Tagen</span>') +
+            ', ' + zugaengeWort(a.daten.zugaenge) + '</span></span>' +
+            '<span class="z-recht">' +
+            '<span class="zustand ' + (a.bezahlt ? 'aktiv' : 'wartet') + '" role="img" aria-label="' +
+            (a.bezahlt ? 'bezahlt' : 'offen') + '" title="' + (a.bezahlt ? 'bezahlt' : 'offen') + '"></span>' +
+            '<span class="z-betrag">' + euro(a.daten.gesamt) + '</span></span></a>';
+        }).join('');
+
+    zaehleHoch(laufend.gesamt);
+  }
+
+  /* Die Staffel: wo die Beratung steht, und was bis zur nächsten Stufe fehlt.
+     Ein Rabattsatz ohne die Stufe darüber sagt nur den halben Satz — das ist
+     die Frage, die eine wachsende Beratung wirklich hat. */
+  function zeichneStaffel(zugaenge){
+    /* Ohne einen einzigen Zugang steht die Beratung auf keiner Stufe — ein
+       Rabattsatz ohne Gegenstand ist keine Information (dieselbe Entscheidung
+       wie in der Betreibersicht). Dann ist die erste Stufe das Ziel, nicht
+       der Ort. */
+    var jetzt = zugaenge > 0 ? rabattFuer(zugaenge) : -1;
+    document.getElementById('staffel').innerHTML = STAFFEL.map(function(stufe, i){
+      var bis = STAFFEL[i+1] ? ' bis ' + (STAFFEL[i+1].ab - 1) : ' und mehr';
+      var von = stufe.ab === 0 ? '1' : stufe.ab;
+      var hier = stufe.proz === jetzt;
+      return '<div class="stufe ' + (hier ? 'jetzt' : (stufe.proz > jetzt ? '' : 'fern')) + '">' +
+        '<span class="s-wo">' + von + bis + ' Kundenzugänge' +
+        (hier ? '<span class="s-hier">Hier stehst du: ' + zugaengeWort(zugaenge) + '</span>' : '') +
+        '</span><span class="s-satz">' + stufe.proz + ' % Rabatt</span></div>';
+    }).join('');
+
+    var el = document.getElementById('naechste');
+    if (zugaenge === 0) {
+      el.innerHTML = 'Diesen Monat läuft <b>kein Kundenzugang</b> — es bleibt bei der ' +
+        'Plattformgebühr, und zu rabattieren gibt es nichts. Ab dem ersten Zugang gelten ' +
+        STAFFEL[0].proz + ' %.';
+      return;
+    }
+    var naechste = null;
+    STAFFEL.forEach(function(stufe){ if (!naechste && stufe.proz > jetzt) naechste = stufe; });
+    if (!naechste) {
+      el.innerHTML = 'Du stehst auf der <b>höchsten Stufe</b>. Weiter geht es nicht.';
+      return;
+    }
+    var fehlt = naechste.ab - zugaenge;
+    el.innerHTML = 'Noch <b>' + fehlt + (fehlt === 1 ? ' Kundenzugang' : ' Kundenzugänge') +
+      '</b>, dann gelten ' + naechste.proz + ' % auf alle Listenpreise, nicht nur auf die neuen.';
+  }
+
+  /* Die eine Zahl zählt beim Ankommen hoch — einmal, nicht bei jedem
+     Neuzeichnen. */
+  var hochgezaehlt = false;
+  function zaehleHoch(ziel){
+    if (reduziert || hochgezaehlt) { lageZahl.textContent = euro(ziel); hochgezaehlt = true; return; }
+    hochgezaehlt = true;
+    var start = null, dauer = 900;
+    function schritt(zeit){
+      if (start === null) start = zeit;
+      var p = Math.min((zeit - start) / dauer, 1);
+      var e = 1 - Math.pow(1 - p, 3);
+      lageZahl.textContent = euro(Math.round(ziel * e));
+      if (p < 1) requestAnimationFrame(schritt);
+    }
+    requestAnimationFrame(schritt);
+  }
+
+  /* ================= Ansicht 2: ein abgeschlossener Monat ================= */
+  var monatInhalt = document.getElementById('monat-inhalt');
+
+  function zeichneMonat(a){
+    var html = '<div class="raum-kopf"><h2>' + monatsLabel(a.monat) + '</h2>' +
+      '<div class="meta">' + h(BERATUNG.name) + ', abgeschlossen am ' + datum(a.abgeschlossen) + ', ' +
+      (a.bezahlt ? 'bezahlt am ' + datum(a.bezahlt) : 'noch nicht bezahlt') + '</div></div>';
+
+    html += aufstellung(a.daten, 'fest');
+    html += '<div class="eingefroren">Eingefroren am ' + datum(a.abgeschlossen) +
+            '. Hier wird nichts nachgerechnet — die Zahlen stehen, wie sie an dem Tag galten.</div>';
+
+    html += '<div class="griffe"><button class="knopf leise" type="button" id="beleg">Beleg für die Buchhaltung</button></div>' +
+            '<div class="meldung" id="beleg-meldung" hidden></div>';
+
+    html += a.bezahlt
+      ? '<div class="klein">Bezahlt am ' + datum(a.bezahlt) + '. Stimmt an einer abgeschlossenen Abrechnung etwas nicht, nimmt quoroAI sie zurück und rechnet den Monat neu — von hier aus geht das nicht, und das ist Absicht.</div>'
+      : '<div class="klein">Noch nicht bezahlt, seit ' + tageSeit(a.abgeschlossen) + ' Tagen. Sobald die Überweisung bei uns ankommt, steht hier das Datum. Stimmt etwas nicht, meldest du dich, bevor du zahlst — zurücknehmen kann die Abrechnung nur quoroAI.</div>';
+
+    monatInhalt.innerHTML = html;
+
+    document.getElementById('beleg').addEventListener('click', function(){
+      erzeugeBeleg(a);
+      var m = document.getElementById('beleg-meldung');
+      m.hidden = false;
+      m.textContent = 'Im Entwurf ist der Beleg eine Textdatei. Im Produkt liegt hier die Rechnung als PDF, mit Rechnungsnummer und Steuerausweis.';
+    });
+  }
+
+  /* Der Beleg als Textdatei — dieselbe Krücke wie in rechnungen.html: der
+     Entwurf zeigt, WAS im Dokument steht, nicht wie es gesetzt ist. */
+  function erzeugeBeleg(a){
+    var d = a.daten;
+    var zeilen = ['quoroAI, Abrechnung ' + monatsLabel(a.monat), BERATUNG.name, ''];
+    d.zeilen.forEach(function(z){
+      var her = z.tage < z.tageImMonat ? z.tage + '/' + z.tageImMonat + ' Tage' : 'ganzer Monat';
+      zeilen.push(z.name + ' (' + TARIFE[z.tarif].label + ', ' + her + '): ' + euro(z.betrag));
+    });
+    if (d.zeilen.length === 0) zeilen.push('kein Kundenzugang in diesem Monat');
+    zeilen.push('', 'Listenpreise ' + euro(d.zwischensumme));
+    if (d.zwischensumme > 0) zeilen.push('Wholesale-Rabatt ' + d.rabattProzent + ' %: ' + euro(-d.rabatt));
+    zeilen.push('Plattformgebühr ' + euro(d.gebuehr), 'Zu zahlen ' + euro(d.gesamt), '',
+                'Abgeschlossen am ' + datum(a.abgeschlossen),
+                a.bezahlt ? 'Bezahlt am ' + datum(a.bezahlt) : 'Noch nicht bezahlt', '',
+                '— Vorführung, Demo-Daten; im Produkt ein echtes PDF');
+    var blob = new Blob([zeilen.join('\n')], {type:'text/plain'});
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = 'quoroai-' + a.monat.slice(0,7) + '.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+
+  /* ================= Wege zwischen den Ansichten ================= */
+  var ansichten = {
+    stand: document.getElementById('ansicht-stand'),
+    monat: document.getElementById('ansicht-monat')
+  };
+  function zeige(welche){
+    Object.keys(ansichten).forEach(function(k){
+      ansichten[k].hidden = k !== welche;
+      ansichten[k].classList.remove('zeigt');
+    });
+    var an = ansichten[welche];
+    Array.prototype.forEach.call(an.children, function(el, i){
+      el.style.setProperty('--verz', (i * 0.06) + 's');
+    });
+    void an.offsetWidth; /* erzwingt den Neustart der Ankunft */
+    an.classList.add('zeigt');
+    window.scrollTo(0, 0);
+  }
+
+  function route(){
+    var weg = location.hash.replace(/^#/, '').split('/');
+    if (weg[0] === 'm') {
+      var a = abschlussMit(weg[1]);
+      if (a) {
+        zeichneMonat(a);
+        zeige('monat');
+        document.title = monatsLabel(a.monat) + ', was quoroAI berechnet';
+        return;
+      }
+      location.hash = '';
+      return;
+    }
+    zeichneStand();
+    zeige('stand');
+    document.title = 'Was quoroAI berechnet';
+  }
+  window.addEventListener('hashchange', route);
+
+  document.querySelector('#ansicht-monat .zurueck-zeile').addEventListener('click', function(e){
+    e.preventDefault();
+    location.hash = '';
+  });
+
+  route();
+})();
+</script>
+<script src="uhr.js"></script>
+<script src="zeiger.js"></script>
+</body>
+</html>
