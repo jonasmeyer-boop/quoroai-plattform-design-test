@@ -25,7 +25,14 @@
    ist Arbeitsfläche.
    Unterschied zur Betreibersicht: hier gibt es kein „Bezahlt" und kein
    „Verwerfen". Wer zahlt, stellt nicht selbst fest, dass gezahlt wurde.
-   Marker: BERATUNG-ABRECHNUNG-V1 */
+   V2 (Code-Review): die Kerbe hing IN der Schiene, die ihren Inhalt
+   beschneidet — von der Marke auf der Schiene blieb ein Strich in ihr. Sie
+   hängt jetzt daneben und sitzt auf der Skala der Flüssigkeit. Der Text
+   nennt die Kerbe nur noch, wenn sie auch steht (ein Vormonat über der
+   Hochrechnung passt nicht auf die Schiene), Kerbe und Zeile werden vor
+   jedem Zeichnen zurückgesetzt, und die Begründung „wird teurer, weil …"
+   wird aus den Zahlen abgelesen statt behauptet.
+   Marker: BERATUNG-ABRECHNUNG-V2 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -122,10 +129,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 .lage .offen b{display:block;font-size:22px;font-weight:600;color:var(--tinte);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 .lage .offen.nichts b{color:var(--gruen)}
 /* Der offene Betrag ist der Griff zu seiner Abrechnung — er sieht aus wie
-   eine Zahl und verhält sich wie eine Tür. Die Hover-Fläche liegt als eigene
-   Er trägt keine eigene Fläche: jedes Polster um ihn herum — als Margin oder
-   als untergelegte Schicht — machte ihn breiter als seinen Kasten, und am
-   390er Fenster lief er dadurch 10px hinaus. Der Strich reicht. */
+   eine Zahl und verhält sich wie eine Tür. Er trägt dabei keine eigene
+   Fläche: jedes Polster um ihn herum — als Margin oder als untergelegte
+   Schicht — machte ihn breiter als seinen Kasten, und am 390er Fenster lief
+   er dadurch 10px hinaus. Der Strich beim Überfahren reicht. */
 .lage .offen a{display:block;color:inherit;text-decoration:none}
 .lage .offen a b{color:var(--bernstein)}
 .lage .offen a:hover b{text-decoration:underline;text-underline-offset:4px}
@@ -134,7 +141,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
    aufgelaufen ist, rechts, wo der Monat landet, wenn sich nichts ändert —
    und die Kerbe zeigt, wo der Vormonat stand. Der Balken läuft beim
    Ankommen einmal auf seinen Stand; danach ist die Fläche ruhig. */
-.strecke{margin-top:22px}
+.strecke{margin-top:22px;position:relative}
 .strecke .schiene{
   position:relative;height:14px;border-radius:var(--radius-kapsel);overflow:hidden;
   background:linear-gradient(180deg, rgba(24,21,47,.08), rgba(255,255,255,.45) 55%);
@@ -148,8 +155,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   box-shadow:inset 0 1px 1px rgba(255,255,255,.5), 0 0 8px rgba(111,99,232,.45);
   transition:width .9s var(--kurve);
 }
+/* Die Kerbe hängt an der Strecke, nicht in der Schiene: die Schiene beschneidet
+   ihren Inhalt (sonst liefe der Schein der Flüssigkeit über den Rand hinaus),
+   und darin wurde aus der Marke AUF der Schiene ein Strich IN ihr — genau der
+   Unterschied, von dem die ganze Idee lebt. Sie steht deshalb daneben und
+   rechnet die Geometrie der Flüssigkeit nach: 1px Rand plus 2px Polster. */
 .strecke .kerbe{
-  position:absolute;top:-3px;bottom:-3px;width:2px;border-radius:2px;
+  position:absolute;top:-3px;height:22px;width:2px;border-radius:2px;
   background:var(--nebel-700);opacity:.55;
 }
 .strecke .marken{
@@ -299,8 +311,8 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
       <div class="strecke" id="strecke" hidden>
         <div class="schiene" aria-hidden="true">
           <span class="fluss" id="fluss"></span>
-          <span class="kerbe" id="kerbe" hidden></span>
         </div>
+        <span class="kerbe" id="kerbe" aria-hidden="true" hidden></span>
         <div class="marken">
           <span>bis heute <b id="marke-heute"></b></span>
           <span id="marke-ende"></span>
@@ -490,6 +502,26 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
       '</dl>' + jeZugang + '</section>';
   }
 
+  /* Warum dieser Monat teurer wird — abgelesen, nicht behauptet. Ein Grund,
+     der fest im Satz steht, stimmt für die gesäten Zahlen und lügt bei den
+     nächsten: teurer wird es auch durch eine Höherstufung bei gleicher
+     Zahl von Zugängen oder durch die erste volle Plattformgebühr. Findet
+     sich keine Ursache eindeutig, bleibt der Satz ohne Begründung — lieber
+     karg als falsch. */
+  function warumTeurer(jetzt, vorher){
+    if (jetzt.zugaenge > vorher.zugaenge) return ', weil mehr Kundenzugänge laufen';
+    var vorherTeilweise = {};
+    vorher.zeilen.forEach(function(z){
+      if (z.tage < z.tageImMonat) vorherTeilweise[z.name] = true;
+    });
+    var vollGeworden = jetzt.zeilen.some(function(z){
+      return vorherTeilweise[z.name] && z.tage === z.tageImMonat;
+    });
+    if (vollGeworden) return ', weil Zugänge aus dem Vormonat jetzt den ganzen Monat laufen';
+    if (jetzt.gebuehr > vorher.gebuehr) return ', weil die Plattformgebühr diesmal für den ganzen Monat zählt';
+    return '';
+  }
+
   /* ================= Ansicht 1: Stand und Verlauf ================= */
   var lageZahl = document.getElementById('lage-zahl');
 
@@ -525,25 +557,34 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
       document.getElementById('marke-ende').innerHTML =
         'zum Monatsende rund <b>' + euro(ganzer.gesamt) + '</b>';
       var anteil = Math.max(0, Math.min(1, laufend.gesamt / ganzer.gesamt));
-      /* Die Kerbe steht nur da, wo sie hinpasst: ein Vormonat, der über der
-         Hochrechnung liegt, hat auf dieser Schiene keinen Platz — dann sagt
-         die Zeile darunter es in Worten. */
+      /* Die Kerbe steht nur da, wo sie hinpasst: ein Vormonat, der ÜBER der
+         Hochrechnung liegt, hat auf dieser Schiene keinen Platz. Dann sagt es
+         die Zeile darunter in Worten — und nennt die Kerbe auch nicht, sonst
+         zeigt der Text auf etwas, das nicht da ist.
+         Beide werden bei jedem Zeichnen erst zurückgesetzt: ein Stand, der
+         einmal stand, überlebte sonst die neuen Zahlen. */
       var kerbe = document.getElementById('kerbe');
       var zeile = document.getElementById('marke-vormonat');
+      kerbe.hidden = true;
+      zeile.hidden = true;
       if (vorab) {
-        var v = vorab.daten.gesamt / ganzer.gesamt;
+        var vgl = vorab.daten.gesamt;
+        var v = vgl / ganzer.gesamt;
+        zeile.hidden = false;
         if (v <= 1) {
           kerbe.hidden = false;
-          kerbe.style.left = 'calc(' + (v * 100).toFixed(1) + '% - 1px)';
-        }
-        zeile.hidden = false;
-        zeile.innerHTML = 'Die Kerbe ist der ' + monatsLabel(vorab.monat) + ': <b>' +
-          euro(vorab.daten.gesamt) + '</b>. ' +
-          (ganzer.gesamt > vorab.daten.gesamt
-            ? 'Dieser Monat wird teurer, weil mehr Zugänge den ganzen Monat laufen.'
-            : ganzer.gesamt < vorab.daten.gesamt
-              ? 'Dieser Monat wird günstiger.'
+          /* Die Flüssigkeit beginnt 3px innen (1px Rand, 2px Polster) und ist
+             um 6px kürzer als die Schiene — die Kerbe muss auf derselben
+             Skala sitzen, sonst zeigt sie neben ihren eigenen Wert. */
+          kerbe.style.left = 'calc(2px + (100% - 6px) * ' + v.toFixed(4) + ')';
+          zeile.innerHTML = 'Die Kerbe ist der ' + monatsLabel(vorab.monat) + ': <b>' +
+            euro(vgl) + '</b>. ' + (ganzer.gesamt > vgl
+              ? 'Dieser Monat wird teurer' + warumTeurer(ganzer, vorab.daten) + '.'
               : 'Dieser Monat kostet dasselbe.');
+        } else {
+          zeile.innerHTML = 'Der ' + monatsLabel(vorab.monat) + ' lag mit <b>' + euro(vgl) +
+            '</b> über allem, worauf dieser Monat hinausläuft — er wird günstiger.';
+        }
       }
       requestAnimationFrame(function(){
         document.getElementById('fluss').style.width =
