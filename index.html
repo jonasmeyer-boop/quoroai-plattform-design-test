@@ -3,111 +3,151 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Entwürfe · quoroai-plattform-design</title>
+<title>Der Stand des Designs · quoroAI</title>
+<link rel="stylesheet" href="system.css">
 <style>
-/* Marker: ENTWURFS-INDEX-V12 (Block C: der quoroAI-Plattformbereich) */
+/* Marker: ENTWURFS-INDEX-V13 (verworfene Entwürfe raus, nach Bereichen sortiert)
+
+   Diese Liste ist die Tür zu allen Entwürfen. Sie führt NUR, was heute gilt —
+   verworfene Richtungen stehen in der Chronik, nicht hier. Wer eine Fläche
+   sucht, soll an der Überschrift erkennen, wessen Marke sie trägt: quoroAI
+   selbst, die Beratung im Cockpit (quoroAI), oder der Kunde der Beratung
+   (White-Label). */
 *{margin:0;padding:0;box-sizing:border-box}
-body{
-  background:#f4f4f5;color:#17181c;
-  font-family:system-ui,sans-serif;line-height:1.6;
-  padding:64px 24px;
+body{padding:0}
+.rahmen{max-width:940px;margin:0 auto;padding:72px 24px 96px}
+
+.kopf h1{font-size:clamp(28px,5.5vw,42px);line-height:1.1}
+.kopf .unter{font-size:17px;color:var(--nebel-600);margin-top:12px;max-width:58ch;line-height:1.6}
+.kopf .stand{font-size:13.5px;color:var(--nebel-500);margin-top:14px}
+
+h2.bereich{
+  font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--nebel-600);
+  margin-top:56px;text-transform:uppercase;
 }
-.rahmen{max-width:920px;margin:0 auto}
-/* „Unternehmensberatungen" ist länger als ein Handy breit ist — ohne
-   Trennung schob das Wort die ganze Seite 39px zur Seite. */
-h1{font-size:clamp(22px,6vw,28px);letter-spacing:-.02em;hyphens:auto;overflow-wrap:break-word}
-p.unter{color:#6b7280;margin-top:6px;max-width:60ch}
-.liste{margin-top:40px;display:grid;gap:20px}
-a.entwurf{
-  display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:center;
-  background:#fff;border:0.5px solid rgba(23,24,28,.12);border-radius:20px;
-  padding:16px;text-decoration:none;color:inherit;
-  transition:transform .2s ease,box-shadow .2s ease;
+h2.bereich + .was{font-size:14.5px;color:var(--nebel-600);margin-top:6px;max-width:62ch;line-height:1.55}
+
+/* Der Einstieg eines Bereichs: Bild links, Text rechts. */
+a.gross{
+  display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:center;
+  margin-top:16px;padding:16px;
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);
+  text-decoration:none;color:inherit;
+  transition:transform .2s var(--kurve),box-shadow .2s var(--kurve),border-color .2s var(--kurve);
 }
-a.entwurf:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(23,24,28,.1)}
-a.entwurf img{width:100%;height:124px;object-fit:cover;border-radius:12px;display:block}
-a.entwurf h2{font-size:18px;letter-spacing:-.01em}
-a.entwurf p{font-size:14px;color:#6b7280;margin-top:4px}
+a.gross img{width:100%;height:150px;object-fit:cover;border-radius:var(--radius-innen);display:block}
+a.gross h3{font-family:var(--schrift-schau);font-size:20px;letter-spacing:-.01em;line-height:1.2}
+a.gross p{font-size:14.5px;color:var(--nebel-600);margin-top:6px;line-height:1.55}
+
+/* Die weiteren Flächen eines Bereichs: eine Zeile je Fläche. */
+.zeilen{
+  margin-top:12px;background:var(--flaeche);
+  border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);overflow:hidden;
+}
+a.zeile{
+  display:flex;gap:16px;align-items:baseline;justify-content:space-between;
+  padding:15px 20px;text-decoration:none;color:inherit;
+  border-top:0.5px solid var(--nebel-200);
+  transition:background .15s var(--kurve);
+}
+a.zeile:first-child{border-top:0}
+/* word-spacing wie in system.css: die Schauschrift setzt sonst „Wissen der
+   Beratung" zusammen. Die Regel dort fasst nur h1/h2/h3. */
+a.zeile b{font-family:var(--schrift-schau);font-size:16px;font-weight:600;letter-spacing:-.01em;word-spacing:1.5px;white-space:nowrap}
+a.zeile span{font-size:14px;color:var(--nebel-600);text-align:right;line-height:1.5}
+
+@media (hover:hover){
+  a.gross:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(24,21,47,.08);border-color:var(--lila-300)}
+  a.zeile:hover{background:var(--lila-050)}
+}
+
+.fuss{margin-top:64px;font-size:13.5px;color:var(--nebel-500);line-height:1.6;max-width:62ch}
+.fuss b{color:var(--nebel-600);font-weight:600}
+
 @media (max-width:700px){
-  a.entwurf{grid-template-columns:1fr}
-  a.entwurf img{height:160px}
+  .rahmen{padding:44px 18px 72px}
+  a.gross{grid-template-columns:1fr;gap:14px}
+  a.gross img{height:170px}
+  a.zeile{flex-direction:column;gap:4px;align-items:flex-start}
+  a.zeile span{text-align:left}
+  a.zeile b{white-space:normal}
 }
 </style>
 </head>
-<body>
+<body class="quoro">
 <div class="rahmen">
-  <h1>Entwürfe: Plattform für Unternehmensberatungen</h1>
-  <p class="unter">Drei Richtungen für das begehbare Zuhause der Beratung. Marke, Motiv und Stimmung sind je Entwurf eigenständig, die Beispielmarke Nordholm &amp; Partner ist Platzhalter.</p>
-  <div class="liste">
-    <a class="entwurf" href="system.html" style="border-color:#6f63e8">
-      <img src="bilder/quoro-icon.svg" alt="quoroAI-Designsystem" style="object-fit:contain;background:#ecebfd;padding:28px">
-      <div><h2>Das quoroAI-Designsystem, entschieden</h2><p>Weißer Grund, das Logo-Lila als einzige Akzentfarbe, Clash Display als Schauschrift, Glas als Material fürs Chrom: milchige Flächen schweben über der Lila-Aurora. Tokens in system.css.</p></div>
-    </a>
-    <a class="entwurf" href="wurzel.html" style="border-color:#6f63e8">
-      <img src="bilder/modell/stadt-weiss.jpg" alt="Die quoroAI-Wurzel">
-      <div><h2>Die quoroAI-Wurzel · die Tür der Plattform</h2><p>Die Adresse ohne Beratung dahinter: ein Bildschirm, zwei Wege — Beratung anlegen oder anmelden. Beim Ankommen geht im Modell das Licht an; hinter einer Adresse ohne Beratung bleibt es aus.</p></div>
-    </a>
-    <a class="entwurf" href="plattform.html" style="border-color:#6f63e8">
-      <img src="bilder/quoro-icon.svg" alt="Der quoroAI-Plattformbereich" style="object-fit:contain;background:#ecebfd;padding:28px">
-      <div><h2>Der quoroAI-Plattformbereich · die Abrechnung der Beratungen</h2><p>Die einzige Fläche, die über alle Beratungen hinwegsieht: was der laufende Monat bisher einbringt, was offen ist, und der Abschluss eines vergangenen Monats — der Moment, in dem das Glas zu Eis wird.</p></div>
-    </a>
-    <a class="entwurf" href="startseite.html" style="border-color:#2b5fe3">
-      <img src="bilder/startseite-lobby.jpg" alt="Startseite der Beratung" style="object-fit:contain;background:#fafaf7">
-      <div><h2>Die Startseite der Beratung · die White-Label-Lobby</h2><p>Unter der Adresse der Beratung arbeiten zwei verschiedene Leute: Wohin die Tür führt, entscheidet der Zugang — zum Berater, ins Cockpit oder erst einmal zum Anmelden.</p></div>
-    </a>
-    <a class="entwurf" href="gespraech.html" style="border-color:#2b5fe3">
-      <img src="bilder/hafen.jpg" alt="Gespräch" style="object-position:top">
-      <div><h2>Das Gespräch baut den Raum · aktueller Stand</h2><p>Kein Menü, kein Motiv: Eine Frage, und die Software materialisiert sich als Blaupause, die Wirklichkeit wird. Jonas' Entscheidung vom 2026-08-12.</p></div>
-    </a>
-    <a class="entwurf" href="uebersicht.html" style="border-color:#2b5fe3">
-      <img src="bilder/hafen.jpg" alt="Kundenbereich" style="object-position:bottom">
-      <div><h2>Der Kundenbereich · komplett</h2><p>Übersicht (Akte als Cockpit), Unterlagen mit Suche, Leistungsnachweis, Rechnungen mit Beleg, Anmelden mit Zwei-Faktor — alle Flächen, die Kunden der Beratungen sehen.</p></div>
-    </a>
-    <a class="entwurf" href="beratung-f-modell.html" style="border-color:#2b5fe3">
-      <img src="bilder/modell/stadt.jpg" alt="Das Modell der Beratung">
-      <div><h2>Beratungs-Cockpit · Vorschlag F · Das Modell</h2><p>Fotorealistisches Architekturmodell der Beratung im Abendlicht, die Zentrale glüht als Glas-Laterne: ein Film zeigt, wie der KI-Berater es aufbaut, danach ist es begehbar. Jedes Mandat ein Gebäude, der Stift kritzelt aufs Foto.</p></div>
-    </a>
-    <a class="entwurf" href="beratung-a-lagetisch.html" style="border-color:#2b5fe3">
-      <img src="bilder/hafen.jpg" alt="Der Lagetisch" style="object-position:center">
-      <div><h2>Beratungs-Cockpit · Vorschlag A · Der Lagetisch</h2><p>Alle Mandate liegen als Akten auf dem Tisch von oben, Dringendes obenauf, der Stift kritzelt daneben. Ein Klick fährt den Tisch heran und schlägt die Akte auf.</p></div>
-    </a>
-    <a class="entwurf" href="beratung-b-maschinenraum.html" style="border-color:#2b5fe3">
-      <img src="bilder/hafen.jpg" alt="Der Maschinenraum" style="object-position:top">
-      <div><h2>Beratungs-Cockpit · Vorschlag B · Der Maschinenraum</h2><p>Dem KI-Berater live bei der Arbeit zusehen: Fragen laufen ein, Antworten schreiben sich, und was er nicht darf, wirft er sichtbar auf den Tisch der Beratung.</p></div>
-    </a>
-    <a class="entwurf" href="beratung-c-blaupause.html" style="border-color:#2b5fe3">
-      <img src="bilder/hafen.jpg" alt="Die Blaupause" style="object-position:bottom">
-      <div><h2>Beratungs-Cockpit · Vorschlag C · Die Blaupause</h2><p>Die ganze Beratung als Zeichnung auf Millimeterpapier: je Mandat ein gezeichneter Block, Probleme mit dem Stift eingekreist, ein Klick belichtet den Plan zur echten Oberfläche.</p></div>
-    </a>
-    <a class="entwurf" href="beratung-d-aktenregal.html" style="border-color:#2b5fe3">
-      <img src="bilder/hafen.jpg" alt="Das Aktenregal" style="object-position:center">
-      <div><h2>Beratungs-Cockpit · Vorschlag D · Das Aktenregal</h2><p>Ein Regal lebender Akten, eine je Mandat. Was Aufmerksamkeit braucht, lehnt sich vor und trägt einen Zettel; ein Klick zieht die Akte heraus und klappt sie auf.</p></div>
-    </a>
-    <a class="entwurf" href="beratung-e-morgenlage.html" style="border-color:#2b5fe3">
-      <img src="bilder/hafen.jpg" alt="Die Morgenlage" style="object-position:top">
-      <div><h2>Beratungs-Cockpit · Vorschlag E · Die Morgenlage</h2><p>Das Cockpit ist selbst ein Gespräch: der KI-Berater schreibt der Beratung die Lage, und alles Genannte materialisiert sich daneben. Die Sprache der Kundenseite, von der anderen Seite.</p></div>
-    </a>
-    <a class="entwurf" href="beratung-cockpit.html">
-      <img src="bilder/hafen.jpg" alt="Cockpit der Beratung" style="object-position:center">
-      <div><h2>Beratungs-Cockpit · der ruhige Grundriss</h2><p>Die nüchterne Fassung als Vergleichsmaßstab: was wartet, die Mandate, der KI-Berater in Zahlen und Auftritt, Abrechnung.</p></div>
-    </a>
-    <a class="entwurf" href="hafen.html">
-      <img src="bilder/hafen.jpg" alt="Hafen">
-      <div><h2>Der Hafen · Archiv</h2><p>Das begehbare Motiv (verworfen): Leuchtturm ist der KI-Berater, jedes Mandat ein Schiff am Liegeplatz.</p></div>
-    </a>
-    <a class="entwurf" href="entwurf-a-nachtglut.html">
-      <img src="bilder/entwurf-a-nachtturm.jpg" alt="Nachtturm">
-      <div><h2>A · Nachtglut</h2><p>Dunkles Premium: der Beratungsturm bei Nacht, warme Glut in den Etagen. Das Haus, das nie schließt.</p></div>
-    </a>
-    <a class="entwurf" href="entwurf-b-tageslicht.html">
-      <img src="bilder/entwurf-b-modell.jpg" alt="Weißes Modell">
-      <div><h2>B · Tageslicht</h2><p>Helles Atelier: weißes Architekturmodell auf Weiß, Kobalt als Akzent. Die ruhige, klare Richtung.</p></div>
-    </a>
-    <a class="entwurf" href="entwurf-c-signal.html">
-      <img src="bilder/entwurf-c-campus.jpg" alt="Campus">
-      <div><h2>C · Signal</h2><p>Mutig und laut: der Beratungs-Campus von schräg oben, Signalgrün auf Papierweiß, harte Kanten.</p></div>
-    </a>
+
+  <div class="kopf">
+    <h1>Der Stand des Designs</h1>
+    <p class="unter">Alle Flächen der Plattform, wie sie heute aussehen sollen. Was hier steht, gilt — verworfene Richtungen stehen in der Chronik, nicht in dieser Liste.</p>
+    <p class="stand">Die Beispielmarke <b>Nordholm &amp; Partner</b> ist Platzhalter; auf den Kundenflächen lässt sie sich unten im Bild wechseln.</p>
   </div>
+
+  <h2 class="bereich">Das Fundament</h2>
+  <p class="was">Eine Quelle für alles, was quoroAIs eigene Marke trägt.</p>
+  <a class="gross" href="system.html">
+    <img src="bilder/quoro-icon.svg" alt="" style="object-fit:contain;background:var(--lila-100);padding:34px">
+    <div>
+      <h3>Das quoroAI-Designsystem</h3>
+      <p>Weißer Grund, das Logo-Lila als einzige Akzentfarbe, Clash Display als Schauschrift, Glas als Material fürs Chrom. Zustände sind Füllstände im Glas. Die Tokens liegen in <code>system.css</code>.</p>
+    </div>
+  </a>
+
+  <h2 class="bereich">quoroAI selbst</h2>
+  <p class="was">Die Flächen, auf denen quoroAI mit eigenem Namen auftritt — davor steht noch keine Beratung.</p>
+  <a class="gross" href="wurzel.html">
+    <img src="bilder/modell/stadt-weiss.jpg" alt="">
+    <div>
+      <h3>Die Wurzel · die Tür der Plattform</h3>
+      <p>Die Adresse ohne Beratung dahinter: ein Bildschirm, zwei Wege. Beim Ankommen geht im Modell das Licht an; hinter einer Adresse, hinter der niemand arbeitet, bleibt es aus.</p>
+    </div>
+  </a>
+  <div class="zeilen">
+    <a class="zeile" href="registrieren.html"><b>Beratung anlegen</b><span>Die Tür für eine neue Beratung — beim Ausfüllen baut sich ihr Modell auf</span></a>
+    <a class="zeile" href="plattform.html"><b>Abrechnung</b><span>Der Plattformbereich: was alle Beratungen uns schulden, und der Abschluss friert einen Monat ein</span></a>
+  </div>
+
+  <h2 class="bereich">Die Beratung arbeitet</h2>
+  <p class="was">Das Cockpit trägt immer die quoroAI-Marke. Alle Räume hängen am Modell — dort geht man hinein, nicht über ein Menü.</p>
+  <a class="gross" href="beratung-f-modell.html">
+    <img src="bilder/modell/stadt.jpg" alt="">
+    <div>
+      <h3>Das Modell · das Cockpit der Beratung</h3>
+      <p>Ein Architekturmodell der Beratung im Abendlicht, die Zentrale glüht als Glas-Laterne. Ein Film zeigt, wie der KI-Berater es aufbaut, danach ist es begehbar: jedes Mandat ein Gebäude.</p>
+    </div>
+  </a>
+  <div class="zeilen">
+    <a class="zeile" href="beratung-mandat.html"><b>Mandat</b><span>Ein Kunde von innen: Auftrag, Zahlen, Verlauf</span></a>
+    <a class="zeile" href="beratung-akte.html"><b>Kundenakte</b><span>Was über den Kunden bekannt ist, an einer Stelle</span></a>
+    <a class="zeile" href="beratung-ki-berater.html"><b>Dein KI-Berater</b><span>Was er kann, wie er auftritt, was er nicht darf</span></a>
+    <a class="zeile" href="beratung-wissen.html"><b>Wissen der Beratung</b><span>Die Unterlagen, aus denen er antwortet</span></a>
+    <a class="zeile" href="beratung-termine.html"><b>Termine und Übergaben</b><span>Wo ein Mensch übernimmt</span></a>
+    <a class="zeile" href="beratung-mitlesen.html"><b>Mitlesen</b><span>Gespräche, die der Kunde freigegeben hat</span></a>
+    <a class="zeile" href="beratung-rechnungen.html"><b>Rechnungen der Beratung</b><span>Was die Beratung ihren Kunden stellt</span></a>
+    <a class="zeile" href="beratung-verwaltung.html"><b>Verwaltung</b><span>Team, Rollen, Einladungen, zweiter Faktor</span></a>
+    <a class="zeile" href="beratung-marke.html"><b>Marke</b><span>Die vier Regler, an denen die Kundenflächen hängen</span></a>
+  </div>
+
+  <h2 class="bereich">Was die Kunden der Beratung sehen</h2>
+  <p class="was">White-Label: hier steht die Marke der Beratung, nicht quoroAI. Diese Flächen binden <code>system.css</code> bewusst nicht ein.</p>
+  <a class="gross" href="startseite.html">
+    <img src="bilder/startseite-lobby.jpg" alt="" style="object-fit:contain;background:#fafaf7">
+    <div>
+      <h3>Die Startseite · die Lobby der Beratung</h3>
+      <p>Unter der Adresse der Beratung arbeiten zwei verschiedene Leute. Wohin die Tür führt, entscheidet der Zugang: zum Berater, ins Cockpit, oder erst einmal zum Anmelden.</p>
+    </div>
+  </a>
+  <div class="zeilen">
+    <a class="zeile" href="gespraech.html"><b>Das Gespräch</b><span>Kein Menü: eine Frage, und die Antwort baut den Raum, in dem man weiterarbeitet</span></a>
+    <a class="zeile" href="uebersicht.html"><b>Übersicht</b><span>Die Akte des Kunden als Cockpit</span></a>
+    <a class="zeile" href="unterlagen.html"><b>Unterlagen</b><span>Alles Hochgeladene, durchsuchbar</span></a>
+    <a class="zeile" href="leistungen.html"><b>Leistungsnachweis</b><span>Was die Beratung geleistet hat, deckungsgleich mit dem Mandat</span></a>
+    <a class="zeile" href="rechnungen.html"><b>Rechnungen</b><span>Mit Beleg und Zahlungsstand</span></a>
+    <a class="zeile" href="anmelden.html"><b>Anmelden</b><span>Die Tür zeichnet sich, zweiter Faktor inbegriffen</span></a>
+  </div>
+
+  <p class="fuss">Verworfen und deshalb nicht mehr hier: das Hafen-Motiv, die drei ersten Richtungen (Nachtglut, Tageslicht, Signal), die Cockpit-Vorschläge A bis E und der ruhige Grundriss. <b>Warum</b> jedes davon weg ist, steht in <code>docs/chronik/</code> — die Entscheidungen bleiben, die Entwürfe nicht.</p>
+
 </div>
 </body>
 </html>
