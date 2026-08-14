@@ -44,7 +44,9 @@
    V24: die Zentrale-Tür „Verwaltung" führt nach beratung-verwaltung.html,
    und daneben steht der Nachweis-Stand des Teams (3 von 5 unterwiesen,
    deiner fehlt) — der Hinweis bleibt im Cockpit stehen, bis bestätigt ist.
-   Marker: BERATUNG-F-MODELL-V25 */
+   V26: die Uhr (uhr.js) liegt als Dock über der Fläche, die Zentrale hat eine
+   Tür „Zeiten", und am schmalen Fenster rückt der Tisch über das Dock.
+   Marker: BERATUNG-F-MODELL-V26 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -225,6 +227,11 @@ body.drin #blitz{animation:durchbruch .6s ease-out}
 #auftakt h1{font-size:clamp(22px,3vw,32px);font-weight:600;letter-spacing:-.03em;line-height:1.15;margin-top:2px}
 
 /* Der Tisch: was wartet, als Glas-Ablage unten ========== */
+/* Am schmalen Fenster nimmt das Uhr-Dock (uhr.js) die volle Breite unten —
+   der Tisch rückt darüber, sonst läge er darunter begraben. */
+@media (max-width:700px){
+  #tisch{bottom:calc(96px + env(safe-area-inset-bottom))!important}
+}
 #tisch{
   position:fixed;left:24px;bottom:20px;z-index:10;
   display:flex;flex-direction:column;gap:8px;max-width:min(430px,calc(100vw - 48px));
@@ -767,6 +774,7 @@ body.gezoomt #zonen{display:block}
       <a class="knopf leise" href="beratung-marke.html">Marke</a>
       <button class="bald knopf leise" type="button">Leistungsnachweise</button>
       <a class="knopf leise" href="beratung-rechnungen.html">Rechnungen</a>
+      <a class="knopf leise" href="beratung-zeiten.html">Zeiten</a>
       <a class="knopf leise" href="beratung-verwaltung.html">Verwaltung</a>
     </div>
   </section>
@@ -1084,6 +1092,7 @@ body.gezoomt #zonen{display:block}
   }
 })();
 </script>
+<script src="uhr.js"></script>
 <script src="zeiger.js"></script>
 </body>
 </html>
