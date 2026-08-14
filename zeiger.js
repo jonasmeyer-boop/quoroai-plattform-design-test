@@ -10,7 +10,14 @@
    Kurve kommen aus den system.css-Tokens; pointercancel löst den Drück-Zustand;
    der Schweif reißt beim Fensterwechsel ab statt quer durchzuziehen; Glow ohne
    shadowBlur; Hover-Zustand wird auch beim Scrollen nachgeführt.
-   Marker: ZEIGER-KOMET-V2 */
+   V3: Der Systemzeiger wird erst ausgeblendet, wenn der Komet weiß, wo er
+   steht. Vorher verschwand nach jedem Seitenwechsel der Zeiger ganz — die
+   Seite schaltete cursor:none sofort, der Komet stand aber unsichtbar bei
+   opacity 0 und wartete auf die erste Mausbewegung. Wer nach einem Klick die
+   Hand ruhen ließ, hatte keinen Zeiger mehr. Dasselbe beim Verlassen des
+   Fensters und beim Tabwechsel. Ab jetzt gilt: entweder der Komet oder der
+   Systempfeil, nie nichts.
+   Marker: ZEIGER-KOMET-V3 */
 (function(){
   'use strict';
   if (!window.matchMedia('(pointer:fine) and (hover:hover)').matches) return;
@@ -38,7 +45,8 @@
   var kopf = document.createElement('div'); kopf.id = 'komet-kopf';
   document.body.appendChild(schweif);
   document.body.appendChild(kopf);
-  document.documentElement.classList.add('komet-zeiger');
+  /* Die Klasse blendet den Systemzeiger aus — sie kommt erst, wenn die erste
+     Mausbewegung verrät, wo der Komet stehen muss (siehe zeige/verstecke). */
 
   var ctx = schweif.getContext('2d');
   var dpr = 1;
@@ -60,10 +68,26 @@
     requestAnimationFrame(male);
   }
 
+  /* Der Tausch geschieht immer als Paar: Komet an, Systemzeiger aus — und
+     zurück. Sonst gibt es einen Zustand ohne jeden Zeiger. */
+  function zeige(){
+    if (da) return;
+    da = true;
+    document.documentElement.classList.add('komet-zeiger');
+    kopf.style.opacity = 1;
+  }
+  function verstecke(){
+    if (!da) return;
+    da = false;
+    document.documentElement.classList.remove('komet-zeiger');
+    kopf.style.opacity = 0;
+    spur.length = 0; /* sonst zieht der Wiedereintritt einen Strich quer durchs Bild */
+  }
+
   document.addEventListener('pointermove', function(e){
     if (e.pointerType === 'touch') return; /* Maus und Stift führen den Kometen */
     mx = e.clientX; my = e.clientY;
-    if (!da) { da = true; kopf.style.opacity = 1; }
+    zeige();
     spur.push({x: mx, y: my, t: performance.now()});
     kopf.style.transform = 'translate(' + mx + 'px,' + my + 'px)';
     wecke();
@@ -102,11 +126,13 @@
     });
   }, {passive: true, capture: true});
 
-  document.addEventListener('mouseleave', function(){
-    kopf.style.opacity = 0; da = false;
-    spur.length = 0; /* sonst zieht der Wiedereintritt einen Strich quer durchs Bild */
+  /* Fenster verlassen, Tab gewechselt, Fokus weg: der Systemzeiger übernimmt
+     wieder, bis die nächste Bewegung den Kometen zurückholt. */
+  document.addEventListener('mouseleave', verstecke);
+  window.addEventListener('blur', verstecke);
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) verstecke();
   });
-  window.addEventListener('blur', function(){ spur.length = 0; });
 
   function male(){
     var jetzt = performance.now();
