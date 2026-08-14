@@ -50,7 +50,7 @@
    Dock; und die Raum-Spalten melden sich jetzt mit data-uhr-polster, damit der
    Baustein ihnen sein Unten unterlegt (diese Fläche hat kein <main>, die
    letzte Tür lag sonst unerreichbar unter dem Dock).
-   Marker: BERATUNG-F-MODELL-V28 (toter Zettel-Handler raus) */
+   Marker: BERATUNG-F-MODELL-V29 (die Tür zur Kundenliste in der Zentrale) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -749,6 +749,9 @@ body.gezoomt #zonen{display:block}
       </div>
     </div>
     <h3 data-du="Deine Mandate, ein Griff je Gebäude" data-sie="Ihre Mandate, ein Griff je Gebäude">Deine Mandate, ein Griff je Gebäude</h3>
+    <!-- Das Modell bleibt der Ort, die Kundenliste ist das Register daneben
+         (Entscheidung 2026-08-14). Deshalb steht die Tür dorthin hier, an den
+         Gebäuden, und nicht als weiteres Gebäude im Bild. -->
     <div class="flotte">
       <button class="flotte-karte" type="button" data-zu="petersen">
         <span class="f-kopf"><b>Petersen Stahlbau</b><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span></span>
@@ -778,6 +781,7 @@ body.gezoomt #zonen{display:block}
       <div class="karte"><div class="wert">3 von 5</div><div class="label">im Team sind KI-unterwiesen</div><div class="delta amber" data-du="deiner fehlt noch" data-sie="Ihrer fehlt noch">deiner fehlt noch</div></div>
     </div>
     <div class="tueren">
+      <a class="knopf leise" href="beratung-kunden.html">Alle Kunden</a>
       <a class="knopf leise" href="beratung-ki-berater.html">Persona einstellen</a>
       <a class="knopf leise" href="beratung-wissen.html">Wissen</a>
       <a class="knopf leise" href="beratung-marke.html">Marke</a>

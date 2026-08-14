@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kunden der Beratung</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Kundenliste (Häppchen C1, Issue #34).
+
+   Die Frage des Häppchens war, wer die Heimat ist. Antwort: das Modell bleibt
+   der Ort, diese Liste ist das Register. Ein Ort trägt Bedeutung — man weiß,
+   wo etwas steht, man sieht, wo es dunkel bleibt. Ein Register trägt Menge —
+   suchen, sortieren, wiederfinden. Bei vier Mandaten reicht der Ort; bei
+   zweihundert braucht es beides, und keines ersetzt das andere. Deshalb hängt
+   die Liste an der Zentrale wie jeder andere Raum, und jede Zeile führt zurück
+   ins Mandat.
+
+   Was die Liste können muss, kommt aus dem Häppchen: suchen, sortieren, sehen
+   wo es klemmt. Das Klemmen ist hier keine Nebensache, sondern die Voreinstellung:
+   die Liste öffnet sortiert nach dem, was Aufmerksamkeit will, und die drei
+   Klemm-Griffe oben sind Filter mit ihrer Zahl daran — stille Mandate, offene
+   Forderungen, ausgelaufene Zugänge.
+
+   Der Buchstabenstreifen rechts erscheint nur bei Sortierung nach Name, weil
+   er nur dort etwas bedeutet. Er ist das einzige Zugeständnis an die Menge,
+   das man sieht; alles andere ist Ruhe.
+
+   Kein Deko-Punkt, kein Mittelpunkt als Trenner (Jonas' Regeln). Zustand ist
+   Füllstand im Glas, Chrom ist quoroAI (system.css).
+
+   Zum Prüfen mit 187 Mandaten gefüllt — das Modell zeigt weiterhin das kleine
+   Beispiel mit vier. Die vier des Modells stehen hier oben mit ihren Zahlen
+   und führen in ihren Raum; die übrigen Zeilen führen auf die Mandatsfläche.
+   V2 nach Code-Review: Orte, Beträge und das Anfangsdatum der vier Modell-
+   Mandate kommen jetzt aus beratung-rechnungen.html statt aus der Erfindung
+   (Cordes hatte eine offene Rechnung, die hier fehlte, und stand deshalb
+   fälschlich auf „läuft"). Die Kennzahl rechts folgt auch in „Was wartet" der
+   Ordnung. Die Ansage für Vorleseprogramme steht einmal statt zwei Dutzend Mal
+   je Tastendruck. Die Griff-Zahlen rechnen Suche und die anderen Griffe mit.
+   Der Buchstabenstreifen rollt, statt seine Knöpfe zu quetschen, und springt
+   über weite Strecken hart statt weich.
+   Marker: BERATUNG-KUNDEN-V2 */
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,select{font-family:inherit}
+/* system.css färbt jeden Link lila und lässt ihm den Unterstrich. Das gilt für
+   Fließtext; eine Zeile, die als Ganzes ein Link ist, wird davon unlesbar. */
+body.quoro a{text-decoration:none}
+body.quoro a.kunde{color:var(--tinte)}
+
+/* ========== quoroAI-Chrom ========== */
+:root{--chrom:60px;--klebe:0px}
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;word-spacing:2px}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+/* Die Krume wird die zweite Zeile des Kopfbands, sobald sie in den Inhalt
+   reicht (Entscheidung 2026-08-14). */
+@media (max-width:1420px){
+  :root{--chrom:118px}
+  nav{height:118px;padding-bottom:58px}
+  #krume{z-index:90}
+}
+
+/* ========== Seite ========== */
+main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:14.5px;color:var(--nebel-600);margin-top:6px;max-width:56ch;line-height:1.55}
+.kopf .tueren{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.kopf .knopf{min-height:40px;padding:0 16px;font-size:13.5px}
+
+/* ---------- Werkzeuge: suchen und sortieren, immer greifbar ---------- */
+.werkzeug{
+  position:sticky;top:calc(var(--chrom) + 8px);z-index:60;
+  margin-top:26px;padding:12px;border-radius:var(--radius-karte);
+  background:rgba(255,255,255,.72);
+  backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid rgba(255,255,255,.66);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 12px 34px rgba(24,21,47,.10);
+}
+.suchreihe{display:flex;gap:10px;align-items:center}
+.suchfeld{position:relative;flex:1;min-width:0}
+.suchfeld input{
+  width:100%;min-height:44px;padding:0 40px 0 40px;font:inherit;font-size:15px;color:var(--tinte);
+  background:var(--flaeche);border:0.5px solid var(--nebel-300);border-radius:var(--radius-innen);
+}
+.suchfeld input:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+.suchfeld input::-webkit-search-cancel-button{display:none}
+.suchfeld .lupe{
+  position:absolute;left:13px;top:50%;translate:0 -50%;width:16px;height:16px;
+  pointer-events:none;color:var(--nebel-400);
+}
+.suchfeld .leeren{
+  position:absolute;right:6px;top:50%;translate:0 -50%;
+  width:32px;height:32px;border:0;border-radius:999px;background:none;cursor:pointer;
+  color:var(--nebel-500);font-size:17px;line-height:1;
+}
+.suchfeld .leeren:hover{background:var(--nebel-100);color:var(--tinte)}
+.sortieren{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.sortieren label{font-size:12.5px;color:var(--nebel-600);white-space:nowrap}
+.sortieren select{
+  min-height:44px;padding:0 12px;font:inherit;font-size:14px;color:var(--tinte);cursor:pointer;
+  background:var(--flaeche);border:0.5px solid var(--nebel-300);border-radius:var(--radius-innen);
+}
+.sortieren select:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+
+/* Die Klemm-Griffe: jeder trägt seine Zahl, keiner ist Deko */
+.klemmen{display:flex;gap:8px;margin-top:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.klemme{
+  display:inline-flex;align-items:baseline;gap:7px;flex-shrink:0;
+  min-height:38px;padding:0 14px;border-radius:999px;cursor:pointer;
+  background:var(--flaeche);border:0.5px solid var(--nebel-300);
+  font-size:13px;font-weight:600;color:var(--nebel-700);
+  transition:border-color .18s var(--kurve),background .18s var(--kurve),color .18s var(--kurve);
+}
+.klemme .n{font-variant-numeric:tabular-nums;font-size:14px;color:var(--tinte)}
+.klemme:hover{border-color:var(--lila-400)}
+.klemme[aria-pressed="true"]{background:var(--tinte);border-color:var(--tinte);color:rgba(255,255,255,.72)}
+.klemme[aria-pressed="true"] .n{color:#fff}
+.klemme.zurueck{margin-left:auto;font-weight:500;color:var(--lila-700);border-color:transparent;background:none}
+.klemme.zurueck:hover{background:var(--lila-050);border-color:var(--lila-200)}
+
+.treffer{
+  display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+  margin:22px 2px 10px;font-size:13.5px;color:var(--nebel-600);
+}
+.treffer b{
+  font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);letter-spacing:var(--schau-spur);
+  font-size:26px;color:var(--tinte);font-variant-numeric:tabular-nums;
+}
+.treffer .summe{margin-left:auto;font-variant-numeric:tabular-nums}
+.nur-gehoert{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/* ---------- Die Liste ---------- */
+/* Ein volles Band statt einer Pille: der Gruppenkopf klebt unter der
+   Werkzeugleiste, und die Karten müssen hinter ihm verschwinden können. Eine
+   Pille bräuchte dafür einen Hintergrund, der über ihre Ränder hinausreicht —
+   der lief auf dem Handy quer aus der Seite heraus. */
+.gruppe{
+  position:sticky;top:calc(var(--chrom) + var(--klebe) + 20px);z-index:40;
+  margin:20px 0 8px;padding:7px 4px;
+  display:flex;align-items:baseline;gap:8px;
+  background:var(--grund);
+  box-shadow:0 -16px 0 var(--grund);
+  font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--nebel-600);
+}
+.gruppe .wie-viele{font-weight:600;letter-spacing:0;text-transform:none;color:var(--nebel-500)}
+.liste{display:flex;flex-direction:column;gap:7px}
+.kunde{
+  display:flex;align-items:center;gap:14px;
+  padding:12px 16px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 6px 18px rgba(16,19,26,.05);
+  text-decoration:none;color:inherit;
+  transition:transform .16s var(--kurve),box-shadow .16s var(--kurve),border-color .16s var(--kurve);
+}
+@media (hover:hover){
+  .kunde:hover{transform:translateY(-1px);border-color:var(--lila-300);box-shadow:0 12px 28px rgba(24,21,47,.09)}
+}
+.kunde .wer{min-width:0;flex:1}
+.kunde .wer b{display:block;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.35}
+.kunde .wer .meta{display:block;font-size:12.5px;color:var(--nebel-500);line-height:1.45;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kunde .wer .klemmt{display:block;font-size:12.5px;color:var(--bernstein);line-height:1.45;font-weight:600}
+.kunde .wer .klemmt.ruhig{color:var(--nebel-500);font-weight:400}
+.kunde .zahl{
+  flex-shrink:0;text-align:right;min-width:96px;
+  font-variant-numeric:tabular-nums;
+}
+.kunde .zahl .wert{display:block;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.kunde .zahl .was{display:block;font-size:11.5px;color:var(--nebel-500)}
+.kunde .z-fuell{display:flex;align-items:center;gap:8px;flex-shrink:0;min-width:112px}
+.kunde .zustand{width:40px;height:18px}
+.kunde .zustand-wort{font-size:12px}
+.kunde .pfeil{flex-shrink:0;color:var(--nebel-400);font-size:15px}
+.kunde:hover .pfeil{color:var(--lila-600)}
+/* Die vier, die im Modell ein Gebäude haben, tragen es als leise Notiz am Namen */
+.kunde .im-modell{
+  display:inline-block;vertical-align:2px;
+  font-family:var(--schrift-text);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--lila-800);background:var(--lila-100);padding:3px 8px;border-radius:999px;
+}
+
+/* Der Buchstabenstreifen: nur bei Sortierung nach Name, nur wo Platz ist */
+#streifen{
+  position:fixed;right:14px;top:50%;translate:0 -50%;z-index:55;
+  display:none;flex-direction:column;gap:1px;
+  padding:8px 4px;border-radius:999px;
+  background:rgba(255,255,255,.7);
+  backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  border:0.5px solid var(--nebel-200);
+  box-shadow:0 10px 30px rgba(24,21,47,.10);
+  /* Ohne overflow quetscht der Flex-Kasten die 26 Knöpfe auf 12px zusammen,
+     sobald das Fenster niedriger als etwa 800px ist — ein Trefferziel, das
+     niemand trifft. Lieber rollen als schrumpfen. */
+  max-height:min(560px, calc(100vh - 260px));
+  overflow-y:auto;overscroll-behavior:contain;
+}
+#streifen button{
+  flex-shrink:0;
+  width:22px;height:19px;border:0;background:none;cursor:pointer;border-radius:6px;
+  font-size:10.5px;font-weight:700;color:var(--nebel-500);line-height:1;
+  transition:color .15s,background .15s;
+}
+#streifen button:hover{color:var(--lila-700);background:var(--lila-050)}
+#streifen button[disabled]{color:var(--nebel-300);cursor:default;background:none}
+@media (min-width:1180px){ body.nach-name #streifen{display:flex} }
+
+/* Nichts gefunden: die Sackgassen-Regel gilt auch hier — ein Ausgang steht da */
+.leer{
+  margin-top:14px;padding:26px 22px;border-radius:var(--radius-karte);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);text-align:center;
+}
+.leer b{display:block;font-family:var(--schrift-schau);font-size:19px;letter-spacing:-.01em}
+.leer p{font-size:14px;color:var(--nebel-600);margin-top:6px;line-height:1.55}
+.leer .knopf{margin-top:16px;min-height:42px;padding:0 18px;font-size:13.5px}
+
+.fuss{margin-top:34px;font-size:12.5px;color:var(--nebel-500);line-height:1.6;max-width:66ch}
+.fuss kbd{
+  font-family:inherit;font-size:11.5px;font-weight:700;padding:1px 6px;border-radius:6px;
+  background:var(--nebel-100);border:0.5px solid var(--nebel-300);color:var(--nebel-700);
+}
+
+@media (max-width:760px){
+  nav{padding:0 18px;padding-bottom:58px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(84px + env(safe-area-inset-bottom))}
+  /* Der Daumen führt: 44px am Handy, auch für Griffe, die am großen Fenster
+     schlanker sein dürfen (docs/wissen/handy-durchgang.md) */
+  .kopf .knopf,.klemme{min-height:44px}
+  /* Suche und Sortierung teilen sich eine Zeile: die Werkzeugleiste klebt, und
+     drei Zeilen Chrom über 187 Karten lassen auf dem Handy fünf davon übrig.
+     Der Name der Sortierung bleibt für Vorleseprogramme stehen. */
+  .sortieren label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .sortieren select{max-width:136px}
+  .kunde{flex-wrap:wrap;row-gap:8px}
+  .kunde .wer{flex:1 1 100%;order:1}
+  .kunde .zahl{order:2;text-align:left;min-width:0}
+  .kunde .z-fuell{order:3;margin-left:auto;min-width:0}
+  .kunde .pfeil{display:none}
+  .kunde .wer .meta{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){
+  .kunde{transition:none}
+}
+</style>
+</head>
+<body class="quoro">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Kunden</b></a>
+
+<main>
+  <div class="kopf">
+    <h1>Kunden</h1>
+    <div class="stand">Das Modell bleibt der Ort, an dem die Beratung arbeitet. Diese Liste ist das Register daneben — für die Tage, an denen man einen Namen sucht und nicht ein Gebäude.</div>
+    <div class="tueren">
+      <a class="knopf sekundaer" href="beratung-f-modell.html">Ins Modell</a>
+      <a class="knopf leise" href="beratung-rechnungen.html">Rechnungen</a>
+      <a class="knopf leise" href="beratung-zeiten.html">Zeiten</a>
+    </div>
+  </div>
+
+  <div class="werkzeug">
+    <div class="suchreihe">
+      <div class="suchfeld">
+        <svg class="lupe" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="7" cy="7" r="4.6"/><path d="M10.4 10.4 14 14" stroke-linecap="round"/>
+        </svg>
+        <input id="suche" type="search" autocomplete="off" spellcheck="false"
+               aria-label="Kunden durchsuchen" placeholder="Name, Branche oder Ort">
+        <button class="leeren" id="leeren" type="button" aria-label="Suche leeren" hidden>✕</button>
+      </div>
+      <div class="sortieren">
+        <label for="sort">Sortiert nach</label>
+        <select id="sort">
+          <option value="klemmt">Was wartet</option>
+          <option value="name">Name</option>
+          <option value="marge">Marge</option>
+          <option value="gehoert">Zuletzt gehört</option>
+          <option value="offen">Offene Forderung</option>
+        </select>
+      </div>
+    </div>
+    <div class="klemmen" role="group" aria-label="Nach Klemmstellen filtern">
+      <button class="klemme" type="button" data-filter="still" aria-pressed="false"><span class="n">0</span> seit drei Wochen still</button>
+      <button class="klemme" type="button" data-filter="offen" aria-pressed="false"><span class="n">0</span> mit offener Forderung</button>
+      <button class="klemme" type="button" data-filter="zugang" aria-pressed="false"><span class="n">0</span> kommen nicht ins Portal</button>
+      <button class="klemme zurueck" type="button" id="alles-zeigen" hidden>Alle zeigen</button>
+    </div>
+  </div>
+
+  <!-- Die Ansage steht bewusst NICHT auf diesem Absatz: die Zahl rollt hoch und
+       änderte ihn zwei Dutzend Mal je Tastendruck — ein Vorleseprogramm hätte
+       jeden Zwischenstand gesprochen. Sie steht einmal, fertig gerechnet, im
+       stillen Feld darunter. -->
+  <p class="treffer"><b id="anzahl">0</b> <span id="anzahl-wort">Kunden</span><span class="summe" id="summe"></span></p>
+  <p class="nur-gehoert" id="ansage" role="status" aria-live="polite"></p>
+
+  <div id="liste" class="liste"></div>
+
+  <div class="leer" id="leer" hidden>
+    <b>Kein Kunde passt dazu</b>
+    <p id="leer-text">Zu dieser Suche findet sich niemand.</p>
+    <button class="knopf sekundaer" type="button" id="leer-zurueck">Alle Kunden zeigen</button>
+  </div>
+
+  <p class="fuss">Zum Prüfen mit 187 Mandaten gefüllt; das Modell zeigt weiterhin das kleine Beispiel mit vier, und nur diese vier haben dort ein Gebäude. Die übrigen Zeilen führen auf die Mandatsfläche. Mit <kbd>/</kbd> springt der Fokus ins Suchfeld.</p>
+</main>
+
+<!-- bewusst kein <nav>: die Kopfband-Regeln dieser Seite fassen jedes nav und
+     legten den Streifen sonst als weißes Band quer über die Liste -->
+<div id="streifen" role="navigation" aria-label="Zu einem Buchstaben springen"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ================= Die Kunden =================
+     Vier stammen aus dem Modell und tragen dessen Zahlen; der Rest ist eine
+     erfundene Beratung in der Größe, die das Häppchen verlangt. Erzeugt wird
+     er fest verdrahtet (eigener Zufall mit Startwert), damit zwei Aufrufe
+     dieselbe Liste zeigen — sonst ist kein Bild mit dem nächsten vergleichbar. */
+  /* Orte und Beträge kommen aus beratung-rechnungen.html — dort stehen die
+     Anschriften, die auf dem Papier landen, und die drei offenen Rechnungen,
+     die das Modell mit 11.900 € zusammenzählt (6.426 + 4.284 + 1.190). Wer
+     hier eigene Zahlen erfindet, baut zwei Wahrheiten auf einen Klickweg. */
+  var AUS_DEM_MODELL = [
+    {name:'Petersen Stahlbau', branche:'Stahlbau', ort:'Oldenburg', seit:2025,
+     marge:30.4, offen:6426, still:4, zugang:'ok', modell:'petersen',
+     klemmt:'Marge fällt, das Preismodell liegt beim Kunden'},
+    {name:'Cordes Logistik', branche:'Spedition', ort:'Bremen', seit:2021,
+     marge:12.1, offen:1190, still:0, zugang:'ok', modell:'cordes',
+     klemmt:'Steuerfrage wartet auf dich, Rechnung seit 11 Tagen offen'},
+    {name:'Bäckerei Freitag', branche:'Bäckerei', ort:'Wilhelmshaven', seit:2018,
+     marge:31.0, offen:0, still:2, zugang:'ok', modell:'freitag',
+     klemmt:'Personalquote im Ziel, läuft ruhig'},
+    {name:'MTS Maschinenbau', branche:'Maschinenbau', ort:'Cloppenburg', seit:2022,
+     marge:26.8, offen:4284, still:22, zugang:'abgelaufen', modell:'mts',
+     klemmt:'Seit drei Wochen still, Anruf vorgeschlagen'}
+  ];
+
+  var STAEMME = ['Ahrens','Bergmann','Clausen','Dohrmann','Eggers','Fricke','Gerdes','Harms',
+    'Ihnen','Jansen','Köster','Lührs','Meinders','Nagel','Oltmanns','Prahl','Quast','Reimers',
+    'Sievers','Tiedemann','Ubben','Voigt','Wehmeyer','Ziegler','Brandt','Kruse','Lohmann',
+    'Mahnke','Nordmann','Piper','Rieck','Struve','Timm','Warnke','Bruns','Dierks','Eilers',
+    'Focke','Grote','Hinrichs','Janssen','Kettler','Lampe','Mommsen','Osterloh','Renken',
+    'Schade','Uhlhorn','Wilkens','Ehlers'];
+  /* voran = die Branche steht vor dem Namen („Bäckerei Freitag") */
+  var BRANCHEN = [
+    {b:'Elektrotechnik'}, {b:'Dachdeckerei', voran:true}, {b:'Sanitärtechnik'},
+    {b:'Tischlerei', voran:true}, {b:'Steuerberatung'}, {b:'Kfz-Technik'},
+    {b:'Garten- und Landschaftsbau'}, {b:'Malerbetrieb'}, {b:'Fensterbau'},
+    {b:'Catering'}, {b:'Physiotherapie', voran:true}, {b:'Apotheke', voran:true},
+    {b:'Gebäudereinigung'}, {b:'Sicherheitsdienst'}, {b:'Kunststofftechnik'},
+    {b:'Werbetechnik'}, {b:'Getränkehandel'}, {b:'Baustoffe'}, {b:'Landtechnik'},
+    {b:'Fleischerei', voran:true}, {b:'Augenoptik'}, {b:'Hörakustik'},
+    {b:'Zahntechnik'}, {b:'Softwarehaus'}, {b:'Ingenieurbüro'}, {b:'Spedition'},
+    {b:'Bootsbau'}, {b:'Segelmacherei', voran:true}, {b:'Fischhandel'},
+    {b:'Stahlbau'}, {b:'Maschinenbau'}, {b:'Bäckerei', voran:true},
+    {b:'Heizungsbau'}, {b:'Zimmerei', voran:true}, {b:'Möbelhandel'}
+  ];
+  var ORTE = ['Bremen','Oldenburg','Delmenhorst','Verden','Achim','Syke','Wildeshausen',
+    'Osterholz','Brake','Nordenham','Cuxhaven','Stade','Buxtehude','Rotenburg','Diepholz',
+    'Twistringen','Bassum','Ganderkesee','Hude','Elsfleth','Varel','Jever','Wilhelmshaven',
+    'Leer','Emden','Aurich','Papenburg','Meppen','Lingen','Vegesack'];
+  var RECHTSFORM = [' GmbH',' GmbH & Co. KG',' KG',' e. K.','',' OHG'];
+
+  var GRUENDE_STILL = [
+    'Seit {t} Tagen kein Wort, weder Frage noch Antwort',
+    'Seit {t} Tagen still, letzte Frage blieb unbeantwortet',
+    'Seit {t} Tagen nichts gehört, letzter Termin liegt im Juni'
+  ];
+  var GRUENDE_RUHIG = [
+    'Läuft ruhig',
+    'Nichts offen, letzte Frage vorgestern beantwortet',
+    'Läuft ruhig, Auswertung geht Monatsende raus',
+    'Nichts offen'
+  ];
+
+  /* eigener Zufall mit Startwert, damit die Liste reproduzierbar bleibt */
+  /* Lehmer, bewusst mit kleinem Faktor: samen * 48271 bleibt unter 2^53 und
+     damit ganzzahlig genau — ein größerer Faktor rundet und der Zufall wird
+     bei jedem Browser ein anderer. */
+  var samen = 20260814;
+  function zufall(){
+    samen = (samen * 48271) % 2147483647;
+    return samen / 2147483647;
+  }
+  function waehle(feld){ return feld[Math.floor(zufall() * feld.length)]; }
+
+  var kunden = AUS_DEM_MODELL.slice();
+  var vergeben = {};
+  kunden.forEach(function(k){ vergeben[k.name] = true; });
+
+  while (kunden.length < 187) {
+    var br = waehle(BRANCHEN);
+    var stamm = waehle(STAEMME);
+    var name = br.voran ? br.b + ' ' + stamm
+                        : stamm + ' ' + br.b + waehle(RECHTSFORM);
+    if (vergeben[name]) continue;
+    vergeben[name] = true;
+
+    /* Tage ohne Kontakt. Bewusst zweigeteilt statt gleichmäßig gestreut: die
+       allermeisten Mandate hört man innerhalb von zwei Wochen, und die paar,
+       die verstummen, verstummen richtig. Eine Liste, in der jedes vierte
+       Mandat still ist, prüft nichts — sie sieht nur dramatisch aus. */
+    var still = zufall() < 0.10 ? 21 + Math.floor(zufall() * 40) : Math.floor(zufall() * 15);
+    var hatOffen = zufall() < 0.065;
+    var zugang = zufall() < 0.022 ? 'abgelaufen' : (zufall() < 0.014 ? 'nie' : 'ok');
+    var klemmt;
+    if (still >= 21) klemmt = waehle(GRUENDE_STILL).replace('{t}', still);
+    else if (hatOffen) klemmt = 'Rechnung offen, Frist ist durch';
+    else if (zugang === 'abgelaufen') klemmt = 'Zugang zum Portal ist abgelaufen';
+    else if (zugang === 'nie') klemmt = 'Zugang nie eingerichtet, der Kunde kommt nicht rein';
+    else klemmt = waehle(GRUENDE_RUHIG);
+
+    kunden.push({
+      name: name,
+      branche: br.b,
+      ort: waehle(ORTE),
+      seit: 2015 + Math.floor(zufall() * 11),
+      marge: Math.round((8 + zufall() * 32) * 10) / 10,
+      offen: hatOffen ? Math.round((900 + zufall() * 9000) / 6) * 6 : 0,
+      still: still,
+      zugang: zugang,
+      klemmt: klemmt
+    });
+  }
+
+  /* Was heißt „klemmt"? Genau die drei Griffe oben, sonst nichts. */
+  function stillHeisst(k){ return k.still >= 21; }
+  function offenHeisst(k){ return k.offen > 0; }
+  function zugangHeisst(k){ return k.zugang !== 'ok'; }
+  function klemmtIrgendwo(k){ return stillHeisst(k) || offenHeisst(k) || zugangHeisst(k); }
+  /* Dringlichkeit: offene Forderung wiegt am schwersten, dann Stille, dann Zugang */
+  function gewicht(k){
+    /* Die Stille ist gedeckelt, damit sie das Geld nicht überholt: eine offene
+       Forderung ist ein Betrag mit Frist, Stille ist ein Verdacht. */
+    return (offenHeisst(k) ? 100 : 0)
+         + (stillHeisst(k) ? 50 + Math.min(k.still, 40) : 0)
+         + (zugangHeisst(k) ? 20 : 0);
+  }
+
+  var euro = new Intl.NumberFormat('de-DE', {style:'currency', currency:'EUR', maximumFractionDigits:0});
+  var zahlF = new Intl.NumberFormat('de-DE');
+  function prozent(n){ return n.toLocaleString('de-DE', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' %'; }
+
+  function zustandVon(k){
+    if (offenHeisst(k) || stillHeisst(k) || zugangHeisst(k)) return {klasse:'wartet', wort:'wartet'};
+    return {klasse:'aktiv', wort:'läuft'};
+  }
+
+  /* ================= Zeichnen ================= */
+  var listeEl = document.getElementById('liste');
+  var leerEl = document.getElementById('leer');
+  var anzahlEl = document.getElementById('anzahl');
+  var anzahlWortEl = document.getElementById('anzahl-wort');
+  var summeEl = document.getElementById('summe');
+  var ansageEl = document.getElementById('ansage');
+  var sucheEl = document.getElementById('suche');
+  var sortEl = document.getElementById('sort');
+  var streifenEl = document.getElementById('streifen');
+  var leerenEl = document.getElementById('leeren');
+  var allesEl = document.getElementById('alles-zeigen');
+
+  var filter = {still:false, offen:false, zugang:false};
+
+  /* Jedes Wort muss vorkommen, aber nicht in dieser Reihenfolge: wer
+     „bäckerei oldenburg" tippt, meint zwei Merkmale und nicht eine
+     Zeichenkette. */
+  function passt(k, worte){
+    if (filter.still && !stillHeisst(k)) return false;
+    if (filter.offen && !offenHeisst(k)) return false;
+    if (filter.zugang && !zugangHeisst(k)) return false;
+    if (!worte.length) return true;
+    var heuhaufen = (k.name + ' ' + k.branche + ' ' + k.ort).toLowerCase();
+    return worte.every(function(w){ return heuhaufen.indexOf(w) !== -1; });
+  }
+
+  function sortiere(feld, art){
+    var nachName = function(a,b){ return a.name.localeCompare(b.name, 'de'); };
+    if (art === 'name')    return feld.sort(nachName);
+    if (art === 'marge')   return feld.sort(function(a,b){ return a.marge - b.marge || nachName(a,b); });
+    if (art === 'gehoert') return feld.sort(function(a,b){ return b.still - a.still || nachName(a,b); });
+    if (art === 'offen')   return feld.sort(function(a,b){ return b.offen - a.offen || nachName(a,b); });
+    return feld.sort(function(a,b){ return gewicht(b) - gewicht(a) || nachName(a,b); });
+  }
+
+  /* Die Spalte gehört der Ordnung. Wer nach offener Forderung sortiert, will
+     Beträge sehen; wer nach „Was wartet" sortiert, will bei jeder Zeile die
+     Zahl sehen, die sie nach oben gebracht hat — und das ist bei einer offenen
+     Rechnung der Betrag und nicht die Marge. Das Etikett unter der Zahl sagt
+     je Zeile, was dasteht, also verträgt die Liste den Wechsel. */
+  function zahlRechts(k, art){
+    if (art === 'offen')   return k.offen > 0 ? {wert: euro.format(k.offen), was:'offen'} : {wert:'—', was:'nichts offen'};
+    if (art === 'gehoert') return {wert: k.still === 0 ? 'heute' : k.still + ' Tage', was: k.still === 0 ? 'zuletzt gehört' : 'ohne Kontakt'};
+    if (art === 'klemmt') {
+      if (k.offen > 0)     return {wert: euro.format(k.offen), was:'offen'};
+      if (stillHeisst(k))  return {wert: k.still + ' Tage', was:'ohne Kontakt'};
+    }
+    return {wert: prozent(k.marge), was:'Marge'};
+  }
+
+  function zeile(k, art){
+    var z = zustandVon(k);
+    var rechts = zahlRechts(k, art);
+    var a = document.createElement('a');
+    a.className = 'kunde';
+    a.href = k.modell ? 'beratung-f-modell.html#' + k.modell : 'beratung-mandat.html';
+
+    var wer = document.createElement('span');
+    wer.className = 'wer';
+    var name = document.createElement('b');
+    name.textContent = k.name;
+    var meta = document.createElement('span');
+    meta.className = 'meta';
+    meta.textContent = k.branche + ' in ' + k.ort + ', Mandat seit ' + k.seit;
+    var klemmt = document.createElement('span');
+    klemmt.className = 'klemmt' + (klemmtIrgendwo(k) ? '' : ' ruhig');
+    klemmt.textContent = k.klemmt;
+    wer.append(name, meta, klemmt);
+
+    var zahl = document.createElement('span');
+    zahl.className = 'zahl';
+    var wert = document.createElement('span'); wert.className = 'wert'; wert.textContent = rechts.wert;
+    var was = document.createElement('span'); was.className = 'was'; was.textContent = rechts.was;
+    zahl.append(wert, was);
+
+    var fuell = document.createElement('span');
+    fuell.className = 'z-fuell';
+    var glas = document.createElement('span');
+    glas.className = 'zustand ' + z.klasse;
+    glas.setAttribute('role', 'img');
+    glas.setAttribute('aria-label', z.wort === 'läuft' ? 'Läuft' : 'Wartet');
+    glas.setAttribute('title', z.wort === 'läuft' ? 'Läuft' : 'Wartet');
+    var wort = document.createElement('span');
+    wort.className = 'zustand-wort'; wort.textContent = z.wort;
+    fuell.append(glas, wort);
+
+    /* Die Notiz steht am Namen, nicht in einer eigenen Spalte: vier von 187
+       Zeilen tragen sie, eine Spalte dafür stünde 183-mal leer und verschöbe
+       die Zahlen genau bei den vier, die man wiedererkennen soll. */
+    if (k.modell) {
+      var m = document.createElement('span');
+      m.className = 'im-modell'; m.textContent = 'im Modell';
+      name.appendChild(document.createTextNode(' '));
+      name.appendChild(m);
+    }
+
+    a.append(wer, zahl, fuell);
+
+    var pfeil = document.createElement('span');
+    pfeil.className = 'pfeil'; pfeil.setAttribute('aria-hidden', 'true'); pfeil.textContent = '→';
+    a.appendChild(pfeil);
+    return a;
+  }
+
+  function kopfzeile(text, wieViele){
+    var d = document.createElement('div');
+    d.className = 'gruppe';
+    d.textContent = text;
+    if (wieViele != null) {
+      var s = document.createElement('span');
+      s.className = 'wie-viele';
+      s.textContent = wieViele + (wieViele === 1 ? ' Kunde' : ' Kunden');
+      d.appendChild(s);
+    }
+    return d;
+  }
+
+  /* Die Zahl am Griff sagt, was ein Druck brächte — sie rechnet die Suche und
+     die anderen gedrückten Griffe mit. Eine feste Zahl aus dem Gesamtbestand
+     log, sobald zwei Griffe gedrückt waren: an beiden stand 11, die Liste
+     zeigte 1. */
+  var FACETTEN = {still: stillHeisst, offen: offenHeisst, zugang: zugangHeisst};
+  function setzeGriffZahlen(worte){
+    Object.keys(FACETTEN).forEach(function(was){
+      var probe = {still:filter.still, offen:filter.offen, zugang:filter.zugang};
+      probe[was] = true;
+      var alt = filter;
+      filter = probe;
+      var n = kunden.filter(function(k){ return passt(k, worte); }).length;
+      filter = alt;
+      document.querySelector('.klemme[data-filter="' + was + '"] .n').textContent = zahlF.format(n);
+    });
+  }
+
+  /* Die Zahl oben rollt, statt zu springen — bei 187 Zeilen ist das der
+     einzige Weg zu merken, dass ein Filter etwas getan hat. */
+  var rollLauf = null;
+  function setzeZahl(ziel){
+    var start = parseInt(anzahlEl.textContent.replace(/\./g, ''), 10) || 0;
+    anzahlWortEl.textContent = ziel === 1 ? 'Kunde' : 'Kunden';
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || start === ziel) {
+      anzahlEl.textContent = zahlF.format(ziel);
+      return;
+    }
+    if (rollLauf) cancelAnimationFrame(rollLauf);
+    var t0 = performance.now(), dauer = 280;
+    (function rolle(jetzt){
+      var p = Math.min((jetzt - t0) / dauer, 1);
+      var e = 1 - Math.pow(1 - p, 3);
+      anzahlEl.textContent = zahlF.format(Math.round(start + (ziel - start) * e));
+      if (p < 1) rollLauf = requestAnimationFrame(rolle);
+    })(t0);
+  }
+
+  var vorhandeneBuchstaben = {};
+
+  function zeichne(){
+    var suchwort = sucheEl.value.trim().toLowerCase();
+    var worte = suchwort ? suchwort.split(/\s+/) : [];
+    var art = sortEl.value;
+    var treffer = sortiere(kunden.filter(function(k){ return passt(k, worte); }), art);
+
+    document.body.classList.toggle('nach-name', art === 'name');
+    leerenEl.hidden = !sucheEl.value;
+    var etwasAn = filter.still || filter.offen || filter.zugang || !!suchwort;
+    allesEl.hidden = !etwasAn;
+
+    setzeZahl(treffer.length);
+    var offenSumme = treffer.reduce(function(s,k){ return s + k.offen; }, 0);
+    summeEl.textContent = offenSumme ? euro.format(offenSumme) + ' offen' : '';
+    ansageEl.textContent = zahlF.format(treffer.length)
+      + (treffer.length === 1 ? ' Kunde' : ' Kunden')
+      + (offenSumme ? ', ' + euro.format(offenSumme) + ' offen' : '');
+    setzeGriffZahlen(worte);
+
+    var neu = document.createDocumentFragment();
+    vorhandeneBuchstaben = {};
+
+    if (art === 'name') {
+      var letzter = '';
+      treffer.forEach(function(k){
+        var b = k.name.charAt(0).toUpperCase().replace('Ä','A').replace('Ö','O').replace('Ü','U');
+        if (b !== letzter) {
+          letzter = b;
+          var kopf = kopfzeile(b, null);
+          kopf.id = 'buchstabe-' + b;
+          kopf.style.scrollMarginTop = 'calc(var(--chrom) + var(--klebe) + 26px)';
+          neu.appendChild(kopf);
+          vorhandeneBuchstaben[b] = true;
+        }
+        neu.appendChild(zeile(k, art));
+      });
+    } else if (art === 'klemmt') {
+      var wartend = treffer.filter(klemmtIrgendwo);
+      var ruhig = treffer.filter(function(k){ return !klemmtIrgendwo(k); });
+      if (wartend.length) {
+        neu.appendChild(kopfzeile('Braucht dich', wartend.length));
+        wartend.forEach(function(k){ neu.appendChild(zeile(k, art)); });
+      }
+      if (ruhig.length) {
+        neu.appendChild(kopfzeile('Läuft', ruhig.length));
+        ruhig.forEach(function(k){ neu.appendChild(zeile(k, art)); });
+      }
+    } else {
+      treffer.forEach(function(k){ neu.appendChild(zeile(k, art)); });
+    }
+
+    listeEl.replaceChildren(neu);
+    leerEl.hidden = treffer.length > 0;
+    if (!treffer.length) {
+      document.getElementById('leer-text').textContent = suchwort
+        ? 'Zu „' + sucheEl.value.trim() + '“ findet sich niemand, jedenfalls nicht mit diesen Filtern.'
+        : 'Kein Kunde klemmt an dieser Stelle. Das ist eine gute Nachricht.';
+    }
+    zeichneStreifen();
+  }
+
+  function zeichneStreifen(){
+    var buchstaben = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    streifenEl.replaceChildren();
+    buchstaben.forEach(function(b){
+      var t = document.createElement('button');
+      t.type = 'button';
+      t.textContent = b;
+      if (!vorhandeneBuchstaben[b]) {
+        t.disabled = true;
+      } else {
+        t.addEventListener('click', function(){
+          var ziel = document.getElementById('buchstabe-' + b);
+          if (!ziel) return;
+          /* Ein Register springt, es reist nicht: über eine Bildschirmhöhe
+             hinaus ist weiches Scrollen kein Übergang mehr, sondern eine
+             Fahrt von zweieinhalb Sekunden durch 180 fremde Namen. */
+          var weit = Math.abs(ziel.getBoundingClientRect().top) > window.innerHeight * 1.5;
+          var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          ziel.scrollIntoView({behavior: (weit || reduziert) ? 'auto' : 'smooth', block:'start'});
+        });
+      }
+      streifenEl.appendChild(t);
+    });
+  }
+
+  /* ================= Bedienung ================= */
+  document.querySelectorAll('.klemme[data-filter]').forEach(function(b){
+    var was = b.dataset.filter;
+    b.addEventListener('click', function(){
+      filter[was] = !filter[was];
+      b.setAttribute('aria-pressed', String(filter[was]));
+      zeichne();
+    });
+  });
+  function allesZeigen(){
+    filter = {still:false, offen:false, zugang:false};
+    document.querySelectorAll('.klemme[data-filter]').forEach(function(b){ b.setAttribute('aria-pressed','false'); });
+    sucheEl.value = '';
+    zeichne();
+  }
+  allesEl.addEventListener('click', allesZeigen);
+  document.getElementById('leer-zurueck').addEventListener('click', function(){
+    allesZeigen();
+    sucheEl.focus();
+  });
+  leerenEl.addEventListener('click', function(){ sucheEl.value = ''; zeichne(); sucheEl.focus(); });
+  sucheEl.addEventListener('input', zeichne);
+  sortEl.addEventListener('change', zeichne);
+  document.addEventListener('keydown', function(e){
+    if (e.key === '/' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      var a = document.activeElement;
+      if (a && a.closest('input,textarea,select,[contenteditable]')) return;
+      e.preventDefault();
+      sucheEl.focus();
+      sucheEl.select();
+    }
+  });
+
+  /* Die Gruppenköpfe kleben unter der Werkzeugleiste; deren Höhe ändert sich
+     mit der Fensterbreite, also wird sie gemessen statt geraten. */
+  var werkzeug = document.querySelector('.werkzeug');
+  function messeKlebe(){
+    document.documentElement.style.setProperty('--klebe', werkzeug.offsetHeight + 'px');
+  }
+  messeKlebe();
+  if (window.ResizeObserver) new ResizeObserver(messeKlebe).observe(werkzeug);
+  else window.addEventListener('resize', messeKlebe);
+
+  zeichne();
+})();
+</script>
+<script src="uhr.js"></script>
+<script src="zeiger.js"></script>
+</body>
+</html>
