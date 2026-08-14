@@ -23,7 +23,10 @@
    weggewischt (im Produkt: time_suggestion_dismissals) — der Vorschlag
    kommt heute nicht wieder.
 
-   Marker: BERATUNG-ZEITEN-V1 */
+   V2 (der Rundgang-Film hat es gezeigt): Einträge ohne Uhr trugen ein
+   angehängtes „nachgetragen", auch wenn sie aus einem Vorschlag kamen — die
+   Zeile nennt jetzt nur noch, was stimmt.
+   Marker: BERATUNG-ZEITEN-V2 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -404,8 +407,11 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
           '<div class="hinweis">Abgerechnet wird, was hier steht. Unter einer Viertelstunde bleibt der Eintrag bei 15 Minuten.</div>' +
         '</div>';
       el.querySelector('.e-name').textContent = e.name;
+      /* Nur Einträge mit Uhr haben ein Von und Bis. Übernommene Vorschläge
+         und Nachträge tragen ihre Herkunft im Text — „Termin: Preis und
+         Marge, nachgetragen" wäre gelogen und doppelt gemoppelt dazu. */
       el.querySelector('.e-detail').textContent =
-        (e.was ? e.was + ', ' : '') + (e.von ? e.von + ' bis ' + e.bis : 'nachgetragen');
+        e.von ? (e.was ? e.was + ', ' : '') + e.von + ' bis ' + e.bis : (e.was || '');
       el.querySelector('.e-dauer').textContent = Uhr.dauerWort(e.dauer);
 
       var kopf = el.querySelector('.kopfzeile');
@@ -482,7 +488,7 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
     var e = {
       id: 'e' + (++lfd),
       name: zettel.dataset.mandat,
-      was: zettel.dataset.was,
+      was: zettel.dataset.was + ', übernommen',
       dauer: parseInt(zettel.dataset.dauer, 10),
       sortier: Date.now(),
       quelle: 'vorschlag'
