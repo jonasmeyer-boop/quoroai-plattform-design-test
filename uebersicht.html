@@ -6,7 +6,7 @@
 <title>Dein Berater · Übersicht</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V9 (die Glocke ist der Baustein glocke.js) */
+/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V10 (Leistungsstunden decken sich mit dem Nachweis, toter Bald-Hinweis raus) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -58,21 +58,9 @@ nav .griffe .ab{
   background:#fff;font-size:12.5px;font-weight:700;color:var(--grau);cursor:pointer;
 }
 
-/* Demo-Hinweis in Handschrift, wenn eine Fläche noch entsteht */
-#demo-hinweis{
-  position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:60;pointer-events:none;
-  font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--stift);
-  opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--feder);
-}
-#demo-hinweis.da{opacity:.95;translate:-50% 0}
-
 /* Nur echte Türen zeigen den Klick-Zeiger */
 div.zeile{cursor:default}
 div.zeile:hover{border-color:var(--linie);translate:none}
-.kopfzeile a.bald,.fuss-links a.bald{color:var(--grau);opacity:.75}
-.kopfzeile a.bald:hover{text-decoration:none}
-.fuss-links a.bald:hover{border-color:var(--linie)}
-.bald small.dazu{color:var(--grau);font-weight:600}
 
 main{max-width:880px;margin:0 auto;padding:108px 24px 96px}
 
@@ -214,8 +202,6 @@ section{margin-top:52px}
   </div>
 </nav>
 
-<div id="demo-hinweis">Diese Fläche entsteht gerade.</div>
-
 <main>
   <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
   <div class="vorgruss">Guten Tag, Herr Petersen.</div>
@@ -286,7 +272,7 @@ section{margin-top:52px}
   <section>
     <div class="kopfzeile"><h2>Zusammenarbeit</h2></div>
     <div class="fuss-links">
-      <a href="leistungen.html">Leistungsnachweis<small>14,5 Std. im August</small></a>
+      <a href="leistungen.html">Leistungsnachweis<small>14,2 Std. im August</small></a>
       <a href="rechnungen.html">Rechnungen<small>eine offen</small></a>
     </div>
   </section>
@@ -362,18 +348,6 @@ section{margin-top:52px}
     }
   });
 
-  /* Ehrlichkeit: was noch entsteht, sagt das — statt tot zu sein */
-  var hinweisTimer = null;
-  function demoHinweis(text){
-    var h = document.getElementById('demo-hinweis');
-    h.textContent = text;
-    h.classList.add('da');
-    clearTimeout(hinweisTimer);
-    hinweisTimer = setTimeout(function(){ h.classList.remove('da'); }, 2200);
-  }
-  document.querySelectorAll('a.bald').forEach(function(a){
-    a.addEventListener('click', function(e){ e.preventDefault(); demoHinweis('Diese Fläche entsteht gerade.'); });
-  });
   document.querySelector('nav .ab').addEventListener('click', function(){
     location.href = 'anmelden.html';
   });

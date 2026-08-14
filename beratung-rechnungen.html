@@ -26,7 +26,7 @@
    Kleinunternehmer-Haken nimmt die Steuerzeile weg und setzt den § 19-Satz
    aufs Papier, der Stichtag entscheidet welche Stunden mitkommen, der
    Stempel läuft nur beim ersten Ansehen, die Gutschrift-Kästchen haben
-   Namen. Marker: BERATUNG-RECHNUNGEN-V4 */
+   Namen. Marker: BERATUNG-RECHNUNGEN-V5 (das Papier rechnet das eingestellte Zahlungsziel) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -465,6 +465,14 @@ a.beleg-zeile{
     var t = String(iso || '').split('-');
     return t.length === 3 ? t[2] + '.' + t[1] + '.' + t[0] : HEUTE;
   }
+  /* Das Fälligkeitsdatum rechnet das eingestellte Zahlungsziel — es steht nie fest. */
+  function plusTage(datum, tage){
+    var t = String(datum).split('.');
+    var d = new Date(Number(t[2]), Number(t[1]) - 1, Number(t[0]));
+    d.setDate(d.getDate() + (isFinite(tage) ? tage : 0));
+    function zwei(n){ return String(n).padStart(2, '0'); }
+    return zwei(d.getDate()) + '.' + zwei(d.getMonth() + 1) + '.' + d.getFullYear();
+  }
 
   /* Positionen tragen Cent. Steuer entsteht auf die Summe, kaufmännisch gerundet —
      eine Rundung je Rechnung, nicht je Position. */
@@ -874,7 +882,7 @@ a.beleg-zeile{
       b.intro = document.getElementById('anschreiben').value.trim() || b.intro;
       b.status = 'issued';
       b.nummer = '2026-' + String(naechsteNummer++).padStart(4, '0');
-      b.gestellt = HEUTE; b.faellig = '28.08.2026'; b.tageOffen = 0;
+      b.gestellt = HEUTE; b.faellig = plusTage(HEUTE, ABSENDER.zielTage); b.tageOffen = 0;
       friereEin(b);
       b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Gestellt als ' + b.nummer + ' — ab hier ändert sich nichts mehr'});
       frischGestellt = b.id;

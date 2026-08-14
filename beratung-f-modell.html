@@ -50,7 +50,7 @@
    Dock; und die Raum-Spalten melden sich jetzt mit data-uhr-polster, damit der
    Baustein ihnen sein Unten unterlegt (diese Fläche hat kein <main>, die
    letzte Tür lag sonst unerreichbar unter dem Dock).
-   Marker: BERATUNG-F-MODELL-V27 */
+   Marker: BERATUNG-F-MODELL-V28 (toter Zettel-Handler raus) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -991,9 +991,6 @@ body.gezoomt #zonen{display:block}
 
   document.querySelectorAll('.zone').forEach(function(z){
     z.addEventListener('click', function(){ if (!offen) oeffne(z.dataset.ziel); });
-  });
-  document.querySelectorAll('#tisch .t-zettel').forEach(function(t){
-    t.addEventListener('click', function(){ oeffne(t.dataset.zu); });
   });
   /* Die Flotte der Zentrale springt direkt ins Mandat */
   document.querySelectorAll('.flotte-karte').forEach(function(k){
