@@ -18,7 +18,15 @@
    aufgestempelt wird. Danach ändert sich an dem Blatt nichts mehr.
    Chrome ist quoroAI (system.css), ruhige Fläche — der Stempel IST der
    Moment. V2: die Beleg-Zeilen tragen Tinte statt Link-Lila (a.beleg-zeile
-   schlägt .quoro a). Marker: BERATUNG-RECHNUNGEN-V2 */
+   schlägt .quoro a). V3 (Review): das Storno gibt die Stunden wirklich
+   zurück in den Pool, Steuer wird immer auf dem Betrag gerundet und dann
+   im Vorzeichen gespiegelt (sonst blieb ein Cent stehen), Gutschriften
+   mindern den Offenstand, die Rechnungsdaten sind die eine Quelle — jeder
+   gestellte Beleg nimmt eine Kopie mit und bleibt dicht, der
+   Kleinunternehmer-Haken nimmt die Steuerzeile weg und setzt den § 19-Satz
+   aufs Papier, der Stichtag entscheidet welche Stunden mitkommen, der
+   Stempel läuft nur beim ersten Ansehen, die Gutschrift-Kästchen haben
+   Namen. Marker: BERATUNG-RECHNUNGEN-V3 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -366,7 +374,7 @@ a.beleg-zeile{
     <h3>Fußzeile</h3>
     <section class="tafel" aria-label="Fußzeile">
       <div class="feldreihe">
-        <div class="feld breit"><label for="rd-fuss">Geschäftsführung, Registergericht</label><input id="rd-fuss" value="Geschäftsführung: Dr. Anna Vogelsang · Amtsgericht Hamburg HRB 118 245"></div>
+        <div class="feld breit"><label for="rd-fuss">Geschäftsführung, Registergericht</label><input id="rd-fuss" value="Geschäftsführung: Dr. Anna Vogelsang, Amtsgericht Hamburg HRB 118 245"></div>
       </div>
       <div class="fuss-griffe">
         <button class="knopf primaer" id="rd-speichern" type="button">Speichern</button>
@@ -398,16 +406,19 @@ a.beleg-zeile{
 
   /* ---------- Die Welt: eine Beratung, vier Kunden, ein Stapel Belege ----------
      „Heute" ist in dieser Vorführung der 14. August 2026 — derselbe Tag,
-     an dem im Stadtmodell die Rechnung von Bäckerei Freitag 12 Tage offen ist. */
+     an dem im Stadtmodell die Rechnung von MTS Maschinenbau 12 Tage offen ist. */
   var HEUTE = '14.08.2026';
-  var STEUERSATZ = 19;
+  /* Die Rechnungsdaten sind die eine Quelle: das Papier liest hier, die
+     Rechnungsdaten-Seite schreibt hierhin. */
   var ABSENDER = {
     firma: 'Nordholm & Partner GmbH',
     anschrift: 'Alsterufer 12, 20354 Hamburg',
     ustid: 'USt-IdNr. DE318245991',
     bank: 'DE71 2005 0550 0123 4567 89, HANSDEHH0XX (Hanseatische Bank)',
-    fuss: 'Geschäftsführung: Dr. Anna Vogelsang · Amtsgericht Hamburg HRB 118 245',
-    zielTage: 14
+    fuss: 'Geschäftsführung: Dr. Anna Vogelsang, Amtsgericht Hamburg HRB 118 245',
+    zielTage: 14,
+    steuersatz: 19,
+    kleinunternehmer: false
   };
   var KUNDEN = {
     petersen: {name: 'Petersen Stahlbau', anschrift: ['Petersen Stahlbau GmbH', 'Brookweg 14', '26123 Oldenburg'], ustid: 'USt-IdNr. DE812457733', mail: 'buchhaltung@petersen-stahlbau.de'},
@@ -415,29 +426,49 @@ a.beleg-zeile{
     freitag:  {name: 'Bäckerei Freitag',  anschrift: ['Bäckerei Freitag e.K.', 'Marktstraße 9', '26382 Wilhelmshaven'], ustid: '', mail: 'post@baeckerei-freitag.de'},
     mts:      {name: 'MTS Maschinenbau',  anschrift: ['MTS Maschinenbau GmbH', 'Industriering 22', '49661 Cloppenburg'], ustid: 'USt-IdNr. DE199034872', mail: 'buchhaltung@mts-maschinenbau.de'}
   };
-  /* Offene berechenbare Stunden je Kunde: [Mandat, Satz in Cent (null = keiner), Minuten] */
+  /* Offene berechenbare Stunden je Kunde. satz = null heißt: das Mandat hat
+     keinen Stundensatz, es bleibt liegen statt den Lauf abzubrechen.
+     bis = letzter Tag, an dem gearbeitet wurde — der Stichtag der neuen
+     Rechnung entscheidet, was davon mitkommt. */
   var STUNDEN = {
     petersen: [
-      {mandat: 'Zweitmeinung', satz: null, min: 90}
+      {mandat: 'Preis und Marge', satz: 18000, min: 210, bis: '2026-08-13'},
+      {mandat: 'Zweitmeinung', satz: null, min: 90, bis: '2026-08-11'}
     ],
-    cordes: [], freitag: [], mts: []
+    cordes: [
+      {mandat: 'Frachtmarge', satz: 10000, min: 480, bis: '2026-08-12'},
+      {mandat: 'Steuerfrage', satz: 10000, min: 45, bis: '2026-07-29'}
+    ],
+    freitag: [
+      {mandat: 'Personal und Kosten', satz: 15000, min: 300, bis: '2026-08-08'}
+    ],
+    mts: [
+      {mandat: 'Standortstrategie', satz: 15000, min: 120, bis: '2026-07-22'}
+    ]
   };
+  /* '2026-08-13' -> '13.08.2026' */
+  function deutsch(iso){
+    var t = String(iso || '').split('-');
+    return t.length === 3 ? t[2] + '.' + t[1] + '.' + t[0] : HEUTE;
+  }
 
   /* Positionen tragen Cent. Steuer entsteht auf die Summe, kaufmännisch gerundet —
      eine Rundung je Rechnung, nicht je Position. */
   var BELEGE = [
     {id: 'e1', art: 'rechnung', status: 'draft', nummer: null, kunde: 'petersen',
      intro: 'Für die Leistungen im August 2026 erlauben wir uns zu berechnen:',
-     positionen: [{was: 'Preis und Marge', her: '01.08.2026 bis 12.08.2026 · 6 Std. × 180,00 €', cent: 108000, zeit: {mandat: 'Preis und Marge', satz: 18000, min: 360}}],
+     positionen: [{was: 'Preis und Marge', her: '01.08.2026 bis 12.08.2026, 6 Std. × 180,00 €', cent: 108000,
+       zeit: {mandat: 'Preis und Marge', satz: 18000, min: 360, bis: '2026-08-12'}}],
      historie: [
        {wann: '12.08.2026, 17:41', wer: 'Dr. Vogelsang', was: 'Entwurf angelegt'},
-       {wann: '12.08.2026, 17:41', wer: 'System', was: 'Position angelegt: Preis und Marge · 6 Std. × 180,00 €'}
+       {wann: '12.08.2026, 17:41', wer: 'System', was: 'Position angelegt: Preis und Marge, 6 Std. × 180,00 €'}
      ]},
     {id: 'r84', art: 'rechnung', status: 'issued', nummer: '2026-0084', kunde: 'petersen',
      gestellt: '05.08.2026', faellig: '19.08.2026', tageOffen: 9,
      intro: 'Für die Leistungen im Juli 2026 erlauben wir uns zu berechnen:',
      positionen: [
-       {was: 'Preis und Marge', her: '01.07.2026 bis 31.07.2026 · 28 Std. × 180,00 €', cent: 504000},
+       {was: 'Preis und Marge', her: '01.07.2026 bis 31.07.2026, 28 Std. × 180,00 €', cent: 504000,
+        zeit: {mandat: 'Preis und Marge', satz: 18000, min: 1680, bis: '2026-07-31'}},
        {was: 'Reisekosten Oldenburg', her: 'Pauschale', cent: 36000}
      ],
      historie: [
@@ -457,7 +488,7 @@ a.beleg-zeile{
     {id: 'r83', art: 'rechnung', status: 'issued', nummer: '2026-0083', kunde: 'cordes',
      gestellt: '03.08.2026', faellig: '17.08.2026', tageOffen: 11,
      intro: 'Für die Leistungen im Juli 2026 erlauben wir uns zu berechnen:',
-     positionen: [{was: 'Frachtmarge', her: '01.07.2026 bis 31.07.2026 · 10 Std. × 100,00 €', cent: 100000}],
+     positionen: [{was: 'Frachtmarge', her: '01.07.2026 bis 31.07.2026, 10 Std. × 100,00 €', cent: 100000}],
      historie: [
        {wann: '03.08.2026, 15:20', wer: 'Dr. Vogelsang', was: 'Entwurf angelegt'},
        {wann: '03.08.2026, 15:22', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0083'},
@@ -466,7 +497,7 @@ a.beleg-zeile{
     {id: 'r81', art: 'rechnung', status: 'paid', nummer: '2026-0081', kunde: 'freitag',
      gestellt: '08.07.2026', faellig: '22.07.2026', bezahlt: '21.07.2026',
      intro: 'Für die Leistungen im Juni 2026 erlauben wir uns zu berechnen:',
-     positionen: [{was: 'Personal und Kosten', her: '01.06.2026 bis 30.06.2026 · 11 Std. × 150,00 €', cent: 165000}],
+     positionen: [{was: 'Personal und Kosten', her: '01.06.2026 bis 30.06.2026, 11 Std. × 150,00 €', cent: 165000}],
      historie: [
        {wann: '08.07.2026, 10:30', wer: 'Dr. Vogelsang', was: 'Entwurf angelegt'},
        {wann: '08.07.2026, 10:32', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0081'},
@@ -475,12 +506,12 @@ a.beleg-zeile{
     {id: 'r80', art: 'storno', status: 'issued', nummer: '2026-0080', kunde: 'petersen',
      gestellt: '14.06.2026', reverses: 'r79',
      intro: 'Storno zur Rechnung 2026-0079 vom 12.06.2026.',
-     positionen: [{was: 'Preis und Marge', her: '01.05.2026 bis 31.05.2026 · 8 Std. × 180,00 €', cent: -144000}],
+     positionen: [{was: 'Preis und Marge', her: '01.05.2026 bis 31.05.2026, 8 Std. × 180,00 €', cent: -144000}],
      historie: [{wann: '14.06.2026, 09:02', wer: 'Dr. Vogelsang', was: 'Als Stornorechnung 2026-0080 zur Rechnung 2026-0079 entstanden'}]},
     {id: 'r79', art: 'rechnung', status: 'cancelled', nummer: '2026-0079', kunde: 'petersen',
      gestellt: '12.06.2026', faellig: '26.06.2026',
      intro: 'Für die Leistungen im Mai 2026 erlauben wir uns zu berechnen:',
-     positionen: [{was: 'Preis und Marge', her: '01.05.2026 bis 31.05.2026 · 8 Std. × 180,00 €', cent: 144000}],
+     positionen: [{was: 'Preis und Marge', her: '01.05.2026 bis 31.05.2026, 8 Std. × 180,00 €', cent: 144000}],
      historie: [
        {wann: '12.06.2026, 14:00', wer: 'Dr. Vogelsang', was: 'Entwurf angelegt'},
        {wann: '12.06.2026, 14:03', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0079'},
@@ -494,14 +525,59 @@ a.beleg-zeile{
     for (var i = 0; i < BELEGE.length; i++) if (BELEGE[i].id === id) return BELEGE[i];
     return null;
   }
+  /* Zwei Nachkommastellen, wo die Stunde krumm ist — sonst behauptet die
+     Herleitung „0,8 Std. × 100,00 €" ein Ergebnis von 80 statt 75 €. */
+  function stunden(z){ return (z.min / 60).toLocaleString('de-DE', {maximumFractionDigits: 2}); }
+  /* Eine Position je Mandat, nicht je Stunde — sie friert ihren eigenen
+     Satz ein und behält die Spur zu den Stunden, damit Herausnehmen und
+     Stornieren sie wieder freigeben können. */
+  /* Gestellt heißt dicht: der Beleg nimmt eine Kopie der Rechnungsdaten mit,
+     spätere Änderungen dort erreichen ihn nicht mehr. */
+  function friereEin(b){
+    b.steuersatz = ABSENDER.steuersatz;
+    b.steuerhinweis = ABSENDER.kleinunternehmer
+      ? 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.' : '';
+    b.absender = {
+      firma: ABSENDER.firma, anschrift: ABSENDER.anschrift, ustid: ABSENDER.ustid,
+      bank: ABSENDER.bank, fuss: ABSENDER.fuss
+    };
+  }
+  function zeitPosition(z){
+    return {
+      was: z.mandat,
+      her: 'bis ' + deutsch(z.bis) + ', ' + stunden(z) + ' Std. × ' + euro(z.satz),
+      cent: Math.round(z.min / 60 * z.satz),
+      zeit: z
+    };
+  }
   function euro(cent){
     var minus = cent < 0;
     var s = (Math.abs(cent) / 100).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     return (minus ? '−' : '') + s + ' €';
   }
   function netto(b){ return b.positionen.reduce(function(s, p){ return s + p.cent; }, 0); }
-  function steuer(b){ return Math.round(netto(b) * STEUERSATZ / 100); }
+  /* Ein Beleg trägt seinen eigenen Steuersatz, sobald er gestellt ist —
+     ein Entwurf rechnet mit dem, was heute in den Rechnungsdaten steht. */
+  function satzVon(b){ return b.steuersatz != null ? b.steuersatz : ABSENDER.steuersatz; }
+  function absenderVon(b){ return b.absender || ABSENDER; }
+  /* Steuer auf die Summe, eine Rundung je Beleg — und immer auf dem Betrag
+     gerundet, dann das Vorzeichen gesetzt. Sonst rundet Math.round den
+     Storno anders herum als die Rechnung und ein Cent bliebe stehen. */
+  function steuer(b){
+    var n = netto(b);
+    return Math.sign(n) * Math.round(Math.abs(n) * satzVon(b) / 100);
+  }
   function brutto(b){ return netto(b) + steuer(b); }
+  /* Was ein Beleg unter dem Strich noch fordert: eine Rechnung ihren Brutto,
+     abzüglich der Gutschriften, die auf sie zeigen. */
+  function offenerBetrag(b){
+    return BELEGE.reduce(function(s, k){
+      return k.reverses === b.id && k.art === 'gutschrift' ? s + brutto(k) : s;
+    }, brutto(b));
+  }
+  function istOffen(b){
+    return b.status === 'issued' && b.art === 'rechnung' && offenerBetrag(b) > 0;
+  }
   function artWort(b){
     return b.art === 'storno' ? 'Stornorechnung' : b.art === 'gutschrift' ? 'Gutschrift' : 'Rechnung';
   }
@@ -509,21 +585,23 @@ a.beleg-zeile{
     if (b.status === 'draft') return 'Entwurf';
     if (b.status === 'paid') return 'Bezahlt';
     if (b.status === 'cancelled') return 'Storniert';
-    return b.art === 'rechnung' ? 'Offen' : 'Gestellt';
+    if (b.art !== 'rechnung') return 'Gestellt';
+    return offenerBetrag(b) > 0 ? 'Offen' : 'Gutgeschrieben';
   }
   function zustandFuer(b){
     /* Füllstand-Vokabular von system.css: Entwurf grau-niedrig, offen amber, bezahlt grün-voll */
     if (b.status === 'draft') return 'entwurf';
     if (b.status === 'paid') return 'aktiv';
     if (b.status === 'cancelled') return '';
-    return b.art === 'rechnung' ? 'wartet' : 'vorschlag';
+    if (b.art !== 'rechnung') return 'vorschlag';
+    return istOffen(b) ? 'wartet' : '';
   }
 
   /* ---------- Kopf-Kapsel: sagt und füllt dasselbe ---------- */
   function maleKopf(){
-    var offene = BELEGE.filter(function(b){ return b.status === 'issued' && b.art === 'rechnung'; });
+    var offene = BELEGE.filter(istOffen);
     var gestellte = BELEGE.filter(function(b){ return b.status !== 'draft' && b.status !== 'cancelled' && b.art === 'rechnung'; });
-    var summe = offene.reduce(function(s, b){ return s + brutto(b); }, 0);
+    var summe = offene.reduce(function(s, b){ return s + offenerBetrag(b); }, 0);
     var wort = offene.length === 0 ? 'Nichts offen'
       : offene.length + ' offen, zusammen ' + euro(summe);
     var kopf = document.getElementById('kopf-stand');
@@ -552,17 +630,18 @@ a.beleg-zeile{
       zeile.href = '#b-' + b.id;
       var text = document.createElement('span'); text.className = 'b-text';
       var titel = document.createElement('span'); titel.className = 'b-titel';
-      titel.textContent = (b.nummer || 'Entwurf') + ' · ' + KUNDEN[b.kunde].name;
+      titel.textContent = (b.nummer || 'Entwurf') + ' für ' + KUNDEN[b.kunde].name;
       var meta = document.createElement('span'); meta.className = 'b-meta';
       var teile = [];
       if (b.art !== 'rechnung') teile.push(artWort(b));
       if (b.status === 'paid') teile.push('bezahlt am ' + b.bezahlt);
       else if (b.status === 'cancelled') teile.push('storniert, Beleg dazu: Stornorechnung');
       else if (b.status === 'draft') teile.push('noch ohne Nummer');
-      else if (b.art === 'rechnung') teile.push('zahlbar bis ' + b.faellig);
-      else teile.push('fordert nichts');
+      else if (b.art !== 'rechnung') teile.push('fordert nichts');
+      else if (offenerBetrag(b) <= 0) teile.push('vollständig gutgeschrieben');
+      else teile.push('zahlbar bis ' + b.faellig);
       meta.textContent = teile.join(', ');
-      if (b.status === 'issued' && b.art === 'rechnung' && b.tageOffen >= 9){
+      if (istOffen(b) && b.tageOffen >= 9){
         meta.appendChild(document.createTextNode(', '));
         var frist = document.createElement('span'); frist.className = 'frist';
         frist.textContent = 'seit ' + b.tageOffen + ' Tagen offen';
@@ -571,8 +650,9 @@ a.beleg-zeile{
       text.appendChild(titel); text.appendChild(document.createElement('br')); text.appendChild(meta);
       var recht = document.createElement('span'); recht.className = 'b-recht';
       var betrag = document.createElement('span');
-      betrag.className = 'b-betrag' + (brutto(b) < 0 ? ' minus' : '');
-      betrag.textContent = euro(brutto(b));
+      var zeigt = b.art === 'rechnung' ? offenerBetrag(b) : brutto(b);
+      betrag.className = 'b-betrag' + (zeigt <= 0 ? ' minus' : '');
+      betrag.textContent = euro(zeigt);
       var fuell = document.createElement('span'); fuell.className = 'z-fuell';
       var kapsel = document.createElement('span');
       kapsel.className = ('zustand ' + zustandFuer(b)).trim();
@@ -608,16 +688,22 @@ a.beleg-zeile{
   function maleSummen(b, wurzel){
     wurzel.textContent = '';
     var n = el('div'); n.appendChild(el('span', null, 'Netto')); n.appendChild(el('span', null, euro(netto(b))));
-    var s = el('div'); s.appendChild(el('span', null, 'Umsatzsteuer ' + STEUERSATZ + ' %')); s.appendChild(el('span', null, euro(steuer(b))));
+    wurzel.appendChild(n);
+    if (satzVon(b) > 0){
+      var s = el('div');
+      s.appendChild(el('span', null, 'Umsatzsteuer ' + satzVon(b) + ' %'));
+      s.appendChild(el('span', null, euro(steuer(b))));
+      wurzel.appendChild(s);
+    }
     var g = el('div', 'gesamt'); g.appendChild(el('span', null, 'Gesamt')); g.appendChild(el('span', null, euro(brutto(b))));
-    wurzel.appendChild(n); wurzel.appendChild(s); wurzel.appendChild(g);
+    wurzel.appendChild(g);
   }
 
   /* ---------- Entwurf: beweglich, mit Werkzeugen ---------- */
   function maleEntwurf(b, wurzel){
     var kopf = el('div', 'beleg-kopf');
     var links = el('div');
-    links.appendChild(el('h2', null, 'Entwurf · ' + KUNDEN[b.kunde].name));
+    links.appendChild(el('h2', null, 'Entwurf für ' + KUNDEN[b.kunde].name));
     links.appendChild(el('div', 'b-stand', 'Noch ohne Nummer, noch beweglich. Beim Stellen friert alles ein: Beträge, Anschriften, Steuersatz — und die nächste freie Nummer wird aufgestempelt.'));
     kopf.appendChild(links);
     var fuell = el('span', 'z-fuell');
@@ -717,19 +803,18 @@ a.beleg-zeile{
         var zeile = el('div', 'oz');
         var text = el('span', 'oz-text');
         text.appendChild(el('span', 'oz-mandat', z.mandat));
-        var std = (z.min / 60).toLocaleString('de-DE', {maximumFractionDigits: 1});
+        var std = stunden(z);
         if (z.satz == null){
-          text.appendChild(el('div', 'oz-meta kein-satz', std + ' Std. — dieses Mandat hat keinen Stundensatz'));
+          text.appendChild(el('div', 'oz-meta kein-satz', std + ' Std. bis ' + deutsch(z.bis) + ' — dieses Mandat hat keinen Stundensatz'));
           zeile.appendChild(text);
         } else {
-          text.appendChild(el('div', 'oz-meta', std + ' Std. × ' + euro(z.satz)));
+          text.appendChild(el('div', 'oz-meta', std + ' Std. bis ' + deutsch(z.bis) + ', ' + euro(z.satz) + ' je Stunde'));
           zeile.appendChild(text);
           var holen = el('button', 'knopf leise', 'Stunden holen'); holen.type = 'button';
           holen.addEventListener('click', function(){
             pool.splice(idx, 1);
-            var cent = Math.round(z.min / 60 * z.satz);
-            b.positionen.push({was: z.mandat, her: 'bis 14.08.2026 · ' + std + ' Std. × ' + euro(z.satz), cent: cent, zeit: z});
-            b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Position angelegt: ' + z.mandat + ' · ' + std + ' Std. × ' + euro(z.satz)});
+            b.positionen.push(zeitPosition(z));
+            b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Position angelegt: ' + z.mandat + ', ' + std + ' Std. × ' + euro(z.satz)});
             frisch();
           });
           zeile.appendChild(holen);
@@ -761,19 +846,22 @@ a.beleg-zeile{
         return;
       }
       b.positionen.push({was: was, her: 'Pauschale', cent: cent});
-      b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Position angelegt: ' + was + ' · Pauschale ' + euro(cent)});
+      b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Position angelegt: ' + was + ', Pauschale ' + euro(cent)});
       i1.value = ''; i2.value = '';
       frisch();
     });
 
-    /* Der Moment: Stellen. Der Entwurf friert ein, die Nummer wird gestempelt. */
+    /* Der Moment: Stellen. Der Entwurf friert ein, die Nummer wird gestempelt.
+       Eingefroren wird alles, was später niemand mehr ändern darf: Steuersatz,
+       Steuerhinweis und die vollständigen Absenderfelder. Die Spur zu den
+       Stunden bleibt am Beleg — nur ein Storno gibt sie wieder frei. */
     stellen.addEventListener('click', function(){
       if (b.positionen.length === 0) return;
       b.intro = document.getElementById('anschreiben').value.trim() || b.intro;
       b.status = 'issued';
       b.nummer = '2026-' + String(naechsteNummer++).padStart(4, '0');
       b.gestellt = HEUTE; b.faellig = '28.08.2026'; b.tageOffen = 0;
-      b.positionen.forEach(function(p){ delete p.zeit; });
+      friereEin(b);
       b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Gestellt als ' + b.nummer + ' — ab hier ändert sich nichts mehr'});
       frischGestellt = b.id;
       zeige('b-' + b.id);
@@ -789,10 +877,11 @@ a.beleg-zeile{
   /* ---------- Gestellter Beleg: ein Dokument ---------- */
   var frischGestellt = null;
   function malePapier(b, wurzel, gutschriftModus, angekreuzt){
+    var abs = absenderVon(b);
     var papier = el('div', 'papier' + (b.status === 'cancelled' ? ' durchgestrichen' : ''));
     if (b.id === frischGestellt) papier.appendChild(el('span', 'hand', 'eingefroren.'));
     papier.appendChild(el('div', 'marke-zeile', 'Nordholm & Partner'));
-    papier.appendChild(el('div', 'absender-klein', ABSENDER.firma + ' · ' + ABSENDER.anschrift));
+    papier.appendChild(el('div', 'absender-klein', abs.firma + ', ' + abs.anschrift));
     var adressen = el('div', 'adress-block');
     var empf = el('div', 'empfaenger');
     KUNDEN[b.kunde].anschrift.forEach(function(z, i){
@@ -811,7 +900,7 @@ a.beleg-zeile{
     }
     eckzeile('Datum', b.gestellt);
     if (b.art === 'rechnung') eckzeile('Zahlbar bis', b.faellig);
-    eckzeile('', ABSENDER.ustid);
+    eckzeile('', abs.ustid);
     adressen.appendChild(empf); adressen.appendChild(eck);
     papier.appendChild(adressen);
 
@@ -833,6 +922,7 @@ a.beleg-zeile{
         var box = document.createElement('input');
         box.type = 'checkbox'; box.className = 'wahl'; box.dataset.idx = idx;
         box.checked = angekreuzt.has(idx);
+        box.setAttribute('aria-label', 'Gutschreiben: ' + p.was + ', ' + euro(p.cent));
         box.addEventListener('change', function(){
           if (box.checked) angekreuzt.add(idx); else angekreuzt.delete(idx);
         });
@@ -848,13 +938,14 @@ a.beleg-zeile{
     var summen = el('div', 'p-summen');
     maleSummen(b, summen);
     papier.appendChild(summen);
+    if (b.steuerhinweis) papier.appendChild(el('div', 'intro', b.steuerhinweis));
     if (b.art === 'rechnung' && b.status !== 'cancelled'){
-      papier.appendChild(el('div', 'bankzeile', 'Zahlbar auf ' + ABSENDER.bank + '.'));
+      papier.appendChild(el('div', 'bankzeile', 'Zahlbar auf ' + abs.bank + '.'));
     }
     if (b.art !== 'rechnung'){
       papier.appendChild(el('div', 'bankzeile', 'Dieser Beleg fordert nichts — er ' + (b.art === 'storno' ? 'hebt die Rechnung ' + beleg(b.reverses).nummer + ' auf.' : 'schreibt die angekreuzten Positionen gut.')));
     }
-    papier.appendChild(el('div', 'fusszeile', ABSENDER.firma + ' · ' + ABSENDER.anschrift + ' · ' + ABSENDER.fuss));
+    papier.appendChild(el('div', 'fusszeile', abs.firma + ', ' + abs.anschrift + ', ' + abs.fuss));
     wurzel.appendChild(papier);
   }
 
@@ -949,10 +1040,13 @@ a.beleg-zeile{
       var erstellen = el('button', 'knopf primaer', 'Gutschrift erstellen'); erstellen.type = 'button'; erstellen.hidden = true;
       erstellen.addEventListener('click', function(){
         if (angekreuzt.size === 0){ demoHinweis('Erst ankreuzen, was gutgeschrieben wird.'); return; }
+        /* Der Korrekturbeleg erbt Steuersatz und Anschriften vom Original —
+           er ist dessen Spiegel, nicht ein Beleg von heute. */
         var neu = {
           id: 'g' + naechsteNummer, art: 'gutschrift', status: 'issued',
           nummer: '2026-' + String(naechsteNummer++).padStart(4, '0'),
           kunde: b.kunde, gestellt: HEUTE, reverses: b.id,
+          steuersatz: satzVon(b), steuerhinweis: b.steuerhinweis, absender: absenderVon(b),
           intro: 'Gutschrift zur Rechnung ' + b.nummer + ' vom ' + b.gestellt + '.',
           positionen: [], historie: []
         };
@@ -974,13 +1068,20 @@ a.beleg-zeile{
           id: 's' + naechsteNummer, art: 'storno', status: 'issued',
           nummer: '2026-' + String(naechsteNummer++).padStart(4, '0'),
           kunde: b.kunde, gestellt: HEUTE, reverses: b.id,
+          steuersatz: satzVon(b), steuerhinweis: b.steuerhinweis, absender: absenderVon(b),
           intro: 'Storno zur Rechnung ' + b.nummer + ' vom ' + b.gestellt + '.',
           positionen: b.positionen.map(function(p){ return {was: p.was, her: p.her, cent: -p.cent}; }),
           historie: []
         };
         neu.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Als Stornorechnung ' + neu.nummer + ' zur Rechnung ' + b.nummer + ' entstanden'});
         b.status = 'cancelled';
-        b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Storniert — der Beleg dazu ist die Stornorechnung ' + neu.nummer + '. Die Stunden sind wieder frei.'});
+        /* Das Storno gibt die Stunden wirklich frei — sie kommen in den Pool
+           des Kunden zurück und stehen im nächsten Entwurf wieder bereit. */
+        var zurueck = 0;
+        b.positionen.forEach(function(p){
+          if (p.zeit){ STUNDEN[b.kunde].push(p.zeit); zurueck += p.zeit.min; }
+        });
+        b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Storniert — der Beleg dazu ist die Stornorechnung ' + neu.nummer + (zurueck ? '. ' + (zurueck / 60).toLocaleString('de-DE', {maximumFractionDigits: 1}) + ' Std. sind wieder frei.' : '.')});
         BELEGE.unshift(neu);
         frischGestellt = neu.id;
         location.hash = 'b-' + neu.id;
@@ -1026,6 +1127,8 @@ a.beleg-zeile{
       var wurzel = document.getElementById('beleg-inhalt');
       wurzel.textContent = '';
       if (b.status === 'draft') maleEntwurf(b, wurzel); else maleGestellt(b, wurzel);
+      /* Der Stempel gehört dem Augenblick: einmal gezeigt, nie wieder. */
+      frischGestellt = null;
       ansichtBeleg.hidden = false;
       window.scrollTo({top: 0, behavior: reduziert ? 'auto' : 'smooth'});
     } else if (ziel === 'daten'){
@@ -1038,48 +1141,84 @@ a.beleg-zeile{
   }
   window.addEventListener('hashchange', function(){
     zeige(location.hash.replace('#', ''));
-    if (!location.hash) frischGestellt = null;
   });
 
-  /* ---------- Neue Rechnung ---------- */
+  /* ---------- Neue Rechnung ----------
+     Der Stichtag entscheidet, was mitkommt: Stunden, die danach gearbeitet
+     wurden, bleiben liegen und stehen beim nächsten Mal wieder da. */
   document.getElementById('neu-anlegen').addEventListener('click', function(){
     var kunde = document.getElementById('neu-kunde').value;
+    var stichtag = document.getElementById('neu-stichtag').value || '2026-08-14';
     var neu = {
       id: 'e' + (++entwurfZaehler), art: 'rechnung', status: 'draft', nummer: null,
-      kunde: kunde, intro: '', positionen: [],
-      historie: [{wann: HEUTE + ', jetzt', wer: 'Du', was: 'Entwurf angelegt'}]
+      kunde: kunde, stichtag: stichtag, intro: '', positionen: [],
+      historie: [{wann: HEUTE + ', jetzt', wer: 'Du', was: 'Entwurf angelegt, Stunden bis einschließlich ' + deutsch(stichtag)}]
     };
     var pool = STUNDEN[kunde];
     for (var i = pool.length - 1; i >= 0; i--){
       var z = pool[i];
-      if (z.satz == null) continue;
+      if (z.satz == null || z.bis > stichtag) continue;
       pool.splice(i, 1);
-      var std = (z.min / 60).toLocaleString('de-DE', {maximumFractionDigits: 1});
-      neu.positionen.push({was: z.mandat, her: 'bis 14.08.2026 · ' + std + ' Std. × ' + euro(z.satz), cent: Math.round(z.min / 60 * z.satz), zeit: z});
-      neu.historie.push({wann: HEUTE + ', jetzt', wer: 'System', was: 'Position angelegt: ' + z.mandat + ' · ' + std + ' Std. × ' + euro(z.satz)});
+      neu.positionen.push(zeitPosition(z));
+      neu.historie.push({wann: HEUTE + ', jetzt', wer: 'System', was: 'Position angelegt: ' + z.mandat + ', ' + stunden(z) + ' Std. × ' + euro(z.satz)});
     }
     BELEGE.unshift(neu);
     location.hash = 'b-' + neu.id;
   });
 
-  /* ---------- Rechnungsdaten ---------- */
+  /* ---------- Rechnungsdaten: die Quelle, aus der jedes neue Papier liest ---------- */
+  function wert(id){ return document.getElementById(id).value.trim(); }
   document.getElementById('rd-klein').addEventListener('change', function(e){
     var satz = document.getElementById('rd-satz');
     satz.disabled = e.target.checked;
-    if (e.target.checked) satz.value = '0'; else satz.value = '19';
+    satz.value = e.target.checked ? '0' : '19';
   });
   document.getElementById('rd-speichern').addEventListener('click', function(){
     var m = document.getElementById('rd-meldung');
-    var iban = document.getElementById('rd-iban').value.replace(/\s/g, '').toUpperCase();
-    if (!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(iban)){
+    function fehler(text){
       m.className = 'bestaetigt'; m.style.background = 'var(--rot-fond)';
-      m.textContent = 'Die IBAN sieht nicht nach einer IBAN aus — zwei Buchstaben, zwei Ziffern, dann die Kontokennung.';
-      m.hidden = false;
+      m.textContent = text; m.hidden = false;
+    }
+    var iban = wert('rd-iban').replace(/\s/g, '').toUpperCase();
+    if (!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(iban)){
+      fehler('Die IBAN sieht nicht nach einer IBAN aus — zwei Buchstaben, zwei Ziffern, dann die Kontokennung.');
       return;
     }
+    if (!wert('rd-firma') || !wert('rd-strasse') || !wert('rd-ort')){
+      fehler('Firma, Straße und Ort gehören auf jede Rechnung — ohne sie lässt sich keine stellen.');
+      return;
+    }
+    var klein = document.getElementById('rd-klein').checked;
+    var satz = parseInt(wert('rd-satz'), 10);
+    if (!klein && (!isFinite(satz) || satz < 0 || satz > 100)){
+      fehler('Der Steuersatz ist eine ganze Zahl zwischen 0 und 100.');
+      return;
+    }
+    var ziel = parseInt(wert('rd-ziel'), 10);
+    if (!isFinite(ziel) || ziel < 0 || ziel > 365){
+      fehler('Das Zahlungsziel sind Tage zwischen 0 und 365.');
+      return;
+    }
+    ABSENDER.firma = wert('rd-firma');
+    ABSENDER.anschrift = wert('rd-strasse') + ', ' + wert('rd-ort');
+    ABSENDER.ustid = wert('rd-ustid') ? 'USt-IdNr. ' + wert('rd-ustid') : '';
+    ABSENDER.bank = wert('rd-iban') + ', ' + wert('rd-bic');
+    ABSENDER.fuss = wert('rd-fuss');
+    ABSENDER.zielTage = ziel;
+    ABSENDER.kleinunternehmer = klein;
+    ABSENDER.steuersatz = klein ? 0 : satz;
     m.className = 'bestaetigt'; m.style.background = '';
-    m.textContent = 'Gespeichert.';
+    m.textContent = 'Gespeichert. Jede neue Rechnung trägt das ab sofort'
+      + (klein ? ', ohne Umsatzsteuer und mit dem Hinweis nach § 19 UStG' : '')
+      + '. Was schon gestellt ist, bleibt wie es ist.';
     m.hidden = false;
+    maleKopf();
+  });
+
+  /* Was beim Laden schon gestellt ist, hat seine Rechnungsdaten damals
+     mitbekommen — sonst würde ein Speichern alte Belege umschreiben. */
+  BELEGE.forEach(function(b){
+    if (b.status !== 'draft' && !b.absender) friereEin(b);
   });
 
   /* Direkteinstieg über den Hash, sonst die Liste */
