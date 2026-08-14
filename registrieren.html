@@ -19,7 +19,7 @@
    übersprungen, die Ankunft ist das erleuchtete Modell).
    Der Baustand ist ein Füllstand im Glas (Systemregel).
    Felder wie im Produkt: Name, E-Mail, Passwort (mind. 12 Zeichen).
-   Marker: REGISTRIEREN-V2 */
+   Marker: REGISTRIEREN-V3 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input{font-family:inherit}
@@ -56,6 +56,11 @@ body{overflow:hidden;background:var(--grund)}
   transition:background .2s ease,color .2s ease;
 }
 .umschalter button.hier{background:var(--tinte);color:#fff}
+/* Am Finger: die zwei Türen sind die erste Entscheidung der Seite und
+   müssen 44px hoch sein, nicht 31. */
+@media (pointer:coarse){
+  .umschalter button{min-height:44px;padding:7px 18px}
+}
 h1{font-size:24px;margin-top:16px}
 .erklaer{font-size:14px;color:var(--nebel-600);margin-top:6px;line-height:1.55}
 .feld{margin-top:14px}

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Entwurf B · Tageslicht</title>
 <style>
-/* quoroai-plattform-design · Entwurf B · Marker: ENTWURF-B-TAGESLICHT-V2 */
+/* quoroai-plattform-design · Entwurf B · Marker: ENTWURF-B-TAGESLICHT-V3 */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -23,6 +23,10 @@
   --radius-gross:24px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
+/* Das Heldenbild ist absichtlich größer als sein Kasten und läuft weich aus.
+   Auf dem Handy ließ sich die Seite dadurch seitlich wegziehen — geklippt
+   wird nur der Überstand, der Auslauf selbst bleibt. */
+body{overflow-x:clip}
 html{scroll-behavior:smooth}
 body{
   background:var(--bg);

@@ -22,7 +22,7 @@
    ARIA, die Summe hat eine Quelle (das Markup), getTotalLength statt harter
    200, Enter wacht über isComposing, Kopf-Kapsel in Geschwistergröße; die
    Posten decken sich mit LEISTUNGEN-V5.
-   Marker: BERATUNG-MANDAT-V2 */
+   Marker: BERATUNG-MANDAT-V3 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -44,7 +44,10 @@ nav{
 }
 nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
 nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
-nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;
+  /* Bei 11px misst die Schauschrift zwischen zwei Wörtern nur 2px — „Cockpit der"
+     las sich als ein Wort. */
+  word-spacing:2px}
 nav a.vorschlaege{
   padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
   background:rgba(255,255,255,.8);
@@ -63,6 +66,17 @@ nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
 #krume .zurueck{color:var(--nebel-600);font-weight:600}
 #krume:hover .zurueck{color:var(--lila-600)}
 #krume b{font-weight:600}
+
+/* Die Krume ist ein Zettel neben der Seite — solange daneben Platz ist.
+   Wird das Fenster schmaler als 1420px, reicht sie in die Inhaltsspalte, und
+   der Inhalt zöge beim Scrollen unter ihr durch. Dann wird sie die zweite
+   Zeile des Kopfbands: das Glas wächst nach unten, die obere Reihe bleibt,
+   wo sie war — das Polster unten hält den Inhaltskasten bei 60px. */
+@media (max-width:1420px){
+  nav{height:118px;padding-bottom:58px}
+  #krume{z-index:90}
+}
+
 
 /* ========== Seite ========== */
 main{max-width:860px;margin:0 auto;padding:136px 24px 90px}
@@ -175,7 +189,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   #pfad circle.hof{animation:none;opacity:0}
 }
 @media (max-width:700px){
-  nav{padding:0 18px}
+  nav{padding:0 18px;padding-bottom:58px}
   nav .wortmarke small{display:none}
   #krume{left:18px;top:70px}
   main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}

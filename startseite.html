@@ -19,7 +19,7 @@
    hinterlegt hat, ihr Anfangsbuchstabe in ihrer Farbe.
    Neu gegenüber dem Produkt: Impressum und Datenschutz stehen im Fuß — eine
    öffentliche Adresse in Deutschland braucht beide erreichbar.
-   Marker: STARTSEITE-V2 (Review-Fix: die Überschrift bleibt, wenn das Logo den Namen trägt) */
+   Marker: STARTSEITE-V3 (Review-Fix: die Überschrift bleibt, wenn das Logo den Namen trägt) */
 @font-face{font-family:'Manrope';src:url('schriften/manrope.woff2') format('woff2');font-weight:200 800;font-display:swap}
 @font-face{font-family:'Caveat';src:url('schriften/caveat.woff2') format('woff2');font-weight:400 700;font-display:swap}
 :root{
@@ -75,6 +75,12 @@ body{
   background:none;border:none;cursor:pointer;text-decoration:none;
 }
 .wechsel-tuer:hover{color:var(--blau)}
+/* Am Finger: ein Wort allein ist kein Ziel. Auf Zeigegeräten bleibt der
+   Knopf so schmal, wie er aussieht, am Berührbildschirm bekommt er die
+   44px Höhe, die eine Fingerkuppe braucht. */
+@media (pointer:coarse){
+  .wechsel-tuer{display:flex;align-items:center;justify-content:center;min-height:44px;margin-top:6px}
+}
 :focus-visible{outline:3px solid var(--blau);outline-offset:3px;border-radius:6px}
 
 /* ---------- Fuß ---------- */

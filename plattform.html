@@ -26,7 +26,7 @@
    Sortierungen sind bei gleichem Monat eindeutig, und angeboten wird der
    ÄLTESTE offene Monat — sonst wäre eine verworfene ältere Abrechnung nie
    wieder abzuschließen.
-   Marker: PLATTFORM-V2 */
+   Marker: PLATTFORM-V3 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -62,6 +62,17 @@ nav a.vorschlaege:hover,nav button.abmelden:hover{border-color:var(--lila-600);c
 #krume .zurueck{color:var(--nebel-600);font-weight:600}
 #krume:hover .zurueck{color:var(--lila-600)}
 #krume b{font-weight:600}
+
+/* Die Krume ist ein Zettel neben der Seite — solange daneben Platz ist.
+   Wird das Fenster schmaler als 1440px, reicht sie in die Inhaltsspalte, und
+   der Inhalt zöge beim Scrollen unter ihr durch. Dann wird sie die zweite
+   Zeile des Kopfbands: das Glas wächst nach unten, die obere Reihe bleibt,
+   wo sie war — das Polster unten hält den Inhaltskasten bei 60px. */
+@media (max-width:1440px){
+  nav{height:118px;padding-bottom:58px}
+  #krume{z-index:90}
+}
+
 
 /* ========== Seite ========== */
 body{position:relative}
@@ -205,7 +216,7 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   .aufstellung.friert .frost{animation:none}
 }
 @media (max-width:760px){
-  nav{padding:0 18px}
+  nav{padding:0 18px;padding-bottom:58px}
   nav .wortmarke small{display:none}
   #krume{left:18px;top:70px}
   main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}

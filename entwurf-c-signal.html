@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Entwurf C · Signal</title>
 <style>
-/* quoroai-plattform-design · Entwurf C · Marker: ENTWURF-C-SIGNAL-V2 */
+/* quoroai-plattform-design · Entwurf C · Marker: ENTWURF-C-SIGNAL-V3 */
 @font-face{
   font-family:'Archivo';
   src:url('schriften/archivo.woff2') format('woff2');
@@ -21,6 +21,10 @@
   --linie:rgba(16,20,10,.14);
 }
 *{margin:0;padding:0;box-sizing:border-box}
+/* Das Heldenbild ist absichtlich größer als sein Kasten und läuft weich aus.
+   Auf dem Handy ließ sich die Seite dadurch seitlich wegziehen — geklippt
+   wird nur der Überstand, der Auslauf selbst bleibt. */
+body{overflow-x:clip}
 html{scroll-behavior:smooth}
 body{
   background:var(--bg);

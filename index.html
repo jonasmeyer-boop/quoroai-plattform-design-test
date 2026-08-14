@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Entwürfe · quoroai-plattform-design</title>
 <style>
-/* Marker: ENTWURFS-INDEX-V11 (Block C: der quoroAI-Plattformbereich) */
+/* Marker: ENTWURFS-INDEX-V12 (Block C: der quoroAI-Plattformbereich) */
 *{margin:0;padding:0;box-sizing:border-box}
 body{
   background:#f4f4f5;color:#17181c;
@@ -13,7 +13,9 @@ body{
   padding:64px 24px;
 }
 .rahmen{max-width:920px;margin:0 auto}
-h1{font-size:28px;letter-spacing:-.02em}
+/* „Unternehmensberatungen" ist länger als ein Handy breit ist — ohne
+   Trennung schob das Wort die ganze Seite 39px zur Seite. */
+h1{font-size:clamp(22px,6vw,28px);letter-spacing:-.02em;hyphens:auto;overflow-wrap:break-word}
 p.unter{color:#6b7280;margin-top:6px;max-width:60ch}
 .liste{margin-top:40px;display:grid;gap:20px}
 a.entwurf{
