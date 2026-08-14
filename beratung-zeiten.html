@@ -30,7 +30,7 @@
    laufen jetzt durch den Baustein statt durch ein Array dieser Seite — sonst
    waren sie nach dem nächsten Seitenwechsel weg, während die Uhr im Dock
    ihn überlebte. Der Minutenschlag hängt nicht mehr an einem exakten Tick.
-   Marker: BERATUNG-ZEITEN-V3 */
+   Marker: BERATUNG-ZEITEN-V4 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -489,17 +489,23 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
     }
   }, 1000);
 
-  window.addEventListener('uhr:gebucht', function(){ male(); });
+  /* Trägt diese Fläche selbst ein, baut sie die Liste gleich danach neu —
+     das Ereignis des Bausteins würde sie ein zweites Mal verwerfen, samt
+     aller Zuhörer, und zwar bevor die Markierung „frisch" gesetzt ist. */
+  var traegtSelbst = false;
+  window.addEventListener('uhr:gebucht', function(){ if (!traegtSelbst) male(); });
   window.addEventListener('uhr:lage', function(){ male(); });
 
   /* ---------- Die Vorschläge ---------- */
   function nimm(zettel){
+    traegtSelbst = true;
     var e = Uhr.trage({
       name: zettel.dataset.mandat,
       was: zettel.dataset.was + ', übernommen',
       dauer: parseInt(zettel.dataset.dauer, 10),
       quelle: 'vorschlag'
     });
+    traegtSelbst = false;
     frischeNamen[e.id] = true;
     weg(zettel);
     male();
@@ -546,12 +552,14 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
   });
 
   document.getElementById('nachtragen').addEventListener('click', function(){
+    traegtSelbst = true;
     var e = Uhr.trage({
       name: gewaehltesMandat.name,
       was: 'von Hand nachgetragen',
       dauer: gewaehlteMinuten * 60,
       quelle: 'hand'
     });
+    traegtSelbst = false;
     frischeNamen[e.id] = true;
     male();
     var neu = listeEl.querySelector('.eintrag.frisch');

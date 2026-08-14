@@ -45,7 +45,7 @@
    und daneben steht der Nachweis-Stand des Teams (3 von 5 unterwiesen,
    deiner fehlt) — der Hinweis bleibt im Cockpit stehen, bis bestätigt ist.
    V26: die Uhr (uhr.js) liegt als Dock über der Fläche, die Zentrale hat eine
-   Tür „Zeiten", und bis 880px rückt der Tisch über das Dock (162px: mit sichtbarem Beleg ist das Dock 130 hoch). V27 (Code-Review):
+   Tür „Zeiten", und bis 880px rückt der Tisch über das Dock, und zwar an dessen gemessener Höhe (--uhr-hoehe). V27 (Code-Review):
    das Band 701–880px war nicht abgedeckt — dort lagen Tisch-Zettel unter dem
    Dock; und die Raum-Spalten melden sich jetzt mit data-uhr-polster, damit der
    Baustein ihnen sein Unten unterlegt (diese Fläche hat kein <main>, die
@@ -236,7 +236,10 @@ body.drin #blitz{animation:durchbruch .6s ease-out}
    430px breit — bis etwa 880px Fensterbreite treffen sich beide. Er rückt
    deshalb im ganzen Band darüber, nicht erst auf dem Handy. */
 @media (max-width:880px){
-  #tisch{bottom:calc(162px + env(safe-area-inset-bottom))!important}
+  /* --uhr-hoehe setzt der Baustein selbst und misst dabei nach: in Ruhe
+     ist das Dock ~60px hoch, mit sichtbarem Beleg ~130. Ein fester Wert
+     ließe den Tisch die meiste Zeit über nichts schweben. */
+  #tisch{bottom:calc(var(--uhr-hoehe, 68px) + 32px + env(safe-area-inset-bottom))!important}
 }
 #tisch{
   position:fixed;left:24px;bottom:20px;z-index:10;

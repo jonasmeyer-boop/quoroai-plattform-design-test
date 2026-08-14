@@ -31,7 +31,16 @@
    dort, wo Klicks nicht bis zum document steigen. Korrekturen und Nachträge
    der Zeiten-Fläche laufen über sichere()/entferne()/trage() in dieselbe
    Ablage wie die Uhr-Läufe.
-   Marker: UHR-V2 */
+
+   V3 (zweites Code-Review): die Auffangfläche hatte kein CSS und war damit
+   wirkungslos — ein Block der Höhe null am Dokumentende. entferne() ohne
+   Namen hätte alle namenlosen Einträge auf einmal getilgt (Einträge aus V1
+   trugen keinen); sie bekommen jetzt beim Laden einen. aria-expanded klebte
+   danach am Halte-Knopf, der nichts ausklappt. Die Liste bekommt eine
+   Höhengrenze, damit sie im Querformat nicht oben hinausläuft, und folgt
+   dem Fenster. Und das Dock sagt seine Höhe als --uhr-hoehe an, statt dass
+   jede Fläche mit eigenem Chrom unten raten muss.
+   Marker: UHR-V3 */
 window.Uhr = (function () {
   'use strict';
 
@@ -72,6 +81,14 @@ window.Uhr = (function () {
     ];
     schreib(SCHLUESSEL_BUCH, buchungen);
   }
+  /* Einträge aus einer älteren Fassung tragen kein id. Ohne Nachrüstung
+     löschte ein Klick auf „Eintrag löschen" sie alle auf einmal, weil sie
+     sich alle gleich (nämlich gar nicht) benennen. */
+  (function () {
+    var fehlte = false;
+    buchungen.forEach(function (e, i) { if (!e.id) { e.id = 'alt' + i; fehlte = true; } });
+    if (fehlte) schreib(SCHLUESSEL_BUCH, buchungen);
+  })();
 
   /* ---------- Zeit in Worten und Ziffern ---------- */
   function zweistellig(n) { return (n < 10 ? '0' : '') + n; }
@@ -200,6 +217,9 @@ window.Uhr = (function () {
       '@supports not (backdrop-filter: blur(1px)){.uhr-liste{background:rgba(255,255,255,.97)}}' +
       '@media (prefers-reduced-transparency: reduce){' +
         '.uhr-liste{background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none}}' +
+      /* Im Querformat eines Telefons ist das Bild 380 Pixel hoch — die Liste
+         muss dann scrollen statt oben hinauszulaufen. */
+      '.uhr-liste{max-height:calc(100vh - 96px);overflow-y:auto;overscroll-behavior:contain}' +
       '.uhr-liste h3{font-size:11.5px;font-weight:600;color:var(--nebel-500,#7f7d93);' +
         'margin:0;padding:8px 12px 6px;letter-spacing:.02em}' +
       '.uhr-wahl{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;' +
@@ -209,6 +229,9 @@ window.Uhr = (function () {
       '.uhr-wahl:focus-visible{outline:3px solid var(--lila-400,#9d93f1);outline-offset:-2px}' +
       '.uhr-wahl .laeuft{margin-left:auto;font-size:12px;font-weight:600;color:var(--gruen,#177452);flex-shrink:0}' +
       '.uhr-wahl span.erster{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+      /* Die Auffangfläche: über der Seite, aber UNTER dem Dock — „Anhalten"
+         bleibt erreichbar, während die Liste offen ist. */
+      '.uhr-schleier{position:fixed;inset:0;z-index:94;background:transparent}' +
       '.uhr-auf{animation:uhr-auf .26s var(--kurve,cubic-bezier(.16,1,.3,1))}' +
       '@keyframes uhr-auf{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}' +
 
@@ -276,6 +299,11 @@ window.Uhr = (function () {
 
     document.body.appendChild(dock);
     machPlatz();
+    /* Wie viel Platz das Dock gerade braucht, weiß nur das Dock: mit
+       sichtbarem Beleg ist es doppelt so hoch wie in Ruhe. Flächen mit
+       eigenem Chrom unten (das Modell) rechnen damit, statt zu raten. */
+    misstHoehe();
+    if (window.ResizeObserver) new ResizeObserver(function () { misstHoehe(); listeSetzen(); }).observe(dock);
 
     werKnopf.addEventListener('click', function (e) { e.stopPropagation(); listeUm(); });
     tatKnopf.addEventListener('click', function (e) {
@@ -308,6 +336,10 @@ window.Uhr = (function () {
       var da = parseFloat(getComputedStyle(m).paddingBottom) || 0;
       if (da < 162) m.style.paddingBottom = 'calc(162px + env(safe-area-inset-bottom))';
     });
+  }
+
+  function misstHoehe() {
+    document.documentElement.style.setProperty('--uhr-hoehe', Math.round(dock.getBoundingClientRect().height) + 'px');
   }
 
   /* ---------- Anzeige ---------- */
@@ -365,6 +397,11 @@ window.Uhr = (function () {
   /* ---------- Die Mandatsliste ---------- */
   function listeUm() { if (liste) listeZu(); else listeAuf(); }
 
+  function listeSetzen() {
+    if (!liste) return;
+    liste.style.bottom = Math.round(window.innerHeight - dock.getBoundingClientRect().top + 8) + 'px';
+  }
+
   function listeAuf() {
     /* Ein Tipp neben die Liste schließt sie. Der Zuhörer auf `document`
        allein genügt nicht: auf iOS steigen Klicks von nicht-interaktiven
@@ -404,7 +441,7 @@ window.Uhr = (function () {
     /* Die Liste darf das Dock nicht zudecken — sonst trifft ein Klick dorthin,
        wo eben „Anhalten" saß, eine Mandatszeile und wechselt still das Mandat.
        Sie setzt sich deshalb über die tatsächliche Oberkante des Docks. */
-    liste.style.bottom = Math.round(window.innerHeight - dock.getBoundingClientRect().top + 8) + 'px';
+    listeSetzen();
     var erster = liste.querySelector('.uhr-wahl:not([disabled])');
     if (erster) erster.focus();
     /* Geöffnet wird die Liste in der Ruhelage vom Tat-Knopf, sonst vom Namen.
@@ -419,7 +456,10 @@ window.Uhr = (function () {
     liste.remove();
     liste = null;
     if (schleier) { schleier.remove(); schleier = null; }
-    if (oeffner) { oeffner.setAttribute('aria-expanded', 'false'); }
+    /* Nicht auf „false" setzen und liegen lassen: in der Ruhelage öffnet der
+       Tat-Knopf die Liste, gleich danach heißt er „Anhalten" und klappt nichts
+       mehr auf. Ein Knopf, der nichts ausklappt, meldet auch nichts. */
+    if (oeffner) { oeffner.removeAttribute('aria-expanded'); oeffner = null; }
   }
 
   /* ---------- Starten, Wechseln, Anhalten ----------
@@ -532,6 +572,7 @@ window.Uhr = (function () {
       schreib(SCHLUESSEL_BUCH, buchungen);
     },
     entferne: function (id) {
+      if (!id) return;   /* ohne Namen träfe der Filter alle Namenlosen */
       buchungen = buchungen.filter(function (e) { return e.id !== id; });
       schreib(SCHLUESSEL_BUCH, buchungen);
     },
