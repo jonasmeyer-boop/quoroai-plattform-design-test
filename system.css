@@ -3,7 +3,7 @@
    Lauftext General Sans, Glas als Material für Chrom, Zustände als Füllstand
    im Glas (Jonas, 2026-08-12). Gilt für quoroAI-gebrandete Flächen
    (Beratungsseite); Kundenflächen bleiben White-Label über marke.js.
-   Marker: SYSTEM-CSS-V6 */
+   Marker: SYSTEM-CSS-V7 */
 
 @font-face{font-family:'Clash Display';src:url('schriften/clash-display.woff2') format('woff2');font-weight:200 700;font-display:swap}
 @font-face{font-family:'General Sans';src:url('schriften/general-sans.woff2') format('woff2');font-weight:200 700;font-display:swap}
@@ -53,6 +53,11 @@ body.quoro{
 .quoro h1,.quoro h2,.quoro h3,.quoro .schau{
   font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);
   letter-spacing:var(--schau-spur);line-height:1.12;
+  /* Clash Display setzt zwischen zwei Wörter nur ein Sechstel der Schriftgröße.
+     In einer Überschrift trägt das; in einem 12px-Etikett stehen 1,75px, und
+     „Offene Einladungen" las sich als ein Wort. Ein fester Schubs von 1,5px
+     rettet das Kleine und verschwindet im Großen. */
+  word-spacing:1.5px;
 }
 .quoro a{color:var(--lila-600)}
 .quoro :focus-visible{outline:3px solid var(--lila-400);outline-offset:2px;border-radius:4px}
