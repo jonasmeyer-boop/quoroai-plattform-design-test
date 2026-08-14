@@ -19,7 +19,7 @@
    hinterlegt hat, ihr Anfangsbuchstabe in ihrer Farbe.
    Neu gegenüber dem Produkt: Impressum und Datenschutz stehen im Fuß — eine
    öffentliche Adresse in Deutschland braucht beide erreichbar.
-   Marker: STARTSEITE-V1 */
+   Marker: STARTSEITE-V2 (Review-Fix: die Überschrift bleibt, wenn das Logo den Namen trägt) */
 @font-face{font-family:'Manrope';src:url('schriften/manrope.woff2') format('woff2');font-weight:200 800;font-display:swap}
 @font-face{font-family:'Caveat';src:url('schriften/caveat.woff2') format('woff2');font-weight:400 700;font-display:swap}
 :root{
@@ -47,6 +47,10 @@ body{
 }
 .marke-logo{height:76px;width:auto;display:block}
 .name{font-size:clamp(26px,4vw,36px);font-weight:800;letter-spacing:-.025em;margin-top:20px}
+.name.nur-vorlesen{
+  position:absolute;width:1px;height:1px;margin:0;padding:0;
+  overflow:hidden;clip-path:inset(50%);white-space:nowrap;
+}
 
 /* ---------- der Gruß, mit der Hand ---------- */
 .anstrich{width:88px;height:12px;display:block;overflow:visible;margin:14px auto 0}
@@ -119,8 +123,10 @@ body{
 <main class="lobby">
   <img class="marke-logo" alt="" hidden>
   <div class="zeichen" data-logo-versteckt aria-hidden="true" id="zeichen">N</div>
-  <!-- Trägt das Logo den Namen schon (wie bei currily), steht er nicht zweimal da -->
-  <h1 class="name" data-marke-name data-logo-versteckt>Nordholm &amp; Partner</h1>
+  <!-- Trägt das Logo den Namen schon (wie bei currily), steht er nicht zweimal
+       da — die Überschrift bleibt aber und wird nur vorgelesen, sonst hätte
+       die Seite gar keine -->
+  <h1 class="name" data-marke-name>Nordholm &amp; Partner</h1>
 
   <svg class="anstrich" viewBox="0 0 88 12" aria-hidden="true"></svg>
   <p class="gruss" id="gruss">Schön, dass du da bist.</p>
@@ -157,6 +163,8 @@ body{
   /* Kein Logo hinterlegt? Dann trägt das Zeichen den Anfangsbuchstaben. */
   var zeichen = document.getElementById('zeichen');
   zeichen.textContent = (Marke.daten.name || '?').trim().charAt(0).toUpperCase();
+  /* Steht der Name schon im Logo, bleibt die Überschrift für Screenreader */
+  if (Marke.daten.logo) document.querySelector('.name').classList.add('nur-vorlesen');
 
   /* ---- der eine Moment: der Anstrich zeichnet sich ---- */
   var NS = 'http://www.w3.org/2000/svg';
