@@ -17,7 +17,8 @@
    ist der Moment, in dem der bewegliche Entwurf einfriert und die Nummer
    aufgestempelt wird. Danach ändert sich an dem Blatt nichts mehr.
    Chrome ist quoroAI (system.css), ruhige Fläche — der Stempel IST der
-   Moment. Marker: BERATUNG-RECHNUNGEN-V1 */
+   Moment. V2: die Beleg-Zeilen tragen Tinte statt Link-Lila (a.beleg-zeile
+   schlägt .quoro a). Marker: BERATUNG-RECHNUNGEN-V2 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -99,7 +100,7 @@ h3 .zu-daten{font-weight:600;color:var(--lila-700);text-decoration:none;margin-l
 
 /* ---------- Liste ---------- */
 .belege{display:flex;flex-direction:column;gap:9px}
-.beleg-zeile{
+a.beleg-zeile{
   display:flex;align-items:center;gap:16px;width:100%;text-align:left;cursor:pointer;
   text-decoration:none;color:var(--tinte);
   padding:13px 16px;border-radius:var(--radius-innen);
