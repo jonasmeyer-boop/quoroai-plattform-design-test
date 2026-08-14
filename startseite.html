@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Startseite der Beratung</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
+<style>
+/* quoroai-plattform-design · Die Startseite unter der Adresse der Beratung —
+   die White-Label-Lobby. Inhalt aus dem Produkt
+   (../quoroai-plattform/src/app/page.tsx, AgencyHome): unter derselben
+   Adresse arbeiten zwei verschiedene Leute, und wohin die Tür führt,
+   entscheidet der Zugang, nicht die Adresse. Drei Lagen: Kunde mit Zugang
+   (zum Berater), Beratung angemeldet (ins Cockpit), niemand angemeldet
+   (anmelden). Kein system.css — Kundenflächen bleiben White-Label über
+   marke.js.
+   Der eine Moment: der Gruß schreibt sich mit der Hand, sonst bleibt die
+   Lobby still. Das Zeichen der Beratung ist ihr Logo, und wenn sie keins
+   hinterlegt hat, ihr Anfangsbuchstabe in ihrer Farbe.
+   Neu gegenüber dem Produkt: Impressum und Datenschutz stehen im Fuß — eine
+   öffentliche Adresse in Deutschland braucht beide erreichbar.
+   Marker: STARTSEITE-V1 */
+@font-face{font-family:'Manrope';src:url('schriften/manrope.woff2') format('woff2');font-weight:200 800;font-display:swap}
+@font-face{font-family:'Caveat';src:url('schriften/caveat.woff2') format('woff2');font-weight:400 700;font-display:swap}
+:root{
+  --papier:#fafaf7;--tinte:#10131a;--grau:#636c7d;--blau:#2b5fe3;--stift:#1d46c9;
+  --linie:rgba(16,19,26,.1);--feder:cubic-bezier(.22,.9,.24,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button{font-family:inherit}
+body{
+  background:var(--papier);color:var(--tinte);
+  font-family:'Manrope',system-ui,sans-serif;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  min-height:100svh;display:grid;grid-template-rows:1fr auto;
+  padding:24px 22px calc(18px + env(safe-area-inset-bottom));
+}
+.lobby{display:grid;align-content:center;justify-items:center;text-align:center;gap:0}
+
+/* ---------- das Zeichen der Beratung ---------- */
+.zeichen{
+  width:76px;height:76px;border-radius:22px;display:grid;place-items:center;
+  background:var(--blau);color:#fff;
+  font-size:33px;font-weight:800;letter-spacing:-.02em;
+  box-shadow:0 14px 34px color-mix(in srgb, var(--blau) 26%, transparent);
+}
+.marke-logo{height:76px;width:auto;display:block}
+.name{font-size:clamp(26px,4vw,36px);font-weight:800;letter-spacing:-.025em;margin-top:20px}
+
+/* ---------- der Gruß, mit der Hand ---------- */
+.anstrich{width:88px;height:12px;display:block;overflow:visible;margin:14px auto 0}
+.anstrich path{fill:none;stroke:var(--stift);stroke-width:2.5;stroke-linecap:round;opacity:.85}
+.gruss{
+  font-family:'Caveat',cursive;font-size:clamp(26px,3.4vw,32px);font-weight:700;
+  color:var(--stift);rotate:-1.5deg;margin-top:6px;
+}
+.satz{font-size:16px;color:var(--grau);margin-top:10px;max-width:44ch;line-height:1.55}
+
+.haupt{
+  display:inline-flex;align-items:center;justify-content:center;
+  margin-top:26px;min-height:52px;padding:0 30px;border-radius:999px;border:none;
+  background:var(--tinte);color:#fff;font-size:15.5px;font-weight:800;
+  text-decoration:none;cursor:pointer;
+  transition:background .2s ease,transform .1s ease;
+}
+.haupt:hover{background:var(--blau)}
+.haupt:active{transform:scale(.98)}
+.wechsel-tuer{
+  display:block;margin-top:14px;font-size:13px;font-weight:700;color:var(--grau);
+  background:none;border:none;cursor:pointer;text-decoration:none;
+}
+.wechsel-tuer:hover{color:var(--blau)}
+:focus-visible{outline:3px solid var(--blau);outline-offset:3px;border-radius:6px}
+
+/* ---------- Fuß ---------- */
+.fuss{
+  display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;justify-content:center;
+  font-size:12.5px;color:var(--grau);
+}
+.fuss a{color:var(--grau);text-decoration:none}
+.fuss a:hover{color:var(--blau)}
+.fuss .marke-wechsel{cursor:pointer}
+.vorfuehrung{
+  position:fixed;right:22px;top:18px;
+  z-index:20;display:flex;align-items:center;gap:10px;
+  padding:6px 6px 6px 14px;border-radius:999px;
+  background:rgba(255,255,255,.78);border:0.5px solid var(--linie);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 10px 26px rgba(16,19,26,.1);
+}
+.vorfuehrung > span{font-size:12px;color:var(--grau);white-space:nowrap}
+.umschalter{display:inline-flex;gap:4px;padding:4px;border-radius:999px;background:rgba(16,19,26,.05)}
+.umschalter button{
+  border:0;background:none;cursor:pointer;border-radius:999px;
+  padding:6px 13px;font-size:12.5px;font-weight:700;color:var(--grau);
+  transition:background .2s ease,color .2s ease;
+}
+.umschalter button.hier{background:var(--tinte);color:#fff}
+
+@media (max-width:700px){
+  .haupt{width:min(320px,100%)}
+  /* schmal: die Vorführung passt oben nicht neben nichts, also unten */
+  .vorfuehrung{
+    right:auto;left:50%;top:auto;translate:-50% 0;
+    bottom:calc(12px + env(safe-area-inset-bottom));padding-left:10px;gap:6px;
+  }
+  .vorfuehrung > span{display:none}
+  .umschalter button{padding:6px 10px;font-size:12px}
+  .fuss{padding-bottom:86px}
+}
+@media (prefers-reduced-motion:reduce){
+  .haupt{transition:none}
+}
+</style>
+<script src="marke.js"></script>
+</head>
+<body>
+<main class="lobby">
+  <img class="marke-logo" alt="" hidden>
+  <div class="zeichen" data-logo-versteckt aria-hidden="true" id="zeichen">N</div>
+  <!-- Trägt das Logo den Namen schon (wie bei currily), steht er nicht zweimal da -->
+  <h1 class="name" data-marke-name data-logo-versteckt>Nordholm &amp; Partner</h1>
+
+  <svg class="anstrich" viewBox="0 0 88 12" aria-hidden="true"></svg>
+  <p class="gruss" id="gruss">Schön, dass du da bist.</p>
+  <p class="satz" id="satz">Dein Berater ist erreichbar. Was du ihn fragst, bleibt bei dir — bis du es freigibst.</p>
+
+  <a class="haupt" id="tuer" href="gespraech.html">Zum Berater</a>
+  <a class="wechsel-tuer" id="zweitweg" href="anmelden.html">Du bist es nicht? Anders anmelden</a>
+</main>
+
+<div class="fuss">
+  <span data-marke-name>Nordholm &amp; Partner</span>
+  <a href="#">Impressum</a>
+  <a href="#">Datenschutz</a>
+  <a class="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung: Beispielmarke wechseln</a>
+</div>
+
+<div class="vorfuehrung">
+  <span>Vorführung</span>
+  <div class="umschalter" role="tablist" aria-label="Wer steht vor der Tür">
+    <button type="button" id="l-kunde" class="hier" role="tab" aria-selected="true">Kunde</button>
+    <button type="button" id="l-beratung" role="tab" aria-selected="false">Beratung</button>
+    <button type="button" id="l-gast" role="tab" aria-selected="false">Niemand angemeldet</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  /* Ohne Kern bleibt die Seite bedienbar — dann eben in Standardmarke und Du-Form */
+  var Marke = window.Marke || {anwenden:function(){}, rede:function(du){return du;}, daten:{name:'Nordholm & Partner'}};
+  Marke.anwenden();
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Kein Logo hinterlegt? Dann trägt das Zeichen den Anfangsbuchstaben. */
+  var zeichen = document.getElementById('zeichen');
+  zeichen.textContent = (Marke.daten.name || '?').trim().charAt(0).toUpperCase();
+
+  /* ---- der eine Moment: der Anstrich zeichnet sich ---- */
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.querySelector('.anstrich');
+  var d = 'M2 6';
+  for (var i = 1; i <= 5; i++) d += ' L' + (2 + 84 * i / 5) + ' ' + (6 + (Math.random() * 4 - 2));
+  var p = document.createElementNS(NS, 'path');
+  p.setAttribute('d', d);
+  svg.appendChild(p);
+  if (!reduziert) {
+    var len = p.getTotalLength();
+    p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+    p.style.transition = 'stroke-dashoffset .6s cubic-bezier(.45,.05,.55,.95) .15s';
+    void p.getBoundingClientRect();
+    p.style.strokeDashoffset = 0;
+  }
+
+  /* ---- die drei Lagen: wohin die Tür führt, entscheidet der Zugang ---- */
+  var LAGEN = {
+    kunde: {
+      gruss: Marke.rede('Schön, dass du da bist.', 'Schön, dass Sie da sind.'),
+      satz: Marke.rede(
+        'Dein Berater ist erreichbar. Was du ihn fragst, bleibt bei dir — bis du es freigibst.',
+        'Ihr Berater ist erreichbar. Was Sie ihn fragen, bleibt bei Ihnen — bis Sie es freigeben.'),
+      knopf: 'Zum Berater', ziel: 'gespraech.html',
+      zweit: Marke.rede('Du bist es nicht? Anders anmelden', 'Sie sind es nicht? Anders anmelden'),
+      zweitZiel: 'anmelden.html'
+    },
+    beratung: {
+      gruss: 'Willkommen zurück.',
+      satz: Marke.rede(
+        'Du bist mit deinem Beratungs-Konto angemeldet — dieselbe Adresse wie für deine Kunden, nur eine andere Tür.',
+        'Sie sind mit Ihrem Beratungs-Konto angemeldet — dieselbe Adresse wie für Ihre Kunden, nur eine andere Tür.'),
+      knopf: 'Zum Cockpit', ziel: 'beratung-f-modell.html',
+      zweit: 'Als Kunde ansehen', zweitZiel: 'uebersicht.html'
+    },
+    gast: {
+      gruss: Marke.rede('Dein Zugang zur Beratung.', 'Ihr Zugang zur Beratung.'),
+      satz: Marke.rede(
+        'Melde dich an, und dein Berater ist da. Einen Zugang bekommst du von deiner Beratung, nicht hier.',
+        'Melden Sie sich an, und Ihr Berater ist da. Einen Zugang bekommen Sie von Ihrer Beratung, nicht hier.'),
+      knopf: 'Anmelden', ziel: 'anmelden.html',
+      zweit: Marke.rede('Ohne Passwort, per Anmelde-Link', 'Ohne Passwort, per Anmelde-Link'),
+      zweitZiel: 'anmelden.html#link'
+    }
+  };
+  var gruss = document.getElementById('gruss');
+  var satz = document.getElementById('satz');
+  var tuer = document.getElementById('tuer');
+  var zweit = document.getElementById('zweitweg');
+  var knoepfe = {
+    kunde: document.getElementById('l-kunde'),
+    beratung: document.getElementById('l-beratung'),
+    gast: document.getElementById('l-gast')
+  };
+  function zeige(name){
+    var l = LAGEN[name];
+    gruss.textContent = l.gruss;
+    satz.textContent = l.satz;
+    tuer.textContent = l.knopf;
+    tuer.href = l.ziel;
+    zweit.textContent = l.zweit;
+    zweit.href = l.zweitZiel;
+    Object.keys(knoepfe).forEach(function(k){
+      var an = k === name;
+      knoepfe[k].classList.toggle('hier', an);
+      knoepfe[k].setAttribute('aria-selected', an ? 'true' : 'false');
+    });
+  }
+  Object.keys(knoepfe).forEach(function(k){
+    knoepfe[k].addEventListener('click', function(){ zeige(k); });
+  });
+  zeige('kunde');
+})();
+</script>
+</body>
+</html>
