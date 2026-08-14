@@ -10,6 +10,9 @@
    Kurve kommen aus den system.css-Tokens; pointercancel löst den Drück-Zustand;
    der Schweif reißt beim Fensterwechsel ab statt quer durchzuziehen; Glow ohne
    shadowBlur; Hover-Zustand wird auch beim Scrollen nachgeführt.
+   V4: Der Komet stand über Klickbarem weit rechts unten neben dem Zeiger —
+   transform:translate wird nach dem scale gerechnet und damit mitvergrößert
+   (Faktor 1,7). Verschoben wird jetzt über die eigene translate-Eigenschaft.
    V3: Der Systemzeiger wird erst ausgeblendet, wenn der Komet weiß, wo er
    steht. Vorher verschwand nach jedem Seitenwechsel der Zeiger ganz — die
    Seite schaltete cursor:none sofort, der Komet stand aber unsichtbar bei
@@ -17,7 +20,7 @@
    Hand ruhen ließ, hatte keinen Zeiger mehr. Dasselbe beim Verlassen des
    Fensters und beim Tabwechsel. Ab jetzt gilt: entweder der Komet oder der
    Systempfeil, nie nichts.
-   Marker: ZEIGER-KOMET-V3 */
+   Marker: ZEIGER-KOMET-V4 */
 (function(){
   'use strict';
   if (!window.matchMedia('(pointer:fine) and (hover:hover)').matches) return;
@@ -89,7 +92,13 @@
     mx = e.clientX; my = e.clientY;
     zeige();
     spur.push({x: mx, y: my, t: performance.now()});
-    kopf.style.transform = 'translate(' + mx + 'px,' + my + 'px)';
+    /* translate als eigene Eigenschaft, NICHT als transform: der Browser
+       rechnet translate → rotate → scale → transform. Ein transform:translate
+       landet damit hinter dem scale und wird mitvergrößert — über Klickbarem
+       (scale 1.7) sprang der Komet auf das 1,7-Fache seiner Koordinaten,
+       also weit nach rechts unten. Als eigene Eigenschaft steht das
+       Verschieben vor dem Vergrößern und bleibt unberührt. */
+    kopf.style.translate = mx + 'px ' + my + 'px';
     wecke();
   }, {passive: true});
 
