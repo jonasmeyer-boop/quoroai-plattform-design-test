@@ -1,6 +1,6 @@
 /* quoroai-plattform-design · Der Marken-Kern: eine Quelle für alle Flächen.
    Vier Farbregler + Anrede je Beratung; im Produkt kommt beides aus dem
-   Mandanten-Profil (agency_branding). Marker: MARKE-KERN-V2 */
+   Mandanten-Profil (agency_branding). Marker: MARKE-KERN-V3 */
 window.Marke = (function () {
   'use strict';
   var MARKEN = [
@@ -37,7 +37,7 @@ window.Marke = (function () {
     document.querySelectorAll('[data-marke-name]').forEach(function (el) { el.textContent = marke.name; });
     document.querySelectorAll('.marke-logo').forEach(function (img) {
       if (marke.logo) { img.src = marke.logo; img.alt = marke.name; img.hidden = false; }
-      else { img.hidden = true; img.removeAttribute('src'); }
+      else { img.hidden = true; img.removeAttribute('src'); img.alt = ''; }
     });
     document.querySelectorAll('[data-logo-versteckt]').forEach(function (el) { el.hidden = !!marke.logo; });
     document.querySelectorAll('[data-du]').forEach(function (el) {
