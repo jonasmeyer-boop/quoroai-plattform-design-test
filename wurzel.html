@@ -21,8 +21,9 @@
    stadt-weiss.jpg: stadt.jpg mit ffmpeg auf reines Weiß gezogen
    (colorlevels 0.93), sonst zeichnet multiply ein graues Rechteck auf die
    weiße Seite.
-   Marker: WURZEL-V3 (die Abrechnung führt jetzt in den gezeichneten
-   Plattformbereich, plattform.html — Block C ist gebaut) */
+   Marker: WURZEL-V4 (die Abrechnung führt in den gezeichneten
+   Plattformbereich plattform.html; die Hinweiszeile ist weg, sie hatte mit
+   dem Knopf ihren einzigen Text verloren) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -60,10 +61,6 @@ h1{font-size:clamp(26px,3.4vw,38px);max-width:min(100%,15em);margin:0 auto}
 }
 .wege{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:26px}
 .wege .knopf{text-decoration:none}
-.leiser-hinweis{
-  font-size:13px;color:var(--nebel-600);margin-top:12px;min-height:1.3em;
-  transition:opacity .3s ease;
-}
 
 /* ---------- Das Modell: erst unbelichtet, dann geht das Licht an ---------- */
 /* min-height, sonst schrumpft die Bildzeile auf niedrigen Fenstern zu einem
@@ -150,7 +147,6 @@ body.erwacht .modell .aurora{opacity:1}
         <a class="knopf sekundaer" href="registrieren.html#anmelden">Anmelden</a>
         <a class="knopf leise" id="abrechnung" href="plattform.html" hidden>Abrechnung</a>
       </div>
-      <p class="leiser-hinweis" id="hinweis" aria-live="polite"></p>
     </div>
 
     <!-- Lage 3: eine Adresse, hinter der keine Beratung steht -->
@@ -206,7 +202,6 @@ body.erwacht .modell .aurora{opacity:1}
   var tWurzel = document.getElementById('t-wurzel');
   var tFremd = document.getElementById('t-fremd');
   var abrechnung = document.getElementById('abrechnung');
-  var hinweis = document.getElementById('hinweis');
   var knoepfe = {
     fremde: document.getElementById('l-fremde'),
     wir: document.getElementById('l-wir'),
@@ -217,7 +212,6 @@ body.erwacht .modell .aurora{opacity:1}
     tWurzel.hidden = lage === 'nichts';
     tFremd.hidden = lage !== 'nichts';
     abrechnung.hidden = lage !== 'wir';
-    hinweis.textContent = '';
     Object.keys(knoepfe).forEach(function(k){
       var an = k === lage;
       knoepfe[k].classList.toggle('hier', an);

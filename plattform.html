@@ -19,8 +19,14 @@
    in Glas. Der Abschluss friert ihn ein: ein Frost läuft über die Aufstellung,
    das Glas wird fest, und ab da ändert sich an dem Blatt nichts mehr.
    Neu gegenüber dem Produkt: der Abschluss zeigt, WAS er einfriert (die
-   gerechnete Aufstellung des Vormonats), und das Verwerfen fragt nach.
-   Marker: PLATTFORM-V1 */
+   gerechnete Aufstellung des Monats), und das Verwerfen fragt nach.
+   V2 nach Code-Review: der Einfrier-Timer wird beim Ansichtswechsel
+   abgeräumt (sonst riss er den Nutzer eine Sekunde später zurück), die
+   mobile Verdichtung greift wirklich (a.zeile statt .zeile), die
+   Sortierungen sind bei gleichem Monat eindeutig, und angeboten wird der
+   ÄLTESTE offene Monat — sonst wäre eine verworfene ältere Abrechnung nie
+   wieder abzuschließen.
+   Marker: PLATTFORM-V2 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -211,7 +217,7 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   /* Das Entwurfs-Chrom weicht als Erstes: „Abmelden" gehört zum Produkt,
      der Weg zu den Vorschlägen ist nur Gerüst. */
   nav a.vorschlaege{display:none}
-  .zeile{gap:10px;padding:12px 14px}
+  a.zeile{gap:10px;padding:12px 14px}
   .zeile .z-recht{gap:10px}
 }
 </style>
@@ -307,6 +313,11 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   function vormonat(monat){
     var d = teile(monat);
     var j = d.m === 1 ? d.j-1 : d.j, m = d.m === 1 ? 12 : d.m-1;
+    return j + '-' + ('0'+m).slice(-2) + '-01';
+  }
+  function naechsterMonat(monat){
+    var d = teile(monat);
+    var j = d.m === 12 ? d.j+1 : d.j, m = d.m === 12 ? 1 : d.m+1;
     return j + '-' + ('0'+m).slice(-2) + '-01';
   }
   function monatsBeginn(iso){ return iso.slice(0,7) + '-01'; }
@@ -454,12 +465,18 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
     }
     return null;
   }
-  /* Welcher Vormonat noch offen ist. Angeboten wird nur der Vormonat —
-     ältere Lücken schließt man von dort aus rückwärts. */
+  /* Der älteste vorbei­gegangene Monat, der noch keinen Abschluss hat.
+     Das Produkt bietet nur den Vormonat an — dann ist ein verworfener älterer
+     Monat über die Oberfläche nie mehr abzuschließen. Hier wird die Lücke
+     angeboten, wo sie ist: der älteste offene zuerst. */
   function offenerAbschluss(beratung){
-    var m = vormonat(monatsBeginn(HEUTE));
-    if (tagesZahl(monatsEnde(m)) < tagesZahl(beratung.seit)) return null;
-    return abschlussMit(beratung, m) ? null : m;
+    var letzter = vormonat(monatsBeginn(HEUTE));
+    var m = monatsBeginn(beratung.seit);
+    while (tagesZahl(m) <= tagesZahl(letzter)) {
+      if (!abschlussMit(beratung, m)) return m;
+      m = naechsterMonat(m);
+    }
+    return null;
   }
   function zugaengeWort(n){
     if (n === 0) return 'kein Kundenzugang';
@@ -512,7 +529,10 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
     BERATUNGEN.forEach(function(b){
       b.abschluesse.forEach(function(a){ if (!a.bezahlt) raus.push({beratung:b, abschluss:a}); });
     });
-    return raus.sort(function(x,y){ return x.abschluss.monat < y.abschluss.monat ? 1 : -1; });
+    return raus.sort(function(x,y){
+      if (x.abschluss.monat === y.abschluss.monat) return x.beratung.name < y.beratung.name ? -1 : 1;
+      return x.abschluss.monat < y.abschluss.monat ? 1 : -1;
+    });
   }
 
   function zeichneListe(){
@@ -600,7 +620,9 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
     if (b.abschluesse.length === 0) {
       html += '<p class="leer">Noch kein Monat abgerechnet.</p>';
     } else {
-      var sortiert = b.abschluesse.slice().sort(function(x,y){ return x.monat < y.monat ? 1 : -1; });
+      var sortiert = b.abschluesse.slice().sort(function(x,y){
+        return x.monat === y.monat ? 0 : (x.monat < y.monat ? 1 : -1);
+      });
       html += '<div class="zeilen">' + sortiert.map(function(a){
         return '<a class="zeile" href="#a/' + b.id + '/' + a.monat + '">' +
           '<span class="z-text"><span class="z-titel">' + monatsLabel(a.monat) + '</span>' +
@@ -639,8 +661,11 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
     }
     if (!blatt || reduziert) { fertig(); return; }
     blatt.classList.add('friert');
-    setTimeout(function(){ blatt.classList.add('fest'); }, 420);
-    setTimeout(fertig, 1050);
+    /* Wer während des Einfrierens weggeht, soll nicht eine Sekunde später
+       zurückgerissen werden — der Wechsel der Ansicht räumt die Uhren ab.
+       Der Abschluss selbst steht da schon, er hängt nicht am Timer. */
+    laufendeUhren.push(setTimeout(function(){ blatt.classList.add('fest'); }, 420));
+    laufendeUhren.push(setTimeout(fertig, 1050));
   }
 
   /* ================= Ansicht 3: eine Abrechnung ================= */
@@ -702,7 +727,11 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
     beratung: document.getElementById('ansicht-beratung'),
     abrechnung: document.getElementById('ansicht-abrechnung')
   };
+  /* Uhren, die noch an einer verlassenen Ansicht hängen. */
+  var laufendeUhren = [];
   function zeige(welche){
+    laufendeUhren.forEach(clearTimeout);
+    laufendeUhren = [];
     Object.keys(ansichten).forEach(function(k){
       ansichten[k].hidden = k !== welche;
       ansichten[k].classList.remove('zeigt');
@@ -733,17 +762,17 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   var stillerHash = false;
   function route(){
     if (stillerHash) { stillerHash = false; return; }
-    var teile = location.hash.replace(/^#/, '').split('/');
-    if (teile[0] === 'b' && beratungMit(teile[1])) {
-      var b = beratungMit(teile[1]);
+    var weg = location.hash.replace(/^#/, '').split('/');
+    if (weg[0] === 'b' && beratungMit(weg[1])) {
+      var b = beratungMit(weg[1]);
       zeichneBeratung(b);
       zeige('beratung');
       document.title = 'Abrechnung, ' + b.name;
       return;
     }
-    if (teile[0] === 'a' && beratungMit(teile[1])) {
-      var b2 = beratungMit(teile[1]);
-      var a = abschlussMit(b2, teile[2]);
+    if (weg[0] === 'a' && beratungMit(weg[1])) {
+      var b2 = beratungMit(weg[1]);
+      var a = abschlussMit(b2, weg[2]);
       if (a) { zeichneAbrechnung(b2, a); zeige('abrechnung');
                document.title = monatsLabel(a.monat) + ', ' + b2.name; return; }
       location.hash = '#b/' + b2.id;
