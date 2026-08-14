@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V37 (der Wasserfall trägt eine Einheit: format wie bei kpi/hero, Entscheidung 2026-08-13) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V38 (die Glocke ist der Baustein glocke.js, Paket 10) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -89,44 +89,6 @@ nav .griffe{display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shri
   #zurueck-griff{display:inline-flex}
   nav .wortmarke small{display:none}
 }
-#glocke{
-  pointer-events:auto;cursor:pointer;position:relative;
-  /* exakt Pillenhöhe, damit die Reihe eine Linie bildet */
-  width:35px;height:35px;border-radius:999px;border:0.5px solid var(--linie);
-  background:#fff;display:inline-flex;align-items:center;justify-content:center;
-  transition:border-color .2s ease;
-}
-#glocke:hover{border-color:var(--blau)}
-#glocke svg{width:18px;height:18px}
-#glocke svg path{fill:none;stroke:var(--tinte);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-#glocke .glocke-zahl{
-  position:absolute;top:-4px;right:-4px;
-  min-width:16px;height:16px;padding:0 4px;border-radius:999px;
-  background:var(--blau);color:#fff;font-size:11px;font-weight:800;
-  display:inline-flex;align-items:center;justify-content:center;
-}
-#glocke-liste{
-  position:fixed;top:58px;right:max(24px,calc((100vw - 1080px)/2));z-index:55;
-  width:min(340px,calc(100vw - 32px));
-  background:#fff;border:0.5px solid var(--linie);border-radius:16px;
-  box-shadow:0 18px 50px rgba(16,19,26,.16);padding:16px 18px;
-}
-#glocke-liste h3{font-size:12px;font-weight:800;color:var(--grau)}
-.glocke-eintrag{
-  display:flex;gap:10px;align-items:flex-start;
-  padding:11px 0;border-top:0.5px solid var(--linie);cursor:pointer;
-}
-.glocke-eintrag:first-of-type{border-top:none}
-#glocke-eintraege .glocke-eintrag:nth-child(1){border-top:none;margin-top:8px}
-.glocke-eintrag .ge-punkt{
-  width:7px;height:7px;border-radius:999px;background:var(--blau);
-  flex-shrink:0;margin-top:6px;transition:opacity .4s ease;
-}
-.glocke-eintrag.gelesen .ge-punkt{opacity:.15}
-.glocke-eintrag .ge-titel{font-size:13.5px;font-weight:800}
-.glocke-eintrag .ge-text{font-size:12.5px;color:var(--grau);margin-top:2px}
-.glocke-eintrag .ge-zeit{font-size:11px;color:var(--grau);opacity:.8;margin-top:3px}
-
 #gespraeche-griff{
   pointer-events:auto;cursor:pointer;
   padding:8px 14px;border-radius:999px;border:0.5px solid var(--linie);
@@ -809,6 +771,7 @@ body.blatt-offen{overflow:hidden}
 }
 </style>
 <script src="marke.js"></script>
+<script src="glocke.js"></script>
 </head>
 <body>
 
@@ -817,10 +780,7 @@ body.blatt-offen{overflow:hidden}
   <span id="hirn-lampe">Hirn an</span>
   <div class="griffe">
     <a id="uebersicht-griff" href="uebersicht.html" title="Zurück zur Übersicht">← Übersicht</a>
-    <button id="glocke" type="button" aria-label="Benachrichtigungen" title="Benachrichtigungen">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17 L18 17 C16.8 15.6 16.4 14.6 16.2 12.2 C16 9.2 14.6 7 12 7 C9.4 7 8 9.2 7.8 12.2 C7.6 14.6 7.2 15.6 6 17 Z M10.4 19.5 a1.8 1.8 0 0 0 3.2 0"/></svg>
-      <span class="glocke-zahl" hidden>0</span>
-    </button>
+    <span data-glocke></span>
     <button id="gespraeche-griff" type="button" title="Alle Gespräche">Gespräche</button>
     <button id="akte-griff" type="button" data-zahl="0">Deine Akte <span class="zahl">0</span></button>
   </div>
@@ -842,11 +802,6 @@ body.blatt-offen{overflow:hidden}
     <button type="button" class="ja" id="ff-ja">Freigeben</button>
     <button type="button" id="ff-nein">Lieber nicht</button>
   </div>
-</div>
-
-<div id="glocke-liste" hidden>
-  <h3>Neuigkeiten</h3>
-  <div id="glocke-eintraege"></div>
 </div>
 
 <div id="gespraechsliste" aria-hidden="true">
@@ -1923,72 +1878,24 @@ body.blatt-offen{overflow:hidden}
     male();
   })();
 
-  /* ---------- Die Glocke: was passiert ist, ohne dass du fragen musst ---------- */
-  (function(){
-    var glocke = document.getElementById('glocke');
-    var liste = document.getElementById('glocke-liste');
-    var lage = document.getElementById('glocke-eintraege');
-    var zahl = glocke.querySelector('.glocke-zahl');
-    /* Jede Neuigkeit führt zu ihrem Ziel — nicht nur zum Schließen */
-    var NEUES = [
-      {titel: function(){ return rede('Dein Termin steht', 'Ihr Termin steht'); },
-        text: function(){ return rede('Donnerstag, 10:00 mit Dr. Anna Vogelsang — sie hat deine Anfrage angenommen.', 'Donnerstag, 10:00 mit Dr. Anna Vogelsang — sie hat Ihre Anfrage angenommen.'); },
-        zeit: 'gerade eben', neu: true,
-        tue: function(){ frageStellen('Welche Termine stehen an?'); }},
-      {titel: function(){ return rede('Neues Dokument für dich', 'Neues Dokument für Sie'); },
-        text: function(){ return rede('Preismodell Benchmark liegt in deinen Unterlagen.', 'Preismodell Benchmark liegt in Ihren Unterlagen.'); },
-        zeit: 'vor 2 Stunden', neu: true,
-        tue: function(){ blattBlick.oeffne('Preismodell Benchmark', '12 Seiten · eben erstellt'); }},
-      {titel: function(){ return rede('Antwort auf deine Anfrage', 'Antwort auf Ihre Anfrage'); },
-        text: function(){ return 'Das Jahresgespräch ist bestätigt.'; },
-        zeit: 'gestern', neu: false,
-        tue: function(){ frageStellen('Welche Termine stehen an?'); }}
-    ];
-    function ungelesen(){ return NEUES.filter(function(n){ return n.neu; }).length; }
-    function maleZahl(){
-      var n = ungelesen();
-      zahl.hidden = !n;
-      zahl.textContent = n > 9 ? '9+' : String(n);
-    }
-    function fuelle(){
-      lage.innerHTML = '';
-      NEUES.forEach(function(n){
-        var e = document.createElement('div');
-        e.className = 'glocke-eintrag' + (n.neu ? '' : ' gelesen');
-        e.innerHTML = '<span class="ge-punkt"></span><div><div class="ge-titel"></div><div class="ge-text"></div><div class="ge-zeit"></div></div>';
-        e.querySelector('.ge-titel').textContent = typeof n.titel === 'function' ? n.titel() : n.titel;
-        e.querySelector('.ge-text').textContent = typeof n.text === 'function' ? n.text() : n.text;
-        e.querySelector('.ge-zeit').textContent = n.zeit;
-        e.addEventListener('click', function(){
-          schliesse();
-          if (n.tue) n.tue();
-        });
-        lage.appendChild(e);
-      });
-    }
-    function oeffne(){
-      fuelle();
-      liste.hidden = false;
-      /* Öffnen heißt gelesen — wie im Produkt */
-      setTimeout(function(){
-        NEUES.forEach(function(n){ n.neu = false; });
-        lage.querySelectorAll('.glocke-eintrag').forEach(function(e){ e.classList.add('gelesen'); });
-        maleZahl();
-      }, 900);
-    }
-    function schliesse(){ liste.hidden = true; }
-    glocke.addEventListener('click', function(e){
-      e.stopPropagation();
-      if (liste.hidden) oeffne(); else schliesse();
-    });
-    document.addEventListener('click', function(e){
-      if (!liste.hidden && !liste.contains(e.target)) schliesse();
-    });
-    window.addEventListener('keydown', function(e){
-      if (e.key === 'Escape' && !liste.hidden) schliesse();
-    });
-    maleZahl();
-  })();
+  /* ---------- Die Glocke: was passiert ist, ohne dass du fragen musst ----------
+     Der Baustein steckt in glocke.js; hier steht nur, was drinsteht und wohin
+     jeder Eintrag führt. Titel und Text sind Funktionen, weil der Wortlaut an
+     der Anrede der Beratung hängt. */
+  Glocke.baue({eintraege: [
+    {titel: function(){ return rede('Dein Termin steht', 'Ihr Termin steht'); },
+      text: function(){ return rede('Donnerstag, 10:00 mit Dr. Anna Vogelsang — sie hat deine Anfrage angenommen.', 'Donnerstag, 10:00 mit Dr. Anna Vogelsang — sie hat Ihre Anfrage angenommen.'); },
+      zeit: 'gerade eben', neu: true,
+      tue: function(){ frageStellen('Welche Termine stehen an?'); }},
+    {titel: function(){ return rede('Neues Dokument für dich', 'Neues Dokument für Sie'); },
+      text: function(){ return rede('Preismodell Benchmark liegt in deinen Unterlagen.', 'Preismodell Benchmark liegt in Ihren Unterlagen.'); },
+      zeit: 'vor 2 Stunden', neu: true,
+      tue: function(){ blattBlick.oeffne('Preismodell Benchmark', '12 Seiten · eben erstellt'); }},
+    {titel: function(){ return rede('Antwort auf deine Anfrage', 'Antwort auf Ihre Anfrage'); },
+      text: function(){ return 'Das Jahresgespräch ist bestätigt.'; },
+      zeit: 'gestern', neu: false,
+      tue: function(){ frageStellen('Welche Termine stehen an?'); }}
+  ]});
 
   /* ---------- Die Gesprächsliste: jedes Gespräch hat seinen Raum ---------- */
   var gespraechsliste = (function(){

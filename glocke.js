@@ -22,6 +22,11 @@ window.Glocke = (function () {
              'C9.4 7 8 9.2 7.8 12.2 C7.6 14.6 7.2 15.6 6 17 Z ' +
              'M10.4 19.5 a1.8 1.8 0 0 0 3.2 0';
 
+  /* Titel und Text dürfen Funktionen sein: auf Kundenflächen hängt der
+     Wortlaut an der Anrede der Beratung (du/Sie), und die kann sich ändern,
+     während die Seite steht. */
+  function wert(x) { return typeof x === 'function' ? x() : x; }
+
   var stilDa = false;
   function stil() {
     if (stilDa) return;
@@ -37,6 +42,7 @@ window.Glocke = (function () {
       '.glocke-knopf{position:relative;width:35px;height:35px;border-radius:999px;' +
         'border:0.5px solid ' + linie + ';background:#fff;cursor:pointer;padding:0;' +
         'display:inline-flex;align-items:center;justify-content:center}' +
+      '@media (hover:hover){.glocke-knopf:hover{border-color:' + akzent + '}}' +
       '.glocke-knopf svg{width:18px;height:18px}' +
       '.glocke-knopf svg path{fill:none;stroke:' + tinte + ';stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}' +
       '.glocke-knopf .zahl{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px;' +
@@ -112,7 +118,8 @@ window.Glocke = (function () {
     function maleZahl() {
       var n = neueZahl();
       zahl.hidden = !n;
-      zahl.textContent = String(n);
+      /* Über neun bleibt die Kapsel rund: die genaue Zahl steht im aria-label */
+      zahl.textContent = n > 9 ? '9+' : String(n);
       knopf.setAttribute('aria-label', n ? titel + ', ' + n + ' neu' : titel + ', nichts Neues');
     }
 
@@ -124,11 +131,14 @@ window.Glocke = (function () {
         e.className = 'glocke-eintrag' + (n.neu ? '' : ' gelesen');
         e.innerHTML = '<span class="ge-titel"></span><span class="ge-text"></span>' +
                       '<span class="ge-zeit"><span class="ge-neu"></span></span>';
-        e.querySelector('.ge-titel').textContent = n.titel;
-        e.querySelector('.ge-text').textContent = n.text;
-        /* „neu" steht als eigenes Stück vor der Zeit, damit es weichen kann,
-           ohne die Zeile neu zu zeichnen. */
-        e.querySelector('.ge-neu').textContent = 'neu, '; /* festes Leerzeichen, sonst frisst es der Zeilenumbruch */
+        e.querySelector('.ge-titel').textContent = wert(n.titel);
+        e.querySelector('.ge-text').textContent = wert(n.text);
+        /* „neu“ steht als eigenes Stück vor der Zeit, damit es weichen kann,
+           ohne die Zeile neu zu zeichnen. Wer schon gelesen hat, bekommt es
+           gar nicht erst — sonst liest ein Screenreader es weiter vor,
+           während das Auge es längst nicht mehr sieht. Festes Leerzeichen,
+           sonst frisst es der Zeilenumbruch. */
+        if (n.neu) e.querySelector('.ge-neu').textContent = 'neu, ';
         e.querySelector('.ge-zeit').appendChild(document.createTextNode(n.zeit));
         e.addEventListener('click', function () {
           schliesse();
@@ -142,9 +152,13 @@ window.Glocke = (function () {
     function schliesse() {
       if (fenster.hidden) return;
       if (alsGelesen) { clearTimeout(alsGelesen); alsGelesen = null; }
+      /* Den Fokus nur zurückholen, wenn er noch im Fenster liegt. Sonst
+         reißt ein Klick ins Eingabefeld daneben ihn auf die Glocke zurück
+         und das Getippte läuft ins Nichts. */
+      var drin = fenster.contains(document.activeElement);
       fenster.hidden = true;
       knopf.setAttribute('aria-expanded', 'false');
-      knopf.focus();
+      if (drin) knopf.focus();
     }
     /* Das Fenster hängt an der Glocke, darf aber nie aus dem Bild laufen:
        auf schmalen Geräten steht die Glocke weit links, und 340 Pixel nach
@@ -163,14 +177,20 @@ window.Glocke = (function () {
       fenster.hidden = false;
       platziere();
       knopf.setAttribute('aria-expanded', 'true');
+      var offen = eintraege.slice(); /* nur diese hier hat das Auge gesehen */
       var erster = liste.querySelector('.glocke-eintrag');
       if (erster) erster.focus();
       /* Geöffnet heißt gelesen — aber erst, nachdem das Auge die Zeile
          gesehen hat, sonst verschwindet das „neu" vor dem Lesen. */
       alsGelesen = setTimeout(function () {
         alsGelesen = null;
-        eintraege.forEach(function (n) { n.neu = false; });
+        offen.forEach(function (n) { n.neu = false; });
         liste.querySelectorAll('.glocke-eintrag').forEach(function (e) { e.classList.add('gelesen'); });
+        /* Erst wegblenden, dann wirklich aus dem Text nehmen — solange das
+           Wort dasteht, hört ein Screenreader es, auch bei Breite null. */
+        setTimeout(function () {
+          liste.querySelectorAll('.gelesen .ge-neu').forEach(function (w) { w.textContent = ''; });
+        }, 500);
         maleZahl();
       }, reduziert ? 1600 : 900);
     }
@@ -197,6 +217,10 @@ window.Glocke = (function () {
       schliesse: schliesse,
       /* Neue Lage von außen setzen (im Produkt: was der Server schickt). */
       setze: function (neue) {
+        /* Frische Lage: der laufende Gelesen-Timer gehört zur alten und
+           würde sonst einen gerade eingetroffenen Eintrag abstempeln,
+           bevor ihn jemand sehen konnte. */
+        if (alsGelesen) { clearTimeout(alsGelesen); alsGelesen = null; }
         eintraege = neue || [];
         if (!fenster.hidden) male();
         maleZahl();
