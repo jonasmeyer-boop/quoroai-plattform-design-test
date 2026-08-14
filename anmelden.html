@@ -6,7 +6,7 @@
 <title>Dein Berater · Anmelden</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Anmelden: die Tür zum Kundenbereich · Marker: ANMELDEN-V8 (das neue Passwort bekommt seine Erfolgsmeldung)
+/* quoroai-plattform-design · Anmelden: die Tür zum Kundenbereich · Marker: ANMELDEN-V9 (Erfolgsmeldung fürs neue Passwort, Vorführ-Schalter auf eigener Zeile)
    (V4: Einladung annehmen (#zugang), Anmelde-Link (#link) und Passwort neu setzen
    (#neu) dazugezeichnet; Direkteinstieg je Ablauf über den Hash, im Produkt sind
    das eigene Routen. V5: Registrieren wieder herausgenommen — Kunden registrieren
@@ -36,7 +36,9 @@ button,input{font-family:inherit}
 .buehne{width:min(420px,100%)}
 .wortmarke{font-weight:800;font-size:16px;letter-spacing:-.01em;text-align:center}
 .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
-.wortmarke .marke-wechsel{cursor:pointer;pointer-events:auto;display:inline-block}
+/* Eigene Zeile wie überall sonst — inline-block hat den Schalter an den
+   Markennamen geklebt (es schlägt das display:block der Regel darüber). */
+.wortmarke .marke-wechsel{cursor:pointer;pointer-events:auto;display:block;width:fit-content;margin:0 auto}
 .wortmarke .marke-wechsel:hover{color:var(--blau)}
 .karte{
   margin-top:22px;background:#fff;border:0.5px solid var(--linie);border-radius:20px;
