@@ -38,7 +38,11 @@
    Tagesreihe, und das Raster zeigt genau eine Spalte. Fünf Spalten auf 375px
    wären eine Lüge.
 
-   Marker: BERATUNG-KALENDER-V1 */
+   V2 nach Code-Review: die Türen ins Entscheiden führen auf den richtigen
+   Zettel, der Wunsch-Block nennt selbst, was weichen würde (am Finger ist die
+   alte Spalte nicht zu sehen), ein Tag ohne jeden Anwesenden heißt „niemand
+   da" statt ausgebucht, und die Knopfleisten behalten den Fokus.
+   Marker: BERATUNG-KALENDER-V2 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -198,6 +202,19 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 }
 .block.angefragt .b-wer{color:var(--lila-800)}
 .block.angefragt .b-zeit{color:var(--lila-700)}
+/* Ein halbstündiger Wunsch ist der flachste Block der Fläche und trotzdem
+   der, über den entschieden wird. Er trägt deshalb als einziger zwei enge
+   Zeilen statt einer breiten: oben das Fenster, unten der Tag, der dafür
+   weichen würde. Auf dem Bildschirm zeigt das Überfahren dasselbe; am Finger
+   gibt es kein Überfahren, und die alte Spalte ist nicht einmal zu sehen. */
+/* Die eigene Schriftgröße muss mit: sonst spannt der Zeilenkasten des Blocks
+   (17px mal 1,6) die erste Zeile auf 27 Pixel auf, und beide Zeilen passen
+   nicht mehr in die halbe Stunde. */
+.block.angefragt.kurz{display:block;padding:3px 8px;font-size:10px;line-height:1.25}
+.block.angefragt.kurz .b-zeit{display:inline;font-size:10px}
+.block.angefragt.kurz .b-zeit::after{content:", "}
+.block.angefragt.kurz .b-wer{display:inline;font-size:10.5px;margin-top:0}
+.block.angefragt.kurz .b-was{display:block;font-size:10px;line-height:1.2;margin-top:0}
 /* Der Kino-Moment: der Wunsch zeigt, wie die Woche danach aussieht. */
 .block.blass{opacity:.3}
 .block.probe{background:var(--flaeche);border:0.5px solid var(--nebel-200);border-left:3px solid var(--lila-500);box-shadow:0 10px 26px rgba(59,52,134,.22)}
@@ -440,7 +457,12 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
      überein; die drei Termine, die auch anderswo stehen (Cordes am Dienstag,
      Petersen am Donnerstag, das Wunschfenster am Freitag), tragen dieselben
      Zeiten wie dort. */
-  var VON = 8, BIS = 19, STUNDE = 54;          /* Raster von 8 bis 19 Uhr */
+  /* Raster von 8 bis 19 Uhr. Am Finger steht nur ein Tag im Bild, also ist
+     Höhe billig und Breite teuer — dort bekommt die Stunde mehr Platz, damit
+     auch ein halbstündiger Block zwei Zeilen tragen kann. Maßstabstreu bleibt
+     es in beiden Fällen. */
+  var VON = 8, BIS = 19, STUNDE = 54;
+  function stundenhoehe(){ return window.matchMedia('(max-width:820px)').matches ? 78 : 54; }
   var ARBEIT_VON = 9, ARBEIT_BIS = 17;
 
   var TEAM = [
@@ -560,10 +582,14 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     document.getElementById('stand').textContent = satz;
   }
 
-  /* ---------- Die Leiste ---------- */
+  /* ---------- Die Leiste ----------
+     Die Knöpfe entstehen genau einmal. Würden sie bei jedem Klick neu
+     gebaut, verschwände der gerade gedrückte aus dem Dokument und der Fokus
+     fiele auf den Seitenanfang — wer mit der Tastatur arbeitet, müsste sich
+     nach jedem Wechsel neu herantasten. */
   function chipsBauen(){
     var box = document.getElementById('wer-chips');
-    box.innerHTML = '';
+    if (box.firstChild) { chipsSetzen(); return; }
     var liste = [{id:'alle', wort:'Alle'}, {id:ICH, wort:'Nur ich'}].concat(
       TEAM.filter(function(p){ return p.id !== ICH; }).map(function(p){ return {id:p.id, wort:p.kurz}; })
     );
@@ -571,27 +597,39 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       var b = document.createElement('button');
       b.type = 'button';
       b.textContent = e.wort;
-      b.setAttribute('aria-pressed', String(werGewaehlt === e.id));
+      b.dataset.wer = e.id;
       b.addEventListener('click', function(){
         werGewaehlt = e.id;
-        chipsBauen();
+        chipsSetzen();
         rasterBauen();
       });
       box.appendChild(b);
+    });
+    chipsSetzen();
+  }
+  function chipsSetzen(){
+    document.querySelectorAll('#wer-chips button').forEach(function(b){
+      b.setAttribute('aria-pressed', String(b.dataset.wer === werGewaehlt));
     });
   }
 
   function tagesreiheBauen(){
     var box = document.getElementById('tagesreihe');
-    box.innerHTML = '';
+    if (box.firstChild) { tageSetzen(); return; }
     TAGE.forEach(function(tg, i){
       var b = document.createElement('button');
       b.type = 'button';
       b.innerHTML = tg.kurz.slice(0, 2) + '<small>' + tg.datum.split(' ')[0] + '</small>';
-      b.setAttribute('aria-pressed', String(tagGewaehlt === i));
+      b.dataset.tag = String(i);
       b.setAttribute('aria-label', tg.kurz + ', ' + tg.datum);
-      b.addEventListener('click', function(){ tagGewaehlt = i; tagesreiheBauen(); rasterBauen(); });
+      b.addEventListener('click', function(){ tagGewaehlt = i; tageSetzen(); rasterBauen(); });
       box.appendChild(b);
+    });
+    tageSetzen();
+  }
+  function tageSetzen(){
+    document.querySelectorAll('#tagesreihe button').forEach(function(b){
+      b.setAttribute('aria-pressed', String(parseInt(b.dataset.tag, 10) === tagGewaehlt));
     });
   }
 
@@ -601,6 +639,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     var leib = document.getElementById('raster-leib');
     kopf.innerHTML = '<div class="tag-kopf" aria-hidden="true"></div>';
     leib.innerHTML = '';
+
+    STUNDE = stundenhoehe();
 
     var achse = document.createElement('div');
     achse.className = 'zeitachse';
@@ -640,6 +680,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         '<div class="tk-datum">' + (i === HEUTE ? 'heute, ' : '') + tg.datum + '</div>' +
         (i < HEUTE ? '<div class="tk-luft"><span>vorbei</span></div>' :
          einzeln && l.weg ? '<div class="tk-luft"><span>' + l.weg.art + '</span></div>' :
+         /* Ist niemand da, ist der Tag nicht ausgebucht, sondern leer — ein
+            voller Balken wäre hier genau die falsche Auskunft. */
+         !einzeln && l.leute === 0 ? '<div class="tk-luft"><span>niemand da</span></div>' :
         '<div class="tk-luft"><span class="zustand ' + klasse + '" style="--stand:' + anteil.toFixed(2) + '" role="img" ' +
         'aria-label="' + Math.round(anteil * 100) + ' Prozent des Tages belegt" title="' +
         stundenWort(l.soll - l.stunden) + ' von ' + stundenWort(l.soll) + ' belegt"></span>' +
@@ -783,11 +826,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       ', ' + mensch + (t.was ? ', ' + t.was : '');
     if (t.wunsch) {
       el.classList.add('mit-wunsch');
-      el.title = 'Verschiebung angefragt';
+      /* angehängt, nicht ersetzt: gerade dieser Block soll beim Überfahren
+         mehr sagen als drei Wörter */
+      el.title += ' — Verschiebung angefragt';
     }
     if (!t.ziel) {
       el.addEventListener('click', function(){
-        if (t.wunsch) { location.href = 'beratung-termine.html#cordes'; return; }
+        if (t.wunsch) { location.href = 'beratung-termine.html#verschiebung'; return; }
         rufen(wer + ', ' + TAGE[t.tag].kurz + ' um ' + zeitWort(t.von) + '. Diese Fläche entsteht gerade.');
       });
     }
@@ -799,7 +844,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   function wunschBauen(t){
     var w = t.wunsch;
     var el = document.createElement('a');
-    el.href = 'beratung-termine.html#cordes';
+    el.href = 'beratung-termine.html#verschiebung';
     el.className = 'block angefragt';
     el.dataset.von = w.von; el.dataset.bis = w.bis;
     setzen(el, w.von, w.bis);
@@ -807,7 +852,11 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     el.innerHTML =
       '<div class="b-zeit">' + (kurz ? 'Wunsch ' + zeitWort(w.von) : zeitWort(w.von) + ' bis ' + zeitWort(w.bis) + ', gewünscht') + '</div>' +
       '<div class="b-wer">' + t.kunde + '</div>' +
-      '<div class="b-was">' + w.von_wem + ' möchte verschieben</div>';
+      /* Was weichen würde, steht im Block selbst — die Vorschau beim
+         Überfahren ist die Zugabe des breiten Bildschirms, nicht die einzige
+         Auskunft. Am Finger steht der alte Tag in einer anderen Spalte und
+         wäre sonst gar nicht zu sehen. */
+      '<div class="b-was">statt ' + TAGE[t.tag].kurz + ', ' + zeitWort(t.von) + '</div>';
     el.title = w.von_wem + ' möchte ' + t.kunde + ' von ' + TAGE[t.tag].kurz + ' ' + zeitWort(t.von) +
       ' auf ' + TAGE[w.tag].kurz + ' ' + zeitWort(w.von) + ' verschieben';
 
@@ -987,6 +1036,19 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   luftBauen();
   einstieg();
   window.addEventListener('hashchange', einstieg);
+
+  /* Wechselt das Fenster über die Schwelle, ändert sich die Stundenhöhe —
+     dann muss das Raster neu gesetzt werden, sonst stünden die Blöcke auf
+     dem alten Maß. */
+  var letzteHoehe = STUNDE, umbauTimer = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(umbauTimer);
+    umbauTimer = setTimeout(function(){
+      if (stundenhoehe() === letzteHoehe) return;
+      letzteHoehe = stundenhoehe();
+      rasterBauen();
+    }, 150);
+  });
 })();
 </script>
 <script src="uhr.js"></script>

@@ -19,7 +19,10 @@
    eingereihten Termins fällt nach kurzem Moment wieder ab.
    V5 (Häppchen C2): der Verschiebe-Wunsch aus dem Portal ist der dritte Zettel;
    entschieden wird er hier, beurteilt in der Woche nebenan (beratung-kalender.html).
-   Marker: BERATUNG-TERMINE-V5 */
+   V6 nach Code-Review: ein eigener Gegenvorschlag verschiebt nichts, die
+   Standzeile zählt ihre Zettel selbst, und die Ersatzfenster liegen in der
+   Zukunft dieser Woche.
+   Marker: BERATUNG-TERMINE-V6 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -232,9 +235,11 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       <button class="knopf gefahr" id="ablehnen" type="button">Ablehnen</button>
     </div>
     <div class="fenster" id="fenster" hidden>
+      <!-- Nur Fenster, die in der Woche noch kommen und bei Dr. Vogelsang
+           wirklich frei sind (beratung-kalender.html) -->
+      <button type="button" data-tagk="MI" data-zeitk="9:00" data-text="Mittwoch, 9:00 bis 9:45, Videocall">Mittwoch, 9:00</button>
+      <button type="button" data-tagk="DO" data-zeitk="14:00" data-text="Donnerstag, 14:00 bis 14:45, Videocall">Donnerstag, 14:00</button>
       <button type="button" data-tagk="FR" data-zeitk="11:00" data-text="Freitag, 11:00 bis 11:45, Videocall">Freitag, 11:00</button>
-      <button type="button" data-tagk="MO" data-zeitk="9:00" data-text="Montag, 9:00 bis 9:45, Videocall">Montag, 9:00</button>
-      <button type="button" data-tagk="MO" data-zeitk="16:00" data-text="Montag, 16:00 bis 16:45, Videocall">Montag, 16:00</button>
     </div>
     <div class="erledigt" id="petersen-fertig" hidden></div>
   </section>
