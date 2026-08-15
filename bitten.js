@@ -30,7 +30,7 @@
    fertigen, bedienbaren Körper einer Bitte.
 
    Markenneutral: alle Farben kommen aus den Tokens der jeweiligen Fläche.
-   Marker: BITTEN-V1 */
+   Marker: BITTEN-V2 */
 window.Bitten = (function () {
   'use strict';
 
@@ -48,7 +48,18 @@ window.Bitten = (function () {
     document.querySelectorAll('[data-bitte]').forEach(function (alt) {
       var b = finde(alt.dataset.bitte);
       if (!b || !alt.parentNode) return;
-      alt.parentNode.replaceChild(inhalt(b), alt);
+      /* Was schon getippt war, kommt mit: ein Markenwechsel ist eine Frage
+         der Anrede, kein Grund, dem Kunden seinen Satz wegzunehmen. */
+      var altesFeld = alt.querySelector('input[type=text]');
+      var neu = inhalt(b);
+      if (altesFeld && altesFeld.value) {
+        var neuesFeld = neu.querySelector('input[type=text]');
+        if (neuesFeld) {
+          neuesFeld.value = altesFeld.value;
+          neuesFeld.dispatchEvent(new Event('input'));
+        }
+      }
+      alt.parentNode.replaceChild(neu, alt);
     });
   }
 
@@ -84,11 +95,18 @@ window.Bitten = (function () {
   var ART_WORT = {datei: 'Unterlage', aufgabe: 'Aufgabe', abnahme: 'Abnahme'};
   var ZAHLWORT = ['Nichts', 'Eine Sache', 'Zwei Dinge', 'Drei Dinge', 'Vier Dinge', 'Fünf Dinge'];
 
-  /* Stand der Vorführung überlebt den Flächenwechsel, nicht den Browser */
+  /* Stand der Vorführung überlebt den Flächenwechsel, nicht den Browser — und
+     nicht den Wechsel der Beispielmarke: mit einer neuen Marke beginnt die
+     Vorführung von vorn, sonst stünde bei Waldmann alles schon erledigt da
+     und niemand bekäme die Bitten je wieder zu sehen. */
+  var MARKENNAME = (Marke.daten && Marke.daten.name) || '';
   var STAND = {};
-  try { STAND = JSON.parse(sessionStorage.getItem('bitten-stand') || '{}') || {}; } catch (e) { STAND = {}; }
+  try {
+    var abgelegt = JSON.parse(sessionStorage.getItem('bitten-stand') || 'null');
+    if (abgelegt && abgelegt.marke === MARKENNAME) STAND = abgelegt.stand || {};
+  } catch (e) { STAND = {}; }
   function merke() {
-    try { sessionStorage.setItem('bitten-stand', JSON.stringify(STAND)); } catch (e) {}
+    try { sessionStorage.setItem('bitten-stand', JSON.stringify({marke: MARKENNAME, stand: STAND})); } catch (e) {}
   }
 
   function wert(x) { return typeof x === 'function' ? x() : x; }
@@ -101,7 +119,10 @@ window.Bitten = (function () {
   function ergebnis(b) {
     var st = stand(b);
     if (st === 'offen') return '';
-    if (st === 'rueckfrage') return 'Rückfrage gestellt: ' + eingabe(b);
+    if (st === 'rueckfrage') {
+      return rede('Rückfrage gestellt: „' + eingabe(b) + '" Deine Beratung antwortet.',
+                  'Rückfrage gestellt: „' + eingabe(b) + '" Ihre Beratung antwortet.');
+    }
     if (b.art === 'abnahme') {
       return rede('Freigegeben. Deine Beratung setzt die Staffeln auf.',
                   'Freigegeben. Ihre Beratung setzt die Staffeln auf.');
@@ -118,6 +139,12 @@ window.Bitten = (function () {
   }
   function offen(arten) {
     return liste(arten).filter(function (b) { return stand(b) === 'offen'; }).length;
+  }
+  /* Eine gestellte Rückfrage ist weder offen noch erledigt: sie liegt bei der
+     Beratung. Wer sie als erledigt zählte, behauptete, die Abnahme sei
+     gegeben — sie ist es nicht. */
+  function wartend(arten) {
+    return liste(arten).filter(function (b) { return stand(b) === 'rueckfrage'; }).length;
   }
   function zahlwort(n) { return ZAHLWORT[n] || (n + ' Dinge'); }
 
@@ -169,6 +196,10 @@ window.Bitten = (function () {
         'background:#fff;font-family:inherit;font-size:14.5px;font-weight:700;color:' + grau + ';cursor:pointer;' +
         'transition:border-color .2s ease,color .2s ease}' +
       '@media (hover:hover){.bitte-neben:hover{border-color:' + akzent + ';color:' + akzent + '}}' +
+      /* Wartend ist ein eigener Zustand: kein Haken, aber auch nicht grau
+         weggelegt — die Sache ist noch im Gang. */
+      '.bitte.wartet{border-color:' + akzent + '}' +
+      '.bitte-wartet-zeile{margin-top:12px;font-size:13.5px;font-weight:700;color:' + akzent + '}' +
       '.bitte-fertig-zeile{display:flex;align-items:center;gap:12px;margin-top:12px;font-size:13.5px;color:' + grau + '}' +
       '.bitte-haken{width:26px;height:26px;flex-shrink:0}' +
       '.bitte-haken path{fill:none;stroke:' + stift + ';stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;' +
@@ -211,7 +242,7 @@ window.Bitten = (function () {
     art.textContent = ART_WORT[b.art] || 'Bitte';
     var wer = document.createElement('span');
     wer.className = 'bitte-wer';
-    wer.textContent = 'von ' + b.wer;
+    wer.textContent = 'von ' + wert(b.wer);
     kopf.appendChild(art);
     kopf.appendChild(wer);
 
@@ -222,7 +253,7 @@ window.Bitten = (function () {
     el.appendChild(kopf);
     el.appendChild(titel);
 
-    if (stand(b) !== 'offen') {
+    if (stand(b) === 'erledigt') {
       el.classList.add('fertig');
       el.appendChild(fertigZeile(ergebnis(b), false));
       return el;
@@ -231,10 +262,23 @@ window.Bitten = (function () {
     var warum = document.createElement('p');
     warum.className = 'bitte-warum';
     warum.textContent = wert(b.warum);
+    el.appendChild(warum);
+
+    /* Rückfrage gestellt: der Grund bleibt stehen, der Griff geht weg — und
+       kein Haken, denn getan ist nichts. Jetzt ist die Beratung am Zug. */
+    if (stand(b) === 'rueckfrage') {
+      el.classList.add('wartet');
+      var w = document.createElement('div');
+      w.className = 'bitte-wartet-zeile';
+      w.setAttribute('role', 'status');
+      w.textContent = ergebnis(b);
+      el.appendChild(w);
+      return el;
+    }
+
     var frist = document.createElement('div');
     frist.className = 'bitte-frist';
-    frist.textContent = b.frist;
-    el.appendChild(warum);
+    frist.textContent = wert(b.frist);
     el.appendChild(frist);
     el.appendChild(griffe(b, el));
     return el;
@@ -356,12 +400,23 @@ window.Bitten = (function () {
     var text = ergebnis(b);
     /* Jede sichtbare Ausfertigung dieser Bitte legt sich hin — auf jeder
        Fläche, die gerade offen ist, und auch in der Karte im Gespräch */
+    var wartet = stand(b) === 'rueckfrage';
     document.querySelectorAll('[data-bitte="' + id + '"]').forEach(function (el) {
-      if (el.classList.contains('fertig')) return;
-      el.classList.add('fertig');
-      var weg = el.querySelectorAll('.bitte-warum, .bitte-frist, .bitte-tun');
+      if (el.classList.contains('fertig') || el.classList.contains('wartet')) return;
+      el.classList.add(wartet ? 'wartet' : 'fertig');
+      /* Bei einer Rückfrage bleibt der Grund stehen — er ist der Zusammenhang,
+         in dem die Antwort der Beratung gleich ankommt. */
+      var weg = el.querySelectorAll(wartet ? '.bitte-frist, .bitte-tun' : '.bitte-warum, .bitte-frist, .bitte-tun');
       weg.forEach(function (x) { x.remove(); });
-      el.appendChild(fertigZeile(text, true));
+      if (wartet) {
+        var w = document.createElement('div');
+        w.className = 'bitte-wartet-zeile';
+        w.setAttribute('role', 'status');
+        w.textContent = text;
+        el.appendChild(w);
+      } else {
+        el.appendChild(fertigZeile(text, true));
+      }
     });
     /* Die Fläche darf antworten, und zwar dort, wo der Kunde gedrückt hat:
        das Ereignis steigt von SEINER Karte auf, nicht von der ersten im
@@ -392,7 +447,9 @@ window.Bitten = (function () {
     function male() {
       lage.textContent = '';
       var alle = liste(arten);
-      var zeigen = opts.nurOffene ? alle.filter(function (b) { return stand(b) === 'offen'; }) : alle;
+      /* „nurOffene" heißt: alles, was noch nicht durch ist — eine gestellte
+         Rückfrage gehört dazu, sie ist nicht erledigt. */
+      var zeigen = opts.nurOffene ? alle.filter(function (b) { return stand(b) !== 'erledigt'; }) : alle;
       if (!zeigen.length) {
         var p = document.createElement('p');
         p.className = 'bitte-leer';
@@ -410,7 +467,7 @@ window.Bitten = (function () {
          dann geht die Karte. Sonst quittiert niemand, was gerade geschickt
          wurde, und die Fläche sieht aus, als sei nichts passiert. */
       if (!opts.nurOffene) {
-        if (typeof opts.aufAenderung === 'function') opts.aufAenderung(offen(arten));
+        if (typeof opts.aufAenderung === 'function') opts.aufAenderung(offen(arten), wartend(arten));
         return;
       }
       var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -418,16 +475,16 @@ window.Bitten = (function () {
         lage.querySelectorAll('.bitte.fertig').forEach(function (el) { el.style.opacity = '0'; });
         setTimeout(function () {
           male();
-          if (typeof opts.aufAenderung === 'function') opts.aufAenderung(offen(arten));
+          if (typeof opts.aufAenderung === 'function') opts.aufAenderung(offen(arten), wartend(arten));
         }, reduziert ? 0 : 420);
       }, reduziert ? 0 : 1500);
     });
-    if (typeof opts.aufAenderung === 'function') opts.aufAenderung(offen(arten));
+    if (typeof opts.aufAenderung === 'function') opts.aufAenderung(offen(arten), wartend(arten));
     return {male: male};
   }
 
   return {
-    liste: liste, offen: offen, zahlwort: zahlwort, finde: finde,
+    liste: liste, offen: offen, wartend: wartend, zahlwort: zahlwort, finde: finde,
     inhalt: inhalt, tafel: tafel, loese: loese, abonniere: abonniere,
     anrede: anrede, stand: stand, ergebnis: ergebnis, eingabe: eingabe
   };

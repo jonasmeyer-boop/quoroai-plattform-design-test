@@ -6,7 +6,7 @@
 <title>Dein Berater – Unterlagen</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Unterlagen: alles, was die Beratung freigegeben hat · Marker: UNTERLAGEN-V7 (Häppchen D1: die offene Bitte um eine Unterlage steht über dem Bestand) */
+/* quoroai-plattform-design · Unterlagen: alles, was die Beratung freigegeben hat · Marker: UNTERLAGEN-V8 (Häppchen D1: die offene Bitte um eine Unterlage steht über dem Bestand) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -315,6 +315,10 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
                  fassungen: []};
       DOKUMENTE.unshift(dok);
       liste.prepend(baueEinen(dok));
+      /* Steht im Suchfeld etwas, gilt es auch für das neue Blatt — sonst
+         stünde es über einer gefilterten Liste, in die es nicht gehört, und
+         die Trefferzahl darunter wäre falsch. */
+      filtere();
     });
   }
   /* Auch beim Ankommen: wer die Unterlage im Gespräch geschickt hat, findet
@@ -337,9 +341,15 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
     if (i === -1) return null;
     var von = Math.max(0, i - 60), bis = Math.min(text.length, i + wort.length + 90);
     var stück = (von > 0 ? '… ' : '') + text.slice(von, bis) + (bis < text.length ? ' …' : '');
-    return zahm(stück).replace(new RegExp('(' + zahm(wort).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig'), '<mark>$1</mark>');
+    /* Erst im Rohtext merken, dann entschärfen, dann die Merkzeichen zu
+       Markierungen machen. Andersherum schnitte eine Suche nach „amp" mitten
+       in ein &amp; hinein. */
+    var merk = stück.replace(new RegExp('(' + wort.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig'), '\u0001$1\u0002');
+    return zahm(merk).replace(/\u0001/g, '<mark>').replace(/\u0002/g, '</mark>');
   }
-  feld.addEventListener('input', function(){
+  feld.addEventListener('input', filtere);
+  function filtere(){
+    if (!feld) return; /* beim Ankommen steht das Feld noch nicht */
     var wort = feld.value.trim();
     var gefunden = 0;
     DOKUMENTE.forEach(function(dok){
@@ -366,7 +376,7 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
     });
     treffer.textContent = wort ? (gefunden === 1 ? 'Ein Dokument gefunden' : gefunden + ' Dokumente gefunden') : '';
     leer.hidden = gefunden > 0;
-  });
+  }
 })();
 </script>
 <script src="rechtsfuss.js"></script>

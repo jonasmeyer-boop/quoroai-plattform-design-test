@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V45 (Häppchen D1: die Bitte der Beratung wird im Gespräch erledigt) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V46 (Häppchen D1: die Bitte der Beratung wird im Gespräch erledigt) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -890,8 +890,8 @@ body.blatt-offen{overflow:hidden}
   function rede(du, sie){ return anredeSie ? sie : du; }
   var akte = document.getElementById('akte');
   var beschaeftigt = false;
-  /* Quittungen, die warten mussten, weil der Berater gerade schrieb.
-     Wer zurücksetzt, lässt sie los — sonst warten sie ewig. */
+  /* Quittungen, die warten mussten, weil der Berater gerade schrieb. Wer
+     fertig geschrieben hat, lässt die nächste los — sonst wartet sie ewig. */
   var wartendeQuittungen = [];
   function nichtMehrBeschaeftigt(){
     beschaeftigt = false;
@@ -2262,15 +2262,16 @@ body.blatt-offen{overflow:hidden}
         }
         continue;
       }
-      /* Die Bitten der Beratung, in dem Zustand, in dem sie gerade sind:
-         wartet noch etwas, stehen nur die offenen — sonst hätte der Berater
-         gerade „zwei Dinge" gesagt und legte drei Karten hin. Ist alles
+      /* Die Bitten der Beratung, in dem Zustand, in dem sie gerade sind: ist
+         noch etwas im Gang, steht nur das — sonst hätte der Berater gerade
+         „zwei Dinge" gesagt und legte drei Karten hin. Eine gestellte
+         Rückfrage bleibt dabei, sie ist nicht durch. Ist wirklich alles
          erledigt, stehen alle drei als Nachweis. */
       if (s.bitten) {
         if (!window.Bitten) continue;
         var alle = Bitten.liste();
-        var offene = alle.filter(function(b){ return Bitten.stand(b) === 'offen'; });
-        var zeigen = offene.length ? offene : alle;
+        var laufend = alle.filter(function(b){ return Bitten.stand(b) !== 'erledigt'; });
+        var zeigen = laufend.length ? laufend : alle;
         for (var jb = 0; jb < zeigen.length; jb++) {
           var kb = baueBitte(zeigen[jb].id);
           if (!kb) continue;
@@ -2432,6 +2433,9 @@ body.blatt-offen{overflow:hidden}
       schritte: [
         {t: function(){
           var n = window.Bitten ? Bitten.offen() : 0;
+          var w = window.Bitten ? Bitten.wartend() : 0;
+          if (!n && w) return rede('Von dir gerade nichts — deine Rückfrage liegt bei Dr. Anna Vogelsang:',
+                                   'Von Ihnen gerade nichts — Ihre Rückfrage liegt bei Dr. Anna Vogelsang:');
           if (!n) return rede('Gerade nichts. Alles, worum ich dich gebeten hatte, liegt bei mir — hier steht es der Reihe nach:',
                               'Gerade nichts. Alles, worum ich Sie gebeten hatte, liegt bei mir — hier steht es der Reihe nach:');
           return (n === 1
@@ -2951,6 +2955,10 @@ body.blatt-offen{overflow:hidden}
           var klon = k.cloneNode(true);
           klon.classList.add('belichtet');
           klon.querySelectorAll('button').forEach(function(b){ b.disabled = true; });
+          /* Der Klon ist ein Abbild, kein Griff: ohne data-bitte zeichnet der
+             Baustein ihn bei einem Markenwechsel nicht als frische, wieder
+             bedienbare Bitte neu — deren Klick nie irgendwo ankäme. */
+          klon.querySelectorAll('[data-bitte]').forEach(function(x){ x.removeAttribute('data-bitte'); });
           brett.appendChild(klon);
         });
         inhalt.appendChild(brett);

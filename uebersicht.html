@@ -6,7 +6,7 @@
 <title>Dein Berater – Übersicht</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V15 (Häppchen D1: was die Beratung vom Kunden braucht, steht vor allem anderen) */
+/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V16 (Häppchen D1: was die Beratung vom Kunden braucht, steht vor allem anderen) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -459,7 +459,18 @@ section{margin-top:52px}
      ansagt. Der Satz zählt mit, damit die Überschrift nicht behauptet, es
      warte etwas, wenn alles erledigt ist. */
   var satz = document.getElementById('zuliefern-satz');
-  if (window.Bitten) Bitten.tafel({aufAenderung: function(n){
+  if (window.Bitten) Bitten.tafel({aufAenderung: function(n, wartet){
+    /* Drei Lagen, und keine darf die andere behaupten: etwas liegt bei dir,
+       nichts liegt bei dir aber eine Rückfrage läuft, oder wirklich alles ist
+       durch. „Erledigt" über einer offenen Rückfrage wäre eine Lüge. */
+    if (n === 0 && wartet) {
+      satz.textContent = wartet === 1
+        ? Marke.rede('Von dir wartet nichts. Eine Rückfrage liegt bei deiner Beratung.',
+                     'Von Ihnen wartet nichts. Eine Rückfrage liegt bei Ihrer Beratung.')
+        : Marke.rede('Von dir wartet nichts. ' + wartet + ' Rückfragen liegen bei deiner Beratung.',
+                     'Von Ihnen wartet nichts. ' + wartet + ' Rückfragen liegen bei Ihrer Beratung.');
+      return;
+    }
     satz.textContent = n === 0
       ? Marke.rede('Erledigt — deine Beratung hat alles, was sie braucht.',
                    'Erledigt — Ihre Beratung hat alles, was sie braucht.')
