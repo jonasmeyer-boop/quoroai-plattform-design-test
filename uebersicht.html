@@ -7,11 +7,13 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
 /* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür
-   Marker: UEBERSICHT-V23
+   Marker: UEBERSICHT-V24
    (V22: die Vorschläge des ersten Tages sind wortgleich mit denen im Gespräch —
    sonst führt einer davon ins falsche Drehbuch. V23 aus dem zweiten Review:
-   eine offene Rückfrage hat auf dem Weg einen eigenen Satz, die Glocke zählt
-   mit statt eine Drei einzufrieren, der Fuß hat Luft unter dem Schalter.)
+   eine offene Rückfrage hat auf dem Weg einen eigenen Satz, der Fuß hat Luft
+   unter dem Schalter. V24 aus dem dritten Review: auch „Im Gespräch erledigen"
+   schreibt die Frage in der Anrede der Marke, und die Glocke nennt keine Zahl,
+   die sie nicht nachführen kann.)
 
    Häppchen D3 (Issue #40), zwei Dinge:
 
@@ -683,7 +685,9 @@ section{margin-top:52px}
   }});
   document.getElementById('zuliefern-fragen').addEventListener('click', function(e){
     e.preventDefault();
-    geheZuGespraech('Was brauchst du von mir?');
+    /* Auch dieser Weg schreibt die Frage, die drüben als die des Kunden über
+       seinem Kapitel steht — sie muss der Anrede folgen. */
+    geheZuGespraech(Marke.rede('Was brauchst du von mir?', 'Was brauchen Sie von mir?'));
   });
 
   /* ---------- Wo wir stehen (Häppchen D3) ----------
@@ -833,14 +837,13 @@ section{margin-top:52px}
      text: Marke.rede('Dr. Anna Vogelsang hat deine Akte angelegt.', 'Dr. Anna Vogelsang hat Ihre Akte angelegt.'),
      zeit: 'gerade eben', neu: true,
      tue: function(){ document.getElementById('brief').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'center'}); }},
-    /* Die Zahl kommt aus dem Baustein, nicht aus dem Text: der Stand der Bitten
-       überlebt den Neuladen, eine eingefrorene „Drei" nicht. Ist nichts mehr
-       offen, sagt der Eintrag das — statt „Nichts, damit die Analyse anlaufen
-       kann". */
+    /* Ohne Zahl, und das mit Absicht: die Glocke berichtet, was passiert ist,
+       nicht was gerade gilt. Eine Zahl darin wäre entweder eingefroren oder
+       müsste die Glocke bei jeder erledigten Bitte neu bauen — und würde sie
+       dem Kunden unter der Hand zuklappen. Wie viele es sind, sagt der
+       Abschnitt, zu dem dieser Eintrag führt. */
     {titel: Marke.rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'),
-     text: (window.Bitten && Bitten.offen() === 0)
-       ? Marke.rede('Erledigt, sie hat alles von dir.', 'Erledigt, sie hat alles von Ihnen.')
-       : zahlwort(window.Bitten ? Bitten.offen() : 3) + ', damit die Analyse anlaufen kann.',
+     text: 'Damit die Analyse anlaufen kann.',
      zeit: 'gerade eben', neu: true,
      tue: function(){ document.getElementById('zuliefern').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'start'}); }},
     {titel: Marke.rede('Dein Kennenlern-Termin steht', 'Ihr Kennenlern-Termin steht'),

@@ -6,14 +6,17 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V53
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V54
    (V51: Häppchen D2, ein Mensch spricht in denselben Strang — aus drei Reviews:
    Ankunft, Abschied, Anlagen, Warteschlange und die Kante des Grenzfalls.
    V52: Häppchen D3 — am ersten Tag stehen im Auftakt die Fragen eines neuen
    Kunden. Nach einer Marge zu fragen, zu der noch keine Zahl vorliegt, wäre
    der erste Satz, mit dem die Fläche lügt.
    V53 aus dem zweiten Review: der Notnagel behauptet nicht mehr, die Zahlen
-   fehlten, wenn sie eben geschickt wurden.) */
+   fehlten, wenn sie eben geschickt wurden.
+   V54 aus dem dritten Review: die Überschrift des Kapitels ist die Frage des
+   Kunden — sie folgt der Anrede, nicht nur der Vorschlag, auf den er gedrückt
+   hat.) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -2853,7 +2856,10 @@ body.blatt-offen{overflow:hidden}
     /* Häppchen D1: der Kunde liefert zu. Drei Formen einer Bitte, jede mit
        ihrem Grund, jede hier erledigt — nicht auf einer anderen Fläche. */
     { probe: /(brauchst du|von mir|zuliefern|was fehlt|hochlad|abnahme|freigeb)/i,
-      frage: 'Was brauchst du von mir?',
+      id: 'bitten',
+      /* Als Funktion, weil diese eine Frage den Kunden anspricht: unter einer
+         Sie-Marke stünde sonst über seiner eigenen Frage die Du-Form. */
+      frage: function(){ return brauchtFrage(); },
       schritte: [
         {t: function(){
           var n = window.Bitten ? Bitten.offen() : 0;
@@ -2987,7 +2993,7 @@ body.blatt-offen{overflow:hidden}
           {chips: [brauchtFrage, 'Wie arbeiten wir zusammen?']}
         ]}
     ];
-    var BITTEN_SKRIPT = SKRIPTE.filter(function(s){ return s.frage === 'Was brauchst du von mir?'; });
+    var BITTEN_SKRIPT = SKRIPTE.filter(function(s){ return s.id === 'bitten'; });
     SKRIPTE = ERSTE.concat(BITTEN_SKRIPT);
     /* Auch der Notnagel darf am ersten Tag nichts versprechen, was er nicht
        halten kann: ohne Zahlen rechnet niemand über Nacht. */
@@ -3000,8 +3006,8 @@ body.blatt-offen{overflow:hidden}
           var b = window.Bitten && Bitten.finde('abschluesse');
           var da = b && Bitten.stand(b) === 'erledigt';
           if (da) {
-            return rede('Ehrliche Antwort: das rechne ich dir aus, sobald ich deine Abschlüsse gelesen habe — die liegen seit eben bei mir.',
-                        'Ehrliche Antwort: das rechne ich Ihnen aus, sobald ich Ihre Abschlüsse gelesen habe — die liegen seit eben bei mir.');
+            return rede('Ehrliche Antwort: das rechne ich dir aus, sobald ich deine Abschlüsse gelesen habe. Die liegen bei mir.',
+                        'Ehrliche Antwort: das rechne ich Ihnen aus, sobald ich Ihre Abschlüsse gelesen habe. Die liegen bei mir.');
           }
           return rede('Ehrliche Antwort: dazu kenne ich deine Zahlen noch nicht. Sobald deine Jahresabschlüsse da sind, rechne ich es dir aus.',
                       'Ehrliche Antwort: dazu kenne ich Ihre Zahlen noch nicht. Sobald Ihre Jahresabschlüsse da sind, rechne ich es Ihnen aus.');
@@ -3435,7 +3441,7 @@ body.blatt-offen{overflow:hidden}
     for (var i = 0; i < SKRIPTE.length; i++) {
       if (SKRIPTE[i].probe.test(t)) { passendes = SKRIPTE[i]; break; }
     }
-    var kapitel = neuesKapitel(passendes ? passendes.frage : t);
+    var kapitel = neuesKapitel(passendes ? (typeof passendes.frage === 'function' ? passendes.frage() : passendes.frage) : t);
     var schritte = (passendes || SONST).schritte;
     if (mitgebracht) {
       schritte = [{t: mitgebracht > 1
@@ -3534,6 +3540,15 @@ body.blatt-offen{overflow:hidden}
       anredeSie = m.anrede === 'sie';
       /* Seiten-Eigenes, das der Kern nicht kennt */
       beschrifteAkte();
+      /* Der Vorschlag, der den Kunden anspricht, steht schon im Bild — er
+         bekommt die neue Anrede, statt in der alten hängen zu bleiben. Die
+         Chips in den Kapiteln lösen sich beim Zeichnen auf und brauchen das
+         nicht; dieser eine stand vorher da. */
+      document.querySelectorAll('#start-chips button[data-braucht]').forEach(function(b){
+        var zahl = b.querySelector('.zahl');
+        b.childNodes[0].nodeValue = brauchtFrage();
+        if (zahl) b.setAttribute('aria-label', brauchtFrage() + ' ' + zahl.textContent + ' offen');
+      });
       /* Der Baustein Bitten redet mit: hier wechselt die Marke im Stehen,
          auf den anderen Flächen lädt die Vorführung neu. Beides muss dasselbe
          bedeuten — sonst stünde hier erledigt, was die Übersicht gleich
@@ -3575,7 +3590,7 @@ body.blatt-offen{overflow:hidden}
     /* Was auf den Kunden wartet, muss er nicht erst erfragen: der erste Chip
        trägt die Zahl (Häppchen D1). Wartet nichts, steht er auch nicht da. */
     var offeneBitten = window.Bitten ? Bitten.offen() : 0;
-    if (offeneBitten) startChips.unshift({text: brauchtFrage(), zahl: offeneBitten});
+    if (offeneBitten) startChips.unshift({text: brauchtFrage(), zahl: offeneBitten, braucht: true});
 
     /* Der Gruß kennt die Uhrzeit — wie ein Berater, nicht wie ein Formular */
     var stunde = new Date().getHours();
@@ -3596,6 +3611,10 @@ body.blatt-offen{overflow:hidden}
         var text = typeof c === 'string' ? c : c.text;
         var b = document.createElement('button');
         b.type = 'button'; b.textContent = text;
+        /* Der Markenwechsel läuft hier im Stehen: dieser eine Chip spricht den
+           Kunden an und muss der neuen Anrede folgen, statt in der alten
+           stehen zu bleiben. */
+        if (c.braucht) b.dataset.braucht = '1';
         if (c.zahl) {
           var z = document.createElement('span');
           z.className = 'zahl';

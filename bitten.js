@@ -41,7 +41,7 @@
    ersten Tag über Staffeln geredet, die es dort nicht gibt.
    Trägt eine Bitte ein `woran`, verlinkt die Fläche es in die Unterlagen —
    etwas freigeben, das man nirgends lesen kann, ist keine Abnahme.
-   Marker: BITTEN-V6 */
+   Marker: BITTEN-V7 */
 window.Bitten = (function () {
   'use strict';
 
@@ -281,8 +281,10 @@ window.Bitten = (function () {
       '.bitte-woran{font-size:12.5px;color:' + grau + ';margin-top:8px}' +
       '.bitte-woran a{color:' + akzent + ';font-weight:700;text-decoration:none}' +
       '.bitte-woran a:hover{text-decoration:underline}' +
-      /* Am Finger ist eine 19px hohe Zeile kein Ziel */
-      '@media (pointer:coarse){.bitte-woran a{display:inline-flex;align-items:center;min-height:44px}}' +
+      /* Am Finger ist eine 19px hohe Zeile kein Ziel. Polster statt inline-flex:
+         das vergrößert die Trefferfläche, ohne die Zeilenhöhe des Absatzes
+         aufzublähen — inline-flex schob „warum" und Frist um 25px auseinander. */
+      '@media (pointer:coarse){.bitte-woran a{position:relative;padding:14px 0}}' +
       '.bitte-frist{font-size:12.5px;font-weight:700;color:' + tinte + ';margin-top:10px}' +
       '.bitte-tun{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}' +
       '.bitte-tun input[type=text]{flex:1 1 240px;min-width:0;min-height:46px;padding:0 16px;' +
