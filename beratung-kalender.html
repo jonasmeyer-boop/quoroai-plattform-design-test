@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Die Woche der Beratung</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Die Woche (Häppchen C2, Issue #35).
+
+   Zwei Fragen liegen im Häppchen, und beide hängen am selben Bild: „Was steht
+   diese Woche an?" und „Wer hat wann Luft?". Deshalb ist das hier EIN Raum
+   und keine zwei — das Raster oben zeigt die Woche, der Streifen darunter
+   zeigt, was von jedem Tag noch übrig ist. Wer auf eine Luft-Zelle tippt,
+   landet im Raster bei genau dieser Person an genau diesem Tag; die beiden
+   Hälften sind dasselbe Bild aus zwei Entfernungen.
+
+   Abgegrenzt gegen die Nachbarräume: die Uhr misst, was gelaufen IST
+   (`beratung-zeiten.html`, Dock über allen Flächen). Hier steht, was noch
+   KOMMT. Und entschieden wird ein Wunsch nicht hier, sondern auf dem Zettel
+   des KI-Beraters (`beratung-termine.html`) — dieser Raum zeigt ihn nur, und
+   zwar dort, wo man ihn beurteilen kann: im Raster, neben dem Tag, den er
+   trifft.
+
+   Der eine Kino-Moment der Fläche ist genau das: fährt man über das
+   angefragte Fenster, zeigt die Woche für einen Augenblick, wie sie nach der
+   Verschiebung aussähe — der alte Block verblasst, der neue wird fest. Man
+   entscheidet nicht über eine Uhrzeit, sondern über ein Bild.
+
+   Farbe bedeutet hier etwas und nichts sonst: Lila trägt, was vereinbart ist,
+   Grau trägt, was intern ist, eine gestrichelte Lila-Kante trägt, was erst
+   gewünscht ist. Die Art des Termins (Videocall, vor Ort, Telefonat) ist ein
+   graues Wort, keine Farbe. Abwesenheit ist keine Farbe, sondern eine
+   Schraffur — sie ist ein Loch im Tag, keine Sorte Termin.
+
+   Am Finger wird aus der Woche ein Tag: unter 820px trägt die Fläche eine
+   Tagesreihe, und das Raster zeigt genau eine Spalte. Fünf Spalten auf 375px
+   wären eine Lüge.
+
+   Marker: BERATUNG-KALENDER-V1 */
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button{font-family:inherit}
+
+/* ========== quoroAI-Chrom (wie in den anderen Cockpit-Räumen) ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;word-spacing:2px}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+/* Die breite Fläche braucht die Krume neben sich; passt sie nicht mehr,
+   wird sie die zweite Zeile des Kopfbands (Entscheidung 2026-08-14). */
+@media (max-width:1560px){
+  nav{height:118px;padding-bottom:58px}
+  #krume{z-index:90}
+}
+
+/* ========== Seite ========== */
+main{max-width:1240px;margin:0 auto;padding:136px 24px 90px}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+@media (max-width:1560px){ main{padding-top:150px} }
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px;max-width:70ch}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:38px}
+
+/* ---------- Die Leiste: welche Woche, wessen Woche ---------- */
+.leiste{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin-top:22px;padding:10px 12px;border-radius:var(--radius-karte);
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 12px 34px rgba(24,21,47,.09);
+}
+.blaettern{display:flex;align-items:center;gap:4px}
+.blaettern button{
+  width:38px;height:38px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:var(--flaeche);cursor:pointer;font-size:16px;color:var(--nebel-600);
+  transition:border-color .2s,color .2s;
+}
+.blaettern button:hover{border-color:var(--lila-500);color:var(--lila-700)}
+.wochen-wort{font-size:15px;font-weight:600;letter-spacing:-.01em;min-width:16ch}
+.wochen-wort small{display:block;font-size:12px;font-weight:400;color:var(--nebel-500);letter-spacing:0}
+.leiste .luecke{flex:1 1 auto}
+.wer-chips{display:flex;gap:6px;flex-wrap:wrap}
+.wer-chips button{
+  min-height:38px;padding:0 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:var(--flaeche);font-size:13.5px;font-weight:600;color:var(--tinte);cursor:pointer;
+  transition:border-color .2s,background .2s,color .2s;
+}
+.wer-chips button:hover{border-color:var(--lila-400)}
+.wer-chips button[aria-pressed="true"]{background:var(--tinte);color:#fff;border-color:var(--tinte)}
+.leiste .knopf{min-height:38px;padding:0 16px;font-size:13.5px}
+
+/* ---------- Das Raster ---------- */
+.raster{
+  margin-top:14px;border-radius:var(--radius-karte);overflow:hidden;
+  border:0.5px solid var(--nebel-200);background:var(--flaeche);
+  box-shadow:0 14px 40px rgba(24,21,47,.07);
+}
+.raster-kopf,.raster-leib{display:grid;grid-template-columns:62px repeat(5,1fr)}
+.raster-kopf{border-bottom:0.5px solid var(--nebel-200);background:var(--nebel-050)}
+.tag-kopf{padding:12px 12px 11px;border-left:0.5px solid var(--nebel-200);min-width:0}
+.tag-kopf:first-child{border-left:0}
+.tag-kopf .tk-tag{font-size:13px;font-weight:600;letter-spacing:-.01em}
+.tag-kopf .tk-datum{font-size:12px;color:var(--nebel-500)}
+.tag-kopf .tk-luft{display:flex;align-items:center;gap:7px;margin-top:8px}
+.tag-kopf .tk-luft .zustand{width:38px;height:16px}
+.tag-kopf .tk-luft span{font-size:11.5px;color:var(--nebel-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag-kopf.heute{background:var(--lila-050)}
+.tag-kopf.heute .tk-tag{color:var(--lila-700)}
+.tag-kopf .tk-weg{font-size:11.5px;color:var(--bernstein);margin-top:6px;line-height:1.35}
+.tag-kopf .tk-geplant{font-size:11.5px;color:var(--nebel-500);margin-top:5px;line-height:1.35}
+
+.zeitachse{position:relative;border-right:0.5px solid var(--nebel-200)}
+.zeitachse span{
+  position:absolute;right:8px;translate:0 -50%;
+  font-size:11px;color:var(--nebel-400);font-variant-numeric:tabular-nums;
+}
+.tag-spalte{
+  position:relative;border-left:0.5px solid var(--nebel-200);min-width:0;
+  background:repeating-linear-gradient(
+    to bottom,
+    var(--nebel-100) 0, var(--nebel-100) 0.5px,
+    transparent 0.5px, transparent var(--stunde)
+  );
+}
+/* Die Stunden vor 9 und nach 17 gehören nicht zum Arbeitstag: sie stehen da,
+   damit ein früher Termin Platz hat, bleiben aber ruhiger. */
+.tag-spalte .rand{position:absolute;left:0;right:0;background:rgba(16,19,26,.022);pointer-events:none}
+
+.block{
+  position:absolute;left:5px;right:5px;overflow:hidden;
+  border-radius:10px;padding:7px 9px;text-align:left;
+  border:0.5px solid var(--nebel-200);border-left:3px solid var(--lila-400);
+  background:var(--flaeche);box-shadow:0 4px 14px rgba(24,21,47,.08);
+  font:inherit;color:var(--tinte);cursor:pointer;text-decoration:none;
+  transition:box-shadow .2s var(--kurve),opacity .3s ease,border-color .2s;
+}
+.block:hover{box-shadow:0 10px 26px rgba(59,52,134,.18);border-color:var(--lila-400)}
+.block .b-zeit{font-size:11px;color:var(--nebel-500);font-variant-numeric:tabular-nums;
+  display:flex;align-items:baseline;gap:8px;white-space:nowrap;overflow:hidden}
+.block .b-zeit i{font-style:normal;margin-left:auto;color:var(--nebel-600);font-weight:600;
+  overflow:hidden;text-overflow:ellipsis}
+.block.schmal .b-zeit i,.block.kurz .b-zeit i{display:none}
+.block .b-wer{font-size:13px;font-weight:600;letter-spacing:-.01em;line-height:1.3;margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.block .b-was{font-size:11.5px;color:var(--nebel-600);line-height:1.35;margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Ein Block sagt so viel, wie in seine Höhe passt — abgeschnittene Wörter
+   sind schlimmer als weggelassene. Unter anderthalb Stunden fällt die dritte
+   Zeile weg, unter einer Dreiviertelstunde stehen Zeit und Name nebeneinander. */
+.block.mittel .b-was{display:none}
+.block.kurz{padding:4px 9px;display:flex;align-items:center;gap:8px}
+.block.kurz .b-was{display:none}
+.block.kurz .b-zeit{flex:0 0 auto}
+.block.kurz .b-wer{margin-top:0;font-size:12px;min-width:0}
+.block.schmal{padding-left:7px;padding-right:6px}
+.block.schmal .b-was{display:none}
+.block.intern{border-left-color:var(--nebel-300)}
+.block.intern .b-wer{color:var(--nebel-700)}
+/* Erst gewünscht, noch nicht vereinbart: nichts Festes, nur eine Kante. */
+.block.angefragt{
+  background:var(--lila-050);border:1.5px dashed var(--lila-400);
+  box-shadow:none;
+}
+.block.angefragt .b-wer{color:var(--lila-800)}
+.block.angefragt .b-zeit{color:var(--lila-700)}
+/* Der Kino-Moment: der Wunsch zeigt, wie die Woche danach aussieht. */
+.block.blass{opacity:.3}
+.block.probe{background:var(--flaeche);border:0.5px solid var(--nebel-200);border-left:3px solid var(--lila-500);box-shadow:0 10px 26px rgba(59,52,134,.22)}
+.abwesend{
+  position:absolute;left:5px;right:5px;border-radius:10px;pointer-events:none;
+  background:repeating-linear-gradient(135deg,
+    rgba(24,21,47,.05) 0, rgba(24,21,47,.05) 5px,
+    transparent 5px, transparent 11px);
+  border:0.5px solid var(--nebel-200);
+  display:flex;align-items:flex-start;justify-content:center;padding-top:10px;
+}
+.abwesend span{font-size:12px;font-weight:600;color:var(--nebel-500)}
+/* Der gewählte Tag: schmal ist er der einzige, breit ist er der betonte.
+   Ohne diese Regel verspräche die Fußnote „dann steht dieser Tag oben im
+   Raster" auf dem Bildschirm etwas, das man nicht sieht. */
+@media (min-width:821px){
+  .tag-kopf.gewaehlt{box-shadow:inset 0 -2.5px 0 var(--lila-500)}
+  .tag-spalte.gewaehlt::before{
+    content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+    background:var(--lila-050);
+    box-shadow:inset 0 0 0 1px var(--lila-200);
+  }
+}
+/* Was hinter uns liegt, tritt zurück, verschwindet aber nicht */
+.tag-kopf.vorbei .tk-tag,.tag-kopf.vorbei .tk-datum{color:var(--nebel-400)}
+.tag-spalte.vorbei .block{opacity:.5}
+.tag-spalte.vorbei .block:hover{opacity:1}
+.jetzt{position:absolute;left:0;right:0;height:1.5px;background:var(--lila-600);pointer-events:none;z-index:2}
+.jetzt::before{content:"";position:absolute;left:-3px;top:-3px;width:8px;height:8px;border-radius:999px;background:var(--lila-600)}
+
+/* Die Tagesreihe für schmale Fenster */
+.tagesreihe{display:none;gap:6px;margin-top:14px;overflow-x:auto;padding-bottom:2px}
+.tagesreihe button{
+  flex:1 0 auto;min-height:52px;padding:6px 14px;border-radius:14px;
+  border:0.5px solid var(--nebel-200);background:var(--flaeche);cursor:pointer;
+  font-size:13px;font-weight:600;color:var(--tinte);line-height:1.3;
+}
+.tagesreihe button small{display:block;font-weight:400;font-size:11px;color:var(--nebel-500)}
+.tagesreihe button[aria-pressed="true"]{background:var(--tinte);color:#fff;border-color:var(--tinte)}
+.tagesreihe button[aria-pressed="true"] small{color:rgba(255,255,255,.7)}
+
+/* ---------- Wer hat wann Luft ---------- */
+.luft{
+  margin-top:12px;border-radius:var(--radius-karte);overflow:hidden;
+  border:0.5px solid var(--nebel-200);background:var(--flaeche);
+  box-shadow:0 12px 34px rgba(24,21,47,.06);
+}
+.luft-zeile{display:grid;grid-template-columns:210px repeat(5,1fr);border-top:0.5px solid var(--nebel-200)}
+.luft-zeile:first-child{border-top:0;background:var(--nebel-050)}
+.luft-zeile .l-name{padding:12px 16px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.luft-zeile .l-name b{font-size:14px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.luft-zeile .l-name small{font-size:11.5px;color:var(--nebel-500)}
+.luft-kopf-zelle{padding:12px 8px;font-size:12px;font-weight:600;color:var(--nebel-600);text-align:center;border-left:0.5px solid var(--nebel-200)}
+.luft-zelle{
+  border:0;border-left:0.5px solid var(--nebel-200);padding:11px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  background:transparent;font:inherit;cursor:pointer;
+  transition:background .15s;
+}
+.luft-zelle:hover{background:var(--lila-050)}
+.luft-zelle .zustand{width:46px;height:18px}
+.luft-zelle .l-wort{font-size:11.5px;color:var(--nebel-600);font-variant-numeric:tabular-nums;white-space:nowrap}
+.luft-zelle.frei .l-wort{color:var(--gruen);font-weight:600}
+.luft-zelle.voll .l-wort{color:var(--bernstein);font-weight:600}
+.luft-zelle.weg{cursor:default}
+.luft-zelle.weg:hover{background:transparent}
+.luft-zelle.weg .l-wort{color:var(--nebel-400)}
+/* Ein Tag, der vorbei ist, hat keine Luft mehr — er wird nur noch berichtet,
+   bleibt aber ein Griff ins Raster. */
+.luft-zelle.vorbei{opacity:.45}
+.luft-zelle.vorbei .l-wort{color:var(--nebel-500);font-weight:400}
+.luft-strich{
+  width:46px;height:18px;border-radius:999px;
+  background:repeating-linear-gradient(135deg,
+    var(--nebel-200) 0, var(--nebel-200) 4px, transparent 4px, transparent 9px);
+  border:0.5px solid var(--nebel-200);
+}
+.fussnote{font-size:12.5px;color:var(--nebel-500);line-height:1.6;margin-top:14px;max-width:76ch}
+
+/* ---------- Der Zettel: Abwesenheit eintragen ---------- */
+.schleier{
+  position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:rgba(24,21,47,.28);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}
+.zettel{
+  width:min(440px,100%);border-radius:var(--radius-karte);padding:24px;
+  background:rgba(255,255,255,.86);
+  backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);
+  border:1px solid rgba(255,255,255,.7);
+  box-shadow:0 30px 80px rgba(24,21,47,.28);
+  animation:zettel-auf .3s var(--kurve);
+}
+@keyframes zettel-auf{from{opacity:0;translate:0 14px;scale:.98}}
+.zettel h2{font-size:20px}
+.zettel .feld{margin-top:14px}
+.zettel .feld select{
+  width:100%;min-height:46px;padding:0 12px;font:inherit;font-size:16px;color:var(--tinte);
+  background:var(--flaeche);border:1px solid var(--nebel-300);border-radius:var(--radius-innen);
+}
+.zettel .zwei{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.zettel .griffe{display:flex;gap:8px;margin-top:20px}
+.zettel .knopf{flex:1 1 auto;min-height:46px;font-size:15px}
+.hand{font-family:'Caveat',cursive;font-size:19px;font-weight:700;color:var(--lila-700);rotate:-1.2deg;display:inline-block}
+
+/* ---------- Der Hinweis, wenn etwas gesetzt wurde ---------- */
+#ruf{
+  position:fixed;left:50%;bottom:calc(24px + var(--uhr-hoehe,0px) + env(safe-area-inset-bottom));
+  translate:-50% 10px;z-index:95;max-width:min(520px,calc(100vw - 32px));
+  padding:13px 20px;border-radius:999px;
+  background:rgba(255,255,255,.8);
+  backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.7);
+  box-shadow:0 16px 44px rgba(24,21,47,.2);
+  font-size:14px;line-height:1.45;text-align:center;
+  opacity:0;pointer-events:none;transition:opacity .3s ease,translate .3s var(--kurve);
+}
+#ruf.da{opacity:1;translate:-50% 0}
+
+@media (prefers-reduced-motion: reduce){
+  main > *{animation:none;opacity:1;translate:none}
+  .zettel{animation:none}
+}
+@media (max-width:1080px){
+  .luft-zeile{grid-template-columns:150px repeat(5,1fr)}
+}
+@media (max-width:820px){
+  main{padding:150px 18px calc(70px + env(safe-area-inset-bottom))}
+  nav{padding:0 18px;padding-bottom:58px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  .tagesreihe{display:flex}
+  /* Aus der Woche wird ein Tag: eine Spalte, dafür lesbar. */
+  .raster-kopf,.raster-leib{grid-template-columns:52px 1fr}
+  .tag-kopf[data-tag]:not(.gewaehlt),.tag-spalte:not(.gewaehlt){display:none}
+  .leiste{gap:8px}
+  .leiste .luecke{display:none}
+  .wer-chips{width:100%;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}
+  .wer-chips button{flex:0 0 auto}
+  .leiste .knopf{width:100%}
+  /* Die Luft-Tafel wird eine Zeile je Person mit fünf schmalen Feldern */
+  .luft-zeile{grid-template-columns:1fr;border-top:0.5px solid var(--nebel-200)}
+  .luft-zeile:first-child{display:none}
+  .luft-zeile .l-name{padding:12px 16px 4px}
+  .luft-zeile .l-tage{display:grid;grid-template-columns:repeat(5,1fr);padding:0 8px 10px}
+  .luft-zelle{border-left:0;padding:8px 4px;min-height:64px}
+  .luft-zelle .l-tag-wort{font-size:11px;color:var(--nebel-500);font-weight:600}
+  .luft-zelle .zustand{width:38px;height:16px}
+}
+@media (min-width:821px){
+  .luft-zeile .l-tage{display:contents}
+  .luft-zelle .l-tag-wort{display:none}
+}
+</style>
+</head>
+<body class="quoro">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Die Woche</b></a>
+
+<main>
+  <div class="kopf">
+    <h1>Die Woche</h1>
+    <div class="stand" id="stand">Was ansteht, und was von jedem Tag noch übrig ist.</div>
+  </div>
+
+  <div class="leiste">
+    <div class="blaettern">
+      <button type="button" id="zurueck" aria-label="Woche davor">‹</button>
+      <button type="button" id="vor" aria-label="Woche danach">›</button>
+    </div>
+    <div class="wochen-wort" id="wochen-wort">17. bis 21. August<small>diese Woche</small></div>
+    <div class="luecke"></div>
+    <div class="wer-chips" id="wer-chips" role="group" aria-label="Wessen Woche"></div>
+    <button class="knopf leise" type="button" id="abwesend-auf">Abwesenheit eintragen</button>
+  </div>
+
+  <div class="tagesreihe" id="tagesreihe" role="group" aria-label="Welcher Tag"></div>
+
+  <div class="raster">
+    <div class="raster-kopf" id="raster-kopf"></div>
+    <div class="raster-leib" id="raster-leib"></div>
+  </div>
+
+  <h3>Wer hat wann Luft</h3>
+  <div class="luft" id="luft"></div>
+  <p class="fussnote">Luft ist der Tag abzüglich Terminen und dem, was auf den Mandaten eingeplant ist. Ein Tag mit weniger als einer Stunde Luft steht auf voll — dort passt kein Gespräch mehr hinein, ohne dass etwas anderes wartet. Tippe auf eine Zelle, dann steht dieser Tag oben im Raster.</p>
+</main>
+
+<div class="schleier" id="schleier" hidden>
+  <div class="zettel" role="dialog" aria-modal="true" aria-labelledby="zettel-titel">
+    <h2 id="zettel-titel">Abwesenheit eintragen</h2>
+    <div class="feld">
+      <label for="a-wer">Wer</label>
+      <select id="a-wer"></select>
+    </div>
+    <div class="zwei">
+      <div class="feld">
+        <label for="a-von">Von</label>
+        <select id="a-von"></select>
+      </div>
+      <div class="feld">
+        <label for="a-bis">Bis einschließlich</label>
+        <select id="a-bis"></select>
+      </div>
+    </div>
+    <div class="feld">
+      <label for="a-art">Was</label>
+      <select id="a-art">
+        <option>Urlaub</option>
+        <option>Fortbildung</option>
+        <option>krank</option>
+        <option>geblockt</option>
+      </select>
+      <div class="hilfe">Die Tage fallen aus der Luft heraus. Termine, die schon stehen, bleiben stehen — die musst du selbst verlegen.</div>
+    </div>
+    <div class="griffe">
+      <button class="knopf primaer" type="button" id="a-setzen">Eintragen</button>
+      <button class="knopf leise" type="button" id="a-ab">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<div id="ruf" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll('main > *').forEach(function(el, i){
+    el.style.setProperty('--verz', (i * 0.07) + 's');
+  });
+
+  /* ---------- Was diese Woche wahr ist ----------
+     Team und Mandate stimmen mit beratung-verwaltung.html und dem Modell
+     überein; die drei Termine, die auch anderswo stehen (Cordes am Dienstag,
+     Petersen am Donnerstag, das Wunschfenster am Freitag), tragen dieselben
+     Zeiten wie dort. */
+  var VON = 8, BIS = 19, STUNDE = 54;          /* Raster von 8 bis 19 Uhr */
+  var ARBEIT_VON = 9, ARBEIT_BIS = 17;
+
+  var TEAM = [
+    {id:'a', name:'Dr. Anna Vogelsang', kurz:'Anna V.',   rolle:'Inhaberin', soll:7},
+    {id:'j', name:'Jens Nordholm',      kurz:'Jens N.',   rolle:'Partner',   soll:7},
+    {id:'m', name:'Miriam Krohn',       kurz:'Miriam K.', rolle:'Beraterin', soll:8},
+    {id:'t', name:'Tarek Aydin',        kurz:'Tarek A.',  rolle:'Berater',   soll:8},
+    {id:'s', name:'Sabine Röttger',     kurz:'Sabine R.', rolle:'Assistenz', soll:8}
+  ];
+  var ICH = 'a';
+
+  var TAGE = [
+    {kurz:'Montag',     datum:'17. August'},
+    {kurz:'Dienstag',   datum:'18. August'},
+    {kurz:'Mittwoch',   datum:'19. August'},
+    {kurz:'Donnerstag', datum:'20. August'},
+    {kurz:'Freitag',    datum:'21. August'}
+  ];
+
+  var termine = [
+    {id:'t1', tag:0, von:8.5,  bis:9,    wer:'*', was:'Wochenrunde', intern:true},
+    {id:'t2', tag:0, von:9,    bis:10,   wer:'t', kunde:'MTS Maschinenbau', was:'Rückruf nach drei stillen Wochen', form:'Telefonat'},
+    {id:'t3', tag:0, von:14,   bis:15.5, wer:'m', kunde:'Bäckerei Freitag', was:'Personalquote', form:'vor Ort'},
+    {id:'t4', tag:1, von:11.5, bis:12,   wer:'a', kunde:'Cordes Logistik', was:'Fuhrpark und Finanzierung', form:'Telefonat',
+     wunsch:{tag:2, von:16, bis:16.5, von_wem:'Herrn Cordes'}},
+    {id:'t5', tag:1, von:15,   bis:16,   wer:'s', kunde:'Petersen Stahlbau', was:'Unterlagen durchgehen', form:'Videocall'},
+    {id:'t6', tag:2, von:10,   bis:11.5, wer:'m', kunde:'Petersen Stahlbau', was:'Zahlen für das Preismodell', form:'vor Ort'},
+    {id:'t7', tag:3, von:10,   bis:11,   wer:'a', kunde:'Petersen Stahlbau', was:'Preis und Marge', form:'Videocall'},
+    /* Zwei zur selben Stunde: der Donnerstag zeigt, dass sich Termine im
+       Raster nebeneinanderstellen statt übereinanderzuliegen. */
+    {id:'t8', tag:3, von:10,   bis:11,   wer:'m', kunde:'Bäckerei Freitag', was:'Zwischenstand Personal', form:'Videocall'},
+    {id:'t9', tag:3, von:14,   bis:15,   wer:'t', kunde:'Cordes Logistik', was:'Frachtraten', form:'Videocall'},
+    {id:'t10', tag:4, von:13,  bis:14,   wer:'a', kunde:'MTS Maschinenbau', was:'Angebot besprechen', form:'Videocall'},
+    /* Die offene Anfrage aus beratung-termine.html steht hier als Fenster, das
+       noch niemandem gehört — entschieden wird sie dort, nicht hier. */
+    {id:'w1', tag:4, von:9, bis:9.75, wer:'a', kunde:'Petersen Stahlbau', was:'Gespräch mit einem Menschen',
+     form:'Videocall', angefragt:true, ziel:'beratung-termine.html#petersen'}
+  ];
+
+  var abwesend = [
+    {wer:'j', von:3, bis:4, art:'Urlaub'},
+    {wer:'s', von:2, bis:2, art:'Fortbildung'}
+  ];
+
+  /* Was auf den Mandaten eingeplant ist, in Stunden je Person und Tag —
+     im Produkt kommt das aus der Mandatsplanung, hier steht es fest. */
+  var GEPLANT = {
+    a:[3,2.5,4,2,2], j:[4,4,3,0,0], m:[2,3,2,3.5,2], t:[3,4,4,2,1], s:[5,4,0,5,4]
+  };
+
+  /* Heute ist Dienstag, der 18. August, kurz vor zehn: der Montag liegt hinter
+     uns, der Anruf bei Cordes um 11:30 ist der nächste Termin — und genau den
+     möchte Herr Cordes seit heute früh verschieben. */
+  var HEUTE = 1, JETZT = 9.67;
+  var werGewaehlt = 'alle';
+  var tagGewaehlt = HEUTE;
+
+  /* ---------- Rechnen ---------- */
+  function fuerPerson(t, id){ return t.wer === '*' || t.wer === id; }
+  function dauer(t){ return t.bis - t.von; }
+
+  function istWeg(id, tag){
+    for (var i = 0; i < abwesend.length; i++){
+      var a = abwesend[i];
+      if (a.wer === id && tag >= a.von && tag <= a.bis) return a;
+    }
+    return null;
+  }
+
+  function belegt(id, tag){
+    var summe = GEPLANT[id] ? GEPLANT[id][tag] : 0;
+    termine.forEach(function(t){
+      if (t.tag === tag && !t.angefragt && fuerPerson(t, id)) summe += dauer(t);
+    });
+    return summe;
+  }
+
+  function luft(id, tag){
+    var person = TEAM.filter(function(p){ return p.id === id; })[0];
+    return Math.max(0, person.soll - belegt(id, tag));
+  }
+
+  function tagesLuft(tag){
+    var summe = 0, soll = 0, da = 0;
+    TEAM.forEach(function(p){
+      if (istWeg(p.id, tag)) return;
+      da++;
+      soll += p.soll;
+      summe += luft(p.id, tag);
+    });
+    return {stunden:summe, soll:soll, leute:da};
+  }
+
+  function stundenWort(h){
+    var g = Math.round(h * 2) / 2;
+    return (g % 1 ? String(g).replace('.', ',') : g) + ' Std.';
+  }
+
+  function zeitWort(h){
+    var st = Math.floor(h), mi = Math.round((h - st) * 60);
+    return st + ':' + (mi < 10 ? '0' : '') + mi;
+  }
+
+  /* ---------- Der Kopf: was die Woche in einem Satz ist ---------- */
+  function standSetzen(){
+    var offen = termine.filter(function(t){ return t.angefragt || t.wunsch; }).length;
+    var wegWer = abwesend.map(function(a){
+      var p = TEAM.filter(function(x){ return x.id === a.wer; })[0];
+      var tage = a.von === a.bis ? 'am ' + TAGE[a.von].kurz
+        : a.bis >= TAGE.length - 1 ? 'ab ' + TAGE[a.von].kurz
+        : 'von ' + TAGE[a.von].kurz + ' bis ' + TAGE[a.bis].kurz;
+      return p.name + ' ' + tage + ' (' + a.art + ')';
+    });
+    var satz = termine.filter(function(t){ return !t.angefragt && !t.intern; }).length + ' Termine stehen, ' +
+      (offen === 1 ? 'einer wartet auf deine Entscheidung' : offen + ' warten auf deine Entscheidung') + '.';
+    if (wegWer.length) satz += ' Nicht da: ' + wegWer.join(', ') + '.';
+    document.getElementById('stand').textContent = satz;
+  }
+
+  /* ---------- Die Leiste ---------- */
+  function chipsBauen(){
+    var box = document.getElementById('wer-chips');
+    box.innerHTML = '';
+    var liste = [{id:'alle', wort:'Alle'}, {id:ICH, wort:'Nur ich'}].concat(
+      TEAM.filter(function(p){ return p.id !== ICH; }).map(function(p){ return {id:p.id, wort:p.kurz}; })
+    );
+    liste.forEach(function(e){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = e.wort;
+      b.setAttribute('aria-pressed', String(werGewaehlt === e.id));
+      b.addEventListener('click', function(){
+        werGewaehlt = e.id;
+        chipsBauen();
+        rasterBauen();
+      });
+      box.appendChild(b);
+    });
+  }
+
+  function tagesreiheBauen(){
+    var box = document.getElementById('tagesreihe');
+    box.innerHTML = '';
+    TAGE.forEach(function(tg, i){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.innerHTML = tg.kurz.slice(0, 2) + '<small>' + tg.datum.split(' ')[0] + '</small>';
+      b.setAttribute('aria-pressed', String(tagGewaehlt === i));
+      b.setAttribute('aria-label', tg.kurz + ', ' + tg.datum);
+      b.addEventListener('click', function(){ tagGewaehlt = i; tagesreiheBauen(); rasterBauen(); });
+      box.appendChild(b);
+    });
+  }
+
+  /* ---------- Das Raster ---------- */
+  function rasterBauen(){
+    var kopf = document.getElementById('raster-kopf');
+    var leib = document.getElementById('raster-leib');
+    kopf.innerHTML = '<div class="tag-kopf" aria-hidden="true"></div>';
+    leib.innerHTML = '';
+
+    var achse = document.createElement('div');
+    achse.className = 'zeitachse';
+    achse.style.height = ((BIS - VON) * STUNDE) + 'px';
+    for (var h = VON; h <= BIS; h++){
+      var s = document.createElement('span');
+      s.textContent = h + ':00';
+      s.style.top = ((h - VON) * STUNDE) + 'px';
+      /* Erste und letzte Zahl liegen an der Kante: sie rutschen nach innen,
+         statt halb abgeschnitten zu werden. */
+      if (h === VON) s.style.translate = '0 0';
+      if (h === BIS) s.style.translate = '0 -100%';
+      achse.appendChild(s);
+    }
+    leib.appendChild(achse);
+
+    TAGE.forEach(function(tg, i){
+      /* Kopf des Tages */
+      var k = document.createElement('div');
+      k.className = 'tag-kopf' + (i === tagGewaehlt ? ' gewaehlt' : '') + (i === HEUTE ? ' heute' : '') + (i < HEUTE ? ' vorbei' : '');
+      k.dataset.tag = String(i);
+      /* Der Füllstand zeigt, wie voll der Tag ist; das Wort daneben, was übrig
+         bleibt. Zwei Sichten auf dieselbe Zahl, keine zwei Zahlen.
+         Ist eine Person gewählt, zählt ihr Tag — und dann muss auch dastehen,
+         was ihn füllt, ohne dass ein Block im Raster steht: die eingeplante
+         Mandatsarbeit. Sonst wäre eine leere Spalte mit „3 Std. frei" ein
+         Rätsel statt einer Auskunft. */
+      var einzeln = werGewaehlt !== 'alle';
+      var person = einzeln ? TEAM.filter(function(p){ return p.id === werGewaehlt; })[0] : null;
+      var l = einzeln
+        ? {stunden:luft(person.id, i), soll:person.soll, geplant:GEPLANT[person.id][i], weg:istWeg(person.id, i)}
+        : tagesLuft(i);
+      var anteil = Math.min(1, Math.max(.06, 1 - l.stunden / Math.max(1, l.soll)));
+      var klasse = l.stunden < 2 ? 'wartet' : 'aktiv';
+      k.innerHTML =
+        '<div class="tk-tag">' + tg.kurz + '</div>' +
+        '<div class="tk-datum">' + (i === HEUTE ? 'heute, ' : '') + tg.datum + '</div>' +
+        (i < HEUTE ? '<div class="tk-luft"><span>vorbei</span></div>' :
+         einzeln && l.weg ? '<div class="tk-luft"><span>' + l.weg.art + '</span></div>' :
+        '<div class="tk-luft"><span class="zustand ' + klasse + '" style="--stand:' + anteil.toFixed(2) + '" role="img" ' +
+        'aria-label="' + Math.round(anteil * 100) + ' Prozent des Tages belegt" title="' +
+        stundenWort(l.soll - l.stunden) + ' von ' + stundenWort(l.soll) + ' belegt"></span>' +
+        '<span>' + stundenWort(l.stunden) + ' frei</span></div>' +
+        (einzeln && l.geplant ? '<div class="tk-geplant">' + stundenWort(l.geplant) + ' auf Mandaten eingeplant</div>' : ''));
+      /* Wer fehlt, steht nur in der Gesamtsicht — bei einer gewählten Person
+         sagt ihr eigener Tageskopf schon, ob sie da ist. */
+      var weg = einzeln ? [] : TEAM.filter(function(p){ return istWeg(p.id, i); });
+      if (weg.length) {
+        k.innerHTML += '<div class="tk-weg">' + weg.map(function(p){
+          return p.kurz + ' ' + istWeg(p.id, i).art;
+        }).join(', ') + '</div>';
+      }
+      kopf.appendChild(k);
+
+      /* Spalte des Tages */
+      var sp = document.createElement('div');
+      sp.className = 'tag-spalte' + (i === tagGewaehlt ? ' gewaehlt' : '') + (i < HEUTE ? ' vorbei' : '');
+      sp.style.setProperty('--stunde', STUNDE + 'px');
+      sp.style.height = ((BIS - VON) * STUNDE) + 'px';
+
+      var frueh = document.createElement('div');
+      frueh.className = 'rand';
+      frueh.style.top = '0';
+      frueh.style.height = ((ARBEIT_VON - VON) * STUNDE) + 'px';
+      sp.appendChild(frueh);
+      var spaet = document.createElement('div');
+      spaet.className = 'rand';
+      spaet.style.top = ((ARBEIT_BIS - VON) * STUNDE) + 'px';
+      spaet.style.bottom = '0';
+      sp.appendChild(spaet);
+
+      /* Die Linie, auf der der Tag gerade steht */
+      if (i === HEUTE) {
+        var jetzt = document.createElement('div');
+        jetzt.className = 'jetzt';
+        jetzt.setAttribute('role', 'img');
+        jetzt.setAttribute('aria-label', 'jetzt, ' + zeitWort(JETZT));
+        jetzt.style.top = ((JETZT - VON) * STUNDE) + 'px';
+        sp.appendChild(jetzt);
+      }
+
+      /* Abwesenheit: nur sichtbar, wenn genau diese Person gemeint ist —
+         sonst läge über einer vollen Spalte eine Schraffur, die für die
+         anderen vier nicht gilt. */
+      if (werGewaehlt !== 'alle') {
+        var a = istWeg(werGewaehlt, i);
+        if (a) {
+          var band = document.createElement('div');
+          band.className = 'abwesend';
+          band.style.top = ((ARBEIT_VON - VON) * STUNDE) + 'px';
+          band.style.height = ((ARBEIT_BIS - ARBEIT_VON) * STUNDE) + 'px';
+          band.innerHTML = '<span>' + a.art + '</span>';
+          sp.appendChild(band);
+        }
+      }
+
+      termine.forEach(function(t){
+        if (t.tag !== i) return;
+        if (werGewaehlt !== 'alle' && !fuerPerson(t, werGewaehlt)) return;
+        sp.appendChild(blockBauen(t));
+        /* Der Verschiebe-Wunsch steht als zweiter, leerer Block am Wunschort */
+        if (t.wunsch && t.wunsch.tag === i) sp.appendChild(wunschBauen(t));
+      });
+      /* Wünsche, die an einem anderen Tag liegen als der Termin selbst */
+      termine.forEach(function(t){
+        if (!t.wunsch || t.wunsch.tag !== i || t.tag === i) return;
+        if (werGewaehlt !== 'alle' && !fuerPerson(t, werGewaehlt)) return;
+        sp.appendChild(wunschBauen(t));
+      });
+
+      spurenLegen(sp);
+      leib.appendChild(sp);
+    });
+  }
+
+  function setzen(el, von, bis){
+    el.style.top = ((von - VON) * STUNDE + 2) + 'px';
+    el.style.height = ((bis - von) * STUNDE - 4) + 'px';
+    if (bis - von <= 0.75) el.classList.add('kurz');
+    else if (bis - von < 1.5) el.classList.add('mittel');
+  }
+
+  /* Zwei Termine zur selben Stunde stehen nebeneinander, nicht übereinander.
+     Geteilt wird nur die Traube, die sich wirklich überschneidet — ein
+     einzelner Termin am Nachmittag bleibt breit, nur weil vormittags zwei
+     zugleich liefen. */
+  function spurenLegen(spalte){
+    var bloecke = Array.prototype.slice.call(spalte.querySelectorAll('.block'));
+    bloecke.sort(function(a, b){ return parseFloat(a.dataset.von) - parseFloat(b.dataset.von); });
+
+    var traube = [], endeDerTraube = -1;
+    function traubeSetzen(){
+      if (traube.length < 2) { traube = []; return; }
+      var spuren = [];
+      traube.forEach(function(el){
+        var von = parseFloat(el.dataset.von), bis = parseFloat(el.dataset.bis), i;
+        for (i = 0; i < spuren.length; i++){ if (spuren[i] <= von + 0.001) break; }
+        spuren[i] = bis;
+        el.dataset.spur = String(i);
+      });
+      var n = spuren.length;
+      if (n > 1) traube.forEach(function(el){
+        var i = parseInt(el.dataset.spur, 10);
+        el.style.left = 'calc(5px + ' + (100 * i / n) + '% - ' + (10 * i / n) + 'px)';
+        el.style.width = 'calc(' + (100 / n) + '% - ' + (10 / n) + 'px - 3px)';
+        el.style.right = 'auto';
+        el.classList.add('schmal');
+      });
+      traube = [];
+    }
+
+    bloecke.forEach(function(el){
+      var von = parseFloat(el.dataset.von), bis = parseFloat(el.dataset.bis);
+      if (traube.length && von >= endeDerTraube - 0.001) traubeSetzen();
+      traube.push(el);
+      endeDerTraube = Math.max(traube.length === 1 ? bis : endeDerTraube, bis);
+    });
+    traubeSetzen();
+  }
+
+  function blockBauen(t){
+    var el = document.createElement(t.ziel ? 'a' : 'button');
+    if (t.ziel) el.href = t.ziel; else el.type = 'button';
+    el.className = 'block' + (t.intern ? ' intern' : '') + (t.angefragt ? ' angefragt' : '');
+    el.dataset.termin = t.id;
+    el.dataset.von = t.von; el.dataset.bis = t.bis;
+    setzen(el, t.von, t.bis);
+    var wer = t.intern ? t.was : (t.kunde || t.was);
+    var mensch = t.wer === '*' ? 'das ganze Team' : TEAM.filter(function(p){ return p.id === t.wer; })[0].kurz;
+    /* Wer aus dem Team dran ist, steht in JEDEM Block, der zwei Zeilen hoch
+       ist. Ein halbstündiger Block trägt nur die Anfangszeit und den Namen —
+       mehr passt nicht hinein, ohne dass Wörter abreißen. */
+    var kurz = el.classList.contains('kurz');
+    el.innerHTML =
+      '<div class="b-zeit">' + (kurz ? zeitWort(t.von) : zeitWort(t.von) + ' bis ' + zeitWort(t.bis)) +
+      (t.angefragt ? ', angefragt' : '') + (kurz ? '' : '<i>' + mensch + '</i>') + '</div>' +
+      '<div class="b-wer">' + wer + '</div>' +
+      (t.intern ? '' : '<div class="b-was">' + t.was + (t.form ? ', ' + t.form : '') + '</div>');
+    el.title = wer + ', ' + TAGE[t.tag].kurz + ' ' + zeitWort(t.von) + ' bis ' + zeitWort(t.bis) +
+      ', ' + mensch + (t.was ? ', ' + t.was : '');
+    if (t.wunsch) {
+      el.classList.add('mit-wunsch');
+      el.title = 'Verschiebung angefragt';
+    }
+    if (!t.ziel) {
+      el.addEventListener('click', function(){
+        if (t.wunsch) { location.href = 'beratung-termine.html#cordes'; return; }
+        rufen(wer + ', ' + TAGE[t.tag].kurz + ' um ' + zeitWort(t.von) + '. Diese Fläche entsteht gerade.');
+      });
+    }
+    return el;
+  }
+
+  /* Das gewünschte Fenster: gestrichelt, und beim Überfahren zeigt die Woche,
+     wie sie nach der Verschiebung aussähe. */
+  function wunschBauen(t){
+    var w = t.wunsch;
+    var el = document.createElement('a');
+    el.href = 'beratung-termine.html#cordes';
+    el.className = 'block angefragt';
+    el.dataset.von = w.von; el.dataset.bis = w.bis;
+    setzen(el, w.von, w.bis);
+    var kurz = el.classList.contains('kurz');
+    el.innerHTML =
+      '<div class="b-zeit">' + (kurz ? 'Wunsch ' + zeitWort(w.von) : zeitWort(w.von) + ' bis ' + zeitWort(w.bis) + ', gewünscht') + '</div>' +
+      '<div class="b-wer">' + t.kunde + '</div>' +
+      '<div class="b-was">' + w.von_wem + ' möchte verschieben</div>';
+    el.title = w.von_wem + ' möchte ' + t.kunde + ' von ' + TAGE[t.tag].kurz + ' ' + zeitWort(t.von) +
+      ' auf ' + TAGE[w.tag].kurz + ' ' + zeitWort(w.von) + ' verschieben';
+
+    function vorschau(an){
+      var alt = document.querySelector('.block[data-termin="' + t.id + '"]');
+      if (alt) alt.classList.toggle('blass', an);
+      el.classList.toggle('probe', an);
+      el.classList.toggle('angefragt', !an);
+    }
+    if (!reduziert) {
+      el.addEventListener('mouseenter', function(){ vorschau(true); });
+      el.addEventListener('mouseleave', function(){ vorschau(false); });
+    }
+    el.addEventListener('focus', function(){ vorschau(true); });
+    el.addEventListener('blur', function(){ vorschau(false); });
+    return el;
+  }
+
+  /* ---------- Wer hat wann Luft ---------- */
+  function luftBauen(){
+    var box = document.getElementById('luft');
+    box.innerHTML = '';
+
+    var kopf = document.createElement('div');
+    kopf.className = 'luft-zeile';
+    kopf.innerHTML = '<div class="l-name"><b>Wer</b><small>Tagesmaß und was noch frei ist</small></div>' +
+      TAGE.map(function(tg){ return '<div class="luft-kopf-zelle">' + tg.kurz + '</div>'; }).join('');
+    box.appendChild(kopf);
+
+    TEAM.forEach(function(p){
+      var zeile = document.createElement('div');
+      zeile.className = 'luft-zeile';
+      var name = document.createElement('div');
+      name.className = 'l-name';
+      name.innerHTML = '<b>' + p.name + '</b><small>' + p.rolle + ', ' + stundenWort(p.soll) + ' am Tag</small>';
+      zeile.appendChild(name);
+
+      var tage = document.createElement('div');
+      tage.className = 'l-tage';
+      TAGE.forEach(function(tg, i){
+        var weg = istWeg(p.id, i);
+        var z = document.createElement(weg ? 'div' : 'button');
+        if (!weg) z.type = 'button';
+        z.className = 'luft-zelle' + (weg ? ' weg' : '');
+        if (weg) {
+          z.innerHTML = '<span class="l-tag-wort">' + tg.kurz.slice(0,2) + '</span>' +
+            '<span class="luft-strich" role="img" aria-label="' + weg.art + '" title="' + weg.art + '"></span>' +
+            '<span class="l-wort">' + weg.art + '</span>';
+        } else {
+          var frei = luft(p.id, i);
+          var anteil = Math.min(1, Math.max(.06, 1 - frei / p.soll));
+          if (i < HEUTE) z.classList.add('vorbei');
+          else if (frei < 1) z.classList.add('voll');
+          else if (frei >= 3) z.classList.add('frei');
+          z.innerHTML = '<span class="l-tag-wort">' + tg.kurz.slice(0,2) + '</span>' +
+            '<span class="zustand ' + (frei < 1 ? 'wartet' : 'aktiv') + '" style="--stand:' + anteil.toFixed(2) + '" role="img" ' +
+            'aria-label="' + stundenWort(belegt(p.id, i)) + ' von ' + stundenWort(p.soll) + ' belegt" ' +
+            'title="' + stundenWort(belegt(p.id, i)) + ' von ' + stundenWort(p.soll) + ' belegt"></span>' +
+            '<span class="l-wort">' + (frei < 1 ? 'voll' : stundenWort(frei)) + '</span>';
+          z.setAttribute('aria-label', p.name + ', ' + tg.kurz + ', ' + (frei < 1 ? 'voll' : stundenWort(frei) + ' frei'));
+          z.addEventListener('click', function(){
+            werGewaehlt = p.id; tagGewaehlt = i;
+            chipsBauen(); tagesreiheBauen(); rasterBauen();
+            document.querySelector('.raster').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block:'start'});
+            rufen(p.name + ' hat am ' + tg.kurz + ' noch ' + stundenWort(frei) + ' Luft.');
+          });
+        }
+        tage.appendChild(z);
+      });
+      zeile.appendChild(tage);
+      box.appendChild(zeile);
+    });
+  }
+
+  /* ---------- Abwesenheit eintragen ---------- */
+  var schleier = document.getElementById('schleier');
+  var zuletztFokus = null;
+
+  function auswahlFuellen(){
+    var wer = document.getElementById('a-wer');
+    wer.innerHTML = TEAM.map(function(p){ return '<option value="' + p.id + '">' + p.name + '</option>'; }).join('');
+    var tage = TAGE.map(function(tg, i){ return '<option value="' + i + '">' + tg.kurz + ', ' + tg.datum + '</option>'; }).join('');
+    document.getElementById('a-von').innerHTML = tage;
+    document.getElementById('a-bis').innerHTML = tage;
+  }
+
+  function zettelAuf(){
+    zuletztFokus = document.activeElement;
+    schleier.hidden = false;
+    document.getElementById('a-wer').focus();
+  }
+  function zettelZu(){
+    schleier.hidden = true;
+    if (zuletztFokus) zuletztFokus.focus();
+  }
+
+  document.getElementById('abwesend-auf').addEventListener('click', zettelAuf);
+  document.getElementById('a-ab').addEventListener('click', zettelZu);
+  schleier.addEventListener('click', function(e){ if (e.target === schleier) zettelZu(); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && !schleier.hidden) zettelZu();
+  });
+
+  document.getElementById('a-setzen').addEventListener('click', function(){
+    var id = document.getElementById('a-wer').value;
+    var von = parseInt(document.getElementById('a-von').value, 10);
+    var bis = parseInt(document.getElementById('a-bis').value, 10);
+    var art = document.getElementById('a-art').value;
+    if (bis < von) { var h = von; von = bis; bis = h; }
+    /* Was sich berührt, wird eins: zwei Einträge derselben Person über
+       dieselben Tage wären zweimal dasselbe Loch, und der Kopfsatz nennte
+       den Namen zweimal. Die zuletzt eingetragene Art gilt für die ganze
+       zusammengewachsene Strecke. */
+    abwesend = abwesend.filter(function(a){
+      if (a.wer !== id) return true;
+      if (a.bis < von - 1 || a.von > bis + 1) return true;
+      von = Math.min(von, a.von);
+      bis = Math.max(bis, a.bis);
+      return false;
+    });
+    abwesend.push({wer:id, von:von, bis:bis, art:art});
+    zettelZu();
+    var p = TEAM.filter(function(x){ return x.id === id; })[0];
+    /* Steht in dieser Zeit schon ein Termin, sagt die Fläche es sofort —
+       sie räumt ihn nicht selbst weg, das wäre eine Entscheidung. */
+    var kollision = termine.filter(function(t){
+      return !t.angefragt && t.tag >= von && t.tag <= bis && fuerPerson(t, id) && !t.intern;
+    });
+    standSetzen(); rasterBauen(); luftBauen();
+    rufen(p.name + ': ' + art + ' ' + (von === bis ? 'am ' + TAGE[von].kurz : 'von ' + TAGE[von].kurz + ' bis ' + TAGE[bis].kurz) + '.' +
+      (kollision.length ? ' Achtung, ' + (kollision.length === 1 ? 'ein Termin steht' : kollision.length + ' Termine stehen') + ' schon in dieser Zeit.' : ''));
+  });
+
+  /* ---------- Der Ruf unten ---------- */
+  var rufTimer = null;
+  function rufen(text){
+    var r = document.getElementById('ruf');
+    r.textContent = text;
+    r.classList.add('da');
+    clearTimeout(rufTimer);
+    rufTimer = setTimeout(function(){ r.classList.remove('da'); }, 4200);
+  }
+
+  /* ---------- Wochen blättern ----------
+     Der Entwurf trägt eine Woche. Wer blättert, soll das merken statt eine
+     erfundene Woche zu sehen — deshalb sagt die Fläche es, statt zu schwindeln. */
+  document.getElementById('zurueck').addEventListener('click', function(){
+    rufen('Der Entwurf zeigt diese eine Woche. Im Produkt blättert es hier weiter.');
+  });
+  document.getElementById('vor').addEventListener('click', function(){
+    rufen('Der Entwurf zeigt diese eine Woche. Im Produkt blättert es hier weiter.');
+  });
+
+  /* ---------- Direkteinstieg ----------
+     #verschiebung kommt vom Zettel des KI-Beraters und von der Kundenseite. */
+  function einstieg(){
+    var h = location.hash.slice(1);
+    if (!h) return;
+    if (h === 'verschiebung') {
+      var t = termine.filter(function(x){ return x.wunsch; })[0];
+      if (!t) return;
+      werGewaehlt = t.wer; tagGewaehlt = t.wunsch.tag;
+      chipsBauen(); tagesreiheBauen(); rasterBauen();
+      rufen(t.wunsch.von_wem.replace(/^Herrn /, 'Herr ') + ' möchte den ' + TAGE[t.tag].kurz + ' auf ' +
+        TAGE[t.wunsch.tag].kurz + ', ' + zeitWort(t.wunsch.von) + ' verschieben.');
+      return;
+    }
+    var i = ['montag','dienstag','mittwoch','donnerstag','freitag'].indexOf(h);
+    if (i > -1) { tagGewaehlt = i; tagesreiheBauen(); rasterBauen(); }
+  }
+
+  auswahlFuellen();
+  standSetzen();
+  chipsBauen();
+  tagesreiheBauen();
+  rasterBauen();
+  luftBauen();
+  einstieg();
+  window.addEventListener('hashchange', einstieg);
+})();
+</script>
+<script src="uhr.js"></script>
+<script src="zeiger.js"></script>
+<script src="rechtsfuss.js"></script>
+</body>
+</html>

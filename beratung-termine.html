@@ -17,7 +17,9 @@
    Kundenworte stehen als Zitat mit Kante in der Mandanten-Farbe wie im
    Mitlesen-Blatt. V2 nach Code-Review: der Lila-Ring des frisch
    eingereihten Termins fällt nach kurzem Moment wieder ab.
-   Marker: BERATUNG-TERMINE-V4 */
+   V5 (Häppchen C2): der Verschiebe-Wunsch aus dem Portal ist der dritte Zettel;
+   entschieden wird er hier, beurteilt in der Woche nebenan (beratung-kalender.html).
+   Marker: BERATUNG-TERMINE-V5 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -237,6 +239,42 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     <div class="erledigt" id="petersen-fertig" hidden></div>
   </section>
 
+  <!-- Der Kunde will verschieben (Häppchen C2): der Wunsch kommt aus dem
+       Portal, entschieden wird er hier. Die Woche daneben zeigt, ob das
+       Fenster überhaupt frei ist — deshalb führt von hier eine Tür dorthin. -->
+  <section class="zettel" id="verschiebung-cordes" aria-label="Verschiebe-Wunsch von Cordes Logistik">
+    <div class="z-kopf">
+      <div>
+        <b>Herr Cordes möchte den Termin heute verschieben</b>
+        <div class="z-meta">Cordes Logistik, heute um 7:55 aus seinem Portal. Der Termin steht noch, bis du entscheidest.</div>
+      </div>
+      <span class="z-fuell" data-zustand><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">liegt vor</span></span>
+    </div>
+    <div class="wunsch">
+      <div class="tag-blatt" aria-hidden="true"><div class="tb-tag" data-v-tag>MI</div><div class="tb-zeit" data-v-zeit>16:00</div></div>
+      <div>
+        <div class="w-wann" data-v-wann>Mittwoch, 16:00 bis 16:30, statt heute 11:30</div>
+        <div class="w-mit">Fuhrpark und Finanzierung, mit Dr. Anna Vogelsang</div>
+      </div>
+    </div>
+    <div class="frei-hinweis" data-v-frei>Mittwoch um 16:00 ist bei Dr. Vogelsang frei. <a href="beratung-kalender.html#verschiebung">In der Woche ansehen</a></div>
+    <div class="kundenwort" style="--kunden-farbe:#2b5fe3">
+      „Bei uns ist heute eine Lieferung dazwischengekommen. Geht es auch später in der Woche?"
+      <span class="kw-wer">Herr Cordes, heute um 7:55</span>
+    </div>
+    <div class="griffe" data-griffe>
+      <button class="knopf primaer" id="v-bestaetigen" type="button">Mittwoch, 16:00 bestätigen</button>
+      <button class="knopf leise" id="v-anders" type="button">Anderes Fenster vorschlagen</button>
+      <button class="knopf gefahr" id="v-bleiben" type="button">Beim Dienstag bleiben</button>
+    </div>
+    <div class="fenster" id="v-fenster" hidden>
+      <button type="button" data-tagk="MI" data-zeitk="10:30" data-text="Mittwoch, 10:30 bis 11:00">Mittwoch, 10:30</button>
+      <button type="button" data-tagk="DO" data-zeitk="16:00" data-text="Donnerstag, 16:00 bis 16:30">Donnerstag, 16:00</button>
+      <button type="button" data-tagk="FR" data-zeitk="15:00" data-text="Freitag, 15:00 bis 15:30">Freitag, 15:00</button>
+    </div>
+    <div class="erledigt" id="verschiebung-fertig" hidden></div>
+  </section>
+
   <!-- Die Übergabe: die Beratung antwortet, der KI-Berater trägt es zurück -->
   <section class="zettel" id="uebergabe-cordes" aria-label="Übergebene Frage von Cordes Logistik">
     <div class="z-kopf">
@@ -264,13 +302,14 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   </section>
 
   <h3>Deine Termine</h3>
+  <p style="font-size:13px;color:var(--nebel-600);margin-top:6px">Was hier steht, sind die Termine deiner Mandate. Die ganze Woche und wer wann Luft hat, steht in <a href="beratung-kalender.html">der Woche</a>.</p>
   <div class="termine" id="termine">
     <div class="termin-zeile">
       <div class="tag-blatt" aria-hidden="true"><div class="tb-tag">DO</div><div class="tb-zeit">10:00</div></div>
       <div><div class="t-wann">Donnerstag, 10:00 bis 11:00, Petersen Stahlbau</div><div class="t-mit">Dr. Anna Vogelsang, Preis und Marge</div></div>
       <span class="t-art">Videocall</span>
     </div>
-    <div class="termin-zeile">
+    <div class="termin-zeile" data-termin="cordes">
       <div class="tag-blatt" aria-hidden="true"><div class="tb-tag">DI</div><div class="tb-zeit">11:30</div></div>
       <div><div class="t-wann">Dienstag, 11:30 bis 12:00, Cordes Logistik</div><div class="t-mit">Fuhrpark und Finanzierung, mit Herrn Cordes</div></div>
       <span class="t-art">Telefonat</span>
@@ -302,12 +341,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2200);
   }
 
+  var ZAHLWORT = ['Kein', 'Ein', 'Zwei', 'Drei', 'Vier', 'Fünf', 'Sechs'];
   function standAktualisieren(){
     var offen = document.querySelectorAll('.zettel .zustand.wartet').length;
     document.querySelector('[data-anfragen-stand]').textContent =
       offen === 0 ? 'Alles beantwortet, nichts wartet auf dich.'
       : offen === 1 ? 'Ein Zettel vom KI-Berater wartet auf dich.'
-      : 'Zwei Zettel vom KI-Berater warten auf dich.';
+      : (ZAHLWORT[offen] || offen) + ' Zettel vom KI-Berater warten auf dich.';
   }
 
   function erledige(zettel, satz){
@@ -342,7 +382,16 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     if (!reduziert) reihe.scrollIntoView({behavior:'smooth', block:'nearest'});
   }
 
+  /* Sobald ein eigenes Fenster gewählt ist, wird aus dem Bestätigen ein
+     Vorschlag — und ein Vorschlag entsteht NICHT als Termin. Sonst stünde
+     etwas in der Liste, worüber der Kunde noch gar nicht Bescheid weiß. */
+  var eigenerVorschlag = false;
+
   document.getElementById('bestaetigen').addEventListener('click', function(){
+    if (eigenerVorschlag) {
+      erledige(anfrage, '<span>Vorgeschlagen: <b>' + gewaehlt.text + '</b>. Der KI-Berater fragt Herrn Petersen, ob das Fenster passt; der Termin entsteht, sobald er zusagt.</span>');
+      return;
+    }
     erledige(anfrage, '<span>Der Termin steht: <b>' + gewaehlt.text + '</b>. Der KI-Berater sagt Herrn Petersen Bescheid, die Einladung geht an Dr. Vogelsang.</span>');
     terminEintragen();
   });
@@ -356,6 +405,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       document.querySelectorAll('#fenster button').forEach(function(x){ x.classList.remove('gewaehlt'); });
       b.classList.add('gewaehlt');
       gewaehlt = {tag: b.dataset.tagk, zeit: b.dataset.zeitk, text: b.dataset.text};
+      eigenerVorschlag = true;
       document.querySelector('#anfrage-petersen [data-tag]').textContent = gewaehlt.tag;
       document.querySelector('#anfrage-petersen [data-zeit]').textContent = gewaehlt.zeit;
       document.querySelector('#anfrage-petersen [data-wann]').textContent = gewaehlt.text;
@@ -366,6 +416,55 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
   document.getElementById('ablehnen').addEventListener('click', function(){
     erledige(anfrage, '<span>Abgelehnt. Der KI-Berater sagt es Herrn Petersen freundlich und bietet ihm an, später neu zu fragen.</span>');
+  });
+
+  /* ---------- Der Verschiebe-Wunsch aus dem Portal (Häppchen C2) ----------
+     Bestätigen heißt: die Zeile in „Deine Termine" trägt die neue Zeit, nicht
+     eine zweite Zeile daneben. Ein verschobener Termin ist derselbe Termin.
+     Ein eigener Gegenvorschlag verschiebt dagegen NICHTS — er ist eine Frage
+     zurück an den Kunden, und bis er zusagt, gilt der alte Termin. */
+  var verschiebung = document.getElementById('verschiebung-cordes');
+  var vWunsch = {tag:'MI', zeit:'16:00', text:'Mittwoch, 16:00 bis 16:30'};
+  var vGegenvorschlag = false;
+
+  function cordesZeileSetzen(){
+    var zeile = document.querySelector('[data-termin="cordes"]');
+    if (!zeile) return;
+    zeile.querySelector('.tb-tag').textContent = vWunsch.tag;
+    zeile.querySelector('.tb-zeit').textContent = vWunsch.zeit;
+    zeile.querySelector('.t-wann').textContent = vWunsch.text + ', Cordes Logistik';
+    zeile.classList.add('neu');
+    setTimeout(function(){ zeile.classList.remove('neu'); }, 1400);
+  }
+
+  document.getElementById('v-bestaetigen').addEventListener('click', function(){
+    if (vGegenvorschlag) {
+      erledige(verschiebung, '<span>Vorgeschlagen: <b>' + vWunsch.text + '</b>. Der KI-Berater fragt Herrn Cordes, ob das Fenster passt; bis er zusagt, bleibt es bei heute 11:30.</span>');
+      return;
+    }
+    erledige(verschiebung, '<span>Verschoben auf <b>' + vWunsch.text + '</b>. Der KI-Berater bestätigt es Herrn Cordes, die alte Zeit ist frei.</span>');
+    cordesZeileSetzen();
+  });
+  document.getElementById('v-anders').addEventListener('click', function(){
+    var f = document.getElementById('v-fenster');
+    f.hidden = !f.hidden;
+  });
+  document.querySelectorAll('#v-fenster button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('#v-fenster button').forEach(function(x){ x.classList.remove('gewaehlt'); });
+      b.classList.add('gewaehlt');
+      vWunsch = {tag:b.dataset.tagk, zeit:b.dataset.zeitk, text:b.dataset.text};
+      vGegenvorschlag = true;
+      verschiebung.querySelector('[data-v-tag]').textContent = vWunsch.tag;
+      verschiebung.querySelector('[data-v-zeit]').textContent = vWunsch.zeit;
+      verschiebung.querySelector('[data-v-wann]').textContent = vWunsch.text + ', statt heute 11:30';
+      verschiebung.querySelector('[data-v-frei]').innerHTML =
+        'Dein Vorschlag. Der KI-Berater fragt Herrn Cordes, ob das Fenster passt. <a href="beratung-kalender.html#verschiebung">In der Woche ansehen</a>';
+      document.getElementById('v-bestaetigen').textContent = vWunsch.text.split(' bis')[0] + ' vorschlagen';
+    });
+  });
+  document.getElementById('v-bleiben').addEventListener('click', function(){
+    erledige(verschiebung, '<span>Es bleibt bei <b>heute, 11:30</b>. Der KI-Berater sagt es Herrn Cordes und bietet ihm an, den Termin ganz abzusagen, wenn die Lieferung dazwischenkommt.</span>');
   });
 
   /* ---------- Die Übergabe ---------- */
@@ -379,8 +478,12 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     demoHinweis('Diese Fläche entsteht gerade.');
   });
 
+  /* Die Standzeile zählt die Zettel selbst — sonst behauptet sie beim Laden
+     eine Zahl, die beim nächsten Zettel nicht mehr stimmt. */
+  standAktualisieren();
+
   /* Direkteinstieg: #petersen oder #cordes hebt den Zettel kurz an */
-  var ziel = {petersen:'anfrage-petersen', cordes:'uebergabe-cordes'}[location.hash.slice(1)];
+  var ziel = {petersen:'anfrage-petersen', cordes:'uebergabe-cordes', verschiebung:'verschiebung-cordes'}[location.hash.slice(1)];
   if (ziel) {
     var el = document.getElementById(ziel);
     el.classList.add('hier');

@@ -6,7 +6,7 @@
 <title>Dein Berater – Übersicht</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V13 (die Anfrage geht an die Beratung, nicht von ihr aus) */
+/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V14 (Häppchen C2: der Kunde darf verschieben — er fragt, die Beratung entscheidet) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -153,6 +153,59 @@ section{margin-top:52px}
 .termin-wann{font-size:14.5px;font-weight:800;letter-spacing:-.01em}
 .termin-mit{font-size:12.5px;color:var(--grau);margin-top:2px}
 
+/* Der Kunde darf verschieben (Häppchen C2): der Wunsch entsteht hier, die
+   Beratung entscheidet ihn drüben. Deshalb bleibt der alte Termin stehen,
+   bis er beantwortet ist — hier wird gefragt, nicht umgebucht. Angeboten
+   werden nur Zeiten, die drüben wirklich frei sind. */
+/* Der Termin mit der Beratung trägt zwei Griffe mehr als die anderen Zeilen.
+   In einer halben Spalte reicht die Breite nicht für beides nebeneinander —
+   dann rutschen die Griffe unter den Termin, statt ihn zu zerquetschen. */
+.zeile.termin{flex-wrap:wrap;row-gap:10px}
+.zeile.termin .termin-lage{flex:1 1 240px;min-width:0}
+.termin-griffe{display:flex;align-items:center;gap:10px;margin-left:auto}
+.verschieben{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:12.5px;font-weight:700;color:var(--tinte);cursor:pointer;
+  transition:border-color .2s ease,color .2s ease;
+}
+.verschieben:hover{border-color:var(--blau);color:var(--blau)}
+.verschiebe-blatt{
+  padding:18px 20px;border-radius:var(--radius);
+  border:0.5px solid var(--blau);background:#fff;
+  box-shadow:0 10px 30px rgba(43,95,227,.12);
+}
+.verschiebe-blatt .vb-frage{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.vb-fenster{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.vb-fenster button{
+  padding:11px 16px;border-radius:12px;border:0.5px solid var(--linie);
+  background:#fff;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--tinte);cursor:pointer;
+  transition:border-color .2s,background .2s;
+}
+.vb-fenster button:hover{border-color:var(--blau)}
+.vb-fenster button[aria-pressed="true"]{background:var(--tinte);color:#fff;border-color:var(--tinte)}
+.vb-hilfe{font-size:12.5px;color:var(--grau);margin-top:10px}
+.vb-label{display:block;font-size:12.5px;font-weight:700;color:var(--grau);margin-top:14px}
+#vb-grund{
+  width:100%;min-height:46px;margin-top:6px;padding:0 14px;
+  border-radius:12px;border:0.5px solid var(--linie);background:#fff;
+  font-family:inherit;font-size:15px;color:var(--tinte);outline:none;
+}
+#vb-grund:focus{border-color:var(--blau)}
+.vb-griffe{display:flex;gap:8px;margin-top:16px}
+.vb-senden{
+  min-height:46px;padding:0 22px;border-radius:999px;border:0;
+  background:var(--tinte);color:#fff;font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer;
+  transition:background .2s ease;
+}
+.vb-senden:hover{background:var(--blau)}
+.vb-senden:disabled{background:rgba(16,19,26,.18);cursor:not-allowed}
+.vb-ab{
+  min-height:46px;padding:0 18px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-family:inherit;font-size:14.5px;font-weight:700;color:var(--grau);cursor:pointer;
+}
+.zeile.termin.gefragt{border-color:var(--blau)}
+.zeile.termin.gefragt .termin-wann{color:var(--grau)}
+
 /* Blatt-Symbol für Unterlagen */
 .blatt{
   width:34px;height:44px;flex-shrink:0;position:relative;
@@ -246,7 +299,30 @@ section{margin-top:52px}
     <div>
       <div class="kopfzeile"><h2>Termine</h2></div>
       <div class="zeilen">
-        <div class="zeile"><div class="termin-lage"><div class="termin-blatt"><div class="tb-tag">DO</div><div class="tb-zeit">10:00</div></div><div><div class="termin-wann">Donnerstag, 10:00–11:00</div><div class="termin-mit">Preis und Marge mit Dr. Anna Vogelsang</div></div></div><span class="z-status geteilt">Videocall</span></div>
+        <!-- Nur der Termin MIT der Beratung lässt sich hier verschieben — beim
+             Steuerbüro hätte der Knopf nichts, an das er sich wenden könnte. -->
+        <div class="zeile termin" id="termin-beratung">
+          <div class="termin-lage"><div class="termin-blatt"><div class="tb-tag" data-t-tag>DO</div><div class="tb-zeit" data-t-zeit>10:00</div></div><div><div class="termin-wann" data-t-wann>Donnerstag, 10:00–11:00</div><div class="termin-mit">Preis und Marge mit Dr. Anna Vogelsang</div></div></div>
+          <div class="termin-griffe">
+            <span class="z-status geteilt">Videocall</span>
+            <button class="verschieben" type="button" id="verschieben-auf">Verschieben</button>
+          </div>
+        </div>
+        <div class="verschiebe-blatt" id="verschiebe-blatt" hidden>
+          <div class="vb-frage" data-du="Wann passt es dir besser?" data-sie="Wann passt es Ihnen besser?">Wann passt es dir besser?</div>
+          <div class="vb-fenster" role="group" aria-label="Freie Zeiten der Beratung">
+            <button type="button" data-tag="MI" data-zeit="14:00" data-wann="Mittwoch, 14:00–15:00">Mittwoch, 14:00</button>
+            <button type="button" data-tag="DO" data-zeit="15:00" data-wann="Donnerstag, 15:00–16:00">Donnerstag, 15:00</button>
+            <button type="button" data-tag="FR" data-zeit="10:00" data-wann="Freitag, 10:00–11:00">Freitag, 10:00</button>
+          </div>
+          <div class="vb-hilfe" data-du="Diese Zeiten sind bei Dr. Anna Vogelsang frei. Passt keine, schreib es dazu." data-sie="Diese Zeiten sind bei Dr. Anna Vogelsang frei. Passt keine, schreiben Sie es dazu.">Diese Zeiten sind bei Dr. Anna Vogelsang frei. Passt keine, schreib es dazu.</div>
+          <label class="vb-label" for="vb-grund" data-du="Grund, wenn du magst" data-sie="Grund, wenn Sie mögen">Grund, wenn du magst</label>
+          <input id="vb-grund" type="text" placeholder="Kurz, damit deine Beratung es einordnen kann" data-du-ph="Kurz, damit deine Beratung es einordnen kann" data-sie-ph="Kurz, damit Ihre Beratung es einordnen kann">
+          <div class="vb-griffe">
+            <button class="vb-senden" type="button" id="vb-senden" disabled>Anfrage senden</button>
+            <button class="vb-ab" type="button" id="vb-ab">Abbrechen</button>
+          </div>
+        </div>
         <div class="zeile"><div class="termin-lage"><div class="termin-blatt"><div class="tb-tag">DI</div><div class="tb-zeit">14:30</div></div><div><div class="termin-wann">Dienstag, 14:30–15:00</div><div class="termin-mit">Jahresgespräch mit dem Steuerbüro</div></div></div><span class="z-status">vor Ort</span></div>
       </div>
     </div>
@@ -358,6 +434,70 @@ section{margin-top:52px}
     {titel: 'Neues Dokument für dich', text: 'Preismodell Benchmark liegt in deinen Unterlagen.', zeit: 'vor 2 Stunden', neu: true, tue: function(){ springe('Unterlagen'); }},
     {titel: 'Antwort auf deine Anfrage', text: 'Das Jahresgespräch ist bestätigt.', zeit: 'gestern', neu: false, tue: function(){ springe('Anfragen'); }}
   ]});
+
+  /* ---------- Verschieben (Häppchen C2) ----------
+     Der Kunde fragt, die Beratung entscheidet. Deshalb ändert sich hier
+     nichts an der Uhrzeit — der Termin trägt einen Vermerk, und in den
+     Anfragen steht, worauf gewartet wird. */
+  var blatt = document.getElementById('verschiebe-blatt');
+  var zeile = document.getElementById('termin-beratung');
+  var senden = document.getElementById('vb-senden');
+  var wunsch = null;
+
+  document.getElementById('verschieben-auf').addEventListener('click', function(){
+    blatt.hidden = !blatt.hidden;
+    if (!blatt.hidden) blatt.querySelector('.vb-fenster button').focus();
+  });
+  document.getElementById('vb-ab').addEventListener('click', function(){ blatt.hidden = true; });
+  blatt.querySelectorAll('.vb-fenster button').forEach(function(b){
+    b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', function(){
+      blatt.querySelectorAll('.vb-fenster button').forEach(function(x){ x.setAttribute('aria-pressed', 'false'); });
+      b.setAttribute('aria-pressed', 'true');
+      wunsch = {tag:b.dataset.tag, zeit:b.dataset.zeit, wann:b.dataset.wann};
+      senden.disabled = false;
+    });
+  });
+
+  senden.addEventListener('click', function(){
+    if (!wunsch) return;
+    var grund = document.getElementById('vb-grund').value.trim();
+    blatt.hidden = true;
+    document.getElementById('verschieben-auf').hidden = true;
+    zeile.classList.add('gefragt');
+    var status = zeile.querySelector('.z-status');
+    status.textContent = 'Verschiebung angefragt';
+    status.className = 'z-status offen';
+    var vermerk = document.createElement('div');
+    vermerk.className = 'termin-mit';
+    vermerk.textContent = Marke.rede(
+      'Dein Wunsch: ' + wunsch.wann + '. Bis deine Beratung antwortet, gilt der Donnerstag.',
+      'Ihr Wunsch: ' + wunsch.wann + '. Bis Ihre Beratung antwortet, gilt der Donnerstag.');
+    zeile.querySelector('.termin-lage > div:last-child').appendChild(vermerk);
+
+    var liste = document.querySelector('.doppel > div:last-child .zeilen');
+    var neu = document.createElement('div');
+    neu.className = 'zeile';
+    /* Der Grund ist frei getippt und wird deshalb als Text gesetzt, nicht als
+       HTML — sonst zerlegt schon ein „<" die Zeile. */
+    var text = document.createElement('span');
+    var titel = document.createElement('span');
+    titel.className = 'z-titel';
+    titel.textContent = 'Termin verschieben';
+    var meta = document.createElement('span');
+    meta.className = 'z-meta';
+    meta.textContent = 'An Dr. Anna Vogelsang, Wunsch ' + wunsch.wann + (grund ? ', „' + grund + '“' : '');
+    text.appendChild(titel);
+    text.appendChild(document.createElement('br'));
+    text.appendChild(meta);
+    var stand = document.createElement('span');
+    stand.className = 'z-status offen';
+    stand.textContent = 'liegt vor';
+    neu.appendChild(text);
+    neu.appendChild(stand);
+    liste.prepend(neu);
+    if (!reduziert) neu.scrollIntoView({behavior:'smooth', block:'nearest'});
+  });
 
   function springe(ueberschrift){
     var ziel = Array.from(document.querySelectorAll('.kopfzeile h2')).find(function(h){ return h.textContent === ueberschrift; });
