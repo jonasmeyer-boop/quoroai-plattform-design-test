@@ -31,7 +31,7 @@
    die Kapsel steht dabei voll und grau statt auf 18 % Baustand (das Haus ist
    fertig, es gehört nur nicht dir); und wer von der Einladung zur Anmeldung
    wechselt, landet nicht mehr in der schon erleuchteten Stadt.
-   Marker: REGISTRIEREN-V5 */
+   Marker: REGISTRIEREN-V6 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input{font-family:inherit}
@@ -152,6 +152,13 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
 }
 @media (max-width:900px){
   body{overflow:auto}
+  /* Gestapelt scrollt die Spalte — dann steht der Rechts-Fuß unten im Fluss
+     statt über dem Formular zu kleben (rechtsfuss.js) */
+  .spalte .rechtsfuss-fix{
+    position:static;justify-content:center;background:none;border:0;border-radius:0;
+    backdrop-filter:none;-webkit-backdrop-filter:none;
+    padding:24px 0 calc(8px + env(safe-area-inset-bottom));font-size:12.5px;
+  }
   .lage{grid-template-columns:1fr;height:auto;min-height:100svh;align-items:start}
   .buehne{order:-1;height:36svh}
   .baustand{bottom:10px}
@@ -251,6 +258,9 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
       </div>
     </div>
     <p class="hinweis">Vorführung mit Demo-Daten, jede Eingabe funktioniert.</p>
+    <!-- Breit steht die Tür still und der Rechts-Fuß klebt am Fensterrand;
+         schmal scrollt die Spalte, dann steht er hier unten im Fluss -->
+    <div data-rechtsfuss="fix"></div>
   </div>
 
   <div class="buehne" aria-hidden="true">
@@ -534,5 +544,6 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
 })();
 </script>
 <script src="zeiger.js"></script>
+<script src="rechtsfuss.js"></script>
 </body>
 </html>

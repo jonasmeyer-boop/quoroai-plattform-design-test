@@ -53,7 +53,7 @@
    letzte Tür lag sonst unerreichbar unter dem Dock).
    V32: die Zentrale hat eine Tür „Fünf Auswertungen" — die fünf festen
    Bilder des Geschäfts, gleich hinter den Zahlen, aus denen sie entstehen.
-   Marker: BERATUNG-F-MODELL-V33 (die offenen Beträge folgen den Abreden:
+   Marker: BERATUNG-F-MODELL-V34 (die offenen Beträge folgen den Abreden:
    MTS' Rechnung ist ein Abschlag auf die Jahrespauschale, Cordes' die
    Monatspauschale — zusammen stehen 12.376 € offen, Häppchen B5) */
 @font-face{
@@ -93,6 +93,10 @@ nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--gr
   /* Bei 11px misst die Schauschrift zwischen zwei Wörtern nur 2px — „Cockpit der"
      las sich als ein Wort. */
   word-spacing:2px}
+/* Der Kasten selbst bleibt durchlässig — sonst schluckt die Lücke zwischen
+   seinen Kindern Klicks auf die Bühne dahinter */
+nav .nav-rechts{display:flex;align-items:center;gap:18px}
+nav .nav-rechts > *{pointer-events:auto}
 nav a.vorschlaege{
   pointer-events:auto;
   padding:8px 14px;border-radius:999px;border:0.5px solid var(--linie);
@@ -473,6 +477,14 @@ body.gezoomt #zonen{display:block}
 @media (max-width:760px){
   nav .wortmarke small{display:none}
   nav{padding:0 18px}
+  /* Schmal ist im Kopfband kein Platz mehr für drei Dinge — die Rechts-Wörter
+     gehen nach unten links, wo weder der Tisch noch das Uhr-Dock stehen */
+  nav .nav-rechts .rechtsfuss-kopf{
+    position:fixed;left:18px;gap:14px;font-size:11.5px;
+    /* Läuft eine Uhr, nimmt ihr Dock hier unten die volle Breite und liegt
+       eine Ebene höher — der Fuß setzt sich deshalb darüber, nicht daneben */
+    bottom:calc(20px + var(--uhr-hoehe, 0px) + env(safe-area-inset-bottom));
+  }
   #buehne{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
   #kamera{
     position:relative;left:0;top:49%;translate:0 -50%;
@@ -513,7 +525,9 @@ body.gezoomt #zonen{display:block}
 
 <nav>
   <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
-  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+  <!-- Die Bühne endet nie, also kann Recht nicht unten stehen; unten rechts
+       wohnt zudem das Uhr-Dock. Hier ist es die stille Hälfte des Kopfbands. -->
+  <div class="nav-rechts"><div data-rechtsfuss="kopf"></div><a class="vorschlaege" href="index.html">Alle Vorschläge</a></div>
 </nav>
 
 <button id="krume" type="button" hidden><span class="zurueck">← Modell</span><span>/</span><b id="krume-ziel">Zone</b></button>
@@ -1112,5 +1126,6 @@ body.gezoomt #zonen{display:block}
 </script>
 <script src="uhr.js"></script>
 <script src="zeiger.js"></script>
+<script src="rechtsfuss.js"></script>
 </body>
 </html>

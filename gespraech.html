@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V41 (der Grenzfall trägt eine Kante statt eines Deko-Punkts) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V42 (der Grenzfall trägt eine Kante statt eines Deko-Punkts) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -29,6 +29,10 @@
   --karte:#ffffff;
   --radius:16px;
   --feder:cubic-bezier(.22,.9,.24,1);
+  /* Die Eingabe liegt fixiert unten und ist mit Umschalter und Hinweis bis zu
+     190px hoch — so viel Luft braucht der Rechts-Fuß unter sich, sonst steht
+     er hinter ihr (rechtsfuss.js) */
+  --rechtsfuss-luft:200px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -2947,5 +2951,6 @@ body.blatt-offen{overflow:hidden}
   })();
 })();
 </script>
+<script src="rechtsfuss.js"></script>
 </body>
 </html>

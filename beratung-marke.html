@@ -30,7 +30,14 @@
    die gemeinsame Marken-Quelle (sessionStorage, marke.js), Sehproben
    kommen aus window.Marke.MARKEN statt einer Handkopie, Absendername
    mit Rückfall und lebender Statuszeile, Prüfen-Timer wird gecleart.
-   Marker: BERATUNG-MARKE-V3 */
+   V4 (Issue #46): Die Anbieterkennzeichnung wohnt zwischen Erscheinung und
+   Versand — sie ist die dritte Hälfte derselben Marke, die nach außen zeigt.
+   Kein Formular für später: die Adresse bleibt zu, solange eine Pflichtangabe
+   fehlt, und das steht als Zustand da, nicht als Warnung. Register und
+   USt-ID hat nicht jede Beratung; das Kästchen macht aus dem leeren Feld
+   eine Erklärung. Gespeichertes geht in die gemeinsame Marken-Quelle und
+   steht sofort im gezeichneten Impressum daneben.
+   Marker: BERATUNG-MARKE-V4 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -193,6 +200,44 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 #spiegel .f-hinweis{font-size:10.5px;color:color-mix(in srgb, var(--m-tinte) 50%, var(--m-papier));margin-top:14px;line-height:1.5}
 .spiegel-wort{font-size:12px;color:var(--nebel-500);margin-top:10px;text-align:center}
 
+/* ---------- Anbieterkennzeichnung ----------
+   Die Sperre ist der Moment dieses Abschnitts: die Adresse steht da, wie sie
+   im Browser stünde, und daneben, ob sie überhaupt hinaus darf. Kein
+   Warnkasten, der etwas behauptet — der Zustand hängt am Füllstand, wie
+   überall im System. */
+.adresse-stand{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:14px 16px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 8px 24px rgba(16,19,26,.06);
+}
+.adresse-stand .zustand{margin-top:3px}
+.adresse-stand .a-text{min-width:0}
+.adresse-stand .a-satz{font-size:14.5px;font-weight:600;line-height:1.45}
+.adresse-stand .a-satz code{
+  font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;font-weight:400;
+  background:var(--nebel-100);border-radius:6px;padding:2px 7px;
+  /* Eine Domain hat keine Trennstellen — schmal bricht sie sonst über den
+     Rand statt umzubrechen */
+  overflow-wrap:anywhere;
+}
+.adresse-stand .a-fehlt{display:block;font-size:13px;color:var(--nebel-600);margin-top:5px;line-height:1.5}
+.adresse-stand.frei{background:var(--gruen-fond);border-color:transparent;box-shadow:none}
+
+.k-felder{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.k-felder .voll{grid-column:1 / -1}
+.k-felder textarea{resize:vertical;line-height:1.5}
+/* Nicht jede Beratung steht im Register oder hat eine USt-ID. Das Kästchen
+   macht aus dem leeren Feld eine Erklärung — sonst ließe sich „vergessen"
+   nicht von „gibt es nicht" unterscheiden, und genau das entscheidet, ob die
+   Adresse live darf. */
+/* .feld label aus system.css ist display:block — ohne die zweite Klasse
+   stünde das Kästchen über seinem Wort statt daneben */
+.feld label.ohne{display:flex;align-items:center;gap:8px;margin:8px 0 0;font-size:13px;font-weight:400;color:var(--nebel-600);cursor:pointer}
+.ohne input{width:17px;height:17px;accent-color:var(--lila-600);cursor:pointer;flex-shrink:0}
+.feld input:disabled,.feld textarea:disabled{background:var(--nebel-100);color:var(--nebel-500);cursor:not-allowed}
+.k-vorschau{font-size:13px;color:var(--nebel-600);margin-top:14px;line-height:1.5}
+
 /* ---------- Versand ---------- */
 .v-felder{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .v-stand{display:flex;align-items:flex-start;gap:10px;margin-top:18px}
@@ -222,6 +267,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 .postfach .p-betreff{font-size:13px;color:var(--nebel-700);margin-top:2px}
 .fuss-griffe{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
 .fuss-griffe .knopf{min-height:40px;padding:0 16px;font-size:13.5px}
+/* Ein Link, der als Knopf auftritt, trägt keinen Unterstrich mehr */
+.fuss-griffe a.knopf{text-decoration:none;color:var(--tinte)}
 
 @media (prefers-reduced-motion: reduce){
   main > *{animation:none;opacity:1;translate:none}
@@ -235,7 +282,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   .zwei{grid-template-columns:1fr}
   #spiegel{position:static}
   .farben{grid-template-columns:repeat(2,1fr)}
-  .v-felder{grid-template-columns:1fr}
+  .v-felder,.k-felder{grid-template-columns:1fr}
+  /* Drei Zeilen Anschrift brauchen schmal mehr Höhe, weil jede umbricht */
+  #k-anschrift{min-height:132px}
+  .adresse-stand .a-satz code{font-size:12.5px}
 }
 </style>
 </head>
@@ -305,6 +355,68 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       <button class="knopf primaer" id="speichern" type="button">Speichern</button>
     </div>
     <div class="bestaetigt" id="m-meldung" hidden></div>
+  </section>
+
+  <h3>Anbieterkennzeichnung</h3>
+  <section class="tafel" aria-label="Anbieterkennzeichnung">
+    <div class="adresse-stand" id="k-stand">
+      <span class="zustand entwurf" id="k-glas" role="img" aria-label="gesperrt" title="gesperrt"></span>
+      <div class="a-text">
+        <div class="a-satz" id="k-satz">Solange etwas fehlt, bleibt <code>beratung.nordholm-partner.de</code> für deine Kunden zu.</div>
+        <small class="a-fehlt" id="k-fehlt"></small>
+      </div>
+    </div>
+
+    <div class="k-felder">
+      <div class="feld voll">
+        <label for="k-anschrift">Anbieter mit Anschrift</label>
+        <textarea id="k-anschrift" rows="3" autocomplete="off"></textarea>
+        <div class="hilfe">Name samt Rechtsform, Straße, Postleitzahl, Ort — genau so, wie es im Register steht. Ein Postfach reicht nicht.</div>
+      </div>
+      <div class="feld">
+        <label for="k-rolle">Bezeichnung der Vertretung</label>
+        <input id="k-rolle" type="text" autocomplete="off">
+        <div class="hilfe">Eine GmbH hat eine Geschäftsführung, eine KG einen persönlich haftenden Gesellschafter.</div>
+      </div>
+      <div class="feld">
+        <label for="k-vertretung">Vertretungsberechtigte</label>
+        <input id="k-vertretung" type="text" autocomplete="off">
+        <div class="hilfe">Alle, die einzeln oder gemeinsam vertreten dürfen.</div>
+      </div>
+      <div class="feld">
+        <label for="k-telefon">Telefon</label>
+        <input id="k-telefon" type="tel" autocomplete="off">
+        <div class="hilfe">Neben der E-Mail verlangt § 5 DDG einen zweiten schnellen Weg zu dir.</div>
+      </div>
+      <div class="feld">
+        <label for="k-mail">E-Mail für Anfragen</label>
+        <input id="k-mail" type="email" autocomplete="off">
+        <div class="hilfe">Nicht die Absenderadresse von oben — hier schreibt dir jemand, der dein Impressum liest.</div>
+      </div>
+      <div class="feld">
+        <label for="k-register">Registereintrag</label>
+        <input id="k-register" type="text" autocomplete="off" placeholder="Amtsgericht, HRB oder HRA">
+        <label class="ohne" for="k-ohne-register"><input type="checkbox" id="k-ohne-register"> Wir stehen in keinem Register</label>
+      </div>
+      <div class="feld">
+        <label for="k-ust">Umsatzsteuer-Identifikationsnummer</label>
+        <input id="k-ust" type="text" autocomplete="off" placeholder="DE…">
+        <label class="ohne" for="k-ohne-ust"><input type="checkbox" id="k-ohne-ust"> Wir haben keine</label>
+      </div>
+      <div class="feld voll">
+        <label for="k-aufsicht">Zuständige Datenschutz-Aufsicht</label>
+        <input id="k-aufsicht" type="text" autocomplete="off">
+        <div class="hilfe">Die Behörde des Bundeslands, in dem du sitzt. Deine Kunden dürfen sich dort beschweren, und deine Datenschutzerklärung muss sie nennen.</div>
+      </div>
+    </div>
+
+    <div class="fuss-griffe">
+      <button class="knopf primaer" id="k-speichern" type="button">Speichern</button>
+      <a class="knopf leise" href="impressum.html" id="k-zum-impressum">Impressum ansehen</a>
+      <a class="knopf leise" href="datenschutz.html" id="k-zum-datenschutz">Datenschutzerklärung ansehen</a>
+    </div>
+    <div class="k-vorschau">Beide Seiten gehören dir, nicht quoroAI — sie tragen deine Marke und deine Angaben. Gespeichertes steht dort sofort.</div>
+    <div class="bestaetigt" id="k-meldung" hidden></div>
   </section>
 
   <h3>Versand</h3>
@@ -432,6 +544,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     maleName();
     document.getElementById('f-adresse').textContent = 'beratung.' + domainZu(mk);
     document.getElementById('v-mail').value = 'beratung@' + domainZu(mk);
+    trageRecht(mk);
     pruefeAdresse(true);
   }
 
@@ -471,6 +584,124 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       m.textContent = 'Gespeichert. Jede Kundenfläche trägt die Marke ab sofort — und jede Mail den Absender.';
     } else {
       m.textContent = 'Gespeichert für diesen Raum. Die Kundenflächen der Vorführung tragen die vier Sehproben — eigene Regler-Werte kommen im Produkt aus deinem Profil.';
+    }
+  });
+
+  /* ---------- Anbieterkennzeichnung: die Sperre vor dem Livegang ----------
+     § 5 DDG gilt ab dem ersten öffentlichen Aufruf, nicht ab dem ersten
+     Kunden. Das hier ist deshalb kein Formular, das man später ausfüllt,
+     sondern die Bedingung dafür, dass die Adresse überhaupt antwortet.
+     Register und USt-ID hat nicht jede Beratung — dafür das Kästchen: eine
+     Erklärung ist etwas anderes als ein vergessenes Feld, und nur die
+     Erklärung darf die Sperre öffnen. */
+  var PFLICHT = [
+    {id: 'k-anschrift',  feld: 'anschrift',       wort: 'die Anschrift'},
+    {id: 'k-rolle',      feld: 'vertretungRolle', wort: 'die Bezeichnung der Vertretung'},
+    {id: 'k-vertretung', feld: 'vertretung',      wort: 'die Vertretungsberechtigten'},
+    {id: 'k-telefon',    feld: 'telefon',         wort: 'das Telefon'},
+    {id: 'k-mail',       feld: 'mail',            wort: 'die E-Mail'},
+    {id: 'k-register',   feld: 'register',        wort: 'der Registereintrag',  ohne: 'k-ohne-register'},
+    {id: 'k-ust',        feld: 'ust',             wort: 'die Umsatzsteuer-Identifikationsnummer', ohne: 'k-ohne-ust'},
+    {id: 'k-aufsicht',   feld: 'aufsicht',        wort: 'die zuständige Datenschutz-Aufsicht'}
+  ];
+
+  function wert(id){ return document.getElementById(id).value.trim(); }
+
+  /* Aus einer Liste wird ein Satz, keine Aufzählung */
+  function undListe(woerter){
+    if (woerter.length === 1) return woerter[0];
+    return woerter.slice(0, -1).join(', ') + ' und ' + woerter[woerter.length - 1];
+  }
+
+  function maleSperre(){
+    var fehlt = [];
+    PFLICHT.forEach(function(p){
+      var erklaert = p.ohne && document.getElementById(p.ohne).checked;
+      if (!erklaert && !wert(p.id)) fehlt.push(p.wort);
+    });
+    var stand = document.getElementById('k-stand');
+    var glas = document.getElementById('k-glas');
+    var satz = document.getElementById('k-satz');
+    var klein = document.getElementById('k-fehlt');
+    var frei = fehlt.length === 0;
+
+    stand.classList.toggle('frei', frei);
+    glas.className = 'zustand ' + (frei ? 'aktiv' : 'entwurf');
+    var zustandswort = frei ? 'freigeschaltet' : 'gesperrt';
+    glas.setAttribute('aria-label', zustandswort);
+    glas.title = zustandswort;
+
+    /* Der Satz wird gebaut, nicht gesetzt — die Adresse ist Nutzereingabe */
+    var code = document.createElement('code');
+    code.textContent = document.getElementById('f-adresse').textContent;
+    satz.textContent = '';
+    if (frei) {
+      satz.appendChild(code);
+      satz.appendChild(document.createTextNode(' darf öffentlich gehen.'));
+      klein.textContent = 'Impressum und Datenschutzerklärung sind vollständig.';
+    } else {
+      satz.appendChild(document.createTextNode('Solange etwas fehlt, bleibt '));
+      satz.appendChild(code);
+      satz.appendChild(document.createTextNode(' für deine Kunden zu.'));
+      klein.textContent = (fehlt.length === 1 ? 'Es fehlt noch ' : 'Es fehlen noch ') + undListe(fehlt) + '.';
+    }
+  }
+
+  PFLICHT.forEach(function(p){
+    document.getElementById(p.id).addEventListener('input', maleSperre);
+    if (!p.ohne) return;
+    var kasten = document.getElementById(p.ohne);
+    kasten.addEventListener('change', function(){
+      var eingabe = document.getElementById(p.id);
+      eingabe.disabled = kasten.checked;
+      if (kasten.checked) eingabe.value = '';
+      maleSperre();
+    });
+  });
+
+  /* Welche Marke gerade in den Feldern steht — die Sehproben tragen eine
+     andere ein, ohne die aktive zu wechseln */
+  var gezeigteMarke = (window.Marke && window.Marke.daten && window.Marke.daten.name) || '';
+
+  function trageRecht(mk){
+    gezeigteMarke = mk.name || '';
+    var r = mk.recht || {};
+    PFLICHT.forEach(function(p){
+      var eingabe = document.getElementById(p.id);
+      eingabe.value = r[p.feld] || '';
+      if (!p.ohne) return;
+      var kasten = document.getElementById(p.ohne);
+      /* Eine Sehprobe ohne Register hat keins — das ist kein Vergessen */
+      kasten.checked = !r[p.feld];
+      eingabe.disabled = kasten.checked;
+    });
+    maleSperre();
+  }
+
+  document.getElementById('k-speichern').addEventListener('click', function(){
+    var m = document.getElementById('k-meldung');
+    m.hidden = false;
+
+    /* Unvollständiges geht nicht hinaus. Das ist die Sperre selbst: gingen
+       drei ausgefüllte Felder schon in die gemeinsame Quelle, stünde im
+       Impressum daneben „Telefon:" ohne Nummer — ein löchriges Impressum ist
+       schlimmer als eines, das noch gar nicht gilt. */
+    if (!document.getElementById('k-stand').classList.contains('frei')) {
+      m.textContent = 'Für diesen Raum gemerkt, aber nicht veröffentlicht: solange oben etwas fehlt, bleibt deine Adresse zu und die Rechtsseiten zeigen sie nicht.';
+      return;
+    }
+
+    var recht = {};
+    PFLICHT.forEach(function(p){ recht[p.feld] = wert(p.id); });
+    try {
+      /* Der Schlüssel ist die Marke, deren Angaben gerade in den Feldern
+         stehen — nicht die aktive. Wer nur eine Sehprobe ansieht und dann
+         speichert, hängte sonst fremde Anschrift, Register und USt-ID an die
+         eigene Marke, und marke.js glaubte es. */
+      sessionStorage.setItem('marke-recht', JSON.stringify({name: gezeigteMarke, recht: recht}));
+      m.textContent = 'Gespeichert. Impressum und Datenschutzerklärung tragen die Angaben ab sofort — sieh sie dir daneben an.';
+    } catch (e) {
+      m.textContent = 'Gespeichert für diesen Raum. Weiterreichen kann die Vorführung es hier nicht.';
     }
   });
 
@@ -589,10 +820,11 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   /* Der Raum öffnet auf der Marke, die gerade gilt — dieselbe Quelle,
      die auch jede Kundenfläche liest */
   if (window.Marke && window.Marke.daten) trageMarke(window.Marke.daten);
-  else { maleAnrede(); maleName(); pruefeAdresse(); }
+  else { maleAnrede(); maleName(); pruefeAdresse(); maleSperre(); }
 })();
 </script>
 <script src="uhr.js"></script>
 <script src="zeiger.js"></script>
+<script src="rechtsfuss.js"></script>
 </body>
 </html>

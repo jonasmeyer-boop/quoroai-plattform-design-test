@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="recht-kunde.css">
 <style>
 /* quoroai-plattform-design · Das Impressum der Beratung (White-Label) ·
-   Marker: IMPRESSUM-V2
+   Marker: IMPRESSUM-V3
 
    Die Adresse gehört der Beratung, also gehört ihr auch das Impressum.
    quoroAI steht hier nur als Satz am Ende: wer die Software stellt. Alle
@@ -16,6 +16,9 @@
    — im Produkt sind das Felder am Mandanten, die die Beratung ausfüllen muss,
    bevor ihre Adresse öffentlich wird. Beim Markenwechsel unten im Bild
    wechselt hier alles mit.
+   V3: Register und USt-ID sind eigene Blöcke — nicht jede Beratung hat
+   beides, und ein leerer Block ist schlechter als kein Block.
+
    V2 nach Code-Review: auch das Wort „Geschäftsführung" kommt aus der Marke
    — bei einer KG stünde dort sonst eine Rechtsform, die es nicht gibt.
 
@@ -56,11 +59,19 @@ Große Elbstraße 145
   <p class="anschrift">Telefon: <span data-marke-recht="telefon">+49 40 5544120</span>
 E-Mail: <span data-marke-recht="mail">kontakt@nordholm-partner.de</span></p>
 
-  <h2>Registereintrag</h2>
-  <p data-marke-recht="register">Amtsgericht Hamburg, HRB 148920</p>
+  <!-- Beides gibt es nicht bei jeder Beratung: eine GbR steht in keinem
+       Register, eine Kleinunternehmerin hat keine USt-ID. Fehlt der Wert,
+       fällt der ganze Block weg (marke.js) statt als leere Überschrift zu
+       stehen. -->
+  <div data-recht-block="register">
+    <h2>Registereintrag</h2>
+    <p data-marke-recht="register">Amtsgericht Hamburg, HRB 148920</p>
+  </div>
 
-  <h2>Umsatzsteuer-Identifikationsnummer</h2>
-  <p>Nach § 27 a Umsatzsteuergesetz: <span data-marke-recht="ust">DE812345678</span></p>
+  <div data-recht-block="ust">
+    <h2>Umsatzsteuer-Identifikationsnummer</h2>
+    <p>Nach § 27 a Umsatzsteuergesetz: <span data-marke-recht="ust">DE812345678</span></p>
+  </div>
 
   <h2>Verbraucherstreitbeilegung</h2>
   <p>

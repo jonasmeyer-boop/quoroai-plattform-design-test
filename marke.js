@@ -1,6 +1,6 @@
 /* quoroai-plattform-design · Der Marken-Kern: eine Quelle für alle Flächen.
    Vier Farbregler + Anrede je Beratung; im Produkt kommt beides aus dem
-   Mandanten-Profil (agency_branding). Marker: MARKE-KERN-V5
+   Mandanten-Profil (agency_branding). Marker: MARKE-KERN-V6
 
    V4: Jede Marke trägt ihre Anbieterkennzeichnung (`recht`). Sie ist kein
    Design-Regler, sondern eine Pflichtangabe: Impressum und Datenschutz der
@@ -13,7 +13,13 @@
    V5 nach Code-Review: auch die Bezeichnung der Vertretung kommt aus der
    Marke (`vertretungRolle`). Eine KG hat keinen Geschäftsführer, sondern
    einen persönlich haftenden Gesellschafter — steht das Wort fest im
-   Markup, macht das Impressum die Rechtsform falsch. */
+   Markup, macht das Impressum die Rechtsform falsch.
+
+   V6: Was die Beratung in `beratung-marke.html` einträgt, überschreibt die
+   `recht`-Felder der laufenden Sehprobe (sessionStorage `marke-recht`).
+   Sonst wäre „Impressum ansehen" dort eine Behauptung: die Fläche zeigte
+   Eingefelder, das Impressum daneben aber weiter die Vorführungswerte. Die
+   Überschreibung hängt am Markennamen und fällt beim Markenwechsel weg. */
 window.Marke = (function () {
   'use strict';
   var MARKEN = [
@@ -43,6 +49,20 @@ window.Marke = (function () {
   try { idx = parseInt(sessionStorage.getItem('marke') || '0', 10); } catch (e) {}
   if (!(idx >= 0 && idx < MARKEN.length)) idx = 0; /* alles Ungültige fällt auf Marke 0 */
   var m = MARKEN[idx];
+  /* Die Beratung darf ihre Anbieterkennzeichnung selbst eintragen — dann gilt
+     ihr Stand, nicht der der Sehprobe. Alles Unlesbare fällt still zurück. */
+  try {
+    var eigen = JSON.parse(sessionStorage.getItem('marke-recht') || 'null');
+    if (eigen && eigen.name === m.name && eigen.recht) {
+      var recht = {};
+      Object.keys(m.recht || {}).forEach(function (k) { recht[k] = m.recht[k]; });
+      Object.keys(eigen.recht).forEach(function (k) { recht[k] = eigen.recht[k]; });
+      var kopie = {};
+      Object.keys(m).forEach(function (k) { kopie[k] = m[k]; });
+      kopie.recht = recht;
+      m = kopie;
+    }
+  } catch (e) {}
   var sie = m.anrede === 'sie';
 
   function rede(du, sieText) { return sie ? sieText : du; }
@@ -69,6 +89,12 @@ window.Marke = (function () {
     document.querySelectorAll('[data-marke-recht]').forEach(function (el) {
       var wert = (marke.recht || {})[el.dataset.markeRecht];
       el.textContent = wert || '';
+    });
+    /* Ganze Blöcke, die an einem Feld hängen: „Registereintrag" ohne Register
+       wäre eine leere Überschrift, und ein Impressum mit leerer Überschrift
+       ist schlechter als eines ohne den Block. */
+    document.querySelectorAll('[data-recht-block]').forEach(function (el) {
+      el.hidden = !String((marke.recht || {})[el.dataset.rechtBlock] || '').trim();
     });
     document.querySelectorAll('.marke-logo').forEach(function (img) {
       if (marke.logo) { img.src = marke.logo; img.alt = marke.name; img.hidden = false; }
