@@ -24,7 +24,10 @@
    Posten decken sich mit LEISTUNGEN-V5.
    V5 (Häppchen C4): auf dem Handy ist der Meilenstein-Pfad eine Leiter statt
    einer Achse, deren Hälfte hinter dem Rand liegt.
-   Marker: BERATUNG-MANDAT-V5 */
+   V6 (Nach-Review zu C4): der Fortschrittsstrich der Leiter hängt an den
+   Stationen statt an einer Prozentmarke — die saß 29px unter dem Punkt,
+   auf dem man steht.
+   Marker: BERATUNG-MANDAT-V6 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -119,14 +122,21 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 @media (max-width:700px){
   .pfad-rolle,.pfad-hand{display:none}
   .pfad-leiter{
-    display:block;list-style:none;margin:2px 0 0;padding:0 0 0 26px;position:relative;
+    display:block;list-style:none;margin:2px 0 0;padding:0 0 0 26px;
   }
-  .pfad-leiter::before{
-    content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;border-radius:2px;
-    background:linear-gradient(180deg,var(--lila-600) 0 38%,var(--nebel-300) 38%);
-  }
+  /* Der Strich gehört den Stationen, nicht einer Prozentzahl: jede Station
+     zieht ihn bis zur nächsten. Lila bis zu der, auf der man steht, danach
+     grau. Eine feste Prozentmarke saß beim ersten Versuch 29px unter dem
+     Jetzt-Punkt und behauptete Fortschritt, den es nicht gab — und jede
+     Textänderung hätte sie erneut verschoben. */
   .pfad-leiter li{position:relative;padding:0 0 16px}
   .pfad-leiter li:last-child{padding-bottom:0}
+  .pfad-leiter li::after{
+    content:"";position:absolute;left:-20px;top:17px;bottom:-4px;width:2px;border-radius:2px;
+    background:var(--nebel-300);
+  }
+  .pfad-leiter li.geschafft::after{background:var(--lila-600)}
+  .pfad-leiter li:last-child::after{display:none}
   .pfad-leiter li::before{
     content:"";position:absolute;left:-26px;top:4px;width:13px;height:13px;border-radius:50%;
     background:#fff;border:2px solid var(--nebel-300);box-sizing:border-box;

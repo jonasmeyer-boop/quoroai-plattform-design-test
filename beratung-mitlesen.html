@@ -19,7 +19,10 @@
    — das Wissen gehört der Beratung, nicht quoroAI (siehe beratung-wissen.html).
    V5 (Häppchen C4): die Lage-Spalte darf schrumpfen (minmax statt 1fr), und
    der Kreis des Beraters um das Ergebnis bleibt in der Karte.
-   Marker: BERATUNG-MITLESEN-V5 */
+   V6 (Nach-Review zu C4): kein Polster an der Ergebniszeile — es brach die
+   Zahlenspalte. Unter 400px setzt sich die Ergebniszahl stattdessen unter
+   ihr Wort, bündig mit der Spalte darüber.
+   Marker: BERATUNG-MITLESEN-V6 */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -310,10 +313,19 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
   #blatt{padding:24px 20px 28px}
   .hebel-reihe{grid-template-columns:1fr}
   .kapitel .frage{flex-direction:column;gap:2px}
-  /* Der Kreis des Beraters greift 14px über die Zahl hinaus. Am schmalen
-     Schirm steht die Zahl an der Kartenkante, und der Kreis wird abgeschnitten
-     — die Karte macht ihm rechts Platz. */
-  .formel .zeile-f.ergebnis{padding-right:22px}
+  /* Der Kreis des Beraters greift über die Zahl hinaus und darf das: er ist
+     mit der Hand gezogen, nichts schneidet ihn ab (keine Karte auf diesem
+     Blatt hat overflow:hidden). Ein Polster nur an der Ergebniszeile wäre der
+     falsche Weg — es bräche die Zahlenspalte um genau seinen Betrag, und in
+     einem Rechenweg fällt das sofort auf.
+     Unter 400px passt die Ergebniszahl aber nicht mehr neben ihr Wort: sie
+     bricht nicht um (19px, tabellarisch) und lief aus der Karte. Dort setzt
+     sie sich unter das Wort, weiter bündig mit der Spalte darüber. */
+  @media (max-width:400px){
+    .formel .zeile-f.ergebnis{flex-wrap:wrap;row-gap:2px}
+    .formel .zeile-f.ergebnis .fuellung{display:none}
+    .formel .zeile-f.ergebnis .ergebnis-fang{margin-left:auto}
+  }
 }
 </style>
 </head>

@@ -21,7 +21,9 @@
    zu stehen.
    V5 (Häppchen C4): am schmalsten Schirm fällt der Einzug der Dokument-Zeile
    weg, statt die Seite hinauszuschieben.
-   Marker: BERATUNG-WISSEN-V5 */
+   V6 (Nach-Review zu C4): die Fehlermeldung eines Dokuments steht am großen
+   Schirm wieder auf der Namensflucht (Rand plus passende Flex-Basis).
+   Marker: BERATUNG-WISSEN-V6 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -159,8 +161,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 .dok.kaputt{border-style:dashed;background:var(--nebel-050)}
 .dok.kaputt .zustand-wort{color:var(--rot)}
 .dok .d-fehler{
-  /* Einzug im Polster: mit margin-left käme er zur 100%-Breite hinzu. */
-  flex-basis:100%;margin-left:0;padding:9px 12px 9px 62px;border-radius:10px;
+  /* Der Rand zieht von der Breite ab, statt sie zu sprengen — dafür muss die
+     Basis ihn kennen. Steht dort 100 %, schrumpft die Zeile still um den
+     Einzug und die Meldung wird schmaler als das Dokument darüber. */
+  flex-basis:calc(100% - 50px);margin-left:50px;padding:9px 12px;border-radius:10px;
   background:var(--rot-fond);font-size:12.5px;line-height:1.5;
 }
 .bestaetigt{
@@ -206,7 +210,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
      und die Fehlerzeile rückt mit. */
   @media (max-width:400px){
     .dok .d-recht{padding-left:0}
-    .dok .d-fehler{padding-left:12px}
+    .dok .d-fehler{flex-basis:100%;margin-left:0}
   }
   .dok .entf{opacity:1}
   .zitat .hand{position:static;display:inline-block;margin-top:10px}
