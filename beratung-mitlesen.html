@@ -22,7 +22,8 @@
    V6 (Nach-Review zu C4): kein Polster an der Ergebniszeile — es brach die
    Zahlenspalte. Unter 400px setzt sich die Ergebniszahl stattdessen unter
    ihr Wort, bündig mit der Spalte darüber.
-   Marker: BERATUNG-MITLESEN-V6 */
+   V7 (Häppchen D2): aus Mitlesen wird Mitreden — die Beratung schreibt in dasselbe Gespräch, es gibt kein Postfach.
+   Marker: BERATUNG-MITLESEN-V7 */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -239,6 +240,43 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
 }
 .anfrage-zeile{font-size:13.5px;color:var(--m-grau);margin-top:8px;line-height:1.55}
 
+/* ---------- Mitreden (Häppchen D2) ----------
+   Es gibt kein Postfach: was die Beratung dem Kunden sagen will, sagt sie
+   HIER, in seinem Gespräch. Deshalb steht die Eingabe im Blatt des Mandanten
+   und nicht im quoroAI-Chrom — was hier getippt wird, erscheint drüben in
+   seiner Marke, unter dem Namen des Menschen, der es geschrieben hat. */
+.beitrag{
+  background:#fff;border:0.5px solid var(--m-linie);border-left:3px solid var(--m-stift);
+  border-radius:6px 16px 16px 6px;padding:16px 20px;margin-top:16px;
+  box-shadow:0 10px 30px rgba(16,19,26,.06);
+  opacity:0;translate:0 10px;
+}
+.beitrag.liegt{opacity:1;translate:none;transition:opacity .45s ease,translate .45s var(--kurve)}
+.beitrag .b-kopf{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;font-family:'Manrope',sans-serif}
+.beitrag .b-name{font-size:14.5px;font-weight:800;letter-spacing:-.01em}
+.beitrag .b-zeit{margin-left:auto;font-size:12px;color:var(--m-grau);font-variant-numeric:tabular-nums}
+.beitrag .b-text{font-size:15px;line-height:1.6;margin-top:8px;max-width:58ch}
+.beitrag .b-stand{font-size:12.5px;color:var(--m-grau);margin-top:10px}
+
+#mitreden{margin-top:26px;padding-top:20px;border-top:0.5px solid var(--m-linie)}
+#mitreden .mr-wort{font-size:13px;font-weight:800;color:var(--m-grau)}
+#mitreden .mr-zeile{display:flex;gap:10px;align-items:flex-start;margin-top:10px}
+#mr-text{
+  flex:1 1 auto;min-width:0;min-height:52px;padding:14px 18px;
+  border-radius:14px;border:0.5px solid var(--m-linie);background:#fff;
+  font-family:'Manrope',system-ui,sans-serif;font-size:15px;line-height:1.5;color:var(--m-tinte);
+  outline:none;resize:vertical;
+}
+#mr-text:focus{border-color:var(--m-blau)}
+#mr-senden{
+  flex-shrink:0;min-height:52px;padding:0 22px;border-radius:999px;border:0;
+  background:var(--m-tinte);color:#fff;font-family:'Manrope',sans-serif;
+  font-size:14.5px;font-weight:700;cursor:pointer;transition:background .2s ease;
+}
+#mr-senden:hover{background:var(--m-blau)}
+#mr-senden:disabled{background:rgba(16,19,26,.18);cursor:not-allowed}
+#mitreden .mr-fuss{font-size:12.5px;color:var(--m-grau);margin-top:10px;line-height:1.55;max-width:60ch}
+
 /* Ende der Abschrift */
 .blatt-fuss{
   margin-top:30px;padding-top:16px;border-top:0.5px solid var(--m-linie);
@@ -311,6 +349,10 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
   #krume{left:18px;top:70px}
   main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
   #blatt{padding:24px 20px 28px}
+  /* Am Finger trägt der Griff die volle Breite, statt sich neben dem Feld auf
+     Daumenbreite zu drücken. */
+  #mitreden .mr-zeile{flex-direction:column}
+  #mr-senden{width:100%}
   .hebel-reihe{grid-template-columns:1fr}
   .kapitel .frage{flex-direction:column;gap:2px}
   /* Der Kreis des Beraters greift über die Zahl hinaus und darf das: er ist
@@ -345,7 +387,7 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
   </div>
 
   <div id="freigabe-leiste" class="glas-lila">
-    <div class="fl-text"><b>Nur Mitlesen.</b> Herr Petersen hat dieses Gespräch gestern um 16:40 für seine Beratung freigegeben. Du liest eine Abschrift, schreiben kann hier niemand. Seine anderen Gespräche bleiben privat, bis er sie freigibt.</div>
+    <div class="fl-text"><b>Freigegeben, also darfst du mitreden.</b> Herr Petersen hat dieses Gespräch gestern um 16:40 für seine Beratung freigegeben. Du liest mit — und kannst am Ende der Abschrift hineinschreiben; er sieht es sofort. Nimmt er die Freigabe zurück, endet beides. Seine anderen Gespräche bleiben privat, bis er sie freigibt.</div>
     <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Freigegeben" title="Freigegeben"></span><span class="zustand-wort">freigegeben</span></span>
   </div>
 
@@ -422,6 +464,17 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
       </section>
 
       <div class="blatt-fuss">Um <b>16:40</b> hat Herr Petersen dieses Gespräch freigegeben. Ende der Abschrift, 2 Fragen zwischen 16:02 und 16:40.</div>
+
+      <!-- Häppchen D2: kein Postfach. Was du ihm sagen willst, sagst du in
+           seinem Gespräch — dort, wo auch der KI-Berater steht. -->
+      <div id="mitreden">
+        <div class="mr-wort">Ins Gespräch schreiben</div>
+        <div class="mr-zeile">
+          <textarea id="mr-text" rows="2" placeholder="Was du Herrn Petersen sagen willst" aria-label="Nachricht an Herrn Petersen"></textarea>
+          <button id="mr-senden" type="button" disabled>Schreiben</button>
+        </div>
+        <p class="mr-fuss">Er sieht es sofort in seinem Gespräch, unter deinem Namen, in seiner Marke. Antwortet er, steht es hier. Die Zeit läuft als Beratungsleistung auf das Mandat.</p>
+      </div>
     </article>
 
     <aside id="leiste" aria-label="Quellen und Kosten">
@@ -518,6 +571,57 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
       setTimeout(function(){ ziel.classList.remove('puls'); }, 600);
     });
   });
+
+  /* ---------- Mitreden (Häppchen D2) ----------
+     Der Beitrag legt sich ans Ende der Abschrift, genau so, wie er drüben im
+     Gespräch des Kunden ankommt. Kein Versandbericht, kein Postausgang: dass
+     er steht, sieht man daran, dass er dasteht. */
+  (function(){
+    var feld = document.getElementById('mr-text');
+    var knopf = document.getElementById('mr-senden');
+    var block = document.getElementById('mitreden');
+    var WER = 'Dr. Anna Vogelsang';
+    feld.addEventListener('input', function(){ knopf.disabled = !feld.value.trim(); });
+    feld.addEventListener('keydown', function(e){
+      /* Absatz mit Enter, senden mit Strg-Enter: wer berät, schreibt manchmal
+         mehr als eine Zeile. */
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && feld.value.trim()) knopf.click();
+    });
+    knopf.addEventListener('click', function(){
+      var text = feld.value.trim();
+      if (!text) return;
+      var jetzt = new Date();
+      var k = document.createElement('div');
+      k.className = 'beitrag';
+      var kopf = document.createElement('div');
+      kopf.className = 'b-kopf';
+      var name = document.createElement('span');
+      name.className = 'b-name';
+      name.textContent = WER;
+      var zeit = document.createElement('span');
+      zeit.className = 'b-zeit';
+      zeit.textContent = jetzt.getHours() + ':' + String(jetzt.getMinutes()).padStart(2, '0');
+      kopf.appendChild(name);
+      kopf.appendChild(zeit);
+      var p = document.createElement('p');
+      p.className = 'b-text';
+      /* Frei getippt, also als Text gesetzt — nicht als HTML */
+      p.textContent = text;
+      var stand = document.createElement('div');
+      stand.className = 'b-stand';
+      stand.setAttribute('role', 'status');
+      stand.textContent = 'Steht in seinem Gespräch. 0,1 Std. auf das Mandat.';
+      k.appendChild(kopf);
+      k.appendChild(p);
+      k.appendChild(stand);
+      block.parentNode.insertBefore(k, block);
+      if (reduziert) k.classList.add('liegt');
+      else requestAnimationFrame(function(){ k.classList.add('liegt'); });
+      feld.value = '';
+      knopf.disabled = true;
+      feld.focus();
+    });
+  })();
 
   /* Ehrlichkeit: die Quelle selbst öffnet sich erst im Produkt */
   var hinweisTimer = null;

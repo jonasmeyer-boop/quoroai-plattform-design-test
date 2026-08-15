@@ -30,7 +30,7 @@
    fertigen, bedienbaren Körper einer Bitte.
 
    Markenneutral: alle Farben kommen aus den Tokens der jeweiligen Fläche.
-   Marker: BITTEN-V2 */
+   Marker: BITTEN-V3 */
 window.Bitten = (function () {
   'use strict';
 
@@ -42,25 +42,29 @@ window.Bitten = (function () {
   var anredeSie = null;
   function sieGilt() { return anredeSie === null ? !!Marke.sie : anredeSie; }
   function rede(du, sie) { return sieGilt() ? sie : du; }
-  function anrede(sie) {
-    if (anredeSie === !!sie) return;
-    anredeSie = !!sie;
+  function neuZeichnen() {
     document.querySelectorAll('[data-bitte]').forEach(function (alt) {
       var b = finde(alt.dataset.bitte);
       if (!b || !alt.parentNode) return;
-      /* Was schon getippt war, kommt mit: ein Markenwechsel ist eine Frage
-         der Anrede, kein Grund, dem Kunden seinen Satz wegzunehmen. */
-      var altesFeld = alt.querySelector('input[type=text]');
-      var neu = inhalt(b);
-      if (altesFeld && altesFeld.value) {
-        var neuesFeld = neu.querySelector('input[type=text]');
-        if (neuesFeld) {
-          neuesFeld.value = altesFeld.value;
-          neuesFeld.dispatchEvent(new Event('input'));
-        }
-      }
-      alt.parentNode.replaceChild(neu, alt);
+      alt.parentNode.replaceChild(inhalt(b), alt);
     });
+  }
+  function anrede(sie) {
+    if (anredeSie === !!sie) return;
+    anredeSie = !!sie;
+    neuZeichnen();
+  }
+  /* Eine andere Beispielmarke ist eine andere Vorführung: der Stand geht auf
+     Anfang. Die meisten Flächen laden dabei neu, das Gespräch nicht — ohne
+     diesen Weg liefe es mit dem Stand der vorigen Marke weiter und widerspräche
+     der Übersicht, sobald der Kunde dorthin wechselt. */
+  function marke(name) {
+    if (!name || name === MARKENNAME) return;
+    MARKENNAME = name;
+    STAND = {};
+    merke();
+    neuZeichnen();
+    rufe(null);
   }
 
   /* ---------- Der Bestand ----------
@@ -486,6 +490,6 @@ window.Bitten = (function () {
   return {
     liste: liste, offen: offen, wartend: wartend, zahlwort: zahlwort, finde: finde,
     inhalt: inhalt, tafel: tafel, loese: loese, abonniere: abonniere,
-    anrede: anrede, stand: stand, ergebnis: ergebnis, eingabe: eingabe
+    anrede: anrede, marke: marke, stand: stand, ergebnis: ergebnis, eingabe: eingabe
   };
 })();

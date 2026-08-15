@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V46 (Häppchen D1: die Bitte der Beratung wird im Gespräch erledigt) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V48 (Häppchen D2: ein Mensch spricht in denselben Strang, es gibt kein Postfach) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -146,7 +146,9 @@ body.gespraeche-offen{overflow:hidden}
 /* Der Mitlese-Schalter wohnt an der Eingabe — er regelt, wer liest, was hier
    geschrieben wird, und ist darum immer sichtbar, bevor man tippt.
    Zwei Plätze: der gefüllte zeigt, was gilt; ein Klick wechselt die Seite. */
-#eingabe .privat-zeile{display:flex;justify-content:flex-end;margin-bottom:10px}
+#eingabe .privat-zeile{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+/* Steht ein Adressat da, gehört ihm die linke Seite der Zeile */
+#eingabe .privat-zeile:has(#an-wen:not([hidden])){justify-content:space-between}
 #freigabe{
   pointer-events:auto;cursor:pointer;
   display:inline-flex;gap:2px;padding:3px;border-radius:999px;
@@ -587,6 +589,53 @@ body.blatt-offen{overflow:hidden}
 }
 .karte.anfrage .anfrage-aktion button:hover{border-color:#a06008;color:#a06008}
 
+/* ---------- Ein Mensch spricht (Häppchen D2) ----------
+   Kein zweites Postfach: der Berater schreibt in denselben Strang. Was ihn
+   vom KI-Berater unterscheidet, trägt die Karte selbst — sein Name, seine
+   Uhrzeit und die Kante in seiner Tinte. Und er strömt nicht: sein Beitrag
+   wird fertig hingelegt, weil er ihn vorhin geschrieben hat. */
+.karte.mensch{border-left:3px solid var(--stift);border-top-left-radius:6px;border-bottom-left-radius:6px}
+.karte.meins{border-left:3px solid var(--linie);border-top-left-radius:6px;border-bottom-left-radius:6px}
+.karte.mensch .m-kopf,.karte.meins .m-kopf{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.m-name{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.karte.meins .m-name{color:var(--grau)}
+.m-rolle{font-size:12px;color:var(--grau)}
+.m-zeit{margin-left:auto;font-size:12px;color:var(--grau);font-variant-numeric:tabular-nums}
+.m-text{font-size:15.5px;line-height:1.6;margin-top:10px;max-width:56ch}
+/* Die ehrliche Zeile: ein Mensch antwortet nicht in Sekunden, und das Gespräch
+   hält deshalb trotzdem nicht an. */
+.m-lage{font-size:13px;color:var(--grau);margin-top:12px;max-width:56ch;line-height:1.55}
+.m-tun{margin-top:14px}
+.m-tun button{
+  padding:9px 18px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--tinte);cursor:pointer;
+  transition:border-color .2s ease,color .2s ease;
+}
+.m-tun button:hover{border-color:var(--stift);color:var(--stift)}
+/* Ein Beitrag des Menschen legt sich hin, statt sich wie ein Konstrukt des
+   KI-Beraters zu belichten — die Blaupause gehört der Maschine. */
+.karte.gelegt{opacity:0;translate:0 10px}
+.karte.gelegt.liegt{opacity:1;translate:none;transition:opacity .45s ease,translate .45s var(--feder)}
+/* Der Inhalt eines Beitrags wird nicht belichtet — er steht sofort scharf da.
+   Die Karte selbst blendet auf, der Text in ihr ist von Anfang an fertig. */
+.karte.gelegt .inhalt-k{opacity:1;filter:none;transform:none}
+
+/* Der Adressat wohnt an der Eingabe, gleich neben der Freigabe: wer schreibt,
+   sieht vorher, bei wem es ankommt. */
+#an-wen{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:5px 6px 5px 14px;border-radius:999px;
+  border:0.5px solid var(--stift);background:#fff;
+  font-size:12px;font-weight:700;color:var(--tinte);
+  box-shadow:0 4px 16px rgba(16,19,26,.06);
+}
+#an-wen .aw-ab{
+  width:26px;height:26px;border-radius:999px;border:none;cursor:pointer;
+  background:rgba(16,19,26,.06);color:var(--tinte);font-size:14px;line-height:1;
+  transition:background .15s ease,color .15s ease;
+}
+#an-wen .aw-ab:hover{background:var(--tinte);color:#fff}
+
 /* Bestätigung */
 .bestaetigung{display:flex;align-items:center;gap:16px}
 .bestaetigung svg{width:44px;height:44px;flex-shrink:0}
@@ -726,10 +775,13 @@ body.blatt-offen{overflow:hidden}
 #senden svg path{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 #senden:hover{background:var(--blau)}
 #senden:active{scale:.9}
-#ki-hinweis{
+#ki-hinweis,#mensch-hinweis{
   margin:9px 6px 0;text-align:center;
   font-size:11px;color:var(--grau);opacity:.75;
 }
+/* Wer an einen Menschen schreibt, darf unter dem Feld nicht lesen, er spreche
+   mit der Maschine (D2). Der Hinweis tauscht, er verschwindet nicht. */
+#mensch-hinweis{color:var(--stift);opacity:.9}
 
 /* Grenz-Momente: ehrlich, ruhig, mit Weg nach vorn.
    Die Kante trägt den Ernst, kein Punkt neben der Überschrift. */
@@ -861,6 +913,13 @@ body.blatt-offen{overflow:hidden}
   <div id="anlagen" hidden></div>
   <!-- Der Mitlese-Schalter wohnt an der Eingabe: er regelt, wer sieht, was du hier schreibst -->
   <div class="privat-zeile">
+    <!-- Häppchen D2: schreibt der Kunde gerade an einen Menschen, steht dessen
+         Name hier — und ein Griff zurück zum KI-Berater. Kein Modus, den man
+         suchen müsste. -->
+    <span id="an-wen" hidden>
+      <span id="aw-text">An Dr. Anna Vogelsang</span>
+      <button class="aw-ab" type="button" id="aw-ab" aria-label="Wieder an den KI-Berater schreiben" title="Wieder an den KI-Berater schreiben">×</button>
+    </span>
     <button id="freigabe" type="button" aria-pressed="false" title="Wer darf dieses Gespräch lesen?">
       <span id="fg-privat" class="hier">Nur für dich</span><span id="fg-geteilt">Beratung liest mit</span>
     </button>
@@ -876,6 +935,7 @@ body.blatt-offen{overflow:hidden}
     </button>
   </div>
   <p id="ki-hinweis"><span id="ki-hinweis-vor" data-du="Du sprichst mit dem KI-Berater von " data-sie="Sie sprechen mit dem KI-Berater von ">Du sprichst mit dem KI-Berater von </span><span id="ki-hinweis-name" data-marke-name>Nordholm &amp; Partner</span>. Er ersetzt keine Rechts- oder Steuerberatung.</p>
+  <p id="mensch-hinweis" hidden></p>
   <input type="file" id="datei-wahl" multiple hidden>
 </div>
 
@@ -893,10 +953,15 @@ body.blatt-offen{overflow:hidden}
   /* Quittungen, die warten mussten, weil der Berater gerade schrieb. Wer
      fertig geschrieben hat, lässt die nächste los — sonst wartet sie ewig. */
   var wartendeQuittungen = [];
+  /* Und Beiträge von Menschen, die ankamen, während der KI-Berater schrieb
+     (Häppchen D2) — ins Wort fällt hier niemand niemandem. */
+  var wartendeBeitraege = [];
   function nichtMehrBeschaeftigt(){
     beschaeftigt = false;
     var n = wartendeQuittungen.shift();
-    if (n) quittiere(n.kapitel, n.satz);
+    if (n) { quittiere(n.kapitel, n.satz); return; }
+    var m = wartendeBeitraege.shift();
+    if (m) meldeMensch(m.kapitel, m.text);
   }
 
   function warte(ms){ return new Promise(function(f){ setTimeout(f, reduziert ? 0 : ms); }); }
@@ -1068,7 +1133,9 @@ body.blatt-offen{overflow:hidden}
   /* ---------- Materialisierung: Blaupause wird Wirklichkeit ---------- */
   function aktualisiereGriff(){
     var griff = document.getElementById('akte-griff');
-    var n = document.querySelectorAll('#akte .karte').length;
+    /* Die Akte zählt, was das Gespräch gebaut hat — nicht, was darin gesagt
+       wurde. Wortbeiträge von Menschen sind kein Aktenstück (D2). */
+    var n = document.querySelectorAll('#akte .karte:not(.mensch):not(.meins)').length;
     griff.dataset.zahl = String(n);
     griff.querySelector('.zahl').textContent = String(n);
   }
@@ -1595,6 +1662,207 @@ body.blatt-offen{overflow:hidden}
     return k;
   }
 
+  /* ---------- Der Mensch im Strang (Häppchen D2) ----------
+     Nachrichten sind kein Ort, sondern ein Sprecher. Es gibt kein Postfach:
+     schreibt ein Mensch aus der Beratung, schreibt er HIER, in dasselbe
+     Kapitel, unter seinem Namen. Drei Dinge trennen ihn vom KI-Berater:
+
+       er hat einen Namen und eine Uhrzeit,
+       sein Beitrag wird fertig hingelegt statt Wort für Wort geschrieben
+         (er hat ihn vorhin getippt, nicht in diesem Moment),
+       und er braucht Zeit — das steht dran, statt so zu tun, als käme
+         sofort etwas zurück.
+
+     Der Weg hinein ist die Freigabe: wer nicht mitliest, kann nicht mitreden.
+     Deshalb hängt alles hier an dem Schalter an der Eingabe. */
+  var ICH = {name: 'Dr. Anna Vogelsang'};
+  function markenName(){
+    var el = document.getElementById('marke-name');
+    return el ? el.textContent : 'deiner Beratung';
+  }
+  function uhrzeit(){
+    var d = new Date();
+    return d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+
+  function baueBeitrag(d){
+    var k = karteAus(
+      '<div class="m-kopf"><span class="m-name"></span><span class="m-rolle"></span><span class="m-zeit"></span></div>' +
+      '<p class="m-text"></p>', (d.vonMir ? 'meins' : 'mensch') + ' gelegt');
+    k.querySelector('.m-name').textContent = d.name;
+    k.querySelector('.m-rolle').textContent = d.rolle || '';
+    k.querySelector('.m-zeit').textContent = uhrzeit();
+    k.querySelector('.m-text').textContent = d.text;
+    if (d.lage) {
+      var l = document.createElement('div');
+      l.className = 'm-lage';
+      l.textContent = d.lage;
+      k.querySelector('.inhalt-k').appendChild(l);
+    }
+    return k;
+  }
+
+  /* Die Vorschläge bleiben das Letzte im Kapitel: ein Beitrag, der unter
+     Chips landet, sähe aus, als hätte der Kunde schon weitergeklickt. */
+  function haengeAn(kapitel, karte){
+    var lauf = kapitel.querySelector('.lauf');
+    var chips = lauf.querySelector(':scope > .chips:last-child');
+    if (chips) chips.remove();
+    lauf.appendChild(karte);
+    if (chips) lauf.appendChild(chips);
+  }
+
+  /* Ein Beitrag legt sich hin. Kein Blaupausen-Gitter, kein Umriss: die
+     Belichtung gehört den Konstrukten des KI-Beraters. */
+  function legeHin(k){
+    aktualisiereGriff();
+    if (reduziert) { k.classList.add('liegt'); return Promise.resolve(); }
+    requestAnimationFrame(function(){ k.classList.add('liegt'); });
+    return warte(480);
+  }
+
+  /* Ein Griff an der Karte des Menschen: antworten heißt, das Feld unten auf
+     ihn auszurichten — nicht, eine zweite Fläche zu öffnen. */
+  function gibAntwortGriff(k){
+    var lage = document.createElement('div');
+    lage.className = 'm-tun';
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = 'Antworten';
+    b.addEventListener('click', function(){ richteAn(ICH.name); });
+    lage.appendChild(b);
+    k.querySelector('.inhalt-k').appendChild(lage);
+  }
+
+  var anWen = null;
+  function richteAn(name){
+    anWen = name;
+    var zeile = document.getElementById('an-wen');
+    document.getElementById('aw-text').textContent = 'An ' + name;
+    zeile.hidden = false;
+    var feld = document.getElementById('frage');
+    feld.placeholder = rede('Schreib an ' + name, 'Schreiben Sie an ' + name);
+    feld.setAttribute('aria-label', 'Nachricht an ' + name);
+    /* Der Hinweis unter dem Feld gilt der Maschine — jetzt gilt er einem
+       Menschen, also sagt er das auch. */
+    var mh = document.getElementById('mensch-hinweis');
+    mh.textContent = 'Das liest ein Mensch: ' + name + ' bei ' + markenName() + '.';
+    mh.hidden = false;
+    document.getElementById('ki-hinweis').hidden = true;
+    feld.focus();
+  }
+  function zurueckZumBerater(){
+    if (!anWen) return;
+    anWen = null;
+    document.getElementById('an-wen').hidden = true;
+    var feld = document.getElementById('frage');
+    feld.placeholder = rede('Frag deine Beratung', 'Fragen Sie Ihre Beratung');
+    feld.setAttribute('aria-label', 'Frage an die Beratung');
+    document.getElementById('mensch-hinweis').hidden = true;
+    document.getElementById('ki-hinweis').hidden = false;
+  }
+
+  /* Vorführung: was Dr. Vogelsang der Reihe nach zurückschreibt. Im Produkt
+     tippt hier ein Mensch. */
+  var ANTWORTEN = [
+    function(){ return rede('Angekommen. Ich sehe es mir bis Donnerstag an und bringe die Zahlen mit — wenn es vorher brennt, ruf mich an.',
+                            'Angekommen. Ich sehe es mir bis Donnerstag an und bringe die Zahlen mit — wenn es vorher brennt, rufen Sie mich an.'); },
+    function(){ return rede('Notiert, das nehme ich in den Termin mit. Der KI-Berater hat deine Zahlen, ich muss dich also nichts zweimal fragen.',
+                            'Notiert, das nehme ich in den Termin mit. Der KI-Berater hat Ihre Zahlen, ich muss Sie also nichts zweimal fragen.'); }
+  ];
+  var antwortIndex = 0;
+
+  async function schickeAnMensch(text){
+    var kapitel = aktuellesKapitel || neuesKapitel(rede('An Dr. Anna Vogelsang', 'An Dr. Anna Vogelsang'));
+    if (kapitel.classList.contains('zu')) klappeAuf(kapitel);
+    beschaeftigt = true;
+    kamera.start();
+    var meins = baueBeitrag({
+      vonMir: true,
+      name: rede('Du', 'Sie'),
+      rolle: '',
+      text: text,
+      /* Ehrlich statt hektisch: ein Mensch antwortet nicht in Sekunden — und
+         das Gespräch steht solange trotzdem nicht still. */
+      lage: rede('Liegt bei ' + ICH.name + '. Sie antwortet meist noch am selben Tag; solange kannst du hier weiterfragen.',
+                 'Liegt bei ' + ICH.name + '. Sie antwortet meist noch am selben Tag; solange können Sie hier weiterfragen.')
+    });
+    haengeAn(kapitel, meins);
+    runter();
+    await legeHin(meins);
+    kamera.halt();
+    nichtMehrBeschaeftigt();
+
+    /* Vorführung: die Antwort kommt nach kurzer Zeit. Nimmt der Kunde die
+       Freigabe in der Zwischenzeit zurück, kommt sie gar nicht — dann liest
+       drüben niemand mehr mit. */
+    await warte(7000);
+    if (!freigabeGilt()) return;
+    var satz = ANTWORTEN[Math.min(antwortIndex, ANTWORTEN.length - 1)]();
+    antwortIndex++;
+    await meldeMensch(kapitel, satz);
+  }
+
+  /* Ein Beitrag des Menschen kommt an — von selbst oder als Antwort. Schreibt
+     der KI-Berater gerade, wartet er, statt ihm ins Wort zu fallen. */
+  async function meldeMensch(kapitel, text){
+    if (beschaeftigt) { wartendeBeitraege.push({kapitel: kapitel, text: text}); return; }
+    beschaeftigt = true;
+    kamera.start();
+    if (kapitel.classList.contains('zu')) klappeAuf(kapitel);
+    var k = baueBeitrag({name: ICH.name, rolle: markenName(), text: text});
+    haengeAn(kapitel, k);
+    runter();
+    await legeHin(k);
+    gibAntwortGriff(k);
+    kamera.halt();
+    nichtMehrBeschaeftigt();
+  }
+
+  /* Der Weg des Menschen ins Gespräch führt ausschließlich über die Freigabe.
+     Sie ist damit nicht länger nur eine Datenschutz-Einstellung, sondern die
+     Tür: dahinter steht jemand. */
+  var annaImStrang = false, annaWarDa = false, annaKommt = null;
+  function freigabeGilt(){
+    var k = document.getElementById('freigabe');
+    return !!k && k.getAttribute('aria-pressed') === 'true';
+  }
+  function meldeDichAn(){
+    if (annaImStrang) return;
+    annaImStrang = true;
+    var wieder = annaWarDa;
+    annaWarDa = true;
+    clearTimeout(annaKommt);
+    annaKommt = setTimeout(function(){
+      /* Ohne offenes Kapitel gibt es nichts mitzulesen — dann hat sie auch
+         nichts zu sagen. */
+      if (!freigabeGilt() || !aktuellesKapitel) return;
+      meldeMensch(aktuellesKapitel, wieder
+        ? rede('Wieder da, ich lese ab jetzt mit.', 'Wieder da, ich lese ab jetzt mit.')
+        : rede('Ich bin’s, Anna Vogelsang. Ich lese ab jetzt mit — das spart uns am Donnerstag das halbe Nacherzählen. Was du hier siehst, sehe ich auch: schreib mir einfach, wenn dir eine Zahl komisch vorkommt.',
+               'Ich bin’s, Anna Vogelsang. Ich lese ab jetzt mit — das spart uns am Donnerstag das halbe Nacherzählen. Was Sie hier sehen, sehe ich auch: schreiben Sie mir einfach, wenn Ihnen eine Zahl komisch vorkommt.'));
+    }, reduziert ? 700 : 5500);
+  }
+  /* Zurückgenommene Freigabe heißt: sie liest nicht mehr, also kann sie auch
+     nicht mehr angeschrieben werden. Das muss dastehen — sonst tippt der Kunde
+     weiter an jemanden, der nicht mehr im Raum ist. */
+  function annaGehtRaus(){
+    clearTimeout(annaKommt);
+    if (!annaImStrang) return;
+    annaImStrang = false;
+    zurueckZumBerater();
+    document.querySelectorAll('#akte .karte.mensch .m-tun').forEach(function(x){ x.remove(); });
+    if (!aktuellesKapitel) return;
+    var k = baueGrenze({
+      titel: ICH.name + ' liest ab jetzt nicht mehr mit',
+      text: rede('Was sie geschrieben hat, bleibt bei dir — sie sieht nur nicht mehr, wie es hier weitergeht. Gib das Gespräch wieder frei, und ihr redet weiter.',
+                 'Was sie geschrieben hat, bleibt bei Ihnen — sie sieht nur nicht mehr, wie es hier weitergeht. Geben Sie das Gespräch wieder frei, und Sie reden weiter.')
+    });
+    haengeAn(aktuellesKapitel, k);
+    runter();
+    materialisiere(k);
+  }
+
   function baueBestaetigung(text, sk){
     return karteAus(
       '<div class="bestaetigung"><svg viewBox="0 0 44 44" aria-hidden="true">' +
@@ -1888,6 +2156,12 @@ body.blatt-offen{overflow:hidden}
       geteilt = neu;
       try { sessionStorage.setItem('freigabe', geteilt ? '1' : '0'); } catch (e) {}
       male();
+      /* Die Freigabe ist die Tür, durch die ein Mensch ins Gespräch kommt
+         (Häppchen D2): wer nicht mitliest, kann nicht mitreden. Also meldet
+         sich die Beraterin, sobald sie lesen darf — und verstummt, sobald die
+         Freigabe zurückgenommen wird. */
+      if (geteilt) meldeDichAn();
+      else annaGehtRaus();
     }
     knopf.addEventListener('click', function(e){
       e.stopPropagation();
@@ -1923,11 +2197,11 @@ body.blatt-offen{overflow:hidden}
     {titel: function(){ return rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'); },
       text: function(){ return 'Der unterschriebene Rahmenvertrag Stahl fehlt Dr. Anna Vogelsang.'; },
       zeit: 'vor 20 Minuten', neu: true,
-      tue: function(){ frageStellen('Was brauchst du von mir?'); }},
+      tue: function(){ frageStellen('Was brauchst du von mir?', true); }},
     {titel: function(){ return rede('Dein Termin steht', 'Ihr Termin steht'); },
       text: function(){ return rede('Donnerstag, 10:00 mit Dr. Anna Vogelsang — sie hat deine Anfrage angenommen.', 'Donnerstag, 10:00 mit Dr. Anna Vogelsang — sie hat Ihre Anfrage angenommen.'); },
       zeit: 'gerade eben', neu: true,
-      tue: function(){ frageStellen('Welche Termine stehen an?'); }},
+      tue: function(){ frageStellen('Welche Termine stehen an?', true); }},
     {titel: function(){ return rede('Neues Dokument für dich', 'Neues Dokument für Sie'); },
       text: function(){ return rede('Preismodell Benchmark liegt in deinen Unterlagen.', 'Preismodell Benchmark liegt in Ihren Unterlagen.'); },
       zeit: 'vor 2 Stunden', neu: true,
@@ -1935,7 +2209,7 @@ body.blatt-offen{overflow:hidden}
     {titel: function(){ return rede('Antwort auf deine Anfrage', 'Antwort auf Ihre Anfrage'); },
       text: function(){ return 'Das Jahresgespräch ist bestätigt.'; },
       zeit: 'gestern', neu: false,
-      tue: function(){ frageStellen('Welche Termine stehen an?'); }}
+      tue: function(){ frageStellen('Welche Termine stehen an?', true); }}
   ]});
 
   /* ---------- Die Gesprächsliste: jedes Gespräch hat seinen Raum ---------- */
@@ -2204,6 +2478,10 @@ body.blatt-offen{overflow:hidden}
       zeichneAnlagen();
     }
     runter();
+    /* Liegt die Freigabe schon vor, wenn das erste Kapitel entsteht, meldet
+       sich die Beraterin hier — sonst käme sie nur, wenn der Schalter genau
+       jetzt umgelegt wird (D2). */
+    if (freigabeGilt()) meldeDichAn();
     return sec;
   }
 
@@ -2213,7 +2491,7 @@ body.blatt-offen{overflow:hidden}
     liste.forEach(function(c, i){
       var b = document.createElement('button');
       b.type = 'button'; b.textContent = c;
-      b.addEventListener('click', function(){ frageStellen(c); });
+      b.addEventListener('click', function(){ frageStellen(c, true); });
       lage.appendChild(b);
       setTimeout(function(){ b.classList.add('da'); }, reduziert ? 0 : 120 * i + 60);
     });
@@ -2270,8 +2548,9 @@ body.blatt-offen{overflow:hidden}
       if (s.bitten) {
         if (!window.Bitten) continue;
         var alle = Bitten.liste();
-        var laufend = alle.filter(function(b){ return Bitten.stand(b) !== 'erledigt'; });
-        var zeigen = laufend.length ? laufend : alle;
+        var offene = alle.filter(function(b){ return Bitten.stand(b) === 'offen'; });
+        var wartende = alle.filter(function(b){ return Bitten.stand(b) === 'rueckfrage'; });
+        var zeigen = offene.length ? offene : (wartende.length ? wartende : alle);
         for (var jb = 0; jb < zeigen.length; jb++) {
           var kb = baueBitte(zeigen[jb].id);
           if (!kb) continue;
@@ -2446,6 +2725,9 @@ body.blatt-offen{overflow:hidden}
         {bitten: true},
         {t: function(){
           var n = window.Bitten ? Bitten.offen() : 0;
+          var w2 = window.Bitten ? Bitten.wartend() : 0;
+          if (!n && w2) return rede('Mehr brauche ich nicht. Sobald Dr. Anna Vogelsang deine Rückfrage beantwortet hat, geht es weiter.',
+                                    'Mehr brauche ich nicht. Sobald Dr. Anna Vogelsang Ihre Rückfrage beantwortet hat, geht es weiter.');
           if (!n) return 'Mehr brauche ich nicht. Ich rechne weiter und melde mich, sobald das Ergebnis steht.';
           return rede('Mehr brauche ich nicht. Was du hier erledigst, hat deine Beratung sofort — du musst es niemandem nachschicken.',
                       'Mehr brauche ich nicht. Was Sie hier erledigen, hat Ihre Beratung sofort — Sie müssen es niemandem nachschicken.');
@@ -2903,10 +3185,21 @@ body.blatt-offen{overflow:hidden}
     geduldTimer = setTimeout(function(){ h.classList.remove('da'); }, 2200);
   }
 
-  function frageStellen(text){
+  /* Eine Frage geht an den KI-Berater, eine Nachricht an einen Menschen. Was
+     von beidem gilt, sagt der Adressat an der Eingabe (D2). Chips, Glocke und
+     Startvorschläge sind immer Fragen an den KI-Berater — sie holen den
+     Adressaten deshalb zurück, statt ihre Frage einem Menschen zu schicken. */
+  function frageStellen(text, anKi){
     if (beschaeftigt) { zeigeGeduld(); return; }
+    if (anKi) zurueckZumBerater();
     var t = text.trim();
     if (!t && !wartendeAnlagen.length) return;
+    if (anWen) {
+      if (!t) return;
+      document.getElementById('frage').value = '';
+      schickeAnMensch(t);
+      return;
+    }
     if (!t) t = 'Schau dir das mal an.';
     var mitgebracht = wartendeAnlagen.length;
     document.getElementById('frage').value = '';
@@ -2928,6 +3221,7 @@ body.blatt-offen{overflow:hidden}
   document.getElementById('senden').addEventListener('click', function(){
     frageStellen(document.getElementById('frage').value);
   });
+  document.getElementById('aw-ab').addEventListener('click', zurueckZumBerater);
   document.getElementById('frage').addEventListener('keydown', function(e){
     if (e.key === 'Enter') frageStellen(this.value);
   });
@@ -2942,7 +3236,7 @@ body.blatt-offen{overflow:hidden}
       var kapitel = document.querySelectorAll('#akte .kapitel');
       var leer = true;
       kapitel.forEach(function(kap){
-        var karten = kap.querySelectorAll('.lauf .karte');
+        var karten = kap.querySelectorAll('.lauf .karte:not(.mensch):not(.meins)');
         if (!karten.length) return;
         leer = false;
         var h = document.createElement('h3');
@@ -3013,9 +3307,14 @@ body.blatt-offen{overflow:hidden}
       anredeSie = m.anrede === 'sie';
       /* Seiten-Eigenes, das der Kern nicht kennt */
       beschrifteAkte();
-      /* Der Baustein Bitten redet mit: hier wechselt die Anrede im Stehen,
-         auf den anderen Flächen lädt die Vorführung neu. */
-      if (window.Bitten) Bitten.anrede(m.anrede === 'sie');
+      /* Der Baustein Bitten redet mit: hier wechselt die Marke im Stehen,
+         auf den anderen Flächen lädt die Vorführung neu. Beides muss dasselbe
+         bedeuten — sonst stünde hier erledigt, was die Übersicht gleich
+         wieder offen zeigt. */
+      if (window.Bitten) { Bitten.marke(m.name); Bitten.anrede(m.anrede === 'sie'); }
+      /* Steht ein Mensch als Adressat da, hat der Kern gerade dessen Platzhalter
+         mit „Frag deine Beratung" überschrieben — hier kommt er zurück (D2). */
+      if (anWen) richteAn(anWen);
       document.querySelector('#freigabe-frage p').innerHTML =
         '<strong id="ff-marke"></strong> ' +
         rede('kann dann <strong>dieses eine Gespräch</strong> lesen — samt Karten und Dokumenten. Andere Gespräche bleiben privat. Du kannst das jederzeit zurücknehmen.',
@@ -3073,7 +3372,7 @@ body.blatt-offen{overflow:hidden}
           b.appendChild(z);
           b.setAttribute('aria-label', text + ' ' + c.zahl + ' offen');
         }
-        b.addEventListener('click', function(){ frageStellen(text); });
+        b.addEventListener('click', function(){ frageStellen(text, true); });
         lage.appendChild(b);
         setTimeout(function(){ b.classList.add('da'); }, reduziert ? 0 : 140 * i + 100);
       });
@@ -3084,7 +3383,7 @@ body.blatt-offen{overflow:hidden}
     if (starteFrage) {
       el.textContent = ziel;
       gruss.classList.add('da');
-      setTimeout(function(){ frageStellen(starteFrage); }, 450);
+      setTimeout(function(){ frageStellen(starteFrage, true); }, 450);
       return;
     }
     if (reduziert) { el.textContent = ziel; vorgruss.classList.add('da'); gruss.classList.add('da'); chipsRein(); return; }
