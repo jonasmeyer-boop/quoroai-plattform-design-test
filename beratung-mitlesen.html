@@ -17,7 +17,9 @@
    Quelle auf, deren Fundstelle gerade im Blick ist.
    V2 (Review): die Quelle heißt „Wissen der Beratung" statt „quoroAI-Wissen"
    — das Wissen gehört der Beratung, nicht quoroAI (siehe beratung-wissen.html).
-   Marker: BERATUNG-MITLESEN-V4 */
+   V5 (Häppchen C4): die Lage-Spalte darf schrumpfen (minmax statt 1fr), und
+   der Kreis des Beraters um das Ergebnis bleibt in der Karte.
+   Marker: BERATUNG-MITLESEN-V5 */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -294,7 +296,10 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
 
 /* ========== Mobil: erst das Blatt, darunter Quellen und Kosten ========== */
 @media (max-width:960px){
-  #lage{grid-template-columns:1fr}
+  /* minmax(0,1fr), nicht 1fr: eine Rasterspalte ist sonst mindestens so breit
+     wie ihr breitester unteilbarer Inhalt, und die Quellen-Leiste schob die
+     Seite am schmalen Schirm über den Rand. */
+  #lage{grid-template-columns:minmax(0,1fr)}
   #leiste{position:static}
 }
 @media (max-width:700px){
@@ -305,6 +310,10 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
   #blatt{padding:24px 20px 28px}
   .hebel-reihe{grid-template-columns:1fr}
   .kapitel .frage{flex-direction:column;gap:2px}
+  /* Der Kreis des Beraters greift 14px über die Zahl hinaus. Am schmalen
+     Schirm steht die Zahl an der Kartenkante, und der Kreis wird abgeschnitten
+     — die Karte macht ihm rechts Platz. */
+  .formel .zeile-f.ergebnis{padding-right:22px}
 }
 </style>
 </head>

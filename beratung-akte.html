@@ -16,7 +16,11 @@
    zeigt, wofür das gut ist (weder Kunde noch KI sehen ihn). Der Zugang
    lässt sich sperren und wieder öffnen, das Kontingent wirkt ehrlich erst
    ab dem nächsten Monat. Chrome ist quoroAI (system.css), ruhige Fläche,
-   kein Kino — die Kapseln SIND der Moment. Marker: BERATUNG-AKTE-V5 (Anschrift deckt sich mit dem Rechnungspapier) */
+   kein Kino — die Kapseln SIND der Moment.
+   V6 (Häppchen C4): am Handy stehen die Freigabe-Kapseln unter dem
+   Dokumentnamen statt neben ihm — daneben blieb dem Namen keine Spalte,
+   und er rutschte unter das Blatt-Symbol.
+   Marker: BERATUNG-AKTE-V6 (Anschrift deckt sich mit dem Rechnungspapier) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -173,8 +177,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   .tafel{padding:18px 18px}
   .stamm{grid-template-columns:1fr}
   .paar{grid-template-columns:1fr}
-  .dok{flex-wrap:wrap}
-  .dok .frei{margin-left:50px}
+  /* Zwei Freigabe-Kapseln passen am Handy nicht neben den Namen. Sie setzen
+     sich darunter, eingerückt auf dessen Flucht — der Einzug im Polster, nicht
+     im Rand, sonst zählt er zur Breite dazu. Der Name bleibt neben dem Blatt:
+     ohne das rutschte er unter das Symbol und ließ eine leere Zeile stehen. */
+  .dok{flex-wrap:wrap;row-gap:10px}
+  .dok .d-text{flex:1 1 0;min-width:0}
+  .dok .frei{margin-left:0;flex:0 0 100%;padding-left:50px}
   .dok .hand{display:none}
 }
 </style>
@@ -217,7 +226,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     <div class="doks">
       <div class="dok">
         <span class="blatt-icon" aria-hidden="true"></span>
-        <span><span class="d-name">Monatsauswertung Juli</span><br><span class="d-meta">8 Seiten, von dir hochgeladen am 4. August</span></span>
+        <span class="d-text"><span class="d-name">Monatsauswertung Juli</span><br><span class="d-meta">8 Seiten, von dir hochgeladen am 4. August</span></span>
         <span class="frei">
           <button type="button" aria-pressed="true"><span class="zustand aktiv" aria-hidden="true"></span><span class="zustand-wort">Kunde sieht es</span></button>
           <button type="button" aria-pressed="true"><span class="zustand vorschlag" aria-hidden="true"></span><span class="zustand-wort">KI liest es</span></button>
@@ -225,7 +234,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       </div>
       <div class="dok">
         <span class="blatt-icon" aria-hidden="true"></span>
-        <span><span class="d-name">Rahmenvertrag Stahl</span><br><span class="d-meta">14 Seiten, vom Kunden hochgeladen am 12. Juni</span></span>
+        <span class="d-text"><span class="d-name">Rahmenvertrag Stahl</span><br><span class="d-meta">14 Seiten, vom Kunden hochgeladen am 12. Juni</span></span>
         <span class="frei">
           <button type="button" aria-pressed="true"><span class="zustand aktiv" aria-hidden="true"></span><span class="zustand-wort">Kunde sieht es</span></button>
           <button type="button" aria-pressed="true"><span class="zustand vorschlag" aria-hidden="true"></span><span class="zustand-wort">KI liest es</span></button>
@@ -233,7 +242,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       </div>
       <div class="dok">
         <span class="blatt-icon" aria-hidden="true"></span>
-        <span><span class="d-name">Preismodell Benchmark</span><br><span class="d-meta">12 Seiten, vom KI-Berater erstellt, gestern</span></span>
+        <span class="d-text"><span class="d-name">Preismodell Benchmark</span><br><span class="d-meta">12 Seiten, vom KI-Berater erstellt, gestern</span></span>
         <span class="frei">
           <button type="button" aria-pressed="true"><span class="zustand aktiv" aria-hidden="true"></span><span class="zustand-wort">Kunde sieht es</span></button>
           <button type="button" aria-pressed="true"><span class="zustand vorschlag" aria-hidden="true"></span><span class="zustand-wort">KI liest es</span></button>
@@ -241,7 +250,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       </div>
       <div class="dok intern">
         <span class="blatt-icon" aria-hidden="true"></span>
-        <span><span class="d-name">Honorar-Kalkulation 2026</span><br><span class="d-meta">2 Seiten, von dir, 28. Juli</span></span>
+        <span class="d-text"><span class="d-name">Honorar-Kalkulation 2026</span><br><span class="d-meta">2 Seiten, von dir, 28. Juli</span></span>
         <span class="hand">bleibt intern.</span>
         <span class="frei">
           <button type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">nur Beratung</span></button>

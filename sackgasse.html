@@ -7,7 +7,8 @@
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="system.css">
 <style>
-/* quoroai-plattform-design · Die Sackgassen des Cockpits · Marker: SACKGASSE-V3
+/* quoroai-plattform-design · Die Sackgassen des Cockpits · Marker: SACKGASSE-V4
+   V4 (Häppchen C4): Impressum und Datenschutz sind am Finger fingerhoch.
 
    Eine Fläche, drei Lagen — im Produkt sind es drei Zweige derselben Route
    (src/app/(beratung)/cockpit/page.tsx): das Konto gehört nicht hierher, es
@@ -100,6 +101,9 @@ a.haus .rein{font-size:14px;font-weight:600;color:var(--lila-700);white-space:no
 }
 .fuss a{color:var(--nebel-600);text-decoration:none}
 .fuss a:hover{color:var(--lila-700)}
+/* Impressum und Datenschutz sind Pflichtziele — am Finger brauchen sie ihre
+   Höhe, auch wenn sie klein gesetzt sind (docs/wissen/handy-durchgang.md). */
+@media (pointer:coarse){.fuss a{display:inline-flex;align-items:center;min-height:44px}}
 
 .vorfuehrung{
   position:fixed;right:22px;top:clamp(14px,3svh,26px);

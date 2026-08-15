@@ -59,7 +59,12 @@
    V37 (Häppchen C3): die Hilfe-Ebene hängt im Kopfband, die Zentrale hat eine
    Tür „Ankommen", und die Erklärstellen gelten je nach Zustand — draußen die
    Stadt, drinnen der Raum (data-hilfe-wenn).
-   Marker: BERATUNG-F-MODELL-V37 */
+   V38 (Häppchen C4, unterwegs): der Aufbaufilm passt hochkant ganz ins Bild
+   statt eine Ecke zu zeigen, die Krume trägt am Handy nur den Rückweg (den
+   Zonennamen sagt die Überschrift), die Rechts-Wörter des Kopfbands haben
+   Tippziele und liegen nicht mehr auf dem Gruß, Mandatskarten stehen
+   einspaltig, und der Zoneninhalt endet über dem Uhr-Dock.
+   Marker: BERATUNG-F-MODELL-V38 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -486,8 +491,13 @@ body.gezoomt #zonen{display:block}
      Vorschläge". Unten ginge nicht — dort teilen sich der Tisch und das
      Uhr-Dock den Rand, und beide wachsen mit ihrem Inhalt. */
   nav .nav-rechts .rechtsfuss-kopf{
-    position:fixed;right:18px;top:68px;gap:14px;font-size:11.5px;
+    position:fixed;right:18px;top:64px;gap:14px;font-size:11.5px;
   }
+  /* Frei stehend hat die Zeile Platz für echte Tippziele. rechtsfuss.js setzt
+     der Kopf-Bauform am Finger min-height:0, weil sie sonst das Kopfband
+     auseinanderdrückt — hier hängt sie darunter, also 32px wie beim festen
+     Rechts-Fuß. */
+  nav .nav-rechts .rechtsfuss-kopf a{display:inline-flex;align-items:center;min-height:32px}
   #buehne{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
   #kamera{
     position:relative;left:0;top:49%;translate:0 -50%;
@@ -495,7 +505,16 @@ body.gezoomt #zonen{display:block}
   }
   .zone .chip{font-size:11.5px;padding:6px 11px;gap:6px}
   .stift-text{font-size:14px}
-  #auftakt{left:18px;top:70px;max-width:calc(100vw - 36px)}
+  /* Die Rechts-Wörter stehen schmal auf derselben Höhe wie sonst die Krume.
+     Der Gruß setzt sich deshalb darunter — nebeneinander lagen „Guten Morgen,
+     Frau Vogelsang." und „Impressum Datenschutz" übereinander. */
+  #auftakt{left:18px;top:104px;max-width:calc(100vw - 36px)}
+  /* Quer ist der Schirm kurz: 104px schieben den Gruß in den Tisch. Dort ist
+     aber auch Breite da — der Gruß bleibt oben und weicht den Rechts-Wörtern
+     zur Seite aus statt nach unten. */
+  @media (max-height:520px){
+    #auftakt{top:70px;max-width:calc(100vw - 210px)}
+  }
   /* Der Tisch wird eine wischbare Reihe: eine Karte je Zettel,
      statt eines Stapels, der das Modell erdrückt */
   #tisch{left:0;right:0;max-width:none;bottom:calc(12px + env(safe-area-inset-bottom))}
@@ -512,14 +531,26 @@ body.gezoomt #zonen{display:block}
   }
   #tisch .t-text b{font-size:12.5px}
   .z-fuell .zustand{width:36px;height:17px}
+  /* Auf dem Handy trägt die Krume nur den Rückweg. Der Zonenname stünde
+     sonst zweimal — er ist die Überschrift direkt darunter — und „← Modell /
+     Petersen Stahlbau" lief in die Rechts-Wörter des Kopfbands hinein. */
   #krume{left:18px;top:70px}
+  #krume .trenner,#krume b{display:none}
   .inhalt{padding:138px 18px calc(56px + env(safe-area-inset-bottom))}
   .inhalt .kopf .z-fuell{flex-direction:row;align-items:center;gap:8px;margin-top:4px}
   .zeile{padding:12px 14px;gap:10px}
   .tueren .knopf{min-height:44px}
   .held{grid-template-columns:1fr}
+  /* Zwei Mandatskarten nebeneinander lassen bei 390px je 165px übrig: „Cordes
+     Logistik" bricht dann in den Deut hinein, und der Deut wird abgeschnitten.
+     Eine Karte je Zeile trägt. */
+  .flotte{grid-template-columns:1fr}
   .flotte-karte{padding:13px 14px}
   .karten,.kpis{grid-template-columns:1fr}
+  /* Den Platz fürs Uhr-Dock räumt uhr.js selbst frei (machPlatz): jede
+     Zonen-Spalte trägt data-uhr-polster und bekommt mindestens 162px. Hier
+     steht dazu nichts mehr — eine zweite Zahl wäre nur eine, die man vergisst
+     mitzuziehen. */
   #film .weiter{bottom:calc(16px + env(safe-area-inset-bottom))}
 }
 </style>
@@ -535,7 +566,7 @@ body.gezoomt #zonen{display:block}
   <div class="nav-rechts"><div data-rechtsfuss="kopf"></div><span data-hilfe-knopf></span><a class="vorschlaege" href="index.html">Alle Vorschläge</a></div>
 </nav>
 
-<button id="krume" type="button" hidden><span class="zurueck">← Modell</span><span>/</span><b id="krume-ziel">Zone</b></button>
+<button id="krume" type="button" hidden><span class="zurueck">← Modell</span><span class="trenner">/</span><b id="krume-ziel">Zone</b></button>
 <div id="demo-hinweis">Diese Fläche entsteht gerade.</div>
 
 <div id="buehne">
@@ -1101,14 +1132,24 @@ body.gezoomt #zonen{display:block}
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.fillStyle = '#fff';
       ctx.fillRect(0, 0, innerWidth, innerHeight);
-      /* quer: einpassen ohne Beschnitt · hochkant: füllen mit Beschnitt,
-         sonst bleibt vom Film nur ein Briefschlitz zwischen weißen Flächen */
+      /* Das Modell bleibt ganz im Bild, beschnitten wird nur das Weiß, das die
+         Bilder selbst mitbringen. Hochkant füllte der Film früher den Schirm —
+         bei 390×844 blieb davon ein Viertel der Modellbreite übrig, und die
+         Stadt, um die es geht, lag außerhalb. Größer als 390×223 kann das
+         Modell dort nicht werden: es ist 1,75-mal so breit wie hoch, und ganz
+         soll es zu sehen sein. Die weißen Ränder sieht niemand — die Leinwand
+         liegt im Multiply-Modus auf weißem Papier.
+         Die beiden Zahlen sind an den Frames gemessen: das Modell füllt 91,5 %
+         der Bildbreite, seine Mitte liegt bei 55,3 % der Bildhöhe. Deshalb
+         rechnen wir mit dem Modell, nicht mit dem Bild — sonst hinge es unter
+         der Schirmmitte und die Texttafel klebte daran. */
+      var INHALT_BREIT = 0.915, INHALT_MITTE = 0.553;
       var hochkant = innerHeight > innerWidth;
-      var s = hochkant
-        ? Math.max(innerWidth / b.naturalWidth, innerHeight / b.naturalHeight)
-        : Math.min(innerWidth / b.naturalWidth, innerHeight / b.naturalHeight);
+      var s = Math.min(innerWidth / (b.naturalWidth * (hochkant ? INHALT_BREIT : 1)),
+                       innerHeight / b.naturalHeight);
       var w = b.naturalWidth * s, h = b.naturalHeight * s;
-      ctx.drawImage(b, (innerWidth - w) / 2, (innerHeight - h) / 2, w, h);
+      var y = hochkant ? innerHeight * 0.44 - h * INHALT_MITTE : (innerHeight - h) / 2;
+      ctx.drawImage(b, (innerWidth - w) / 2, y, w, h);
     }
     function spiele(){
       if (gestartet) return;

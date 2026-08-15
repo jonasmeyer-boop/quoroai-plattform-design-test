@@ -37,7 +37,9 @@
    Jahrespauschale statt an der Verrechnung, die sechs Abschläge vor dem
    Stapel gelten als gestellt, und ein schlussgerechnetes Jahr fordert keine
    Rate mehr.
-   Marker: BERATUNG-RECHNUNGEN-V8 (Pauschalen, Abschläge, Auslagen) */
+   V9 (Häppchen C4): die Beleg-Zeile ist am Handy zwei Zeilen, und
+   „Rechnungsdaten ansehen" ist ein Griff in Fingerhöhe.
+   Marker: BERATUNG-RECHNUNGEN-V9 (Pauschalen, Abschläge, Auslagen) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -104,6 +106,13 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
 .kopf .z-fuell .zustand{width:40px;height:18px}
 h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:30px}
 h3 .zu-daten{font-weight:600;color:var(--lila-700);text-decoration:none;margin-left:10px}
+/* Am Finger ist „Rechnungsdaten ansehen" ein Griff, kein Wort im Satz — also
+   volle Fingerhöhe (docs/wissen/handy-durchgang.md). inline-flex, nicht flex:
+   als Block wäre die ganze Zeilenbreite klickbar, und ein Tipp weit rechts
+   neben den Wörtern spränge zu den Rechnungsdaten. */
+@media (pointer:coarse){
+  h3 .zu-daten{display:inline-flex;align-items:center;min-height:44px}
+}
 
 .tafel{
   margin-top:12px;border-radius:var(--radius-karte);padding:22px 24px;
@@ -311,7 +320,13 @@ a.beleg-zeile{
   .tafel{padding:18px 18px}
   .papier{padding:22px 18px}
   .papier .eckdaten{text-align:left}
-  .beleg-zeile .b-recht{margin-left:50px}
+  /* Die Beleg-Zeile ist auf dem Handy zwei Zeilen: erst der Beleg, dann
+     Betrag und Zustand. Nebeneinander blieb dem Titel eine 40px-Spalte —
+     „2026-0079 für Petersen Stahlbau" stand dann Wort für Wort untereinander. */
+  a.beleg-zeile{flex-wrap:wrap;gap:10px 16px}
+  .beleg-zeile .b-text{flex:1 1 100%}
+  .beleg-zeile .b-recht{margin-left:0;width:100%;justify-content:flex-start}
+  .beleg-zeile .b-betrag{margin-right:auto}
   /* Auf dem Handy nimmt der Text die ganze Zeile; Betrag und Griff rutschen
      darunter. Sonst quetscht eine lange Herleitung — die Schlussrechnung
      nennt Pauschale, Anzahl und Summe — sich in eine 60px-Spalte. */

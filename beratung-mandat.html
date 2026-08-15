@@ -22,7 +22,9 @@
    ARIA, die Summe hat eine Quelle (das Markup), getTotalLength statt harter
    200, Enter wacht über isComposing, Kopf-Kapsel in Geschwistergröße; die
    Posten decken sich mit LEISTUNGEN-V5.
-   Marker: BERATUNG-MANDAT-V4 */
+   V5 (Häppchen C4): auf dem Handy ist der Meilenstein-Pfad eine Leiter statt
+   einer Achse, deren Hälfte hinter dem Rand liegt.
+   Marker: BERATUNG-MANDAT-V5 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -112,7 +114,32 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 #pfad text.m-name{font-weight:600;fill:var(--tinte);font-size:10.5px}
 #pfad text.geschafft-t{fill:var(--nebel-500)}
 .pfad-hand{font-family:'Caveat',cursive;font-size:19px;font-weight:700;color:var(--lila-700);rotate:-1.2deg;display:inline-block;margin-top:8px;margin-left:calc(36% - 46px)}
-@media (max-width:700px){.pfad-hand{margin-left:calc(36% - 40px)}}
+/* Die Leiter ist die Handy-Form des Pfads; am großen Schirm gilt die Achse. */
+.pfad-leiter{display:none}
+@media (max-width:700px){
+  .pfad-rolle,.pfad-hand{display:none}
+  .pfad-leiter{
+    display:block;list-style:none;margin:2px 0 0;padding:0 0 0 26px;position:relative;
+  }
+  .pfad-leiter::before{
+    content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;border-radius:2px;
+    background:linear-gradient(180deg,var(--lila-600) 0 38%,var(--nebel-300) 38%);
+  }
+  .pfad-leiter li{position:relative;padding:0 0 16px}
+  .pfad-leiter li:last-child{padding-bottom:0}
+  .pfad-leiter li::before{
+    content:"";position:absolute;left:-26px;top:4px;width:13px;height:13px;border-radius:50%;
+    background:#fff;border:2px solid var(--nebel-300);box-sizing:border-box;
+  }
+  .pfad-leiter li.geschafft::before{background:var(--lila-600);border-color:var(--lila-600)}
+  .pfad-leiter li.jetzt::before{border-color:var(--lila-600);border-width:3px}
+  .pfad-leiter b{display:block;font-size:14px;font-weight:600;letter-spacing:-.01em}
+  .pfad-leiter span{display:block;font-size:12.5px;color:var(--nebel-600);margin-top:1px}
+  .pfad-leiter em{
+    display:inline-block;font-family:'Caveat',cursive;font-style:normal;font-size:19px;
+    font-weight:700;color:var(--lila-700);rotate:-1.2deg;margin-top:4px;
+  }
+}
 @keyframes hofpuls{0%{r:9;opacity:.8}100%{r:20;opacity:0}}
 #pfad circle.hof{animation:hofpuls 2.8s var(--kurve) infinite}
 
@@ -240,6 +267,16 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       <text x="660" y="80" text-anchor="middle">Woche 6, Oktober</text>
     </svg></div>
     <span class="pfad-hand">hier stehst du.</span>
+    <!-- Auf dem Handy ist der Pfad eine Leiter statt einer Achse: die vier
+         Meilensteine stehen untereinander, keiner liegt hinter dem Rand.
+         Bewusst dieselben vier Texte wie im SVG darüber — sichtbar ist
+         immer nur eine der beiden Formen. -->
+    <ol class="pfad-leiter" aria-label="Vier Meilensteine">
+      <li class="geschafft"><b>Analyse</b><span>Juli, geschafft</span></li>
+      <li class="jetzt"><b>Preismodell</b><span>liegt beim Kunden</span><em>hier stehst du.</em></li>
+      <li><b>Staffeln umsetzen</b><span>ab September</span></li>
+      <li><b>Wirksam</b><span>Woche 6, Oktober</span></li>
+    </ol>
   </section>
 
   <h3>Aufgaben</h3>

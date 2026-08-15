@@ -17,7 +17,8 @@
    Verbrauch je Mandat mit Kontingent-Füllständen, Kosten führt der Euro.
    Chrome ist quoroAI (system.css). V2: der Rahmen-Absatz verlinkt Akte
    und Wissen als echte Räume. V5 (Häppchen C3): Hilfe-Ebene im Kopfband.
-   Marker: BERATUNG-KI-BERATER-V5 */
+   V6 (Häppchen C4): die Regler-Rinne ist am Finger 34px hoch.
+   Marker: BERATUNG-KI-BERATER-V6 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -120,6 +121,14 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   box-shadow:inset 0 1px 0 #fff, inset 0 0 0 1px var(--nebel-200), 0 4px 12px rgba(59,52,134,.28);
 }
 .regler input[type=range]:focus-visible{outline:3px solid var(--lila-400);outline-offset:2px}
+/* Am Finger wird die Rinne selbst zum Ziel: 26px trifft man beim Wischen
+   daneben. Der Daumen wächst mit — bliebe er bei 30px, stünde die harte
+   Abbruchkante der Füllung über und unter ihm frei. */
+@media (pointer:coarse){
+  .regler input[type=range]{height:34px}
+  .regler input[type=range]::-webkit-slider-thumb{width:34px;height:34px}
+  .regler input[type=range]::-moz-range-thumb{width:34px;height:34px}
+}
 .regler .pole{display:flex;justify-content:space-between;font-size:12px;color:var(--nebel-500);margin-top:6px}
 .regler .pole b{font-weight:600;color:var(--nebel-600)}
 
