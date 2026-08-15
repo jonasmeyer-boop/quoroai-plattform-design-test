@@ -6,7 +6,33 @@
 <title>Dein Berater – Übersicht</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V20 (Häppchen D2: wer geschrieben hat, steht an seinem Gespräch; nur eine Gesprächszeile trägt dessen Stand) */
+/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür
+   Marker: UEBERSICHT-V21
+
+   Häppchen D3 (Issue #40), zwei Dinge:
+
+   1. Der erste Tag ist kein leeres Cockpit, sondern ein Brief. Ein neuer Kunde
+      hat keine Gespräche, keine Kennzahlen, keine Unterlagen und keine
+      Rechnungen. Die übliche Antwort darauf sind leere Abschnitte mit „noch
+      nichts vorhanden" — sechs graue Kästen, die dem Kunden am ersten Tag
+      sagen, dass er nichts hat. Hier gibt es diese Abschnitte am ersten Tag
+      schlicht nicht. Es steht nur da, was wirklich da ist: ein Brief der
+      Beraterin mit ihrem Zeichen, die drei Dinge, die sie von ihm braucht, der
+      Weg, der vor beiden liegt, und der Kennenlern-Termin. Die Tür ins
+      Gespräch bleibt, wo sie immer ist — am ersten Tag ist sie das Wichtigste.
+
+   2. Der Projektstand ist der Meilenstein-Pfad des Mandats, aus Kundensicht.
+      Dieselben Stationen wie in beratung-mandat.html, dieselben Worte — eine
+      Quelle, zwei Sichten. Dazu, was der Kunde dort zusätzlich braucht und die
+      Beratung nicht: bei wem der Ball liegt. Der Stand ist lebendig: gibt der
+      Kunde die Abnahme oben frei, wandert der Ball hier sichtbar zu seiner
+      Beratung — die Station selbst rückt NICHT weiter, denn erreicht ist der
+      Meilenstein damit nicht.
+
+   Die Vorführung schaltet zwischen beiden Lagen; welche gilt, steht in
+   sessionStorage['lage'], dieselbe Quelle liest bitten.js.
+   Kein Deko-Punkt: die Stationsringe tragen die Stellung, nicht eine Farbe
+   neben einem Wort. */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -26,9 +52,15 @@
   --blau:#2b5fe3;
   --stift:#1d46c9;
   --linie:rgba(16,19,26,.1);
+  /* Ein 2px-Ring in --linie verschwindet auf Papier — die Stationen des Wegs
+     brauchen eine Linie, die man auch als Kreis noch sieht. */
+  --linie-kraeftig:rgba(16,19,26,.22);
   --karte:#ffffff;
   --radius:16px;
   --feder:cubic-bezier(.22,.9,.24,1);
+  /* Der Vorführungs-Schalter schwebt unten fest — der Rechts-Fuß bekommt so
+     viel Luft, dass er nicht darunter verschwindet. */
+  --rechtsfuss-luft:60px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
@@ -98,8 +130,94 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
 .chips a:hover{border-color:var(--blau)}
 .ki-hinweis{font-size:11px;color:var(--grau);opacity:.75;margin-top:12px}
 
+/* ---------- Der Brief: der erste Moment (Häppchen D3) ----------
+   Am ersten Tag weiß der Kunde nicht, wer hier für ihn arbeitet und was schon
+   passiert ist. Beides sagt kein Abschnitt, sondern ein Mensch mit Namen. */
+.brief{
+  display:flex;gap:16px;align-items:flex-start;
+  margin-top:26px;max-width:680px;padding:20px 22px;
+  border-radius:var(--radius);background:#fff;border:0.5px solid var(--linie);
+  box-shadow:0 10px 30px rgba(16,19,26,.06);
+}
+.brief-zeichen{
+  flex-shrink:0;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
+  background:var(--blau);color:#fff;font-size:14.5px;font-weight:800;letter-spacing:.02em;
+}
+.brief-text{font-size:15px;line-height:1.6;max-width:56ch}
+.brief-wer{font-size:12.5px;color:var(--grau);margin-top:10px}
+
 /* Abschnitte */
 section{margin-top:52px}
+
+/* ---------- Wo wir stehen: der Weg (Häppchen D3) ----------
+   Am breiten Schirm ein Band von links nach rechts, am Finger eine Leiter von
+   oben nach unten — dieselbe Liste, zwei Formen, kein zweites Markup. Der
+   Strich gehört den Stationen: er ist blau bis zu der, auf der man steht, und
+   grau danach. Eine Prozentzahl gäbe es hier nicht ehrlich zu rechnen. */
+.weg{
+  margin-top:14px;padding:22px 24px 20px;border-radius:var(--radius);
+  background:#fff;border:0.5px solid var(--linie);
+  box-shadow:0 10px 30px rgba(16,19,26,.06);
+}
+.weg-satz{font-size:15px;line-height:1.6;max-width:62ch}
+.pfad{list-style:none;display:grid;grid-template-columns:repeat(4,1fr);margin-top:22px}
+.pfad li{position:relative;padding:26px 14px 0 0}
+.pfad li::before{
+  content:"";position:absolute;left:0;top:5px;width:13px;height:13px;border-radius:50%;
+  background:#fff;border:2px solid var(--linie-kraeftig);box-sizing:border-box;
+}
+.pfad li::after{
+  content:"";position:absolute;left:17px;right:2px;top:10.5px;height:2px;border-radius:2px;
+  background:var(--linie-kraeftig);
+}
+.pfad li:last-child::after{display:none}
+.pfad li.geschafft::before{background:var(--blau);border-color:var(--blau)}
+.pfad li.geschafft::after{background:var(--blau)}
+.pfad li.jetzt::before{border-color:var(--blau);border-width:3px}
+.pfad b{display:block;font-size:14px;font-weight:800;letter-spacing:-.01em;color:var(--grau)}
+.pfad li.geschafft b,.pfad li.jetzt b{color:var(--tinte)}
+.pfad span{display:block;font-size:12.5px;color:var(--grau);margin-top:2px}
+.pfad li.jetzt span{color:var(--tinte);font-weight:700}
+.pfad em{
+  display:inline-block;font-family:'Caveat',cursive;font-style:normal;
+  font-size:19px;font-weight:700;color:var(--stift);rotate:-1.2deg;margin-top:6px;
+}
+@media (max-width:700px){
+  .pfad{grid-template-columns:1fr;margin-top:18px;padding-left:26px}
+  .pfad li{padding:0 0 16px}
+  .pfad li:last-child{padding-bottom:0}
+  .pfad li::before{left:-26px;top:4px}
+  .pfad li::after{
+    left:-20px;right:auto;top:19px;bottom:-2px;width:2px;height:auto;
+  }
+}
+
+/* ---------- Vorführung: welcher Tag wird gezeigt ----------
+   Oben sitzt schon das Kopfband, also steht der Schalter unten. Breit rückt er
+   an den Rand: mittig läge er quer über der Lesespalte und deckte gerade den
+   Satz zu, den man prüfen will. Schmal gibt es keinen Rand mehr, dort steht er
+   mittig. */
+.vorfuehrung{
+  position:fixed;right:22px;bottom:calc(14px + env(safe-area-inset-bottom));
+  z-index:20;display:flex;align-items:center;gap:10px;
+  padding:6px 6px 6px 14px;border-radius:999px;
+  background:rgba(255,255,255,.82);border:0.5px solid var(--linie);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 10px 26px rgba(16,19,26,.12);
+}
+.vorfuehrung > span{font-size:12px;color:var(--grau);white-space:nowrap}
+.umschalter{display:inline-flex;gap:4px;padding:4px;border-radius:999px;background:rgba(16,19,26,.05)}
+.umschalter button{
+  border:0;background:none;cursor:pointer;border-radius:999px;
+  padding:6px 13px;font-size:12.5px;font-weight:700;color:var(--grau);
+  transition:background .2s ease,color .2s ease;
+}
+.umschalter button.hier{background:var(--tinte);color:#fff}
+@media (max-width:760px){
+  .vorfuehrung{right:auto;left:50%;translate:-50% 0;padding-left:10px}
+  .vorfuehrung > span{display:none}
+  .umschalter button{padding:6px 11px;font-size:12px}
+}
 .kopfzeile{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
 .kopfzeile h2{font-size:13px;font-weight:800;color:var(--grau)}
 .kopfzeile a{font-size:13px;font-weight:700;color:var(--blau);text-decoration:none}
@@ -155,6 +273,9 @@ section{margin-top:52px}
 
 /* Termine + Anfragen nebeneinander */
 .doppel{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+/* Am ersten Tag liegt noch keine Anfrage vor. Eine leere Spalte daneben wäre
+   eine Behauptung — dann nimmt der Termin die ganze Breite. */
+.doppel.einzeln{grid-template-columns:1fr}
 .termin-lage{display:flex;align-items:center;gap:14px}
 .termin-blatt{
   width:46px;height:52px;flex-shrink:0;border-radius:10px;overflow:hidden;
@@ -289,6 +410,16 @@ section{margin-top:52px}
   </div>
   <p class="ki-hinweis"><span data-du="Du sprichst mit dem KI-Berater von " data-sie="Sie sprechen mit dem KI-Berater von ">Du sprichst mit dem KI-Berater von </span><span data-marke-name>Nordholm &amp; Partner</span>. Er ersetzt keine Rechts- oder Steuerberatung.</p>
 
+  <!-- Häppchen D3: der erste Moment. Nur am ersten Tag — danach hat der Kunde
+       lange verstanden, wer für ihn arbeitet, und der Brief wäre Möbel. -->
+  <div class="brief" id="brief" hidden>
+    <div class="brief-zeichen" aria-hidden="true">AV</div>
+    <div>
+      <p class="brief-text" id="brief-text"></p>
+      <p class="brief-wer" id="brief-wer"></p>
+    </div>
+  </div>
+
   <!-- Häppchen D1: Was von dir gebraucht wird, steht VOR allem anderen. Der
        Kunde soll es nicht suchen und nicht danach fragen müssen. -->
   <section id="zuliefern">
@@ -300,7 +431,24 @@ section{margin-top:52px}
     <div data-bitten></div>
   </section>
 
-  <section>
+  <!-- Häppchen D3: der Projektstand. Er steht direkt hinter dem, was beim
+       Kunden liegt — erst was von dir gebraucht wird, dann wo wir stehen.
+       Beides zusammen beantwortet die Frage, mit der er die Seite öffnet. -->
+  <section id="stand">
+    <!-- Bewusst ohne Griff daneben: eine Nachfrage zum Fahrplan hat im
+         Gespräch (noch) keine eigene Antwort und liefe in den Notnagel „das
+         rechne ich durch". Ein Griff, der falsch antwortet, ist schlechter als
+         keiner; die Tür ins Gespräch steht ohnehin oben auf der Seite. -->
+    <div class="kopfzeile">
+      <h2>Wo wir stehen</h2>
+    </div>
+    <div class="weg">
+      <p class="weg-satz" id="weg-satz"></p>
+      <ol class="pfad" id="pfad"></ol>
+    </div>
+  </section>
+
+  <section data-lage="laufend">
     <div class="kopfzeile">
       <h2 data-du="Aus deinen Gesprächen" data-sie="Aus Ihren Gesprächen">Aus deinen Gesprächen</h2>
     </div>
@@ -311,7 +459,7 @@ section{margin-top:52px}
     </div>
   </section>
 
-  <section>
+  <section data-lage="laufend">
     <div class="kopfzeile">
       <h2 data-du="Deine Gespräche" data-sie="Ihre Gespräche">Deine Gespräche</h2>
       <a href="gespraech.html">Neues Gespräch</a>
@@ -353,18 +501,18 @@ section{margin-top:52px}
             <button class="vb-ab" type="button" id="vb-ab">Abbrechen</button>
           </div>
         </div>
-        <div class="zeile"><div class="termin-lage"><div class="termin-blatt"><div class="tb-tag">DI</div><div class="tb-zeit">14:30</div></div><div><div class="termin-wann">Dienstag, 14:30–15:00</div><div class="termin-mit">Jahresgespräch mit dem Steuerbüro</div></div></div><span class="z-status">vor Ort</span></div>
+        <div class="zeile" data-lage="laufend"><div class="termin-lage"><div class="termin-blatt"><div class="tb-tag">DI</div><div class="tb-zeit">14:30</div></div><div><div class="termin-wann">Dienstag, 14:30–15:00</div><div class="termin-mit">Jahresgespräch mit dem Steuerbüro</div></div></div><span class="z-status">vor Ort</span></div>
       </div>
     </div>
-    <div>
+    <div data-lage="laufend">
       <div class="kopfzeile"><h2>Anfragen</h2></div>
       <div class="zeilen">
-        <div class="zeile"><span><span class="z-titel">Gespräch mit einem Menschen</span><br><span class="z-meta">An Dr. Anna Vogelsang, Wunschfenster Freitag, 9:00</span></span><span class="z-status offen">liegt vor</span></div>
+        <div class="zeile" data-lage="laufend"><span><span class="z-titel">Gespräch mit einem Menschen</span><br><span class="z-meta">An Dr. Anna Vogelsang, Wunschfenster Freitag, 9:00</span></span><span class="z-status offen">liegt vor</span></div>
       </div>
     </div>
   </section>
 
-  <section>
+  <section data-lage="laufend">
     <div class="kopfzeile">
       <h2>Unterlagen</h2>
       <a href="unterlagen.html">Alle durchsuchen</a>
@@ -375,7 +523,7 @@ section{margin-top:52px}
     </div>
   </section>
 
-  <section>
+  <section data-lage="laufend">
     <div class="kopfzeile"><h2>Zusammenarbeit</h2></div>
     <div class="fuss-links">
       <a href="leistungen.html">Leistungsnachweis<small>14,2 Std. im August</small></a>
@@ -384,15 +532,39 @@ section{margin-top:52px}
   </section>
 </main>
 
+<div class="vorfuehrung">
+  <span>Vorführung</span>
+  <!-- Kein tablist: die Knöpfe laden die Seite neu, es gibt kein Panel, auf das
+       sie zeigen könnten. Eine angesagte „Registerkarte 1 von 2" verspräche
+       genau das. Gedrückt ist gedrückt. -->
+  <div class="umschalter" role="group" aria-label="Welcher Tag wird gezeigt">
+    <button type="button" id="v-erster" aria-pressed="false">Erster Tag</button>
+    <button type="button" id="v-laufend" class="hier" aria-pressed="true">Fünfter Monat</button>
+  </div>
+</div>
+
 <script src="glocke.js"></script>
 <script src="bitten.js"></script>
 <script>
 (function(){
   'use strict';
   /* Ohne Kern bleibt die Seite bedienbar — dann eben in Standardmarke und Du-Form */
-  var Marke = window.Marke || {anwenden: function(){}, rede: function(du){ return du; }};
+  var Marke = window.Marke || {anwenden: function(){}, rede: function(du){ return du; }, daten: {name: 'Nordholm & Partner'}};
   Marke.anwenden();
   var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Welcher Tag wird gezeigt (Häppchen D3) ----------
+     Eine Quelle: bitten.js liest denselben Schlüssel und stellt seinen Bestand
+     danach. Hier wird nur gefragt, nie ein zweites Mal geschrieben. */
+  var LAGE = (window.Bitten && Bitten.lage()) || 'laufend';
+  var ersterTag = LAGE === 'erster-tag';
+  /* Am ersten Tag gibt es diese Abschnitte nicht — statt sie leer hinzustellen
+     und „noch nichts vorhanden" zu behaupten. Was fehlt, fehlt eben. */
+  if (ersterTag) {
+    document.querySelectorAll('[data-lage="laufend"]').forEach(function(el){ el.hidden = true; });
+    document.querySelector('.doppel').classList.add('einzeln');
+  }
+  var terminTag = ersterTag ? 'der Dienstag' : 'der Donnerstag';
   function zufall(a, b){ return a + Math.random() * (b - a); }
   /* Der Stift zieht seinen Anstrich, die Karten belichten gestaffelt */
   var svg = document.querySelector('.anstrich');
@@ -508,8 +680,147 @@ section{margin-top:52px}
     geheZuGespraech('Was brauchst du von mir?');
   });
 
+  /* ---------- Wo wir stehen (Häppchen D3) ----------
+     Dieselben Stationen, die die Beratung im Mandat plant (beratung-mandat.html),
+     nur aus der Sicht dessen, für den geplant wird. Was hier dazukommt und
+     drüben fehlt: bei wem der Ball liegt — die einzige Frage, die der Kunde an
+     einen Projektstand wirklich hat.
+     Der Weg zeichnet sich neu, sobald eine Bitte oben beantwortet ist. Der Ball
+     wechselt dann sichtbar die Seite; die Station selbst rückt nur weiter, wenn
+     der Meilenstein wirklich erreicht ist. */
+  /* Ohne den Baustein bleibt die Fläche lesbar — dann eben mit Ziffer */
+  function zahlwort(n){ return window.Bitten ? Bitten.zahlwort(n) : (n + ' Dinge'); }
+  function bitteStand(id){
+    if (!window.Bitten) return 'offen';
+    var b = Bitten.finde(id);
+    return b ? Bitten.stand(b) : 'offen';
+  }
+  var WEGE = {
+    'erster-tag': function(){
+      var offen = window.Bitten ? Bitten.offen() : 3;
+      var wartet = window.Bitten ? Bitten.wartend() : 0;
+      var los = offen === 0 && wartet === 0;
+      return {
+        satz: los
+          ? Marke.rede('Du hast alles geschickt. Dein KI-Berater rechnet über Nacht, und am Dienstag gehen wir gemeinsam durch, was herauskommt — damit ist das Kennenlernen durch.',
+                       'Sie haben alles geschickt. Ihr KI-Berater rechnet über Nacht, und am Dienstag gehen wir gemeinsam durch, was herauskommt — damit ist das Kennenlernen durch.')
+          : Marke.rede('Wir stehen ganz am Anfang. Sobald deine Zahlen da sind, rechnet dein KI-Berater über Nacht — die erste Einschätzung findest du am nächsten Morgen hier.',
+                       'Wir stehen ganz am Anfang. Sobald Ihre Zahlen da sind, rechnet Ihr KI-Berater über Nacht — die erste Einschätzung finden Sie am nächsten Morgen hier.'),
+        /* Kennenlernen bleibt die Station, auch wenn alles geschickt ist: der
+           Termin steht erst am Dienstag. Nur der Ball wechselt die Seite —
+           dieselbe Regel wie im laufenden Fall, ein Meilenstein gilt nicht als
+           erreicht, weil die Vorarbeit da ist (Fund aus dem Review zu D3). */
+        stationen: [
+          {name: 'Kennenlernen', stand: 'jetzt',
+           wann: los ? Marke.rede('liegt bei deiner Beratung', 'liegt bei Ihrer Beratung')
+             : (offen === 0
+                 ? Marke.rede('deine Rückfrage läuft', 'Ihre Rückfrage läuft')
+                 : Marke.rede(zahlwort(offen) + ' bei dir', zahlwort(offen) + ' bei Ihnen'))},
+          {name: 'Analyse',
+           wann: los ? 'nach dem Dienstag'
+                     : Marke.rede('sobald deine Zahlen da sind', 'sobald Ihre Zahlen da sind')},
+          {name: 'Erste Empfehlung', wann: 'etwa vier Wochen später'},
+          {name: 'Umsetzung', wann: 'im Herbst, gemeinsam'}
+        ]
+      };
+    },
+    'laufend': function(){
+      var st = bitteStand('preismodell');
+      var frei = st === 'erledigt', fragt = st === 'rueckfrage';
+      return {
+        satz: frei
+          ? Marke.rede('Freigegeben. Dr. Anna Vogelsang schneidet jetzt die Staffeln — ab September stellst du um, ab Woche 6 rechnet es sich.',
+                       'Freigegeben. Dr. Anna Vogelsang schneidet jetzt die Staffeln — ab September stellen Sie um, ab Woche 6 rechnet es sich.')
+          : fragt
+          ? Marke.rede('Wir sind beim Preismodell. Deine Rückfrage liegt bei Dr. Anna Vogelsang; sobald sie geantwortet hat, entscheidest du.',
+                       'Wir sind beim Preismodell. Ihre Rückfrage liegt bei Dr. Anna Vogelsang; sobald sie geantwortet hat, entscheiden Sie.')
+          : Marke.rede('Wir sind beim Preismodell. Es liegt bei dir — sobald du freigibst, schneidet Dr. Anna Vogelsang die Staffeln und lässt deine Preisliste neu rechnen.',
+                       'Wir sind beim Preismodell. Es liegt bei Ihnen — sobald Sie freigeben, schneidet Dr. Anna Vogelsang die Staffeln und lässt Ihre Preisliste neu rechnen.'),
+        stationen: [
+          {name: 'Analyse', stand: 'geschafft', wann: 'im Juli geschafft'},
+          {name: 'Preismodell', stand: 'jetzt',
+           wann: frei ? Marke.rede('liegt bei deiner Beratung', 'liegt bei Ihrer Beratung')
+               : fragt ? Marke.rede('deine Rückfrage läuft', 'Ihre Rückfrage läuft')
+               : Marke.rede('liegt bei dir', 'liegt bei Ihnen')},
+          {name: 'Staffeln umsetzen', wann: 'ab September'},
+          {name: 'Wirksam', wann: 'Woche 6, im Oktober'}
+        ]
+      };
+    }
+  };
+  var wegSatz = document.getElementById('weg-satz');
+  var pfad = document.getElementById('pfad');
+  function malWeg(){
+    var w = (WEGE[LAGE] || WEGE.laufend)();
+    wegSatz.textContent = w.satz;
+    pfad.textContent = '';
+    w.stationen.forEach(function(s){
+      var li = document.createElement('li');
+      if (s.stand) li.className = s.stand;
+      if (s.stand === 'jetzt') li.setAttribute('aria-current', 'step');
+      var name = document.createElement('b');
+      name.textContent = s.name;
+      var wann = document.createElement('span');
+      wann.textContent = s.wann;
+      li.appendChild(name);
+      li.appendChild(wann);
+      if (s.stand === 'jetzt') {
+        var hand = document.createElement('em');
+        hand.textContent = 'hier stehen wir.';
+        li.appendChild(hand);
+      }
+      pfad.appendChild(li);
+    });
+  }
+  malWeg();
+  if (window.Bitten) Bitten.abonniere(malWeg);
+
+  /* ---------- Der erste Tag (Häppchen D3) ----------
+     Der Unterschied ist nicht ein leerer Bildschirm mit anderen Worten, sondern
+     ein anderer Bildschirm: ein Mensch mit Namen, drei Bitten, ein Weg und ein
+     Termin. Sonst nichts. */
+  if (ersterTag) {
+    document.querySelector('.vorgruss').textContent = 'Willkommen, Herr Petersen.';
+    var brief = document.getElementById('brief');
+    brief.hidden = false;
+    document.getElementById('brief-text').textContent = Marke.rede(
+      'Ich habe deine Akte angelegt und drei Dinge notiert, die ich von dir brauche. Sobald deine Zahlen da sind, rechnet mein KI-Berater über Nacht — meine erste Einschätzung findest du am nächsten Morgen hier. Alles Weitere klären wir am Dienstag.',
+      'Ich habe Ihre Akte angelegt und drei Dinge notiert, die ich von Ihnen brauche. Sobald Ihre Zahlen da sind, rechnet mein KI-Berater über Nacht — meine erste Einschätzung finden Sie am nächsten Morgen hier. Alles Weitere klären wir am Dienstag.');
+    var beiWem = (Marke.daten && Marke.daten.name) || 'deiner Beratung';
+    document.getElementById('brief-wer').textContent = Marke.rede(
+      'Dr. Anna Vogelsang, deine Beraterin bei ' + beiWem,
+      'Dr. Anna Vogelsang, Ihre Beraterin bei ' + beiWem);
+    /* Die Chips sind die Fragen, die ein neuer Kunde wirklich hat — nicht die
+       nach einer Marge, zu der noch keine Zahl vorliegt. */
+    var ersteFragen = [
+      Marke.rede('Was machst du eigentlich für mich?', 'Was machen Sie eigentlich für mich?'),
+      'Wie läuft das hier ab?',
+      'Was kostet mich das?'
+    ];
+    document.querySelectorAll('.chips a').forEach(function(a, i){
+      a.textContent = ersteFragen[i];
+    });
+    /* Der einzige Termin, den es am ersten Tag gibt: das Kennenlernen. */
+    var t = document.getElementById('termin-beratung');
+    t.querySelector('[data-t-tag]').textContent = 'DI';
+    t.querySelector('[data-t-zeit]').textContent = '11:00';
+    t.querySelector('[data-t-wann]').textContent = 'Dienstag, 11:00–12:00';
+    t.querySelector('.termin-mit').textContent = 'Kennenlernen mit Dr. Anna Vogelsang';
+  }
+
   /* Die Glocke ist ein Baustein (glocke.js): Neuigkeiten führen zu ihrem Abschnitt */
-  Glocke.baue({eintraege: [
+  Glocke.baue({eintraege: ersterTag ? [
+    {titel: Marke.rede('Dein Zugang ist da', 'Ihr Zugang ist da'),
+     text: Marke.rede('Dr. Anna Vogelsang hat deine Akte angelegt.', 'Dr. Anna Vogelsang hat Ihre Akte angelegt.'),
+     zeit: 'gerade eben', neu: true,
+     tue: function(){ document.getElementById('brief').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'center'}); }},
+    {titel: Marke.rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'),
+     text: 'Drei Dinge, damit die Analyse anlaufen kann.', zeit: 'gerade eben', neu: true,
+     tue: function(){ document.getElementById('zuliefern').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'start'}); }},
+    {titel: Marke.rede('Dein Kennenlern-Termin steht', 'Ihr Kennenlern-Termin steht'),
+     text: 'Dienstag, 11:00 mit Dr. Anna Vogelsang.', zeit: 'vor 10 Minuten', neu: true,
+     tue: function(){ springe('Termine'); }}
+  ] : [
     {titel: 'Dr. Anna Vogelsang hat geschrieben',
      text: 'In „Warum schrumpft meine Marge?" — sie liest seit gestern mit.',
      zeit: 'vor 5 Minuten', neu: true,
@@ -558,11 +869,20 @@ section{margin-top:52px}
     var vermerk = document.createElement('div');
     vermerk.className = 'termin-mit';
     vermerk.textContent = Marke.rede(
-      'Dein Wunsch: ' + wunsch.wann + '. Bis deine Beratung antwortet, gilt der Donnerstag.',
-      'Ihr Wunsch: ' + wunsch.wann + '. Bis Ihre Beratung antwortet, gilt der Donnerstag.');
+      'Dein Wunsch: ' + wunsch.wann + '. Bis deine Beratung antwortet, gilt ' + terminTag + '.',
+      'Ihr Wunsch: ' + wunsch.wann + '. Bis Ihre Beratung antwortet, gilt ' + terminTag + '.');
     zeile.querySelector('.termin-lage > div:last-child').appendChild(vermerk);
 
-    var liste = document.querySelector('.doppel > div:last-child .zeilen');
+    /* Am ersten Tag gibt es die Spalte „Anfragen" nicht — bis zu diesem Klick.
+       Jetzt liegt eine vor, also entsteht sie; ohne das fiele die Anfrage in
+       einen versteckten Kasten und der Kunde sähe von seiner Bitte nichts
+       (Fund aus dem Review zu D3). */
+    var spalte = document.querySelector('.doppel > div:last-child');
+    if (spalte.hidden) {
+      spalte.hidden = false;
+      document.querySelector('.doppel').classList.remove('einzeln');
+    }
+    var liste = spalte.querySelector('.zeilen');
     var neu = document.createElement('div');
     neu.className = 'zeile';
     /* Der Grund ist frei getippt und wird deshalb als Text gesetzt, nicht als
@@ -584,6 +904,25 @@ section{margin-top:52px}
     neu.appendChild(stand);
     liste.prepend(neu);
     if (!reduziert) neu.scrollIntoView({behavior:'smooth', block:'nearest'});
+  });
+
+  /* ---------- Der Vorführungs-Schalter ----------
+     Ein anderer Tag ist ein anderer Besuch: die Fläche lädt neu, statt sich im
+     Stehen umzubauen. Der Stand der Bitten geht dabei bewusst auf Anfang —
+     sonst stünden am ersten Tag Dinge erledigt, die es dort nicht gibt. */
+  var schalter = {'erster-tag': document.getElementById('v-erster'), 'laufend': document.getElementById('v-laufend')};
+  Object.keys(schalter).forEach(function(k){
+    var an = k === LAGE;
+    schalter[k].classList.toggle('hier', an);
+    schalter[k].setAttribute('aria-pressed', an ? 'true' : 'false');
+    schalter[k].addEventListener('click', function(){
+      if (k === LAGE) return;
+      try {
+        sessionStorage.setItem('lage', k);
+        sessionStorage.removeItem('bitten-stand');
+      } catch (e) {}
+      location.reload();
+    });
   });
 
   function springe(ueberschrift){

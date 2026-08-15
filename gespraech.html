@@ -6,7 +6,12 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V51 (Häppchen D2: ein Mensch spricht in denselben Strang; V51 aus drei Reviews: Ankunft, Abschied, Anlagen, Warteschlange und die Kante des Grenzfalls) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V52
+   (V51: Häppchen D2, ein Mensch spricht in denselben Strang — aus drei Reviews:
+   Ankunft, Abschied, Anlagen, Warteschlange und die Kante des Grenzfalls.
+   V52: Häppchen D3 — am ersten Tag stehen im Auftakt die Fragen eines neuen
+   Kunden. Nach einer Marge zu fragen, zu der noch keine Zahl vorliegt, wäre
+   der erste Satz, mit dem die Fläche lügt.) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -959,6 +964,11 @@ body.blatt-offen{overflow:hidden}
      die Antworten des Beraters regelt im Produkt der Modell-Prompt. */
   var anredeSie = false;
   function rede(du, sie){ return anredeSie ? sie : du; }
+  /* Welcher Tag gezeigt wird (Häppchen D3). Der Baustein bitten.js führt die
+     Lage; hier wird sie nur gelesen. Am ersten Tag gibt es keine früheren
+     Gespräche, keine Neuigkeiten aus dem fünften Monat und keine Startfragen
+     nach Zahlen, die noch niemand gesehen hat. */
+  var ersterTag = !!(window.Bitten && Bitten.lage() === 'erster-tag');
   var akte = document.getElementById('akte');
   var beschaeftigt = false;
   /* Quittungen, die warten mussten, weil der Berater gerade schrieb. Wer
@@ -2289,7 +2299,19 @@ body.blatt-offen{overflow:hidden}
      Der Baustein steckt in glocke.js; hier steht nur, was drinsteht und wohin
      jeder Eintrag führt. Titel und Text sind Funktionen, weil der Wortlaut an
      der Anrede der Beratung hängt. */
-  Glocke.baue({eintraege: [
+  Glocke.baue({eintraege: ersterTag ? [
+    {titel: function(){ return rede('Dein Zugang ist da', 'Ihr Zugang ist da'); },
+      text: function(){ return rede('Dr. Anna Vogelsang hat deine Akte angelegt.', 'Dr. Anna Vogelsang hat Ihre Akte angelegt.'); },
+      zeit: 'gerade eben', neu: true,
+      tue: function(){ frageStellen('Was brauchst du von mir?', true); }},
+    {titel: function(){ return rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'); },
+      text: function(){ return 'Drei Dinge, damit die Analyse anlaufen kann.'; },
+      zeit: 'gerade eben', neu: true,
+      tue: function(){ frageStellen('Was brauchst du von mir?', true); }},
+    /* Der Kennenlern-Termin steht in der Glocke der Übersicht, wo er auch
+       hinführt. Hier fehlte ihm das Ziel: die Termin-Frage spielt das Drehbuch
+       des fünften Monats ab, und das gibt es am ersten Tag nicht. */
+  ] : [
     {titel: function(){ return rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'); },
       text: function(){ return 'Der unterschriebene Rahmenvertrag Stahl fehlt Dr. Anna Vogelsang.'; },
       zeit: 'vor 20 Minuten', neu: true,
@@ -2317,7 +2339,9 @@ body.blatt-offen{overflow:hidden}
     var neu = document.getElementById('neues-gespraech');
     /* Frühere Gespräche der Vorführung: öffnen spielt ihr Drehbuch neu an —
        im Produkt lädt hier der gespeicherte Verlauf. */
-    var FRUEHERE = [
+    /* Am ersten Tag gibt es keine früheren Gespräche. Die Liste bleibt leer,
+       statt drei Gespräche zu erfinden, die niemand geführt hat (D3). */
+    var FRUEHERE = ersterTag ? [] : [
       {frage: 'Warum schrumpft meine Marge?', zeit: 'gestern, 16:40', geteilt: true},
       {frage: 'Wie läuft mein Geschäft?', zeit: 'Montag, 9:12', geteilt: false},
       {frage: 'Was bringt mir das Preismodell?', zeit: '5. August', geteilt: false}
@@ -2625,7 +2649,12 @@ body.blatt-offen{overflow:hidden}
       if (s.chips) { zeigeChips(kapitel, s.chips); continue; }
       if (s.belege) { zeigeBelege(kapitel, s.belege); await warte(420); continue; }
       if (s.liste) {
-        for (var jl = 0; jl < s.liste.length; jl++) await stroeme(kapitel, s.liste[jl], null, 'punkt');
+        /* Auch ein Punkt darf eine Funktion sein — sonst redet er in der
+           Anrede weiter, die galt, als das Drehbuch geschrieben wurde. */
+        for (var jl = 0; jl < s.liste.length; jl++) {
+          var pt = s.liste[jl];
+          await stroeme(kapitel, typeof pt === 'function' ? pt() : pt, null, 'punkt');
+        }
         await warte(240);
         continue;
       }
@@ -2839,7 +2868,8 @@ body.blatt-offen{overflow:hidden}
           return rede('Mehr brauche ich nicht. Was du hier erledigst, hat deine Beratung sofort — du musst es niemandem nachschicken.',
                       'Mehr brauche ich nicht. Was Sie hier erledigen, hat Ihre Beratung sofort — Sie müssen es niemandem nachschicken.');
         }},
-        {chips: ['Warum schrumpft meine Marge?', 'Buch mir einen Menschen']}
+        {chips: ersterTag ? ['Wie arbeiten wir zusammen?', 'Was kostet mich das?']
+                          : ['Warum schrumpft meine Marge?', 'Buch mir einen Menschen']}
       ]},
     { probe: /(termine|kalender|steht an|anstehen)/i,
       frage: 'Welche Termine stehen an?',
@@ -2895,24 +2925,94 @@ body.blatt-offen{overflow:hidden}
       {chips: ['Wie läuft mein Geschäft?', 'Warum schrumpft meine Marge?', 'Buch mir einen Menschen']}
     ]};
 
+  /* ---------- Der erste Tag hat ein eigenes Drehbuch (Häppchen D3) ----------
+     Nicht eines NEBEN dem alten, sondern statt seiner. Der Review hat gezeigt,
+     warum: „Wie läuft das hier ab?" traf die Probe auf „läuft" und der Berater
+     legte einem Kunden, dessen Zahlen niemand gesehen hat, 412.000 € Umsatz und
+     eine Margenkurve hin. Auch über einen Folge-Vorschlag darf man dort nicht
+     hinkommen — deshalb bleibt vom Bestand nur, was ohne Zahlen wahr ist: die
+     Bitten. Alles andere ist neu und redet über die Zusammenarbeit, nicht über
+     ein Geschäft, das der Berater noch nicht kennt. */
+  if (ersterTag) {
+    var ERSTE = [
+      { probe: /(wie arbeit|zusammenarbeit|wie funktioniert|was machst du|was macht ihr|ablauf|wie läuft das)/i,
+        frage: 'Wie arbeiten wir zusammen?',
+        schritte: [
+          {t: function(){
+            return rede('Kurz gesagt: ich rechne, und Dr. Anna Vogelsang entscheidet mit dir. Vier Dinge solltest du wissen:',
+                        'Kurz gesagt: ich rechne, und Dr. Anna Vogelsang entscheidet mit Ihnen. Vier Dinge sollten Sie wissen:');
+          }},
+          {liste: [
+            function(){ return rede('Du fragst hier, wann du willst. Ich antworte mit Zahlen aus deinen Unterlagen, nicht aus dem Bauch, und zeige dir immer, woher sie kommen.',
+                                    'Sie fragen hier, wann Sie wollen. Ich antworte mit Zahlen aus Ihren Unterlagen, nicht aus dem Bauch, und zeige Ihnen immer, woher sie kommen.'); },
+            function(){ return rede('Was ich rechne, bleibt als Karte in deiner Akte stehen. Du findest es nächste Woche wieder, ohne zu suchen.',
+                                    'Was ich rechne, bleibt als Karte in Ihrer Akte stehen. Sie finden es nächste Woche wieder, ohne zu suchen.'); },
+            function(){ return rede('Jedes Gespräch gehört erst nur dir. Erst wenn du es freigibst, liest deine Beratung mit.',
+                                    'Jedes Gespräch gehört erst nur Ihnen. Erst wenn Sie es freigeben, liest Ihre Beratung mit.'); },
+            'Wird eine Entscheidung daraus, hole ich Dr. Anna Vogelsang dazu. Dafür ist sie da, nicht für das Zusammensuchen von Zahlen.'
+          ]},
+          {t: function(){
+            return rede('Was ich heute noch nicht kann: über deine Zahlen reden. Die habe ich noch nicht.',
+                        'Was ich heute noch nicht kann: über Ihre Zahlen reden. Die habe ich noch nicht.');
+          }},
+          {chips: ['Was brauchst du von mir?', 'Was kostet mich das?']}
+        ]},
+      { probe: /(kostet|kosten|preis|honorar|pauschale|teuer|rechnung)/i,
+        frage: 'Was kostet mich das?',
+        schritte: [
+          {t: function(){
+            return rede('Eine Pauschale im Monat, und die deckt alles ab: mich, Dr. Anna Vogelsang und jede Stunde, die wir für dich arbeiten. Der Betrag steht im Beratungsvertrag, der in deinen Unterlagen liegt.',
+                        'Eine Pauschale im Monat, und die deckt alles ab: mich, Dr. Anna Vogelsang und jede Stunde, die wir für Sie arbeiten. Der Betrag steht im Beratungsvertrag, der in Ihren Unterlagen liegt.');
+          }},
+          /* Kein Gedankenstrich direkt hinter der Marke: die Auszeichnung
+             schluckt den Abstand davor und es klebt „Auslagen—" zusammen. */
+          {t: function(){
+            return rede('Dazu kommen nur *Auslagen*, etwa eine Registerauskunft oder eine Fahrt zu dir. Die stehen einzeln auf deiner Rechnung, nie als Sammelposten.',
+                        'Dazu kommen nur *Auslagen*, etwa eine Registerauskunft oder eine Fahrt zu Ihnen. Die stehen einzeln auf Ihrer Rechnung, nie als Sammelposten.');
+          }, marken:['merk-auslagen']},
+          {skizze: [{art:'unterstreich', ziel:'merk-auslagen'}]},
+          {t: function(){
+            return rede('Und du siehst jederzeit, wofür: jede Stunde steht in deinem Leistungsnachweis, mit dem, was dabei herausgekommen ist.',
+                        'Und Sie sehen jederzeit, wofür: jede Stunde steht in Ihrem Leistungsnachweis, mit dem, was dabei herausgekommen ist.');
+          }},
+          {chips: ['Was brauchst du von mir?', 'Wie arbeiten wir zusammen?']}
+        ]}
+    ];
+    var BITTEN_SKRIPT = SKRIPTE.filter(function(s){ return s.frage === 'Was brauchst du von mir?'; });
+    SKRIPTE = ERSTE.concat(BITTEN_SKRIPT);
+    /* Auch der Notnagel darf am ersten Tag nichts versprechen, was er nicht
+       halten kann: ohne Zahlen rechnet niemand über Nacht. */
+    SONST = {
+      schritte: [
+        {t: function(){
+          return rede('Ehrliche Antwort: dazu kenne ich deine Zahlen noch nicht. Sobald deine Jahresabschlüsse da sind, rechne ich es dir aus.',
+                      'Ehrliche Antwort: dazu kenne ich Ihre Zahlen noch nicht. Sobald Ihre Jahresabschlüsse da sind, rechne ich es Ihnen aus.');
+        }},
+        {t: function(){
+          return rede('Deine Frage habe ich Dr. Anna Vogelsang notiert. Am Dienstag geht sie mit dir durch, was sich daraus ergibt.',
+                      'Ihre Frage habe ich Dr. Anna Vogelsang notiert. Am Dienstag geht sie mit Ihnen durch, was sich daraus ergibt.');
+        }},
+        {chips: ['Was brauchst du von mir?', 'Wie arbeiten wir zusammen?']}
+      ]};
+  }
+
   /* Wer zuliefert, bekommt eine Antwort — sonst fällt das Geschickte in ein
      Loch. Der Berater sagt in einem Satz, was er damit jetzt tut (D1).
      Das Ereignis steigt von der Karte auf, die der Kunde gedrückt hat: nur so
      landet die Antwort im richtigen Kapitel, auch wenn dieselbe Bitte in einem
      zweiten Kapitel noch einmal steht. */
+  /* Was der Berater sagt, weiß nur die Bitte selbst (bitten.js). Fest verdrahtet
+     redete er hier am ersten Tag über Staffeln, die es dort nicht gibt (Fund aus
+     dem Review zu D3). Der Notnagel bleibt für den Fall, dass eine Bitte ihren
+     Satz nicht mitbringt — er sagt dann nichts, was er nicht wissen kann. */
+  function wert(x){ return typeof x === 'function' ? x() : x; }
   function bittenSatz(b, stand){
-    if (b.art === 'datei') {
-      return rede('Angekommen. Ich lese den Vertrag und rechne den Einkaufshebel damit neu — das Ergebnis lege ich dir heute Abend in die Akte.',
-                  'Angekommen. Ich lese den Vertrag und rechne den Einkaufshebel damit neu — das Ergebnis lege ich Ihnen heute Abend in die Akte.');
-    }
-    if (b.art === 'aufgabe') {
-      return 'Notiert. Die drei nehme ich aus der Staffel heraus und rechne die Preisliste ohne sie.';
-    }
     if (stand === 'rueckfrage') {
-      return rede('Deine Rückfrage liegt bei Dr. Anna Vogelsang. Bis sie antwortet, ändere ich an den Staffeln nichts.',
-                  'Ihre Rückfrage liegt bei Dr. Anna Vogelsang. Bis sie antwortet, ändere ich an den Staffeln nichts.');
+      return wert(b.antwortRueckfrage) ||
+        rede('Deine Rückfrage liegt bei Dr. Anna Vogelsang. Bis sie antwortet, entscheide ich nichts.',
+             'Ihre Rückfrage liegt bei Dr. Anna Vogelsang. Bis sie antwortet, entscheide ich nichts.');
     }
-    return 'Danke. Ich schneide die Staffeln und melde mich, sobald die neue Preisliste steht.';
+    return wert(b.antwort) || 'Angekommen. Ich arbeite damit weiter und melde mich.';
   }
 
   /* Erledigt der Kunde eine Bitte, während der Berater noch schreibt, wartet
@@ -3449,7 +3549,11 @@ body.blatt-offen{overflow:hidden}
     var ziel = rede('Womit ringst du gerade?', 'Womit ringen Sie gerade?');
     var el = document.getElementById('gruss-text');
     var vorgruss = document.getElementById('vorgruss');
-    var startChips = ['Wie läuft mein Geschäft?', 'Warum schrumpft meine Marge?', 'Buch mir einen Menschen'];
+    /* Welcher Tag gilt, sagt derselbe Baustein, der auch die Bitten stellt
+       (Häppchen D3) — nicht ein zweiter Schlüssel, den jemand vergisst. */
+    var startChips = ersterTag
+      ? ['Wie arbeiten wir zusammen?', 'Was kostet mich das?']
+      : ['Wie läuft mein Geschäft?', 'Warum schrumpft meine Marge?', 'Buch mir einen Menschen'];
     /* Was auf den Kunden wartet, muss er nicht erst erfragen: der erste Chip
        trägt die Zahl (Häppchen D1). Wartet nichts, steht er auch nicht da. */
     var offeneBitten = window.Bitten ? Bitten.offen() : 0;

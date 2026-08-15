@@ -6,7 +6,11 @@
 <title>Dein Berater – Unterlagen</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Unterlagen: alles, was die Beratung freigegeben hat · Marker: UNTERLAGEN-V9 (Häppchen D1: die offene Bitte um eine Unterlage steht über dem Bestand) */
+/* quoroai-plattform-design · Unterlagen: alles, was die Beratung freigegeben hat
+   Marker: UNTERLAGEN-V10 (V9: Häppchen D1, die offene Bitte um eine Unterlage
+   steht über dem Bestand. V10: Häppchen D3 — am ersten Tag liegt hier genau ein
+   Dokument, der Beratungsvertrag. Ein neuer Kunde mit fünf Beratungsdokumenten
+   in der Akte wäre eine Behauptung.) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -219,8 +223,16 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
     hinweisTimer = setTimeout(function(){ h.classList.remove('da'); }, 2200);
   }
 
-  /* Demo-Bestand: Titel, Meta, Fassungen, Volltext für die Suche */
-  var DOKUMENTE = [
+  /* Demo-Bestand: Titel, Meta, Fassungen, Volltext für die Suche.
+     Am ersten Tag (Häppchen D3, Lage aus bitten.js) liegt genau ein Dokument
+     hier: der Beratungsvertrag, den die offene Abnahme oben meint. Alles andere
+     wäre eine Akte, die ein neuer Kunde nicht haben kann. */
+  var ersterTag = !!(window.Bitten && Bitten.lage() === 'erster-tag');
+  var DOKUMENTE = ersterTag ? [
+    {titel: 'Beratungsvertrag', meta: Marke.rede('4 Seiten, heute, von deiner Beratung', '4 Seiten, heute, von Ihrer Beratung'), status: 'neu',
+     text: 'Monatliche Pauschale, Laufzeit zwölf Monate, Kündigungsfrist drei Monate. Enthalten sind der KI-Berater, die Beratungsleistung und die laufende Auswertung. Auslagen werden einzeln abgerechnet.',
+     fassungen: []}
+  ] : [
     {titel: 'Preismodell Benchmark', meta: '12 Seiten, gestern, Fassung 1', status: 'neu',
      text: 'Preisanpassung von vier Prozent auf die C-Kunden bringt 38.000 Euro im Jahr. Staffeln neu geschnitten, A- und B-Kunden unberührt. Branchenschnitt sechs Prozent darüber.',
      fassungen: []},

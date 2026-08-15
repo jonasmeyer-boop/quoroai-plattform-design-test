@@ -29,8 +29,17 @@
    Für eigene Behälter (Karten im Gespräch): Bitten.inhalt(bitte) liefert den
    fertigen, bedienbaren Körper einer Bitte.
 
+   Zwei Lagen (Häppchen D3): am ersten Tag bittet die Beratung um anderes als
+   im fünften Monat. Welche Lage gilt, steht in sessionStorage['lage'] — dieselbe
+   Quelle, aus der Übersicht und Gespräch ihre Vorführung ziehen. Der Baustein
+   liest sie selbst, so wie er die Marke selbst liest; keine Fläche muss sie ihm
+   nachreichen, und keine kann sie vergessen.
+
    Markenneutral: alle Farben kommen aus den Tokens der jeweiligen Fläche.
-   Marker: BITTEN-V3 */
+   Jede Bitte bringt außerdem mit, was der Berater sagt, wenn sie erledigt ist
+   (`antwort`) — das Gespräch hatte diese Sätze fest verdrahtet und hätte am
+   ersten Tag über Staffeln geredet, die es dort nicht gibt.
+   Marker: BITTEN-V5 */
 window.Bitten = (function () {
   'use strict';
 
@@ -69,13 +78,69 @@ window.Bitten = (function () {
 
   /* ---------- Der Bestand ----------
      Vorführungsdaten zum Fall Petersen (Metallzulieferer), passend zu dem,
-     was der Berater im Gespräch rechnet. Im Produkt kommt das vom Server. */
-  var BITTEN = [
+     was der Berater im Gespräch rechnet. Im Produkt kommt das vom Server.
+
+     Am ersten Tag steht hier anderes, und zwar aus demselben Grund, aus dem
+     es überhaupt Bitten gibt: die Beratung kommt ohne diese drei Dinge nicht
+     los. Es sind dieselben drei Formen — eine Unterlage, eine Frage, eine
+     Abnahme —, damit der Kunde die Gattung am ersten Tag lernt und sie im
+     fünften Monat wiedererkennt. */
+  var ERSTER_TAG = [
+    {id: 'abschluesse', art: 'datei',
+     titel: 'Die letzten zwei Jahresabschlüsse',
+     warum: function () {
+       return rede('Ohne deine Zahlen rechne ich mit dem Branchenschnitt, und der passt auf niemanden. Mit ihnen steht meine erste Einschätzung morgen früh hier.',
+                   'Ohne Ihre Zahlen rechne ich mit dem Branchenschnitt, und der passt auf niemanden. Mit ihnen steht meine erste Einschätzung morgen früh hier.');
+     },
+     frist: 'am besten heute, dann steht sie morgen früh',
+     wer: 'Dr. Anna Vogelsang',
+     antwort: function () {
+       return rede('Angekommen. Ich lese sie heute Abend ein und rechne über Nacht — meine erste Einschätzung liegt morgen früh in deiner Akte.',
+                   'Angekommen. Ich lese sie heute Abend ein und rechne über Nacht — meine erste Einschätzung liegt morgen früh in Ihrer Akte.');
+     }},
+    {id: 'ziel', art: 'aufgabe',
+     titel: function () { return rede('Sag mir in einem Satz, was in einem Jahr anders sein soll', 'Sagen Sie mir in einem Satz, was in einem Jahr anders sein soll'); },
+     warum: function () {
+       return rede('Marge, Wachstum und Liquidität ziehen in verschiedene Richtungen — ich kann nicht an allen dreien zuerst arbeiten. Du weißt, was dich nachts wach hält, und danach richte ich die Analyse aus.',
+                   'Marge, Wachstum und Liquidität ziehen in verschiedene Richtungen — ich kann nicht an allen dreien zuerst arbeiten. Sie wissen, was Sie nachts wach hält, und danach richte ich die Analyse aus.');
+     },
+     frist: 'vor unserem Kennenlern-Termin am Dienstag',
+     wer: 'Dr. Anna Vogelsang',
+     platzhalter: 'Ein Satz reicht',
+     antwort: 'Notiert. Danach richte ich die Analyse aus, und am Dienstag fangen wir genau dort an.'},
+    {id: 'beratungsvertrag', art: 'abnahme',
+     titel: 'Den Beratungsvertrag freigeben',
+     warum: function () {
+       return rede('Pauschale, Laufzeit und was drin ist — alles steht darin. Vor deiner Freigabe arbeite ich nicht auf deine Rechnung, und der KI-Berater sieht deine Zahlen nicht.',
+                   'Pauschale, Laufzeit und was drin ist — alles steht darin. Vor Ihrer Freigabe arbeite ich nicht auf Ihre Rechnung, und der KI-Berater sieht Ihre Zahlen nicht.');
+     },
+     frist: 'vor dem ersten Termin',
+     wer: 'Dr. Anna Vogelsang',
+     woran: 'Beratungsvertrag',
+     danach: function () {
+       return rede('Freigegeben. Deine Beratung darf jetzt für dich arbeiten.',
+                   'Freigegeben. Ihre Beratung darf jetzt für Sie arbeiten.');
+     },
+     antwort: function () {
+       return rede('Freigegeben, danke. Ab jetzt darf ich für dich rechnen — sobald deine Zahlen da sind, lege ich los.',
+                   'Freigegeben, danke. Ab jetzt darf ich für Sie rechnen — sobald Ihre Zahlen da sind, lege ich los.');
+     },
+     antwortRueckfrage: function () {
+       return rede('Deine Rückfrage liegt bei Dr. Anna Vogelsang. Bis sie geantwortet hat, fasse ich deine Zahlen nicht an.',
+                   'Ihre Rückfrage liegt bei Dr. Anna Vogelsang. Bis sie geantwortet hat, fasse ich Ihre Zahlen nicht an.');
+     }}
+  ];
+
+  var LAUFEND = [
     {id: 'rahmenvertrag', art: 'datei',
      titel: 'Der unterschriebene Rahmenvertrag Stahl',
      warum: 'Meine Rechnung zum Einkauf steht auf der Fassung vom Mai. Die Preisgleitklausel endet am 30. September — steht im unterschriebenen Vertrag etwas anderes, liegt der Hebel um 21.000 € daneben.',
      frist: 'bis Freitag, sonst rechne ich ohne',
-     wer: 'Dr. Anna Vogelsang'},
+     wer: 'Dr. Anna Vogelsang',
+     antwort: function () {
+       return rede('Angekommen. Ich lese den Vertrag und rechne den Einkaufshebel damit neu — das Ergebnis lege ich dir heute Abend in die Akte.',
+                   'Angekommen. Ich lese den Vertrag und rechne den Einkaufshebel damit neu — das Ergebnis lege ich Ihnen heute Abend in die Akte.');
+     }},
     {id: 'c-kunden', art: 'aufgabe',
      titel: function () { return rede('Nenn mir deine drei wichtigsten C-Kunden', 'Nennen Sie mir Ihre drei wichtigsten C-Kunden'); },
      warum: function () {
@@ -84,7 +149,8 @@ window.Bitten = (function () {
      },
      frist: 'vor dem Termin am Donnerstag',
      wer: 'Dr. Anna Vogelsang',
-     platzhalter: 'Drei Namen reichen'},
+     platzhalter: 'Drei Namen reichen',
+     antwort: 'Notiert. Die drei nehme ich aus der Staffel heraus und rechne die Preisliste ohne sie.'},
     {id: 'preismodell', art: 'abnahme',
      titel: 'Das neue Preismodell freigeben',
      warum: function () {
@@ -93,8 +159,24 @@ window.Bitten = (function () {
      },
      frist: 'keine Eile, aber vor Woche 3',
      wer: 'Dr. Anna Vogelsang',
-     woran: 'Preismodell Benchmark'}
+     woran: 'Preismodell Benchmark',
+     antwort: 'Danke. Ich schneide die Staffeln und melde mich, sobald die neue Preisliste steht.',
+     antwortRueckfrage: function () {
+       return rede('Deine Rückfrage liegt bei Dr. Anna Vogelsang. Bis sie antwortet, ändere ich an den Staffeln nichts.',
+                   'Ihre Rückfrage liegt bei Dr. Anna Vogelsang. Bis sie antwortet, ändere ich an den Staffeln nichts.');
+     },
+     danach: function () {
+       return rede('Freigegeben. Deine Beratung setzt die Staffeln auf.',
+                   'Freigegeben. Ihre Beratung setzt die Staffeln auf.');
+     }}
   ];
+
+  /* Welche Lage gilt, sagt die Vorführung — der Baustein liest sie selbst,
+     genau wie die Marke. Eine unbekannte Lage ist die laufende. */
+  var LAGEN = {'erster-tag': ERSTER_TAG, 'laufend': LAUFEND};
+  var LAGE = 'laufend';
+  try { if (LAGEN[sessionStorage.getItem('lage')]) LAGE = sessionStorage.getItem('lage'); } catch (e) {}
+  var BITTEN = LAGEN[LAGE];
 
   var ART_WORT = {datei: 'Unterlage', aufgabe: 'Aufgabe', abnahme: 'Abnahme'};
   var ZAHLWORT = ['Nichts', 'Eine Sache', 'Zwei Dinge', 'Drei Dinge', 'Vier Dinge', 'Fünf Dinge'];
@@ -107,10 +189,10 @@ window.Bitten = (function () {
   var STAND = {};
   try {
     var abgelegt = JSON.parse(sessionStorage.getItem('bitten-stand') || 'null');
-    if (abgelegt && abgelegt.marke === MARKENNAME) STAND = abgelegt.stand || {};
+    if (abgelegt && abgelegt.marke === MARKENNAME && abgelegt.lage === LAGE) STAND = abgelegt.stand || {};
   } catch (e) { STAND = {}; }
   function merke() {
-    try { sessionStorage.setItem('bitten-stand', JSON.stringify({marke: MARKENNAME, stand: STAND})); } catch (e) {}
+    try { sessionStorage.setItem('bitten-stand', JSON.stringify({marke: MARKENNAME, lage: LAGE, stand: STAND})); } catch (e) {}
   }
 
   function wert(x) { return typeof x === 'function' ? x() : x; }
@@ -127,9 +209,13 @@ window.Bitten = (function () {
       return rede('Rückfrage gestellt: „' + eingabe(b) + '" Deine Beratung antwortet.',
                   'Rückfrage gestellt: „' + eingabe(b) + '" Ihre Beratung antwortet.');
     }
+    /* Was nach der Freigabe passiert, weiß nur die Bitte selbst — „die
+       Staffeln" gibt es am ersten Tag nicht. Ohne eigenen Satz bleibt der
+       Baustein bei dem, was in jedem Fall stimmt. */
     if (b.art === 'abnahme') {
-      return rede('Freigegeben. Deine Beratung setzt die Staffeln auf.',
-                  'Freigegeben. Ihre Beratung setzt die Staffeln auf.');
+      return b.danach ? wert(b.danach)
+        : rede('Freigegeben. Deine Beratung macht weiter.',
+               'Freigegeben. Ihre Beratung macht weiter.');
     }
     return 'Geschickt: ' + eingabe(b);
   }
@@ -218,6 +304,10 @@ window.Bitten = (function () {
         /* Am Finger trägt jeder Griff die volle Breite, statt sich zu zweit
            eine Zeile zu teilen und dabei unter die Tippgröße zu fallen */
         '.bitte-tun{flex-direction:column;align-items:stretch}' +
+        /* In einer Spalte meint flex-basis die HÖHE: die 240px, die breit ein
+           Mindestmaß waren, machten das Feld schmal 240px hoch (Fund aus der
+           Handy-Prüfung zu D3). Untereinander braucht es keine Basis mehr. */
+        '.bitte-tun input[type=text]{flex:0 0 auto}' +
         '.bitte-tun input[type=text],.bitte-haupt,.bitte-neben{width:100%}}';
     document.head.appendChild(s);
   }
@@ -490,6 +580,9 @@ window.Bitten = (function () {
   return {
     liste: liste, offen: offen, wartend: wartend, zahlwort: zahlwort, finde: finde,
     inhalt: inhalt, tafel: tafel, loese: loese, abonniere: abonniere,
-    anrede: anrede, marke: marke, stand: stand, ergebnis: ergebnis, eingabe: eingabe
+    anrede: anrede, marke: marke, stand: stand, ergebnis: ergebnis, eingabe: eingabe,
+    /* Welche Lage gilt — damit keine Fläche den Schlüssel ein zweites Mal
+       selbst aus dem sessionStorage klaubt und dabei anders schreibt */
+    lage: function () { return LAGE; }
   };
 })();
