@@ -6,7 +6,7 @@
 <title>Dein Berater – Übersicht</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V19 (Häppchen D2: wer geschrieben hat, steht an seinem Gespräch; der Klick gibt nichts frei) */
+/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V20 (Häppchen D2: wer geschrieben hat, steht an seinem Gespräch; nur eine Gesprächszeile trägt dessen Stand) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -319,7 +319,7 @@ section{margin-top:52px}
     <div class="zeilen">
       <!-- Häppchen D2: kein Postfach. Dass ein Mensch geschrieben hat, steht an
            dem Gespräch, in dem er es getan hat — nicht in einer eigenen Liste. -->
-      <a class="zeile" href="gespraech.html"><span><span class="z-titel">Warum schrumpft meine Marge?</span><br><span class="z-meta z-neu">Dr. Anna Vogelsang hat um 17:12 geschrieben</span></span><span class="z-status geteilt">freigegeben</span></a>
+      <a class="zeile" id="zeile-marge" href="gespraech.html"><span><span class="z-titel">Warum schrumpft meine Marge?</span><br><span class="z-meta z-neu">Dr. Anna Vogelsang hat um 17:12 geschrieben</span></span><span class="z-status geteilt">freigegeben</span></a>
       <a class="zeile" href="gespraech.html"><span><span class="z-titel">Wie läuft mein Geschäft?</span><br><span class="z-meta">Montag, 9:12</span></span><span class="z-status" data-du="nur für dich" data-sie="nur für Sie">nur für dich</span></a>
       <a class="zeile" href="gespraech.html"><span><span class="z-titel">Was bringt mir das Preismodell?</span><br><span class="z-meta">5. August</span></span><span class="z-status" data-du="nur für dich" data-sie="nur für Sie">nur für dich</span></a>
     </div>
@@ -424,8 +424,13 @@ section{margin-top:52px}
     try {
       if (frage) sessionStorage.setItem('starte-frage', frage);
       else sessionStorage.removeItem('starte-frage');
+      /* Nur wer eine Gesprächszeile anfasst, öffnet ein bestimmtes Gespräch
+         mit dessen Stand. Feld, Chip und Karte führen in ein Gespräch, das
+         hier niemand kennt — die rühren den Schalter nicht an, weder auf noch
+         zu. Sonst nähme ein Umweg über die Übersicht eine Freigabe zurück,
+         die der Kunde eben erst gegeben hat. */
       var geteilt = !!(zeile && zeile.querySelector('.z-status.geteilt'));
-      sessionStorage.setItem('freigabe', geteilt ? '1' : '0');
+      if (zeile) sessionStorage.setItem('freigabe', geteilt ? '1' : '0');
       /* Wer kommt, weil hier steht „Dr. Vogelsang hat geschrieben", muss ihren
          Beitrag drüben auch vorfinden. Ohne Freigabe kann sie nicht mitlesen,
          also hat sie auch nichts geschrieben. */
@@ -508,7 +513,7 @@ section{margin-top:52px}
     {titel: 'Dr. Anna Vogelsang hat geschrieben',
      text: 'In „Warum schrumpft meine Marge?" — sie liest seit gestern mit.',
      zeit: 'vor 5 Minuten', neu: true,
-     tue: function(){ geheZuGespraech('Warum schrumpft meine Marge?', document.querySelector('a.zeile:has(.z-neu)')); }},
+     tue: function(){ geheZuGespraech('Warum schrumpft meine Marge?', document.getElementById('zeile-marge')); }},
     {titel: Marke.rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'),
      text: 'Der unterschriebene Rahmenvertrag Stahl fehlt Dr. Anna Vogelsang.', zeit: 'vor 20 Minuten', neu: true,
      tue: function(){ document.getElementById('zuliefern').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'start'}); }},

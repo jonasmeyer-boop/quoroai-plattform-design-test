@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V50 (Häppchen D2: ein Mensch spricht in denselben Strang; V50 aus zwei Reviews: Ankunft, Abschied, Anlagen und die Warteschlange) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V51 (Häppchen D2: ein Mensch spricht in denselben Strang; V51 aus drei Reviews: Ankunft, Abschied, Anlagen, Warteschlange und die Kante des Grenzfalls) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -792,7 +792,11 @@ body.blatt-offen{overflow:hidden}
 
 /* Grenz-Momente: ehrlich, ruhig, mit Weg nach vorn.
    Die Kante trägt den Ernst, kein Punkt neben der Überschrift. */
-.karte.grenzfall{border-left:2px solid #a06008;border-top-left-radius:6px;border-bottom-left-radius:6px}
+/* Die Kante kommt mit dem Inhalt, nicht vor ihm: an .grenzfall allein stünde
+   sie fertig da, während daneben noch der Riss der Blaupause entsteht, und
+   ihre 6px-Ecke schnitte in die 16px-Ecken von Gitter und Umriss (Fund aus
+   dem Produkt-Repo, Übernahme A2). */
+.karte.grenzfall.belichtet{border-left:2px solid #a06008;border-top-left-radius:6px;border-bottom-left-radius:6px}
 .karte.grenzfall h3{font-size:16px;font-weight:800;letter-spacing:-.01em}
 .karte.grenzfall .grenze-text{font-size:14px;color:var(--grau);margin-top:8px;max-width:56ch}
 .karte.grenzfall .grenze-wann{
@@ -1832,27 +1836,39 @@ body.blatt-offen{overflow:hidden}
        drüben niemand mehr mit. */
     await warte(7000);
     if (!freigabeGilt()) return;
-    var satz = ANTWORTEN[Math.min(antwortIndex, ANTWORTEN.length - 1)]();
-    antwortIndex++;
     /* Hat der Kunde inzwischen weitergefragt, ist sein Blick im neuen Kapitel.
        Die Antwort kommt dorthin, wo er liest — nicht in ein zugeklapptes
        Kapitel über ihm, wo er sie nie zu sehen bekäme. */
-    await meldeMensch(aktuellesKapitel || kapitel, satz);
+    await meldeMensch(aktuellesKapitel || kapitel, function(){
+      var satz = ANTWORTEN[Math.min(antwortIndex, ANTWORTEN.length - 1)]();
+      antwortIndex++;
+      return satz;
+    });
   }
 
   /* Ein Beitrag des Menschen kommt an — von selbst oder als Antwort. Schreibt
-     der KI-Berater gerade, wartet er, statt ihm ins Wort zu fallen. */
+     der KI-Berater gerade, wartet er, statt ihm ins Wort zu fallen.
+
+     Der Text darf eine Funktion sein, und in der Regel ist er es: was sie
+     sagt, entscheidet sich im Moment des Sprechens, nicht beim Einreihen.
+     Sonst wäre ihr Satz schon verbraucht, wenn der Beitrag danach verworfen
+     wird — und ihre eigentliche Nachricht käme nie an. */
   async function meldeMensch(kapitel, text){
     if (beschaeftigt) { wartendeBeitraege.push({kapitel: kapitel, text: text}); return; }
+    if (!freigabeGilt()) return;
     annaSprach = true;
     beschaeftigt = true;
     kamera.start();
     if (kapitel.classList.contains('zu')) klappeAuf(kapitel);
-    var k = baueBeitrag({name: ICH.name, rolle: markenName(), text: text});
+    var k = baueBeitrag({name: ICH.name, rolle: markenName(),
+      text: typeof text === 'function' ? text() : text});
     haengeAn(kapitel, k);
     runter();
     await legeHin(k);
-    gibAntwortGriff(k);
+    /* Wurde die Freigabe gezogen, während ihre Karte sich hinlegte, bleibt der
+       Beitrag stehen — sie hat ihn ja geschrieben —, aber der Griff kommt
+       nicht: antworten kann man niemandem, der nicht mehr mitliest. */
+    if (freigabeGilt()) gibAntwortGriff(k);
     kamera.halt();
     nichtMehrBeschaeftigt();
   }
@@ -1888,10 +1904,12 @@ body.blatt-offen{overflow:hidden}
       /* „Sie hat gesprochen" setzt meldeMensch selbst, und zwar erst, wenn
          der Beitrag wirklich gezeichnet wird — hier wäre er womöglich nur
          eingereiht, und ein Abschied dafür wäre wieder eine Lüge. */
-      meldeMensch(aktuellesKapitel, vonMenschAngekuendigt() || (wieder
-        ? 'Wieder da, ich lese ab jetzt mit.'
-        : rede('Ich bin’s, Anna Vogelsang. Ich lese ab jetzt mit — das spart uns am Donnerstag das halbe Nacherzählen. Was du hier siehst, sehe ich auch: schreib mir einfach, wenn dir eine Zahl komisch vorkommt.',
-               'Ich bin’s, Anna Vogelsang. Ich lese ab jetzt mit — das spart uns am Donnerstag das halbe Nacherzählen. Was Sie hier sehen, sehe ich auch: schreiben Sie mir einfach, wenn Ihnen eine Zahl komisch vorkommt.')));
+      meldeMensch(aktuellesKapitel, function(){
+        return vonMenschAngekuendigt() || (wieder
+          ? 'Wieder da, ich lese ab jetzt mit.'
+          : rede('Ich bin’s, Anna Vogelsang. Ich lese ab jetzt mit — das spart uns am Donnerstag das halbe Nacherzählen. Was du hier siehst, sehe ich auch: schreib mir einfach, wenn dir eine Zahl komisch vorkommt.',
+                 'Ich bin’s, Anna Vogelsang. Ich lese ab jetzt mit — das spart uns am Donnerstag das halbe Nacherzählen. Was Sie hier sehen, sehe ich auch: schreiben Sie mir einfach, wenn Ihnen eine Zahl komisch vorkommt.'));
+      });
     }, reduziert ? 700 : (vonMenschWartet ? 1800 : 5500));
   }
   /* Wer von der Übersicht oder aus der Glocke kommt, weil dort steht, dass
