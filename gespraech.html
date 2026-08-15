@@ -6,12 +6,14 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V52
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V53
    (V51: Häppchen D2, ein Mensch spricht in denselben Strang — aus drei Reviews:
    Ankunft, Abschied, Anlagen, Warteschlange und die Kante des Grenzfalls.
    V52: Häppchen D3 — am ersten Tag stehen im Auftakt die Fragen eines neuen
    Kunden. Nach einer Marge zu fragen, zu der noch keine Zahl vorliegt, wäre
-   der erste Satz, mit dem die Fläche lügt.) */
+   der erste Satz, mit dem die Fläche lügt.
+   V53 aus dem zweiten Review: der Notnagel behauptet nicht mehr, die Zahlen
+   fehlten, wenn sie eben geschickt wurden.) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -969,6 +971,10 @@ body.blatt-offen{overflow:hidden}
      Gespräche, keine Neuigkeiten aus dem fünften Monat und keine Startfragen
      nach Zahlen, die noch niemand gesehen hat. */
   var ersterTag = !!(window.Bitten && Bitten.lage() === 'erster-tag');
+  /* Die eine Frage, die den Kunden anspricht statt nur zu benennen — und
+     deshalb die einzige, die der Anrede folgen muss. Die Probe im Drehbuch
+     greift auf „von mir" und trifft beide Formen. */
+  function brauchtFrage(){ return rede('Was brauchst du von mir?', 'Was brauchen Sie von mir?'); }
   var akte = document.getElementById('akte');
   var beschaeftigt = false;
   /* Quittungen, die warten mussten, weil der Berater gerade schrieb. Wer
@@ -2303,11 +2309,11 @@ body.blatt-offen{overflow:hidden}
     {titel: function(){ return rede('Dein Zugang ist da', 'Ihr Zugang ist da'); },
       text: function(){ return rede('Dr. Anna Vogelsang hat deine Akte angelegt.', 'Dr. Anna Vogelsang hat Ihre Akte angelegt.'); },
       zeit: 'gerade eben', neu: true,
-      tue: function(){ frageStellen('Was brauchst du von mir?', true); }},
+      tue: function(){ frageStellen(brauchtFrage(), true); }},
     {titel: function(){ return rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'); },
       text: function(){ return 'Drei Dinge, damit die Analyse anlaufen kann.'; },
       zeit: 'gerade eben', neu: true,
-      tue: function(){ frageStellen('Was brauchst du von mir?', true); }},
+      tue: function(){ frageStellen(brauchtFrage(), true); }},
     /* Der Kennenlern-Termin steht in der Glocke der Übersicht, wo er auch
        hinführt. Hier fehlte ihm das Ziel: die Termin-Frage spielt das Drehbuch
        des fünften Monats ab, und das gibt es am ersten Tag nicht. */
@@ -2315,7 +2321,7 @@ body.blatt-offen{overflow:hidden}
     {titel: function(){ return rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'); },
       text: function(){ return 'Der unterschriebene Rahmenvertrag Stahl fehlt Dr. Anna Vogelsang.'; },
       zeit: 'vor 20 Minuten', neu: true,
-      tue: function(){ frageStellen('Was brauchst du von mir?', true); }},
+      tue: function(){ frageStellen(brauchtFrage(), true); }},
     {titel: function(){ return rede('Dein Termin steht', 'Ihr Termin steht'); },
       text: function(){ return rede('Donnerstag, 10:00 mit Dr. Anna Vogelsang — sie hat deine Anfrage angenommen.', 'Donnerstag, 10:00 mit Dr. Anna Vogelsang — sie hat Ihre Anfrage angenommen.'); },
       zeit: 'gerade eben', neu: true,
@@ -2619,10 +2625,13 @@ body.blatt-offen{overflow:hidden}
   function zeigeChips(kapitel, liste){
     var lage = document.createElement('div');
     lage.className = 'chips';
+    /* Auch ein Vorschlag darf eine Funktion sein: „Was brauchst du von mir?"
+       muss unter einer Sie-Marke „Was brauchen Sie von mir?" heißen. */
     liste.forEach(function(c, i){
+      var text = typeof c === 'function' ? c() : c;
       var b = document.createElement('button');
-      b.type = 'button'; b.textContent = c;
-      b.addEventListener('click', function(){ frageStellen(c, true); });
+      b.type = 'button'; b.textContent = text;
+      b.addEventListener('click', function(){ frageStellen(text, true); });
       lage.appendChild(b);
       setTimeout(function(){ b.classList.add('da'); }, reduziert ? 0 : 120 * i + 60);
     });
@@ -2955,7 +2964,7 @@ body.blatt-offen{overflow:hidden}
             return rede('Was ich heute noch nicht kann: über deine Zahlen reden. Die habe ich noch nicht.',
                         'Was ich heute noch nicht kann: über Ihre Zahlen reden. Die habe ich noch nicht.');
           }},
-          {chips: ['Was brauchst du von mir?', 'Was kostet mich das?']}
+          {chips: [brauchtFrage, 'Was kostet mich das?']}
         ]},
       { probe: /(kostet|kosten|preis|honorar|pauschale|teuer|rechnung)/i,
         frage: 'Was kostet mich das?',
@@ -2972,10 +2981,10 @@ body.blatt-offen{overflow:hidden}
           }, marken:['merk-auslagen']},
           {skizze: [{art:'unterstreich', ziel:'merk-auslagen'}]},
           {t: function(){
-            return rede('Und du siehst jederzeit, wofür: jede Stunde steht in deinem Leistungsnachweis, mit dem, was dabei herausgekommen ist.',
-                        'Und Sie sehen jederzeit, wofür: jede Stunde steht in Ihrem Leistungsnachweis, mit dem, was dabei herausgekommen ist.');
+            return rede('Und du siehst jederzeit, wofür: sobald wir loslegen, steht jede Stunde in deinem Leistungsnachweis, mit dem, was dabei herausgekommen ist.',
+                        'Und Sie sehen jederzeit, wofür: sobald wir loslegen, steht jede Stunde in Ihrem Leistungsnachweis, mit dem, was dabei herausgekommen ist.');
           }},
-          {chips: ['Was brauchst du von mir?', 'Wie arbeiten wir zusammen?']}
+          {chips: [brauchtFrage, 'Wie arbeiten wir zusammen?']}
         ]}
     ];
     var BITTEN_SKRIPT = SKRIPTE.filter(function(s){ return s.frage === 'Was brauchst du von mir?'; });
@@ -2984,7 +2993,16 @@ body.blatt-offen{overflow:hidden}
        halten kann: ohne Zahlen rechnet niemand über Nacht. */
     SONST = {
       schritte: [
+        /* Hat der Kunde die Abschlüsse in dieser Sitzung schon geschickt, ist
+           „sobald deine Zahlen da sind" falsch — sie sind da (Fund aus dem
+           zweiten Review zu D3). */
         {t: function(){
+          var b = window.Bitten && Bitten.finde('abschluesse');
+          var da = b && Bitten.stand(b) === 'erledigt';
+          if (da) {
+            return rede('Ehrliche Antwort: das rechne ich dir aus, sobald ich deine Abschlüsse gelesen habe — die liegen seit eben bei mir.',
+                        'Ehrliche Antwort: das rechne ich Ihnen aus, sobald ich Ihre Abschlüsse gelesen habe — die liegen seit eben bei mir.');
+          }
           return rede('Ehrliche Antwort: dazu kenne ich deine Zahlen noch nicht. Sobald deine Jahresabschlüsse da sind, rechne ich es dir aus.',
                       'Ehrliche Antwort: dazu kenne ich Ihre Zahlen noch nicht. Sobald Ihre Jahresabschlüsse da sind, rechne ich es Ihnen aus.');
         }},
@@ -2992,7 +3010,7 @@ body.blatt-offen{overflow:hidden}
           return rede('Deine Frage habe ich Dr. Anna Vogelsang notiert. Am Dienstag geht sie mit dir durch, was sich daraus ergibt.',
                       'Ihre Frage habe ich Dr. Anna Vogelsang notiert. Am Dienstag geht sie mit Ihnen durch, was sich daraus ergibt.');
         }},
-        {chips: ['Was brauchst du von mir?', 'Wie arbeiten wir zusammen?']}
+        {chips: [brauchtFrage, 'Wie arbeiten wir zusammen?']}
       ]};
   }
 
@@ -3557,7 +3575,7 @@ body.blatt-offen{overflow:hidden}
     /* Was auf den Kunden wartet, muss er nicht erst erfragen: der erste Chip
        trägt die Zahl (Häppchen D1). Wartet nichts, steht er auch nicht da. */
     var offeneBitten = window.Bitten ? Bitten.offen() : 0;
-    if (offeneBitten) startChips.unshift({text: 'Was brauchst du von mir?', zahl: offeneBitten});
+    if (offeneBitten) startChips.unshift({text: brauchtFrage(), zahl: offeneBitten});
 
     /* Der Gruß kennt die Uhrzeit — wie ein Berater, nicht wie ein Formular */
     var stunde = new Date().getHours();

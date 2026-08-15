@@ -39,7 +39,9 @@
    Jede Bitte bringt außerdem mit, was der Berater sagt, wenn sie erledigt ist
    (`antwort`) — das Gespräch hatte diese Sätze fest verdrahtet und hätte am
    ersten Tag über Staffeln geredet, die es dort nicht gibt.
-   Marker: BITTEN-V5 */
+   Trägt eine Bitte ein `woran`, verlinkt die Fläche es in die Unterlagen —
+   etwas freigeben, das man nirgends lesen kann, ist keine Abnahme.
+   Marker: BITTEN-V6 */
 window.Bitten = (function () {
   'use strict';
 
@@ -55,7 +57,7 @@ window.Bitten = (function () {
     document.querySelectorAll('[data-bitte]').forEach(function (alt) {
       var b = finde(alt.dataset.bitte);
       if (!b || !alt.parentNode) return;
-      alt.parentNode.replaceChild(inhalt(b), alt);
+      alt.parentNode.replaceChild(inhalt(b, alt.dataset.woran === '1'), alt);
     });
   }
   function anrede(sie) {
@@ -175,7 +177,13 @@ window.Bitten = (function () {
      genau wie die Marke. Eine unbekannte Lage ist die laufende. */
   var LAGEN = {'erster-tag': ERSTER_TAG, 'laufend': LAUFEND};
   var LAGE = 'laufend';
-  try { if (LAGEN[sessionStorage.getItem('lage')]) LAGE = sessionStorage.getItem('lage'); } catch (e) {}
+  try {
+    var gewuenscht = sessionStorage.getItem('lage');
+    /* Eigene Schlüssel, nicht geerbte: stünde dort „constructor", wäre BITTEN
+       eine Funktion und der erste filter() risse alle Bitten auf allen Flächen
+       weg. */
+    if (Object.prototype.hasOwnProperty.call(LAGEN, gewuenscht)) LAGE = gewuenscht;
+  } catch (e) {}
   var BITTEN = LAGEN[LAGE];
 
   var ART_WORT = {datei: 'Unterlage', aufgabe: 'Aufgabe', abnahme: 'Abnahme'};
@@ -270,6 +278,11 @@ window.Bitten = (function () {
       '.bitte-titel{font-size:16px;font-weight:800;letter-spacing:-.01em;color:' + tinte + ';margin-top:4px}' +
       '.bitte.fertig .bitte-titel{color:' + grau + '}' +
       '.bitte-warum{font-size:14px;color:' + grau + ';margin-top:6px;max-width:58ch;line-height:1.55}' +
+      '.bitte-woran{font-size:12.5px;color:' + grau + ';margin-top:8px}' +
+      '.bitte-woran a{color:' + akzent + ';font-weight:700;text-decoration:none}' +
+      '.bitte-woran a:hover{text-decoration:underline}' +
+      /* Am Finger ist eine 19px hohe Zeile kein Ziel */
+      '@media (pointer:coarse){.bitte-woran a{display:inline-flex;align-items:center;min-height:44px}}' +
       '.bitte-frist{font-size:12.5px;font-weight:700;color:' + tinte + ';margin-top:10px}' +
       '.bitte-tun{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}' +
       '.bitte-tun input[type=text]{flex:1 1 240px;min-width:0;min-height:46px;padding:0 16px;' +
@@ -322,12 +335,18 @@ window.Bitten = (function () {
     return svg;
   }
 
-  function inhalt(b) {
+  /* `mitWoran`: zeigt, worum es geht, und verlinkt es in die Unterlagen. Etwas
+     freigeben, das man nirgends lesen kann, ist keine Abnahme, sondern ein
+     Haken (Fund aus dem zweiten Review zu D3). Im Gespräch bleibt der Verweis
+     aus — dort schickt keine Bitte jemanden auf eine andere Fläche, das
+     Dokument kommt dort als Karte. */
+  function inhalt(b, mitWoran) {
     stil();
     var el = document.createElement('div');
     el.className = 'bitte';
     el.dataset.bitte = b.id;
     el.dataset.art = b.art;
+    if (mitWoran) el.dataset.woran = '1';
 
     var kopf = document.createElement('div');
     kopf.className = 'bitte-kopf';
@@ -357,6 +376,17 @@ window.Bitten = (function () {
     warum.className = 'bitte-warum';
     warum.textContent = wert(b.warum);
     el.appendChild(warum);
+
+    if (mitWoran && b.woran) {
+      var woran = document.createElement('p');
+      woran.className = 'bitte-woran';
+      woran.appendChild(document.createTextNode('Es geht um '));
+      var hin = document.createElement('a');
+      hin.href = 'unterlagen.html';
+      hin.textContent = wert(b.woran);
+      woran.appendChild(hin);
+      el.appendChild(woran);
+    }
 
     /* Rückfrage gestellt: der Grund bleibt stehen, der Griff geht weg — und
        kein Haken, denn getan ist nichts. Jetzt ist die Beratung am Zug. */
@@ -551,7 +581,9 @@ window.Bitten = (function () {
         lage.appendChild(p);
         return;
       }
-      zeigen.forEach(function (b) { lage.appendChild(inhalt(b)); });
+      /* Auf einer Fläche steht der Verweis in die Unterlagen; im Gespräch, das
+         inhalt() direkt ruft, nicht. */
+      zeigen.forEach(function (b) { lage.appendChild(inhalt(b, true)); });
     }
     male();
 

@@ -7,8 +7,11 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
 /* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür
-   Marker: UEBERSICHT-V22 (V22: die Vorschläge des ersten Tages sind wortgleich
-   mit denen im Gespräch — sonst führt einer davon ins falsche Drehbuch)
+   Marker: UEBERSICHT-V23
+   (V22: die Vorschläge des ersten Tages sind wortgleich mit denen im Gespräch —
+   sonst führt einer davon ins falsche Drehbuch. V23 aus dem zweiten Review:
+   eine offene Rückfrage hat auf dem Weg einen eigenen Satz, die Glocke zählt
+   mit statt eine Drei einzufrieren, der Fuß hat Luft unter dem Schalter.)
 
    Häppchen D3 (Issue #40), zwei Dinge:
 
@@ -60,8 +63,10 @@
   --radius:16px;
   --feder:cubic-bezier(.22,.9,.24,1);
   /* Der Vorführungs-Schalter schwebt unten fest — der Rechts-Fuß bekommt so
-     viel Luft, dass er nicht darunter verschwindet. */
-  --rechtsfuss-luft:60px;
+     viel Luft, dass er nicht darunter verschwindet. Gemessen: die Pille ist
+     68px hoch und sitzt 14px über der Kante, dazu die sichere Fläche des
+     Geräts. 60px reichten nicht, Impressum lag 2px unter der Pille. */
+  --rechtsfuss-luft:104px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
@@ -701,10 +706,18 @@ section{margin-top:52px}
       var offen = window.Bitten ? Bitten.offen() : 3;
       var wartet = window.Bitten ? Bitten.wartend() : 0;
       var los = offen === 0 && wartet === 0;
+      /* Nichts mehr offen, aber eine Rückfrage läuft: dann steht es weder am
+         Anfang noch ist alles geschickt. Ohne eigenen Satz behauptete der Weg
+         „sobald deine Zahlen da sind", obwohl sie längst da sind (Fund aus dem
+         zweiten Review zu D3). */
+      var fragt = offen === 0 && wartet > 0;
       return {
         satz: los
           ? Marke.rede('Du hast alles geschickt. Dein KI-Berater rechnet über Nacht, und am Dienstag gehen wir gemeinsam durch, was herauskommt — damit ist das Kennenlernen durch.',
                        'Sie haben alles geschickt. Ihr KI-Berater rechnet über Nacht, und am Dienstag gehen wir gemeinsam durch, was herauskommt — damit ist das Kennenlernen durch.')
+          : fragt
+          ? Marke.rede('Von dir liegt alles vor. Deine Rückfrage liegt bei Dr. Anna Vogelsang — sobald sie beantwortet ist, fängt dein KI-Berater an zu rechnen.',
+                       'Von Ihnen liegt alles vor. Ihre Rückfrage liegt bei Dr. Anna Vogelsang — sobald sie beantwortet ist, fängt Ihr KI-Berater an zu rechnen.')
           : Marke.rede('Wir stehen ganz am Anfang. Sobald deine Zahlen da sind, rechnet dein KI-Berater über Nacht — die erste Einschätzung findest du am nächsten Morgen hier.',
                        'Wir stehen ganz am Anfang. Sobald Ihre Zahlen da sind, rechnet Ihr KI-Berater über Nacht — die erste Einschätzung finden Sie am nächsten Morgen hier.'),
         /* Kennenlernen bleibt die Station, auch wenn alles geschickt ist: der
@@ -719,7 +732,8 @@ section{margin-top:52px}
                  : Marke.rede(zahlwort(offen) + ' bei dir', zahlwort(offen) + ' bei Ihnen'))},
           {name: 'Analyse',
            wann: los ? 'nach dem Dienstag'
-                     : Marke.rede('sobald deine Zahlen da sind', 'sobald Ihre Zahlen da sind')},
+               : fragt ? 'sobald die Rückfrage geklärt ist'
+               : Marke.rede('sobald deine Zahlen da sind', 'sobald Ihre Zahlen da sind')},
           {name: 'Erste Empfehlung', wann: 'etwa vier Wochen später'},
           {name: 'Umsetzung', wann: 'im Herbst, gemeinsam'}
         ]
@@ -800,7 +814,7 @@ section{margin-top:52px}
     var ersteFragen = [
       'Wie arbeiten wir zusammen?',
       'Was kostet mich das?',
-      'Was brauchst du von mir?'
+      Marke.rede('Was brauchst du von mir?', 'Was brauchen Sie von mir?')
     ];
     document.querySelectorAll('.chips a').forEach(function(a, i){
       a.textContent = ersteFragen[i];
@@ -819,8 +833,15 @@ section{margin-top:52px}
      text: Marke.rede('Dr. Anna Vogelsang hat deine Akte angelegt.', 'Dr. Anna Vogelsang hat Ihre Akte angelegt.'),
      zeit: 'gerade eben', neu: true,
      tue: function(){ document.getElementById('brief').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'center'}); }},
+    /* Die Zahl kommt aus dem Baustein, nicht aus dem Text: der Stand der Bitten
+       überlebt den Neuladen, eine eingefrorene „Drei" nicht. Ist nichts mehr
+       offen, sagt der Eintrag das — statt „Nichts, damit die Analyse anlaufen
+       kann". */
     {titel: Marke.rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'),
-     text: 'Drei Dinge, damit die Analyse anlaufen kann.', zeit: 'gerade eben', neu: true,
+     text: (window.Bitten && Bitten.offen() === 0)
+       ? Marke.rede('Erledigt, sie hat alles von dir.', 'Erledigt, sie hat alles von Ihnen.')
+       : zahlwort(window.Bitten ? Bitten.offen() : 3) + ', damit die Analyse anlaufen kann.',
+     zeit: 'gerade eben', neu: true,
      tue: function(){ document.getElementById('zuliefern').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'start'}); }},
     {titel: Marke.rede('Dein Kennenlern-Termin steht', 'Ihr Kennenlern-Termin steht'),
      text: 'Dienstag, 11:00 mit Dr. Anna Vogelsang.', zeit: 'vor 10 Minuten', neu: true,
