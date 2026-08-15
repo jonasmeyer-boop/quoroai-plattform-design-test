@@ -37,7 +37,7 @@
    USt-ID hat nicht jede Beratung; das Kästchen macht aus dem leeren Feld
    eine Erklärung. Gespeichertes geht in die gemeinsame Marken-Quelle und
    steht sofort im gezeichneten Impressum daneben.
-   Marker: BERATUNG-MARKE-V4 */
+   Marker: BERATUNG-MARKE-V5 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -415,6 +415,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       <a class="knopf leise" href="impressum.html" id="k-zum-impressum">Impressum ansehen</a>
       <a class="knopf leise" href="datenschutz.html" id="k-zum-datenschutz">Datenschutzerklärung ansehen</a>
     </div>
+    <div class="k-vorschau" id="k-eigen" hidden>Die Sehprobe hat Farben und Namen gewechselt, deine Angaben hier aber stehen lassen — sie sind Eingabe, kein Regler.</div>
     <div class="k-vorschau">Beide Seiten gehören dir, nicht quoroAI — sie tragen deine Marke und deine Angaben. Gespeichertes steht dort sofort.</div>
     <div class="bestaetigt" id="k-meldung" hidden></div>
   </section>
@@ -663,12 +664,31 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
      andere ein, ohne die aktive zu wechseln */
   var gezeigteMarke = (window.Marke && window.Marke.daten && window.Marke.daten.name) || '';
 
+  /* Was zuletzt eingetragen wurde — daran erkennen wir Getipptes */
+  var eingetragen = {};
+
+  function selbstGetippt(){
+    return PFLICHT.some(function(p){
+      return wert(p.id) !== (eingetragen[p.feld] || '');
+    });
+  }
+
   function trageRecht(mk){
+    /* Farben und Namen darf eine Sehprobe wechseln, eingetippte
+       Pflichtangaben nicht: das hier ist Dateneingabe, kein Regler, und ein
+       Klick aus Neugier darf keine halbe Stunde Tipparbeit löschen. */
+    if (selbstGetippt()) {
+      var hinweis = document.getElementById('k-eigen');
+      hinweis.hidden = false;
+      maleSperre();
+      return;
+    }
     gezeigteMarke = mk.name || '';
     var r = mk.recht || {};
     PFLICHT.forEach(function(p){
       var eingabe = document.getElementById(p.id);
       eingabe.value = r[p.feld] || '';
+      eingetragen[p.feld] = eingabe.value;
       if (!p.ohne) return;
       var kasten = document.getElementById(p.ohne);
       /* Eine Sehprobe ohne Register hat keins — das ist kein Vergessen */
@@ -687,7 +707,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
        Impressum daneben „Telefon:" ohne Nummer — ein löchriges Impressum ist
        schlimmer als eines, das noch gar nicht gilt. */
     if (!document.getElementById('k-stand').classList.contains('frei')) {
-      m.textContent = 'Für diesen Raum gemerkt, aber nicht veröffentlicht: solange oben etwas fehlt, bleibt deine Adresse zu und die Rechtsseiten zeigen sie nicht.';
+      m.textContent = 'Nichts veröffentlicht: solange oben etwas fehlt, bleibt deine Adresse zu, und die Rechtsseiten zeigen deine Angaben nicht.';
       return;
     }
 
@@ -699,7 +719,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
          speichert, hängte sonst fremde Anschrift, Register und USt-ID an die
          eigene Marke, und marke.js glaubte es. */
       sessionStorage.setItem('marke-recht', JSON.stringify({name: gezeigteMarke, recht: recht}));
-      m.textContent = 'Gespeichert. Impressum und Datenschutzerklärung tragen die Angaben ab sofort — sieh sie dir daneben an.';
+      var aktiv = (window.Marke && window.Marke.daten && window.Marke.daten.name) || '';
+      /* Steht in den Feldern eine andere Marke als die geltende, gelten die
+         Angaben auch erst mit ihr — das muss die Meldung sagen, sonst schaut
+         jemand daneben ins Impressum und sieht unverändert die alte. */
+      m.textContent = gezeigteMarke === aktiv
+        ? 'Gespeichert. Impressum und Datenschutzerklärung tragen die Angaben ab sofort — sieh sie dir daneben an.'
+        : 'Gespeichert für ' + gezeigteMarke + '. Sichtbar wird es, sobald diese Marke die geltende ist — daneben steht noch ' + aktiv + '.';
     } catch (e) {
       m.textContent = 'Gespeichert für diesen Raum. Weiterreichen kann die Vorführung es hier nicht.';
     }

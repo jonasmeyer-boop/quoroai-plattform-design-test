@@ -1,6 +1,6 @@
 /* quoroai-plattform-design · Der Marken-Kern: eine Quelle für alle Flächen.
    Vier Farbregler + Anrede je Beratung; im Produkt kommt beides aus dem
-   Mandanten-Profil (agency_branding). Marker: MARKE-KERN-V6
+   Mandanten-Profil (agency_branding). Marker: MARKE-KERN-V7
 
    V4: Jede Marke trägt ihre Anbieterkennzeichnung (`recht`). Sie ist kein
    Design-Regler, sondern eine Pflichtangabe: Impressum und Datenschutz der
@@ -18,8 +18,9 @@
    V6: Was die Beratung in `beratung-marke.html` einträgt, überschreibt die
    `recht`-Felder der laufenden Sehprobe (sessionStorage `marke-recht`).
    Sonst wäre „Impressum ansehen" dort eine Behauptung: die Fläche zeigte
-   Eingefelder, das Impressum daneben aber weiter die Vorführungswerte. Die
-   Überschreibung hängt am Markennamen und fällt beim Markenwechsel weg. */
+   Eingabefelder, das Impressum daneben aber weiter die Vorführungswerte. Die
+   Überschreibung hängt am Markennamen und gilt nur für ihre Marke — schaltet
+   die Vorführung weiter, ruht sie, und mit ihrer Marke gilt sie wieder. */
 window.Marke = (function () {
   'use strict';
   var MARKEN = [

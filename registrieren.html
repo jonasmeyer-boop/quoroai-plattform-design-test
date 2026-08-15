@@ -31,7 +31,7 @@
    die Kapsel steht dabei voll und grau statt auf 18 % Baustand (das Haus ist
    fertig, es gehört nur nicht dir); und wer von der Einladung zur Anmeldung
    wechselt, landet nicht mehr in der schon erleuchteten Stadt.
-   Marker: REGISTRIEREN-V6 */
+   Marker: REGISTRIEREN-V7 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input{font-family:inherit}
@@ -158,6 +158,11 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
     position:static;justify-content:center;background:none;border:0;border-radius:0;
     backdrop-filter:none;-webkit-backdrop-filter:none;
     padding:24px 0 calc(8px + env(safe-area-inset-bottom));font-size:12.5px;
+  }
+  /* Im Fluss ist der Fuß eine gewöhnliche Fußzeile — dann gelten wieder die
+     44px der Fingerkuppe, nicht die 32px der schwebenden Glaszeile */
+  @media (pointer:coarse){
+    .spalte .rechtsfuss-fix a{min-height:44px}
   }
   .lage{grid-template-columns:1fr;height:auto;min-height:100svh;align-items:start}
   .buehne{order:-1;height:36svh}
