@@ -23,7 +23,8 @@
    Zahlenspalte. Unter 400px setzt sich die Ergebniszahl stattdessen unter
    ihr Wort, bündig mit der Spalte darüber.
    V7 (Häppchen D2): aus Mitlesen wird Mitreden — die Beratung schreibt in dasselbe Gespräch, es gibt kein Postfach.
-   Marker: BERATUNG-MITLESEN-V7 */
+   V8 (Review zu D2): der Fuß sagt, was unter ihm steht, und Strg-Enter hinterlässt keinen Absatz.
+   Marker: BERATUNG-MITLESEN-V8 */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -463,7 +464,7 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
         </div>
       </section>
 
-      <div class="blatt-fuss">Um <b>16:40</b> hat Herr Petersen dieses Gespräch freigegeben. Ende der Abschrift, 2 Fragen zwischen 16:02 und 16:40.</div>
+      <div class="blatt-fuss">Um <b>16:40</b> hat Herr Petersen dieses Gespräch freigegeben. Hier endet die Abschrift, 2 Fragen zwischen 16:02 und 16:40. Was darunter steht, hast du selbst geschrieben.</div>
 
       <!-- Häppchen D2: kein Postfach. Was du ihm sagen willst, sagst du in
            seinem Gespräch — dort, wo auch der KI-Berater steht. -->
@@ -585,7 +586,11 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
     feld.addEventListener('keydown', function(e){
       /* Absatz mit Enter, senden mit Strg-Enter: wer berät, schreibt manchmal
          mehr als eine Zeile. */
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && feld.value.trim()) knopf.click();
+      if (e.key !== 'Enter' || !(e.metaKey || e.ctrlKey) || !feld.value.trim()) return;
+      /* Ohne das trüge das Feld nach dem Senden noch den Absatz, den die
+         Voreinstellung danach einfügt. */
+      e.preventDefault();
+      knopf.click();
     });
     knopf.addEventListener('click', function(){
       var text = feld.value.trim();

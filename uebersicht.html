@@ -6,7 +6,7 @@
 <title>Dein Berater – Übersicht</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V17 (Häppchen D2: dass ein Mensch geschrieben hat, steht an seinem Gespräch — kein Postfach) */
+/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V18 (Häppchen D2: wer geschrieben hat, steht an seinem Gespräch — und der Klick löst es drüben ein) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -416,10 +416,15 @@ section{margin-top:52px}
 
   /* Die Brücke ins Gespräch: was man hier anfasst, kommt dort AN.
      Das Gespräch liest 'starte-frage' beim Laden und stellt sie sofort. */
-  function geheZuGespraech(frage){
+  function geheZuGespraech(frage, vonMensch){
     try {
       if (frage) sessionStorage.setItem('starte-frage', frage);
       else sessionStorage.removeItem('starte-frage');
+      /* Wer kommt, weil hier steht „Dr. Vogelsang hat geschrieben", muss ihren
+         Beitrag drüben auch vorfinden — und lesen kann sie nur, wenn das
+         Gespräch freigegeben ist (Häppchen D2). */
+      if (vonMensch) { sessionStorage.setItem('von-mensch', '1'); sessionStorage.setItem('freigabe', '1'); }
+      else sessionStorage.removeItem('von-mensch');
     } catch (e) {}
     location.href = 'gespraech.html';
   }
@@ -443,7 +448,9 @@ section{margin-top:52px}
     z.addEventListener('click', function(e){
       e.preventDefault();
       var t = z.querySelector('.z-titel');
-      geheZuGespraech(t ? t.textContent.trim() : null);
+      /* Steht an der Zeile, dass ein Mensch geschrieben hat, muss dort auch
+         seine Nachricht warten. */
+      geheZuGespraech(t ? t.textContent.trim() : null, !!z.querySelector('.z-neu'));
     });
   });
   document.querySelectorAll('.karte[data-frage]').forEach(function(k){
@@ -495,7 +502,7 @@ section{margin-top:52px}
     {titel: 'Dr. Anna Vogelsang hat geschrieben',
      text: 'In „Warum schrumpft meine Marge?" — sie liest seit gestern mit.',
      zeit: 'vor 5 Minuten', neu: true,
-     tue: function(){ geheZuGespraech('Warum schrumpft meine Marge?'); }},
+     tue: function(){ geheZuGespraech('Warum schrumpft meine Marge?', true); }},
     {titel: Marke.rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'),
      text: 'Der unterschriebene Rahmenvertrag Stahl fehlt Dr. Anna Vogelsang.', zeit: 'vor 20 Minuten', neu: true,
      tue: function(){ document.getElementById('zuliefern').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'start'}); }},

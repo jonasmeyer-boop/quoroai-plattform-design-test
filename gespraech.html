@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V48 (Häppchen D2: ein Mensch spricht in denselben Strang, es gibt kein Postfach) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V49 (Häppchen D2: ein Mensch spricht in denselben Strang; V49 aus dem Review: Ankunft, Abschied und Anlagen) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -617,7 +617,14 @@ body.blatt-offen{overflow:hidden}
 .karte.gelegt{opacity:0;translate:0 10px}
 .karte.gelegt.liegt{opacity:1;translate:none;transition:opacity .45s ease,translate .45s var(--feder)}
 /* Der Inhalt eines Beitrags wird nicht belichtet — er steht sofort scharf da.
-   Die Karte selbst blendet auf, der Text in ihr ist von Anfang an fertig. */
+   Die Karte selbst blendet auf, der Text in ihr ist von Anfang an fertig.
+   Kante und Schatten trägt sie trotzdem: was entfällt, ist die Belichtung,
+   nicht der Körper. Ohne sie stünde ein weißes Rechteck ohne Rand neben
+   lauter Karten, die einen haben. */
+.karte.gelegt{border-color:var(--linie);box-shadow:0 10px 30px rgba(16,19,26,.06)}
+/* …und die Kante des Menschen überlebt das: sie ist seine Tinte, nicht die
+   Umrandung der Karte. */
+.karte.mensch.gelegt{border-left-color:var(--stift)}
 .karte.gelegt .inhalt-k{opacity:1;filter:none;transform:none}
 
 /* Der Adressat wohnt an der Eingabe, gleich neben der Freigabe: wer schreibt,
@@ -961,7 +968,9 @@ body.blatt-offen{overflow:hidden}
     var n = wartendeQuittungen.shift();
     if (n) { quittiere(n.kapitel, n.satz); return; }
     var m = wartendeBeitraege.shift();
-    if (m) meldeMensch(m.kapitel, m.text);
+    if (!m) return;
+    if (m.tue) m.tue();
+    else meldeMensch(m.kapitel, m.text);
   }
 
   function warte(ms){ return new Promise(function(f){ setTimeout(f, reduziert ? 0 : ms); }); }
@@ -1773,10 +1782,27 @@ body.blatt-offen{overflow:hidden}
   var antwortIndex = 0;
 
   async function schickeAnMensch(text){
-    var kapitel = aktuellesKapitel || neuesKapitel(rede('An Dr. Anna Vogelsang', 'An Dr. Anna Vogelsang'));
+    var kapitel = aktuellesKapitel || neuesKapitel('An ' + ICH.name);
     if (kapitel.classList.contains('zu')) klappeAuf(kapitel);
     beschaeftigt = true;
     kamera.start();
+    /* Was am Feld hängt, geht mit — an einen Menschen genauso wie an den
+       KI-Berater. Sonst läge die Unterlage sichtbar an der Eingabe und ritte
+       ungefragt auf der nächsten Frage mit. */
+    if (wartendeAnlagen.length) {
+      var lage = document.createElement('div');
+      lage.className = 'reihe' + (wartendeAnlagen.length === 2 ? ' zweier' : '');
+      haengeAn(kapitel, lage);
+      wartendeAnlagen.forEach(function(a){
+        var ka = baueEigene(a);
+        lage.appendChild(ka);
+        materialisiere(ka);
+      });
+      wartendeAnlagen.length = 0;
+      zeichneAnlagen();
+      runter();
+      await warte(500);
+    }
     var meins = baueBeitrag({
       vonMir: true,
       name: rede('Du', 'Sie'),
@@ -1800,13 +1826,17 @@ body.blatt-offen{overflow:hidden}
     if (!freigabeGilt()) return;
     var satz = ANTWORTEN[Math.min(antwortIndex, ANTWORTEN.length - 1)]();
     antwortIndex++;
-    await meldeMensch(kapitel, satz);
+    /* Hat der Kunde inzwischen weitergefragt, ist sein Blick im neuen Kapitel.
+       Die Antwort kommt dorthin, wo er liest — nicht in ein zugeklapptes
+       Kapitel über ihm, wo er sie nie zu sehen bekäme. */
+    await meldeMensch(aktuellesKapitel || kapitel, satz);
   }
 
   /* Ein Beitrag des Menschen kommt an — von selbst oder als Antwort. Schreibt
      der KI-Berater gerade, wartet er, statt ihm ins Wort zu fallen. */
   async function meldeMensch(kapitel, text){
     if (beschaeftigt) { wartendeBeitraege.push({kapitel: kapitel, text: text}); return; }
+    annaSprach = true;
     beschaeftigt = true;
     kamera.start();
     if (kapitel.classList.contains('zu')) klappeAuf(kapitel);
@@ -1822,43 +1852,78 @@ body.blatt-offen{overflow:hidden}
   /* Der Weg des Menschen ins Gespräch führt ausschließlich über die Freigabe.
      Sie ist damit nicht länger nur eine Datenschutz-Einstellung, sondern die
      Tür: dahinter steht jemand. */
-  var annaImStrang = false, annaWarDa = false, annaKommt = null;
+  /* Zwei Zustände, und sie sind nicht dasselbe: „angekündigt" heißt, die
+     Freigabe gilt und sie kommt gleich; „hat gesprochen" heißt, ihr Beitrag
+     steht wirklich da. Wer beides in eine Variable legte, verabschiedete
+     jemanden, der nie angekommen ist. */
+  var annaAngekuendigt = false, annaSprach = false, annaWarDa = false, annaKommt = null;
   function freigabeGilt(){
     var k = document.getElementById('freigabe');
     return !!k && k.getAttribute('aria-pressed') === 'true';
   }
   function meldeDichAn(){
-    if (annaImStrang) return;
-    annaImStrang = true;
+    if (annaAngekuendigt) return;
+    annaAngekuendigt = true;
     var wieder = annaWarDa;
     annaWarDa = true;
     clearTimeout(annaKommt);
     annaKommt = setTimeout(function(){
       /* Ohne offenes Kapitel gibt es nichts mitzulesen — dann hat sie auch
-         nichts zu sagen. */
-      if (!freigabeGilt() || !aktuellesKapitel) return;
-      meldeMensch(aktuellesKapitel, wieder
-        ? rede('Wieder da, ich lese ab jetzt mit.', 'Wieder da, ich lese ab jetzt mit.')
+         nichts zu sagen. Der Versuch wird zurückgedreht, sonst käme sie beim
+         ersten Kapitel nicht mehr und grüßte später mit „wieder da", ohne je
+         da gewesen zu sein. */
+      if (!freigabeGilt() || !aktuellesKapitel) {
+        annaAngekuendigt = false;
+        annaWarDa = wieder;
+        return;
+      }
+      annaSprach = true;
+      meldeMensch(aktuellesKapitel, vonMenschAngekuendigt() || (wieder
+        ? 'Wieder da, ich lese ab jetzt mit.'
         : rede('Ich bin’s, Anna Vogelsang. Ich lese ab jetzt mit — das spart uns am Donnerstag das halbe Nacherzählen. Was du hier siehst, sehe ich auch: schreib mir einfach, wenn dir eine Zahl komisch vorkommt.',
-               'Ich bin’s, Anna Vogelsang. Ich lese ab jetzt mit — das spart uns am Donnerstag das halbe Nacherzählen. Was Sie hier sehen, sehe ich auch: schreiben Sie mir einfach, wenn Ihnen eine Zahl komisch vorkommt.'));
-    }, reduziert ? 700 : 5500);
+               'Ich bin’s, Anna Vogelsang. Ich lese ab jetzt mit — das spart uns am Donnerstag das halbe Nacherzählen. Was Sie hier sehen, sehe ich auch: schreiben Sie mir einfach, wenn Ihnen eine Zahl komisch vorkommt.')));
+    }, reduziert ? 700 : (vonMenschWartet ? 1800 : 5500));
+  }
+  /* Wer von der Übersicht oder aus der Glocke kommt, weil dort steht, dass
+     ein Mensch geschrieben hat, muss diesen Beitrag hier auch vorfinden —
+     sonst hat die Glocke etwas versprochen, das niemand einlöst. */
+  var vonMenschWartet = false;
+  try { vonMenschWartet = sessionStorage.getItem('von-mensch') === '1'; } catch (e) {}
+  function vonMenschAngekuendigt(){
+    if (!vonMenschWartet) return null;
+    vonMenschWartet = false;
+    try { sessionStorage.removeItem('von-mensch'); } catch (e) {}
+    return rede('Ich habe deine Marge-Rechnung gelesen. Der Preis-Hebel stimmt so. Beim Ausschuss auf Linie 2 wäre ich vorsichtig: die Hälfte der 12.000 € steckt in einer Maschine, die nächstes Jahr ohnehin fällig ist.',
+                'Ich habe Ihre Marge-Rechnung gelesen. Der Preis-Hebel stimmt so. Beim Ausschuss auf Linie 2 wäre ich vorsichtig: die Hälfte der 12.000 € steckt in einer Maschine, die nächstes Jahr ohnehin fällig ist.');
   }
   /* Zurückgenommene Freigabe heißt: sie liest nicht mehr, also kann sie auch
      nicht mehr angeschrieben werden. Das muss dastehen — sonst tippt der Kunde
      weiter an jemanden, der nicht mehr im Raum ist. */
   function annaGehtRaus(){
     clearTimeout(annaKommt);
-    if (!annaImStrang) return;
-    annaImStrang = false;
+    annaAngekuendigt = false;
+    /* Wer nie gesprochen hat, wird auch nicht verabschiedet — und grüßt beim
+       nächsten Mal nicht mit „wieder da". */
+    if (!annaSprach) { annaWarDa = false; return; }
+    annaSprach = false;
     zurueckZumBerater();
     document.querySelectorAll('#akte .karte.mensch .m-tun').forEach(function(x){ x.remove(); });
     if (!aktuellesKapitel) return;
+    /* Schreibt der KI-Berater gerade, wartet der Vermerk — mitten in einen
+       laufenden Satz gestellt, zerrisse er ihn. */
+    if (beschaeftigt) { wartendeBeitraege.push({tue: zeigeAbschied}); return; }
+    zeigeAbschied();
+  }
+  function zeigeAbschied(){
+    var kapitel = aktuellesKapitel;
+    if (!kapitel) return;
+    if (kapitel.classList.contains('zu')) klappeAuf(kapitel);
     var k = baueGrenze({
       titel: ICH.name + ' liest ab jetzt nicht mehr mit',
       text: rede('Was sie geschrieben hat, bleibt bei dir — sie sieht nur nicht mehr, wie es hier weitergeht. Gib das Gespräch wieder frei, und ihr redet weiter.',
                  'Was sie geschrieben hat, bleibt bei Ihnen — sie sieht nur nicht mehr, wie es hier weitergeht. Geben Sie das Gespräch wieder frei, und Sie reden weiter.')
     });
-    haengeAn(aktuellesKapitel, k);
+    haengeAn(kapitel, k);
     runter();
     materialisiere(k);
   }
@@ -3195,7 +3260,9 @@ body.blatt-offen{overflow:hidden}
     var t = text.trim();
     if (!t && !wartendeAnlagen.length) return;
     if (anWen) {
-      if (!t) return;
+      /* Wer nur eine Unterlage anhängt und sendet, hat trotzdem etwas gesagt —
+         genau wie beim KI-Berater. */
+      if (!t) t = rede('Schau dir das mal an.', 'Schauen Sie sich das bitte an.');
       document.getElementById('frage').value = '';
       schickeAnMensch(t);
       return;
