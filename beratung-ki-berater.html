@@ -20,7 +20,10 @@
    V6 (Häppchen C4): die Regler-Rinne ist am Finger 34px hoch.
    V7 (Nach-Review zu C4): der Daumendurchmesser steht nur noch einmal, als
    --griff; die Füllung der Rinne rechnet damit.
-   Marker: BERATUNG-KI-BERATER-V7 */
+   V8 (zweites Nachreview zu C4): die Füllung endet an der Mitte des
+   Griffs, nicht an seiner Hinterkante — dort deckt der runde Griff die
+   Abbruchkante zu, an der Kante berührte er sie nur in einem Punkt.
+   Marker: BERATUNG-KI-BERATER-V8 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -330,11 +333,17 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     }, 180);
     probeNeu();
   }
-  /* die Spur füllt sich bis zum Griff, wie ein Füllstand */
+  /* Die Spur füllt sich bis zur MITTE des Griffs, nicht bis zu seiner
+     Hinterkante. Der Griff ist rund: an seiner Kante berührt er die Rinne nur
+     in einem Punkt, und die harte Abbruchkante der Füllung stünde darüber und
+     darunter frei — genau der Renderfehler-Eindruck, den wir vermeiden. In der
+     Mitte hat er seinen vollen Durchmesser und deckt sie zu.
+     Der Griff läuft von 0 bis (Breite − Griff), seine Mitte also bei
+     p · 100 % − p · Griff + Griff/2. */
   function fuelle(r){
     var p = (r.value - r.min) / (r.max - r.min);
     var griff = parseFloat(getComputedStyle(r).getPropertyValue('--griff')) || 30;
-    r.style.setProperty('--voll', 'calc(' + (p * 100) + '% - ' + ((p - 0.5) * griff) + 'px + ' + (griff / 2) + 'px)');
+    r.style.setProperty('--voll', 'calc(' + (p * 100) + '% - ' + (p * griff) + 'px + ' + (griff / 2) + 'px)');
   }
   ton.addEventListener('input', sprich);
   laenge.addEventListener('input', sprich);
