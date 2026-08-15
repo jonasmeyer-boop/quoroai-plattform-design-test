@@ -6,7 +6,7 @@
 <title>Dein Berater – Übersicht</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V14 (Häppchen C2: der Kunde darf verschieben — er fragt, die Beratung entscheidet) */
+/* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür · Marker: UEBERSICHT-V15 (Häppchen D1: was die Beratung vom Kunden braucht, steht vor allem anderen) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -104,6 +104,15 @@ section{margin-top:52px}
 .kopfzeile h2{font-size:13px;font-weight:800;color:var(--grau)}
 .kopfzeile a{font-size:13px;font-weight:700;color:var(--blau);text-decoration:none}
 .kopfzeile a:hover{text-decoration:underline}
+/* Am Finger ist ein Wort von 21 Pixeln Höhe kein Ziel — die Zeile daneben
+   bekommt Fingerhöhe, ohne im Bild größer zu werden. */
+@media (pointer:coarse){
+  /* Eine 44px hohe Inline-Flex-Zeile hat ihre Grundlinie in der Mitte — auf
+     baseline ausgerichtet schöbe sie jede Überschrift der Seite nach unten.
+     Deshalb richtet sich die Kopfzeile am Finger mittig aus. */
+  .kopfzeile{align-items:center}
+  .kopfzeile a{display:inline-flex;align-items:center;min-height:44px}
+}
 
 /* Karten (Akte-Auszug) */
 .reihe{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
@@ -237,6 +246,11 @@ section{margin-top:52px}
   .karte{opacity:1;translate:none}
   .karte.da{transition:none}
 }
+@media (max-width:620px){
+  /* Zwei lange Zeilen teilen sich schmal keine Zeile: nebeneinander bricht
+     beides zweizeilig und die Überschrift verliert ihren Anfang. */
+  .kopfzeile{flex-direction:column;align-items:flex-start;gap:0}
+}
 @media (max-width:700px){
   .reihe{grid-template-columns:1fr}
   .doppel{grid-template-columns:1fr}
@@ -271,6 +285,17 @@ section{margin-top:52px}
     <a href="gespraech.html">Buch mir einen Menschen</a>
   </div>
   <p class="ki-hinweis"><span data-du="Du sprichst mit dem KI-Berater von " data-sie="Sie sprechen mit dem KI-Berater von ">Du sprichst mit dem KI-Berater von </span><span data-marke-name>Nordholm &amp; Partner</span>. Er ersetzt keine Rechts- oder Steuerberatung.</p>
+
+  <!-- Häppchen D1: Was von dir gebraucht wird, steht VOR allem anderen. Der
+       Kunde soll es nicht suchen und nicht danach fragen müssen. -->
+  <section id="zuliefern">
+    <div class="kopfzeile">
+      <h2 data-du="Was deine Beratung von dir braucht" data-sie="Was Ihre Beratung von Ihnen braucht">Was deine Beratung von dir braucht</h2>
+      <a href="gespraech.html" id="zuliefern-fragen">Im Gespräch erledigen</a>
+    </div>
+    <p class="bitten-satz" id="zuliefern-satz"></p>
+    <div data-bitten></div>
+  </section>
 
   <section>
     <div class="kopfzeile">
@@ -355,6 +380,7 @@ section{margin-top:52px}
 </main>
 
 <script src="glocke.js"></script>
+<script src="bitten.js"></script>
 <script>
 (function(){
   'use strict';
@@ -428,8 +454,31 @@ section{margin-top:52px}
     location.href = 'anmelden.html';
   });
 
+  /* ---------- Was die Beratung braucht (Häppchen D1) ----------
+     Der Baustein bitten.js führt die Liste; hier steht nur, wie sie sich
+     ansagt. Der Satz zählt mit, damit die Überschrift nicht behauptet, es
+     warte etwas, wenn alles erledigt ist. */
+  var satz = document.getElementById('zuliefern-satz');
+  if (window.Bitten) Bitten.tafel({aufAenderung: function(n){
+    satz.textContent = n === 0
+      ? Marke.rede('Erledigt — deine Beratung hat alles, was sie braucht.',
+                   'Erledigt — Ihre Beratung hat alles, was sie braucht.')
+      : (n === 1
+          ? Marke.rede('Eine Sache wartet auf dich. Danach kommt deine Beratung ohne Nachfrage weiter.',
+                       'Eine Sache wartet auf Sie. Danach kommt Ihre Beratung ohne Nachfrage weiter.')
+          : Marke.rede(Bitten.zahlwort(n) + ' warten auf dich. Danach kommt deine Beratung ohne Nachfrage weiter.',
+                       Bitten.zahlwort(n) + ' warten auf Sie. Danach kommt Ihre Beratung ohne Nachfrage weiter.'));
+  }});
+  document.getElementById('zuliefern-fragen').addEventListener('click', function(e){
+    e.preventDefault();
+    geheZuGespraech('Was brauchst du von mir?');
+  });
+
   /* Die Glocke ist ein Baustein (glocke.js): Neuigkeiten führen zu ihrem Abschnitt */
   Glocke.baue({eintraege: [
+    {titel: Marke.rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'),
+     text: 'Der unterschriebene Rahmenvertrag Stahl fehlt Dr. Anna Vogelsang.', zeit: 'vor 20 Minuten', neu: true,
+     tue: function(){ document.getElementById('zuliefern').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'start'}); }},
     {titel: 'Dein Termin steht', text: 'Donnerstag, 10:00 mit Dr. Anna Vogelsang.', zeit: 'gerade eben', neu: true, tue: function(){ springe('Termine'); }},
     {titel: 'Neues Dokument für dich', text: 'Preismodell Benchmark liegt in deinen Unterlagen.', zeit: 'vor 2 Stunden', neu: true, tue: function(){ springe('Unterlagen'); }},
     {titel: 'Antwort auf deine Anfrage', text: 'Das Jahresgespräch ist bestätigt.', zeit: 'gestern', neu: false, tue: function(){ springe('Anfragen'); }}

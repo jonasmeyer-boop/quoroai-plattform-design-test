@@ -6,7 +6,7 @@
 <title>Dein Berater – Unterlagen</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Unterlagen: alles, was die Beratung freigegeben hat · Marker: UNTERLAGEN-V6 (kein Mittelpunkt als Trenner) */
+/* quoroai-plattform-design · Unterlagen: alles, was die Beratung freigegeben hat · Marker: UNTERLAGEN-V7 (Häppchen D1: die offene Bitte um eine Unterlage steht über dem Bestand) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -56,6 +56,9 @@ main{max-width:880px;margin:0 auto;padding:108px 24px 96px}
 .anstrich path{fill:none;stroke:var(--stift);stroke-width:2.5;stroke-linecap:round;opacity:.85}
 h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-height:1.15}
 .unter{color:var(--grau);font-size:15px;margin-top:4px}
+
+#gebeten{margin-top:26px;max-width:640px}
+#gebeten .gebeten-titel{font-size:13px;font-weight:800;color:var(--grau)}
 
 .suche{position:relative;margin-top:24px;max-width:560px}
 .suche input{
@@ -149,6 +152,7 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
 }
 </style>
 <script src="marke.js"></script>
+<script src="bitten.js"></script>
 </head>
 <body>
 
@@ -162,6 +166,14 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
   <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
   <h1>Unterlagen</h1>
   <p class="unter" data-du="Alles, was deine Beratung für dich freigegeben hat — mit jeder Fassung." data-sie="Alles, was Ihre Beratung für Sie freigegeben hat — mit jeder Fassung.">Alles, was deine Beratung für dich freigegeben hat — mit jeder Fassung.</p>
+
+  <!-- Häppchen D1: Wer hier steht, will eine Unterlage — dann gehört die
+       offene Datei-Anfrage hierher und nicht nur auf die Übersicht. Erledigte
+       Bitten fallen weg (nurOffene): auf dieser Fläche zählt der Bestand. -->
+  <section id="gebeten" hidden>
+    <h2 class="gebeten-titel" data-du="Deine Beratung bittet um eine Unterlage" data-sie="Ihre Beratung bittet um eine Unterlage">Deine Beratung bittet um eine Unterlage</h2>
+    <div data-bitten></div>
+  </section>
 
   <div class="suche">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 17 a6.5 6.5 0 1 0 0-13 a6.5 6.5 0 0 0 0 13 Z M15.5 15.5 L20.5 20.5"/></svg>
@@ -229,68 +241,103 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
 
   var liste = document.getElementById('liste');
   function baue(){
-    DOKUMENTE.forEach(function(dok){
-      var el = document.createElement('div');
-      el.className = 'dok';
-      el.innerHTML =
-        '<div class="kopf"><div class="blatt"></div>' +
-        '<div style="min-width:0"><div class="titel"></div><div class="meta"></div></div>' +
-        '<span class="status"></span>' +
-        '<span class="aktionen"><button type="button" class="laden">↓ Laden</button>' +
-        (dok.fassungen.length ? '<button type="button" class="ff">Fassungen</button>' : '') +
-        '</span></div>' +
-        '<div class="auszug" hidden></div>' +
-        (dok.warnung ? '<div class="warnung"></div>' : '') +
-        (dok.fassungen.length ? '<div class="fassungen" hidden></div>' : '');
-      el.querySelector('.titel').textContent = dok.titel;
-      el.querySelector('.meta').textContent = dok.meta;
-      var st = el.querySelector('.status');
-      st.textContent = dok.status;
-      if (dok.status === 'neu') st.classList.add('neu');
-      if (dok.warnung) el.querySelector('.warnung').textContent = dok.warnung;
-      if (dok.fassungen.length) {
-        var lage = el.querySelector('.fassungen');
-        dok.fassungen.forEach(function(f){
-          var z = document.createElement('div');
-          z.className = 'fassung';
-          z.innerHTML = '<span><span class="f-name"></span> <span class="f-meta"></span></span><button type="button">↓ Laden</button>';
-          z.querySelector('.f-name').textContent = f.name;
-          z.querySelector('.f-meta').textContent = f.meta;
-          z.querySelector('button').addEventListener('click', function(){ demoHinweis('Vorführung — hier läge ' + f.name 	+ '.'); });
-          lage.appendChild(z);
-        });
-        el.querySelector('.ff').addEventListener('click', function(e){
-          e.stopPropagation();
-          lage.hidden = !lage.hidden;
-        });
-      }
-      el.querySelector('.laden').addEventListener('click', function(e){
+    DOKUMENTE.forEach(function(dok){ liste.appendChild(baueEinen(dok)); });
+  }
+  function baueEinen(dok){
+    var el = document.createElement('div');
+    el.className = 'dok';
+    el.innerHTML =
+      '<div class="kopf"><div class="blatt"></div>' +
+      '<div style="min-width:0"><div class="titel"></div><div class="meta"></div></div>' +
+      '<span class="status"></span>' +
+      '<span class="aktionen"><button type="button" class="laden">↓ Laden</button>' +
+      (dok.fassungen.length ? '<button type="button" class="ff">Fassungen</button>' : '') +
+      '</span></div>' +
+      '<div class="auszug" hidden></div>' +
+      (dok.warnung ? '<div class="warnung"></div>' : '') +
+      (dok.fassungen.length ? '<div class="fassungen" hidden></div>' : '');
+    el.querySelector('.titel').textContent = dok.titel;
+    el.querySelector('.meta').textContent = dok.meta;
+    var st = el.querySelector('.status');
+    st.textContent = dok.status;
+    if (dok.status === 'neu') st.classList.add('neu');
+    if (dok.warnung) el.querySelector('.warnung').textContent = dok.warnung;
+    if (dok.fassungen.length) {
+      var lage = el.querySelector('.fassungen');
+      dok.fassungen.forEach(function(f){
+        var z = document.createElement('div');
+        z.className = 'fassung';
+        z.innerHTML = '<span><span class="f-name"></span> <span class="f-meta"></span></span><button type="button">↓ Laden</button>';
+        z.querySelector('.f-name').textContent = f.name;
+        z.querySelector('.f-meta').textContent = f.meta;
+        z.querySelector('button').addEventListener('click', function(){ demoHinweis('Vorführung — hier läge ' + f.name 	+ '.'); });
+        lage.appendChild(z);
+      });
+      el.querySelector('.ff').addEventListener('click', function(e){
         e.stopPropagation();
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob(['# ' + dok.titel + '\n\n' + dok.text + '\n\n— Vorführung, Demo-Daten\n'], {type: 'text/markdown'}));
-        a.download = dok.titel.replace(/[^\wäöüÄÖÜß-]+/g, '-') + '.md';
-        a.click();
-        setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+        lage.hidden = !lage.hidden;
       });
-      el.querySelector('.kopf').addEventListener('click', function(){
-        demoHinweis('Vorführung — im Produkt öffnet sich hier das Original.');
-      });
-      dok.el = el;
-      liste.appendChild(el);
+    }
+    el.querySelector('.laden').addEventListener('click', function(e){
+      e.stopPropagation();
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob(['# ' + dok.titel + '\n\n' + dok.text + '\n\n— Vorführung, Demo-Daten\n'], {type: 'text/markdown'}));
+      a.download = dok.titel.replace(/[^\wäöüÄÖÜß-]+/g, '-') + '.md';
+      a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
     });
+    el.querySelector('.kopf').addEventListener('click', function(){
+      demoHinweis('Vorführung — im Produkt öffnet sich hier das Original.');
+    });
+    dok.el = el;
+    return el;
   }
   baue();
+
+  /* ---------- Die Bitte um eine Unterlage (Häppchen D1) ----------
+     Was hochgeladen wird, steht anschließend in der Liste — sonst hätte der
+     Kunde etwas geschickt und sähe an derselben Stelle weiter nichts davon. */
+  var gebeten = document.getElementById('gebeten');
+  if (window.Bitten) Bitten.tafel({arten: ['datei'], nurOffene: true, aufAenderung: function(n){
+    gebeten.hidden = n === 0;
+  }});
+  function zeigeGeschickte(){
+    if (!window.Bitten) return;
+    Bitten.liste(['datei']).forEach(function(b){
+      if (Bitten.stand(b) === 'offen' || b.abgelegt) return;
+      b.abgelegt = true;
+      var name = String(Bitten.eingabe(b) || '');
+      var dok = {titel: name || 'Deine Unterlage',
+                 meta: Marke.rede('von dir, gerade eben', 'von Ihnen, gerade eben'),
+                 status: Marke.rede('von dir', 'von Ihnen'),
+                 text: Marke.rede('Diese Unterlage hast du gerade geschickt. Deine Beratung hat sie.',
+                                  'Diese Unterlage haben Sie gerade geschickt. Ihre Beratung hat sie.'),
+                 fassungen: []};
+      DOKUMENTE.unshift(dok);
+      liste.prepend(baueEinen(dok));
+    });
+  }
+  /* Auch beim Ankommen: wer die Unterlage im Gespräch geschickt hat, findet
+     sie hier vor — nicht erst, wenn er sie ein zweites Mal schickt. */
+  zeigeGeschickte();
+  if (window.Bitten) Bitten.abonniere(zeigeGeschickte);
 
   /* Volltextsuche mit Trefferauszug — filtert sofort beim Tippen */
   var feld = document.getElementById('suchfeld');
   var treffer = document.getElementById('treffer');
   var leer = document.getElementById('leer');
+  /* Der Auszug wird als HTML gesetzt, damit die Fundstelle leuchten kann.
+     Seit der Kunde selbst Unterlagen schickt, ist der Titel sein Text —
+     also erst entschärfen, dann die Marke hineinsetzen, nie umgekehrt. */
+  function zahm(t){
+    return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
   function markiere(text, wort){
     var i = text.toLowerCase().indexOf(wort.toLowerCase());
     if (i === -1) return null;
     var von = Math.max(0, i - 60), bis = Math.min(text.length, i + wort.length + 90);
     var stück = (von > 0 ? '… ' : '') + text.slice(von, bis) + (bis < text.length ? ' …' : '');
-    return stück.replace(new RegExp('(' + wort.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig'), '<mark>$1</mark>');
+    return zahm(stück).replace(new RegExp('(' + zahm(wort).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig'), '<mark>$1</mark>');
   }
   feld.addEventListener('input', function(){
     var wort = feld.value.trim();
@@ -313,7 +360,7 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
       }
       gefunden++;
       dok.el.classList.remove('versteckt');
-      titelEl.innerHTML = imTitel || dok.titel.replace(/</g, '&lt;');
+      titelEl.innerHTML = imTitel || zahm(dok.titel);
       if (imText) { auszug.innerHTML = imText; auszug.hidden = false; }
       else auszug.hidden = true;
     });

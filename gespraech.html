@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V44 (die Anfrage geht an die Beratung, nicht von ihr aus) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V45 (Häppchen D1: die Bitte der Beratung wird im Gespräch erledigt) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -630,6 +630,14 @@ body.blatt-offen{overflow:hidden}
 }
 .chips button.da{opacity:1;translate:none}
 .chips button:hover{border-color:var(--blau)}
+/* Ein Chip darf mitzählen: „Was brauchst du von mir?" trägt, wie viel offen
+   ist — sonst müsste der Kunde erst fragen, um zu erfahren, dass etwas wartet
+   (Häppchen D1). */
+.chips button .zahl{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:18px;height:18px;margin-left:8px;padding:0 5px;border-radius:999px;
+  background:var(--blau);color:#fff;font-size:11px;font-weight:800;
+}
 
 #eingabe{
   position:fixed;left:0;right:0;bottom:0;z-index:9;
@@ -777,6 +785,7 @@ body.blatt-offen{overflow:hidden}
 </style>
 <script src="marke.js"></script>
 <script src="glocke.js"></script>
+<script src="bitten.js"></script>
 </head>
 <body>
 
@@ -881,6 +890,14 @@ body.blatt-offen{overflow:hidden}
   function rede(du, sie){ return anredeSie ? sie : du; }
   var akte = document.getElementById('akte');
   var beschaeftigt = false;
+  /* Quittungen, die warten mussten, weil der Berater gerade schrieb.
+     Wer zurücksetzt, lässt sie los — sonst warten sie ewig. */
+  var wartendeQuittungen = [];
+  function nichtMehrBeschaeftigt(){
+    beschaeftigt = false;
+    var n = wartendeQuittungen.shift();
+    if (n) quittiere(n.kapitel, n.satz);
+  }
 
   function warte(ms){ return new Promise(function(f){ setTimeout(f, reduziert ? 0 : ms); }); }
 
@@ -1563,6 +1580,21 @@ body.blatt-offen{overflow:hidden}
     }
   }
 
+  /* Eine Bitte der Beratung als Karte im Gespräch (Häppchen D1). Der Körper
+     kommt aus dem Baustein bitten.js — dieselbe Bitte, derselbe Stand wie auf
+     der Übersicht und bei den Unterlagen. Erledigt wird sie hier, an Ort und
+     Stelle: das Gespräch ist der Raum, nicht der Verweis auf einen anderen. */
+  function baueBitte(id){
+    var b = window.Bitten && Bitten.finde(id);
+    if (!b) return null;
+    /* Nicht 'bitte': der Baustein malt unter diesem Namen selbst einen
+       Rahmen mit Schatten, und der stünde fertig da, bevor die Karte sich
+       belichtet hat. Der äußere Rahmen gehört der Karte. */
+    var k = karteAus('', 'bitte-karte', 'bitte-' + id);
+    k.querySelector('.inhalt-k').appendChild(Bitten.inhalt(b));
+    return k;
+  }
+
   function baueBestaetigung(text, sk){
     return karteAus(
       '<div class="bestaetigung"><svg viewBox="0 0 44 44" aria-hidden="true">' +
@@ -1888,6 +1920,10 @@ body.blatt-offen{overflow:hidden}
      jeder Eintrag führt. Titel und Text sind Funktionen, weil der Wortlaut an
      der Anrede der Beratung hängt. */
   Glocke.baue({eintraege: [
+    {titel: function(){ return rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'); },
+      text: function(){ return 'Der unterschriebene Rahmenvertrag Stahl fehlt Dr. Anna Vogelsang.'; },
+      zeit: 'vor 20 Minuten', neu: true,
+      tue: function(){ frageStellen('Was brauchst du von mir?'); }},
     {titel: function(){ return rede('Dein Termin steht', 'Ihr Termin steht'); },
       text: function(){ return rede('Donnerstag, 10:00 mit Dr. Anna Vogelsang — sie hat deine Anfrage angenommen.', 'Donnerstag, 10:00 mit Dr. Anna Vogelsang — sie hat Ihre Anfrage angenommen.'); },
       zeit: 'gerade eben', neu: true,
@@ -2197,7 +2233,10 @@ body.blatt-offen{overflow:hidden}
     denk.weg(); /* schmilzt weg, während die ersten Worte schon kommen */
     for (var i = 0; i < schritte.length; i++) {
       var s = schritte[i];
-      if (s.t) { await stroeme(kapitel, s.t, s.marken); await warte(240); continue; }
+      /* Ein Satz darf eine Funktion sein: was gerade offen ist, weiß erst der
+         Moment des Sprechens — ein fester Text würde behaupten, es warte noch
+         etwas, das längst erledigt ist. */
+      if (s.t) { await stroeme(kapitel, typeof s.t === 'function' ? s.t() : s.t, s.marken); await warte(240); continue; }
       if (s.chips) { zeigeChips(kapitel, s.chips); continue; }
       if (s.belege) { zeigeBelege(kapitel, s.belege); await warte(420); continue; }
       if (s.liste) {
@@ -2220,6 +2259,25 @@ body.blatt-offen{overflow:hidden}
             if (nach) await stift.pfeil(kapitel, ziel, nach);
           }
           await warte(200);
+        }
+        continue;
+      }
+      /* Die Bitten der Beratung, in dem Zustand, in dem sie gerade sind:
+         wartet noch etwas, stehen nur die offenen — sonst hätte der Berater
+         gerade „zwei Dinge" gesagt und legte drei Karten hin. Ist alles
+         erledigt, stehen alle drei als Nachweis. */
+      if (s.bitten) {
+        if (!window.Bitten) continue;
+        var alle = Bitten.liste();
+        var offene = alle.filter(function(b){ return Bitten.stand(b) === 'offen'; });
+        var zeigen = offene.length ? offene : alle;
+        for (var jb = 0; jb < zeigen.length; jb++) {
+          var kb = baueBitte(zeigen[jb].id);
+          if (!kb) continue;
+          kapitel.querySelector('.lauf').appendChild(kb);
+          runter();
+          await materialisiere(kb);
+          await warte(300);
         }
         continue;
       }
@@ -2256,6 +2314,7 @@ body.blatt-offen{overflow:hidden}
       if (s.fahrplan) k = baueFahrplan(s.fahrplan);
       if (s.vergleich) k = baueVergleich(s.vergleich);
       if (s.dokument) k = baueDokument(s.dokument);
+      if (s.bitte) k = baueBitte(s.bitte);
       if (s.kalender) k = baueKalender(s.kalender);
       if (s.bestaetigung) k = baueBestaetigung(s.bestaetigung, s.sk);
       if (k) {
@@ -2268,7 +2327,7 @@ body.blatt-offen{overflow:hidden}
       }
     }
     kamera.halt();
-    beschaeftigt = false;
+    nichtMehrBeschaeftigt();
   }
 
   /* ---------- Drehbuch ---------- */
@@ -2366,6 +2425,29 @@ body.blatt-offen{overflow:hidden}
         {t: 'Wenn du das angehen willst: Dr. Anna Vogelsang hat das Modell mitgerechnet. Soll ich euch zusammenbringen?'},
         {chips: ['Buch mir einen Menschen', 'Warum schrumpft meine Marge?']}
       ]},
+    /* Häppchen D1: der Kunde liefert zu. Drei Formen einer Bitte, jede mit
+       ihrem Grund, jede hier erledigt — nicht auf einer anderen Fläche. */
+    { probe: /(brauchst du|von mir|zuliefern|was fehlt|hochlad|abnahme|freigeb)/i,
+      frage: 'Was brauchst du von mir?',
+      schritte: [
+        {t: function(){
+          var n = window.Bitten ? Bitten.offen() : 0;
+          if (!n) return rede('Gerade nichts. Alles, worum ich dich gebeten hatte, liegt bei mir — hier steht es der Reihe nach:',
+                              'Gerade nichts. Alles, worum ich Sie gebeten hatte, liegt bei mir — hier steht es der Reihe nach:');
+          return (n === 1
+            ? rede('Eine Sache. Ich sage dir dazu, warum ich sie brauche:', 'Eine Sache. Ich sage Ihnen dazu, warum ich sie brauche:')
+            : rede(Bitten.zahlwort(n) + '. Bei jedem sage ich dir, warum — und du kannst es gleich hier erledigen:',
+                   Bitten.zahlwort(n) + '. Bei jedem sage ich Ihnen, warum — und Sie können es gleich hier erledigen:'));
+        }},
+        {bitten: true},
+        {t: function(){
+          var n = window.Bitten ? Bitten.offen() : 0;
+          if (!n) return 'Mehr brauche ich nicht. Ich rechne weiter und melde mich, sobald das Ergebnis steht.';
+          return rede('Mehr brauche ich nicht. Was du hier erledigst, hat deine Beratung sofort — du musst es niemandem nachschicken.',
+                      'Mehr brauche ich nicht. Was Sie hier erledigen, hat Ihre Beratung sofort — Sie müssen es niemandem nachschicken.');
+        }},
+        {chips: ['Warum schrumpft meine Marge?', 'Buch mir einen Menschen']}
+      ]},
     { probe: /(termine|kalender|steht an|anstehen)/i,
       frage: 'Welche Termine stehen an?',
       schritte: [
@@ -2419,6 +2501,54 @@ body.blatt-offen{overflow:hidden}
       {skizze: [{art:'notiz', ziel:'auftrag', text:'bis morgen früh', wo:'rechts'}]},
       {chips: ['Wie läuft mein Geschäft?', 'Warum schrumpft meine Marge?', 'Buch mir einen Menschen']}
     ]};
+
+  /* Wer zuliefert, bekommt eine Antwort — sonst fällt das Geschickte in ein
+     Loch. Der Berater sagt in einem Satz, was er damit jetzt tut (D1).
+     Das Ereignis steigt von der Karte auf, die der Kunde gedrückt hat: nur so
+     landet die Antwort im richtigen Kapitel, auch wenn dieselbe Bitte in einem
+     zweiten Kapitel noch einmal steht. */
+  function bittenSatz(b, stand){
+    if (b.art === 'datei') {
+      return rede('Angekommen. Ich lese den Vertrag und rechne den Einkaufshebel damit neu — das Ergebnis lege ich dir heute Abend in die Akte.',
+                  'Angekommen. Ich lese den Vertrag und rechne den Einkaufshebel damit neu — das Ergebnis lege ich Ihnen heute Abend in die Akte.');
+    }
+    if (b.art === 'aufgabe') {
+      return 'Notiert. Die drei nehme ich aus der Staffel heraus und rechne die Preisliste ohne sie.';
+    }
+    if (stand === 'rueckfrage') {
+      return rede('Deine Rückfrage liegt bei Dr. Anna Vogelsang. Bis sie antwortet, ändere ich an den Staffeln nichts.',
+                  'Ihre Rückfrage liegt bei Dr. Anna Vogelsang. Bis sie antwortet, ändere ich an den Staffeln nichts.');
+    }
+    return 'Danke. Ich schneide die Staffeln und melde mich, sobald die neue Preisliste steht.';
+  }
+
+  /* Erledigt der Kunde eine Bitte, während der Berater noch schreibt, wartet
+     die Antwort — verworfen würde sie genau das Loch reißen, das sie
+     schließen soll. */
+  async function quittiere(kapitel, satz){
+    beschaeftigt = true;
+    kamera.start();
+    await warte(600);
+    /* Die Vorschläge bleiben das Letzte im Kapitel — sonst stünde die
+       Antwort des Beraters unter Chips, die schon weiterführen wollen. */
+    var lauf = kapitel.querySelector('.lauf');
+    var chips = lauf.querySelector(':scope > .chips:last-child');
+    if (chips) chips.remove();
+    await stroeme(kapitel, satz);
+    if (chips) lauf.appendChild(chips);
+    kamera.halt();
+    nichtMehrBeschaeftigt();
+  }
+
+  akte.addEventListener('bitte-erledigt', function(e){
+    var b = window.Bitten && Bitten.finde(e.detail.id);
+    var kapitel = e.target.closest('.kapitel');
+    if (!b || !kapitel) return;
+    if (kapitel.classList.contains('zu')) klappeAuf(kapitel);
+    var satz = bittenSatz(b, e.detail.stand);
+    if (beschaeftigt) { wartendeQuittungen.push({kapitel: kapitel, satz: satz}); return; }
+    quittiere(kapitel, satz);
+  });
 
   function waehleSlot(karte, knopf, slot){
     if (beschaeftigt) { zeigeGeduld(); return; }
@@ -2581,6 +2711,7 @@ body.blatt-offen{overflow:hidden}
       if (d.art === 'vergleich' && d.vorher && d.nachher) k = baueVergleich(d);
       if (d.art === 'donut') k = baueDonut(d);
       if (d.art === 'dokument') k = baueDokument(d);
+      if (d.art === 'bitte' && d.id) k = baueBitte(d.id);
       if (d.art === 'kalender') k = baueKalender(d.slots || ['Donnerstag, 10:00', 'Donnerstag, 16:00', 'Freitag, 9:00']);
       if (d.art === 'bestaetigung') k = baueBestaetigung(d.text || 'Erledigt', d.sk);
       if (!k) return;
@@ -2755,7 +2886,7 @@ body.blatt-offen{overflow:hidden}
       lauf.appendChild(p2);
     }
     kamera.halt();
-    beschaeftigt = false;
+    nichtMehrBeschaeftigt();
     runter();
   }
 
@@ -2874,6 +3005,9 @@ body.blatt-offen{overflow:hidden}
       anredeSie = m.anrede === 'sie';
       /* Seiten-Eigenes, das der Kern nicht kennt */
       beschrifteAkte();
+      /* Der Baustein Bitten redet mit: hier wechselt die Anrede im Stehen,
+         auf den anderen Flächen lädt die Vorführung neu. */
+      if (window.Bitten) Bitten.anrede(m.anrede === 'sie');
       document.querySelector('#freigabe-frage p').innerHTML =
         '<strong id="ff-marke"></strong> ' +
         rede('kann dann <strong>dieses eine Gespräch</strong> lesen — samt Karten und Dokumenten. Andere Gespräche bleiben privat. Du kannst das jederzeit zurücknehmen.',
@@ -2900,6 +3034,10 @@ body.blatt-offen{overflow:hidden}
     var el = document.getElementById('gruss-text');
     var vorgruss = document.getElementById('vorgruss');
     var startChips = ['Wie läuft mein Geschäft?', 'Warum schrumpft meine Marge?', 'Buch mir einen Menschen'];
+    /* Was auf den Kunden wartet, muss er nicht erst erfragen: der erste Chip
+       trägt die Zahl (Häppchen D1). Wartet nichts, steht er auch nicht da. */
+    var offeneBitten = window.Bitten ? Bitten.offen() : 0;
+    if (offeneBitten) startChips.unshift({text: 'Was brauchst du von mir?', zahl: offeneBitten});
 
     /* Der Gruß kennt die Uhrzeit — wie ein Berater, nicht wie ein Formular */
     var stunde = new Date().getHours();
@@ -2917,9 +3055,17 @@ body.blatt-offen{overflow:hidden}
       var lage = document.getElementById('start-chips');
       if (!lage) return; /* Begrüßung wurde von einer ungeduldigen Frage überholt */
       startChips.forEach(function(c, i){
+        var text = typeof c === 'string' ? c : c.text;
         var b = document.createElement('button');
-        b.type = 'button'; b.textContent = c;
-        b.addEventListener('click', function(){ frageStellen(c); });
+        b.type = 'button'; b.textContent = text;
+        if (c.zahl) {
+          var z = document.createElement('span');
+          z.className = 'zahl';
+          z.textContent = String(c.zahl);
+          b.appendChild(z);
+          b.setAttribute('aria-label', text + ' ' + c.zahl + ' offen');
+        }
+        b.addEventListener('click', function(){ frageStellen(text); });
         lage.appendChild(b);
         setTimeout(function(){ b.classList.add('da'); }, reduziert ? 0 : 140 * i + 100);
       });
