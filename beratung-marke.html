@@ -37,7 +37,8 @@
    USt-ID hat nicht jede Beratung; das Kästchen macht aus dem leeren Feld
    eine Erklärung. Gespeichertes geht in die gemeinsame Marken-Quelle und
    steht sofort im gezeichneten Impressum daneben.
-   Marker: BERATUNG-MARKE-V5 */
+   V6 (Häppchen C3): Hilfe-Ebene im Kopfband.
+   Marker: BERATUNG-MARKE-V6 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -289,11 +290,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 }
 </style>
 </head>
-<body class="quoro">
+<body class="quoro"
+      data-hilfe-titel="Marke"
+      data-hilfe-satz="Wie deine Kunden dich sehen: Name, Logo, Farbe, Anrede — und die Anbieterkennzeichnung, ohne die ihre Adresse zu bleibt.">
 
 <nav>
   <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
-  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+  <div class="nav-rechts" style="display:flex;align-items:center;gap:10px"><span data-hilfe-knopf></span><a class="vorschlaege" href="index.html">Alle Vorschläge</a></div>
 </nav>
 
 <a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Marke</b></a>
@@ -305,7 +308,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   </div>
 
   <h3>Erscheinung</h3>
-  <section class="tafel" aria-label="Erscheinung">
+  <section class="tafel" aria-label="Erscheinung"
+           data-hilfe-name="Deine Erscheinung"
+           data-hilfe="Name, Logo und Farbe deiner Kundenflächen. Deine Kunden sehen nie quoroAI — sie sehen das hier. Rechts siehst du sofort, wie es bei ihnen ankommt.">
     <div class="zwei">
       <div>
         <div class="feld">
@@ -358,7 +363,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   </section>
 
   <h3>Anbieterkennzeichnung</h3>
-  <section class="tafel" aria-label="Anbieterkennzeichnung">
+  <section class="tafel" aria-label="Anbieterkennzeichnung"
+           data-hilfe-name="Dein Impressum"
+           data-hilfe="Kein Kleingedrucktes, sondern die Bedingung: solange diese Felder leer sind, bleibt deine Kundenadresse zu. Anbieter der Kundenfläche bist du, nicht quoroAI, also steht hier dein Name.">
     <div class="adresse-stand" id="k-stand">
       <span class="zustand entwurf" id="k-glas" role="img" aria-label="gesperrt" title="gesperrt"></span>
       <div class="a-text">
@@ -421,7 +428,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   </section>
 
   <h3>Versand</h3>
-  <section class="tafel" aria-label="Versand">
+  <section class="tafel" aria-label="Versand"
+           data-hilfe-name="Deine Post"
+           data-hilfe="Von welcher Adresse deine Kunden Mails bekommen und wohin ihre Antworten gehen. Antwortet jemand auf eine Einladung, soll das bei dir landen und nicht bei quoroAI.">
     <div class="v-felder">
       <div class="feld">
         <label for="v-mail">Absenderadresse</label>
@@ -849,6 +858,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   else { maleAnrede(); maleName(); pruefeAdresse(); maleSperre(); }
 })();
 </script>
+<script src="hilfe.js"></script>
 <script src="uhr.js"></script>
 <script src="zeiger.js"></script>
 <script src="rechtsfuss.js"></script>

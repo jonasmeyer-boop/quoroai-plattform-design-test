@@ -45,7 +45,8 @@
    blenden jetzt gemeinsam über.
    V3 (Häppchen B5): MTS’ Abrede nennt die zwölf Abschläge, in denen die
    Jahrespauschale gestellt wird — so steht sie auch auf den Rechnungen.
-   Marker: BERATUNG-MARGE-V4 */
+   V5 (Häppchen C3): Hilfe-Ebene im Kopfband.
+   Marker: BERATUNG-MARGE-V5 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -301,11 +302,13 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
 }
 </style>
 </head>
-<body class="quoro">
+<body class="quoro"
+      data-hilfe-titel="Marge und Sätze"
+      data-hilfe-satz="Was deine Arbeit einbringt und was sie kostet. Ohne hinterlegte Sätze rechnet die Plattform nichts ab, und die Marge bleibt blind.">
 
 <nav>
   <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
-  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+  <div class="nav-rechts" style="display:flex;align-items:center;gap:10px"><span data-hilfe-knopf></span><a class="vorschlaege" href="index.html">Alle Vorschläge</a></div>
 </nav>
 
 <a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Marge und Sätze</b></a>
@@ -325,7 +328,9 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
   </div>
 
   <h3 class="weich" id="titel-gesamt">Die Beratung, seit Jahresbeginn</h3>
-  <section class="gesamt" aria-labelledby="titel-gesamt">
+  <section class="gesamt" aria-labelledby="titel-gesamt"
+           data-hilfe-name="Was dir bleibt"
+           data-hilfe="Die Röhre teilt dein Honorar in das, was die Arbeit gekostet hat, und das, was übrig bleibt. Beides kommt aus den Sätzen weiter unten — ändere sie dort, und diese Zahl ändert sich mit.">
     <div class="g-zahl zahl weich" id="g-zahl"></div>
     <div class="g-wort weich" id="g-wort"></div>
     <div class="roehre" id="g-roehre" role="img" aria-label="">
@@ -338,16 +343,22 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
   <h3>Je Mandat</h3>
   <p class="was weich" id="was-mandate"></p>
   <div class="mass-kopf weich" id="mass-kopf"><span class="mk-wort"></span></div>
-  <div class="mandate" id="mandate"></div>
+  <div class="mandate" id="mandate"
+       data-hilfe-name="Je Mandat"
+       data-hilfe="Dieselbe Rechnung für jedes Mandat einzeln. Hier siehst du, welches sich trägt und welches du unter Wert bearbeitest — meist ist es eine Pauschale, in die zu viele Stunden geflossen sind."></div>
 
   <h3>Sätze</h3>
   <p class="was weich" id="was-saetze"></p>
-  <div class="saetze" id="saetze"></div>
+  <div class="saetze" id="saetze"
+       data-hilfe-name="Die Sätze"
+       data-hilfe="Zwei Zahlen je Kopf: was der Kunde für die Stunde zahlt, und was sie dich kostet — Gehalt plus alles, was daran hängt. Ohne die zweite Zahl gibt es keine Marge, und sie sehen nur Inhaber und Partner."></div>
   <p class="regel weich" id="regel-saetze"></p>
 
   <h3>Tarifverlauf der Kundenzugänge</h3>
   <p class="was">Auf welchem Tarif ein Kunde wann lag — die Grundlage jeder Rechnung, die quoroAI der Beratung stellt.</p>
-  <div class="strang" id="strang"></div>
+  <div class="strang" id="strang"
+       data-hilfe-name="Der Tarifverlauf"
+       data-hilfe="Auf welchem Tarif jeder Kundenzugang wann lag. Das ist die Grundlage der Rechnung, die quoroAI dir stellt — wer hier einen Sprung sieht, findet ihn auch auf seiner Rechnung wieder."></div>
   <p class="strang-fuss">Die Beträge sind Listenpreise je Monat, vor der Mengenstaffel. Was daraus jeden Monat wirklich wird, steht unter <a href="beratung-abrechnung.html">Was quoroAI berechnet</a>.</p>
 </main>
 
@@ -727,6 +738,7 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
   roehrenStellen();
 })();
 </script>
+<script src="hilfe.js"></script>
 <script src="uhr.js"></script>
 <script src="zeiger.js"></script>
 <script src="rechtsfuss.js"></script>

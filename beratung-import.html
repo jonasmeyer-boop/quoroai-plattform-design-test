@@ -1,0 +1,1113 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kundenliste einlesen</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, der Import-Assistent (Häppchen C3, Issue #36).
+
+   Die Frage war, wie eine fremde Beratung ihre zweihundert Kunden hereinbekommt,
+   ohne sie abzutippen. Die übliche Antwort ist ein Zuordnungsformular: links die
+   Spalten der Datei, rechts zwanzig Auswahlfelder, und der Mensch macht die
+   Arbeit, die die Software machen sollte.
+
+   Hier nicht. Der Assistent LIEST die Tabelle und sagt in Sätzen, was er
+   verstanden hat — „die erste Spalte lese ich als Namen, hier sind drei
+   Beispiele". Entschieden wird nur, was er selbst nicht sicher weiß. Das ist
+   dieselbe Haltung wie bei der Verwaltung (Entscheidung 2026-08-14): ein
+   Nachweis, kein Formular.
+
+   Drei Lagen auf einer Fläche: hineingeben, das Verstandene prüfen, übernehmen.
+   Die dritte Lage ist der einzige Fancy-Moment — die Zeilen der Tabelle richten
+   sich als Gebäude auf, weil genau das passiert: aus einer Tabelle wird das
+   Modell.
+
+   Was nicht glatt geht, wird nicht verschluckt. Jede Zeile, die stolpert, steht
+   mit ihrem Grund da und mit dem, was der Assistent damit vorhat — und das lässt
+   sich ändern. Eine Zeile verschwindet nie stillschweigend.
+
+   Die Erkennung ist echt: das Beispiel wird wirklich zerlegt, und wer eine
+   eigene Tabelle einfügt, bekommt seine eigenen Spalten zu sehen.
+
+   Kein Deko-Punkt, kein Mittelpunkt als Trenner (Jonas' Regeln). Zustand ist
+   Füllstand im Glas, Chrom ist quoroAI (system.css).
+   Marker: BERATUNG-IMPORT-V1 */
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,select,textarea{font-family:inherit}
+body.quoro a{text-decoration:none}
+body.quoro .lauf a{text-decoration:underline}
+
+/* ========== quoroAI-Chrom ========== */
+:root{--chrom:60px}
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;word-spacing:2px}
+nav .rechts{display:flex;align-items:center;gap:10px}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+@media (max-width:1420px){
+  :root{--chrom:118px}
+  nav{height:118px;padding-bottom:58px}
+  #krume{z-index:90}
+}
+
+/* ========== Seite ========== */
+main{max-width:920px;margin:0 auto;padding:136px 24px 90px}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:15px;color:var(--nebel-600);margin-top:8px;max-width:58ch;line-height:1.55}
+
+/* Der Weg: drei Lagen, und man sieht immer, wo man steht */
+.weg{display:flex;gap:8px;align-items:center;margin-top:22px;flex-wrap:wrap}
+.weg .schritt{
+  display:inline-flex;align-items:baseline;gap:8px;
+  font-size:13px;color:var(--nebel-500);
+}
+.weg .schritt b{font-weight:600}
+.weg .schritt.hier{color:var(--tinte)}
+.weg .strich{width:26px;height:1px;background:var(--nebel-300)}
+.weg .nr{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:21px;height:21px;border-radius:999px;flex-shrink:0;align-self:center;
+  border:1px solid var(--nebel-300);font-size:11.5px;font-weight:700;color:var(--nebel-500);
+}
+.weg .schritt.hier .nr{background:var(--tinte);border-color:var(--tinte);color:#fff}
+.weg .schritt.fertig .nr{background:var(--lila-100);border-color:var(--lila-300);color:var(--lila-800)}
+
+/* ---------- Lage 1: hineingeben ---------- */
+.zone{
+  margin-top:26px;padding:40px 28px;text-align:center;
+  border:1.5px dashed var(--nebel-300);border-radius:var(--radius-karte);
+  background:var(--flaeche);
+  transition:border-color .2s var(--kurve),background .2s var(--kurve);
+}
+.zone.drueber{border-color:var(--lila-500);background:var(--lila-050)}
+.zone h2{font-size:21px}
+.zone p{font-size:14.5px;color:var(--nebel-600);margin-top:8px;line-height:1.55;max-width:52ch;margin-left:auto;margin-right:auto}
+.zone .tueren{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+.zone .knopf{min-height:44px;padding:0 18px;font-size:14px}
+.zone textarea{
+  width:100%;margin-top:20px;min-height:130px;resize:vertical;
+  padding:14px;font-size:13.5px;line-height:1.5;color:var(--tinte);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  background:var(--nebel-050);border:0.5px solid var(--nebel-300);border-radius:var(--radius-innen);
+}
+.zone textarea:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+.zone .klein{font-size:12.5px;color:var(--nebel-500);margin-top:12px}
+.zone .fehler{color:var(--rot);font-size:14px;margin-top:14px;font-weight:600}
+
+/* ---------- Lage 2: was ich verstanden habe ---------- */
+.urteil{
+  margin-top:26px;padding:22px 24px;border-radius:var(--radius-karte);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 10px 30px rgba(24,21,47,.06);
+}
+.urteil .satz{font-family:var(--schrift-schau);font-weight:600;letter-spacing:-.01em;word-spacing:1.5px;
+  font-size:clamp(20px,2.6vw,26px);line-height:1.25}
+.urteil .satz em{font-style:normal;color:var(--lila-700)}
+.urteil .dazu{font-size:14.5px;color:var(--nebel-600);margin-top:10px;line-height:1.55;max-width:60ch}
+
+h2.abschnitt{
+  margin-top:34px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--nebel-600);
+}
+h2.abschnitt + .was{font-size:14px;color:var(--nebel-600);margin-top:6px;max-width:62ch;line-height:1.55}
+
+.spalten{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.spalte{
+  display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;align-items:start;
+  padding:14px 16px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+}
+.spalte.unsicher{border-color:var(--bernstein);background:var(--bernstein-fond)}
+.spalte.fremd{background:var(--nebel-050)}
+.spalte .kopfname{
+  grid-column:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:13px;color:var(--nebel-700);word-break:break-word;
+}
+.spalte .lese{grid-column:2;grid-row:1;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.spalte .lese.nichts{font-weight:400;color:var(--nebel-500)}
+.spalte .proben{
+  grid-column:1;grid-row:2;font-size:12.5px;color:var(--nebel-500);line-height:1.5;
+  overflow:hidden;text-overflow:ellipsis;
+}
+.spalte .urteilswort{grid-column:2;grid-row:2;font-size:12.5px;line-height:1.5;color:var(--nebel-600)}
+.spalte.unsicher .urteilswort{color:var(--bernstein);font-weight:600}
+.spalte .wahl{grid-column:2;grid-row:3;margin-top:6px}
+.spalte select{
+  width:100%;min-height:40px;padding:0 10px;font:inherit;font-size:13.5px;color:var(--tinte);cursor:pointer;
+  background:var(--flaeche);border:0.5px solid var(--nebel-300);border-radius:10px;
+}
+.spalte select:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+.spalte .anders{
+  grid-column:2;grid-row:3;margin-top:4px;
+  background:none;border:0;padding:0;cursor:pointer;
+  font-size:12.5px;color:var(--lila-700);text-align:left;
+}
+.spalte .anders:hover{text-decoration:underline}
+
+/* Die Stolpersteine: was nicht glatt geht, mit Grund und Vorhaben */
+.steine{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.stein{
+  display:flex;gap:14px;align-items:center;flex-wrap:wrap;
+  padding:13px 16px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+}
+.stein .wer{flex:1;min-width:190px}
+.stein .wer b{display:block;font-size:14.5px;font-weight:600;letter-spacing:-.01em}
+.stein .wer .grund{display:block;font-size:12.5px;color:var(--nebel-600);line-height:1.45}
+.stein .zeile-nr{
+  flex-shrink:0;font-size:11.5px;font-weight:700;color:var(--nebel-500);
+  font-variant-numeric:tabular-nums;min-width:56px;
+}
+.stein select{
+  min-height:40px;padding:0 10px;font:inherit;font-size:13.5px;color:var(--tinte);cursor:pointer;
+  background:var(--flaeche);border:0.5px solid var(--nebel-300);border-radius:10px;flex-shrink:0;
+}
+.stein select:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+.glatt{
+  margin-top:14px;padding:18px 20px;border-radius:var(--radius-innen);
+  background:var(--gruen-fond);border:0.5px solid rgba(23,116,82,.2);
+  font-size:14.5px;color:var(--gruen);font-weight:600;
+}
+
+/* Die Vorschau der ersten Zeilen, so wie sie im Modell landen */
+.probe-tabelle{margin-top:14px;overflow-x:auto;border-radius:var(--radius-innen);border:0.5px solid var(--nebel-200);background:var(--flaeche)}
+.probe-tabelle table{border-collapse:collapse;width:100%;font-size:13.5px}
+.probe-tabelle th{
+  text-align:left;padding:10px 14px;white-space:nowrap;
+  font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--nebel-600);
+  border-bottom:0.5px solid var(--nebel-200);background:var(--nebel-050);
+}
+.probe-tabelle td{padding:10px 14px;white-space:nowrap;border-bottom:0.5px solid var(--nebel-100)}
+.probe-tabelle tr:last-child td{border-bottom:0}
+.probe-tabelle td.leer{color:var(--nebel-400)}
+
+/* Der Abschluss der zweiten Lage */
+.abschluss{
+  position:sticky;bottom:0;z-index:50;
+  margin-top:30px;padding:16px;border-radius:var(--radius-karte);
+  display:flex;gap:14px;align-items:center;flex-wrap:wrap;
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid rgba(255,255,255,.66);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.14);
+}
+.abschluss .bilanz{flex:1;min-width:220px;font-size:14px;line-height:1.5}
+.abschluss .bilanz b{font-family:var(--schrift-schau);font-weight:600;letter-spacing:-.01em;font-size:22px;
+  font-variant-numeric:tabular-nums}
+.abschluss .bilanz .rest{display:block;font-size:12.5px;color:var(--nebel-600);margin-top:2px}
+.abschluss .knopf{min-height:46px;padding:0 20px;font-size:14.5px}
+/* system.css kennt keinen gesperrten Knopf. Ohne diese Regel steht ein voller
+   lila Knopf da, der nichts tut — und niemand erfährt, warum. */
+.abschluss .knopf:disabled{
+  opacity:.42;cursor:not-allowed;box-shadow:none;transform:none;
+}
+.abschluss .knopf:disabled::after{display:none}
+.abschluss .warum-gesperrt{
+  flex:1 1 100%;order:9;font-size:13px;color:var(--nebel-600);line-height:1.5;
+}
+
+/* ---------- Lage 3: die Ankunft ---------- */
+.ankunft{margin-top:26px;text-align:center}
+.skyline{
+  display:flex;align-items:flex-end;justify-content:center;gap:4px;
+  height:190px;width:fit-content;max-width:100%;margin:0 auto;overflow:hidden;
+  border-bottom:1.5px solid var(--nebel-300);
+}
+/* Verschiedene Breiten, nicht nur verschiedene Höhen: gleich breite Balken sind
+   ein Diagramm, ungleich breite sind eine Skyline. */
+.skyline i{
+  display:block;flex-shrink:0;min-width:2px;
+  border-radius:3px 3px 0 0;
+  background:linear-gradient(180deg,var(--lila-400),var(--lila-700));
+  transform-origin:50% 100%;transform:scaleY(0);
+  transition:transform .62s var(--kurve);
+}
+.skyline i.schon{
+  background:linear-gradient(180deg,var(--nebel-300),var(--nebel-400));
+}
+.skyline i.steht{transform:scaleY(1)}
+.skyline i.leuchtet{box-shadow:0 -2px 22px rgba(111,99,232,.55)}
+.ankunft .zahl{
+  font-family:var(--schrift-schau);font-weight:600;letter-spacing:-.02em;
+  font-size:clamp(40px,8vw,68px);line-height:1;margin-top:26px;font-variant-numeric:tabular-nums;
+}
+.ankunft .zahl-wort{font-size:16px;color:var(--nebel-600);margin-top:8px}
+.ankunft .dazu{font-size:14.5px;color:var(--nebel-600);margin-top:14px;line-height:1.6;max-width:52ch;margin-left:auto;margin-right:auto}
+.ankunft .tueren{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+.ankunft .knopf{min-height:46px;padding:0 20px;font-size:14.5px}
+
+.fuss{margin-top:36px;font-size:12.5px;color:var(--nebel-500);line-height:1.6;max-width:68ch}
+
+@media (max-width:760px){
+  nav{padding:0 18px;padding-bottom:58px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(84px + env(safe-area-inset-bottom))}
+  .zone{padding:28px 18px}
+  .zone .knopf{width:100%}
+  .spalte{grid-template-columns:1fr;gap:4px}
+  .spalte .kopfname,.spalte .lese,.spalte .proben,.spalte .urteilswort,.spalte .wahl,.spalte .anders{grid-column:1;grid-row:auto}
+  /* Der Daumen führt: 44px am Handy (docs/wissen/handy-durchgang.md) */
+  .spalte select,.stein select{min-height:44px}
+  .spalte .anders{display:flex;align-items:center;min-height:44px;margin-top:0}
+  .stein select{width:100%}
+  .abschluss .knopf{width:100%}
+  .skyline{height:150px;gap:3px}
+  .skyline i{max-width:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  .skyline i{transition:none}
+  .zone{transition:none}
+}
+</style>
+</head>
+<body class="quoro"
+      data-hilfe-titel="Kundenliste einlesen"
+      data-hilfe-satz="Hier kommt deine bestehende Kundenliste in die Plattform. Du gibst eine Tabelle hinein, quoroAI liest sie und sagt dir, was es verstanden hat. Entscheiden musst du nur, wo es unsicher ist.">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <div class="rechts">
+    <span data-hilfe-knopf></span>
+    <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+  </div>
+</nav>
+
+<a id="krume" href="beratung-ankommen.html"><span class="zurueck">← Ankommen</span><span>/</span><b>Kundenliste einlesen</b></a>
+
+<main>
+  <div class="kopf">
+    <h1>Kundenliste einlesen</h1>
+    <div class="stand">Gib deine Tabelle hinein, wie sie ist. Nichts umbenennen, nichts sortieren — ich sage dir, was ich darin verstanden habe, und du prüfst nur das, wo ich unsicher bin.</div>
+  </div>
+
+  <div class="weg" id="weg" data-hilfe-name="Drei Schritte" data-hilfe="Hineingeben, prüfen, übernehmen. Mehr ist es nicht. Solange du nicht auf „Übernehmen“ drückst, ändert sich in deiner Beratung nichts.">
+    <span class="schritt hier" data-lage="1"><span class="nr">1</span><b>Tabelle hineingeben</b></span>
+    <span class="strich"></span>
+    <span class="schritt" data-lage="2"><span class="nr">2</span><b>Prüfen, was ich verstanden habe</b></span>
+    <span class="strich"></span>
+    <span class="schritt" data-lage="3"><span class="nr">3</span><b>Übernehmen</b></span>
+  </div>
+
+  <!-- ================= Lage 1 ================= -->
+  <section id="lage1">
+    <div class="zone" id="zone"
+         data-hilfe-name="Die Tabelle"
+         data-hilfe="Zieh eine CSV-Datei hierher oder füge den Inhalt unten ein. Aus Excel reicht Kopieren und Einfügen — die Zwischenablage bringt die Spalten mit. Die Datei verlässt deinen Rechner erst, wenn du übernimmst.">
+      <h2>Zieh deine Kundenliste hierher</h2>
+      <p>Eine CSV-Datei, oder aus Excel einfach markieren, kopieren und unten einfügen. Wie die Spalten heißen, ist mir gleich.</p>
+      <div class="tueren">
+        <button class="knopf primaer" type="button" id="datei-waehlen">Datei wählen</button>
+        <button class="knopf sekundaer" type="button" id="beispiel">Beispiel einsetzen</button>
+      </div>
+      <input type="file" id="datei" accept=".csv,.tsv,.txt,text/csv,text/plain" hidden>
+      <textarea id="einfuegen" spellcheck="false"
+                aria-label="Tabelle hier einfügen"
+                placeholder="… oder hier einfügen"></textarea>
+      <p class="klein">Excel-Dateien (.xlsx) kann ich noch nicht öffnen. In Excel „Speichern unter → CSV“, dann klappt es.</p>
+      <p class="fehler" id="fehler" hidden></p>
+    </div>
+    <p class="fuss">Was du hier hineingibst, wird gelesen, nicht gespeichert. Erst der letzte Schritt legt Mandate an, und der sagt dir vorher genau, wie viele.</p>
+  </section>
+
+  <!-- ================= Lage 2 ================= -->
+  <section id="lage2" hidden>
+    <div class="urteil" id="urteil"
+         data-hilfe-name="Was ich gelesen habe"
+         data-hilfe="Mein Urteil über deine Datei in einem Satz. Stimmt die Zeilenzahl nicht, hat die Datei wahrscheinlich ein anderes Trennzeichen — dann hilft es, sie noch einmal als CSV zu speichern.">
+      <div class="satz" id="urteil-satz"></div>
+      <div class="dazu" id="urteil-dazu"></div>
+    </div>
+
+    <h2 class="abschnitt">Die Spalten</h2>
+    <p class="was">Links steht, wie die Spalte in deiner Datei heißt. Rechts, was ich daraus lese. Was ich sicher weiß, kannst du überfliegen.</p>
+    <div class="spalten" id="spalten"
+         data-hilfe-name="Die Spalten"
+         data-hilfe="Für jede Spalte deiner Datei steht hier, wofür ich sie halte, mit den ersten Werten als Beleg. Gelb heißt: geraten, sieh bitte drüber. Grau heißt: verstehe ich nicht, die Spalte bleibt draußen und schadet nichts."></div>
+
+    <h2 class="abschnitt">Was nicht glatt geht</h2>
+    <p class="was" id="steine-was"></p>
+    <div class="steine" id="steine"
+         data-hilfe-name="Die Stolpersteine"
+         data-hilfe="Jede Zeile, mit der ich nicht ohne Weiteres umgehen kann, steht hier mit ihrem Grund und mit dem, was ich vorhabe. Ändere es, wo du es anders willst. Stillschweigend fällt keine Zeile weg."></div>
+    <div class="glatt" id="glatt" hidden>Alles glatt. Keine Zeile stolpert.</div>
+
+    <h2 class="abschnitt">So sähen die ersten Mandate aus</h2>
+    <div class="probe-tabelle" id="probe"
+         data-hilfe-name="Die Probe"
+         data-hilfe="Die ersten Zeilen, schon in meiner Lesart. Wenn hier etwas in der falschen Spalte steht, korrigiere es oben — nicht in deiner Datei."></div>
+
+    <div class="abschluss"
+         data-hilfe-name="Der Abschluss"
+         data-hilfe="Die Bilanz rechnet mit, was du oben entschieden hast. Erst dieser Knopf legt die Mandate an.">
+      <div class="bilanz" id="bilanz"></div>
+      <button class="knopf leise" type="button" id="andere">Andere Datei</button>
+      <button class="knopf primaer" type="button" id="uebernehmen">Übernehmen</button>
+      <p class="warum-gesperrt" id="warum-gesperrt" hidden></p>
+    </div>
+  </section>
+
+  <!-- ================= Lage 3 ================= -->
+  <section id="lage3" hidden>
+    <div class="ankunft">
+      <div class="skyline" id="skyline" role="img" aria-label="Die neuen Mandate richten sich im Modell auf"></div>
+      <div class="zahl" id="ankunft-zahl">0</div>
+      <div class="zahl-wort" id="ankunft-wort">Mandate stehen im Modell</div>
+      <p class="dazu" id="ankunft-dazu"></p>
+      <div class="tueren">
+        <a class="knopf primaer" href="beratung-f-modell.html">Ins Modell</a>
+        <a class="knopf sekundaer" href="beratung-kunden.html">Zur Kundenliste</a>
+        <a class="knopf leise" href="beratung-ankommen.html">Weiter beim Ankommen</a>
+      </div>
+    </div>
+    <p class="fuss">Jedes eingelesene Mandat ist zunächst nur ein Name mit Stammdaten. Der KI-Berater fängt erst an zu arbeiten, wenn das Mandat einen Tarif hat und der Kunde seinen Zugang bekommen hat — beides geht aus der Kundenliste heraus.</p>
+  </section>
+</main>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ================= Das Beispiel =================
+     Absichtlich unordentlich, weil echte Listen unordentlich sind: eine
+     zwei Überschriften, die nichts verraten („Kontakt 1", „Rückruf") und nur an
+     den Werten zu erkennen sind, eine Spalte, mit der niemand etwas anfangen
+     kann („Ampel"), eine Zeile ohne Namen, ein Kunde zweimal, ein unlesbares
+     Datum und einer, der im Modell schon steht. Wer einen Import-Assistenten an
+     einer sauberen Datei vorführt, führt nichts vor. */
+  var BEISPIEL = [
+    'Firma;Gewerk;PLZ;Sitz;Kontakt 1;Rückruf;Mandant seit;KdNr;Ampel;Bemerkung intern',
+    'Petersen Stahlbau GmbH;Stahlbau;26123;Oldenburg;buero@petersen-stahlbau.de;0441 21 88 40;01.03.2019;K-1001;gruen;Werkhalle 2 neu',
+    'Ahrens Elektrotechnik GmbH;Elektrotechnik;28195;Bremen;info@ahrens-elektro.de;0421 33 47 12;15.06.2020;K-1002;gruen;',
+    'Bäckerei Nordmann;Bäckerei;27568;Bremerhaven;kontakt@baeckerei-nordmann.de;0471 90 21 55;01.01.2018;K-1003;gelb;5 Filialen',
+    'Kruse Sanitärtechnik e. K.;Sanitärtechnik;27749;Delmenhorst;kruse@kruse-sanitaer.de;04221 55 09 18;12.09.2021;K-1004;gruen;',
+    'Tischlerei Struve;Tischlerei;27283;Verden;post@tischlerei-struve.de;04231 74 22 06;04.04.2017;K-1005;gruen;',
+    'Warnke Landtechnik GmbH & Co. KG;Landtechnik;49661;Cloppenburg;buero@warnke-landtechnik.de;04471 18 33 90;22.11.2022;K-1006;gelb;Saisongeschäft',
+    'Timm Gebäudereinigung;Gebäudereinigung;26382;Wilhelmshaven;info@timm-reinigung.de;04421 60 14 27;08.02.2023;K-1007;gruen;',
+    ';Malerbetrieb;26721;Emden;info@maler-nordwest.de;04921 45 78 11;01.07.2021;K-1008;gelb;Firmenname klären',
+    'Focke Kunststofftechnik GmbH;Kunststofftechnik;49716;Meppen;zentrale@focke-kunststoff.de;05931 82 40 66;30.05.2019;K-1009;gruen;',
+    'Apotheke Eilers;Apotheke;26789;Leer;eilers@apotheke-leer.de;0491 60 33 08;17.08.2016;K-1010;gruen;',
+    'Ahrens Elektrotechnik GmbH;Elektrotechnik;28195;Bremen;info@ahrens-elektro.de;0421 33 47 12;15.06.2020;K-1002;gruen;doppelt erfasst',
+    'Hinrichs Fensterbau;Fensterbau;26802;Moormerland;info@hinrichs-fensterbau.de;04954 91 20 74;03.03.2020;K-1011;gruen;',
+    'Segelmacherei Voigt;Segelmacherei;26935;Stadland;voigt@segel-voigt.de;04732 55 41 09;irgendwann 2015;K-1012;gelb;Datum unklar',
+    'Grote Ingenieurbüro GmbH;Ingenieurbüro;26160;Bad Zwischenahn;kontakt@grote-ing.de;04403 71 65 22;19.01.2024;K-1013;gruen;',
+    'Reimers Kfz-Technik;Kfz-Technik;27356;Rotenburg;werkstatt@reimers-kfz.de;04261 88 90 34;25.10.2018;K-1014;gruen;',
+    'Fleischerei Piper;Fleischerei;27793;Wildeshausen;piper@fleischerei-piper.de;04431 62 17 85;11.11.2019;K-1015;gruen;',
+    'Osterloh Heizungsbau GmbH;Heizungsbau;26129;Oldenburg;info@osterloh-heizung.de;0441 39 55 71;07.07.2022;K-1016;gelb;',
+    'Lampe Werbetechnik;Werbetechnik;28309;Bremen;hallo@lampe-werbetechnik.de;0421 47 92 30;14.05.2023;K-1017;gruen;',
+    'Zimmerei Dierks;Zimmerei;27404;Zeven;dierks@zimmerei-dierks.de;04281 95 60 12;02.02.2015;K-1018;gruen;',
+    'Mommsen Baustoffe GmbH;Baustoffe;27472;Cuxhaven;vertrieb@mommsen-baustoffe.de;04721 30 88 45;28.09.2020;K-1019;gruen;',
+    'Renken Hörakustik;Hörakustik;26603;Aurich;renken@hoerakustik-aurich.de;04941 66 20 93;06.06.2021;K-1020;gruen;',
+    'Wilkens Bootsbau;Bootsbau;26954;Nordenham;werft@wilkens-bootsbau.de;04731 27 14 60;13.03.2017;K-1021;gelb;',
+    'Physiotherapie Kettler;Physiotherapie;27239;Twistringen;praxis@physio-kettler.de;04243 80 55 27;21.04.2024;K-1022;gruen;'
+  ].join('\n');
+
+  /* Wer im Modell schon steht. Aus beratung-kunden.html — wer hier eigene
+     Namen erfindet, baut zwei Wahrheiten auf einen Klickweg. */
+  var IM_MODELL = ['Petersen Stahlbau', 'Cordes Logistik', 'Bäckerei Freitag', 'MTS Maschinenbau'];
+
+  /* ================= Die Rollen, die ich kenne =================
+     kopf  = am Namen der Spalte erkannt (sicher)
+     wert  = an den Werten erkannt (vermutet, du siehst bitte drüber)
+     Reihenfolge zählt: die erste passende Rolle gewinnt, und jede Rolle wird
+     höchstens einmal vergeben. */
+  var ROLLEN = [
+    {s:'name',    wort:'Name des Kunden',
+     kopf:/^(firma|firmenname|name|kunde|kundenname|mandant|unternehmen|betrieb)$/i,
+     wert:null, pflicht:true},
+    {s:'branche', wort:'Branche',
+     kopf:/(branche|gewerk|t[äa]tigkeit|sparte)/i, wert:null},
+    {s:'plz',     wort:'Postleitzahl',
+     kopf:/(plz|postleit)/i,
+     wert:function(v){ return /^\d{5}$/.test(v); }},
+    {s:'ort',     wort:'Ort',
+     kopf:/^(ort|stadt|sitz|standort)$/i, wert:null},
+    {s:'strasse', wort:'Straße',
+     kopf:/(stra[sß]e|anschrift|adresse)/i,
+     /* Muss mit einem Wort beginnen, nicht mit einer Ziffer: „0441 21 88 40"
+        endet auch auf eine Zahl und wurde sonst zur Straße statt zur Telefon-
+        nummer. Eine Hausnummer hat höchstens vier Stellen. */
+     wert:function(v){ return /^[A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß.\- ]{2,}\s+\d{1,4}\s?[a-z]?$/.test(v); }},
+    {s:'email',   wort:'E-Mail',
+     kopf:/(mail|e-?mail)/i,
+     wert:function(v){ return /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v); }},
+    {s:'telefon', wort:'Telefon',
+     kopf:/(telefon|tel\.?|fon|mobil|handy)/i,
+     wert:function(v){ return /^[+\d][\d\s\/()-]{6,}$/.test(v); }},
+    {s:'ansprech',wort:'Ansprechpartner',
+     kopf:/(ansprech|kontaktperson|inhaber|gesch[äa]ftsf)/i, wert:null},
+    {s:'seit',    wort:'Mandat seit',
+     kopf:/(seit|beginn|start|mandatsbeginn|kunde seit)/i,
+     wert:function(v){ return !!datum(v); }},
+    {s:'nummer',  wort:'Kundennummer',
+     kopf:/(kd\.?-?nr|kundennummer|kunden-?nr|nummer|^nr\.?$)/i, wert:null},
+    {s:'notiz',   wort:'Notiz zum Mandat',
+     kopf:/(bemerkung|notiz|hinweis|kommentar|intern)/i, wort_hinweis:true, wert:null}
+  ];
+
+  function rolleVon(s){ for (var i=0;i<ROLLEN.length;i++) if (ROLLEN[i].s===s) return ROLLEN[i]; return null; }
+
+  /* ================= Tabelle lesen ================= */
+  /* Trennzeichen raten: das Zeichen, das in den meisten Zeilen gleich oft
+     vorkommt. Gezählt wird der Median über bis zu zwanzig Zeilen und nicht nur
+     die Kopfzeile — ein Komma in einem einzelnen Firmennamen („Meyer, Sohn &
+     Co.") darf die Rechnung sonst kippen. */
+  function trennzeichen(zeilen){
+    var kandidaten = [';', '\t', ',', '|'];
+    var probe = zeilen.slice(0, 20);
+    var bestes = ';', besteZahl = 0;
+    kandidaten.forEach(function(z){
+      var zahlen = probe.map(function(zeile){ return zeile.split(z).length - 1; });
+      zahlen.sort(function(a, b){ return a - b; });
+      var median = zahlen[Math.floor(zahlen.length / 2)];
+      if (median > besteZahl) { besteZahl = median; bestes = z; }
+    });
+    return besteZahl ? bestes : ';';
+  }
+
+  /* CSV mit Anführungszeichen: "Meyer, Sohn & Co." bleibt ein Feld. */
+  function zerlege(zeile, tz){
+    var felder = [], feld = '', inZitat = false;
+    for (var i = 0; i < zeile.length; i++) {
+      var c = zeile[i];
+      if (inZitat) {
+        if (c === '"') {
+          if (zeile[i+1] === '"') { feld += '"'; i++; }
+          else inZitat = false;
+        } else feld += c;
+      } else if (c === '"') inZitat = true;
+      else if (c === tz) { felder.push(feld); feld = ''; }
+      else feld += c;
+    }
+    felder.push(feld);
+    return felder.map(function(f){ return f.trim(); });
+  }
+
+  var MONAT_KURZ = ['Jan.','Feb.','März','Apr.','Mai','Juni','Juli','Aug.','Sep.','Okt.','Nov.','Dez.'];
+  /* Deutsche und ISO-Schreibweise, sonst nichts — „irgendwann 2015" ist kein
+     Datum, und so zu tun als ob wäre schlimmer als es zuzugeben. */
+  function datum(v){
+    if (!v) return null;
+    var m = /^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/.exec(v);
+    var t, mo, j;
+    if (m) { t = +m[1]; mo = +m[2]; j = +m[3]; }
+    else {
+      m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+      if (!m) return null;
+      j = +m[1]; mo = +m[2]; t = +m[3];
+    }
+    if (mo < 1 || mo > 12 || t < 1 || t > 31 || j < 1900 || j > 2100) return null;
+    return { jahr: j, wort: t + '. ' + MONAT_KURZ[mo-1] + ' ' + j };
+  }
+
+  /* ================= Zustand ================= */
+  var kopf = [], zeilen = [], zuordnung = [], befunde = [];
+
+  function lies(text){
+    var roh = text.replace(/\r\n?/g, '\n').split('\n').filter(function(z){ return z.trim() !== ''; });
+    if (roh.length < 2) return 'Da sind keine zwei Zeilen drin. Eine Kopfzeile und mindestens ein Kunde müssen es schon sein.';
+    var tz = trennzeichen(roh);
+    kopf = zerlege(roh[0], tz);
+    if (kopf.length < 2) return 'Ich finde nur eine Spalte. Wahrscheinlich hat die Datei ein anderes Trennzeichen — in Excel „Speichern unter → CSV“ hilft.';
+    zeilen = roh.slice(1).map(function(z){
+      var f = zerlege(z, tz);
+      while (f.length < kopf.length) f.push('');
+      return f.slice(0, kopf.length);
+    });
+    ordne();
+    finde();
+    return null;
+  }
+
+  /* Für jede Spalte die beste Rolle: erst am Namen, dann an den Werten. */
+  function ordne(){
+    zuordnung = kopf.map(function(){ return {rolle:null, sicher:false}; });
+    var vergeben = {};
+
+    kopf.forEach(function(name, i){
+      for (var r = 0; r < ROLLEN.length; r++) {
+        var R = ROLLEN[r];
+        if (vergeben[R.s]) continue;
+        if (R.kopf.test(name.trim())) {
+          zuordnung[i] = {rolle:R.s, sicher:true};
+          vergeben[R.s] = true;
+          return;
+        }
+      }
+    });
+
+    kopf.forEach(function(name, i){
+      if (zuordnung[i].rolle) return;
+      var proben = werte(i, 8);
+      if (!proben.length) return;
+      for (var r = 0; r < ROLLEN.length; r++) {
+        var R = ROLLEN[r];
+        if (vergeben[R.s] || !R.wert) continue;
+        var treffer = proben.filter(R.wert).length;
+        if (treffer / proben.length >= 0.8) {
+          zuordnung[i] = {rolle:R.s, sicher:false};
+          vergeben[R.s] = true;
+          return;
+        }
+      }
+    });
+
+    /* Kein Name gefunden? Dann ist es die erste Spalte, die überall gefüllt ist
+       und nirgends nach etwas anderem aussieht — ohne Namen ist die Datei
+       nutzlos, und raten ist hier besser als aufgeben. */
+    if (!vergeben['name']) {
+      for (var i = 0; i < kopf.length; i++) {
+        if (zuordnung[i].rolle) continue;
+        var p = werte(i, 8);
+        if (p.length >= Math.min(3, zeilen.length) && p.every(function(v){ return v.length > 2 && !/^\d+$/.test(v); })) {
+          zuordnung[i] = {rolle:'name', sicher:false};
+          break;
+        }
+      }
+    }
+  }
+
+  function werte(i, wieViele){
+    var raus = [];
+    for (var z = 0; z < zeilen.length && raus.length < wieViele; z++) {
+      var v = zeilen[z][i];
+      if (v) raus.push(v);
+    }
+    return raus;
+  }
+
+  var ERSATZNAME = 'Ohne Namen';
+  /* Wer „trotzdem anlegen" wählt, muss den Ersatznamen auch in der Probe und in
+     der Silhouette sehen. Sonst widerspricht die Fläche der Entscheidung, die
+     der Mensch gerade getroffen hat — auf einer Fläche, deren ganzes Versprechen
+     „ich zeige dir, was entsteht" lautet. */
+  function nameVon(zi){
+    var n = feld(zeilen[zi], 'name').trim();
+    return n || ERSATZNAME;
+  }
+
+  function spalteFuer(s){
+    for (var i = 0; i < zuordnung.length; i++) if (zuordnung[i].rolle === s) return i;
+    return -1;
+  }
+  function feld(zeile, s){
+    var i = spalteFuer(s);
+    return i === -1 ? '' : (zeile[i] || '');
+  }
+
+  /* ================= Die Stolpersteine =================
+     Jeder Befund trägt seinen Grund, sein Vorhaben und die Wahl dazu. Ein
+     Befund, den man nicht ändern kann, ist eine Ausrede. */
+  function finde(){
+    /* Was der Mensch schon entschieden hat, überlebt eine Spaltenänderung.
+       Vorher baute finde() die Liste bei jedem Klick neu auf und setzte jede
+       Wahl still auf die Voreinstellung zurück — die Bilanz sprang, ohne dass
+       jemand etwas gesagt hätte. */
+    var vorher = Object.create(null);
+    befunde.forEach(function(b){ vorher[b.art + '#' + b.zeile] = b.wahl; });
+    function wahlVon(art, zeile, standard){
+      var w = vorher[art + '#' + zeile];
+      return w === undefined ? standard : w;
+    }
+
+    befunde = [];
+    /* Object.create(null): eine Firma namens „Constructor GmbH" fiele bei einem
+       gewöhnlichen Objekt über die geerbten Eigenschaften und stünde als
+       Dublette in Zeile NaN da. */
+    var gesehen = Object.create(null);
+    zeilen.forEach(function(z, i){
+      var name = feld(z, 'name').trim();
+      var nr = i + 2; /* Zeile 1 ist die Kopfzeile — so zählt auch Excel */
+
+      if (!name) {
+        befunde.push({art:'ohne-name', nr:nr, zeile:i, titel:'Zeile ' + nr + ' hat keinen Namen',
+          grund: erstesGefuelltes(z) ? 'Nur „' + erstesGefuelltes(z) + '“ steht drin, aber kein Firmenname.' : 'Die Zeile ist praktisch leer.',
+          wahl: wahlVon('ohne-name', i, 'weg'),
+          optionen: [['weg','Zeile überspringen'], ['leer','Trotzdem anlegen, Name „Ohne Namen“']]});
+        return;
+      }
+      var schluessel = name.toLowerCase();
+      if (gesehen[schluessel] != null) {
+        befunde.push({art:'doppelt', nr:nr, zeile:i, titel:name,
+          grund:'Steht in deiner Datei schon in Zeile ' + (gesehen[schluessel] + 2) + '.',
+          wahl: wahlVon('doppelt', i, 'einmal'),
+          optionen: [['einmal','Nur einmal anlegen'], ['beide','Beide anlegen']]});
+        return;
+      }
+      gesehen[schluessel] = i;
+
+      if (kenntSchon(name)) {
+        befunde.push({art:'bekannt', nr:nr, zeile:i, titel:name,
+          grund:'Dieses Mandat steht schon im Modell.',
+          wahl: wahlVon('bekannt', i, 'ergaenzen'),
+          optionen: [['ergaenzen','Stammdaten ergänzen'], ['weg','Zeile überspringen']]});
+        return;
+      }
+
+      var si = spalteFuer('seit');
+      if (si !== -1 && z[si] && !datum(z[si])) {
+        befunde.push({art:'datum', nr:nr, zeile:i, titel:name,
+          grund:'„' + z[si] + '“ kann ich nicht als Datum lesen.',
+          wahl: wahlVon('datum', i, 'leer'),
+          optionen: [['leer','Anlegen, Mandatsbeginn bleibt offen'], ['weg','Zeile überspringen']]});
+      }
+    });
+  }
+
+  function erstesGefuelltes(z){
+    for (var i = 0; i < z.length; i++) if (z[i]) return z[i];
+    return '';
+  }
+  /* „Petersen Stahlbau GmbH" und „Petersen Stahlbau" sind derselbe Betrieb:
+     die Rechtsform steht mal dran und mal nicht. */
+  function kern(n){
+    return n.toLowerCase()
+      .replace(/\b(gmbh|ag|kg|ohg|ug|e\.?\s?k\.?|mbh|co\.?|&|gbr)\b/g, ' ')
+      .replace(/[^a-zäöüß0-9]+/g, ' ').trim();
+  }
+  function kenntSchon(name){
+    var k = kern(name);
+    return IM_MODELL.some(function(m){ return kern(m) === k; });
+  }
+
+  /* ================= Zeichnen: Lage 2 ================= */
+  var spaltenEl = document.getElementById('spalten');
+  var steineEl = document.getElementById('steine');
+  var probeEl = document.getElementById('probe');
+
+  function zeichneUrteil(){
+    var erkannt = zuordnung.filter(function(z){ return z.rolle; }).length;
+    var unsicher = zuordnung.filter(function(z){ return z.rolle && !z.sicher; }).length;
+    var fremd = zuordnung.length - erkannt;
+
+    var satz = document.getElementById('urteil-satz');
+    satz.replaceChildren();
+    satz.append(
+      wortMit(zeilen.length + (zeilen.length === 1 ? ' Zeile' : ' Zeilen')),
+      document.createTextNode(' und '),
+      wortMit(kopf.length + (kopf.length === 1 ? ' Spalte' : ' Spalten') + '. '),
+      document.createTextNode(erkannt === kopf.length
+        ? 'Alle verstehe ich.'
+        : erkannt + ' davon verstehe ich, ' + (fremd === 1 ? 'eine nicht.' : fremd + ' nicht.'))
+    );
+
+    var dazu = [];
+    if (unsicher) dazu.push(unsicher === 1
+      ? 'Bei einer Spalte habe ich geraten, sie ist unten gelb.'
+      : 'Bei ' + unsicher + ' Spalten habe ich geraten, sie sind unten gelb.');
+    if (fremd) dazu.push(fremd === 1
+      ? 'Die Spalte, die ich nicht kenne, bleibt einfach draußen — sie schadet nichts.'
+      : 'Die Spalten, die ich nicht kenne, bleiben einfach draußen — sie schaden nichts.');
+    if (!unsicher && !fremd) dazu.push('Du kannst direkt nach unten und übernehmen.');
+    document.getElementById('urteil-dazu').textContent = dazu.join(' ');
+  }
+  function wortMit(t){ var e = document.createElement('em'); e.textContent = t; return e; }
+
+  function zeichneSpalten(){
+    spaltenEl.replaceChildren();
+    kopf.forEach(function(name, i){
+      var z = zuordnung[i];
+      var R = z.rolle ? rolleVon(z.rolle) : null;
+      var d = document.createElement('div');
+      d.className = 'spalte' + (R && !z.sicher ? ' unsicher' : '') + (R ? '' : ' fremd');
+
+      var kn = document.createElement('div');
+      kn.className = 'kopfname';
+      kn.textContent = name || '(ohne Überschrift)';
+      var le = document.createElement('div');
+      le.className = 'lese' + (R ? '' : ' nichts');
+      le.textContent = R ? R.wort : 'Kenne ich nicht';
+
+      var pr = document.createElement('div');
+      pr.className = 'proben';
+      var p = werte(i, 3);
+      pr.textContent = p.length ? p.join(', ') : 'in allen Zeilen leer';
+
+      var uw = document.createElement('div');
+      uw.className = 'urteilswort';
+      uw.textContent = !R ? 'bleibt draußen'
+        : z.sicher ? 'an der Überschrift erkannt'
+                   : 'an den Werten geraten, bitte prüfen';
+
+      d.append(kn, le, pr, uw);
+
+      /* Sichere Spalten bekommen keinen Kasten, sondern einen leisen Ausweg —
+         sonst stehen bei zwölf Spalten zwölf Auswahlfelder da und die drei,
+         auf die es ankommt, gehen unter. */
+      if (R && z.sicher) {
+        var anders = document.createElement('button');
+        anders.type = 'button';
+        anders.className = 'anders';
+        anders.textContent = 'Anders lesen';
+        anders.addEventListener('click', function(){
+          anders.replaceWith(waehler(i));
+        });
+        d.appendChild(anders);
+      } else {
+        d.appendChild(waehler(i));
+      }
+      spaltenEl.appendChild(d);
+    });
+  }
+
+  function waehler(i){
+    var huelle = document.createElement('div');
+    huelle.className = 'wahl';
+    var sel = document.createElement('select');
+    sel.setAttribute('aria-label', 'Spalte „' + (kopf[i] || 'ohne Überschrift') + '“ lesen als');
+    var leer = document.createElement('option');
+    leer.value = ''; leer.textContent = 'Nicht übernehmen';
+    sel.appendChild(leer);
+    ROLLEN.forEach(function(R){
+      var o = document.createElement('option');
+      o.value = R.s; o.textContent = R.wort;
+      sel.appendChild(o);
+    });
+    sel.value = zuordnung[i].rolle || '';
+    sel.addEventListener('change', function(){
+      /* Eine Rolle gibt es nur einmal: wer „Ort" auf eine zweite Spalte legt,
+         nimmt sie der ersten weg. Zwei Ortsspalten wären eine stille Lüge. */
+      if (sel.value) {
+        zuordnung.forEach(function(z, j){ if (j !== i && z.rolle === sel.value) z.rolle = null; });
+      }
+      zuordnung[i] = {rolle: sel.value || null, sicher: false};
+      finde();
+      zeichneLage2();
+    });
+    huelle.appendChild(sel);
+    return huelle;
+  }
+
+  function zeichneSteine(){
+    steineEl.replaceChildren();
+    document.getElementById('glatt').hidden = befunde.length > 0;
+    document.getElementById('steine-was').textContent = befunde.length
+      ? (befunde.length === 1 ? 'Eine Zeile stolpert. Sie steht hier mit dem, was ich vorhabe.'
+                              : befunde.length + ' Zeilen stolpern. Jede steht hier mit dem, was ich vorhabe.')
+      : '';
+    befunde.forEach(function(b, idx){
+      var d = document.createElement('div');
+      d.className = 'stein';
+      var nr = document.createElement('span');
+      nr.className = 'zeile-nr';
+      nr.textContent = 'Zeile ' + b.nr;
+      var wer = document.createElement('span');
+      wer.className = 'wer';
+      var t = document.createElement('b'); t.textContent = b.titel;
+      var g = document.createElement('span'); g.className = 'grund'; g.textContent = b.grund;
+      wer.append(t, g);
+      var sel = document.createElement('select');
+      sel.setAttribute('aria-label', b.titel + ': was soll passieren?');
+      b.optionen.forEach(function(o){
+        var op = document.createElement('option');
+        op.value = o[0]; op.textContent = o[1];
+        sel.appendChild(op);
+      });
+      sel.value = b.wahl;
+      sel.addEventListener('change', function(){
+        befunde[idx].wahl = sel.value;
+        zeichneBilanz();
+        zeichneProbe();
+      });
+      d.append(nr, wer, sel);
+      steineEl.appendChild(d);
+    });
+  }
+
+  /* Was tatsächlich entsteht, nach allem, was oben entschieden wurde. */
+  function bilanz(){
+    var raus = {neu:[], ergaenzt:[], draussen:0};
+    var behandelt = {};
+    befunde.forEach(function(b){ behandelt[b.zeile] = b; });
+
+    zeilen.forEach(function(z, i){
+      var b = behandelt[i];
+      if (b) {
+        if (b.wahl === 'weg') { raus.draussen++; return; }
+        if (b.art === 'doppelt' && b.wahl === 'einmal') { raus.draussen++; return; }
+        if (b.art === 'bekannt' && b.wahl === 'ergaenzen') { raus.ergaenzt.push(i); return; }
+      }
+      raus.neu.push(i);
+    });
+    return raus;
+  }
+
+  function zeichneBilanz(){
+    var b = bilanz();
+    var el = document.getElementById('bilanz');
+    el.replaceChildren();
+    var stark = document.createElement('b');
+    stark.textContent = b.neu.length;
+    el.append(stark, document.createTextNode(b.neu.length === 1 ? ' neues Mandat' : ' neue Mandate'));
+    var rest = document.createElement('span');
+    rest.className = 'rest';
+    var teile = [];
+    if (b.ergaenzt.length) teile.push(b.ergaenzt.length + (b.ergaenzt.length === 1 ? ' bestehendes ergänzt' : ' bestehende ergänzt'));
+    if (b.draussen) teile.push(b.draussen + (b.draussen === 1 ? ' Zeile bleibt draußen' : ' Zeilen bleiben draußen'));
+    rest.textContent = teile.length ? teile.join(', ') : 'Alle Zeilen kommen mit.';
+    el.appendChild(rest);
+
+    var leer = b.neu.length === 0 && b.ergaenzt.length === 0;
+    document.getElementById('uebernehmen').disabled = leer;
+    var warum = document.getElementById('warum-gesperrt');
+    warum.hidden = !leer;
+    warum.textContent = leer
+      ? 'So bleibt nichts übrig, was angelegt werden könnte. Stell oben mindestens eine Zeile auf „anlegen“ oder „ergänzen“.'
+      : '';
+  }
+
+  var ZEIG = ['name','branche','ort','plz','email','seit','ansprech','telefon','strasse','nummer','notiz'];
+  function zeichneProbe(){
+    var spalten = ZEIG.filter(function(s){ return spalteFuer(s) !== -1; });
+    var tab = document.createElement('table');
+    var kopfz = document.createElement('tr');
+    spalten.forEach(function(s){
+      var th = document.createElement('th');
+      th.textContent = rolleVon(s).wort;
+      kopfz.appendChild(th);
+    });
+    var thead = document.createElement('thead'); thead.appendChild(kopfz);
+    var tbody = document.createElement('tbody');
+    var b = bilanz();
+    b.neu.concat(b.ergaenzt).sort(function(a,c){ return a - c; }).slice(0, 5).forEach(function(zi){
+      var tr = document.createElement('tr');
+      spalten.forEach(function(s){
+        var td = document.createElement('td');
+        var v = s === 'name' ? nameVon(zi) : feld(zeilen[zi], s);
+        if (s === 'seit') { var d = datum(v); v = d ? d.wort : ''; }
+        if (!v) { td.className = 'leer'; td.textContent = '—'; }
+        else td.textContent = v;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    tab.append(thead, tbody);
+    probeEl.replaceChildren(tab);
+  }
+
+  function zeichneLage2(){
+    zeichneUrteil();
+    zeichneSpalten();
+    zeichneSteine();
+    zeichneProbe();
+    zeichneBilanz();
+  }
+
+  /* ================= Lagen schalten ================= */
+  function zeigeLage(n){
+    document.getElementById('lage1').hidden = n !== 1;
+    document.getElementById('lage2').hidden = n !== 2;
+    document.getElementById('lage3').hidden = n !== 3;
+    document.querySelectorAll('.weg .schritt').forEach(function(s){
+      var l = +s.dataset.lage;
+      s.classList.toggle('hier', l === n);
+      s.classList.toggle('fertig', l < n);
+    });
+    window.scrollTo({top:0, behavior:'auto'});
+  }
+
+  /* ================= Lage 3: die Ankunft =================
+     Aus einer Tabelle wird ein Modell — deshalb richten sich die Zeilen als
+     Gebäude auf. Die Höhen kommen aus dem Namen, nicht aus dem Zufall: dieselbe
+     Datei ergibt dieselbe Silhouette, und bei einer Vorführung sieht zweimal
+     dasselbe gleich aus. Die grauen Häuser sind die ergänzten — die standen
+     schon. */
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function massAus(name){
+    var s = 0;
+    for (var i = 0; i < name.length; i++) s = (s * 31 + name.charCodeAt(i)) % 100000;
+    return {
+      hoehe: 34 + (s % 62),           /* Prozent der Bühnenhöhe */
+      breite: 15 + (Math.floor(s / 7) % 14)  /* Pixel */
+    };
+  }
+
+  function ankunft(){
+    var b = bilanz();
+    var haeuser = b.neu.map(function(i){ return {i:i, neu:true}; })
+      .concat(b.ergaenzt.map(function(i){ return {i:i, neu:false}; }))
+      .sort(function(x,y){ return x.i - y.i; });
+
+    var el = document.getElementById('skyline');
+    el.replaceChildren();
+    el.setAttribute('aria-label', haeuser.length + ' Mandate richten sich im Modell auf');
+
+    /* Alle müssen ins Bild. Zweihundert Häuser zu je fünfzehn Pixeln sind drei
+       Meter breit — abgeschnitten wäre die Silhouette eine Lüge, denn die Zahl
+       darunter zählt trotzdem bis zweihundert. Also schrumpfen Abstand und
+       Breite mit der Menge, bis alles passt. */
+    var platz = el.parentNode.clientWidth || 800;
+    var luft = haeuser.length > 60 ? 1 : 4;
+    el.style.gap = luft + 'px';
+    var deckel = Math.max(2, Math.floor((platz - luft * Math.max(0, haeuser.length - 1)) / Math.max(1, haeuser.length)));
+
+    var bauten = haeuser.map(function(h){
+      var i = document.createElement('i');
+      var m = massAus(nameVon(h.i));
+      i.style.height = m.hoehe + '%';
+      i.style.width = Math.min(m.breite, deckel) + 'px';
+      if (!h.neu) i.className = 'schon';
+      el.appendChild(i);
+      return i;
+    });
+
+    var wort = document.getElementById('ankunft-wort');
+    wort.textContent = haeuser.length === 1 ? 'Mandat steht im Modell' : 'Mandate stehen im Modell';
+
+    var dazu = [];
+    if (b.neu.length) dazu.push(b.neu.length === 1 ? 'Ein Mandat ist neu.' : b.neu.length + ' Mandate sind neu.');
+    if (b.ergaenzt.length) dazu.push(b.ergaenzt.length === 1
+      ? 'Eines stand schon im Modell und hat seine Stammdaten bekommen, das graue Haus.'
+      : b.ergaenzt.length + ' standen schon im Modell und haben ihre Stammdaten bekommen, die grauen Häuser.');
+    if (b.draussen) dazu.push(b.draussen === 1 ? 'Eine Zeile ist draußen geblieben, so wie du es entschieden hast.'
+      : b.draussen + ' Zeilen sind draußen geblieben, so wie du es entschieden hast.');
+    document.getElementById('ankunft-dazu').textContent = dazu.join(' ');
+
+    var zahlEl = document.getElementById('ankunft-zahl');
+
+    if (reduziert || !bauten.length) {
+      bauten.forEach(function(x){ x.classList.add('steht'); });
+      zahlEl.textContent = haeuser.length;
+      return;
+    }
+
+    zahlEl.textContent = '0';
+    /* Die Häuser stehen in ~1,1 s alle, egal ob es zwölf oder zweihundert sind:
+       der Abstand richtet sich nach ihrer Zahl. Ein fester Abstand pro Haus
+       machte aus zweihundert Mandaten einen Film von zwanzig Sekunden. */
+    var luecke = Math.min(46, 1100 / bauten.length);
+    bauten.forEach(function(x, k){
+      setTimeout(function(){
+        x.classList.add('steht');
+        x.classList.add('leuchtet');
+        setTimeout(function(){ x.classList.remove('leuchtet'); }, 420);
+        zahlEl.textContent = k + 1;
+      }, 120 + k * luecke);
+    });
+  }
+
+  /* ================= Bedienung ================= */
+  var fehlerEl = document.getElementById('fehler');
+  function annehmen(text){
+    var fehler = lies(text);
+    if (fehler) { fehlerEl.textContent = fehler; fehlerEl.hidden = false; return; }
+    fehlerEl.hidden = true;
+    zeichneLage2();
+    zeigeLage(2);
+  }
+
+  document.getElementById('beispiel').addEventListener('click', function(){
+    document.getElementById('einfuegen').value = BEISPIEL;
+    annehmen(BEISPIEL);
+  });
+  document.getElementById('datei-waehlen').addEventListener('click', function(){
+    document.getElementById('datei').click();
+  });
+  document.getElementById('datei').addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0];
+    if (f) leseDatei(f);
+  });
+  /* Eingefügt wird sofort gelesen. Getippt wird nicht: wer eine kleine Liste
+     von Hand schreibt, verlöre das Feld mitten im zweiten Wort. Deshalb wartet
+     das Tippen auf eine Pause — und wer gar nicht warten will, drückt den
+     Knopf daneben. */
+  var tippTimer = null;
+  var einfuegenEl = document.getElementById('einfuegen');
+  function vielleichtLesen(text){
+    if (text.trim().split('\n').filter(function(z){ return z.trim(); }).length >= 2) annehmen(text);
+  }
+  einfuegenEl.addEventListener('paste', function(){
+    setTimeout(function(){ vielleichtLesen(einfuegenEl.value); }, 0);
+  });
+  einfuegenEl.addEventListener('input', function(e){
+    if (e.inputType === 'insertFromPaste') return;   /* der paste-Zweig hat es schon */
+    clearTimeout(tippTimer);
+    var text = e.target.value;
+    tippTimer = setTimeout(function(){ vielleichtLesen(text); }, 1200);
+  });
+
+  function leseDatei(f){
+    if (/\.xlsx?$/i.test(f.name)) {
+      fehlerEl.textContent = 'Das ist eine Excel-Datei. Speichere sie in Excel einmal als CSV, dann lese ich sie.';
+      fehlerEl.hidden = false;
+      return;
+    }
+    /* Deutsche Excel-Exporte kommen oft als Windows-1252 heraus. Erst UTF-8;
+       entstehen dabei Ersatzzeichen (U+FFFD), war es die falsche Annahme und
+       die Datei wird ein zweites Mal gelesen. Ohne das hieße die Bäckerei im
+       Modell für immer „B?ckerei Nordmann". */
+    function lesen(kodierung, dannAnders){
+      var leser = new FileReader();
+      leser.onload = function(){
+        var text = String(leser.result);
+        if (dannAnders && text.indexOf('\uFFFD') !== -1) { lesen('windows-1252', false); return; }
+        annehmen(text);
+      };
+      leser.onerror = function(){
+        fehlerEl.textContent = 'Die Datei ließ sich nicht öffnen.';
+        fehlerEl.hidden = false;
+      };
+      leser.readAsText(f, kodierung);
+    }
+    lesen('utf-8', true);
+  }
+
+  var zone = document.getElementById('zone');
+  ['dragenter','dragover'].forEach(function(e){
+    zone.addEventListener(e, function(ev){ ev.preventDefault(); zone.classList.add('drueber'); });
+  });
+  ['dragleave','drop'].forEach(function(e){
+    zone.addEventListener(e, function(ev){ ev.preventDefault(); zone.classList.remove('drueber'); });
+  });
+  zone.addEventListener('drop', function(ev){
+    var f = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+    if (f) leseDatei(f);
+  });
+
+  document.getElementById('andere').addEventListener('click', function(){
+    clearTimeout(tippTimer);
+    einfuegenEl.value = '';
+    zeigeLage(1);
+  });
+  document.getElementById('uebernehmen').addEventListener('click', function(){
+    zeigeLage(3);
+    ankunft();
+  });
+})();
+</script>
+<script src="hilfe.js"></script>
+<script src="uhr.js"></script>
+<script src="zeiger.js"></script>
+<script src="rechtsfuss.js"></script>
+</body>
+</html>

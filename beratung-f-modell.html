@@ -56,8 +56,10 @@
    V35: die offenen Beträge folgen den Abreden — MTS' Rechnung ist ein
    Abschlag auf die Jahrespauschale, Cordes' die Monatspauschale, zusammen
    stehen 12.376 € offen (Häppchen B5).
-   Marker: BERATUNG-F-MODELL-V36 (die Zentrale hat eine Tür „Die Woche":
-   Wochenraster und wer wann Luft hat, Häppchen C2) */
+   V37 (Häppchen C3): die Hilfe-Ebene hängt im Kopfband, die Zentrale hat eine
+   Tür „Ankommen", und die Erklärstellen gelten je nach Zustand — draußen die
+   Stadt, drinnen der Raum (data-hilfe-wenn).
+   Marker: BERATUNG-F-MODELL-V37 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -522,13 +524,15 @@ body.gezoomt #zonen{display:block}
 }
 </style>
 </head>
-<body class="quoro">
+<body class="quoro"
+      data-hilfe-titel="Das Modell"
+      data-hilfe-satz="Dein Cockpit. Jedes Gebäude ist ein Mandat, die leuchtende Zentrale bist du selbst. Ein Druck auf ein Gebäude fährt hinein — von dort führt jede Tür weiter. Ein Menü gibt es bewusst nicht.">
 
 <nav>
   <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
   <!-- Die Bühne endet nie, also kann Recht nicht unten stehen; unten rechts
        wohnt zudem das Uhr-Dock. Hier ist es die stille Hälfte des Kopfbands. -->
-  <div class="nav-rechts"><div data-rechtsfuss="kopf"></div><a class="vorschlaege" href="index.html">Alle Vorschläge</a></div>
+  <div class="nav-rechts"><div data-rechtsfuss="kopf"></div><span data-hilfe-knopf></span><a class="vorschlaege" href="index.html">Alle Vorschläge</a></div>
 </nav>
 
 <button id="krume" type="button" hidden><span class="zurueck">← Modell</span><span>/</span><b id="krume-ziel">Zone</b></button>
@@ -546,10 +550,16 @@ body.gezoomt #zonen{display:block}
     <button class="zone" data-ziel="mts" style="--l:13%;--t:35%;--w:20%;--h:22%;--chipt:42%">
       <span class="chip">MTS Maschinenbau<span class="zahl" data-zahl="0">0</span></span>
     </button>
-    <button class="zone" data-ziel="zentrale" style="--l:34.5%;--t:13%;--w:21%;--h:41%;--chipt:32%">
+    <button class="zone" data-ziel="zentrale" style="--l:34.5%;--t:13%;--w:21%;--h:41%;--chipt:32%"
+            data-hilfe-wenn="body:not(.gezoomt)"
+            data-hilfe-name="Die Zentrale"
+            data-hilfe="Deine eigene Beratung: der KI-Berater, dein Wissen, deine Marke, deine Zahlen, dein Team. Alles, was nicht zu einem einzelnen Mandat gehört, wohnt hier.">
       <span class="chip">Zentrale<span class="zahl" data-zahl="0">0</span></span>
     </button>
-    <button class="zone" data-ziel="petersen" style="--l:25%;--t:52%;--w:16.5%;--h:19%;--chipt:58%">
+    <button class="zone" data-ziel="petersen" style="--l:25%;--t:52%;--w:16.5%;--h:19%;--chipt:58%"
+            data-hilfe-wenn="body:not(.gezoomt)"
+            data-hilfe-name="Ein Gebäude je Mandat"
+            data-hilfe="Jeder Kunde hat sein Haus. Die Zahl am Schild sagt, wie viel dort auf dich wartet, und die Stiftnotiz daneben ist das, was der KI-Berater dir aufgeschrieben hat. Neue Mandate bekommen ihr Haus, sobald du deine Kundenliste einliest.">
       <span class="chip">Petersen Stahlbau<span class="zahl" data-zahl="2">2</span></span>
     </button>
     <button class="zone" data-ziel="cordes" style="--l:57%;--t:32%;--w:12%;--h:25%;--chipt:48%">
@@ -566,7 +576,10 @@ body.gezoomt #zonen{display:block}
   <h1 data-du="Deine Beratung. Als Modell." data-sie="Ihre Beratung. Als Modell.">Deine Beratung. Als Modell.</h1>
 </div>
 
-<div id="tisch">
+<div id="tisch"
+     data-hilfe-wenn="body:not(.gezoomt)"
+     data-hilfe-name="Auf deinem Tisch"
+     data-hilfe="Was heute deine Hand braucht, quer über alle Mandate. Jeder Zettel führt genau an die Stelle, um die es geht — die Liste ist keine Ablage, sie leert sich.">
   <div class="t-titel" data-du="Auf deinem Tisch" data-sie="Auf Ihrem Tisch">Auf deinem Tisch</div>
   <div class="t-reihe">
   <a class="t-zettel" href="beratung-termine.html#petersen">
@@ -772,7 +785,10 @@ body.gezoomt #zonen{display:block}
     <!-- Das Modell bleibt der Ort, die Kundenliste ist das Register daneben
          (Entscheidung 2026-08-14). Deshalb steht die Tür dorthin hier, an den
          Gebäuden, und nicht als weiteres Gebäude im Bild. -->
-    <div class="flotte">
+    <div class="flotte"
+         data-hilfe-wenn="body.gezoomt"
+         data-hilfe-name="Deine Flotte"
+         data-hilfe="Alle Mandate auf einen Blick, mit der Zahl, um die es bei ihnen gerade geht. Ein Druck fährt in das Gebäude — von hier aus musst du nicht erst zurück aufs Modell.">
       <button class="flotte-karte" type="button" data-zu="petersen">
         <span class="f-kopf"><b>Petersen Stahlbau</b><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span></span>
         <span class="f-zahl">30,4 %</span>
@@ -794,13 +810,18 @@ body.gezoomt #zonen{display:block}
         <span class="f-deut">seit 3 Wochen still, Anruf vorgeschlagen</span>
       </button>
     </div>
-    <h3>So tritt er auf</h3>
+    <h3 data-hilfe-wenn="body.gezoomt"
+        data-hilfe-name="So tritt er auf"
+        data-hilfe="Deine Marke, deine Stunden, dein Team — die drei Zahlen, an denen du merkst, ob die Beratung als Betrieb rund läuft. Sie gehören dir und keinem Mandat.">So tritt er auf</h3>
     <div class="karten">
       <div class="karte"><div class="wert" style="font-size:18px;color:#2b5fe3">Nordholm &amp; Partner</div><div class="label">Marke und Anrede der Kundenflächen</div><div class="proben" aria-label="Markenfarben"><span class="probe p-blau" title="Akzent"></span><span class="probe p-stift" title="Stift"></span><span class="probe p-tinte" title="Tinte"></span><span class="probe p-papier" title="Papier"></span><span class="anrede-wert" data-du="per Du" data-sie="per Sie">per Du</span></div></div>
       <div class="karte"><div class="wert">34,0</div><div class="label">Std. im August, alle Mandate</div><div class="delta amber">3 Rechnungen offen, 12.376 €</div></div>
       <div class="karte"><div class="wert">3 von 5</div><div class="label">im Team sind KI-unterwiesen</div><div class="delta amber" data-du="deiner fehlt noch" data-sie="Ihrer fehlt noch">deiner fehlt noch</div></div>
     </div>
-    <div class="tueren">
+    <div class="tueren"
+         data-hilfe-wenn="body.gezoomt"
+         data-hilfe-name="Die Türen der Zentrale"
+         data-hilfe="Alles, was nicht zu einem einzelnen Mandat gehört, hängt hier: der KI-Berater, dein Wissen, deine Marke, deine Zahlen, dein Team. Ein Menü über allen Flächen gibt es bewusst nicht — man geht durch die Räume.">
       <a class="knopf leise" href="beratung-kunden.html">Alle Kunden</a>
       <a class="knopf leise" href="beratung-ki-berater.html">Persona einstellen</a>
       <a class="knopf leise" href="beratung-wissen.html">Wissen</a>
@@ -813,6 +834,7 @@ body.gezoomt #zonen{display:block}
       <a class="knopf leise" href="beratung-zeiten.html">Zeiten</a>
       <a class="knopf leise" href="beratung-kalender.html">Die Woche</a>
       <a class="knopf leise" href="beratung-verwaltung.html">Verwaltung</a>
+      <a class="knopf leise" href="beratung-ankommen.html">Ankommen</a>
     </div>
   </section>
 </div>
@@ -1127,6 +1149,7 @@ body.gezoomt #zonen{display:block}
 })();
 </script>
 <script src="uhr.js"></script>
+<script src="hilfe.js"></script>
 <script src="zeiger.js"></script>
 <script src="rechtsfuss.js"></script>
 </body>

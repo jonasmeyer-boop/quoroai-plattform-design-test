@@ -16,7 +16,8 @@
    immer übergibt (die Cordes-Steuerfrage ist das lebende Beispiel).
    Verbrauch je Mandat mit Kontingent-Füllständen, Kosten führt der Euro.
    Chrome ist quoroAI (system.css). V2: der Rahmen-Absatz verlinkt Akte
-   und Wissen als echte Räume. Marker: BERATUNG-KI-BERATER-V4 */
+   und Wissen als echte Räume. V5 (Häppchen C3): Hilfe-Ebene im Kopfband.
+   Marker: BERATUNG-KI-BERATER-V5 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -199,11 +200,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 }
 </style>
 </head>
-<body class="quoro">
+<body class="quoro"
+      data-hilfe-titel="Dein KI-Berater"
+      data-hilfe-satz="Wie dein KI-Berater auftritt, was er beantworten darf und wo er an dich übergibt. Diese Grenze ist die Stelle, an der du haftest.">
 
 <nav>
   <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
-  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+  <div class="nav-rechts" style="display:flex;align-items:center;gap:10px"><span data-hilfe-knopf></span><a class="vorschlaege" href="index.html">Alle Vorschläge</a></div>
 </nav>
 
 <a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Dein KI-Berater</b></a>
@@ -215,7 +218,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   </div>
 
   <h3>So spricht er</h3>
-  <section class="tafel" aria-label="Persona einstellen">
+  <section class="tafel" aria-label="Persona einstellen"
+           data-hilfe-name="Wie er auftritt"
+           data-hilfe="Name, Anrede und Ton deines KI-Beraters. Deine Kunden sehen nur ihn, nie quoroAI — was er sagt, sagt er in deinem Namen.">
     <div class="regler-lage">
       <div class="regler">
         <label for="ton">Tonlage</label>
@@ -233,13 +238,17 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   </section>
 
   <h3>Sein Rahmen</h3>
-  <section class="tafel rahmen" aria-label="Rahmen des KI-Beraters">
+  <section class="tafel rahmen" aria-label="Rahmen des KI-Beraters"
+           data-hilfe-name="Die Grenze"
+           data-hilfe="Die wichtigste Einstellung der Plattform: wo er antwortet und wo er an dich übergibt. Alles außerhalb dieses Rahmens landet als Frage bei dir, statt beantwortet zu werden.">
     <p>Zahlen, Auswertungen und Rechenwege beantwortet er selbst, immer mit Quellen aus <a href="beratung-akte.html">Akte</a> und <a href="beratung-wissen.html">Wissen</a>. <b>Steuer- und Rechtsfragen übergibt er dir grundsätzlich</b>, mit deiner Antwort geht es zurück ins Gespräch, so wie heute Morgen bei der <a href="beratung-termine.html#cordes">Steuerfrage von Herrn Cordes</a>.</p>
     <div class="merk">Der Rahmen gilt für alle Mandate gleich. Was er nicht weiß, sagt er ehrlich.</div>
   </section>
 
   <h3>Probier ihn aus</h3>
-  <section class="tafel" aria-label="Probegespräch">
+  <section class="tafel" aria-label="Probegespräch"
+           data-hilfe-name="Das Probegespräch"
+           data-hilfe="Hier hörst du ihn, bevor ein Kunde ihn hört. Ändere oben den Ton und stelle dieselbe Frage noch einmal — der Unterschied ist das, was dein Kunde erlebt.">
     <div class="chips">
       <button type="button" data-frage="lage">Wie läuft mein Geschäft?</button>
       <button type="button" data-frage="kosten">Was kostet mich der Dieselpreis?</button>
@@ -367,6 +376,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   });
 })();
 </script>
+<script src="hilfe.js"></script>
 <script src="uhr.js"></script>
 <script src="zeiger.js"></script>
 <script src="rechtsfuss.js"></script>

@@ -29,7 +29,10 @@
    gewählte, aber nicht übernommene Rolle überlebt das Neuzeichnen.
    V3: der Versandvermerk ist der Baustein vermerk.js (Paket 10), nicht
    mehr eine eigene Funktion in dieser Datei.
-   Marker: BERATUNG-VERWALTUNG-V5 */
+   V6 (Häppchen C3): Hilfe-Ebene im Kopfband, und ein Abschnitt „Einrichten"
+   führt zum Ankommen — dort wohnt die Fläche, sobald sie aus der Zentrale
+   verschwunden ist.
+   Marker: BERATUNG-VERWALTUNG-V6 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -243,11 +246,13 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
 }
 </style>
 </head>
-<body class="quoro">
+<body class="quoro"
+      data-hilfe-titel="Verwaltung"
+      data-hilfe-satz="Wer bei dir arbeitet, was er darf, und der Nachweis, dass er im Umgang mit dem KI-Berater unterwiesen ist. Kein Formular, sondern ein Nachweis.">
 
 <nav>
   <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
-  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+  <div class="nav-rechts" style="display:flex;align-items:center;gap:10px"><span data-hilfe-knopf></span><a class="vorschlaege" href="index.html">Alle Vorschläge</a></div>
 </nav>
 
 <a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Verwaltung</b></a>
@@ -270,7 +275,9 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
 
   <h3>Team</h3>
   <section class="tafel" id="team" aria-label="Team">
-    <ul class="liste" id="mitglieder"></ul>
+    <ul class="liste" id="mitglieder"
+        data-hilfe-name="Dein Team"
+        data-hilfe="Jeder Kopf mit seiner Rolle. Die Rolle entscheidet, was jemand sieht — gehaltsnahe Zahlen sehen nur Inhaber und Partner. Was jemand getan hat, hängt an seinem Zugang, deshalb teilt man keinen."></ul>
     <div class="fussnote" id="letzter-inhaber" hidden>Der letzte Inhaber lässt sich weder umstufen noch entfernen — sonst käme niemand mehr an diese Beratung heran.</div>
     <div class="fussnote">Inhaber und Partner sehen die ganze Beratung. Berater und Assistenz kommen nur über die Mandate an einen Kunden, denen sie zugewiesen sind. Wer mit dem KI-Berater arbeitet, muss unterwiesen sein — <a href="#ki-kompetenz">der Text steht unten</a>, die Zeile am Namen ist dein Nachweis.</div>
     <div class="melde" id="team-melde" role="status" aria-live="polite" hidden></div>
@@ -302,7 +309,8 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
     </div>
   </section>
 
-  <h3>Sicherheit</h3>
+  <h3 data-hilfe-name="Sicherheit"
+      data-hilfe="Der zweite Faktor. In dieser Software liegen die Zahlen fremder Betriebe — ein Passwort allein ist dafür zu wenig.">Sicherheit</h3>
   <section class="tafel" id="sicherheit" aria-label="Sicherheit">
     <div class="zf-stand" id="zf-stand"></div>
 
@@ -329,13 +337,25 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
     <div class="zf-hinweis">Der zweite Faktor gilt für dein Konto, nicht für die ganze Beratung — jeder richtet ihn selbst ein. Deine Kunden brauchen ihn nicht: sie kommen über den Anmelde-Link herein, nicht über ein Passwort.</div>
   </section>
 
-  <h3>KI-Kompetenz</h3>
+  <h3 data-hilfe-name="Die Unterweisung"
+      data-hilfe="Der EU AI Act verlangt, dass wer KI einsetzt, sie auch versteht. Zehn Minuten, einmal, und die Bestätigung ist der Nachweis — deshalb steht sie als Seite da und nicht als Sperre.">KI-Kompetenz</h3>
   <section class="tafel" id="ki-kompetenz" aria-label="KI-Kompetenz">
     <div class="schau" style="font-size:21px">Der KI-Berater: was du wissen musst</div>
     <div class="fassung">Fassung vom 10. August 2026. Zehn Minuten, einmal.</div>
     <div class="unterweisung" id="unterweisung"></div>
     <div id="gelesen-bereich"></div>
     <div class="fussnote">Diese Unterweisung steht als Seite da und nicht als Sperre vor der Anwendung: eine Unterweisung, die man wegklicken muss, um weiterzuarbeiten, wird weggeklickt.</div>
+  </section>
+
+  <h3>Einrichten</h3>
+  <section class="tafel" aria-label="Einrichten">
+    <div class="schau" style="font-size:21px">Ankommen</div>
+    <div class="fassung">Der Weg von der Anmeldung bis zum ersten Kunden, der sich einloggen kann.</div>
+    <div class="fussnote" style="margin-top:12px">Solange ein Pflichtschritt offen ist, hängt diese Fläche in der Zentrale. Danach verschwindet sie dort und steht nur noch hier — ein Raum, den man ewig sieht und nie braucht, wird zum Möbel.</div>
+    <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:16px">
+      <a class="knopf sekundaer" href="beratung-ankommen.html">Zum Ankommen</a>
+      <a class="knopf leise" href="beratung-import.html">Kundenliste einlesen</a>
+    </div>
   </section>
 </main>
 
@@ -847,6 +867,7 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
   maleGelesen();
 })();
 </script>
+<script src="hilfe.js"></script>
 <script src="uhr.js"></script>
 <script src="zeiger.js"></script>
 <script src="rechtsfuss.js"></script>

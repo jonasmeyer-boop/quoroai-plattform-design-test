@@ -44,7 +44,8 @@
    V3 (Häppchen B5): die offenen Beträge von Cordes und MTS sind ihre Raten
    aus der Abrede, nicht mehr Einzelrechnungen — und die Zelle zeigt Cent,
    wenn welche da sind.
-   Marker: BERATUNG-KUNDEN-V4 */
+   V5 (Häppchen C3): Tür zum Einlesen der Kundenliste, Hilfe-Ebene im Kopfband.
+   Marker: BERATUNG-KUNDEN-V5 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -276,11 +277,13 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
 }
 </style>
 </head>
-<body class="quoro">
+<body class="quoro"
+      data-hilfe-titel="Kunden"
+      data-hilfe-satz="Das Register deiner Mandate. Gearbeitet wird im Modell — hierher kommst du, wenn du einen Namen suchst statt ein Gebäude, oder wenn du sehen willst, wo es klemmt.">
 
 <nav>
   <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
-  <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+  <div class="nav-rechts" style="display:flex;align-items:center;gap:10px"><span data-hilfe-knopf></span><a class="vorschlaege" href="index.html">Alle Vorschläge</a></div>
 </nav>
 
 <a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Kunden</b></a>
@@ -291,12 +294,15 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
     <div class="stand">Das Modell bleibt der Ort, an dem die Beratung arbeitet. Diese Liste ist das Register daneben — für die Tage, an denen man einen Namen sucht und nicht ein Gebäude.</div>
     <div class="tueren">
       <a class="knopf sekundaer" href="beratung-f-modell.html">Ins Modell</a>
+      <a class="knopf leise" href="beratung-import.html">Liste einlesen</a>
       <a class="knopf leise" href="beratung-rechnungen.html">Rechnungen</a>
       <a class="knopf leise" href="beratung-zeiten.html">Zeiten</a>
     </div>
   </div>
 
-  <div class="werkzeug">
+  <div class="werkzeug"
+       data-hilfe-name="Suchen und sortieren"
+       data-hilfe="Die Suche versteht mehrere Merkmale auf einmal: „bäckerei oldenburg“ findet die Bäckereien in Oldenburg. Die Sortierung öffnet auf „Was wartet“ — oben steht, was Aufmerksamkeit braucht.">
     <div class="suchreihe">
       <div class="suchfeld">
         <svg class="lupe" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6">
@@ -317,7 +323,9 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
         </select>
       </div>
     </div>
-    <div class="klemmen" role="group" aria-label="Nach Klemmstellen filtern">
+    <div class="klemmen" role="group" aria-label="Nach Klemmstellen filtern"
+         data-hilfe-name="Die drei Klemmstellen"
+         data-hilfe="Das sind Filter, keine Anzeigen. Die Zahl an jedem Griff sagt, wie viele übrig blieben, wenn du ihn drückst — sie rechnet deine Suche und die anderen Griffe schon mit.">
       <button class="klemme" type="button" data-filter="still" aria-pressed="false"><span class="n">0</span> seit drei Wochen still</button>
       <button class="klemme" type="button" data-filter="offen" aria-pressed="false"><span class="n">0</span> mit offener Forderung</button>
       <button class="klemme" type="button" data-filter="zugang" aria-pressed="false"><span class="n">0</span> kommen nicht ins Portal</button>
@@ -329,10 +337,14 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
        änderte ihn zwei Dutzend Mal je Tastendruck — ein Vorleseprogramm hätte
        jeden Zwischenstand gesprochen. Sie steht einmal, fertig gerechnet, im
        stillen Feld darunter. -->
-  <p class="treffer"><b id="anzahl">0</b> <span id="anzahl-wort">Kunden</span><span class="summe" id="summe"></span></p>
+  <p class="treffer"
+     data-hilfe-name="Die Bilanz"
+     data-hilfe="Wie viele Kunden gerade in der Liste stehen, und was bei ihnen zusammen offen ist. Beides folgt Suche und Filtern."><b id="anzahl">0</b> <span id="anzahl-wort">Kunden</span><span class="summe" id="summe"></span></p>
   <p class="nur-gehoert" id="ansage" role="status" aria-live="polite"></p>
 
-  <div id="liste" class="liste"></div>
+  <div id="liste" class="liste"
+       data-hilfe-name="Die Liste"
+       data-hilfe="Jede Zeile führt in ihr Mandat. Die Zahl rechts wechselt mit der Sortierung — sie zeigt immer den Wert, wegen dem die Zeile dort steht. Das gefüllte Glas heißt „läuft“, das halbe heißt „wartet auf dich“."></div>
 
   <div class="leer" id="leer" hidden>
     <b>Kein Kunde passt dazu</b>
@@ -784,6 +796,7 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
   zeichne();
 })();
 </script>
+<script src="hilfe.js"></script>
 <script src="uhr.js"></script>
 <script src="zeiger.js"></script>
 <script src="rechtsfuss.js"></script>

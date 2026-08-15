@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ankommen</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, das Ankommen (Häppchen C3, Issue #36).
+
+   Eine fremde Beratung meldet sich an und steht in einem leeren Modell. Was
+   jetzt? Die übliche Antwort ist eine Willkommenstour mit sechs Sprechblasen,
+   die man wegklickt, und danach weiß niemand mehr etwas.
+
+   Hier ist es eine Kette, und jedes Glied nennt seinen Grund. Nicht „Schritt 3
+   von 5", sondern „ohne Sätze rechnet die Plattform nichts ab". Wer versteht,
+   warum etwas nötig ist, macht es; wer nur eine Fortschrittsleiste sieht,
+   klickt sie weg.
+
+   Der Maßstab ist hart und steht oben: arbeitsfähig heißt, dass ein Kunde sich
+   anmelden kann und der KI-Berater für ihn arbeiten darf. Alles, was dafür
+   nötig ist, steht hier. Was nicht nötig ist, steht als Kür unten und drängelt
+   nicht.
+
+   Diese Fläche ist auf Verschwinden gebaut: sobald die Pflicht steht, hängt sie
+   nicht mehr in der Zentrale. Ein Raum, den man ewig sieht und nie braucht,
+   wird zum Möbel.
+
+   Ruhig gehalten, kein zweiter Fancy-Moment: der Aufbau des Modells ist der
+   Film, das Aufrichten der Gebäude gehört dem Import. Hier zählt Klarheit.
+
+   Kein Deko-Punkt, kein Mittelpunkt als Trenner (Jonas' Regeln). Zustand ist
+   Füllstand im Glas, Chrom ist quoroAI (system.css).
+   Marker: BERATUNG-ANKOMMEN-V1 */
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,select{font-family:inherit}
+body.quoro a{text-decoration:none}
+body.quoro .lauf a{text-decoration:underline}
+
+/* ========== quoroAI-Chrom ========== */
+:root{--chrom:60px}
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;word-spacing:2px}
+nav .rechts{display:flex;align-items:center;gap:10px}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+@media (max-width:1420px){
+  :root{--chrom:118px}
+  nav{height:118px;padding-bottom:58px}
+  #krume{z-index:90}
+}
+
+/* ========== Seite ========== */
+main{max-width:880px;margin:0 auto;padding:136px 24px 90px}
+
+/* Der Stand: ein Satz, ein Glas. Keine Prozentzahl — „68 % eingerichtet" sagt
+   niemandem, was noch fehlt. */
+.stand-kopf h1{font-size:clamp(28px,4.2vw,40px);line-height:1.12}
+.stand-kopf .satz{font-size:17px;color:var(--nebel-600);margin-top:10px;max-width:56ch;line-height:1.55}
+.stand-kopf .messe{display:flex;align-items:center;gap:12px;margin-top:20px;flex-wrap:wrap}
+.stand-kopf .zustand{width:180px;height:22px}
+.stand-kopf .messe .wort{font-size:14px;color:var(--nebel-600)}
+.stand-kopf .messe .wort b{color:var(--tinte);font-weight:600}
+
+/* ---------- Die Kette ---------- */
+h2.abschnitt{
+  margin-top:44px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--nebel-600);
+}
+h2.abschnitt + .was{font-size:14.5px;color:var(--nebel-600);margin-top:6px;max-width:62ch;line-height:1.55}
+
+.kette{margin-top:16px;display:flex;flex-direction:column}
+.glied{position:relative;padding-left:46px;padding-bottom:14px}
+/* Die Linie zwischen den Gliedern: sie zeigt, dass es eine Reihenfolge gibt,
+   ohne sie zu erzwingen — man darf springen, aber man sieht den Weg. */
+.glied::before{
+  content:'';position:absolute;left:15px;top:34px;bottom:0;width:1.5px;
+  background:var(--nebel-200);
+}
+.glied:last-child::before{display:none}
+.glied.fertig::before{background:var(--lila-200)}
+.marke{
+  position:absolute;left:0;top:6px;width:31px;height:31px;border-radius:999px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--flaeche);border:1.5px solid var(--nebel-300);
+  font-size:13px;font-weight:700;color:var(--nebel-500);
+  font-variant-numeric:tabular-nums;
+}
+.glied.fertig .marke{background:var(--lila-600);border-color:var(--lila-600);color:#fff}
+.glied.teils .marke{border-color:var(--bernstein);color:var(--bernstein)}
+.glied.fertig .marke svg{width:15px;height:15px;display:block}
+
+.karte-glied{
+  padding:18px 20px;border-radius:var(--radius-karte);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 6px 18px rgba(16,19,26,.05);
+}
+.glied.dran .karte-glied{border-color:var(--lila-300);box-shadow:0 14px 36px rgba(111,99,232,.14)}
+.glied.fertig .karte-glied{background:var(--nebel-050);box-shadow:none}
+.karte-glied .titelzeile{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.karte-glied h3{font-size:20px;line-height:1.2}
+.karte-glied .jetzt{
+  font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--lila-800);background:var(--lila-100);padding:3px 9px;border-radius:999px;
+}
+.karte-glied .warum{font-size:15px;color:var(--nebel-700);margin-top:8px;line-height:1.55;max-width:56ch}
+.karte-glied .lage{
+  display:flex;align-items:center;gap:9px;margin-top:12px;font-size:13.5px;line-height:1.5;
+}
+.karte-glied .lage .zustand{width:34px;height:16px;flex-shrink:0}
+.karte-glied .lage span{color:var(--nebel-600)}
+.karte-glied.offen .lage span{color:var(--nebel-600)}
+.glied.teils .karte-glied .lage span{color:var(--bernstein);font-weight:600}
+.karte-glied .tueren{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.karte-glied .knopf{min-height:42px;padding:0 17px;font-size:13.5px}
+.glied.fertig .karte-glied .knopf.primaer{display:none}
+
+/* ---------- Die Kür ---------- */
+.kuer{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.kuer a{
+  display:flex;gap:14px;align-items:center;justify-content:space-between;
+  padding:15px 18px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);color:inherit;
+  transition:border-color .16s var(--kurve),transform .16s var(--kurve);
+}
+@media (hover:hover){.kuer a:hover{border-color:var(--lila-300);transform:translateY(-1px)}}
+.kuer b{display:block;font-family:var(--schrift-schau);font-weight:600;letter-spacing:-.01em;word-spacing:1.5px;font-size:16px}
+.kuer .warum{display:block;font-size:13px;color:var(--nebel-600);margin-top:3px;line-height:1.45}
+.kuer .pfeil{color:var(--nebel-400);flex-shrink:0}
+.kuer a:hover .pfeil{color:var(--lila-600)}
+
+/* ---------- Fertig ---------- */
+.fertig-tafel{
+  margin-top:26px;padding:28px 26px;border-radius:var(--radius-karte);
+  background:linear-gradient(160deg,var(--lila-050),var(--flaeche) 62%);
+  border:0.5px solid var(--lila-200);
+  box-shadow:0 16px 44px rgba(111,99,232,.12);
+}
+.fertig-tafel h2{font-size:clamp(22px,3vw,28px);line-height:1.2}
+.fertig-tafel p{font-size:15px;color:var(--nebel-700);margin-top:10px;line-height:1.6;max-width:56ch}
+.fertig-tafel .tueren{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.fertig-tafel .knopf{min-height:44px;padding:0 18px;font-size:14px}
+
+/* ---------- Vorführung ---------- */
+.vorfuehrung{
+  margin-top:48px;padding:16px 18px;border-radius:var(--radius-innen);
+  background:var(--nebel-050);border:0.5px dashed var(--nebel-300);
+}
+.vorfuehrung .titel{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--nebel-500)}
+.vorfuehrung .reihe{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.vorfuehrung button{
+  min-height:38px;padding:0 14px;border-radius:999px;cursor:pointer;
+  background:var(--flaeche);border:0.5px solid var(--nebel-300);
+  font:inherit;font-size:13px;font-weight:600;color:var(--nebel-700);
+}
+.vorfuehrung button:hover{border-color:var(--lila-400)}
+.vorfuehrung button[aria-pressed="true"]{background:var(--tinte);border-color:var(--tinte);color:#fff}
+.vorfuehrung p{font-size:12.5px;color:var(--nebel-500);margin-top:10px;line-height:1.5;max-width:64ch}
+
+.fuss{margin-top:30px;font-size:12.5px;color:var(--nebel-500);line-height:1.6;max-width:66ch}
+
+@media (max-width:760px){
+  nav{padding:0 18px;padding-bottom:58px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(84px + env(safe-area-inset-bottom))}
+  .glied{padding-left:38px}
+  .glied::before{left:13px}
+  .marke{width:27px;height:27px;font-size:12px}
+  .karte-glied .knopf{min-height:44px;flex:1 1 auto}
+  .stand-kopf .zustand{width:100%;max-width:260px}
+  .vorfuehrung button{min-height:44px}
+}
+@media (prefers-reduced-motion:reduce){
+  .kuer a{transition:none}
+}
+</style>
+</head>
+<body class="quoro"
+      data-hilfe-titel="Ankommen"
+      data-hilfe-satz="Der Weg von der Anmeldung bis zum ersten Kunden, der sich einloggen kann. Diese Fläche hängt nur so lange in der Zentrale, bis du sie nicht mehr brauchst.">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <div class="rechts">
+    <span data-hilfe-knopf></span>
+    <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+  </div>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Ankommen</b></a>
+
+<main>
+  <div class="stand-kopf">
+    <h1 id="ueberschrift">Willkommen bei quoroAI</h1>
+    <p class="satz" id="kopfsatz"></p>
+    <div class="messe"
+         data-hilfe-name="Der Maßstab"
+         data-hilfe="Arbeitsfähig heißt hier eine einzige Sache: ein Kunde kann sich anmelden und der KI-Berater darf für ihn arbeiten. Das Glas füllt sich mit den Schritten, die dafür nötig sind — nicht mit allem, was man einstellen kann.">
+      <span class="zustand" id="mess-glas" role="img" aria-label="Fortschritt beim Einrichten"></span>
+      <span class="wort" id="mess-wort"></span>
+    </div>
+  </div>
+
+  <div id="fertig-tafel" class="fertig-tafel" hidden>
+    <h2>Du bist arbeitsfähig.</h2>
+    <p>Dein erster Kunde kann sich anmelden, und der KI-Berater arbeitet in deinem Namen und in deinen Grenzen. Ab hier passiert alles im Modell — diese Fläche verschwindet aus der Zentrale, du findest sie in der Verwaltung wieder, falls du sie noch einmal brauchst.</p>
+    <div class="tueren">
+      <a class="knopf primaer" href="beratung-f-modell.html">Ins Modell</a>
+      <a class="knopf sekundaer" href="beratung-mitlesen.html">Beim ersten Gespräch mitlesen</a>
+    </div>
+  </div>
+
+  <h2 class="abschnitt">Was nötig ist</h2>
+  <p class="was">Fünf Schritte, und jeder nennt seinen Grund. Die Reihenfolge ist ein Vorschlag, keine Sperre — du darfst überall anfangen.</p>
+  <div class="kette" id="kette"
+       data-hilfe-name="Die Kette"
+       data-hilfe="Jeder Schritt sagt, warum es ihn braucht und was gerade fehlt. Ein gefülltes Glas heißt erledigt, ein halbvolles heißt angefangen. Drücke auf die Tür, dann stehst du an der Stelle, an der es weitergeht."></div>
+
+  <h2 class="abschnitt">Kür</h2>
+  <p class="was">Nichts davon hält dich auf. Aber jedes macht die Arbeit ab dem zweiten Monat leichter.</p>
+  <div class="kuer"
+       data-hilfe-name="Die Kür"
+       data-hilfe="Das hier ist bewusst nicht Pflicht. Eine Beratung, die allein arbeitet, braucht kein Team, und Wissen kann man auch später einlagern.">
+    <a href="beratung-verwaltung.html">
+      <span><b>Dein Team einladen</b><span class="warum">Allein geht auch. Sobald ihr zu zweit seid, braucht jeder seinen eigenen Zugang, weil sonst niemand sieht, wer was getan hat.</span></span>
+      <span class="pfeil" aria-hidden="true">→</span>
+    </a>
+    <a href="beratung-wissen.html">
+      <span><b>Wissen einlagern</b><span class="warum">Deine Vorlagen, Checklisten und Merkblätter. Der KI-Berater zitiert daraus, statt sich etwas auszudenken.</span></span>
+      <span class="pfeil" aria-hidden="true">→</span>
+    </a>
+    <a href="beratung-kalender.html">
+      <span><b>Deine Woche verbinden</b><span class="warum">Ohne Kalender schlägt der KI-Berater Termine ins Blaue vor, und du räumst hinterher auf.</span></span>
+      <span class="pfeil" aria-hidden="true">→</span>
+    </a>
+    <a href="beratung-auswertungen.html">
+      <span><b>Die fünf Auswertungen ansehen</b><span class="warum">Sie stehen sofort, sobald Zahlen da sind. Einmal hingesehen zu haben, spart die Suche im ersten Monatsgespräch.</span></span>
+      <span class="pfeil" aria-hidden="true">→</span>
+    </a>
+  </div>
+
+  <div class="vorfuehrung">
+    <div class="titel">Vorführung</div>
+    <div class="reihe" id="lagen" role="group" aria-label="Lage der Vorführung">
+      <button type="button" data-lage="frisch" aria-pressed="true">Gerade angemeldet</button>
+      <button type="button" data-lage="mitten" aria-pressed="false">Mittendrin</button>
+      <button type="button" data-lage="fertig" aria-pressed="false">Arbeitsfähig</button>
+    </div>
+    <p>Nur für diesen Entwurf: im Produkt kommt die Lage aus dem, was tatsächlich eingerichtet ist. Hier lässt sie sich umschalten, damit man alle drei Zustände sieht, ohne fünf Flächen durchzuklicken.</p>
+  </div>
+
+  <p class="fuss">Die Fläche hängt in der Zentrale, solange ein Pflichtschritt offen ist. Danach verschwindet sie dort und bleibt über die Verwaltung erreichbar — ein Raum, den man ewig sieht und nie braucht, wird zum Möbel.</p>
+</main>
+
+<script>
+(function(){
+  'use strict';
+
+  var HAKEN = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" ' +
+    'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 6.6 11.6 12.5 4.8"/></svg>';
+
+  /* Die fünf Pflichtschritte. „warum" ist der wichtigste Text der Fläche: er
+     ist der Grund, aus dem jemand den Schritt tut, statt ihn wegzuklicken. */
+  var SCHRITTE = [
+    {s:'marke', titel:'Deine Marke setzen', tuer:'beratung-marke.html', tuerwort:'Zur Marke',
+     warum:'Deine Kunden sehen nie quoroAI. Sie sehen deinen Namen, deine Farbe, dein Logo — und dein Impressum. Ohne Anbieterkennzeichnung bleibt die Kundenadresse zu, das ist keine Einstellung, sondern Gesetz.',
+     lagen:{
+       frisch:{stand:'offen', satz:'Weder Name noch Farbe stehen. Deine Kundenadresse ist zu.'},
+       mitten:{stand:'teils', satz:'Name, Farbe und Logo stehen. Das Impressum fehlt noch, deshalb bleibt die Kundenadresse zu.'},
+       fertig:{stand:'fertig', satz:'Marke, Impressum und Datenschutz stehen. Die Kundenadresse ist offen.'}
+     }},
+    {s:'kunden', titel:'Deine Kunden holen', tuer:'beratung-import.html', tuerwort:'Kundenliste einlesen',
+     neben:{wort:'Einzeln anlegen', tuer:'beratung-kunden.html'},
+     warum:'Jedes Mandat ist ein Gebäude in deinem Modell. Ohne Mandat gibt es nichts zu beraten, und das Modell bleibt ein leeres Grundstück. Wenn du eine Liste hast, dauert das eine Minute.',
+     lagen:{
+       frisch:{stand:'offen', satz:'Noch kein Mandat. Das Modell ist leer.'},
+       mitten:{stand:'fertig', satz:'22 Mandate stehen im Modell.'},
+       fertig:{stand:'fertig', satz:'22 Mandate stehen im Modell.'}
+     }},
+    {s:'saetze', titel:'Deine Sätze hinterlegen', tuer:'beratung-marge.html', tuerwort:'Marge und Sätze',
+     warum:'Was eine Stunde bei dir kostet, und was sie dich kostet. Ohne beides rechnet die Plattform nichts ab, und du siehst deine Marge nicht — die Zahl, wegen der die meisten hier sind.',
+     lagen:{
+       frisch:{stand:'offen', satz:'Keine Sätze. Nichts ist abrechenbar.'},
+       mitten:{stand:'teils', satz:'Der Stundensatz steht, die Kostensätze deines Teams fehlen. Die Marge bleibt blind.'},
+       fertig:{stand:'fertig', satz:'Sätze und Kostensätze stehen. Die Marge rechnet.'}
+     }},
+    {s:'ki', titel:'Deinen KI-Berater einstellen', tuer:'beratung-ki-berater.html', tuerwort:'Persona einstellen',
+     warum:'Wie er auftritt, was er beantworten darf und wo er an dich übergibt. Diese Grenze ist die wichtigste Einstellung der ganzen Plattform, denn was er sagt, sagt er in deinem Namen.',
+     lagen:{
+       frisch:{stand:'offen', satz:'Noch nicht eingestellt. Er würde neutral und ohne Grenze antworten.'},
+       mitten:{stand:'offen', satz:'Noch nicht eingestellt. Er würde neutral und ohne Grenze antworten.'},
+       fertig:{stand:'fertig', satz:'Anrede, Ton und die Grenze zur Übergabe stehen.'}
+     }},
+    {s:'zugang', titel:'Den ersten Zugang verschicken', tuer:'beratung-kunden.html', tuerwort:'Zu den Kunden',
+     warum:'Erst wenn ein Kunde sich anmelden kann, arbeitet die Plattform überhaupt. Der Zugang geht als Mail hinaus, und der Versandvermerk sagt dir hinterher, ob sie angekommen ist.',
+     lagen:{
+       frisch:{stand:'offen', satz:'Noch niemand eingeladen.'},
+       mitten:{stand:'offen', satz:'Noch niemand eingeladen. Deine Mandate warten.'},
+       fertig:{stand:'fertig', satz:'Petersen Stahlbau ist drin und hat gestern die erste Frage gestellt.'}
+     }}
+  ];
+
+  var GLAS = {offen:'entwurf', teils:'wartet', fertig:'aktiv'};
+  var lage = 'frisch';
+
+  var ketteEl = document.getElementById('kette');
+
+  function zeichne(){
+    ketteEl.replaceChildren();
+    var offen = [];
+
+    SCHRITTE.forEach(function(sch, i){
+      var L = sch.lagen[lage];
+      if (L.stand !== 'fertig') offen.push(sch);
+
+      var glied = document.createElement('div');
+      glied.className = 'glied ' + (L.stand === 'fertig' ? 'fertig' : L.stand === 'teils' ? 'teils' : '');
+      /* „dran" bekommt genau der erste offene Schritt — ein Vorschlag, wo man
+         weitermacht, nicht mehr. */
+      if (offen.length === 1 && L.stand !== 'fertig') glied.classList.add('dran');
+
+      var marke = document.createElement('div');
+      marke.className = 'marke';
+      if (L.stand === 'fertig') marke.innerHTML = HAKEN;
+      else marke.textContent = String(i + 1);
+      marke.setAttribute('aria-hidden', 'true');
+
+      var karte = document.createElement('div');
+      karte.className = 'karte-glied ' + (L.stand === 'fertig' ? '' : 'offen');
+
+      var tz = document.createElement('div');
+      tz.className = 'titelzeile';
+      var h3 = document.createElement('h3');
+      h3.textContent = sch.titel;
+      tz.appendChild(h3);
+      if (glied.classList.contains('dran')) {
+        var jetzt = document.createElement('span');
+        jetzt.className = 'jetzt';
+        jetzt.textContent = 'Hier weiter';
+        tz.appendChild(jetzt);
+      }
+
+      var warum = document.createElement('p');
+      warum.className = 'warum';
+      warum.textContent = sch.warum;
+
+      var lz = document.createElement('div');
+      lz.className = 'lage';
+      var glas = document.createElement('span');
+      glas.className = 'zustand ' + GLAS[L.stand];
+      glas.setAttribute('role', 'img');
+      glas.setAttribute('aria-label', L.stand === 'fertig' ? 'Erledigt' : L.stand === 'teils' ? 'Angefangen' : 'Offen');
+      glas.setAttribute('title', L.stand === 'fertig' ? 'Erledigt' : L.stand === 'teils' ? 'Angefangen' : 'Offen');
+      var satz = document.createElement('span');
+      satz.textContent = L.satz;
+      lz.append(glas, satz);
+
+      var tueren = document.createElement('div');
+      tueren.className = 'tueren';
+      var haupt = document.createElement('a');
+      /* Nur ein voller Knopf auf der Fläche: der beim Schritt, an dem es
+         weitergeht. Fünf lila Knöpfe untereinander heißen nichts mehr — man
+         sieht dann keinen davon, sondern eine Wand. */
+      haupt.className = 'knopf ' + (L.stand === 'fertig' ? 'leise'
+        : glied.classList.contains('dran') ? 'primaer' : 'sekundaer');
+      haupt.href = sch.tuer;
+      haupt.textContent = L.stand === 'fertig' ? 'Noch einmal ansehen' : sch.tuerwort;
+      tueren.appendChild(haupt);
+      if (sch.neben && L.stand !== 'fertig') {
+        var neben = document.createElement('a');
+        neben.className = 'knopf leise';
+        neben.href = sch.neben.tuer;
+        neben.textContent = sch.neben.wort;
+        tueren.appendChild(neben);
+      }
+
+      karte.append(tz, warum, lz, tueren);
+      glied.append(marke, karte);
+      ketteEl.appendChild(glied);
+    });
+
+    /* Der Kopf sagt, was fehlt, nicht wie weit es ist. */
+    var fertig = SCHRITTE.length - offen.length;
+    var glas = document.getElementById('mess-glas');
+    glas.style.setProperty('--stand', Math.max(0.06, fertig / SCHRITTE.length));
+    glas.style.setProperty('--fluid', fertig === SCHRITTE.length ? '#43b384' : 'var(--lila-400)');
+    glas.style.setProperty('--fluid-tief', fertig === SCHRITTE.length ? '#1e8a63' : 'var(--lila-600)');
+    glas.setAttribute('aria-label', fertig + ' von ' + SCHRITTE.length + ' Pflichtschritten erledigt');
+
+    var wort = document.getElementById('mess-wort');
+    wort.replaceChildren();
+    var b = document.createElement('b');
+    b.textContent = fertig + ' von ' + SCHRITTE.length;
+    wort.append(b, document.createTextNode(' Pflichtschritten erledigt'));
+
+    /* „Fast da" erst, wenn es wirklich fast so weit ist — bei einem von fünf
+       ist es eine Schmeichelei, und die glaubt einem niemand zweimal. */
+    document.getElementById('ueberschrift').textContent =
+      offen.length === 0 ? 'Angekommen' :
+      offen.length <= 2 ? 'Fast da' : 'Willkommen bei quoroAI';
+
+    document.getElementById('kopfsatz').textContent =
+      offen.length === 0
+        ? 'Alles, was ein Kunde braucht, um bei dir anzukommen, steht.'
+        : offen.length === 1
+          ? 'Noch ein Schritt: ' + kleinTitel(offen[0]) + '. Dann kann dein erster Kunde herein.'
+          : 'Noch ' + zahlwort(offen.length) + ' Schritte, dann kann dein erster Kunde herein. Der nächste ist ' + kleinTitel(offen[0]) + '.';
+
+    document.getElementById('fertig-tafel').hidden = offen.length > 0;
+  }
+
+  function kleinTitel(sch){
+    /* „Deine Marke setzen" wird im Fließtext zu „deine Marke setzen" */
+    return sch.titel.charAt(0).toLowerCase() + sch.titel.slice(1);
+  }
+  var ZAHLWORT = ['null','ein','zwei','drei','vier','fünf'];
+  function zahlwort(n){ return ZAHLWORT[n] || String(n); }
+
+  document.querySelectorAll('#lagen button').forEach(function(b){
+    b.addEventListener('click', function(){
+      lage = b.dataset.lage;
+      document.querySelectorAll('#lagen button').forEach(function(x){
+        x.setAttribute('aria-pressed', String(x === b));
+      });
+      zeichne();
+    });
+  });
+
+  zeichne();
+})();
+</script>
+<script src="hilfe.js"></script>
+<script src="uhr.js"></script>
+<script src="zeiger.js"></script>
+<script src="rechtsfuss.js"></script>
+</body>
+</html>
