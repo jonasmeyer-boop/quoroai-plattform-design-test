@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dein Berater · Rechnungen</title>
+<title>Dein Berater – Rechnungen</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Rechnungen: Liste, Beleg, PDF · Marker: RECHNUNGEN-V5 (Rückweg heißt überall „← Übersicht") */
+/* quoroai-plattform-design · Rechnungen: Liste, Beleg, PDF · Marker: RECHNUNGEN-V6 (kein Mittelpunkt als Trenner) */
 @font-face{font-family:'Manrope';src:url('schriften/manrope.woff2') format('woff2');font-weight:200 800;font-display:swap}
 @font-face{font-family:'Caveat';src:url('schriften/caveat.woff2') format('woff2');font-weight:400 700;font-display:swap}
 :root{
@@ -106,7 +106,7 @@ body.beleg-offen{overflow:hidden}
 </head>
 <body>
 <nav>
-  <div class="wortmarke"><img class="marke-logo" alt="" hidden><div><span data-marke-name data-logo-versteckt>Nordholm &amp; Partner</span><small class="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung · Beispielmarke wechseln</small></div></div>
+  <div class="wortmarke"><img class="marke-logo" alt="" hidden><div><span data-marke-name data-logo-versteckt>Nordholm &amp; Partner</span><small class="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung: Beispielmarke wechseln</small></div></div>
   <a class="zurueck" href="uebersicht.html">← Übersicht</a>
 </nav>
 
@@ -162,16 +162,16 @@ body.beleg-offen{overflow:hidden}
   var RECHNUNGEN = [
     {nr: 'RE-2026-084', datum: '1. August 2026', ziel: 'zahlbar bis 15. August', status: 'offen',
      posten: [
-       {was: 'Beratung Preis und Marge, Juli', wer: 'Dr. Anna Vogelsang · 8,0 Std.', betrag: '1.520,00 €'},
+       {was: 'Beratung Preis und Marge, Juli', wer: 'Dr. Anna Vogelsang, 8,0 Std.', betrag: '1.520,00 €'},
        {was: 'Benchmark-Auswertung Metallzulieferer', wer: 'Pauschale', betrag: '480,00 €'}
      ], netto: '2.000,00 €', steuer: '380,00 €', gesamt: '2.380,00 €'},
     {nr: 'RE-2026-071', datum: '1. Juli 2026', ziel: 'bezahlt am 9. Juli', status: 'bezahlt',
      posten: [
-       {was: 'Beratung Jahresabschluss, Juni', wer: 'J. Brandt · 6,5 Std.', betrag: '1.105,00 €'}
+       {was: 'Beratung Jahresabschluss, Juni', wer: 'J. Brandt, 6,5 Std.', betrag: '1.105,00 €'}
      ], netto: '1.105,00 €', steuer: '209,95 €', gesamt: '1.314,95 €'},
     {nr: 'RE-2026-058', datum: '1. Juni 2026', ziel: 'bezahlt am 12. Juni', status: 'bezahlt',
      posten: [
-       {was: 'Laufende Beratung, Mai', wer: 'Dr. Anna Vogelsang · 5,0 Std.', betrag: '950,00 €'},
+       {was: 'Laufende Beratung, Mai', wer: 'Dr. Anna Vogelsang, 5,0 Std.', betrag: '950,00 €'},
        {was: 'Unterlagen-Aufbereitung Akte', wer: 'Pauschale', betrag: '150,00 €'}
      ], netto: '1.100,00 €', steuer: '209,00 €', gesamt: '1.309,00 €'}
   ];
@@ -182,7 +182,7 @@ body.beleg-offen{overflow:hidden}
   function oeffne(r){
     offen = r;
     blick.querySelector('.b-titel').textContent = 'Rechnung ' + r.nr;
-    blick.querySelector('.b-meta').textContent = r.datum + ' · ' + r.ziel;
+    blick.querySelector('.b-meta').textContent = r.datum + ', ' + r.ziel;
     var tb = blick.querySelector('tbody');
     tb.innerHTML = '';
     r.posten.forEach(function(po){
@@ -217,7 +217,7 @@ body.beleg-offen{overflow:hidden}
   });
   document.getElementById('pdf').addEventListener('click', function(){
     if (!offen) return;
-    var zeilen = ['Rechnung ' + offen.nr, offen.datum + ' · ' + offen.ziel, ''];
+    var zeilen = ['Rechnung ' + offen.nr, offen.datum + ', ' + offen.ziel, ''];
     offen.posten.forEach(function(po){ zeilen.push(po.was + ' (' + po.wer + '): ' + po.betrag); });
     zeilen.push('', 'Netto ' + offen.netto, '19 % USt. ' + offen.steuer, 'Gesamt ' + offen.gesamt, '', '— Vorführung, Demo-Daten; im Produkt ein echtes PDF');
     var a = document.createElement('a');
@@ -234,7 +234,7 @@ body.beleg-offen{overflow:hidden}
     z.className = 'rechnung';
     z.innerHTML = '<span><span class="nr"></span><br><span class="datum"></span></span><span class="status"></span><span class="betrag"></span>';
     z.querySelector('.nr').textContent = r.nr;
-    z.querySelector('.datum').textContent = r.datum + ' · ' + r.ziel;
+    z.querySelector('.datum').textContent = r.datum + ', ' + r.ziel;
     var st = z.querySelector('.status');
     st.textContent = r.status;
     st.classList.add(r.status);

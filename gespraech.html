@@ -6,7 +6,7 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V42 (der Grenzfall trägt eine Kante statt eines Deko-Punkts) */
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V43 (kein Mittelpunkt als Trenner) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -781,7 +781,7 @@ body.blatt-offen{overflow:hidden}
 <body>
 
 <nav>
-  <div class="wortmarke"><a id="zurueck-griff" href="uebersicht.html" title="Zur Übersicht" aria-label="Zur Übersicht">←</a><div><a class="marke-heim" href="uebersicht.html" title="Zur Übersicht"><img id="marke-logo" class="marke-logo" alt="" hidden><span id="marke-name" data-marke-name data-logo-versteckt>Nordholm &amp; Partner</span></a><small id="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung · Beispielmarke wechseln</small></div></div>
+  <div class="wortmarke"><a id="zurueck-griff" href="uebersicht.html" title="Zur Übersicht" aria-label="Zur Übersicht">←</a><div><a class="marke-heim" href="uebersicht.html" title="Zur Übersicht"><img id="marke-logo" class="marke-logo" alt="" hidden><span id="marke-name" data-marke-name data-logo-versteckt>Nordholm &amp; Partner</span></a><small id="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung: Beispielmarke wechseln</small></div></div>
   <span id="hirn-lampe">Hirn an</span>
   <div class="griffe">
     <a id="uebersicht-griff" href="uebersicht.html" title="Zurück zur Übersicht">← Übersicht</a>
@@ -1416,7 +1416,7 @@ body.blatt-offen{overflow:hidden}
     function oeffneQuelle(q){
       setzeLadbar(null);
       titel.textContent = q.titel;
-      meta.textContent = (q.abschnitt ? 'Abschnitt ' + q.abschnitt + ' · ' : '') +
+      meta.textContent = (q.abschnitt ? 'Abschnitt ' + q.abschnitt + ' ' : '') +
         (q.art === 'wissen' ? 'aus dem Wissen deiner Beratung' : 'aus deiner Akte');
       notiz.hidden = true;
       inhalt.innerHTML = '<h4>Die Stelle, auf die sich dein Berater stützt</h4>';
@@ -1505,7 +1505,7 @@ body.blatt-offen{overflow:hidden}
     var k = karteAus(
       '<div class="kalender"><div class="wer"><span class="kreis">AV</span><div>' +
       '<div style="font-weight:800;font-size:15px">Dr. Anna Vogelsang</div>' +
-      '<div style="font-size:12.5px;color:var(--grau)">Partnerin · Strategie und Preis</div>' +
+      '<div style="font-size:12.5px;color:var(--grau)">Partnerin für Strategie und Preis</div>' +
       '</div></div><div class="slots"></div></div>');
     var lage = k.querySelector('.slots');
     slots.forEach(function(s){
@@ -1550,7 +1550,7 @@ body.blatt-offen{overflow:hidden}
       '<div class="anfrage-aktion"><button type="button">Anfrage zurückziehen</button></div>',
       'anfrage', d.sk);
     k.querySelector('.anfrage-zeile').textContent =
-      d.wer + ' · ' + d.grund + (d.wunsch ? ' · Wunsch: ' + d.wunsch : '');
+      d.wer + ' zu ' + d.grund + (d.wunsch ? ', gewünscht ' + d.wunsch : '');
     return k;
   }
   function anfrageStatus(k, art, text){
@@ -1895,7 +1895,7 @@ body.blatt-offen{overflow:hidden}
     {titel: function(){ return rede('Neues Dokument für dich', 'Neues Dokument für Sie'); },
       text: function(){ return rede('Preismodell Benchmark liegt in deinen Unterlagen.', 'Preismodell Benchmark liegt in Ihren Unterlagen.'); },
       zeit: 'vor 2 Stunden', neu: true,
-      tue: function(){ blattBlick.oeffne('Preismodell Benchmark', '12 Seiten · eben erstellt'); }},
+      tue: function(){ blattBlick.oeffne('Preismodell Benchmark', '12 Seiten, eben erstellt'); }},
     {titel: function(){ return rede('Antwort auf deine Anfrage', 'Antwort auf Ihre Anfrage'); },
       text: function(){ return 'Das Jahresgespräch ist bestätigt.'; },
       zeit: 'gestern', neu: false,
@@ -1941,7 +1941,7 @@ body.blatt-offen{overflow:hidden}
       var karten = akte.querySelectorAll('.karte').length;
       var geteilt = false;
       try { geteilt = sessionStorage.getItem('freigabe') === '1'; } catch (e) {}
-      var jetzt = zeile(titel, 'gerade eben · ' + karten + ' Karten in der Akte' + (geteilt ? ' · freigegeben' : ''), 'jetzt offen', 'jetzt');
+      var jetzt = zeile(titel, 'gerade eben, ' + karten + ' Karten in der Akte' + (geteilt ? ', freigegeben' : ''), 'jetzt offen', 'jetzt');
       jetzt.addEventListener('click', schliesse);
       eintraege.appendChild(jetzt);
       FRUEHERE.forEach(function(g){
@@ -2093,9 +2093,9 @@ body.blatt-offen{overflow:hidden}
       k = karteAus('<div class="dokument"><div class="blatt"></div><div><div class="name"></div><div class="meta"></div></div></div>');
     }
     k.dataset.doku = a.datei.name;
-    k.dataset.dokuMeta = rede('von dir · ', 'von Ihnen · ') + groesse(a.datei.size);
+    k.dataset.dokuMeta = rede('von dir, ', 'von Ihnen, ') + groesse(a.datei.size);
     k.querySelector('.name').textContent = a.datei.name;
-    k.querySelector('.meta').textContent = rede('von dir · ', 'von Ihnen · ') + groesse(a.datei.size);
+    k.querySelector('.meta').textContent = rede('von dir, ', 'von Ihnen, ') + groesse(a.datei.size);
     return k;
   }
 
@@ -2334,7 +2334,7 @@ body.blatt-offen{overflow:hidden}
           {titel:'Branchenspiegel Metallzulieferer 2025', abschnitt:'5', art:'wissen', auszug:'Zulieferer mit 20 bis 80 Mitarbeitenden erzielen im Median 35,9 Prozent Rohertragsmarge; das untere Quartil liegt bei 31,2 Prozent.'}
         ]},
         {t: 'Den vollen Rechenweg habe ich dir in die Akte gelegt:'},
-        {dokument: {name:'Preismodell Benchmark', meta:'12 Seiten · eben erstellt · liegt in deiner Akte'}},
+        {dokument: {name:'Preismodell Benchmark', meta:'12 Seiten, eben erstellt, liegt in deiner Akte'}},
         {chips: ['Was bringt mir das Preismodell?', 'Buch mir einen Menschen']}
       ]},
     { probe: /(was bringt|preismodell|szenario|wenn ich)/i,
@@ -2370,8 +2370,8 @@ body.blatt-offen{overflow:hidden}
       frage: 'Welche Termine stehen an?',
       schritte: [
         {t: 'Zwei Dinge stehen an:'},
-        {termin: {tag: 'DO', zeit: '10:00', wann: 'Donnerstag, 10:00–11:00', mit: 'Dr. Anna Vogelsang · Preis und Marge', form: 'Videocall'}},
-        {termin: {tag: 'DI', zeit: '14:30', wann: 'nächsten Dienstag, 14:30–15:00', mit: 'Jahresgespräch · mit deinem Steuerbüro', form: 'vor Ort'}},
+        {termin: {tag: 'DO', zeit: '10:00', wann: 'Donnerstag, 10:00–11:00', mit: 'Preis und Marge mit Dr. Anna Vogelsang', form: 'Videocall'}},
+        {termin: {tag: 'DI', zeit: '14:30', wann: 'nächsten Dienstag, 14:30–15:00', mit: 'Jahresgespräch mit deinem Steuerbüro', form: 'vor Ort'}},
         {t: 'Absagen oder verschieben geht direkt bei deiner Beratung — sag mir einfach Bescheid, ich richte es aus.'},
         {chips: ['Buch mir einen Menschen', 'Wie läuft mein Geschäft?']}
       ]},
@@ -2415,7 +2415,7 @@ body.blatt-offen{overflow:hidden}
   var SONST = {
     schritte: [
       {t: 'Verstanden. Das rechne ich in Ruhe durch und lege dir die Antwort in die Akte, mit Rechenweg. Du siehst hier, sobald sie liegt.'},
-      {dokument: {name:'In Arbeit: deine Frage', meta:'Antwort entsteht · landet in deiner Akte', sk:'auftrag'}},
+      {dokument: {name:'In Arbeit: deine Frage', meta:'Antwort entsteht und landet in deiner Akte', sk:'auftrag'}},
       {skizze: [{art:'notiz', ziel:'auftrag', text:'bis morgen früh', wo:'rechts'}]},
       {chips: ['Wie läuft mein Geschäft?', 'Warum schrumpft meine Marge?', 'Buch mir einen Menschen']}
     ]};
@@ -2452,12 +2452,12 @@ body.blatt-offen{overflow:hidden}
       kamera.start();
       anfrageStatus(k, 'steht', 'Termin steht');
       await stroeme(kapitel, 'Dr. Anna Vogelsang hat bestätigt: ' + slot + '. Sie bekommt vorab, was wir hier besprochen haben.');
-      var b = baueBestaetigung('Termin bestätigt · ' + slot, 'termin');
+      var b = baueBestaetigung('Termin bestätigt für ' + slot, 'termin');
       kapitel.querySelector('.lauf').appendChild(b);
       runter();
       await materialisiere(b);
       await stift.notiz(kapitel, b, 'steht!', 'rechts');
-      var t = baueTermin({tag: slot.slice(0, 2).toUpperCase(), zeit: slot.split(', ')[1] || '', wann: slot, mit: 'Dr. Anna Vogelsang · Preis und Marge', form: 'Videocall'});
+      var t = baueTermin({tag: slot.slice(0, 2).toUpperCase(), zeit: slot.split(', ')[1] || '', wann: slot, mit: 'Preis und Marge mit Dr. Anna Vogelsang', form: 'Videocall'});
       kapitel.querySelector('.lauf').appendChild(t);
       runter();
       await materialisiere(t);
