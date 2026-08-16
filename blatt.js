@@ -59,7 +59,25 @@
    Randnotizen, die Feder-Tönung schlägt den Überfahr-Ton, ein leerer Absatz
    mit Feder sagt trotzdem „Schreib hier.", der Stand unten veraltet nicht mehr,
    und die Fläche erfährt vom Zuklappen (beimSchliessen).
-   Marker: BLATT-V3
+
+   Skizzieren (Häppchen D4 Teil 3) — ein Block ist eine Tafel:
+       {tafel: {beschreibung: 'Was darauf zu sehen ist, in einem Satz.',
+                striche: [{kasten:[x,y,b,h]}, {pfeil:[x1,y1,x2,y2]},
+                          {linie:[…]}, {kringel:[cx,cy,rx,ry]},
+                          {d:'M…', art:'marker'}],
+                worte:   [{x:…, y:…, t:'Stahlpreis', gross:true}]}}
+   Auf eigenem Papier (schreibbar) liegt der Stift bereit: Stift, Marker,
+   Radierer, „Strich zurück" stehen unten in derselben Leiste, in der man
+   blättert — über dem Blatt liegt nichts.
+
+   Und der Stift der KI? Er zeichnet nicht auf das Blatt, er zeichnet auf
+   Pauspapier. Der Vorschlag liegt als eigenes, durchscheinendes Blatt über
+   der Tafel; erst „Übernehmen" drückt ihn in die Tinte der Beratung, und dann
+   zieht er sich sichtbar nach. „Verwerfen" nimmt das Pauspapier weg. Dieselbe
+   Regel wie beim Text: was die KI beiträgt, steht daneben, bis ein Mensch es
+   annimmt — eine Skizze, in der über Nacht ein Kasten mehr steht, wäre keine
+   Handzeichnung mehr.
+   Marker: BLATT-V4
 
    Markenneutral: alle Farben kommen aus den Tokens der Fläche — Kundenflächen
    setzen --blau/--linie/--grau über marke.js, quoroAI-Flächen bringen
@@ -77,6 +95,8 @@ window.Blatt = (function () {
   var HOCH = Math.round(BREIT * 1.414);
   var MINI = 96;            /* Breite der Seiten-Miniatur in der Leiste */
 
+  var TAF_B = 1000, TAF_H = 1290;  /* das Maß der Tafel, in dem ihre Striche stehen */
+
   var offen = false;
   var schicht = null, lauf = null, leiste = null, kopfTitel = null, kopfMeta = null;
   var zaehler = null, zurueckKnopf = null, weiterKnopf = null, griffeKasten = null, fussWort = null;
@@ -84,6 +104,7 @@ window.Blatt = (function () {
   var seitenEl = [], miniEl = [];
   var federn = [], federHier = null;
   var standNeu = '', schonGetippt = false, miniTakt = null;
+  var tafeln = [], letzteTafel = null, werkzeug = 'stift', werkzeugKasten = null;
   var jetzigesDok = null;
   var jetzt = 0, gesamtDok = 0;
   var faehrtSelbst = 0, faehrtEnde = null;
@@ -230,6 +251,50 @@ window.Blatt = (function () {
       '@keyframes bb-gesetzt{0%,20%{background:color-mix(in srgb, ' + akzent + ' 34%, transparent)}' +
         '100%{background:transparent}}' +
 
+      /* ---- die Tafel: hier wird gezeichnet (Häppchen D4 Teil 3) ----
+         Das Karo sagt ohne ein Wort, dass diese Fläche etwas anderes ist als
+         der Satz darüber: hier darf man mit der Hand hinein. Es ist blass
+         genug, um unter einer fertigen Zeichnung zu verschwinden. */
+      '.bb-tafel{position:relative;width:100%;aspect-ratio:' + TAF_B + '/' + TAF_H + ';' +
+        'background-image:radial-gradient(rgba(27,27,31,.13) 1px, transparent 1.2px);' +
+        'background-size:5.2% 4.03%;background-position:2.6% 2%;border-radius:3px}' +
+      '.bb-tafel svg{display:block;width:100%;height:100%;overflow:visible}' +
+      /* Der Stift führt den Finger: ohne touch-action verschiebt der erste
+         Strich am Handy die Seite, statt eine Linie zu ziehen. */
+      '.bb-tafel.offen svg{touch-action:none;cursor:crosshair}' +
+      '.bb-tafel.offen.radiert svg{cursor:cell}' +
+      /* Eine Tafel mit Vorschlag wird nicht getönt: das Pauspapier liegt
+         sichtbar darauf, und ein eingefärbtes halbes Blatt sähe aus wie ein
+         Fehler, nicht wie eine Markierung. Der Strich in der Marge bleibt. */
+      /* Und die Kurzform background: der Feder-Regel hätte das Karo gleich
+         mitgelöscht — es steht deshalb hier noch einmal. */
+      '.bb-seite .bb-tafel.bb-mit-feder,.bb-seite .bb-tafel.bb-mit-feder.hier{' +
+        'background-color:transparent;' +
+        'background-image:radial-gradient(rgba(27,27,31,.13) 1px, transparent 1.2px);' +
+        'background-size:5.2% 4.03%;background-position:2.6% 2%}' +
+      '.bb-tafel .strich{fill:none;stroke:#1b1b1f;stroke-width:3.2;' +
+        'stroke-linecap:round;stroke-linejoin:round}' +
+      /* Der Marker liegt unter der Tinte und deckt sie nie zu — er ist zum
+         Hervorheben da, nicht zum Übermalen. */
+      '.bb-tafel .marker .strich{stroke:' + akzent + ';stroke-width:17;opacity:.24;stroke-linecap:round}' +
+      '.bb-tafel text{font-family:Caveat,cursive;font-weight:700;fill:#1b1b1f;font-size:30px}' +
+      '.bb-tafel text.gross{font-size:38px}' +
+      /* Die Wörter der Vorführung sind gesetzt, damit man sie liest; gezeichnet
+         wird mit dem Stift, auch die eigenen Buchstaben. */
+      '.bb-tafel .leerwort{display:none;font-family:Caveat,cursive;font-size:27px;color:#c0c0c9;' +
+        'position:absolute;inset:0;align-items:center;justify-content:center;pointer-events:none}' +
+      '.bb-tafel.offen.leer .leerwort{display:flex}' +
+
+      /* Das Pauspapier des KI-Beraters: ein eigenes Blatt über der Tafel,
+         durchscheinend, leicht schief aufgelegt — nichts davon ist Tinte. */
+      '.bb-pause{opacity:.72;transition:opacity .4s ' + kurve + '}' +
+      '.bb-pause.weg{opacity:0}' +
+      '.bb-pause .strich{stroke:' + akzent + ';stroke-width:3.2}' +
+      '.bb-pause .marker .strich{stroke:' + akzent + '}' +
+      '.bb-pause text{fill:' + akzent + '}' +
+      '.bb-pause .papier{fill:' + akzent + ';opacity:.07;stroke:' + akzent + ';' +
+        'stroke-opacity:.35;stroke-width:1.5;stroke-dasharray:7 6}' +
+
       /* ---- die Feder: der Vorschlag steht NEBEN dem Blatt, nie darin ---- */
       /* Die Tönung sagt, WELCHER Satz gemeint ist. Sie muss den Überfahr-Ton
          schlagen, sonst verliert man beim Zeigen genau die Auskunft, wegen
@@ -310,6 +375,10 @@ window.Blatt = (function () {
       '@media (hover:hover){.bb-steuer button:hover:not([disabled]){border-color:' + akzent + '}}' +
       '.bb-steuer button[disabled]{opacity:.4;cursor:default}' +
       '.bb-steuer .griffe{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}' +
+      /* Der Stift wohnt unten, nicht über dem Blatt: die Tafel bleibt frei,
+         wie die Seite beim Schreiben. */
+      '.bb-steuer .werkzeuge{display:flex;gap:6px;flex-wrap:wrap}' +
+      '.bb-steuer .werkzeuge button[aria-pressed="true"]{background:' + tinte + ';color:#fff;border-color:' + tinte + '}' +
 
       /* ---- das Aufschlagen: aus der Zeile heraus ---- */
       '.bb-schicht .bb-band,.bb-schicht .bb-steuer,.bb-schicht .bb-leiste,' +
@@ -343,6 +412,11 @@ window.Blatt = (function () {
            weiter oben auf der Seite und ist dort markiert. Ihn hier noch
            einmal zu setzen, kostet die halbe Höhe des Blattes für nichts. */
         '.bb-vorschlag .alt,.bb-vorschlag .statt{display:none}' +
+        /* Wo der Stift liegt, braucht die Leiste ihren Platz für ihn: der
+           Fußsatz der Fläche kostet am Handy eine ganze Zeile und sagt
+           nichts, was man zum Zeichnen wissen muss. */
+        '.bb-steuer.hat-tafel .fusswort{display:none}' +
+        '.bb-steuer .werkzeuge button{padding:0 13px}' +
       '}' +
       '@media (prefers-reduced-motion:reduce){' +
         '.bb-seite mark.frisch{animation:none}' +
@@ -450,17 +524,23 @@ window.Blatt = (function () {
   /* Die Feder am Rand: ein Strich in der Marge, mehr nicht. Sie sitzt IM
      offenen Block und trägt deshalb contenteditable="false" — sonst wäre der
      Knopf selbst Text, den man versehentlich wegtippt. */
-  function hefteFeder(el, feder, seitenNr) {
+  function hefteFeder(el, feder, seitenNr, tafelSvg) {
     el.classList.add('bb-mit-feder');
     var f = document.createElement('button');
     f.type = 'button';
     f.className = 'bb-feder';
     f.contentEditable = 'false';
     f.setAttribute('aria-expanded', 'false');
-    f.setAttribute('aria-label', 'Der KI-Berater schlägt an dieser Stelle etwas vor');
+    f.setAttribute('aria-label', tafelSvg
+      ? 'Der KI-Berater hat etwas auf Pauspapier dazugezeichnet'
+      : 'Der KI-Berater schlägt an dieser Stelle etwas vor');
     f.innerHTML = '<span class="strich"></span>';
     el.appendChild(f);
-    var eintrag = { el: el, knopf: f, feder: feder, seite: seitenNr };
+    /* Das Pauspapier liegt sofort auf der Tafel — man soll den Vorschlag
+       sehen, bevor man ihn anfasst. Auf dem Blatt liegt er, in der Tinte
+       steht er nicht. */
+    if (tafelSvg && feder.pause) legePauspapier(tafelSvg, feder.pause);
+    var eintrag = { el: el, knopf: f, feder: feder, seite: seitenNr, tafelSvg: tafelSvg || null };
     f.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -488,6 +568,369 @@ window.Blatt = (function () {
         return neu;
       });
     });
+  }
+
+  /* ---------- Die Tafel: gezeichnet, nicht getippt (Häppchen D4 Teil 3) ----
+     Striche stehen im Maß der Tafel (1000 × 740), nicht in Bildschirmpunkten:
+     nur so ist dieselbe Zeichnung am Handy, auf dem Blatt und in der
+     fingernagelgroßen Miniatur dieselbe Zeichnung. Und die Miniatur ist ein
+     Klon der Seite — mit einem Canvas wäre sie leer geblieben. */
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  function svgs(name, attrs) {
+    var e = document.createElementNS(SVGNS, name);
+    for (var k in attrs) if (Object.prototype.hasOwnProperty.call(attrs, k)) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function r1(z) { return Math.round(z * 10) / 10; }
+
+  /* Eine Hand zieht keine geraden Linien. Der Versatz kommt aber nicht aus
+     dem Zufall, sondern aus den Koordinaten selbst: eine Zeichnung, die beim
+     zweiten Aufschlagen anders wackelt als beim ersten, wäre keine
+     Zeichnung, sondern ein Bildschirmschoner. */
+  function saatWert(saat) {
+    var x = Math.sin(saat * 12.9898) * 43758.5453;
+    return x - Math.floor(x);
+  }
+  function handLinie(x1, y1, x2, y2, saat, weite) {
+    var d = 'M' + r1(x1) + ' ' + r1(y1), n = 3;
+    for (var i = 1; i <= n; i++) {
+      var t = i / n, x = x1 + (x2 - x1) * t, y = y1 + (y2 - y1) * t;
+      if (i < n) {
+        x += (saatWert(saat + i * 3.7) - .5) * weite;
+        y += (saatWert(saat + i * 5.1 + 9) - .5) * weite;
+      }
+      d += ' L' + r1(x) + ' ' + r1(y);
+    }
+    return d;
+  }
+  /* Ein von Hand gezogener Kasten schließt nie genau: die Ecken stehen über.
+     Genau das macht den Unterschied zwischen einer Skizze und einem
+     Organigramm aus dem Programm. */
+  function kastenPfad(x, y, b, h, saat) {
+    var o = 5;
+    return handLinie(x - o, y, x + b + o, y, saat, 3.4) + ' ' +
+           handLinie(x + b, y - o, x + b, y + h + o, saat + 21, 3.4) + ' ' +
+           handLinie(x + b + o, y + h, x - o, y + h, saat + 47, 3.4) + ' ' +
+           handLinie(x, y + h + o, x, y - o, saat + 83, 3.4);
+  }
+  function pfeilPfad(x1, y1, x2, y2, saat) {
+    var d = handLinie(x1, y1, x2, y2, saat, 4.5);
+    var w = Math.atan2(y2 - y1, x2 - x1), L = 19, s = .42;
+    d += ' M' + r1(x2) + ' ' + r1(y2) + ' L' + r1(x2 - L * Math.cos(w - s)) + ' ' + r1(y2 - L * Math.sin(w - s));
+    d += ' M' + r1(x2) + ' ' + r1(y2) + ' L' + r1(x2 - L * Math.cos(w + s)) + ' ' + r1(y2 - L * Math.sin(w + s));
+    return d;
+  }
+  function kringelPfad(cx, cy, rx, ry, saat) {
+    var d = '', n = 30;
+    for (var i = 0; i <= n; i++) {
+      /* Etwas mehr als einmal herum, und schief begonnen: eine Umkreisung von
+         Hand trifft ihren Anfang nicht wieder. */
+      var t = -0.35 + (i / n) * Math.PI * 2 * 1.07;
+      var f = 1 + (saatWert(saat + i * 2.3) - .5) * .07;
+      d += (i ? ' L' : 'M') + r1(cx + Math.cos(t) * rx * f) + ' ' + r1(cy + Math.sin(t) * ry * f);
+    }
+    return d;
+  }
+  function strichPfad(s) {
+    if (s.d) return s.d;
+    var a = s.kasten || s.pfeil || s.linie || s.kringel;
+    if (!a) return '';
+    var saat = a[0] * .37 + a[1] * .11 + a[2] * .53 + a[3] * .29;
+    if (s.kasten) return kastenPfad(a[0], a[1], a[2], a[3], saat);
+    if (s.pfeil) return pfeilPfad(a[0], a[1], a[2], a[3], saat);
+    if (s.linie) return handLinie(a[0], a[1], a[2], a[3], saat, 3.4);
+    return kringelPfad(a[0], a[1], a[2], a[3], saat);
+  }
+
+  function setzeStrich(svg, s, inPause) {
+    var wo = svg.querySelector((inPause ? '.bb-pause > ' : ':scope > ') + (s.art === 'marker' ? '.marker' : '.tinte'));
+    if (!wo) return null;
+    var p = svgs('path', { class: 'strich', d: strichPfad(s) });
+    p.__daten = s;
+    wo.appendChild(p);
+    return p;
+  }
+  function setzeWort(svg, w, inPause) {
+    var wo = svg.querySelector((inPause ? '.bb-pause > ' : ':scope > ') + '.worte');
+    if (!wo) return null;
+    var t = svgs('text', { x: w.x, y: w.y });
+    if (w.gross) t.setAttribute('class', 'gross');
+    t.textContent = w.t;
+    t.__daten = w;
+    wo.appendChild(t);
+    return t;
+  }
+
+  function baueTafel(b, zeichenbar) {
+    var daten = b.tafel || {};
+    var wrap = document.createElement('div');
+    wrap.className = 'bb-tafel' + (zeichenbar ? ' offen' : '');
+    var svg = svgs('svg', { viewBox: '0 0 ' + TAF_B + ' ' + TAF_H });
+    /* Eine Zeichnung, die niemand sehen kann, muss sich sagen lassen. */
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', daten.beschreibung || 'Eine Handzeichnung.');
+    svg.append(svgs('g', { class: 'marker' }), svgs('g', { class: 'tinte' }), svgs('g', { class: 'worte' }));
+    wrap.appendChild(svg);
+    var leerwort = document.createElement('span');
+    leerwort.className = 'leerwort';
+    leerwort.textContent = 'Zeichne hier.';
+    wrap.appendChild(leerwort);
+
+    (daten.striche || []).forEach(function (s) { setzeStrich(svg, s, false); });
+    (daten.worte || []).forEach(function (w) { setzeWort(svg, w, false); });
+
+    svg.__wrap = wrap;
+    svg.__block = b;
+    svg.__undo = [];
+    svg.__zeichenbar = !!zeichenbar;
+    zeigeLeereTafel(svg);
+    if (zeichenbar) hoercheAufDenStift(svg);
+    tafeln.push(svg);
+    if (!letzteTafel) letzteTafel = svg;
+    return wrap;
+  }
+
+  function zeigeLeereTafel(svg) {
+    var leer = !svg.querySelector('.tinte .strich, .marker .strich, .worte text');
+    svg.__wrap.classList.toggle('leer', leer);
+  }
+
+  /* ---------- Der Stift des Menschen ---------- */
+  function ortAufTafel(svg, e) {
+    var k = svg.getBoundingClientRect();
+    if (!k.width || !k.height) return null;
+    return { x: (e.clientX - k.left) / k.width * TAF_B, y: (e.clientY - k.top) / k.height * TAF_H };
+  }
+
+  function hoercheAufDenStift(svg) {
+    var lauft = null, punkte = null, radiert = false;
+    svg.addEventListener('pointerdown', function (e) {
+      if (e.button !== undefined && e.button !== 0) return;
+      var p = ortAufTafel(svg, e);
+      if (!p) return;
+      e.preventDefault();
+      letzteTafel = svg;
+      /* Der Zeiger bleibt bis zum Loslassen bei der Tafel — auch wenn die Hand
+         über den Rand hinausfährt. Nicht jeder Zeiger lässt sich fangen; ein
+         Strich soll daran nicht scheitern. */
+      try { svg.setPointerCapture(e.pointerId); } catch (fehler) { /* dann eben nicht */ }
+      if (werkzeug === 'radierer') {
+        radiert = true;
+        radiereBei(svg, p.x, p.y, true);
+        return;
+      }
+      punkte = [[p.x, p.y]];
+      lauft = setzeStrich(svg, { d: 'M' + r1(p.x) + ' ' + r1(p.y), art: werkzeug === 'marker' ? 'marker' : 'stift' }, false);
+      svg.__wrap.classList.remove('leer');
+    });
+    svg.addEventListener('pointermove', function (e) {
+      var p = ortAufTafel(svg, e);
+      if (!p) return;
+      if (radiert) { radiereBei(svg, p.x, p.y, false); return; }
+      if (!lauft) return;
+      var letzt = punkte[punkte.length - 1];
+      /* Jeder Mauszucker ein Punkt hieße: hundert Punkte je Zentimeter, und
+         die Linie zittert. Erst ab einem sichtbaren Abstand wird gezeichnet. */
+      if (Math.abs(p.x - letzt[0]) + Math.abs(p.y - letzt[1]) < 4) return;
+      punkte.push([p.x, p.y]);
+      lauft.setAttribute('d', glattePunkte(punkte));
+      lauft.__daten.d = lauft.getAttribute('d');
+    });
+    function fertig(e) {
+      try {
+        if (svg.hasPointerCapture && e && e.pointerId !== undefined &&
+            svg.hasPointerCapture(e.pointerId)) svg.releasePointerCapture(e.pointerId);
+      } catch (fehler) { /* nie gefangen, nichts loszulassen */ }
+      if (lauft) {
+        /* Ein Tippen ohne Bewegung ist ein Punkt, kein Strich — ohne diesen
+           Schluss stünde ein unsichtbares M irgendwo im Blatt und wäre nur
+           mit dem Radierer wieder wegzubekommen. */
+        if (punkte.length === 1) {
+          lauft.setAttribute('d', 'M' + r1(punkte[0][0]) + ' ' + r1(punkte[0][1]) +
+            ' L' + r1(punkte[0][0] + .4) + ' ' + r1(punkte[0][1]));
+          lauft.__daten.d = lauft.getAttribute('d');
+        }
+        svg.__undo.push({ typ: 'strich', el: lauft });
+        lauft = null; punkte = null;
+        getippt();
+      }
+      if (radiert) { radiert = false; getippt(); }
+      zeigeLeereTafel(svg);
+    }
+    svg.addEventListener('pointerup', fertig);
+    svg.addEventListener('pointercancel', fertig);
+    svg.addEventListener('pointerleave', function (e) { if (lauft || radiert) fertig(e); });
+  }
+
+  /* Zwischen zwei Punkten liegt die Mitte: aus Ecken werden Bögen, ohne dass
+     man rechnen muss, wie eine Hand wirklich schwingt. */
+  function glattePunkte(p) {
+    if (p.length < 3) return 'M' + r1(p[0][0]) + ' ' + r1(p[0][1]) +
+      (p[1] ? ' L' + r1(p[1][0]) + ' ' + r1(p[1][1]) : '');
+    var d = 'M' + r1(p[0][0]) + ' ' + r1(p[0][1]);
+    for (var i = 1; i < p.length - 1; i++) {
+      d += ' Q' + r1(p[i][0]) + ' ' + r1(p[i][1]) + ' ' +
+        r1((p[i][0] + p[i + 1][0]) / 2) + ' ' + r1((p[i][1] + p[i + 1][1]) / 2);
+    }
+    var z = p[p.length - 1];
+    return d + ' L' + r1(z[0]) + ' ' + r1(z[1]);
+  }
+
+  /* Der Radierer nimmt ganze Striche weg, keine Löcher hinein. Eine Skizze
+     besteht aus Strichen; ein halb weggeriebener Pfeil ist nichts. */
+  function radiereBei(svg, x, y, ersteBeruehrung) {
+    var weg = [];
+    Array.prototype.forEach.call(svg.querySelectorAll('.tinte .strich, .marker .strich, .worte text'), function (el) {
+      if (el.closest('.bb-pause')) return;   /* Pauspapier gehört nicht der Beratung */
+      if (nahDran(el, x, y, el.tagName === 'text' ? 6 : 15)) weg.push(el);
+    });
+    if (!weg.length) return;
+    var schritt = { typ: 'weg', wo: [] };
+    weg.forEach(function (el) {
+      schritt.wo.push({ el: el, eltern: el.parentNode, danach: el.nextSibling });
+      el.remove();
+    });
+    svg.__undo.push(schritt);
+    zeigeLeereTafel(svg);
+    if (ersteBeruehrung) getippt();
+  }
+
+  function nahDran(el, x, y, nah) {
+    if (el.tagName === 'text') {
+      var b;
+      try { b = el.getBBox(); } catch (e) { return false; }
+      return x >= b.x - nah && x <= b.x + b.width + nah && y >= b.y - nah && y <= b.y + b.height + nah;
+    }
+    var L = 0;
+    try { L = el.getTotalLength(); } catch (e2) { return false; }
+    var n = Math.max(2, Math.min(260, Math.round(L / 7)));
+    for (var i = 0; i <= n; i++) {
+      var p = el.getPointAtLength(L * i / n);
+      if ((p.x - x) * (p.x - x) + (p.y - y) * (p.y - y) <= nah * nah) return true;
+    }
+    return false;
+  }
+
+  /* Ein Strich zurück ist der einzige Rückweg, den eine Zeichnung braucht —
+     und er gilt auch für einen übernommenen Vorschlag. */
+  function strichZurueck() {
+    var svg = letzteTafel;
+    if (!svg || !svg.__undo || !svg.__undo.length) return;
+    var s = svg.__undo.pop();
+    if (s.typ === 'strich') s.el.remove();
+    else if (s.typ === 'pause') s.wo.forEach(function (el) { el.remove(); });
+    else if (s.typ === 'weg') s.wo.forEach(function (w) { w.eltern.insertBefore(w.el, w.danach); });
+    zeigeLeereTafel(svg);
+    getippt();
+  }
+
+  /* ---------- Der Stift der KI: Pauspapier über der Tafel ---------- */
+  function legePauspapier(svg, pause) {
+    var g = svgs('g', { class: 'bb-pause' });
+    /* Leicht schief aufgelegt — ein Blatt, das jemand darübergelegt hat,
+       liegt nicht im Winkel des Papiers darunter. */
+    g.setAttribute('transform', 'rotate(-0.7 ' + (TAF_B / 2) + ' ' + (TAF_H / 2) + ')');
+    if (pause.papier) {
+      g.appendChild(svgs('rect', { class: 'papier', x: pause.papier[0], y: pause.papier[1],
+        width: pause.papier[2], height: pause.papier[3], rx: 6 }));
+    }
+    g.append(svgs('g', { class: 'marker' }), svgs('g', { class: 'tinte' }), svgs('g', { class: 'worte' }));
+    svg.appendChild(g);
+    (pause.striche || []).forEach(function (s) { setzeStrich(svg, s, true); });
+    (pause.worte || []).forEach(function (w) { setzeWort(svg, w, true); });
+    return g;
+  }
+
+  /* Übernehmen heißt: das Pauspapier wird zu Tinte. Man sieht es nachziehen,
+     weil ein Kasten, der einfach da ist, aussieht wie ein Programmfehler —
+     und weil man in dieser Sekunde sehen soll, was man gerade angenommen hat. */
+  function nimmPause(eintrag) {
+    var svg = eintrag.tafelSvg, g = svg.querySelector('.bb-pause');
+    if (!g) return;
+    var neu = [];
+    Array.prototype.forEach.call(g.querySelectorAll('.strich, text'), function (el) {
+      var inMarker = !!el.closest('.marker');
+      var ziel = svg.querySelector(el.tagName === 'text' ? ':scope > .worte'
+        : (inMarker ? ':scope > .marker' : ':scope > .tinte'));
+      if (!ziel) return;
+      ziel.appendChild(el);
+      neu.push(el);
+    });
+    g.remove();
+    svg.__undo.push({ typ: 'pause', wo: neu });
+    zeichneNach(neu);
+    zeigeLeereTafel(svg);
+    getippt();
+  }
+
+  function zeichneNach(els) {
+    if (reduziert) return;
+    els.forEach(function (el, i) {
+      if (el.tagName === 'text') {
+        el.style.opacity = '0';
+        setTimeout(function () {
+          el.style.transition = 'opacity .5s ease'; el.style.opacity = '';
+          setTimeout(function () { el.style.transition = ''; }, 600);
+        }, 240 + i * 70);
+        return;
+      }
+      var L;
+      try { L = el.getTotalLength(); } catch (e) { return; }
+      el.style.strokeDasharray = L; el.style.strokeDashoffset = L;
+      /* Zwei Bilder warten, sonst zeichnet der Browser den Anfang nie. */
+      requestAnimationFrame(function () { requestAnimationFrame(function () {
+        el.style.transition = 'stroke-dashoffset .5s ease ' + (i * 70) + 'ms';
+        el.style.strokeDashoffset = '0';
+        setTimeout(function () {
+          el.style.transition = ''; el.style.strokeDasharray = ''; el.style.strokeDashoffset = '';
+        }, 700 + i * 70);
+      }); });
+    });
+  }
+
+  /* ---------- Der Stift liegt unten, neben der Seitenzahl ---------- */
+  function baueWerkzeuge() {
+    var offene = tafeln.filter(function (s) { return s.__zeichenbar; });
+    if (!offene.length) return;
+    letzteTafel = offene[0];
+    werkzeugKasten = document.createElement('span');
+    werkzeugKasten.className = 'werkzeuge';
+    werkzeugKasten.setAttribute('role', 'group');
+    werkzeugKasten.setAttribute('aria-label', 'Womit du zeichnest');
+    var wahl = [['stift', 'Stift'], ['marker', 'Marker'], ['radierer', 'Radierer']];
+    var knoepfe = [];
+    wahl.forEach(function (w) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = w[1];
+      b.setAttribute('aria-pressed', String(werkzeug === w[0]));
+      b.addEventListener('click', function () {
+        werkzeug = w[0];
+        knoepfe.forEach(function (k) { k.setAttribute('aria-pressed', String(k === b)); });
+        /* Der Zeiger sagt, was in der Hand liegt: über der Tafel wird aus dem
+           Kreuz ein Radierer, sonst müsste man es ausprobieren. */
+        tafeln.forEach(function (s) { s.__wrap.classList.toggle('radiert', werkzeug === 'radierer'); });
+      });
+      knoepfe.push(b);
+      werkzeugKasten.appendChild(b);
+    });
+    var zurueck = document.createElement('button');
+    zurueck.type = 'button';
+    zurueck.textContent = 'Strich zurück';
+    zurueck.addEventListener('click', strichZurueck);
+    werkzeugKasten.appendChild(zurueck);
+    /* Vor die Griffe der Fläche: „Fertigstellen" steht rechts außen, der
+       Stift gehört zur Zeichnung und nicht zum Abschluss. */
+    griffeKasten.parentNode.insertBefore(werkzeugKasten, griffeKasten);
+    griffeKasten.parentNode.classList.add('hat-tafel');
+  }
+
+  function wirfPauseWeg(svg) {
+    var g = svg && svg.querySelector('.bb-pause');
+    if (!g) return;
+    if (reduziert) { g.remove(); return; }
+    g.classList.add('weg');
+    setTimeout(function () { g.remove(); }, 420);
   }
 
   function baueSeite(bloecke, nr, gesamt, fundWort, papierOffen) {
@@ -526,6 +969,8 @@ window.Blatt = (function () {
           li.innerHTML = mitFund(z, fundWort, treffer);
           el.appendChild(li);
         });
+      } else if (b.tafel) {
+        el = baueTafel(b, papierOffen);
       } else if (b.tab) {
         el = document.createElement('table');
         b.tab.forEach(function (reihe, i) {
@@ -545,13 +990,13 @@ window.Blatt = (function () {
         el = document.createElement('p');
         el.innerHTML = mitFund(b.p || '', fundWort, treffer);
       }
-      if (papierOffen && !b.bild && !b.tab) el.setAttribute('contenteditable', 'true');
+      if (papierOffen && !b.bild && !b.tab && !b.tafel) el.setAttribute('contenteditable', 'true');
       /* Das Element weiß, aus welchem Block es entstanden ist. Nur so kann,
          was jemand hineinschreibt, beim Schließen wieder dorthin zurück —
          sonst stünde beim zweiten Aufschlagen der alte Text da, und der
          Entwurf wäre ein Bild von einem Entwurf. */
       if (papierOffen) el.__block = b;
-      if (b.feder && papierOffen) hefteFeder(el, b.feder, nr);
+      if (b.feder && papierOffen) hefteFeder(el, b.feder, nr, b.tafel ? el.querySelector('svg') : null);
       seite.appendChild(el);
     });
     seite.appendChild(seitenzahl(nr, gesamt));
@@ -662,6 +1107,9 @@ window.Blatt = (function () {
     zaehler.textContent = gesamtDok > 1 ? 'Seite ' + (jetzt + 1) + ' von ' + gesamtDok : '';
     zurueckKnopf.disabled = jetzt <= 0;
     weiterKnopf.disabled = jetzt >= gesamt - 1;
+    /* Bei einer einzigen Seite gibt es nichts zu blättern. Zwei tote Knöpfe
+       sind auf dem großen Schirm Lärm und am Handy eine ganze Zeile. */
+    zurueckKnopf.hidden = weiterKnopf.hidden = gesamt < 2;
     miniEl.forEach(function (m, i) {
       m.classList.toggle('hier', i === jetzt);
       if (i === jetzt) m.setAttribute('aria-current', 'true');
@@ -691,12 +1139,25 @@ window.Blatt = (function () {
     eintrag.el.classList.add('hier');
     eintrag.knopf.setAttribute('aria-expanded', 'true');
     federBlatt.querySelector('.grund').textContent = eintrag.feder.grund || '';
-    /* Was heute dasteht, wird aus dem Blatt gelesen und nicht aus den Daten:
-       hat jemand den Satz inzwischen selbst umgeschrieben, muss er SEINEN
-       Satz sehen — sonst nimmt er einen Vorschlag an und merkt erst danach,
-       dass er die eigene Fassung damit weggeräumt hat. */
-    federBlatt.querySelector('.alt').textContent = lies(eintrag.el);
-    federBlatt.querySelector('.wortlaut').textContent = eintrag.feder.neu || '';
+    /* Bei einer Zeichnung gibt es kein „statt" und kein „neu": der Vorschlag
+       liegt sichtbar auf der Tafel, und ihn hier noch einmal in Worten
+       nachzuerzählen wäre die schlechtere Auskunft. */
+    var zeichnung = !!eintrag.tafelSvg;
+    ['.statt.a', '.alt', '.statt.b', '.wortlaut'].forEach(function (w) {
+      federBlatt.querySelector(w).style.display = zeichnung ? 'none' : '';
+    });
+    federBlatt.querySelector('.wer').textContent = zeichnung
+      ? 'Der KI-Berater hat auf Pauspapier dazugezeichnet'
+      : 'Der KI-Berater schlägt vor';
+    federBlatt.querySelector('.nimm').textContent = zeichnung ? 'In die Skizze übernehmen' : 'Übernehmen';
+    if (!zeichnung) {
+      /* Was heute dasteht, wird aus dem Blatt gelesen und nicht aus den Daten:
+         hat jemand den Satz inzwischen selbst umgeschrieben, muss er SEINEN
+         Satz sehen — sonst nimmt er einen Vorschlag an und merkt erst danach,
+         dass er die eigene Fassung damit weggeräumt hat. */
+      federBlatt.querySelector('.alt').textContent = lies(eintrag.el);
+      federBlatt.querySelector('.wortlaut').textContent = eintrag.feder.neu || '';
+    }
     federBlatt.hidden = false;
     /* Erst das Panel einblenden, dann die Stelle ins Bild holen: das Panel
        nimmt bis zu 38vh, und ein Vorschlag, dessen Satz man nicht sieht, ist
@@ -745,12 +1206,21 @@ window.Blatt = (function () {
 
   function wirfFeder(weg) {
     var el = federHier && federHier.el;
+    var svg = federHier && federHier.tafelSvg;
     schliesseFeder(weg);
+    /* Verworfen heißt bei einer Zeichnung: das Pauspapier wird weggezogen. */
+    if (weg && svg) wirfPauseWeg(svg);
     if (el && el.isContentEditable) el.focus();
   }
 
   function nimmFeder() {
     if (!federHier) return;
+    if (federHier.tafelSvg) {
+      var eintrag = federHier;
+      schliesseFeder(true);
+      nimmPause(eintrag);
+      return;
+    }
     var el = federHier.el, neu = federHier.feder.neu || '';
     schliesseFeder(true);
     setzeText(el, neu);
@@ -806,9 +1276,14 @@ window.Blatt = (function () {
     if (!federKnopf) return;
     if (!federn.length) { federKnopf.hidden = true; return; }
     federKnopf.hidden = false;
-    federKnopf.textContent = federn.length === 1
-      ? 'Ein Vorschlag des KI-Beraters'
-      : federn.length + ' Vorschläge des KI-Beraters';
+    /* Auf einer Zeichnung ist „Vorschlag" das falsche Wort für etwas, das
+       man sieht: dort liegt Pauspapier. */
+    var nurTafel = federn.every(function (f) { return f.tafelSvg; });
+    federKnopf.textContent = nurTafel
+      ? (federn.length === 1 ? 'Der KI-Berater hat dazugezeichnet'
+                             : federn.length + ' Stellen hat der KI-Berater dazugezeichnet')
+      : (federn.length === 1 ? 'Ein Vorschlag des KI-Beraters'
+                             : federn.length + ' Vorschläge des KI-Beraters');
   }
 
   function naechsteFeder() {
@@ -826,6 +1301,13 @@ window.Blatt = (function () {
       /* Stand blieb bisher womöglich versteckt, weil das Blatt keinen hatte —
          geschrieben hat man jetzt trotzdem. */
       standWort.style.display = '';
+    }
+    /* Ein Blatt, dessen Name in seiner Überschrift steht, heißt oben im Band
+       so, wie es gerade dasteht. Erst beim Zuklappen nachzuziehen hieße: man
+       schreibt einen Titel und liest darüber weiter „Ohne Titel". */
+    if (jetzigesDok && jetzigesDok.titelFolgtUeberschrift && seitenEl[0]) {
+      var kopf = seitenEl[0].querySelector('h4');
+      if (kopf) kopfTitel.textContent = lies(kopf).trim() || 'Ohne Titel';
     }
     raeumeFedern();
     zeigeLeere();
@@ -907,6 +1389,21 @@ window.Blatt = (function () {
         else if (b.klein !== undefined) b.klein = lies(el);
         else if (!b.tab && !b.bild) b.p = lies(el);
       });
+      /* Auch die Zeichnung kommt zurück ins Dokument: ein Strich, der beim
+         Zuklappen verschwindet, wäre schlimmer als kein Stift. */
+      Array.prototype.forEach.call(seite.querySelectorAll('.bb-tafel svg'), function (svg) {
+        if (!svg.__block || !svg.__block.tafel) return;
+        var striche = [], worte = [];
+        Array.prototype.forEach.call(
+          svg.querySelectorAll(':scope > .marker .strich, :scope > .tinte .strich'), function (p) {
+            if (p.__daten) striche.push(p.__daten);
+          });
+        Array.prototype.forEach.call(svg.querySelectorAll(':scope > .worte text'), function (t) {
+          if (t.__daten) worte.push(t.__daten);
+        });
+        svg.__block.tafel.striche = striche;
+        svg.__block.tafel.worte = worte;
+      });
       var n = seite.querySelector('.bb-notiz');
       /* lies() auch hier: eine Handschrift über zwei Zeilen ist zwei Zeilen. */
       if (n && lies(n).trim()) notizen[i + 1] = lies(n).trim();
@@ -975,6 +1472,9 @@ window.Blatt = (function () {
     federn = [];
     federHier = null;
     federBlatt.hidden = true;
+    tafeln = [];
+    letzteTafel = null;
+    werkzeug = 'stift';
     clearTimeout(miniTakt);
 
     /* Ein gescannter Stapel hat keinen Text — auf dem kann man auch keinen
@@ -1067,8 +1567,14 @@ window.Blatt = (function () {
     standWort.style.display = dok.stand ? '' : 'none';
 
     griffeKasten.textContent = '';
+    if (werkzeugKasten) { werkzeugKasten.remove(); werkzeugKasten = null; }
+    griffeKasten.parentNode.classList.remove('hat-tafel');
     federKnopf = null;
     notizKnopf = null;
+
+    /* Der Stift liegt nur da, wo eine Tafel offen ist. Auf einem Blatt aus
+       Sätzen wäre ein Radierer ein Versprechen, das nichts einlöst. */
+    if (tafeln.length) baueWerkzeuge();
 
     if (federn.length) {
       federKnopf = document.createElement('button');
@@ -1192,6 +1698,13 @@ window.Blatt = (function () {
       if (federHier) { var k = federHier.knopf; schliesseFeder(false); if (k.isConnected) k.focus(); return; }
       if (imText) { document.activeElement.blur(); schicht.querySelector('.bb-zu').focus(); return; }
       schliesse();
+      return;
+    }
+    /* Strg+Z gehört im Text dem Browser — der kennt dort jeden Schritt. Auf
+       der Tafel kennt ihn niemand außer uns. */
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'z' || e.key === 'Z') && !imText && letzteTafel) {
+      e.preventDefault();
+      strichZurueck();
       return;
     }
     /* Im offenen Text gehören die Pfeile dem Cursor, nicht dem Blättern. */

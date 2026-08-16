@@ -36,7 +36,7 @@
    durch „In die Akte legen", und der Name zieht der Überschrift nach. Der
    Zettel oben ist ein role=status, sonst bliebe die einzige Rückmeldung nach
    dem Fertigstellen ungesprochen.
-   Marker: BERATUNG-AKTE-V9 (Anschrift deckt sich mit dem Rechnungspapier) */
+   Marker: BERATUNG-AKTE-V10 (die Skizze liegt in der Akte und wird gezeichnet) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -275,6 +275,19 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
           <span class="noch">Ein Entwurf wird nicht freigegeben.</span>
         </span>
       </div>
+      <!-- Was am Tisch entsteht, ist kein Absatz (Häppchen D4 Teil 3). Der
+           Kunde sieht diese Skizze nicht; der KI-Berater liest sie, sonst
+           könnte er nichts dazuzeichnen. -->
+      <div class="dok" data-dok="skizze">
+        <button class="d-oeffnen" type="button">
+          <span class="blatt-icon" aria-hidden="true"></span>
+          <span class="d-text"><span class="d-name">Skizze zum Preisgespräch</span><br><span class="d-meta">Handzeichnung, 1 Seite, von dir, gestern</span></span>
+        </button>
+        <span class="frei">
+          <button type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">nur Beratung</span></button>
+          <button type="button" aria-pressed="true"><span class="zustand vorschlag" aria-hidden="true"></span><span class="zustand-wort">KI liest es</span></button>
+        </span>
+      </div>
       <div class="dok" data-dok="monatsauswertung">
         <button class="d-oeffnen" type="button">
           <span class="blatt-icon" aria-hidden="true"></span>
@@ -319,8 +332,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     </div>
     <div class="fuss-griffe">
       <button class="knopf leise" id="neues-blatt" type="button">Neues Blatt schreiben</button>
+      <button class="knopf leise" id="neue-skizze" type="button">Neue Skizze zeichnen</button>
       <button class="bald knopf leise" type="button">Dokument hochladen</button>
-      <div class="tarif-fuss" style="margin-top:8px;flex-basis:100%">Ein Druck auf den Namen schlägt das Dokument auf, hier, ohne Herunterladen. Ein eigenes Blatt ist dabei offen — der Cursor steht im Text, und was der KI-Berater vorschlägt, steht daneben, bis du es übernimmst. Fremdes Papier bleibt gesetzt; dort schreibst du an den Rand. Was die KI liest, kann sie dem Kunden im Gespräch zitieren, mit Fundstelle, wie im <a href="beratung-mitlesen.html" style="color:var(--lila-700)">freigegebenen Gespräch</a>.</div>
+      <div class="tarif-fuss" style="margin-top:8px;flex-basis:100%">Ein Druck auf den Namen schlägt das Dokument auf, hier, ohne Herunterladen. Ein eigenes Blatt ist dabei offen — der Cursor steht im Text, und was der KI-Berater vorschlägt, steht daneben, bis du es übernimmst. Fremdes Papier bleibt gesetzt; dort schreibst du an den Rand. Auf einer Skizze liegt der Stift unten bereit, und was der KI-Berater dazuzeichnet, liegt als Pauspapier darüber, bis du es übernimmst. Was die KI liest, kann sie dem Kunden im Gespräch zitieren, mit Fundstelle, wie im <a href="beratung-mitlesen.html" style="color:var(--lila-700)">freigegebenen Gespräch</a>.</div>
     </div>
   </section>
 
@@ -397,6 +411,15 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       stand: 'Entwurf, zuletzt von dir vor vier Minuten',
       standNeu: 'Entwurf, gerade eben von dir',
       fuss: 'Niemand außer euch sieht ihn.'},
+    /* Eine Zeichnung ist eigenes Papier wie ein Vermerk: der Stift liegt
+       bereit, und der KI-Berater legt seinen Vorschlag als Pauspapier
+       darüber, statt ihn hineinzuzeichnen (Häppchen D4 Teil 3). */
+    skizze: {meta: 'Handzeichnung, 1 Seite, von dir, gestern',
+      schreibbar: true,
+      wort: ' aufschlagen und weiterzeichnen',
+      stand: 'Skizze, zuletzt von dir gestern',
+      standNeu: 'Skizze, gerade eben von dir',
+      fuss: 'Nur für euch. Am Tisch entstanden.'},
     monatsauswertung: {meta: '8 Seiten, von dir, 4. August', notizbar: true,
       fuss: 'Liegt beim Kunden in den Unterlagen.'},
     rahmenvertrag: {meta: '14 Seiten, vom Kunden, 12. Juni',
@@ -470,7 +493,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     if (!dok) { griff.disabled = true; return; }
     DOKS[name] = dok;
     griff.setAttribute('aria-label', zeile.querySelector('.d-name').textContent +
-      (AKTE[name].schreibbar ? ' aufschlagen und weiterschreiben' : ' aufschlagen'));
+      (AKTE[name].wort || (AKTE[name].schreibbar ? ' aufschlagen und weiterschreiben' : ' aufschlagen')));
     griff.addEventListener('click', function(){
       dok.aus = zeile;
       Blatt.zeige(dok);
@@ -494,6 +517,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       titel: 'Ohne Titel',
       meta: 'Entwurf, gerade angelegt',
       schreibbar: true,
+      titelFolgtUeberschrift: true,
       stand: 'Entwurf, noch kein Wort',
       standNeu: 'Entwurf, gerade eben von dir',
       fuss: 'Noch nirgends abgelegt — erst „In die Akte legen" gibt ihm seine Zeile.',
@@ -509,7 +533,34 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     Blatt.zeige(blatt);
   });
 
-  function legAb(blatt){
+  /* Und was am Tisch entsteht, ist kein Absatz (Häppchen D4 Teil 3). Ein
+     leeres Blatt mit einer Tafel darauf: der Stift liegt unten bereit, die
+     Überschrift schreibt man wie auf jedem anderen Blatt. */
+  document.getElementById('neue-skizze').addEventListener('click', function(){
+    if (!window.Blatt) return;
+    var knopf = this;
+    var blatt = {
+      titel: 'Ohne Titel',
+      meta: 'Skizze, gerade angelegt',
+      schreibbar: true,
+      titelFolgtUeberschrift: true,
+      stand: 'Skizze, noch kein Strich',
+      standNeu: 'Skizze, gerade eben von dir',
+      fuss: 'Noch nirgends abgelegt — erst „In die Akte legen" gibt ihr ihre Zeile.',
+      seiten: [[{h: 'Ohne Titel'},
+                {klein: 'Skizze, Dr. Anna Vogelsang, ' + BERATUNG + ', 16. August 2026.'},
+                {tafel: {beschreibung: 'Eine leere Zeichenfläche.', striche: [], worte: []}}]],
+      aus: knopf
+    };
+    blatt.griffe = [{wort: 'In die Akte legen', stark: true, tat: function(){
+      Blatt.schliesse();
+      legAb(blatt, true);
+    }}];
+    Blatt.zeige(blatt);
+  });
+
+  function legAb(blatt, zeichnung){
+    var tunwort = zeichnung ? ' aufschlagen und weiterzeichnen' : ' aufschlagen und weiterschreiben';
     /* Der Titel steht in der Überschrift, nicht in einem Feld daneben —
        geholt wird er von dort, wo ihn jemand hingeschrieben hat. */
     var kopf = blatt.seiten[0][0];
@@ -523,12 +574,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       '<button class="d-oeffnen" type="button">' +
         '<span class="blatt-icon" aria-hidden="true"></span>' +
         '<span class="d-text"><span class="d-name"></span><br>' +
-        '<span class="d-meta">Entwurf, 1 Seite, von dir, gerade eben</span></span>' +
+        '<span class="d-meta">' + (zeichnung ? 'Handzeichnung, 1 Seite, von dir, gerade eben'
+                                             : 'Entwurf, 1 Seite, von dir, gerade eben') + '</span></span>' +
       '</button>' +
       '<span class="frei"><span class="noch">Ein Entwurf wird nicht freigegeben.</span></span>';
     zeile.querySelector('.d-name').textContent = name;
     var griff = zeile.querySelector('.d-oeffnen');
-    griff.setAttribute('aria-label', name + ' aufschlagen und weiterschreiben');
+    griff.setAttribute('aria-label', name + tunwort);
     griff.addEventListener('click', function(){
       blatt.aus = zeile;
       Blatt.zeige(blatt);
@@ -541,12 +593,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       if (jetzt === blatt.titel) return;
       blatt.titel = jetzt;
       zeile.querySelector('.d-name').textContent = jetzt;
-      griff.setAttribute('aria-label', jetzt + ' aufschlagen und weiterschreiben');
+      griff.setAttribute('aria-label', jetzt + tunwort);
     };
     document.querySelector('.doks').appendChild(zeile);
     blatt.aus = zeile;
     blatt.fuss = 'Liegt in der Akte Petersen.';
-    demoHinweisText('„' + name + '" liegt jetzt in der Akte — als Entwurf, den außer euch niemand sieht.');
+    demoHinweisText('„' + name + '" liegt jetzt in der Akte — als ' +
+      (zeichnung ? 'Skizze, die' : 'Entwurf, den') + ' außer euch niemand sieht.');
   }
 
   /* ---------- Freigabe-Kapseln: Zustand wird gekippt ---------- */

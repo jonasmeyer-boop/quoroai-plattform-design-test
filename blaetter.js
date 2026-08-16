@@ -29,7 +29,15 @@
 
    Geschrieben wird hier nie: die Seiten oben sind die Quelle und bleiben es.
    Wo offenes Papier entsteht, zieht blatt.js sich eine eigene Fassung.
-   Marker: BLAETTER-V2 */
+
+   Ein Block darf statt Sätzen eine Tafel tragen (Häppchen D4 Teil 3):
+     {tafel: {beschreibung: '…', striche: [{kasten: […]}, {pfeil: […]}],
+              worte: [{x: …, y: …, t: 'Stahlpreis'}]}}
+   Die Striche stehen im Maß der Tafel (1000 × 1290), nicht in Pixeln, und die
+   Hand wackelt aus den Koordinaten heraus — dieselbe Zeichnung sieht beim
+   zweiten Aufschlagen genauso aus. Der Vorschlag des KI-Beraters liegt in
+   feder.pause und wird als Pauspapier über die Tafel gelegt.
+   Marker: BLAETTER-V3 */
 window.Blaetter = (function () {
   'use strict';
 
@@ -188,6 +196,57 @@ window.Blaetter = (function () {
           feder: {grund: 'Der Vertrag nennt ein Datum, und es ist nah. Ohne das Datum liest sich der Satz wie eine Sorge statt wie eine Frist.',
                   neu: 'Der Rahmenvertrag mit Nordstahl endet am 30. September, danach gilt der Tagespreis. Ob die vier Prozent reichen, entscheidet sich am neuen Einkaufspreis — die Verhandlung gehört vor das Preisgespräch, nicht danach.'}},
          {klein: 'Solange dieser Vermerk ein Entwurf ist, sieht ihn außer euch niemand.'}]
+      ]
+    },
+
+    /* Das Blatt, auf dem gezeichnet wird (Häppchen D4 Teil 3) -------------
+       Nicht jeder Gedanke ist ein Absatz. Was am Tisch entsteht, entsteht als
+       Kästen und Pfeile — und der KI-Berater hat dazu etwas beizutragen, das
+       er NICHT selbst in die Zeichnung setzt: sein Vorschlag liegt als
+       Pauspapier darüber (blatt.js). */
+    skizze: {
+      titel: 'Skizze zum Preisgespräch', seitenGesamt: 1,
+      seiten: [
+        [{h: 'Preisgespräch Petersen, Donnerstag'},
+         {klein: 'Handzeichnung, Dr. Anna Vogelsang, {beratung}. Am Tisch entstanden.'},
+         {tafel: {
+           beschreibung: 'Eine Handzeichnung: Vom seit achtzehn Monaten hohen Stahlpreis führt ein Pfeil auf die Marge von 31,4 Prozent gegenüber 35,9 Prozent in der Branche, von dort auf den eingekreisten Schritt „plus vier Prozent auf die C-Kunden". Darunter steht, was er im Jahr bringt: 38.000 Euro. Am Rand die Notiz, nicht zu verhandeln, sondern zu begründen.',
+           striche: [
+             {kasten: [70, 58, 330, 170]},
+             {pfeil: [235, 245, 235, 370]},
+             {kasten: [70, 385, 330, 185]},
+             {pfeil: [415, 472, 545, 472]},
+             {kasten: [560, 380, 375, 195]},
+             {kringel: [747, 477, 205, 138]},
+             {linie: [568, 720, 900, 720], art: 'marker'}
+           ],
+           worte: [
+             {x: 100, y: 130, t: 'Stahlpreis', gross: true},
+             {x: 100, y: 188, t: 'seit 18 Monaten hoch'},
+             {x: 100, y: 458, t: 'Marge 31,4 %', gross: true},
+             {x: 100, y: 518, t: 'Branche: 35,9 %'},
+             {x: 590, y: 458, t: '+4 % auf die', gross: true},
+             {x: 590, y: 523, t: 'C-Kunden', gross: true},
+             {x: 575, y: 700, t: '= 38.000 € im Jahr', gross: true},
+             {x: 110, y: 690, t: 'nicht verhandeln —'},
+             {x: 110, y: 740, t: 'begründen.'}
+           ]
+         },
+          feder: {
+            grund: 'In der Skizze fehlt, woran der Schritt hängt: Der Rahmenvertrag mit Nordstahl endet am 30. September, danach gilt der Tagespreis. Der KI-Berater würde den Einkauf als eigenen Kasten dazusetzen — verhandelt gehört er vor das Preisgespräch, nicht danach.',
+            pause: {
+              papier: [60, 800, 530, 350],
+              striche: [
+                {kasten: [100, 845, 400, 175]},
+                {pfeil: [505, 880, 610, 742]}
+              ],
+              worte: [
+                {x: 125, y: 915, t: 'Einkauf Nordstahl', gross: true},
+                {x: 125, y: 975, t: 'endet am 30.9.'},
+                {x: 125, y: 1100, t: 'erst hier verhandeln'}
+              ]
+            }
+          }}]
       ]
     },
 
