@@ -7,11 +7,16 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
 /* quoroai-plattform-design · Das wöchentliche Briefing beim Kunden
-   Marker: BRIEFING-V2 (Häppchen E3, Issue #44)
+   Marker: BRIEFING-V3 (Häppchen E3, Issue #44)
    V2 (Code-Review vor der Freigabe): die Herkunft der Zahl führt nicht mehr
    in die Unterlagen (die beiden Papiere liegen dort nicht), die Tür eines
    Punktes steht auf eigener Zeile, und die Beträge brechen nicht mehr vor
    dem Euro-Zeichen um.
+   V3 (zweites Review): die vier Sätze mit den eigenen Zahlen stehen wieder als
+   Text in der Seite und werden nur für Sie-Marken ersetzt — ohne Skript waren
+   ausgerechnet sie leer. Und der Weg ins Gespräch löscht die Fahne
+   „ein Mensch hat geschrieben", die sonst aus einem anderen Gespräch
+   mitwandert.
 
    Die Fläche, an der sich entscheidet, ob eine ungefragte Meldung ein
    Newsletter ist. Drei Dinge trennen sie davon, und alle drei sieht man:
@@ -203,8 +208,7 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
 
     <article class="punkt">
       <p class="p-welt">Das Bundeskabinett hat am Dienstag den Entwurf für eine Einfuhrabgabe auf Stahl aus Drittländern beschlossen, 6 Prozent ab Januar. <span class="quelle">Handelsblatt, 12. August</span></p>
-      <p class="p-bei-dir" data-du="Du beziehst 340 Tonnen im Jahr, gut 60 Prozent davon aus der Einfuhr. Das wären rund &lt;b&gt;11.900&nbsp;€ Mehrkosten im Jahr&lt;/b&gt; — bei deiner Marge von 30,4 Prozent sind das 1,2 Punkte."
-                             data-sie="Sie beziehen 340 Tonnen im Jahr, gut 60 Prozent davon aus der Einfuhr. Das wären rund &lt;b&gt;11.900&nbsp;€ Mehrkosten im Jahr&lt;/b&gt; — bei Ihrer Marge von 30,4 Prozent sind das 1,2 Punkte."></p>
+      <p class="p-bei-dir" data-sie-html="Sie beziehen 340 Tonnen im Jahr, gut 60 Prozent davon aus der Einfuhr. Das wären rund &lt;b&gt;11.900&nbsp;€ Mehrkosten im Jahr&lt;/b&gt; — bei Ihrer Marge von 30,4 Prozent sind das 1,2 Punkte.">Du beziehst 340 Tonnen im Jahr, gut 60 Prozent davon aus der Einfuhr. Das wären rund <b>11.900&nbsp;€ Mehrkosten im Jahr</b> — bei deiner Marge von 30,4 Prozent sind das 1,2 Punkte.</p>
       <span class="p-woher" data-du="Deine Zahl kommt aus: Rohstoffbezug 2025" data-sie="Ihre Zahl kommt aus: Rohstoffbezug 2025">Deine Zahl kommt aus: Rohstoffbezug 2025</span>
       <p class="p-unsicher" data-du="Sicher ist das noch nicht: der Entwurf muss durch den Bundestag, und über die Höhe wird gestritten. Ich sage Bescheid, wenn er beschlossen ist."
                             data-sie="Sicher ist das noch nicht: der Entwurf muss durch den Bundestag, und über die Höhe wird gestritten. Ich sage Bescheid, wenn er beschlossen ist.">Sicher ist das noch nicht: der Entwurf muss durch den Bundestag, und über die Höhe wird gestritten. Ich sage Bescheid, wenn er beschlossen ist.</p>
@@ -216,8 +220,7 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
 
     <article class="punkt">
       <p class="p-welt">Der Tarifabschluss in der Metall- und Elektroindustrie steht: 4,2 Prozent mehr ab Oktober, Laufzeit 21 Monate. <span class="quelle">IG Metall, 11. August</span></p>
-      <p class="p-bei-dir" data-du="Bei deinen 19 gewerblichen Mitarbeitern sind das rund &lt;b&gt;34.000&nbsp;€ im Jahr&lt;/b&gt;, im laufenden Geschäftsjahr aber nur ein Vierteljahr davon: gut 8.500&nbsp;€."
-                             data-sie="Bei Ihren 19 gewerblichen Mitarbeitern sind das rund &lt;b&gt;34.000&nbsp;€ im Jahr&lt;/b&gt;, im laufenden Geschäftsjahr aber nur ein Vierteljahr davon: gut 8.500&nbsp;€."></p>
+      <p class="p-bei-dir" data-sie-html="Bei Ihren 19 gewerblichen Mitarbeitern sind das rund &lt;b&gt;34.000&nbsp;€ im Jahr&lt;/b&gt;, im laufenden Geschäftsjahr aber nur ein Vierteljahr davon: gut 8.500&nbsp;€.">Bei deinen 19 gewerblichen Mitarbeitern sind das rund <b>34.000&nbsp;€ im Jahr</b>, im laufenden Geschäftsjahr aber nur ein Vierteljahr davon: gut 8.500&nbsp;€.</p>
       <span class="p-woher" data-du="Deine Zahl kommt aus: Personalliste, Stand Juli" data-sie="Ihre Zahl kommt aus: Personalliste, Stand Juli">Deine Zahl kommt aus: Personalliste, Stand Juli</span>
       <button class="p-tuer" type="button" data-frage="Was macht der Tarifabschluss mit meiner Kalkulation?">
         Was macht das mit meiner Kalkulation?
@@ -243,8 +246,7 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
       </div>
     </div>
 
-    <p class="fuss" data-du="&lt;b&gt;Was daraus zu tun ist, sage ich hier nicht.&lt;/b&gt; Ich melde, was passiert ist und was es bei dir ausmacht. Was du damit machst, besprichst du mit deiner Beratung — jede der beiden Meldungen öffnet dafür ein Gespräch."
-                     data-sie="&lt;b&gt;Was daraus zu tun ist, sage ich hier nicht.&lt;/b&gt; Ich melde, was passiert ist und was es bei Ihnen ausmacht. Was Sie damit machen, besprechen Sie mit Ihrer Beratung — jede der beiden Meldungen öffnet dafür ein Gespräch."></p>
+    <p class="fuss" data-sie-html="&lt;b&gt;Was daraus zu tun ist, sage ich hier nicht.&lt;/b&gt; Ich melde, was passiert ist und was es bei Ihnen ausmacht. Was Sie damit machen, besprechen Sie mit Ihrer Beratung — jede der beiden Meldungen öffnet dafür ein Gespräch."><b>Was daraus zu tun ist, sage ich hier nicht.</b> Ich melde, was passiert ist und was es bei dir ausmacht. Was du damit machst, besprichst du mit deiner Beratung — jede der beiden Meldungen öffnet dafür ein Gespräch.</p>
   </div>
 
   <!-- ========== Die stille Woche ==========
@@ -253,8 +255,7 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
        vorgeführt. -->
   <div data-woche="still" hidden>
     <h1 data-du="Diese Woche nichts." data-sie="Diese Woche nichts.">Diese Woche nichts.</h1>
-    <p class="still-satz" data-du="Elf Meldungen aus dem Stahlbau gelesen. &lt;b&gt;Keine rührt an deine Zahlen.&lt;/b&gt;"
-                          data-sie="Elf Meldungen aus dem Stahlbau gelesen. &lt;b&gt;Keine rührt an Ihre Zahlen.&lt;/b&gt;"></p>
+    <p class="still-satz" data-sie-html="Elf Meldungen aus dem Stahlbau gelesen. &lt;b&gt;Keine rührt an Ihre Zahlen.&lt;/b&gt;">Elf Meldungen aus dem Stahlbau gelesen. <b>Keine rührt an deine Zahlen.</b></p>
 
     <div class="weg">
       <button class="weg-kopf" type="button" aria-expanded="false" aria-controls="weg-still">
@@ -300,10 +301,11 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
      Text. Deshalb werden diese Stellen hier eingesetzt, VOR dem Aufruf, und
      danach nicht mehr angefasst. */
   var sie = (Marke.rede('du','sie') === 'sie');
-  document.querySelectorAll('.p-bei-dir[data-du], .fuss[data-du], .still-satz[data-du]').forEach(function(el){
-    el.innerHTML = sie ? el.dataset.sie : el.dataset.du;
-    /* Aus der Hand von Marke.anwenden() nehmen, sonst überschreibt es das HTML */
-    delete el.dataset.du; delete el.dataset.sie;
+  document.querySelectorAll('[data-sie-html]').forEach(function(el){
+    if (sie) el.innerHTML = el.dataset.sieHtml;
+    /* Das Attribut heißt bewusst nicht data-sie: Marke.anwenden() setzt
+       textContent und schriebe die <b> als Zeichen in den Satz. */
+    delete el.dataset.sieHtml;
   });
   Marke.anwenden();
 
@@ -361,7 +363,14 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
      und ob die Beratung mitliest, entscheidet der Kunde dort. */
   document.querySelectorAll('.p-tuer').forEach(function(b){
     b.addEventListener('click', function(){
-      try { sessionStorage.setItem('starte-frage', b.dataset.frage); } catch (e) {}
+      try {
+        sessionStorage.setItem('starte-frage', b.dataset.frage);
+        /* Wie auf der Übersicht: die Fahne „ein Mensch hat geschrieben" gilt
+           für ein bestimmtes Gespräch. Bleibt sie liegen, begrüßt die Beraterin
+           den Kunden im nagelneuen Zoll-Gespräch mit einem Satz über seine
+           Marge-Rechnung. */
+        sessionStorage.removeItem('von-mensch');
+      } catch (e) {}
       location.href = 'gespraech.html';
     });
   });

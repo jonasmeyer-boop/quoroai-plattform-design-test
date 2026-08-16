@@ -45,7 +45,12 @@
    Trennlinie über dem ersten Punkt hing an `:first-of-type` und griff nie.
    Der Vermerk beim Anhalten wird erst eingehängt, dann gefüllt. Und der
    Einleitungssatz zählt die drei Stellen so, wie sie darunter stehen.
-   Marker: BERATUNG-RADAR-V2 */
+   V3 (zweites Review): der Fußsatz verspricht die Tür ins Gespräch nicht mehr
+   auf dieser Fläche (die trägt das Blatt des Kunden) und führt statt in den
+   Kundenraum nach Mitlesen; der Satz der stillen Karte wird mitgeändert,
+   sobald ein Nachtrag darin liegt; und „bekommt es Donnerstag" ist vor dem
+   Klick auch fürs Vorlesen weg, nicht nur fürs Auge.
+   Marker: BERATUNG-RADAR-V3 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -147,12 +152,16 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 .wartende li .seit{color:var(--nebel-500);font-size:12.5px}
 /* Der Wechsel: aus „wartet seit" wird „bekommt Donnerstag". Grün ist hier
    kein Etikett, sondern der Unterschied, den der Klick gemacht hat. */
+/* visibility statt nur opacity: durchsichtig steht der Satz weiter im
+   Vorlese-Baum, und dann hörte man „bekommt es Donnerstag im Briefing",
+   bevor jemand geklickt hat. */
 .wartende li .antwort{
   font-size:12.5px;font-weight:600;color:var(--gruen);
-  opacity:0;translate:0 4px;transition:opacity .35s ease, translate .35s var(--kurve);
+  visibility:hidden;opacity:0;translate:0 4px;
+  transition:opacity .35s ease, translate .35s var(--kurve);
 }
 .wartende li.bedient .seit{display:none}
-.wartende li.bedient .antwort{opacity:1;translate:0 0}
+.wartende li.bedient .antwort{visibility:visible;opacity:1;translate:0 0}
 
 .griffe{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;align-items:center}
 .griffe .knopf{min-height:42px;padding:0 18px;font-size:14px}
@@ -442,7 +451,11 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     <div class="k-kopf">
       <div><span class="k-name">MTS Maschinenbau</span> <span class="k-zahl">nichts</span></div>
     </div>
-    <p class="still-satz">Der Tarifabschluss träfe sie auch — aber ihre Personalliste ist von 2024, damit rechnet er ihr keinen Betrag aus. <b>Lieber nichts als eine Zahl, die nicht stimmt.</b></p>
+    <!-- data-dann: sobald ein Nachtrag in dieser Karte liegt, stimmt der Satz
+         „sie bekommt nichts" nicht mehr. Der Grund bleibt derselbe, nur die
+         Folgerung ändert sich. -->
+    <p class="still-satz"
+       data-dann="Ihre Personalliste ist von 2024, deshalb rechnet er ihr zum Tarifabschluss weiter keinen Betrag aus. Dein Satz geht ohne Zahl hinaus — der stimmt auch ohne ihre Liste.">Der Tarifabschluss träfe sie auch — aber ihre Personalliste ist von 2024, damit rechnet er ihr keinen Betrag aus. <b>Lieber nichts als eine Zahl, die nicht stimmt.</b></p>
   </section>
 
   <!-- Vorlage für den Nachtrag, den „Bescheid geben" oben in die Karten der
@@ -461,7 +474,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
   <p class="fuss-satz"
      data-hilfe-name="Du gibst nichts frei"
-     data-hilfe="Es gibt hier bewusst keinen Freigabe-Knopf. Bei zweihundert Kunden wäre wöchentliches Freigeben eine Behauptung, und Schweigen darf dich keine Arbeit kosten. Anhalten kannst du jeden Punkt.">Du gibst nichts frei — was hier steht, geht Donnerstag um 7:00 hinaus, in der Stimme deines KI-Beraters und in deiner Marke. Er meldet, was ist, und was es bei diesem Betrieb ausmacht. Was daraus zu tun ist, sagt er nicht: das ist Beratung, und die kommt von dir — im <a href="gespraech.html">Gespräch</a>, zu dem jeder Punkt eine Tür hat.</p>
+     data-hilfe="Es gibt hier bewusst keinen Freigabe-Knopf. Bei zweihundert Kunden wäre wöchentliches Freigeben eine Behauptung, und Schweigen darf dich keine Arbeit kosten. Anhalten kannst du jeden Punkt.">Du gibst nichts frei — was hier steht, geht Donnerstag um 7:00 hinaus, in der Stimme deines KI-Beraters und in deiner Marke. Er meldet, was ist, und was es bei diesem Betrieb ausmacht. Was daraus zu tun ist, sagt er nicht: das ist Beratung, und die kommt von dir. Auf dem Blatt des Kunden trägt jeder Punkt dafür eine Tür in sein Gespräch — gibt er es frei, findest du es unter <a href="beratung-mitlesen.html">Mitlesen</a>.</p>
 </main>
 
 <div id="demo-hinweis" role="status" aria-live="polite">Diese Fläche entsteht gerade.</div>
@@ -580,6 +593,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         var neu = vorlage.content.firstElementChild.cloneNode(true);
         kunde.appendChild(neu);
         anhaltenBinden(neu);
+        /* Der Satz der stillen Karte erklärte, warum nichts hinausgeht. Bleibt
+           er stehen, widerspricht er der Kopfzahl direkt darüber. */
+        var still = kunde.querySelector('.still-satz[data-dann]');
+        if (still) { still.textContent = still.dataset.dann; delete still.dataset.dann; }
       });
       var quelle = document.getElementById('zoll-quelle');
       if (quelle) quelle.innerHTML = 'Seine Zahl kommt aus dem <a href="beratung-akte.html">Rohstoffbezug in seiner Akte</a>. Deine Antwort von eben geht als eigener Punkt mit hinaus.';
