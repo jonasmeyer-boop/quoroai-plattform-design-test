@@ -14,10 +14,11 @@
    einmal hin, ohne dass daraus ein Formular wird, das niemand ausfüllt?
 
    1. Eine Vorlage wird nicht erfunden, sondern BEMERKT. Der KI-Berater hat
-      die vier gelaufenen Mandate nebeneinandergelegt: drei gingen denselben
+      die vier laufenden Mandate nebeneinandergelegt: drei gehen denselben
       Weg. Der Vorschlag hängt damit an einer eigenen Zahl, wie alles, was er
-      ungefragt meldet (Entscheidung 2026-08-16, E3) — und die Abweichung
-      steht dabei: bei Bäckerei Freitag kam er in ein laufendes Projekt.
+      ungefragt meldet (Entscheidung 2026-08-16, E3) — und beide Abweichungen
+      stehen dabei: Bäckerei Freitag hat keine Analyse, Cordes und MTS haben
+      einen Schritt mehr, der dem Vorschlag mit zwei von drei zu dünn ist.
    2. Der Moment der Fläche: aus dem Mandat wird die Vorlage, und der Kunde
       bleibt sichtbar zurück. Petersens Zahlen, Namen und Termine heben sich
       ab und fallen weg; darunter steht, welche sieben Stellen zurückgeblieben
@@ -45,7 +46,18 @@
 
    Chrome ist quoroAI (system.css, Entscheidung 2026-08-12), Hilfe-Ebene im
    Kopfband, Uhr-Dock und Komet wie überall im Cockpit.
-   Marker: BERATUNG-VORLAGEN-V1 */
+   V2 (Code-Review vor der Freigabe, sieben Funde): beim Anwenden werden alle
+   drei offenen Fragen genannt statt zwei — die dritte war ausgerechnet die
+   Kundengruppen-Frage, also die Stelle, an der Petersens Schnitt sonst
+   stillschweigend im nächsten Mandat gelandet wäre. „In die Vorlage
+   aufnehmen" fügt die Station jetzt wirklich ein, und die Zahlen der Karte
+   werden gezählt statt getippt. Der Befund widerspricht dem Rückweg nicht
+   mehr (Cordes und MTS hatten die Zwischenprüfung schon, zwei von drei waren
+   dem Vorschlag zu wenig). Das aria-label des Pfads schreibt zeichnePfad()
+   aus denselben Daten — über 700px ist die Leiter aus, ein Screenreader hörte
+   sonst nur ein falsches, festes Label. Vier laufende Mandate heißen überall
+   laufend, und Überschrift und Vorsatz altern beim Übernehmen mit.
+   Marker: BERATUNG-VORLAGEN-V2 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -131,6 +143,14 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   background:var(--nebel-200);
 }
 .stationen li:last-child::after{display:none}
+/* Die eben aufgenommene Station trägt kurz einen Ring, damit man sieht, wo
+   sie gelandet ist — danach fällt er ab (wie im Mandat). */
+.stationen li.neu{
+  border-radius:var(--radius-innen);
+  box-shadow:inset 0 0 0 1.5px var(--lila-300);
+  transition:box-shadow .6s ease;
+}
+.stationen li.neu::before{border-color:var(--lila-600)}
 .stationen .s-kopf{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .stationen .s-name{font-size:15.5px;font-weight:600;letter-spacing:-.01em}
 .stationen .s-wann{font-size:12.5px;color:var(--nebel-500);font-variant-numeric:tabular-nums}
@@ -362,7 +382,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
   <h3 data-hilfe-name="Eure Vorlagen"
       data-hilfe="Jede Vorlage ist ein Bauplan für Mandate einer Art. Sie steht hier einmal, und jedes neue Mandat dieser Art bekommt sie beim Anlegen. Wer sie ändert, ändert nur das nächste Mandat, nie die laufenden.">Eure Vorlagen</h3>
-  <p class="h3-satz">Eine liegt hinterlegt. Eine zweite geht ihr, ohne sie hinterlegt zu haben.</p>
+  <p class="h3-satz" id="vorlagen-satz">Eine liegt hinterlegt. Eine zweite geht ihr, ohne sie hinterlegt zu haben.</p>
 
   <section class="vorlage" aria-label="Vorlage Nachfolge in Etappen">
     <div class="v-kopf">
@@ -388,8 +408,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   </section>
 
   <h3 data-hilfe-name="Der Vorschlag"
-      data-hilfe="Dein KI-Berater erfindet keine Vorlage. Er hat gelesen, wie deine vier Mandate tatsächlich gelaufen sind, und den Weg gefunden, den drei von ihnen gegangen sind. Solange der Bogen durchscheinend liegt, gehört er dir noch nicht.">Was du machst, ohne es hinterlegt zu haben</h3>
-  <p class="h3-satz">Dein KI-Berater hat die vier gelaufenen Mandate nebeneinandergelegt.</p>
+      data-hilfe="Dein KI-Berater erfindet keine Vorlage. Er hat gelesen, wie deine vier Mandate tatsächlich laufen, und den Weg gefunden, den drei von ihnen gehen. Solange der Bogen durchscheinend liegt, gehört er dir noch nicht."><span id="vorschlag-titel">Was du machst, ohne es hinterlegt zu haben</span></h3>
+  <p class="h3-satz" id="vorschlag-satz">Dein KI-Berater hat deine vier laufenden Mandate nebeneinandergelegt.</p>
 
   <section class="vorlage" id="bogen" aria-label="Vorschlag für eine Vorlage">
     <div class="b-herkunft" id="b-herkunft"><img src="bilder/quoro-icon.svg" alt="" width="15" height="15"><span id="b-herkunft-wort">Vorschlag, gehört dir noch nicht</span></div>
@@ -401,9 +421,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     </div>
 
     <div class="befund">
-      <div class="zeile"><span class="marke">3 von 4</span><span>Mandaten gingen denselben Weg: Analyse, Preismodell, Umsetzung, Wirksam. In dieser Reihenfolge, ohne Ausnahme.</span></div>
+      <div class="zeile"><span class="marke">3 von 4</span><span>Mandaten gehen denselben Weg: Analyse, Preismodell, Umsetzung, Wirksam. In dieser Reihenfolge, in allen dreien.</span></div>
       <div class="zeile"><span class="marke">14 Wochen</span><span>vom Start bis zur Wirkung, im Schnitt. Am kürzesten 11 bei Cordes, am längsten 17 bei MTS.</span></div>
-      <div class="zeile abweichung"><span class="marke">1 anders</span><span>Bäckerei Freitag hatte keine Analyse — dort bist du in ein laufendes Projekt gekommen, die Zahlen lagen schon auf dem Tisch.</span></div>
+      <div class="zeile abweichung"><span class="marke">1 anders</span><span>Bäckerei Freitag hat keine Analyse — dort bist du in ein laufendes Projekt gekommen, die Zahlen lagen schon auf dem Tisch.</span></div>
+      <div class="zeile abweichung"><span class="marke">2 mit mehr</span><span>Cordes und MTS haben zusätzlich eine Zwischenprüfung der Kalkulation. Zwei von drei sind mir zu wenig für einen Bauplan, deshalb steht sie hier nicht drin.</span></div>
     </div>
 
     <p class="einschraenkung">Vier Mandate sind wenig. Was hier steht, ist die Form von dreien, nicht das Gesetz deiner Beratung.</p>
@@ -448,6 +469,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
     <div class="geblieben" id="zurueckgeblieben" hidden
          data-hilfe-wenn="#bogen.eigen"
+         data-hilfe-name="Was zurückgeblieben ist"
          data-hilfe="Eine Vorlage darf die Zahlen des letzten Kunden nicht in den nächsten tragen. Hier steht, was beim Herauslösen zurückgeblieben ist — Stelle für Stelle, mit dem Grund.">
       <div class="z-kopf">Sieben Stellen sind zurückgeblieben. Sie gehören Petersen, nicht deiner Methode.</div>
       <ul>
@@ -493,7 +515,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         <button type="button" data-start="2026-10-01" aria-pressed="false">1. Oktober</button>
       </div>
       <ol class="stationen" id="angewandt-stationen" aria-label="Vier Meilensteine mit Terminen"></ol>
-      <div class="s-frage" style="margin-top:18px">Zwei Fragen sind offen: <b>das Ziel des Mandats</b> und <b>wer auf beiden Seiten zuständig ist</b>. Die Vorlage gibt den Weg, das Ziel gibst du.</div>
+      <div class="s-frage" style="margin-top:18px">Drei Fragen sind offen — genau die, die beim Herauslösen zurückgeblieben sind: <b>das Ziel des Mandats</b>, <b>welche Kundengruppen unberührt bleiben</b> und <b>wer auf beiden Seiten zuständig ist</b>. Die Vorlage gibt den Weg, das Ziel gibst du.</div>
     </section>
 
     <h3 data-hilfe-name="Ein Mandat aus der Vorlage"
@@ -501,15 +523,18 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     <p class="h3-satz">So sieht Rehbein sechs Wochen später aus. Der Pfad ist derselbe wie in jedem Mandat — nur trägt jede Station, woher sie kommt.</p>
 
     <section class="vorlage" aria-label="Meilenstein-Pfad des Mandats Rehbein">
-      <div class="pfad-rolle"><svg id="pfad" viewBox="0 0 760 108" role="img" aria-label="Fünf Meilensteine: Analyse, Preismodell, Zwischenprüfung der Kalkulation von Hand eingefügt, Umsetzung, Wirksam">
+      <!-- Das aria-label schreibt zeichnePfad() aus denselben Daten wie die
+           Achse: über 700px ist die Leiter darunter aus, ein Screenreader
+           hört also ausschließlich dieses Label. -->
+      <div class="pfad-rolle"><svg id="pfad" viewBox="0 0 760 108" role="img" aria-label="Der Meilenstein-Pfad des Mandats">
         <line class="grund" x1="60" y1="38" x2="700" y2="38"></line>
       </svg></div>
       <ol class="pfad-leiter" id="pfad-leiter" aria-label="Fünf Meilensteine"></ol>
       <p class="woher-legende">Vier Stationen kommen aus der Vorlage. Eine hast du <b>selbst eingefügt</b>: die Zwischenprüfung der Kalkulation, weil Rehbein drei Werke getrennt rechnet.</p>
 
       <div class="rueckweg" id="rueckweg">
-        <div class="r-satz"><b>Diese Zwischenprüfung hast du zum dritten Mal von Hand eingefügt.</b> Vorher bei Cordes und bei MTS, jedes Mal an derselben Stelle. Soll sie in die Vorlage?</div>
-        <div class="r-fuss">Die drei laufenden Mandate behalten, was sie haben — sie haben den Schritt ja schon.</div>
+        <div class="r-satz"><b>Diese Zwischenprüfung brauchst du zum dritten Mal.</b> Bei Cordes und MTS hast du sie damals selbst eingebaut, jetzt bei Rehbein von Hand eingefügt — jedes Mal an derselben Stelle. Aus zwei von drei sind drei von vier geworden. Soll sie in die Vorlage?</div>
+        <div class="r-fuss">Rehbein, Cordes und MTS behalten ihre Pläne — sie haben den Schritt ja schon.</div>
         <div class="griffe">
           <button class="knopf sekundaer" type="button" id="aufnehmen">In die Vorlage aufnehmen</button>
           <button class="knopf leise" type="button" id="nicht-aufnehmen">Bleibt eine Ausnahme</button>
@@ -638,6 +663,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       svg.appendChild(d);
     });
 
+    svg.setAttribute('aria-label',
+      STATIONEN.length + ' Meilensteine: ' + STATIONEN.map(function(s, i){
+        return s.name + ', ' + datum(start, s.woche)
+          + (geschafft(s) ? ', geschafft' : (i === jetztIndex ? ', läuft' : ''))
+          + (s.woher === 'hand' ? ', von Hand eingefügt' : '');
+      }).join('. '));
+
     var leiter = document.getElementById('pfad-leiter');
     leiter.textContent = '';
     STATIONEN.forEach(function(s, i){
@@ -696,6 +728,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       document.getElementById('b-hand').hidden = false;
       document.getElementById('b-kante').hidden = false;
 
+      /* Was die Überschriften behaupten, stimmt jetzt nicht mehr: es liegt
+         nichts mehr unhinterlegt herum. */
+      document.getElementById('vorlagen-satz').textContent = 'Seit eben liegen zwei hinterlegt.';
+      document.getElementById('vorschlag-titel').textContent = 'Was du gemacht hast, ohne es hinterlegt zu haben';
+      document.getElementById('vorschlag-satz').textContent =
+        'Dein KI-Berater hatte deine vier laufenden Mandate nebeneinandergelegt.';
+
       document.getElementById('platzhalter').hidden = true;
       document.getElementById('anwenden-satz').textContent =
         'Rehbein Elektrotechnik ist das erste Mandat, das sie bekommt. Aus dem Start rechnen sich alle Termine.';
@@ -735,10 +774,39 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     rueckweg.querySelector('.r-satz').innerHTML = '<b>' + satz + '</b>';
     rueckweg.querySelector('.r-fuss').textContent = fuss;
   }
+  /* Aufnehmen heißt aufnehmen: die Station steht danach wirklich in der
+     Karte oben, und jede Zahl auf dieser Fläche wird gezählt statt getippt.
+     Eine Erfolgsmeldung, die eine Karte drei Zeilen weiter oben widerlegt,
+     ist keine. */
+  var ZAHLWORT = ['null','eine','zwei','drei','vier','fünf','sechs','sieben'];
   document.getElementById('aufnehmen').addEventListener('click', function(){
+    var liste = document.getElementById('stationen');
+    var li = document.createElement('li');
+    li.className = 'neu';
+    li.innerHTML =
+      '<div class="s-kopf"><span class="s-name">Zwischenprüfung der Kalkulation</span>'
+      + '<span class="s-wann">Woche 10</span></div>'
+      + '<ul class="s-aufgaben"><li><span class="wer ki">KI-Berater</span>'
+      + '<span>Kalkulation je Standort gegenrechnen</span></li></ul>';
+    /* an dieselbe Stelle wie im Mandat: hinter die Umsetzung */
+    liste.insertBefore(li, liste.children[3] || null);
+    setTimeout(function(){ li.classList.remove('neu'); }, 1400);
+
+    var anzahl = liste.children.length;
+    var wort = ZAHLWORT[anzahl] || anzahl;
+    document.getElementById('b-meta').textContent =
+      anzahl + ' Meilensteine, herausgelöst aus drei Mandaten und einmal nachgeschärft';
+    document.getElementById('b-kante').innerHTML =
+      '<b>Ab jetzt bekommt jedes neue Preis-und-Marge-Mandat diese ' + wort
+      + ' Meilensteine.</b> Die vier laufenden behalten ihre eigenen Pläne — auch Petersen, aus dem sie stammt.';
+    document.querySelector('.woher-legende').innerHTML =
+      'Vier Stationen kamen aus der Vorlage. Eine hast du <b>selbst eingefügt</b>: die Zwischenprüfung der '
+      + 'Kalkulation, weil Rehbein drei Werke getrennt rechnet. Seit eben steht sie auch in der Vorlage — '
+      + 'in diesem Mandat bleibt sie trotzdem deine Einfügung.';
+
     rueckweg.classList.add('getan');
     rueckwegSchliessen(
-      'Aufgenommen. Die Vorlage hat jetzt fünf Meilensteine.',
+      'Aufgenommen. Die Vorlage hat jetzt ' + wort + ' Meilensteine.',
       'Rehbein, Cordes und MTS behalten ihre Pläne unverändert — sie haben den Schritt schon. Das nächste Mandat bekommt ihn von Anfang an.');
   });
   document.getElementById('nicht-aufnehmen').addEventListener('click', function(){
