@@ -50,7 +50,12 @@
    Kundenraum nach Mitlesen; der Satz der stillen Karte wird mitgeändert,
    sobald ein Nachtrag darin liegt; und „bekommt es Donnerstag" ist vor dem
    Klick auch fürs Vorlesen weg, nicht nur fürs Auge.
-   Marker: BERATUNG-RADAR-V3 */
+   V4 (Issue #50): die Quelle eines Punktes führt jetzt in die Akte, aus der
+   die Zahl stammt — auch bei Cordes, dessen Akte es vorher nicht gab. Und
+   Lücke 2 sagt, was seit der gezeichneten Akte wirklich fehlt: nicht der
+   Fuhrpark (den hat er, Fassung 1 des Kunden), sondern die Anlagenliste des
+   Steuerbüros mit den Nutzungsdauern.
+   Marker: BERATUNG-RADAR-V4 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -362,10 +367,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
        eine Bitte beim Kunden — und die nennt ihren Grund (Entscheidung
        2026-08-15). -->
   <section class="luecke" id="l-anlagen" aria-label="Wissenslücke Anlagenliste Cordes">
-    <div class="l-zitat">„Den Fuhrpark rechne ich mit den Zahlen von 2025. Die beiden Wechselbrücken vom Mai stehen dort nicht drin."</div>
-    <div class="l-zitat-wer"><img src="bilder/quoro-icon.svg" alt="" width="14" height="14">Sagt er seit dem 14. Mai in jeder Antwort dazu</div>
+    <div class="l-zitat">„Den Fuhrpark kenne ich aus seiner eigenen Übersicht. Was darin steuerlich zählt, steht dort nicht — keine Nutzungsdauern, keine Restbuchwerte."</div>
+    <div class="l-zitat-wer"><img src="bilder/quoro-icon.svg" alt="" width="14" height="14">Sagt er seit dem 14. Mai bei jeder Frage zur Abschreibung</div>
 
-    <div class="l-titel">Die Anlagenliste 2026 von Cordes</div>
+    <div class="l-titel">Die steuerliche Anlagenliste 2026 von Cordes</div>
     <div class="l-meta">Hier fehlt kein Wissen, sondern eine Unterlage. Vier Antworten hat er mit diesem Vorbehalt gegeben.</div>
 
     <div class="griffe">
@@ -402,7 +407,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     <div class="punkt" data-punkt="zoll">
       <div class="p-welt">Das Kabinett hat am Dienstag den Entwurf zur Einfuhrabgabe auf Stahl beschlossen, 6 Prozent ab Januar.</div>
       <div class="p-bei-ihm">Bei ihm sind das <b>340 Tonnen im Jahr</b>, gut 60 Prozent davon aus der Einfuhr — rund <b>11.900&nbsp;€ Mehrkosten</b>, gerechnet auf seine Mengen aus 2025.</div>
-      <div class="p-quelle" id="zoll-quelle">Seine Zahl kommt aus dem <a href="beratung-akte.html">Rohstoffbezug in seiner Akte</a>. Dieselbe Frage steht oben als offene Lücke.</div>
+      <div class="p-quelle" id="zoll-quelle">Seine Zahl kommt aus dem <a href="beratung-akte.html?mandat=petersen">Rohstoffbezug in seiner Akte</a>. Dieselbe Frage steht oben als offene Lücke.</div>
       <div class="p-griffe">
         <button class="anhalten" type="button">Anhalten, ich sage es selbst</button>
       </div>
@@ -431,7 +436,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     <div class="punkt" data-punkt="maut">
       <div class="p-welt">Die Maut für schwere Lkw steigt zum Januar um 4,3 Cent je Kilometer.</div>
       <div class="p-bei-ihm">Bei ihm sind das <b>11 Zugmaschinen</b> und rund <b>18.400&nbsp;€ im Jahr</b>, gerechnet auf seine Fahrleistung aus 2025.</div>
-      <div class="p-quelle">Seine Zahl kommt aus der Fahrleistung in seiner Akte — die Anlagenliste 2026 fehlt ihm dafür noch, das steht oben.</div>
+      <div class="p-quelle">Seine Zahl kommt aus der <a href="beratung-akte.html?mandat=cordes">Fahrleistung in seiner Akte</a> — die steuerliche Anlagenliste 2026 fehlt ihm dafür noch, das steht oben.</div>
       <div class="p-griffe">
         <button class="anhalten" type="button">Anhalten, ich sage es selbst</button>
       </div>
@@ -599,7 +604,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         if (still) { still.textContent = still.dataset.dann; delete still.dataset.dann; }
       });
       var quelle = document.getElementById('zoll-quelle');
-      if (quelle) quelle.innerHTML = 'Seine Zahl kommt aus dem <a href="beratung-akte.html">Rohstoffbezug in seiner Akte</a>. Deine Antwort von eben geht als eigener Punkt mit hinaus.';
+      if (quelle) quelle.innerHTML = 'Seine Zahl kommt aus dem <a href="beratung-akte.html?mandat=petersen">Rohstoffbezug in seiner Akte</a>. Deine Antwort von eben geht als eigener Punkt mit hinaus.';
       zaehle();
       demoHinweis('Ein Satz. Drei Kunden hören auf zu warten.');
     },
@@ -617,7 +622,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       block.className = 'schreiben';
       block.innerHTML =
         '<label for="grund-anlagen">Warum du sie brauchst — das steht bei ihm daran</label>' +
-        '<textarea id="grund-anlagen" style="min-height:80px">Ohne die aktuelle Anlagenliste rechnet Ihr KI-Berater den Fuhrpark mit den Zahlen von 2025 — die beiden Wechselbrücken vom Mai fehlen darin.</textarea>' +
+        '<textarea id="grund-anlagen" style="min-height:80px">Ihre Fuhrpark-Übersicht hat Ihr KI-Berater. Was ihm fehlt, ist die Anlagenliste Ihres Steuerbüros — ohne Nutzungsdauern bleibt bei den beiden Wechselbrücken vom Mai offen, was davon dieses Jahr abgeschrieben wird.</textarea>' +
         '<div class="griffe">' +
           '<button class="knopf primaer" type="button" data-tu="bitte-senden">Bitte in sein Portal legen</button>' +
           '<button class="knopf leise" type="button" data-tu="doch-nicht">Doch nicht</button>' +

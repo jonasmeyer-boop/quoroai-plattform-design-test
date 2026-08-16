@@ -62,7 +62,11 @@
    V5 (Fund aus dem Review zu E2, gleicher Fehler hier): der Hinweis rutscht
    schon unter das Kopfband, sobald dieses zweizeilig wird — er hing an der
    Handy-Schwelle und lag dazwischen auf der Krume, also auf dem Rückweg.
-   Marker: BERATUNG-FRAGEN-V5 */
+   V6 (Issue #50): der Anlagenlisten-Beleg heißt jetzt nach dem Blatt, in dem
+   die Zahl wirklich steht — der Fuhrpark-Übersicht von Cordes — und führt in
+   dessen Akte, auf die Seite mit den Wechselbrücken. Die Umschiffung war
+   nötig, solange nur Petersen eine gezeichnete Akte hatte.
+   Marker: BERATUNG-FRAGEN-V6 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -208,15 +212,6 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 /* Ein Beleg ist ein Weg in die Unterlage, kein Etikett — am Finger muss er
    sich treffen lassen (docs/wissen/handy-durchgang.md). */
 @media (pointer:coarse){.belege a{min-height:44px;padding:0 14px}}
-/* Der Beleg ohne Tür: gestrichelt, damit man ihm nicht vergeblich einen
-   Druck gibt. Er nennt die Quelle, führt aber (noch) nicht hin. */
-.belege .beleg-ohne-tuer{
-  display:inline-flex;align-items:center;
-  padding:6px 12px;border-radius:999px;
-  border:0.5px dashed var(--nebel-300);
-  font-size:12.5px;color:var(--nebel-500);
-}
-
 /* Die Kante: hier hört der Beleg auf. Bei einem Kunden bricht er hier ab und
    übergibt — bei der Beratung tut er es nicht, sagt es aber. */
 .kante{
@@ -390,7 +385,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         </ol>
       </div>
       <div class="belege">
-        <a href="beratung-akte.html">Akte Petersen, Skizze zum Preisgespräch</a>
+        <a href="beratung-akte.html?mandat=petersen&amp;dok=skizze">Akte Petersen, Skizze zum Preisgespräch</a>
         <a href="beratung-wissen.html">Wissen, Branchenspiegel Abschnitt 5</a>
         <a href="beratung-marge.html">Marge und Sätze</a>
       </div>
@@ -552,19 +547,19 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       frage: 'Wechselbrücken bei Cordes: dieses Jahr voll abschreiben oder über die Nutzungsdauer?',
       meta: 'Über Cordes Logistik, gerade eben. Genau diese Frage hat er dir heute um 8:12 <a href="beratung-termine.html#cordes">als Übergabe hingelegt</a>.',
       text:
-        '<p>Die zwei Wechselbrücken stehen mit <b>34.800 € netto</b> in der Anlagenliste, geliefert am 14. Mai. Die amtliche AfA-Tabelle führt Wechselbrücken mit <b>neun Jahren</b> Nutzungsdauer; zeitanteilig ab Mai wären das <b>2.253 € für 2026</b>.</p>',
+        '<p>Die zwei Wechselbrücken stehen mit <b>34.800 € netto</b> in seiner Fuhrpark-Übersicht, geliefert am 14. Mai. Die amtliche AfA-Tabelle führt Wechselbrücken mit <b>neun Jahren</b> Nutzungsdauer; zeitanteilig ab Mai wären das <b>2.578 € für 2026</b>.</p>',
       kante: {
         kopf: 'Ab hier steht nichts mehr in einer Unterlage.',
         text: 'Ob daneben ein Sofortabzug in Frage kommt, hängt an Dingen, die ich nicht sehe: Betriebsgröße, Gewinn des Vorjahres, was in den letzten Jahren schon abgezogen wurde. <b>Bei Herrn Cordes hätte ich hier abgebrochen und an dich übergeben. Bei dir tue ich es nicht — aber es bleibt eine Steuerfrage, und die verantwortest du.</b>'
       },
       belege: [
-        /* Ohne Tür, und das ist Absicht: die Kundenakte ist in den Entwürfen
-           bisher nur für Petersen gezeichnet (Issue #50). Ein Beleg, der von
-           Cordes' Bogen in die Akte eines anderen Mandanten führt, wäre auf
-           ausgerechnet dieser Fläche die falsche Aussage — der Umweg über
-           einen neutralen Namen verdeckte das nur. Solange es die Akte nicht
-           gibt, nennt der Beleg seine Quelle, ohne eine Tür zu behaupten. */
-        {text:'Anlagenliste Cordes, Seite 2', ohneTuer:true},
+        /* Mit Tür, seit jedes Mandat seine Akte hat (Issue #50): der Beleg
+           nennt die Akte, aus der er stammt, und führt genau dorthin — auf
+           Seite 2 der Fuhrpark-Übersicht, wo die beiden Wechselbrücken
+           stehen. Vorher war er ein Zitat ohne Tür, weil es die Akte von
+           Cordes nicht gab. Die steuerliche Anlagenliste 2026 fehlt ihm
+           weiterhin; die Zahlen hier stehen in seiner eigenen Fassung. */
+        {text:'Fuhrpark-Übersicht Cordes, Seite 2', href:'beratung-akte.html?mandat=cordes&dok=fuhrpark'},
         {text:'Wissen, AfA-Tabelle 2026', href:'beratung-wissen.html'},
         {text:'Die Übergabe von heute früh', href:'beratung-termine.html#cordes'}
       ],
@@ -578,7 +573,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       ausgang: {
         wer: 'Herrn Cordes',
         marke: 'Nordholm & Partner',
-        entwurf: 'Guten Tag Herr Cordes,\n\ndie beiden Wechselbrücken stehen mit 34.800 € netto in Ihrer Anlagenliste, geliefert am 14. Mai. Die amtliche AfA-Tabelle sieht für Wechselbrücken neun Jahre Nutzungsdauer vor, zeitanteilig ab Mai also rund 2.253 € für 2026.\n\nOb daneben ein Sofortabzug in Frage kommt, sehe ich mir bis Freitag an und melde mich.',
+        entwurf: 'Guten Tag Herr Cordes,\n\ndie beiden Wechselbrücken stehen mit 34.800 € netto in Ihrer Fuhrpark-Übersicht, geliefert am 14. Mai. Die amtliche AfA-Tabelle sieht für Wechselbrücken neun Jahre Nutzungsdauer vor, zeitanteilig ab Mai also rund 2.578 € für 2026.\n\nOb daneben ein Sofortabzug in Frage kommt, sehe ich mir bis Freitag an und melde mich.',
         zurueck: 'Nicht mitgeschickt: seine Einschätzung zum Sofortabzug. Die war für dich geschrieben.'
       }
     }
@@ -586,13 +581,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
   var tisch = document.getElementById('tisch');
 
-  /* Ein Beleg ist normalerweise eine Tür. Wo die Unterlage noch nicht
-     gezeichnet ist, steht er als Zitat da — ein Knopf, der woanders hinführt
-     als er sagt, ist schlimmer als kein Knopf. */
+  /* Jeder Beleg ist eine Tür. Seit jedes Mandat seine Akte hat (Issue #50),
+     gibt es keine Quelle mehr, die man nur nennen und nicht öffnen kann. */
   function beleg(b){
-    return b.ohneTuer
-      ? '<span class="beleg-ohne-tuer">' + b.text + '</span>'
-      : '<a href="' + b.href + '">' + b.text + '</a>';
+    return '<a href="' + b.href + '">' + b.text + '</a>';
   }
 
   function baueBogen(id){

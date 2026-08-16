@@ -10,7 +10,7 @@
 <script src="blatt.js"></script>
 <style>
 /* quoroai-plattform-design, Kundenakte: vierter Raum hinter den Cockpit-Türen
-   (Reihenfolge-Entscheidung 2026-08-13), exemplarisch für Petersen Stahlbau
+   (Reihenfolge-Entscheidung 2026-08-13), eine Fläche für alle vier Mandate
    (Produkt: /kunden/[id]). Das dichteste Stück: Stammdaten, Dokumente mit
    Freigabe, Kundenzugang, Tarif. Kern-Idee der Freigabe: jedes Dokument
    trägt zwei anfassbare Füllstand-Kapseln — „Kunde sieht es" und „KI liest
@@ -36,7 +36,12 @@
    durch „In die Akte legen", und der Name zieht der Überschrift nach. Der
    Zettel oben ist ein role=status, sonst bliebe die einzige Rückmeldung nach
    dem Fertigstellen ungesprochen.
-   Marker: BERATUNG-AKTE-V11 (die Skizze liegt in der Akte und wird gezeichnet) */
+   V12 (Issue #50): jedes der vier Mandate hat seine Akte, ?mandat=cordes
+   öffnet sie. Alles Mandatseigene steht in der Tabelle MANDATE, gezeichnet
+   wird für alle vier dasselbe. Einen Umschalter gibt es bewusst nicht — man
+   betritt eine Akte über ihr Mandat oder über einen Beleg, der sagt, wessen
+   Akte er meint.
+   Marker: BERATUNG-AKTE-V12 (jedes Mandat hat seine Akte) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -233,103 +238,31 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
 </nav>
 
+<!-- Krume und Titel stehen auf Petersen, bis die Fläche weiß, welche Akte
+     gefragt ist. Beides zieht in derselben Sekunde nach (MANDATE weiter
+     unten); ein leerer Platzhalter würde beim Laden nur blinken. -->
 <a id="krume" href="beratung-f-modell.html#petersen"><span class="zurueck">← Petersen Stahlbau</span><span>/</span><b>Kundenakte</b></a>
 
 <main>
   <div class="kopf">
     <div>
       <h1>Kundenakte</h1>
-      <div class="stand">Petersen Stahlbau, Mandat seit März 2025, betreut von Dr. Anna Vogelsang</div>
+      <div class="stand" id="kopf-stand"></div>
     </div>
-    <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Mandat aktiv" title="Mandat aktiv"></span><span class="zustand-wort">Mandat aktiv</span></span>
+    <span class="z-fuell" id="mandat-zustand"></span>
   </div>
 
   <h3>Stammdaten</h3>
   <section class="tafel" aria-label="Stammdaten">
-    <div class="stamm">
-      <div class="s-feld"><b>Firma</b><span>Petersen Stahlbau GmbH, Stahlbau, 46 Mitarbeitende</span></div>
-      <div class="s-feld"><b>Ansprechpartner</b><span>Matthias Petersen, Geschäftsführer</span></div>
-      <div class="s-feld"><b>E-Mail</b><span>m.petersen@petersen-stahlbau.de</span></div>
-      <!-- Anschrift und Telefonvorwahl kommen aus beratung-rechnungen.html —
-           dort landet die Adresse auf dem Papier, hier stand eine zweite. -->
-      <div class="s-feld"><b>Telefon</b><span>+49 441 88 41 20</span></div>
-      <div class="s-feld"><b>Anschrift</b><span>Brookweg 14, 26123 Oldenburg</span></div>
-      <div class="s-feld"><b>Schwerpunkt</b><span>Preis und Marge, seit April im Fokus</span></div>
-    </div>
+    <!-- Anschrift und Telefonvorwahl kommen aus beratung-rechnungen.html —
+         dort landet die Adresse auf dem Papier, hier stand eine zweite. -->
+    <div class="stamm"></div>
     <div class="fuss-griffe"><button class="bald knopf leise" type="button">Stammdaten bearbeiten</button></div>
   </section>
 
   <h3>Dokumente, und wer sie sieht</h3>
   <section class="tafel" aria-label="Dokumente mit Freigabe">
-    <div class="doks">
-      <div class="dok schreibt" data-dok="vermerk">
-        <button class="d-oeffnen" type="button">
-          <span class="blatt-icon" aria-hidden="true"></span>
-          <span class="d-text"><span class="d-name">Vermerk zum Preisgespräch</span><br><span class="d-meta">Entwurf, 2 Seiten, zuletzt von dir vor vier Minuten</span></span>
-        </button>
-        <!-- Die Handschrift sagt etwas, das sonst nirgends steht — dass der
-             Entwurf noch nicht freigegeben ist, sagt schon der graue Satz
-             daneben. Zweimal dasselbe wäre eine Zeile verschenkt. -->
-        <span class="hand">für Donnerstag.</span>
-        <span class="frei">
-          <span class="noch">Ein Entwurf wird nicht freigegeben.</span>
-        </span>
-      </div>
-      <!-- Was am Tisch entsteht, ist kein Absatz (Häppchen D4 Teil 3). Der
-           Kunde sieht diese Skizze nicht; der KI-Berater liest sie, sonst
-           könnte er nichts dazuzeichnen. -->
-      <div class="dok" data-dok="skizze">
-        <button class="d-oeffnen" type="button">
-          <span class="blatt-icon" aria-hidden="true"></span>
-          <span class="d-text"><span class="d-name">Skizze zum Preisgespräch</span><br><span class="d-meta">Handzeichnung, 1 Seite, von dir, gestern</span></span>
-        </button>
-        <span class="frei">
-          <button type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">nur Beratung</span></button>
-          <button type="button" aria-pressed="true"><span class="zustand vorschlag" aria-hidden="true"></span><span class="zustand-wort">KI liest es</span></button>
-        </span>
-      </div>
-      <div class="dok" data-dok="monatsauswertung">
-        <button class="d-oeffnen" type="button">
-          <span class="blatt-icon" aria-hidden="true"></span>
-          <span class="d-text"><span class="d-name">Monatsauswertung Juli</span><br><span class="d-meta">8 Seiten, von dir hochgeladen am 4. August</span></span>
-        </button>
-        <span class="frei">
-          <button type="button" aria-pressed="true"><span class="zustand aktiv" aria-hidden="true"></span><span class="zustand-wort">Kunde sieht es</span></button>
-          <button type="button" aria-pressed="true"><span class="zustand vorschlag" aria-hidden="true"></span><span class="zustand-wort">KI liest es</span></button>
-        </span>
-      </div>
-      <div class="dok" data-dok="rahmenvertrag">
-        <button class="d-oeffnen" type="button">
-          <span class="blatt-icon" aria-hidden="true"></span>
-          <span class="d-text"><span class="d-name">Rahmenvertrag Stahl</span><br><span class="d-meta">14 Seiten, vom Kunden hochgeladen am 12. Juni</span></span>
-        </button>
-        <span class="frei">
-          <button type="button" aria-pressed="true"><span class="zustand aktiv" aria-hidden="true"></span><span class="zustand-wort">Kunde sieht es</span></button>
-          <button type="button" aria-pressed="true"><span class="zustand vorschlag" aria-hidden="true"></span><span class="zustand-wort">KI liest es</span></button>
-        </span>
-      </div>
-      <div class="dok" data-dok="benchmark">
-        <button class="d-oeffnen" type="button">
-          <span class="blatt-icon" aria-hidden="true"></span>
-          <span class="d-text"><span class="d-name">Preismodell Benchmark</span><br><span class="d-meta">12 Seiten, vom KI-Berater erstellt, gestern</span></span>
-        </button>
-        <span class="frei">
-          <button type="button" aria-pressed="true"><span class="zustand aktiv" aria-hidden="true"></span><span class="zustand-wort">Kunde sieht es</span></button>
-          <button type="button" aria-pressed="true"><span class="zustand vorschlag" aria-hidden="true"></span><span class="zustand-wort">KI liest es</span></button>
-        </span>
-      </div>
-      <div class="dok intern" data-dok="honorar">
-        <button class="d-oeffnen" type="button">
-          <span class="blatt-icon" aria-hidden="true"></span>
-          <span class="d-text"><span class="d-name">Honorar-Kalkulation 2026</span><br><span class="d-meta">2 Seiten, von dir, 28. Juli</span></span>
-        </button>
-        <span class="hand">bleibt intern.</span>
-        <span class="frei">
-          <button type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">nur Beratung</span></button>
-          <button type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">KI liest nicht</span></button>
-        </span>
-      </div>
-    </div>
+    <div class="doks"></div>
     <div class="fuss-griffe">
       <button class="knopf leise" id="neues-blatt" type="button">Neues Blatt schreiben</button>
       <button class="knopf leise" id="neue-skizze" type="button">Neue Skizze zeichnen</button>
@@ -340,8 +273,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
   <div class="paar">
     <section class="tafel" aria-label="Kundenzugang">
-      <div class="zugang-kopf"><b>Kundenzugang</b><span class="z-fuell" id="zugang-zustand"><span class="zustand aktiv" role="img" aria-label="Zugang aktiv" title="Zugang aktiv"></span><span class="zustand-wort">aktiv</span></span></div>
-      <div class="zugang-meta">Matthias Petersen, angemeldet mit m.petersen@petersen-stahlbau.de.<br>Zuletzt drin: gestern, 16:40, beim Freigeben seines Gesprächs.</div>
+      <div class="zugang-kopf"><b>Kundenzugang</b><span class="z-fuell" id="zugang-zustand"></span></div>
+      <div class="zugang-meta" id="zugang-meta"></div>
       <div class="bestaetigt" id="zugang-meldung" hidden></div>
       <div class="fuss-griffe">
         <button class="knopf leise" id="link-schicken" type="button">Anmelde-Link schicken</button>
@@ -350,15 +283,15 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     </section>
 
     <section class="tafel" aria-label="Tarif">
-      <div class="tarif-gross" id="tarif-zahl">40 Fragen</div>
+      <div class="tarif-gross" id="tarif-zahl"></div>
       <div class="tarif-deut">im Monat, an den KI-Berater</div>
       <div class="tarif-stand">
-        <span class="zustand" id="tarif-kapsel" style="--stand:.43;--fluid:var(--lila-400);--fluid-tief:var(--lila-600)" role="img" aria-label="17 von 40 verbraucht" title="17 von 40 verbraucht"></span>
-        <span class="zustand-wort" id="tarif-wort">17 von 40 im August verbraucht</span>
+        <span class="zustand" id="tarif-kapsel" style="--fluid:var(--lila-400);--fluid-tief:var(--lila-600)" role="img"></span>
+        <span class="zustand-wort" id="tarif-wort"></span>
       </div>
       <div class="kontingent-wahl" id="kontingent-wahl" hidden>
         <button type="button" data-zahl="20">20</button>
-        <button type="button" data-zahl="40" class="gewaehlt">40</button>
+        <button type="button" data-zahl="40">40</button>
         <button type="button" data-zahl="80">80</button>
       </div>
       <div class="bestaetigt" id="tarif-meldung" hidden></div>
@@ -392,112 +325,375 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     el.addEventListener('click', function(){ demoHinweisText('Diese Fläche entsteht gerade.'); });
   });
 
-  /* ---------- Der Blatt-Blick: die Akte ist ein Arbeitsraum ----------
-     Was hier liegt, wird angesehen, nicht heruntergeladen (Häppchen D4).
-     Die Seiten stehen hier, weil sie zu diesem Mandat gehören — der Baustein
-     blatt.js ist nur der Leseraum und kennt keinen Inhalt. Der Rahmenvertrag
-     trägt die Fundstelle, die der KI-Berater im freigegebenen Gespräch
-     zitiert: derselbe Satz, dieselbe Ziffer. */
   /* Die Beratung dieser Vorführung. Auf den Kundenflächen kommt der Name aus
      marke.js — im Papier steht er nicht fest (blaetter.js). */
   var BERATUNG = 'Nordholm & Partner';
-  /* Was der Beratung gehört, ist offen; was von außen kam, bleibt gesetzt
-     (Häppchen D4 Teil 2). In einen Rahmenvertrag, den man hier ändern könnte,
-     wäre kein Beleg mehr — man wüsste bei keinem Zitat, ob der Satz je so
-     dastand. Auf fremdem Papier gibt es deshalb nur den Rand. */
-  var AKTE = {
-    vermerk: {meta: 'Entwurf, 2 Seiten, für das Gespräch am Donnerstag',
-      schreibbar: true,
-      stand: 'Entwurf, zuletzt von dir vor vier Minuten',
-      standNeu: 'Entwurf, gerade eben von dir',
-      fuss: 'Niemand außer euch sieht ihn.'},
-    /* Eine Zeichnung ist eigenes Papier wie ein Vermerk: der Stift liegt
-       bereit, und der KI-Berater legt seinen Vorschlag als Pauspapier
-       darüber, statt ihn hineinzuzeichnen (Häppchen D4 Teil 3). */
-    skizze: {meta: 'Handzeichnung, 1 Seite, von dir, gestern',
-      schreibbar: true,
-      wort: ' aufschlagen und weiterzeichnen',
-      stand: 'Skizze, zuletzt von dir gestern',
-      standNeu: 'Skizze, gerade eben von dir',
-      fuss: 'Nur für euch. Am Tisch entstanden.'},
-    monatsauswertung: {meta: '8 Seiten, von dir, 4. August', notizbar: true,
-      fuss: 'Liegt beim Kunden in den Unterlagen.'},
-    rahmenvertrag: {meta: '14 Seiten, vom Kunden, 12. Juni',
-      fund: {seite: 2, wort: 'Preisgleitklausel'}, notizbar: true,
-      fuss: 'Fremdes Papier. Der KI-Berater zitiert daraus Abschnitt 3.'},
-    benchmark: {meta: '12 Seiten, vom KI-Berater erstellt, gestern',
-      fuss: 'Im Gespräch entstanden, in die Akte gelegt.',
-      notizbar: true,
-      randnotiz: 'mit ihm durchgehen!'},
-    honorar: {meta: '2 Seiten, von dir, 28. Juli', notizbar: true,
-      fuss: 'Weder der Kunde noch die KI sehen dieses Blatt.'}
+
+  /* ---------- Vier Mandate, eine Akte (Issue #50) ----------
+     Diese Fläche war die Akte von Petersen Stahlbau. Damit konnte kein Beleg
+     auf einer anderen Fläche die Akte eines anderen Mandanten benennen und
+     dorthin führen — ausgerechnet dort, wo die Aussage lautet, dass der
+     KI-Berater die Akten sauber auseinanderhält.
+
+     Einen Mandanten-Umschalter bekommt sie trotzdem nicht. Man betritt eine
+     Akte über ihr Mandat — im Modell durch die Tür „Kundenakte", von außen
+     über einen Beleg, der sagt, wessen Akte er meint. Ein Wähler oben würde
+     eine zweite Navigation neben das begehbare Modell setzen; dieselbe
+     Haltung, aus der es in der Zentrale bewusst kein Menü gibt.
+
+     Was ein Mandat unterscheidet, steht hier; alles andere ist für alle vier
+     dieselbe Fläche. Die Seiten der Dokumente stehen in blaetter.js, weil
+     dieselben Blätter beim Kunden und im Gespräch auftauchen. */
+  var MANDATE = {
+
+    petersen: {
+      name: 'Petersen Stahlbau',
+      stand: 'Petersen Stahlbau, Mandat seit März 2025, betreut von Dr. Anna Vogelsang',
+      zustand: {art: 'aktiv', wort: 'Mandat aktiv'},
+      stamm: [
+        ['Firma', 'Petersen Stahlbau GmbH, Stahlbau, 46 Mitarbeitende'],
+        ['Ansprechpartner', 'Matthias Petersen, Geschäftsführer'],
+        ['E-Mail', 'm.petersen@petersen-stahlbau.de'],
+        ['Telefon', '+49 441 88 41 20'],
+        ['Anschrift', 'Brookweg 14, 26123 Oldenburg'],
+        ['Schwerpunkt', 'Preis und Marge, seit April im Fokus']
+      ],
+      zugang: {
+        zustand: {art: 'aktiv', wort: 'aktiv'},
+        anrede: 'Herr Petersen',
+        meta: 'Matthias Petersen, angemeldet mit m.petersen@petersen-stahlbau.de.<br>Zuletzt drin: gestern, 16:40, beim Freigeben seines Gesprächs.'
+      },
+      tarif: {zahl: 40, verbraucht: 17},
+      doks: [
+        /* Der Entwurf, an dem gerade geschrieben wird (Häppchen D4 Teil 2).
+           Die Handschrift sagt etwas, das sonst nirgends steht — dass er noch
+           nicht freigegeben ist, sagt schon der graue Satz daneben. */
+        {dok: 'vermerk', name: 'Vermerk zum Preisgespräch',
+         meta: 'Entwurf, 2 Seiten, zuletzt von dir vor vier Minuten',
+         entwurf: true, noch: 'Ein Entwurf wird nicht freigegeben.',
+         hand: 'für Donnerstag.',
+         fertigMeta: '2 Seiten, von dir, gerade eben',
+         blatt: {meta: 'Entwurf, 2 Seiten, für das Gespräch am Donnerstag',
+           schreibbar: true,
+           stand: 'Entwurf, zuletzt von dir vor vier Minuten',
+           standNeu: 'Entwurf, gerade eben von dir',
+           fuss: 'Niemand außer euch sieht ihn.'}},
+        /* Was am Tisch entsteht, ist kein Absatz (Häppchen D4 Teil 3). Der
+           Kunde sieht diese Skizze nicht; der KI-Berater liest sie, sonst
+           könnte er nichts dazuzeichnen. */
+        {dok: 'skizze', name: 'Skizze zum Preisgespräch',
+         meta: 'Handzeichnung, 1 Seite, von dir, gestern',
+         kunde: false, ki: true,
+         blatt: {meta: 'Handzeichnung, 1 Seite, von dir, gestern',
+           schreibbar: true,
+           wort: ' aufschlagen und weiterzeichnen',
+           stand: 'Skizze, zuletzt von dir gestern',
+           standNeu: 'Skizze, gerade eben von dir',
+           fuss: 'Nur für euch. Am Tisch entstanden.'}},
+        {dok: 'monatsauswertung', name: 'Monatsauswertung Juli',
+         meta: '8 Seiten, von dir hochgeladen am 4. August',
+         kunde: true, ki: true,
+         blatt: {meta: '8 Seiten, von dir, 4. August', notizbar: true,
+           fuss: 'Liegt beim Kunden in den Unterlagen.'}},
+        {dok: 'rahmenvertrag', name: 'Rahmenvertrag Stahl',
+         meta: '14 Seiten, vom Kunden hochgeladen am 12. Juni',
+         kunde: true, ki: true,
+         blatt: {meta: '14 Seiten, vom Kunden, 12. Juni',
+           fund: {seite: 2, wort: 'Preisgleitklausel'}, notizbar: true,
+           fuss: 'Fremdes Papier. Der KI-Berater zitiert daraus Abschnitt 3.'}},
+        {dok: 'benchmark', name: 'Preismodell Benchmark',
+         meta: '12 Seiten, vom KI-Berater erstellt, gestern',
+         kunde: true, ki: true,
+         blatt: {meta: '12 Seiten, vom KI-Berater erstellt, gestern',
+           fuss: 'Im Gespräch entstanden, in die Akte gelegt.',
+           notizbar: true,
+           randnotiz: 'mit ihm durchgehen!'}},
+        {dok: 'honorar', name: 'Honorar-Kalkulation 2026',
+         meta: '2 Seiten, von dir, 28. Juli',
+         intern: true, hand: 'bleibt intern.',
+         kunde: false, ki: false,
+         blatt: {meta: '2 Seiten, von dir, 28. Juli', notizbar: true,
+           fuss: 'Weder der Kunde noch die KI sehen dieses Blatt.'}}
+      ]
+    },
+
+    cordes: {
+      name: 'Cordes Logistik',
+      stand: 'Cordes Logistik, Mandat seit Juni 2021, betreut von Dr. Anna Vogelsang',
+      zustand: {art: 'wartet', wort: 'Übergabe offen'},
+      stamm: [
+        ['Firma', 'Cordes Logistik GmbH & Co. KG, Spedition, 62 Mitarbeitende'],
+        ['Ansprechpartner', 'Heiko Cordes, Geschäftsführer'],
+        ['E-Mail', 'h.cordes@cordes-logistik.de'],
+        ['Telefon', '+49 421 33 07 12'],
+        ['Anschrift', 'Am Güterbahnhof 3, 28195 Bremen'],
+        ['Schwerpunkt', 'Fuhrpark und Frachtmarge']
+      ],
+      zugang: {
+        zustand: {art: 'aktiv', wort: 'aktiv'},
+        anrede: 'Herr Cordes',
+        meta: 'Heiko Cordes, angemeldet mit h.cordes@cordes-logistik.de.<br>Zuletzt drin: heute, 8:09, kurz bevor er seine Steuerfrage gestellt hat.'
+      },
+      /* Kontingent und Verbrauch stehen auch in beratung-ki-berater.html
+         („Was er verbraucht"). Dieselben Zahlen, oder es sind zwei. */
+      tarif: {zahl: 40, verbraucht: 9},
+      doks: [
+        /* Seite 2 dieses Blattes ist die Stelle, die der KI-Berater in
+           beratung-fragen.html zitiert. Solange es die Akte nicht gab, konnte
+           der Beleg sie nur benennen. */
+        {dok: 'fuhrpark', name: 'Fuhrpark-Übersicht 2026',
+         meta: '6 Seiten, vom Kunden hochgeladen, Fassung 1',
+         kunde: true, ki: true,
+         blatt: {meta: '6 Seiten, vom Kunden, Fassung 1',
+           fund: {seite: 2, wort: 'Wechselbrücken'}, notizbar: true,
+           fuss: 'Fremdes Papier. Die steuerliche Anlagenliste 2026 fehlt noch.'}},
+        {dok: 'dieselkosten', name: 'Dieselkosten je Tour, erstes Halbjahr',
+         meta: '4 Seiten, vom KI-Berater erstellt, 9. Juli',
+         kunde: true, ki: true,
+         blatt: {meta: '4 Seiten, vom KI-Berater erstellt, 9. Juli',
+           notizbar: true,
+           fuss: 'Liegt beim Kunden in den Unterlagen.'}},
+        {dok: 'steuernotiz', name: 'Notiz zur Steuerfrage',
+         meta: '1 Seite, von dir, heute',
+         intern: true, hand: 'erst das Steuerbüro.',
+         kunde: false, ki: false,
+         blatt: {meta: '1 Seite, von dir, heute', notizbar: true,
+           fuss: 'Weder der Kunde noch die KI sehen dieses Blatt.'}}
+      ]
+    },
+
+    freitag: {
+      name: 'Bäckerei Freitag',
+      stand: 'Bäckerei Freitag, Mandat seit Januar 2018, betreut von Miriam Krohn',
+      zustand: {art: 'aktiv', wort: 'Mandat aktiv'},
+      stamm: [
+        ['Firma', 'Bäckerei Freitag e.K., Bäckerei, 34 Mitarbeitende'],
+        ['Ansprechpartner', 'Silke Freitag, Inhaberin'],
+        ['E-Mail', 's.freitag@baeckerei-freitag.de'],
+        ['Telefon', '+49 4421 55 19 08'],
+        ['Anschrift', 'Marktstraße 9, 26382 Wilhelmshaven'],
+        ['Schwerpunkt', 'Personalquote, drei Standorte']
+      ],
+      zugang: {
+        zustand: {art: 'aktiv', wort: 'aktiv'},
+        anrede: 'Frau Freitag',
+        meta: 'Silke Freitag, angemeldet mit s.freitag@baeckerei-freitag.de.<br>Zuletzt drin: Montag, 7:20, vor dem Öffnen.'
+      },
+      tarif: {zahl: 20, verbraucht: 6},
+      /* Ein ruhiges Mandat hat eine dünne Akte. Zwei Blätter, beide
+         freigegeben, kein interner Vermerk — das ist kein Loch im Entwurf,
+         das ist der Zustand. */
+      doks: [
+        {dok: 'personalquote', name: 'Personalquote Juli',
+         meta: '5 Seiten, von dir, 6. August',
+         kunde: true, ki: true,
+         blatt: {meta: '5 Seiten, von dir, 6. August', notizbar: true,
+           fuss: 'Liegt beim Kunden in den Unterlagen.'}},
+        {dok: 'filialvergleich', name: 'Filialvergleich, drei Standorte',
+         meta: '7 Seiten, vom KI-Berater erstellt, 2. August',
+         kunde: true, ki: true,
+         blatt: {meta: '7 Seiten, vom KI-Berater erstellt, 2. August',
+           notizbar: true,
+           randnotiz: 'Bahnhof ansprechen!',
+           fuss: 'Im Gespräch entstanden, in die Akte gelegt.'}}
+      ]
+    },
+
+    mts: {
+      name: 'MTS Maschinenbau',
+      stand: 'MTS Maschinenbau, Mandat seit September 2022, betreut von Tarek Aydin',
+      zustand: {art: 'wartet', wort: 'seit drei Wochen still'},
+      stamm: [
+        ['Firma', 'MTS Maschinenbau GmbH, Maschinenbau, 78 Mitarbeitende'],
+        ['Ansprechpartner', 'Thorben Steffens, Geschäftsführer'],
+        ['E-Mail', 't.steffens@mts-maschinenbau.de'],
+        ['Telefon', '+49 4471 92 44 30'],
+        ['Anschrift', 'Industriering 22, 49661 Cloppenburg'],
+        ['Schwerpunkt', 'Auftragsbestand und Liquidität']
+      ],
+      zugang: {
+        /* Der abgelaufene Zugang ist keine Nebensache: er ist die
+           wahrscheinlichste Erklärung dafür, dass seit drei Wochen nichts
+           kommt. Deshalb steht er hier als Zustand da und nicht als Fehler. */
+        zustand: {art: 'wartet', wort: 'Anmelde-Link abgelaufen'},
+        anrede: 'Herr Steffens',
+        meta: 'Thorben Steffens, angemeldet mit t.steffens@mts-maschinenbau.de.<br>Zuletzt drin: 22. Juli, bei der Auswertung Mai. Sein Anmelde-Link ist seit dem 26. Juli abgelaufen.',
+        /* Solange kein neuer Link unterwegs ist, wäre „wieder offen" nur die
+           halbe Wahrheit — hinein kommt er damit trotzdem nicht. */
+        wiederOffen: 'Wieder offen. Hinein kommt Herr Steffens damit noch nicht — sein Anmelde-Link ist abgelaufen, er braucht einen neuen.',
+        /* Was der verschickte Link an dieser Akte ändert. Bei einem Zugang,
+           der ohnehin läuft, ändert er nichts, und dann steht hier auch
+           nichts. */
+        neuerLink: {
+          zustand: {art: 'wartet', wort: 'neuer Link unterwegs'},
+          meta: 'Thorben Steffens, angemeldet mit t.steffens@mts-maschinenbau.de.<br>Ein neuer Anmelde-Link ist seit gerade eben unterwegs, der alte lief am 26. Juli ab.'
+        }
+      },
+      tarif: {zahl: 40, verbraucht: 0},
+      doks: [
+        {dok: 'maiauswertung', name: 'Auswertung Mai',
+         meta: '6 Seiten, von dir, 11. Juni',
+         kunde: true, ki: true,
+         blatt: {meta: '6 Seiten, von dir, 11. Juni', notizbar: true,
+           fuss: 'Das letzte Blatt, das er geöffnet hat.'}},
+        {dok: 'ratenabrede', name: 'Abrede zur Ratenzahlung',
+         meta: '2 Seiten, von dir, 12. Juni',
+         kunde: true, ki: true,
+         blatt: {meta: '2 Seiten, von dir, 12. Juni', notizbar: true,
+           fuss: 'Liegt beim Kunden in den Unterlagen.'}},
+        {dok: 'stillnotiz', name: 'Notiz: seit drei Wochen still',
+         meta: '1 Seite, von dir, 14. August',
+         intern: true, hand: 'anrufen, nicht schreiben.',
+         kunde: false, ki: false,
+         blatt: {meta: '1 Seite, von dir, 14. August', notizbar: true,
+           fuss: 'Weder der Kunde noch die KI sehen dieses Blatt.'}}
+      ]
+    }
   };
+
+  /* Welche Akte offen ist, sagt die Adresse — und nur sie. Ein unbekannter
+     Name führt nach Petersen statt in eine leere Fläche. */
+  var welches = 'petersen';
+  var gefragt = (location.search.match(/[?&]mandat=([a-z]+)/i) || [])[1];
+  if (gefragt && MANDATE[gefragt.toLowerCase()]) welches = gefragt.toLowerCase();
+  var M = MANDATE[welches];
+  /* Und welches Blatt, falls der Weg hierher von einem Beleg kam. */
+  var gefragtesBlatt = (location.search.match(/[?&]dok=([a-z]+)/i) || [])[1] || '';
+
+  function kapselHtml(z){
+    return '<span class="zustand ' + z.art + '" role="img" aria-label="' + z.wort +
+           '" title="' + z.wort + '"></span><span class="zustand-wort">' + z.wort + '</span>';
+  }
+
+  document.title = 'Kundenakte ' + M.name;
+  var krume = document.getElementById('krume');
+  krume.href = 'beratung-f-modell.html#' + welches;
+  krume.querySelector('.zurueck').textContent = '← ' + M.name;
+  document.getElementById('kopf-stand').textContent = M.stand;
+  document.getElementById('mandat-zustand').innerHTML = kapselHtml(M.zustand);
+
+  var stamm = document.querySelector('.stamm');
+  M.stamm.forEach(function(feld){
+    var d = document.createElement('div');
+    d.className = 's-feld';
+    var b = document.createElement('b');
+    b.textContent = feld[0];
+    var s = document.createElement('span');
+    s.textContent = feld[1];
+    d.appendChild(b);
+    d.appendChild(s);
+    stamm.appendChild(d);
+  });
 
   /* ---------- Fertigstellen: erst dann gibt es etwas freizugeben ----------
      Ein Entwurf hat keine Freigabe-Kapseln, weil es nichts zu entscheiden
      gibt: was noch geschrieben wird, kann niemand sehen. Mit dem Fertigstellen
      wird aus dem Entwurf ein Dokument — und in derselben Sekunde steht die
      Frage da, wer es lesen darf. Beide Kapseln beginnen zu. */
-  function stelleFertig(zeile){
+  function freigabeKnopf(an, ja, nein, art){
+    return '<button type="button" aria-pressed="' + (an ? 'true' : 'false') + '">' +
+      '<span class="zustand ' + (an ? art : 'entwurf') + '" aria-hidden="true"></span>' +
+      '<span class="zustand-wort">' + (an ? ja : nein) + '</span></button>';
+  }
+  function freigabeHtml(kunde, ki){
+    return freigabeKnopf(kunde, 'Kunde sieht es', 'nur Beratung', 'aktiv') +
+           freigabeKnopf(ki, 'KI liest es', 'KI liest nicht', 'vorschlag');
+  }
+
+  function stelleFertig(zeile, d, dok){
     if (!zeile || !zeile.classList.contains('schreibt')) return;
     zeile.classList.remove('schreibt');
-    zeile.querySelector('.d-meta').textContent = '2 Seiten, von dir, gerade eben';
+    zeile.querySelector('.d-meta').textContent = d.fertigMeta;
     var hand = zeile.querySelector('.hand');
     if (hand) hand.remove();
-    zeile.querySelector('.frei').innerHTML =
-      '<button type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">nur Beratung</span></button>' +
-      '<button type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">KI liest nicht</span></button>';
+    zeile.querySelector('.frei').innerHTML = freigabeHtml(false, false);
     kippbar(Array.prototype.slice.call(zeile.querySelectorAll('.frei button')));
     /* Geändert wird das Dokument, das die Fläche in der Hand hält — der
        geschriebene Text steht darin und darf beim Fertigstellen nicht
        verlorengehen. Fertig heißt: gesetzt. Ab jetzt nur noch der Rand. */
-    var dok = DOKS.vermerk;
     if (dok) {
       delete dok.schreibbar;
       delete dok.standNeu;
       delete dok.griffe;
       dok.stand = '';
       dok.notizbar = true;
-      dok.meta = '2 Seiten, von dir, gerade eben';
+      dok.meta = d.fertigMeta;
       dok.fuss = 'Fertig. Jetzt entscheidest du, wer es sieht.';
     }
     /* Auch das gesprochene Wort stimmt wieder: „weiterschreiben" wäre nach
        dem Fertigstellen eine Zusage, die der Griff nicht mehr einlöst. */
     var griff = zeile.querySelector('.d-oeffnen');
-    if (griff) griff.setAttribute('aria-label',
-      zeile.querySelector('.d-name').textContent + ' aufschlagen');
+    if (griff) griff.setAttribute('aria-label', d.name + ' aufschlagen');
     demoHinweisText('Fertig. Jetzt steht die Frage da, wer ihn lesen darf — beide Kapseln beginnen zu.');
   }
-  AKTE.vermerk.griffe = [{wort: 'Fertigstellen', stark: true, tat: function(){
-    var zeile = document.querySelector('.dok[data-dok="vermerk"]');
-    Blatt.schliesse();
-    stelleFertig(zeile);
-  }}];
+
+  /* ---------- Der Blatt-Blick: die Akte ist ein Arbeitsraum ----------
+     Was hier liegt, wird angesehen, nicht heruntergeladen (Häppchen D4). Die
+     Seiten stehen in blaetter.js, weil sie zu diesem Mandat gehören und
+     anderswo wieder auftauchen — der Baustein blatt.js ist nur der Leseraum
+     und kennt keinen Inhalt. Was der Beratung gehört, ist offen; was von
+     außen kam, bleibt gesetzt (Häppchen D4 Teil 2). In einen Rahmenvertrag,
+     den man hier ändern könnte, wäre kein Beleg mehr — man wüsste bei keinem
+     Zitat, ob der Satz je so dastand. Auf fremdem Papier gibt es nur den
+     Rand. */
   var DOKS = {};
-  document.querySelectorAll('.dok[data-dok]').forEach(function(zeile){
+  var doksFlaeche = document.querySelector('.doks');
+  M.doks.forEach(function(d){
+    var zeile = document.createElement('div');
+    zeile.className = 'dok' + (d.entwurf ? ' schreibt' : '') + (d.intern ? ' intern' : '');
+    zeile.dataset.dok = d.dok;
+    zeile.innerHTML =
+      '<button class="d-oeffnen" type="button">' +
+        '<span class="blatt-icon" aria-hidden="true"></span>' +
+        '<span class="d-text"><span class="d-name"></span><br><span class="d-meta"></span></span>' +
+      '</button>' +
+      (d.hand ? '<span class="hand"></span>' : '') +
+      '<span class="frei">' +
+        (d.entwurf ? '<span class="noch"></span>' : freigabeHtml(d.kunde, d.ki)) +
+      '</span>';
+    zeile.querySelector('.d-name').textContent = d.name;
+    zeile.querySelector('.d-meta').textContent = d.meta;
+    if (d.hand) zeile.querySelector('.hand').textContent = d.hand;
+    if (d.entwurf) zeile.querySelector('.noch').textContent = d.noch;
+    doksFlaeche.appendChild(zeile);
+
     var griff = zeile.querySelector('.d-oeffnen');
-    var name = zeile.dataset.dok;
-    if (!griff) return;
     /* Ohne die Bausteine gibt es nichts aufzuschlagen — dann darf die Zeile
-       auch nicht so aussehen, als ließe sie sich anfassen. */
-    if (!AKTE[name] || !window.Blatt || !window.Blaetter) { griff.disabled = true; return; }
-    AKTE[name].beratung = BERATUNG;
-    /* Auch wenn hier ein Eintrag steht: kennt blaetter.js den Namen nicht, gibt
-       es keine Seiten — und dann keinen Knopf, der so tut. */
+       auch nicht so aussehen, als ließe sie sich anfassen. Ebenso, wenn
+       blaetter.js den Namen nicht kennt: keinen Knopf, der so tut. */
+    if (!window.Blatt || !window.Blaetter) { griff.disabled = true; return; }
+    var sicht = d.blatt || {};
+    sicht.beratung = BERATUNG;
     /* Ein Dokument, einmal geholt und behalten. Wer hineinschreibt oder etwas
        an den Rand notiert, findet es beim nächsten Aufschlagen wieder — bei
        jedem Druck neu zu holen hieße, das Geschriebene jedes Mal zu verlieren.
        Über ein Neuladen der Seite hinaus hält es trotzdem nichts; das ist die
        Grenze einer Vorführung ohne Rückseite. */
-    var dok = Blaetter.hol(name, AKTE[name]);
+    var dok = Blaetter.hol(d.dok, sicht);
     if (!dok) { griff.disabled = true; return; }
-    DOKS[name] = dok;
-    griff.setAttribute('aria-label', zeile.querySelector('.d-name').textContent +
-      (AKTE[name].wort || (AKTE[name].schreibbar ? ' aufschlagen und weiterschreiben' : ' aufschlagen')));
+    DOKS[d.dok] = dok;
+    griff.setAttribute('aria-label', d.name +
+      (sicht.wort || (sicht.schreibbar ? ' aufschlagen und weiterschreiben' : ' aufschlagen')));
     griff.addEventListener('click', function(){
       dok.aus = zeile;
       Blatt.zeige(dok);
     });
+    if (d.entwurf) {
+      dok.griffe = [{wort: 'Fertigstellen', stark: true, tat: function(){
+        Blatt.schliesse();
+        stelleFertig(zeile, d, dok);
+      }}];
+    }
+    /* Ein Beleg zeigt nicht auf eine Akte, sondern auf ein Blatt darin. Nennt
+       die Adresse eines (&dok=fuhrpark), schlägt es sich selbst auf — bei
+       einer Fundstelle auf der zitierten Seite, mit markiertem Wort. Ohne das
+       stünde man in der Aktenübersicht und müsste suchen, was der Beleg
+       gerade genau benannt hat. */
+    if (gefragtesBlatt === d.dok) {
+      zeile.scrollIntoView({block: 'center'});
+      dok.aus = zeile;
+      Blatt.zeige(dok);
+    }
   });
 
   /* ---------- Ein neues Blatt ----------
@@ -599,7 +795,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     };
     document.querySelector('.doks').appendChild(zeile);
     blatt.aus = zeile;
-    blatt.fuss = 'Liegt in der Akte Petersen.';
+    blatt.fuss = 'Liegt in der Akte ' + M.name + '.';
     demoHinweisText('„' + name + '" liegt jetzt in der Akte — als ' +
       (zeichnung ? 'Skizze, die' : 'Entwurf, den') + ' außer euch niemand sieht.');
   }
@@ -626,6 +822,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   kippbar(Array.prototype.slice.call(document.querySelectorAll('.frei button')));
 
   /* ---------- Kundenzugang ---------- */
+  var zugangZustand = document.getElementById('zugang-zustand');
+  var zugangJetzt = M.zugang.zustand;
+  zugangZustand.innerHTML = kapselHtml(zugangJetzt);
+  /* Der Umbruch trennt zwei Sätze über denselben Menschen — ein <br> steht
+     hier in den Daten, deshalb innerHTML statt textContent. */
+  document.getElementById('zugang-meta').innerHTML = M.zugang.meta;
+
   var gesperrt = false;
   var meldung = document.getElementById('zugang-meldung');
   document.getElementById('link-schicken').addEventListener('click', function(){
@@ -633,26 +836,51 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     meldung.className = 'bestaetigt';
     meldung.textContent = 'Ist unterwegs. Der Link gilt eine Stunde und genau einmal.';
     meldung.hidden = false;
+    /* Wo der Zugang an einem abgelaufenen Link hing, ändert das Verschicken
+       den Zustand der Akte — sonst stünde neben der Meldung weiter, dass
+       nichts unterwegs ist. */
+    if (M.zugang.neuerLink) {
+      zugangJetzt = M.zugang.neuerLink.zustand;
+      zugangZustand.innerHTML = kapselHtml(zugangJetzt);
+      document.getElementById('zugang-meta').innerHTML = M.zugang.neuerLink.meta;
+      delete M.zugang.wiederOffen;
+    }
   });
   document.getElementById('sperren').addEventListener('click', function(){
     gesperrt = !gesperrt;
-    var z = document.getElementById('zugang-zustand');
     var knopf = document.getElementById('sperren');
     if (gesperrt) {
-      z.innerHTML = '<span class="zustand entwurf" role="img" aria-label="Zugang gesperrt" title="Zugang gesperrt"></span><span class="zustand-wort">gesperrt</span>';
+      zugangZustand.innerHTML = kapselHtml({art: 'entwurf', wort: 'gesperrt'});
       meldung.className = 'bestaetigt gefahr';
-      meldung.textContent = 'Gesperrt. Herr Petersen kommt nicht mehr hinein, bis du den Zugang wieder öffnest. Seine Daten bleiben unberührt.';
+      meldung.textContent = 'Gesperrt. ' + M.zugang.anrede + ' kommt nicht mehr hinein, bis du den Zugang wieder öffnest. Die Daten bleiben unberührt.';
       meldung.hidden = false;
       knopf.textContent = 'Zugang wieder öffnen';
     } else {
-      z.innerHTML = '<span class="zustand aktiv" role="img" aria-label="Zugang aktiv" title="Zugang aktiv"></span><span class="zustand-wort">aktiv</span>';
+      /* Zurück in den Zustand, der vorher da war — bei MTS ist das nicht
+         „aktiv", sondern der abgelaufene Link. Ein Entsperren, das aus einem
+         abgelaufenen Zugang einen offenen macht, wäre eine Lüge. */
+      zugangZustand.innerHTML = kapselHtml(zugangJetzt);
       meldung.className = 'bestaetigt';
-      meldung.textContent = 'Wieder offen. Herr Petersen kann sich anmelden wie zuvor.';
+      meldung.textContent = M.zugang.wiederOffen ||
+        ('Wieder offen. ' + M.zugang.anrede + ' kann sich anmelden wie zuvor.');
       knopf.textContent = 'Zugang sperren';
     }
   });
 
   /* ---------- Tarif: Kontingent wählen, gilt ab nächstem Monat ---------- */
+  var tarifZahl = document.getElementById('tarif-zahl');
+  var tarifKapsel = document.getElementById('tarif-kapsel');
+  var tarifWort = document.getElementById('tarif-wort');
+  var verbraucht = M.tarif.verbraucht + ' von ' + M.tarif.zahl + ' verbraucht';
+  tarifZahl.textContent = M.tarif.zahl + ' Fragen';
+  tarifKapsel.style.setProperty('--stand', (M.tarif.verbraucht / M.tarif.zahl).toFixed(2));
+  tarifKapsel.setAttribute('aria-label', verbraucht);
+  tarifKapsel.setAttribute('title', verbraucht);
+  tarifWort.textContent = M.tarif.verbraucht + ' von ' + M.tarif.zahl + ' im August verbraucht';
+  document.querySelectorAll('#kontingent-wahl button').forEach(function(b){
+    b.classList.toggle('gewaehlt', +b.dataset.zahl === M.tarif.zahl);
+  });
+
   document.getElementById('kontingent-aendern').addEventListener('click', function(){
     var wahl = document.getElementById('kontingent-wahl');
     wahl.hidden = !wahl.hidden;
@@ -663,13 +891,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       b.classList.add('gewaehlt');
       var zahl = +b.dataset.zahl;
       var m = document.getElementById('tarif-meldung');
-      if (zahl === 40) {
+      tarifZahl.textContent = zahl + ' Fragen';
+      if (zahl === M.tarif.zahl) {
         m.hidden = true;
-        document.getElementById('tarif-zahl').textContent = '40 Fragen';
       } else {
-        document.getElementById('tarif-zahl').textContent = zahl + ' Fragen';
         m.className = 'bestaetigt';
-        m.textContent = 'Ab 1. September: ' + zahl + ' Fragen im Monat. Der August läuft mit 40 weiter.';
+        m.textContent = 'Ab 1. September: ' + zahl + ' Fragen im Monat. Der August läuft mit ' +
+          M.tarif.zahl + ' weiter.';
         m.hidden = false;
       }
     });

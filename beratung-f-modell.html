@@ -67,7 +67,12 @@
    V39 (Häppchen E1): die Zentrale hat eine Tür „Selber fragen" — die Beratung
    fragt denselben KI-Berater, den ihre Kunden hören, bekommt aber Entwürfe
    statt Auskünfte (beratung-fragen.html).
-   Marker: BERATUNG-F-MODELL-V41 (Tür „Wie ihr arbeitet" in der Zentrale) */
+   V42 (Issue #50): jedes der vier Mandate hat jetzt die Tür „Kundenakte",
+   und Freitags 31 % heißen, was sie sind — die Rohertragsmarge, nicht die
+   Personalquote (die steht mit 38,4 % in seiner Akte).
+   mit seinem Namen in der Adresse. Vorher hatte nur Petersen eine — und ein
+   Beleg auf einer anderen Fläche konnte eine fremde Akte nicht öffnen.
+   Marker: BERATUNG-F-MODELL-V42 (jedes Mandat hat die Tür zu seiner Akte) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -671,12 +676,12 @@ body.gezoomt #zonen{display:block}
     <h3>Gespräche und Unterlagen</h3>
     <div class="zeilen">
       <button class="zeile bald" type="button"><span><span class="z-titel">Wie läuft mein Geschäft?</span><br><span class="z-meta">Montag, 9:12, nur für den Kunden</span></span><span class="z-typ">Gespräch</span></button>
-      <a class="zeile" href="beratung-akte.html"><span><span class="z-titel">Preismodell Benchmark</span><br><span class="z-meta">gestern in die Akte gelegt, 12 Seiten</span></span><span class="z-typ">Unterlage</span></a>
+      <a class="zeile" href="beratung-akte.html?mandat=petersen"><span><span class="z-titel">Preismodell Benchmark</span><br><span class="z-meta">gestern in die Akte gelegt, 12 Seiten</span></span><span class="z-typ">Unterlage</span></a>
       <button class="zeile bald" type="button"><span><span class="z-titel">Termin Donnerstag, 10:00</span><br><span class="z-meta">Dr. Anna Vogelsang, Preis und Marge</span></span><span class="z-typ">Videocall</span></button>
     </div>
     <div class="tueren">
       <a class="knopf leise" href="beratung-mitlesen.html">Gespräche mitlesen</a>
-      <a class="knopf leise" href="beratung-akte.html">Kundenakte</a>
+      <a class="knopf leise" href="beratung-akte.html?mandat=petersen">Kundenakte</a>
       <a class="knopf leise" href="beratung-mandat.html">Meilensteine und Aufgaben</a>
       <button class="bald knopf leise" type="button">Leistungsnachweis</button>
     </div>
@@ -715,11 +720,11 @@ body.gezoomt #zonen{display:block}
     <h3>Gespräche und Unterlagen</h3>
     <div class="zeilen">
       <button class="zeile bald" type="button"><span><span class="z-titel">Was kostet mich der Dieselpreis wirklich?</span><br><span class="z-meta">Freitag, 11:05, nur für den Kunden</span></span><span class="z-typ">Gespräch</span></button>
-      <button class="zeile bald" type="button"><span><span class="z-titel">Fuhrpark-Übersicht 2026</span><br><span class="z-meta">Fassung 1, vom Kunden hochgeladen</span></span><span class="z-typ">Unterlage</span></button>
+      <a class="zeile" href="beratung-akte.html?mandat=cordes"><span><span class="z-titel">Fuhrpark-Übersicht 2026</span><br><span class="z-meta">Fassung 1, vom Kunden hochgeladen</span></span><span class="z-typ">Unterlage</span></a>
     </div>
     <div class="tueren">
       <a class="knopf leise" href="beratung-termine.html#cordes">Frage beantworten</a>
-      <button class="bald knopf leise" type="button">Unterlagen</button>
+      <a class="knopf leise" href="beratung-akte.html?mandat=cordes">Kundenakte</a>
     </div>
   </section>
 
@@ -731,7 +736,7 @@ body.gezoomt #zonen{display:block}
     <div class="held">
       <div class="tafel-glas">
         <div class="gross" data-zaehl>31 %</div>
-        <div class="deut">Personalquote, Ziel gehalten</div>
+        <div class="deut">Rohertragsmarge, Ziel gehalten</div>
         <svg class="zieh" viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden="true">
           <defs><linearGradient id="verlauf-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6f63e8" stop-opacity=".2"/><stop offset="1" stop-color="#6f63e8" stop-opacity="0"/></linearGradient></defs>
           <path class="fuell" fill="url(#verlauf-f)" d="M2 18 L18 20 L34 17 L50 19 L66 16 L82 18 L98 17 L98 36 L2 36 Z"/>
@@ -754,6 +759,7 @@ body.gezoomt #zonen{display:block}
     </div>
     <div class="tueren">
       <button class="bald knopf leise" type="button">Gespräche ansehen</button>
+      <a class="knopf leise" href="beratung-akte.html?mandat=freitag">Kundenakte</a>
       <button class="bald knopf leise" type="button">Leistungsnachweis</button>
     </div>
   </section>
@@ -792,6 +798,7 @@ body.gezoomt #zonen{display:block}
     </div>
     <div class="tueren">
       <button class="bald knopf leise" type="button">Gespräche ansehen</button>
+      <a class="knopf leise" href="beratung-akte.html?mandat=mts">Kundenakte</a>
       <a class="knopf leise" href="beratung-rechnungen.html#b-r82">Rechnung ansehen</a>
     </div>
   </section>
@@ -836,7 +843,7 @@ body.gezoomt #zonen{display:block}
       <button class="flotte-karte" type="button" data-zu="freitag">
         <span class="f-kopf"><b>Bäckerei Freitag</b><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span></span>
         <span class="f-zahl">31 %</span>
-        <span class="f-deut">Personalquote im Ziel, läuft ruhig</span>
+        <span class="f-deut">Marge im Ziel, läuft ruhig</span>
       </button>
       <button class="flotte-karte" type="button" data-zu="mts">
         <span class="f-kopf"><b>MTS Maschinenbau</b><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span></span>

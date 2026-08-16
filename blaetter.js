@@ -37,7 +37,10 @@
    Hand wackelt aus den Koordinaten heraus — dieselbe Zeichnung sieht beim
    zweiten Aufschlagen genauso aus. Der Vorschlag des KI-Beraters liegt in
    feder.pause und wird als Pauspapier über die Tafel gelegt.
-   Marker: BLAETTER-V3 */
+   V4 (Issue #50): die Akten von Cordes, Freitag und MTS stehen hier neben
+   der von Petersen. Ohne sie konnte ein Beleg die Akte eines anderen
+   Mandanten nur benennen, nicht öffnen.
+   Marker: BLAETTER-V4 */
 window.Blaetter = (function () {
   'use strict';
 
@@ -263,6 +266,132 @@ window.Blaetter = (function () {
                 ['Personalaufwand', '1.011.000 €', '958.000 €'],
                 ['Jahresüberschuss', '164.000 €', '191.000 €']]},
          {p: 'Der Rohertrag liegt bei 31,8 Prozent nach 33,1 Prozent im Vorjahr. Die Eigenkapitalquote beträgt 38 Prozent.'}]
+      ]
+    },
+
+    /* ---------- Die Akten der drei anderen Mandate ----------
+       Seit jedes Mandat seine Akte hat (Issue #50), darf ein Beleg die Akte
+       eines anderen Mandanten benennen UND dorthin führen. Die Seiten hier
+       sind der Grund, dass das keine Behauptung ist. */
+
+    /* Cordes Logistik. Seite 2 ist die Stelle, die der KI-Berater in
+       beratung-fragen.html zitiert: zwei Wechselbrücken, 34.800 €, und keine
+       eingetragene Nutzungsdauer — daher überhaupt die Frage. Die steuerliche
+       Anlagenliste 2026 fehlt Cordes noch (beratung-radar.html); dies ist die
+       Fassung des Kunden, nicht die des Steuerbüros. */
+    fuhrpark: {
+      titel: 'Fuhrpark-Übersicht 2026', seitenGesamt: 6,
+      seiten: [
+        [{h: 'Fuhrpark-Übersicht 2026'},
+         {klein: 'Cordes Logistik GmbH & Co. KG, Bremen. Fassung 1, gepflegt von der Disposition, Stand 30. Juni 2026.'},
+         {h: '1. Bestand'},
+         {tab: [['Art', 'Anzahl', 'Ø Alter', 'Buchwert'],
+                ['Zugmaschinen', '11', '4,2 Jahre', '486.000 €'],
+                ['Sattelauflieger', '14', '6,8 Jahre', '291.000 €'],
+                ['Wechselbrücken', '8', '3,1 Jahre', '89.200 €'],
+                ['Transporter bis 3,5 t', '3', '5,0 Jahre', '38.700 €']]},
+         {p: 'Die Fahrleistung der Zugmaschinen lag 2025 bei 428.000 Kilometern; sie ist die Grundlage jeder Mautrechnung in diesem Mandat.'}],
+        [{h: '2. Zugänge 2026'},
+         {tab: [['Zugang', 'Datum', 'Anzahl', 'Netto'],
+                ['Wechselbrücken, Typ C 745', '14. Mai 2026', '2', '34.800 €'],
+                ['Sattelauflieger, gebraucht', '3. März 2026', '1', '21.500 €']]},
+         {p: 'Die beiden Wechselbrücken ersetzen zwei Einheiten von 2016, die im April ausgesondert wurden. Bezahlt wurde aus dem laufenden Konto, ohne Finanzierung.'},
+         {p: 'Für die Wechselbrücken ist in dieser Fassung keine Nutzungsdauer eingetragen. Die Übersicht führt den Bestand, sie rechnet nicht ab.'}]
+      ]
+    },
+
+    dieselkosten: {
+      titel: 'Dieselkosten je Tour, erstes Halbjahr', seitenGesamt: 4,
+      seiten: [
+        [{h: 'Dieselkosten je Tour, Januar bis Juni 2026'},
+         {klein: 'Cordes Logistik, ausgewertet vom KI-Berater aus den Tankbelegen und den Tourdaten. Erstellt am 9. Juli 2026.'},
+         {tab: [['Monat', 'Touren', 'Liter je Tour', '€ je Tour'],
+                ['Januar', '412', '78,4', '132,10 €'],
+                ['März', '446', '77,9', '128,40 €'],
+                ['Mai', '463', '79,6', '136,80 €'],
+                ['Juni', '451', '80,2', '141,20 €']]},
+         {p: 'Der Verbrauch je Tour steigt seit März, der Preis je Liter ebenfalls. Zusammen sind das 9,10 € je Tour mehr als im Januar, bei rund 5.400 Touren im Jahr also etwa 49.000 €.'},
+         {p: 'Die Frachtraten sind im selben Zeitraum um 1,4 Prozent gestiegen. Der Dieselzuschlag deckt davon rechnerisch zwei Drittel.'}]
+      ]
+    },
+
+    steuernotiz: {
+      titel: 'Notiz zur Steuerfrage Cordes', seitenGesamt: 1,
+      seiten: [
+        [{h: 'Notiz zur Steuerfrage Cordes'},
+         {klein: 'Dr. Anna Vogelsang, {beratung}, 16. August 2026. Interne Notiz.'},
+         {p: 'Herr Cordes fragt, ob die beiden Wechselbrücken vom 14. Mai in diesem Jahr voll abgezogen werden können. Die Nutzungsdauer nach amtlicher Tabelle beträgt neun Jahre; ab Mai zeitanteilig, also mit acht Zwölfteln, 2.578 € für 2026.'},
+         {p: 'Was ich nicht weiß und vor einer Antwort brauche: Gewinn 2025 nach Abschluss, ob in den letzten drei Jahren bereits ein Investitionsabzugsbetrag gebildet wurde, und die Größenmerkmale zum Bilanzstichtag.'},
+         {p: 'Vor der Antwort mit dem Steuerbüro Ahlers klären. Bis dahin bekommt Herr Cordes die Rechnung nach Nutzungsdauer und den Satz, dass daneben ein Sofortabzug geprüft wird.'}]
+      ]
+    },
+
+    /* Bäckerei Freitag. Ein ruhiges Mandat hat eine dünne Akte, und das darf
+       man sehen — zwei Blätter, beide freigegeben, kein interner Vermerk. */
+    personalquote: {
+      titel: 'Personalquote Juli', seitenGesamt: 5,
+      seiten: [
+        [{h: 'Personalquote Juli 2026'},
+         {klein: 'Bäckerei Freitag e.K., Wilhelmshaven. Erstellt am 6. August 2026 von {beratung}.'},
+         {p: 'Die Personalquote liegt im Juli bei 38,4 Prozent vom Umsatz und damit erstmals seit März im Zielkorridor von 37 bis 39 Prozent.'},
+         {tab: [['Standort', 'Umsatz Juli', 'Personalkosten', 'Quote'],
+                ['Marktstraße', '104.200 €', '38.900 €', '37,3 %'],
+                ['Bahnhof', '61.800 €', '25.400 €', '41,1 %'],
+                ['Voslapp', '48.300 €', '18.100 €', '37,5 %']]},
+         {p: 'Der Standort Bahnhof trägt die Abweichung allein. Die Öffnungszeit am Sonntag bindet dort zwei Kräfte für einen Umsatz, der an Werktagen in vier Stunden entsteht.'}]
+      ]
+    },
+
+    filialvergleich: {
+      titel: 'Filialvergleich, drei Standorte', seitenGesamt: 7,
+      seiten: [
+        [{h: 'Filialvergleich, drei Standorte'},
+         {klein: 'Bäckerei Freitag, ausgewertet vom KI-Berater aus den Kassendaten Januar bis Juli 2026.'},
+         {tab: [['Kennzahl', 'Marktstraße', 'Bahnhof', 'Voslapp'],
+                ['Bons je Tag', '612', '388', '291'],
+                ['Ø Bon', '5,40 €', '4,10 €', '5,80 €'],
+                ['Retourenquote', '4,1 %', '9,3 %', '3,8 %'],
+                ['Rohertragsmarge', '32,6 %', '27,9 %', '33,1 %']]},
+         {p: 'Der Standort Bahnhof verkauft mehr Stück zu kleineren Bons und wirft fast jedes zehnte Teil weg. Beides zusammen erklärt die vier Punkte Margenabstand vollständig.'},
+         {p: 'Eine kleinere Nachmittagsbestückung am Bahnhof würde bei gleicher Nachfrage rund 11.000 € Retouren im Jahr sparen.'}]
+      ]
+    },
+
+    /* MTS Maschinenbau. Seit drei Wochen still, Zugang abgelaufen — die Akte
+       ist das Einzige, was in diesem Mandat gerade noch spricht. */
+    ratenabrede: {
+      titel: 'Abrede zur Ratenzahlung', seitenGesamt: 2,
+      seiten: [
+        [{h: 'Abrede zur Ratenzahlung'},
+         {klein: 'Zwischen {beratung} und der MTS Maschinenbau GmbH, Cloppenburg. Geschlossen am 12. Juni 2026.'},
+         {p: 'Die Jahrespauschale 2026 von 27.000 € netto wird abweichend von der Rechnung in zwölf gleichen Monatsraten von 2.250 € netto gezahlt, fällig jeweils zum 15. des Monats.'},
+         {p: 'Die Abrede endet, wenn zwei Raten offen sind. Dann wird der Restbetrag in einer Summe fällig.'},
+         {p: 'Die Leistung bleibt unverändert: KI-Berater mit 40 Fragen im Monat, vier Termine im Jahr, Auswertung zum Quartal.'}]
+      ]
+    },
+
+    maiauswertung: {
+      titel: 'Auswertung Mai', seitenGesamt: 6,
+      seiten: [
+        [{h: 'Auswertung Mai 2026'},
+         {klein: 'MTS Maschinenbau GmbH, Cloppenburg. Erstellt am 11. Juni 2026 von {beratung}.'},
+         {tab: [['Kennzahl', 'Mai 2026', 'Mai 2025'],
+                ['Umsatz', '612.000 €', '648.000 €'],
+                ['Rohertragsmarge', '26,8 %', '28,9 %'],
+                ['Auftragsbestand', '2,1 Monate', '3,4 Monate'],
+                ['Betriebsergebnis', '21.400 €', '39.800 €']]},
+         {p: 'Der Auftragsbestand ist der schwächste seit Beginn des Mandats. Bei gleichbleibendem Zugang reicht er bis Mitte Juli.'}]
+      ]
+    },
+
+    stillnotiz: {
+      titel: 'Notiz: seit drei Wochen still', seitenGesamt: 1,
+      seiten: [
+        [{h: 'Notiz: seit drei Wochen still'},
+         {klein: 'Dr. Anna Vogelsang, {beratung}, 14. August 2026. Interne Notiz.'},
+         {p: 'Seit dem 22. Juli keine Frage, kein Anruf, keine Antwort auf zwei Mails. Sein Anmelde-Link ist am 26. Juli abgelaufen — möglich, dass er schlicht nicht mehr hineinkommt.'},
+         {p: 'Die Juli-Rate ist gezahlt, die August-Rate seit dem 15. offen. Der Auftragsbestand aus der Mai-Auswertung reichte bis Mitte Juli.'},
+         {p: 'Vor allem anderen anrufen, nicht schreiben. Wenn niemand rangeht, über die Assistenz einen Termin anbieten.'}]
       ]
     },
 

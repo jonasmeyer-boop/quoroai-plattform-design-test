@@ -60,7 +60,8 @@
    lag er auf der Krume) und räumt seinen Text mit sich weg. Die Uhr rechnet
    aus dem Startzeitpunkt statt Takte zu zählen — im Hintergrund-Tab verliert
    man Takte.
-   Marker: BERATUNG-PROTOKOLL-V2 */
+   V3 (Issue #50): die Türen in die Kundenakte nennen jetzt das Mandat in der Adresse.
+   Marker: BERATUNG-PROTOKOLL-V3 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -708,7 +709,7 @@ main > .bogen{animation:none;opacity:1;translate:none}
     document.querySelector('#schritt-nein .griffe').hidden = true;
     var fertig = document.getElementById('notiz-fertig');
     fertig.hidden = false;
-    fertig.innerHTML = '<span>Liegt als <b>deine Notiz</b> in der Akte Petersen, mit dem heutigen Datum und deinem Namen daran. Kein Protokoll, und es gibt sich auch nicht als eines aus. <a href="beratung-akte.html">In die Akte</a></span>';
+    fertig.innerHTML = '<span>Liegt als <b>deine Notiz</b> in der Akte Petersen, mit dem heutigen Datum und deinem Namen daran. Kein Protokoll, und es gibt sich auch nicht als eines aus. <a href="beratung-akte.html?mandat=petersen">In die Akte</a></span>';
   });
 
   /* ---------- Es läuft ----------
@@ -859,7 +860,7 @@ main > .bogen{animation:none;opacity:1;translate:none}
 
   var TUN_PROTOKOLL = {
     'akte': function(bogen){
-      ablegen(bogen, '<span>Liegt als Blatt in der <b>Akte Petersen</b>, mit dem heutigen Datum. <a href="beratung-akte.html">In die Akte</a></span>');
+      ablegen(bogen, '<span>Liegt als Blatt in der <b>Akte Petersen</b>, mit dem heutigen Datum. <a href="beratung-akte.html?mandat=petersen">In die Akte</a></span>');
     },
     'an-kunden': function(bogen){ inTinteDruecken(bogen); },
     /* Wer das Blatt verwirft, verwirft die Karten daraus mit: sie sind aus
@@ -907,7 +908,7 @@ main > .bogen{animation:none;opacity:1;translate:none}
       bogen.querySelector('.ausgang .ausgang-feld').hidden = true;
       bogen.querySelector('.ausgang .griffe').hidden = true;
       bogen.querySelector('.ausgang .hand').hidden = true;
-      ablegen(bogen, '<span>Steht in seinem Portal, als dein Wort, mit deinem Namen daran. Eine Kopie liegt in der <a href="beratung-akte.html">Akte Petersen</a>.</span>');
+      ablegen(bogen, '<span>Steht in seinem Portal, als dein Wort, mit deinem Namen daran. Eine Kopie liegt in der <a href="beratung-akte.html?mandat=petersen">Akte Petersen</a>.</span>');
     },
     'doch-nicht': function(bogen){
       var ausgang = bogen.querySelector('.ausgang');
