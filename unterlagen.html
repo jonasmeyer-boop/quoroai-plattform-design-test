@@ -7,13 +7,17 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
 /* quoroai-plattform-design · Unterlagen: alles, was die Beratung freigegeben hat
-   Marker: UNTERLAGEN-V11 (V9: Häppchen D1, die offene Bitte um eine Unterlage
+   Marker: UNTERLAGEN-V12 (V9: Häppchen D1, die offene Bitte um eine Unterlage
    steht über dem Bestand. V10: Häppchen D3 — am ersten Tag liegt hier genau ein
    Dokument, der Beratungsvertrag. Ein neuer Kunde mit fünf Beratungsdokumenten
    in der Akte wäre eine Behauptung. V11: Häppchen D4 — die Unterlage wird
    hier gelesen, Seite für Seite; Laden ist der zweite Weg, nicht der einzige.
    Die Seiten kommen aus blaetter.js, es sind dieselben, die die Beratung in
-   der Akte sieht.) */
+   der Akte sieht.)
+   V12: der Hinweis startet leer, wird gesprochen (role=status) und räumt
+   seinen Satz erst nach der Überblendung weg. Im Markup stand er fest —
+   das Vorlesen las ihn beim Betreten der Seite mit, ohne dass jemand
+   etwas gedrückt hatte. */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -181,7 +185,11 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
   <div class="wortmarke"><img class="marke-logo" alt="" hidden><div><span data-marke-name data-logo-versteckt>Nordholm &amp; Partner</span><small class="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung: Beispielmarke wechseln</small></div></div>
   <a class="zurueck" href="uebersicht.html">← Übersicht</a>
 </nav>
-<div id="demo-hinweis">Vorführung — hier läge die echte Datei.</div>
+<!-- role="status" muss sein: nach „Laden" und beim Aufschlagen ohne Baustein
+     ist dieser Zettel die einzige Rückmeldung. Ungesprochen wäre sie keine.
+     Und er startet leer: stünde der Satz im Markup, läse ihn das Vorlesen beim
+     Betreten der Seite mit, ohne dass jemand etwas gedrückt hat. -->
+<div id="demo-hinweis" role="status" aria-live="polite"></div>
 
 <main>
   <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
@@ -231,13 +239,19 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
     p.style.strokeDashoffset = 0;
   }
 
-  var hinweisTimer = null;
+  var hinweisTimer = null, leerTimer = null;
   function demoHinweis(text){
     var h = document.getElementById('demo-hinweis');
     h.textContent = text;
     h.classList.add('da');
-    clearTimeout(hinweisTimer);
-    hinweisTimer = setTimeout(function(){ h.classList.remove('da'); }, 2200);
+    clearTimeout(hinweisTimer); clearTimeout(leerTimer);
+    hinweisTimer = setTimeout(function(){
+      h.classList.remove('da');
+      /* Leeren erst nach der Überblendung: durchsichtig ist der Satz nur fürs
+         Auge, im Vorlesebaum stünde er weiter — im selben Zug geleert
+         verschwände er schlagartig, statt zu verklingen. */
+      leerTimer = setTimeout(function(){ h.textContent = ''; }, 320);
+    }, 2200);
   }
 
   /* Demo-Bestand: Titel, Meta, Fassungen, Volltext für die Suche.

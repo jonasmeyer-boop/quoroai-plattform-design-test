@@ -76,7 +76,9 @@
    oder beratung-rechnungen.html nachzuschlagen.
    V8 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
-   Marker: BERATUNG-FRAGEN-V8 (die Krume kommt aus einer Quelle) */
+   V9: der Demo-Hinweis startet leer und räumt seinen Satz mit sich weg
+   (siehe beratung-akte.html V16).
+   Marker: BERATUNG-FRAGEN-V9 (die Krume kommt aus einer Quelle) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -405,7 +407,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
      data-hilfe="Nichts auf diesem Tisch erreicht einen Kunden, solange du es nicht schickst. Gibst du einen Bogen an ihn weiter, wechselt er sichtbar in deine Marke, und sein Text landet in einem Feld — ab da hast du ihn unterschrieben.">Was hier steht, sieht kein Kunde — auch nicht der, über den es geht. Was du hinausgibst, geht als dein Wort in sein Gespräch, so wie die Antworten aus <a href="beratung-termine.html">Termine und Übergaben</a>.</p>
 </main>
 
-<div id="demo-hinweis" role="status" aria-live="polite">Diese Fläche entsteht gerade.</div>
+<div id="demo-hinweis" role="status" aria-live="polite"></div>
 
 <script>
 (function(){
@@ -416,13 +418,19 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     el.style.setProperty('--verz', (i * 0.07) + 's');
   });
 
-  var hinweisTimer = null;
+  var hinweisTimer = null, leerTimer = null;
   function demoHinweis(text){
     var h = document.getElementById('demo-hinweis');
     h.textContent = text;
     h.style.opacity = .95; h.style.translate = '-50% 0';
-    clearTimeout(hinweisTimer);
-    hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2600);
+    clearTimeout(hinweisTimer); clearTimeout(leerTimer);
+    hinweisTimer = setTimeout(function(){
+      h.style.opacity = 0; h.style.translate = '-50% 6px';
+      /* Nicht nur ausblenden, auch leeren: durchsichtig ist der Satz nur fürs
+         Auge, im Vorlesebaum stünde er weiter. Aber erst NACH der Überblendung —
+         im selben Zug geleert verschwände er schlagartig, statt zu verklingen. */
+      leerTimer = setTimeout(function(){ h.textContent = ''; }, 320);
+    }, 2600);
   }
 
   /* ---------- Worüber: der Umschalter zeigt seine Wirkung ----------

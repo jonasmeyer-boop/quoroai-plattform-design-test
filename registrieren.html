@@ -31,7 +31,11 @@
    die Kapsel steht dabei voll und grau statt auf 18 % Baustand (das Haus ist
    fertig, es gehört nur nicht dir); und wer von der Einladung zur Anmeldung
    wechselt, landet nicht mehr in der schon erleuchteten Stadt.
-   Marker: REGISTRIEREN-V7 */
+   V8: „Passwort vergessen?" sagte wörtlich „Diese Fläche entsteht gerade." —
+   den Satz, den die Entscheidung vom 2026-08-16 abgeschafft hat, und hier war
+   er wirklich zu sehen. Jetzt „Dieser Griff ist im Entwurf nicht gezeichnet.",
+   gesprochen (role=status), und der Hinweis startet leer.
+   Marker: REGISTRIEREN-V8 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input{font-family:inherit}
@@ -290,7 +294,7 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
   </div>
 </div>
 
-<div id="demo-hinweis" style="position:fixed;top:20px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-size:14px;font-weight:600;color:var(--lila-700);opacity:0;transition:opacity .3s ease,translate .3s var(--kurve)">Diese Fläche entsteht gerade.</div>
+<div id="demo-hinweis" role="status" aria-live="polite" style="position:fixed;top:20px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-size:14px;font-weight:600;color:var(--lila-700);opacity:0;transition:opacity .3s ease,translate .3s var(--kurve)"></div>
 
 <script>
 (function(){
@@ -539,12 +543,22 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
     setTimeout(function(){ location.href = 'beratung-f-modell.html'; }, reduziert ? 150 : 1500);
   });
 
-  var hinweisTimer = null;
+  var hinweisTimer = null, leerTimer = null;
   document.getElementById('vergessen').addEventListener('click', function(){
     var h = document.getElementById('demo-hinweis');
+    /* Nicht mehr „entsteht gerade": hier entsteht nichts, der Weg zurück ins
+       Passwort ist im Entwurf schlicht nicht gezeichnet (Entscheidung
+       2026-08-16). Der Satz steht erst beim Druck da, nicht schon im Markup —
+       sonst läse ihn das Vorlesen beim Betreten der Seite mit. */
+    h.textContent = 'Dieser Griff ist im Entwurf nicht gezeichnet.';
     h.style.opacity = .95; h.style.translate = '-50% 0';
-    clearTimeout(hinweisTimer);
-    hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2200);
+    clearTimeout(hinweisTimer); clearTimeout(leerTimer);
+    hinweisTimer = setTimeout(function(){
+      h.style.opacity = 0; h.style.translate = '-50% 6px';
+      /* Leeren erst nach der Überblendung — sonst verschwindet der Satz
+         schlagartig, statt zu verklingen. */
+      leerTimer = setTimeout(function(){ h.textContent = ''; }, 320);
+    }, 2200);
   });
 })();
 </script>

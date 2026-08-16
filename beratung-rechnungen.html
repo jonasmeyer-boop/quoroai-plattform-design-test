@@ -41,7 +41,9 @@
    „Rechnungsdaten ansehen" ist ein Griff in Fingerhöhe.
    V10 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
-   Marker: BERATUNG-RECHNUNGEN-V10 (die Krume kommt aus einer Quelle) */
+   V11: der Demo-Hinweis startet leer, räumt seinen Satz mit sich weg und wird
+   gesprochen (role=status) — er war die einzige Rückmeldung mehrerer Griffe.
+   Marker: BERATUNG-RECHNUNGEN-V11 (die Krume kommt aus einer Quelle) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -426,7 +428,7 @@ a.beleg-zeile{
   </div>
 </main>
 
-<div id="demo-hinweis" style="position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--lila-700);opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--kurve)">Diese Fläche entsteht gerade.</div>
+<div id="demo-hinweis" role="status" aria-live="polite" style="position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--lila-700);opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--kurve)"></div>
 
 <script>
 (function(){
@@ -436,13 +438,19 @@ a.beleg-zeile{
     el.style.setProperty('--verz', (i * 0.07) + 's');
   });
 
-  var hinweisTimer = null;
+  var hinweisTimer = null, leerTimer = null;
   function demoHinweis(text){
     var h = document.getElementById('demo-hinweis');
     h.textContent = text;
     h.style.opacity = .95; h.style.translate = '-50% 0';
-    clearTimeout(hinweisTimer);
-    hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2800);
+    clearTimeout(hinweisTimer); clearTimeout(leerTimer);
+    hinweisTimer = setTimeout(function(){
+      h.style.opacity = 0; h.style.translate = '-50% 6px';
+      /* Nicht nur ausblenden, auch leeren: durchsichtig ist der Satz nur fürs
+         Auge, im Vorlesebaum stünde er weiter. Aber erst NACH der Überblendung —
+         im selben Zug geleert verschwände er schlagartig, statt zu verklingen. */
+      leerTimer = setTimeout(function(){ h.textContent = ''; }, 320);
+    }, 2800);
   }
 
   /* ---------- Die Welt: eine Beratung, vier Kunden, ein Stapel Belege ----------

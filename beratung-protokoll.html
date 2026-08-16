@@ -66,7 +66,9 @@
    nennt, wo die Sache liegt, nicht wo man herkam (Chronik 2026-08-16), und
    dieses Protokoll ist von der ersten bis zur letzten Zeile Petersen. Wer aus
    dem Petersen-Raum hereinkam, hatte vorher keinen Weg zurück in ihn.
-   Marker: BERATUNG-PROTOKOLL-V4 (die Krume kommt aus einer Quelle) */
+   V5: der Hinweis räumt seinen Satz erst nach der Überblendung weg — im
+   selben Zug geleert verschwand er schlagartig, statt zu verklingen.
+   Marker: BERATUNG-PROTOKOLL-V5 (die Krume kommt aus einer Quelle) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -657,17 +659,18 @@ main > .bogen{animation:none;opacity:1;translate:none}
     el.style.setProperty('--verz', (i * 0.06) + 's');
   });
 
-  var hinweisTimer = null;
+  var hinweisTimer = null, leerTimer = null;
   function demoHinweis(text){
     var h = document.getElementById('demo-hinweis');
     h.textContent = text;
     h.style.opacity = .95; h.style.translate = '-50% 0';
-    clearTimeout(hinweisTimer);
+    clearTimeout(hinweisTimer); clearTimeout(leerTimer);
     hinweisTimer = setTimeout(function(){
       h.style.opacity = 0; h.style.translate = '-50% 6px';
       /* Nicht nur ausblenden, auch leeren: durchsichtig ist der Satz nur fürs
-         Auge, im Vorlesebaum stünde er weiter. */
-      h.textContent = '';
+         Auge, im Vorlesebaum stünde er weiter. Aber erst NACH der Überblendung —
+         im selben Zug geleert verschwände er schlagartig, statt zu verklingen. */
+      leerTimer = setTimeout(function(){ h.textContent = ''; }, 320);
     }, 2600);
   }
 
