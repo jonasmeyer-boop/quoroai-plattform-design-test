@@ -82,7 +82,10 @@
    Pauspapier zurück statt ins Nichts, die Blätterknöpfe zählen das Dokument
    und nicht die Vorführung, und das Pauspapier zählt nicht als eigener
    Inhalt der Tafel.
-   Marker: BLATT-V5
+   V6 (zweites Review zu Teil 3): kein Knopf steht sichtbar und tot zugleich,
+   „Zeichne hier." legt sich nicht über ein Pauspapier, ein Rückschritt prüft
+   erst und nimmt dann weg, und jeder Vorschlag kennt sein eigenes Pauspapier.
+   Marker: BLATT-V6
 
    Markenneutral: alle Farben kommen aus den Tokens der Fläche — Kundenflächen
    setzen --blau/--linie/--grau über marke.js, quoroAI-Flächen bringen
@@ -288,7 +291,7 @@ window.Blatt = (function () {
          wird mit dem Stift, auch die eigenen Buchstaben. */
       '.bb-tafel .leerwort{display:none;font-family:Caveat,cursive;font-size:27px;color:#c0c0c9;' +
         'position:absolute;inset:0;align-items:center;justify-content:center;pointer-events:none}' +
-      '.bb-tafel.offen.leer .leerwort{display:flex}' +
+      '.bb-tafel.offen.leer:not(.mit-pause) .leerwort{display:flex}' +
 
       /* Das Pauspapier des KI-Beraters: ein eigenes Blatt über der Tafel,
          durchscheinend, leicht schief aufgelegt — nichts davon ist Tinte. */
@@ -544,8 +547,13 @@ window.Blatt = (function () {
     /* Das Pauspapier liegt sofort auf der Tafel — man soll den Vorschlag
        sehen, bevor man ihn anfasst. Auf dem Blatt liegt er, in der Tinte
        steht er nicht. */
-    if (tafelSvg && feder.pause) legePauspapier(tafelSvg, feder.pause);
-    var eintrag = { el: el, knopf: f, feder: feder, seite: seitenNr, tafelSvg: tafelSvg || null };
+    var pauseG = (tafelSvg && feder.pause) ? legePauspapier(tafelSvg, feder.pause) : null;
+    if (tafelSvg) zeigeLeereTafel(tafelSvg);
+    /* Die Gruppe hängt an DIESEM Vorschlag. Zwei Vorschläge auf einer Tafel
+       sind zwei Pauspapiere, und wer sich das erste greift, übernimmt beim
+       zweiten Druck die Striche des falschen. */
+    var eintrag = { el: el, knopf: f, feder: feder, seite: seitenNr,
+                    tafelSvg: tafelSvg || null, pauseG: pauseG };
     f.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -703,6 +711,10 @@ window.Blatt = (function () {
        steht, ist leer und sagt das auch. */
     var leer = !svg.querySelector(':scope > .tinte .strich, :scope > .marker .strich, :scope > .worte text');
     svg.__wrap.classList.toggle('leer', leer);
+    /* „Zeichne hier." steht in der Mitte der Tafel — genau dort, wo auch das
+       Pauspapier liegt. Solange ein Vorschlag daliegt, ist die Aufforderung
+       ein Aufkleber quer über der Zeichnung, die man gerade beurteilen soll. */
+    svg.__wrap.classList.toggle('mit-pause', !!svg.querySelector('.bb-pause'));
   }
 
   /* ---------- Der Stift des Menschen ---------- */
@@ -850,8 +862,12 @@ window.Blatt = (function () {
      durch ein Strg+Z endgültig zu verlieren, wäre die härteste Strafe für
      den kleinsten Irrtum. */
   function legeZurueckAufsPauspapier(svg, s) {
-    s.wo.forEach(function (el) { el.remove(); });
+    /* Erst prüfen, dann wegnehmen: wer den Absatz mit der Feder inzwischen
+       weggetippt hat, hätte sonst beide Fassungen verloren — die
+       übernommene UND den Vorschlag. Dann bleibt die Zeichnung lieber
+       stehen, als dass ein Rückschritt sie vernichtet. */
     if (!s.feder || !s.el || !s.el.isConnected) return;
+    s.wo.forEach(function (el) { el.remove(); });
     if (s.el.__block) s.el.__block.feder = s.feder;
     hefteFeder(s.el, s.feder, s.seite, svg);
     zeigeFedernStand();
@@ -878,8 +894,11 @@ window.Blatt = (function () {
      weil ein Kasten, der einfach da ist, aussieht wie ein Programmfehler —
      und weil man in dieser Sekunde sehen soll, was man gerade angenommen hat. */
   function nimmPause(eintrag) {
-    var svg = eintrag.tafelSvg, g = svg.querySelector('.bb-pause');
-    if (!g) return;
+    var svg = eintrag.tafelSvg, g = eintrag.pauseG;
+    if (!g || !g.isConnected) return;
+    /* Der nächste Rückschritt gilt dieser Tafel: sonst nimmt Strg+Z auf einem
+       Blatt mit zwei Tafeln der anderen einen Strich weg. */
+    if (svg.__zeichenbar) letzteTafel = svg;
     var neu = [];
     Array.prototype.forEach.call(g.querySelectorAll('.strich, text'), function (el) {
       var inMarker = !!el.closest('.marker');
@@ -958,12 +977,12 @@ window.Blatt = (function () {
     griffeKasten.parentNode.classList.add('hat-tafel');
   }
 
-  function wirfPauseWeg(svg) {
-    var g = svg && svg.querySelector('.bb-pause');
-    if (!g) return;
-    if (reduziert) { g.remove(); return; }
+  function wirfPauseWeg(svg, g) {
+    if (!g || !g.isConnected) return;
+    function weg() { g.remove(); if (svg) zeigeLeereTafel(svg); }
+    if (reduziert) { weg(); return; }
     g.classList.add('weg');
-    setTimeout(function () { g.remove(); }, 420);
+    setTimeout(weg, 420);
   }
 
   function baueSeite(bloecke, nr, gesamt, fundWort, papierOffen) {
@@ -1140,13 +1159,14 @@ window.Blatt = (function () {
     zaehler.textContent = gesamtDok > 1 ? 'Seite ' + (jetzt + 1) + ' von ' + gesamtDok : '';
     zurueckKnopf.disabled = jetzt <= 0;
     weiterKnopf.disabled = jetzt >= gesamt - 1;
-    /* Bei einer einzigen Seite gibt es nichts zu blättern. Zwei tote Knöpfe
-       sind auf dem großen Schirm Lärm und am Handy eine ganze Zeile.
-       Gezählt wird das Dokument: der Jahresabschluss hat 48 Seiten, von denen
-       die Vorführung eine setzt — dort sagt der Zähler „Seite 1 von 48", und
-       ein Blatt ohne Blätterknöpfe daneben wäre die Behauptung, es gäbe
-       nichts weiter. */
-    zurueckKnopf.hidden = weiterKnopf.hidden = gesamtDok < 2;
+    /* Geblättert wird in dem, was dasteht — und wo nur eine Seite dasteht,
+       gibt es nichts zu blättern. Gezählt wird trotzdem das Dokument: beim
+       Jahresabschluss sagt der Zähler „Seite 1 von 48", und dass die anderen
+       47 in der Vorführung nicht gesetzt sind, sagt der Zettel unter der
+       Seite. Zwei sichtbare, aber tote Knöpfe wären die schlechtere Auskunft
+       als gar keine: am großen Schirm Lärm, am Handy eine ganze Zeile, und
+       beides für einen Griff, der nichts tun kann. */
+    zurueckKnopf.hidden = weiterKnopf.hidden = gesamt < 2;
     miniEl.forEach(function (m, i) {
       m.classList.toggle('hier', i === jetzt);
       if (i === jetzt) m.setAttribute('aria-current', 'true');
@@ -1244,9 +1264,10 @@ window.Blatt = (function () {
   function wirfFeder(weg) {
     var el = federHier && federHier.el;
     var svg = federHier && federHier.tafelSvg;
+    var pauseG = federHier && federHier.pauseG;
     schliesseFeder(weg);
     /* Verworfen heißt bei einer Zeichnung: das Pauspapier wird weggezogen. */
-    if (weg && svg) wirfPauseWeg(svg);
+    if (weg && svg) wirfPauseWeg(svg, pauseG);
     if (el && el.isContentEditable) el.focus();
   }
 
