@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Was er von selbst meldet</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Was er von selbst meldet: Wissenslücken-Radar und
+   die Briefings, die Donnerstag früh zu den Kunden gehen (Häppchen E3,
+   Issue #44).
+
+   Die Frage des Häppchens war: welche Form hat eine Meldung, um die niemand
+   gebeten hat, ohne dass sie zum Newsletter wird? Diese Fläche antwortet in
+   drei Sätzen, die man sieht statt liest.
+
+   1. Er meldet sich nur, wo etwas an einer eigenen Zahl hängt. Nach innen ist
+      das eine Lücke, die er selbst hatte — nicht ein Thema, das gerade läuft:
+      jede Karte trägt den Satz, mit dem er stehen blieb, wer seitdem darauf
+      wartet, und was das die Beratung an Stunden gekostet hat. Nach außen ist
+      es der Betrag, den eine Branchenmeldung im Betrieb DIESES Kunden ausmacht.
+   2. Nicht jedes Loch soll zu. Die Steuerfrage ist keine Lücke, sondern die
+      Kante, die die Beratung selbst gesetzt hat (beratung-ki-berater.html).
+      Ein Radar, das jede Übergabe als Versäumnis führt, erzieht zur falschen
+      Antwort.
+   3. Was hinausgeht, sieht die Beratung vorher — aber sie gibt es nicht frei,
+      sie kann es ANHALTEN. Freigabe je Kunde und Woche wäre bei zweihundert
+      Kunden eine Lüge; Schweigen darf keine Arbeit kosten. Angehalten wird,
+      was die Beratung lieber selbst sagt.
+
+   Der Moment der Fläche: ein Satz ins Wissen geschrieben, und drei Kunden
+   hören auf zu warten — sichtbar, in derselben Karte. Der zweite Schritt
+   (ihnen Bescheid geben) ist bewusst ein eigener Griff: ins Wissen schreiben
+   heißt, dass er es künftig selbst beantwortet, nicht dass er heute jemanden
+   anschreibt (Regel aus E1 — nichts geht ohne Hand hinaus).
+
+   Chrome ist quoroAI (system.css, Entscheidung 2026-08-12), Hilfe-Ebene im
+   Kopfband, Uhr-Dock und Komet wie überall im Cockpit.
+   Marker: BERATUNG-RADAR-V1 */
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,textarea{font-family:inherit}
+
+/* ========== quoroAI-Chrom (wie in den anderen Cockpit-Räumen) ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;word-spacing:2px}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+/* Unter 1360px reicht die Krume in die Inhaltsspalte und wird die zweite
+   Zeile des Kopfbands (Entscheidung 2026-08-14). */
+@media (max-width:1360px){
+  nav{height:118px;padding-bottom:58px}
+  #krume{z-index:90}
+}
+
+/* ========== Seite ========== */
+main{max-width:880px;margin:0 auto;padding:136px 24px 90px}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px;max-width:60ch;line-height:1.6}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:38px}
+.h3-satz{font-size:14px;color:var(--nebel-600);line-height:1.6;max-width:64ch;margin-top:4px}
+
+/* ---------- Die Lücke: was er selbst nicht wusste ----------
+   Kein Themen-Etikett. Eine Lücke ist der Satz, an dem er stehen blieb, plus
+   die Leute, die seitdem warten. Deshalb steht sein Zitat ganz oben und die
+   Überschrift ist nur die Kurzform darunter. */
+.luecke{
+  position:relative;margin-top:14px;border-radius:var(--radius-karte);padding:22px 24px;
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 12px 34px rgba(24,21,47,.06);
+  transition:border-color .4s ease, box-shadow .4s ease;
+}
+.luecke + .luecke{margin-top:14px}
+.l-zitat{
+  font-size:16.5px;line-height:1.6;letter-spacing:-.005em;
+  padding-left:16px;border-left:3px solid var(--lila-300);
+}
+.l-zitat-wer{
+  display:flex;align-items:center;gap:7px;margin-top:9px;
+  font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--lila-700);
+}
+.l-zitat-wer img{width:14px;height:14px;display:block}
+.l-titel{font-family:var(--schrift-schau);font-size:19px;letter-spacing:-.01em;word-spacing:1.5px;margin-top:18px}
+.l-meta{font-size:13px;color:var(--nebel-600);margin-top:4px;line-height:1.55}
+
+/* Was die Lücke gekostet hat. Die Zahl ist der Grund, warum diese Fläche
+   überhaupt existiert — dieselbe Antwort dreimal getippt. */
+.l-preis{
+  margin-top:16px;padding:12px 15px;border-radius:var(--radius-innen);
+  background:var(--nebel-100);font-size:13.5px;line-height:1.6;color:var(--nebel-700);
+}
+.l-preis b{color:var(--tinte);font-weight:600}
+.l-preis a{color:var(--nebel-700);text-decoration:underline;text-decoration-color:var(--nebel-300);text-underline-offset:3px}
+.l-preis a:hover{color:var(--lila-700)}
+
+/* Wer wartet: die Zeile, die sich beim Schließen sichtbar ändert. */
+.wartende{margin-top:16px}
+.wartende .w-kopf{font-size:12.5px;font-weight:600;color:var(--nebel-600)}
+.wartende ul{list-style:none;margin-top:8px;display:flex;flex-direction:column;gap:7px}
+.wartende li{
+  display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+  font-size:13.5px;line-height:1.5;
+}
+.wartende li b{font-weight:600}
+.wartende li .seit{color:var(--nebel-500);font-size:12.5px}
+/* Der Wechsel: aus „wartet seit" wird „bekommt Donnerstag". Grün ist hier
+   kein Etikett, sondern der Unterschied, den der Klick gemacht hat. */
+.wartende li .antwort{
+  font-size:12.5px;font-weight:600;color:var(--gruen);
+  opacity:0;translate:0 4px;transition:opacity .35s ease, translate .35s var(--kurve);
+}
+.wartende li.bedient .seit{display:none}
+.wartende li.bedient .antwort{opacity:1;translate:0 0}
+
+.griffe{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;align-items:center}
+.griffe .knopf{min-height:42px;padding:0 18px;font-size:14px}
+.hand{font-family:'Caveat',cursive;font-size:20px;font-weight:700;color:var(--lila-700);rotate:-1.2deg;display:inline-block;margin-top:12px}
+
+/* Das Feld, in das die Beratung ihre Antwort schreibt. Sein Vorschlag steht
+   NEBEN dem Feld, nicht darin (Entscheidung 2026-08-16, die KI schlägt vor,
+   statt zu schreiben). */
+.schreiben{margin-top:18px}
+.schreiben label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.schreiben textarea{
+  width:100%;min-height:120px;resize:vertical;line-height:1.6;font-size:16px;
+  padding:14px 16px;border-radius:var(--radius-innen);
+  border:1px solid var(--nebel-300);background:var(--flaeche);color:var(--tinte);
+}
+.schreiben textarea:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+.vorschlag-zeile{
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  margin-top:10px;font-size:13px;color:var(--nebel-600);
+}
+.vorschlag-zeile button{
+  padding:8px 14px;border-radius:999px;border:0.5px dashed var(--lila-300);
+  background:var(--lila-050);font-size:12.5px;font-weight:600;color:var(--lila-700);cursor:pointer;
+  transition:border-color .2s,background .2s;
+}
+.vorschlag-zeile button:hover{border-color:var(--lila-500);background:var(--lila-100)}
+@media (pointer:coarse){.vorschlag-zeile button{min-height:44px}}
+
+/* Geschlossen: die Karte wird ruhig und sagt, wo die Antwort jetzt steht. */
+.luecke.zu{border-color:var(--gruen);box-shadow:0 12px 34px rgba(23,116,82,.10)}
+.abgelegt{
+  margin-top:18px;padding:13px 16px;border-radius:var(--radius-innen);
+  background:var(--gruen-fond);font-size:14px;line-height:1.55;
+}
+.abgelegt b{font-weight:600}
+.abgelegt a{color:var(--gruen)}
+.luecke.weg{opacity:.5;filter:saturate(.5)}
+.luecke.weg .abgelegt{background:var(--nebel-100);color:var(--nebel-600)}
+
+/* Der zweite Schritt. Er ist bewusst getrennt: ins Wissen schreiben heißt,
+   dass er es künftig selbst beantwortet — nicht, dass heute jemand
+   angeschrieben wird. */
+.zweiter-schritt{
+  margin-top:14px;padding:16px 18px;border-radius:var(--radius-innen);
+  background:var(--lila-050);border:0.5px solid var(--lila-200);
+}
+.zweiter-schritt .zs-frage{font-size:14.5px;line-height:1.55}
+.zweiter-schritt .zs-frage b{font-weight:600}
+
+/* Die Kante: kein Loch, sondern eine Grenze, die die Beratung gesetzt hat. */
+.luecke.kante{background:var(--bernstein-fond);border-color:rgba(154,91,0,.22);box-shadow:none}
+.luecke.kante .l-zitat{border-left-color:var(--bernstein)}
+.luecke.kante .l-zitat-wer{color:var(--bernstein)}
+.k-satz{margin-top:16px;font-size:14px;line-height:1.6;max-width:62ch}
+.k-satz b{font-weight:600;color:var(--bernstein)}
+.k-satz a{color:var(--bernstein)}
+
+/* ---------- Was Donnerstag früh hinausgeht ---------- */
+.kunde{
+  margin-top:14px;border-radius:var(--radius-karte);padding:20px 22px;
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 12px 34px rgba(24,21,47,.05);
+}
+.k-kopf{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.k-name{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.01em;word-spacing:1.5px}
+.k-zahl{font-size:12.5px;color:var(--nebel-600)}
+.k-tuer{font-size:13px;font-weight:600;color:var(--lila-700);text-decoration:none}
+.k-tuer:hover{text-decoration:underline}
+@media (pointer:coarse){.k-tuer{display:inline-flex;align-items:center;min-height:44px}}
+
+.punkt{
+  margin-top:14px;padding-top:14px;border-top:0.5px solid var(--nebel-200);
+  transition:opacity .35s ease;
+}
+.punkt:first-of-type{border-top:0;padding-top:0}
+/* Grau und klein: was passiert ist. Dunkel und größer: was es bei ihm
+   ausmacht. Die Reihenfolge ist die Aussage — die Meldung ist der Anlass,
+   nicht der Inhalt. */
+.p-welt{font-size:12.5px;color:var(--nebel-500);line-height:1.55}
+.p-bei-ihm{font-size:14.5px;line-height:1.6;margin-top:6px;max-width:66ch}
+.p-bei-ihm b{font-weight:600}
+.p-quelle{font-size:12px;color:var(--nebel-500);margin-top:6px}
+.p-quelle a{color:var(--nebel-500);text-decoration:underline;text-decoration-color:var(--nebel-300);text-underline-offset:3px}
+.p-quelle a:hover{color:var(--lila-700)}
+.p-griffe{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.anhalten{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:var(--flaeche);font-size:12.5px;font-weight:600;color:var(--nebel-600);cursor:pointer;
+  transition:border-color .2s,color .2s;
+}
+.anhalten:hover{border-color:var(--bernstein);color:var(--bernstein)}
+@media (pointer:coarse){.anhalten{min-height:44px}}
+.punkt.angehalten{opacity:.62}
+.punkt.angehalten .p-bei-ihm{text-decoration:line-through;text-decoration-color:var(--nebel-300)}
+.p-vermerk{
+  margin-top:10px;padding:10px 14px;border-radius:var(--radius-innen);
+  background:var(--bernstein-fond);font-size:13px;line-height:1.55;color:var(--nebel-700);
+}
+.p-vermerk b{color:var(--bernstein);font-weight:600}
+.p-vermerk button{
+  border:0;background:none;padding:0;margin-left:6px;
+  font-size:13px;font-weight:600;color:var(--bernstein);cursor:pointer;text-decoration:underline;
+}
+
+/* Der stille Kunde. Diese Karte ist der eigentliche Beweis der Fläche:
+   ein Newsletter hat keine Ausgabe, in der nichts steht. */
+.kunde.still{background:var(--nebel-050);box-shadow:none}
+.still-satz{font-size:14px;line-height:1.6;color:var(--nebel-600);margin-top:8px;max-width:62ch}
+.still-satz b{color:var(--tinte);font-weight:600}
+
+.fuss-satz{font-size:13px;color:var(--nebel-500);margin-top:26px;line-height:1.6;max-width:64ch}
+.fuss-satz a{color:var(--lila-700)}
+
+#demo-hinweis{
+  position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;
+  pointer-events:none;font-family:'Caveat',cursive;font-size:21px;font-weight:700;
+  color:var(--lila-700);opacity:0;rotate:-1deg;
+  transition:opacity .3s ease,translate .3s var(--kurve);
+}
+/* Der Hinweis hängt an derselben Schwelle wie das Kopfband, nicht an der
+   Handy-Schwelle — sonst läge er zwischen 701 und 1360px auf der Krume, also
+   auf dem Rückweg (Fund aus dem Review zu E2). */
+@media (max-width:1360px){
+  #demo-hinweis{top:124px}
+}
+
+@media (prefers-reduced-motion: reduce){
+  main > *{animation:none;opacity:1;translate:none}
+  .luecke,.punkt,.wartende li .antwort{transition:none}
+}
+@media (max-width:700px){
+  nav{padding:0 18px;padding-bottom:58px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
+  .luecke,.kunde{padding:18px 18px}
+  .griffe .knopf{flex:1 1 100%;min-height:48px}
+  .k-kopf{gap:6px}
+}
+</style>
+</head>
+<body class="quoro"
+      data-hilfe-titel="Was er von selbst meldet"
+      data-hilfe-satz="Zweimal meldet sich dein KI-Berater, ohne gefragt zu werden: bei dir, wenn er etwas nicht wusste — und bei deinen Kunden, wenn in ihrer Branche etwas passiert, das an ihren eigenen Zahlen hängt. Beides steht hier, bevor es hinausgeht.">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <div class="nav-rechts" style="display:flex;align-items:center;gap:10px"><span data-hilfe-knopf></span><a class="vorschlaege" href="index.html">Alle Vorschläge</a></div>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Was er von selbst meldet</b></a>
+
+<main>
+  <div class="kopf">
+    <h1>Was er von selbst meldet</h1>
+    <div class="stand">Zweimal meldet er sich ungefragt: bei dir, wo er nicht weiterkam — und bei deinen Kunden, wo eine Branchenmeldung an einer Zahl aus ihrer Akte hängt. Nichts davon ist eine Rundmail; jede Meldung nennt den Betrag, um den es bei genau diesem Betrieb geht.</div>
+  </div>
+
+  <h3 data-hilfe-name="Wo er nicht weiterkam"
+      data-hilfe="Jedes Mal, wenn er in einem Gespräch an dich übergeben musste, merkt er sich die Stelle. Was hier steht, sind nicht Themen, die gerade laufen, sondern Sätze, an denen er stehen geblieben ist — und die Leute, die seitdem auf dich warten.">Wo er nicht weiterkam</h3>
+  <p class="h3-satz">Drei Stellen in diesem Monat. Zwei davon hast du je dreimal einzeln beantwortet.</p>
+
+  <!-- Lücke 1: der Moment der Fläche. Ein Satz ins Wissen, und drei Kunden
+       hören auf zu warten. -->
+  <section class="luecke" id="l-zoll" aria-label="Wissenslücke Einfuhrabgabe auf Stahl"
+           data-hilfe-name="Eine Lücke ist ein Satz, kein Thema"
+           data-hilfe="Oben steht wörtlich, womit er das Gespräch verlassen hat. Darunter, wen es getroffen hat und was dich das gekostet hat: dieselbe Antwort, dreimal von Hand geschrieben.">
+    <div class="l-zitat">„Was die geplante Einfuhrabgabe für euch bedeutet, steht in eurem Wissen nicht. Ich gebe die Frage an deine Beratung weiter."</div>
+    <div class="l-zitat-wer"><img src="bilder/quoro-icon.svg" alt="" width="14" height="14">So hat er es dreimal gesagt</div>
+
+    <div class="l-titel">Die Einfuhrabgabe auf Stahl</div>
+    <div class="l-meta">Zuletzt gestern um 16:40, im Gespräch mit Herrn Petersen.</div>
+
+    <div class="l-preis">Du hast die Antwort <b>dreimal einzeln geschrieben</b>, in drei Gesprächen. <a href="beratung-zeiten.html">2,1 Stunden im August</a> — für einen Satz, den er von nun an selbst sagen könnte.</div>
+
+    <div class="wartende">
+      <div class="w-kopf">Wer darauf wartet</div>
+      <ul>
+        <li data-wartet><b>Petersen Stahlbau</b><span class="seit">seit gestern</span><span class="antwort">bekommt es Donnerstag im Briefing</span></li>
+        <li data-wartet><b>Cordes Logistik</b><span class="seit">seit Montag</span><span class="antwort">bekommt es Donnerstag im Briefing</span></li>
+        <li data-wartet><b>MTS Maschinenbau</b><span class="seit">seit dem 5. August</span><span class="antwort">bekommt es Donnerstag im Briefing</span></li>
+      </ul>
+    </div>
+
+    <div class="griffe">
+      <button class="knopf primaer" type="button" data-tu="schreiben">Antwort ins Wissen schreiben</button>
+      <button class="knopf leise" type="button" data-tu="woche">In die Woche legen</button>
+      <button class="knopf leise" type="button" data-tu="keine-luecke">Ist keine Lücke</button>
+    </div>
+    <div class="abgelegt" role="status" aria-live="polite" hidden></div>
+  </section>
+
+  <!-- Lücke 2: nicht Wissen fehlt, sondern eine Unterlage. Der Ausgang ist
+       eine Bitte beim Kunden — und die nennt ihren Grund (Entscheidung
+       2026-08-15). -->
+  <section class="luecke" id="l-anlagen" aria-label="Wissenslücke Anlagenliste Cordes">
+    <div class="l-zitat">„Den Fuhrpark rechne ich mit den Zahlen von 2025. Die beiden Wechselbrücken vom Mai stehen dort nicht drin."</div>
+    <div class="l-zitat-wer"><img src="bilder/quoro-icon.svg" alt="" width="14" height="14">Sagt er seit dem 14. Mai in jeder Antwort dazu</div>
+
+    <div class="l-titel">Die Anlagenliste 2026 von Cordes</div>
+    <div class="l-meta">Hier fehlt kein Wissen, sondern eine Unterlage. Vier Antworten hat er mit diesem Vorbehalt gegeben.</div>
+
+    <div class="griffe">
+      <button class="knopf primaer" type="button" data-tu="bitte">Bei Cordes anfragen</button>
+      <button class="knopf leise" type="button" data-tu="keine-luecke">Ist keine Lücke</button>
+    </div>
+    <div class="abgelegt" role="status" aria-live="polite" hidden></div>
+  </section>
+
+  <!-- Lücke 3: die, die zubleiben soll. Ohne sie wäre das Radar eine Liste
+       von Versäumnissen und erzöge zur falschen Antwort. -->
+  <section class="luecke kante" aria-label="Kante Steuerfragen"
+           data-hilfe-name="Nicht jedes Loch soll zu"
+           data-hilfe="Wo er übergibt, weil du es so gesetzt hast, ist keine Lücke, sondern deine Kante. Sie steht hier mit, damit das Radar nicht dazu verführt, sie zuzuschütten.">
+    <div class="l-zitat">„Das ist eine Steuerfrage. Ich hole dir die Antwort bei deiner Beratung."</div>
+    <div class="l-zitat-wer"><img src="bilder/quoro-icon.svg" alt="" width="14" height="14">Vierzehnmal in diesem Monat</div>
+
+    <div class="l-titel">Steuerfragen</div>
+    <div class="l-meta">Die häufigste Übergabe von allen. Und die einzige, die so bleiben soll.</div>
+
+    <p class="k-satz"><b>Das ist keine Lücke, sondern deine Kante.</b> Du hast sie am 3. August gesetzt: was Steuerrecht ist, sagt er keinem Kunden, auch wenn er es könnte. Die Stunden dafür stehen in deiner Rechnung, nicht in seinem Konto. <a href="beratung-ki-berater.html">Wo deine Kanten stehen</a></p>
+  </section>
+
+  <h3 data-hilfe-name="Was Donnerstag früh hinausgeht"
+      data-hilfe="Jeder Kunde bekommt sein eigenes Briefing, und darin steht nur, was an einer Zahl aus seiner Akte hängt. Du gibst nichts frei — Schweigen darf dich keine Arbeit kosten. Du kannst einen Punkt anhalten, wenn du ihn lieber selbst sagst.">Was Donnerstag früh hinausgeht</h3>
+  <p class="h3-satz">Er hat diese Woche 41 Branchenmeldungen gelesen. Drei davon rühren an eine Zahl aus einer eurer Akten. Zwei von vier Kunden bekommen deshalb nichts.</p>
+
+  <section class="kunde" aria-label="Briefing für Petersen Stahlbau">
+    <div class="k-kopf">
+      <div><span class="k-name">Petersen Stahlbau</span> <span class="k-zahl">zwei Punkte</span></div>
+      <a class="k-tuer" href="briefing.html">Ansehen, wie er es bekommt</a>
+    </div>
+
+    <div class="punkt" data-punkt="zoll">
+      <div class="p-welt">Das Kabinett hat am Dienstag den Entwurf zur Einfuhrabgabe auf Stahl beschlossen, 6 Prozent ab Januar.</div>
+      <div class="p-bei-ihm">Bei ihm sind das <b>340 Tonnen im Jahr</b>, gut 60 Prozent davon aus der Einfuhr — rund <b>11.900 € Mehrkosten</b>, gerechnet auf seine Mengen aus 2025.</div>
+      <div class="p-quelle">Seine Zahl kommt aus dem <a href="beratung-akte.html">Rohstoffbezug in seiner Akte</a>. Dieselbe Frage steht oben als offene Lücke.</div>
+      <div class="p-griffe">
+        <button class="anhalten" type="button">Anhalten, ich sage es selbst</button>
+      </div>
+    </div>
+
+    <div class="punkt" data-punkt="tarif">
+      <div class="p-welt">Der Tarifabschluss in der Metall- und Elektroindustrie steht: 4,2 Prozent ab Oktober.</div>
+      <div class="p-bei-ihm">Bei ihm sind das <b>19 gewerbliche Mitarbeiter</b> und rund <b>34.000 € im Jahr</b>, ab Oktober also gut 8.500 € im laufenden Geschäftsjahr.</div>
+      <div class="p-quelle">Seine Zahl kommt aus der Personalliste in seiner Akte.</div>
+      <div class="p-griffe">
+        <button class="anhalten" type="button">Anhalten, ich sage es selbst</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="kunde" aria-label="Briefing für Cordes Logistik">
+    <div class="k-kopf">
+      <div><span class="k-name">Cordes Logistik</span> <span class="k-zahl">ein Punkt</span></div>
+      <a class="k-tuer" href="briefing.html">Ansehen, wie er es bekommt</a>
+    </div>
+    <div class="punkt" data-punkt="maut">
+      <div class="p-welt">Die Maut für schwere Lkw steigt zum Januar um 4,3 Cent je Kilometer.</div>
+      <div class="p-bei-ihm">Bei ihm sind das <b>11 Zugmaschinen</b> und rund <b>18.400 € im Jahr</b>, gerechnet auf seine Fahrleistung aus 2025.</div>
+      <div class="p-quelle">Seine Zahl kommt aus der Fahrleistung in seiner Akte — die Anlagenliste 2026 fehlt ihm dafür noch, das steht oben.</div>
+      <div class="p-griffe">
+        <button class="anhalten" type="button">Anhalten, ich sage es selbst</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="kunde still" aria-label="Briefing für Bäckerei Freitag"
+           data-hilfe-name="Eine Woche ohne Meldung"
+           data-hilfe="Wenn nichts an ihre Zahlen rührt, bekommt sie nichts. Ein Rundschreiben hat keine Ausgabe, in der nichts steht — er schon, und das ist der Unterschied.">
+    <div class="k-kopf">
+      <div><span class="k-name">Bäckerei Freitag</span> <span class="k-zahl">nichts</span></div>
+    </div>
+    <p class="still-satz">Neun Meldungen aus dem Backhandwerk gelesen, keine rührt an ihre Zahlen. <b>Sie bekommt Donnerstag nichts</b> — und merkt davon nichts.</p>
+  </section>
+
+  <section class="kunde still" aria-label="Briefing für MTS Maschinenbau">
+    <div class="k-kopf">
+      <div><span class="k-name">MTS Maschinenbau</span> <span class="k-zahl">nichts</span></div>
+    </div>
+    <p class="still-satz">Der Tarifabschluss träfe sie auch — aber ihre Personalliste ist von 2024, damit rechnet er ihr keinen Betrag aus. <b>Lieber nichts als eine Zahl, die nicht stimmt.</b></p>
+  </section>
+
+  <p class="fuss-satz"
+     data-hilfe-name="Du gibst nichts frei"
+     data-hilfe="Es gibt hier bewusst keinen Freigabe-Knopf. Bei zweihundert Kunden wäre wöchentliches Freigeben eine Behauptung, und Schweigen darf dich keine Arbeit kosten. Anhalten kannst du jeden Punkt.">Du gibst nichts frei — was hier steht, geht Donnerstag um 7:00 hinaus, in der Stimme deines KI-Beraters und in deiner Marke. Er meldet, was ist, und was es bei diesem Betrieb ausmacht. Was daraus zu tun ist, sagt er nicht: das ist Beratung, und die kommt von dir — im <a href="gespraech.html">Gespräch</a>, zu dem jeder Punkt eine Tür hat.</p>
+</main>
+
+<div id="demo-hinweis" role="status" aria-live="polite">Diese Fläche entsteht gerade.</div>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll('main > *').forEach(function(el, i){
+    el.style.setProperty('--verz', (i * 0.06) + 's');
+  });
+
+  var hinweisTimer = null;
+  function demoHinweis(text){
+    var h = document.getElementById('demo-hinweis');
+    h.textContent = text;
+    h.style.opacity = .95; h.style.translate = '-50% 0';
+    clearTimeout(hinweisTimer);
+    hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2800);
+  }
+
+  /* ---------- Die Ausgänge einer Lücke ---------- */
+  function ablegen(karte, html){
+    var griffe = karte.querySelector('.griffe');
+    if (griffe) griffe.hidden = true;
+    /* Erst sichtbar, dann füllen: ein aria-live-Bereich, der versteckt
+       beschrieben wird, sagt beim Auftauchen nichts. */
+    var k = karte.querySelector('.abgelegt');
+    k.hidden = false;
+    k.innerHTML = html;
+  }
+
+  /* Sein Vorschlag steht neben dem Feld, nicht darin. Ins Feld kommt er erst,
+     wenn eine Hand ihn holt — dieselbe Regel wie auf der Zeichentafel
+     (Entscheidung 2026-08-16). */
+  var VORSCHLAG = 'Die geplante Einfuhrabgabe von 6 Prozent gilt ab Januar für Rohstahl aus Drittländern. EU-Ware ist nicht betroffen. Wer heute mehr als die Hälfte einführt, sollte bis November prüfen, ob sich der Bezug innerhalb der EU rechnet — die Preisdifferenz liegt derzeit bei 4 bis 5 Prozent.';
+
+  var TUN = {
+    /* Der Kern: erst schreiben, dann — als eigener Schritt — Bescheid geben. */
+    schreiben: function(karte){
+      karte.querySelector('.griffe').hidden = true;
+      var block = document.createElement('div');
+      block.className = 'schreiben';
+      block.innerHTML =
+        '<label for="antwort-zoll">Was gilt dazu — in deinen Worten, für alle Mandate</label>' +
+        '<textarea id="antwort-zoll" placeholder="Zwei Sätze reichen. Ab dann sagt er es selbst, und zwar so."></textarea>' +
+        '<div class="vorschlag-zeile">' +
+          '<button type="button" data-tu="vorschlag-holen">Seinen Vorschlag einsetzen</button>' +
+          '<span>Er hat aus deinen drei Antworten gelesen, was du jedes Mal geschrieben hast.</span>' +
+        '</div>' +
+        '<div class="griffe">' +
+          '<button class="knopf primaer" type="button" data-tu="wissen-speichern">Ins Wissen legen</button>' +
+          '<button class="knopf leise" type="button" data-tu="doch-nicht">Doch nicht</button>' +
+        '</div>';
+      karte.querySelector('.abgelegt').before(block);
+      binden(karte);
+      var feld = block.querySelector('textarea');
+      feld.focus();
+      feld.scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'center'});
+    },
+
+    'vorschlag-holen': function(karte){
+      var feld = karte.querySelector('.schreiben textarea');
+      feld.value = VORSCHLAG;
+      feld.focus();
+      demoHinweis('Sein Vorschlag steht im Feld. Er gehört dir erst jetzt.');
+    },
+
+    'doch-nicht': function(karte){
+      var block = karte.querySelector('.schreiben');
+      if (block) block.remove();
+      karte.querySelector('.griffe').hidden = false;
+    },
+
+    'wissen-speichern': function(karte){
+      var feld = karte.querySelector('.schreiben textarea');
+      if (!feld.value.trim()) { feld.focus(); return; }
+      karte.querySelector('.schreiben').remove();
+      karte.classList.add('zu');
+      ablegen(karte, '<span>Steht seit heute in deinem <b><a href="beratung-wissen.html">Wissen</a></b>, für alle Mandate. Ab jetzt beantwortet er die Frage selbst, statt sie dir hinzulegen.</span>');
+
+      /* Der zweite Schritt, und er ist wirklich ein zweiter: ins Wissen
+         schreiben heißt nicht, heute jemanden anzuschreiben. */
+      var zs = document.createElement('div');
+      zs.className = 'zweiter-schritt';
+      zs.innerHTML =
+        '<div class="zs-frage">Drei warten seit Tagen auf genau diesen Satz. <b>Sie fragen von allein nicht noch einmal.</b></div>' +
+        '<div class="griffe">' +
+          '<button class="knopf sekundaer" type="button" data-tu="bescheid">Allen dreien Donnerstag Bescheid geben</button>' +
+          '<button class="knopf leise" type="button" data-tu="nur-wissen">Nur ins Wissen, ich rede selbst</button>' +
+        '</div>';
+      karte.querySelector('.abgelegt').after(zs);
+      binden(karte);
+      if (!reduziert) zs.scrollIntoView({behavior:'smooth', block:'nearest'});
+    },
+
+    /* Der Moment: ein Satz, drei Kunden hören auf zu warten. */
+    bescheid: function(karte){
+      karte.querySelector('.zweiter-schritt').remove();
+      var zeilen = karte.querySelectorAll('[data-wartet]');
+      zeilen.forEach(function(li, i){
+        setTimeout(function(){ li.classList.add('bedient'); }, reduziert ? 0 : 120 + i * 220);
+      });
+      karte.querySelector('.wartende .w-kopf').textContent = 'Wer darauf gewartet hat';
+      var k = karte.querySelector('.abgelegt');
+      k.innerHTML = '<span>Steht in deinem <b><a href="beratung-wissen.html">Wissen</a></b>. Petersen, Cordes und MTS bekommen den Satz am Donnerstag in ihrem Briefing — jeder mit seinen eigenen Zahlen dahinter.</span>';
+      demoHinweis('Ein Satz. Drei Kunden hören auf zu warten.');
+    },
+
+    'nur-wissen': function(karte){
+      karte.querySelector('.zweiter-schritt').remove();
+      demoHinweis('Niemand wurde angeschrieben.');
+    },
+
+    /* Die Bitte nennt ihren Grund — sonst steht beim Kunden eine Forderung
+       ohne Anlass (Entscheidung 2026-08-15). */
+    bitte: function(karte){
+      karte.querySelector('.griffe').hidden = true;
+      var block = document.createElement('div');
+      block.className = 'schreiben';
+      block.innerHTML =
+        '<label for="grund-anlagen">Warum du sie brauchst — das steht bei ihm daran</label>' +
+        '<textarea id="grund-anlagen" style="min-height:80px">Ohne die aktuelle Anlagenliste rechnet Ihr KI-Berater den Fuhrpark mit den Zahlen von 2025 — die beiden Wechselbrücken vom Mai fehlen darin.</textarea>' +
+        '<div class="griffe">' +
+          '<button class="knopf primaer" type="button" data-tu="bitte-senden">Bitte in sein Portal legen</button>' +
+          '<button class="knopf leise" type="button" data-tu="doch-nicht">Doch nicht</button>' +
+        '</div>';
+      karte.querySelector('.abgelegt').before(block);
+      binden(karte);
+      block.querySelector('textarea').focus();
+    },
+
+    'bitte-senden': function(karte){
+      var feld = karte.querySelector('.schreiben textarea');
+      if (!feld.value.trim()) { feld.focus(); return; }
+      karte.querySelector('.schreiben').remove();
+      karte.classList.add('zu');
+      ablegen(karte, '<span>Liegt als Bitte in <b>Cordes’ Portal</b>, mit deinem Grund daran. Sobald die Liste da ist, rechnet er den Fuhrpark neu.</span>');
+    },
+
+    woche: function(karte){
+      ablegen(karte, '<span>Steht als Aufgabe in <b><a href="beratung-kalender.html">deiner Woche</a></b>, Donnerstagvormittag. Die drei warten so lange weiter.</span>');
+    },
+
+    'keine-luecke': function(karte){
+      karte.classList.add('weg');
+      ablegen(karte, '<span>Aus dem Radar genommen. Er übergibt weiter, wenn die Frage kommt.</span>');
+    }
+  };
+
+  function binden(wurzel){
+    wurzel.querySelectorAll('[data-tu]').forEach(function(b){
+      if (b.dataset.gebunden) return;
+      b.dataset.gebunden = '1';
+      b.addEventListener('click', function(){
+        var karte = b.closest('.luecke');
+        var tun = TUN[b.dataset.tu];
+        if (tun && karte) tun(karte);
+      });
+    });
+  }
+  document.querySelectorAll('.luecke').forEach(binden);
+
+  /* ---------- Anhalten ----------
+     Nicht freigeben, anhalten. Der Punkt bleibt sichtbar stehen und lässt sich
+     zurückholen — was weg ist und nicht mehr auffindbar, ist keine Kontrolle,
+     sondern ein Verlust. */
+  document.querySelectorAll('.punkt .anhalten').forEach(function(b){
+    var punkt = b.closest('.punkt');
+    b.addEventListener('click', function(){
+      b.hidden = true;
+      punkt.classList.add('angehalten');
+      var v = document.createElement('div');
+      v.className = 'p-vermerk';
+      v.setAttribute('role', 'status');
+      v.innerHTML = '<b>Angehalten.</b> Dieser Punkt geht Donnerstag nicht hinaus. Er steht als Notiz in deiner Woche, damit du ihn nicht vergisst.<button type="button">Doch hinausgehen lassen</button>';
+      punkt.appendChild(v);
+      v.querySelector('button').addEventListener('click', function(){
+        v.remove();
+        punkt.classList.remove('angehalten');
+        b.hidden = false;
+      });
+      demoHinweis('Angehalten. Der Rest geht Donnerstag hinaus.');
+    });
+  });
+})();
+</script>
+<script src="hilfe.js"></script>
+<script src="uhr.js"></script>
+<script src="zeiger.js"></script>
+<script src="rechtsfuss.js"></script>
+</body>
+</html>

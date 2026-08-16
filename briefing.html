@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dein Berater – Was diese Woche dich betrifft</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
+<style>
+/* quoroai-plattform-design · Das wöchentliche Briefing beim Kunden
+   Marker: BRIEFING-V1 (Häppchen E3, Issue #44)
+
+   Die Fläche, an der sich entscheidet, ob eine ungefragte Meldung ein
+   Newsletter ist. Drei Dinge trennen sie davon, und alle drei sieht man:
+
+   1. Die Meldung ist der Anlass, nicht der Inhalt. Was in der Welt passiert
+      ist, steht klein und grau; groß steht, was es in DIESEM Betrieb ausmacht,
+      mit einer Zahl aus seiner eigenen Akte und der Angabe, woher sie kommt.
+      Ohne eigene Zahl kommt die Meldung nicht vor.
+   2. Was weggelassen wurde, steht mit Grund darunter. Ein Rundschreiben zeigt
+      nie, was es aussortiert hat. Genau diese Liste ist der Beweis, dass er
+      die Akte dieses Kunden gelesen hat und nicht eine Verteilerliste.
+   3. Eine Woche ohne Treffer ist ein Briefing aus drei Zeilen. Der
+      Vorführungs-Schalter unten zeigt sie — sie ist die eigentliche Aussage
+      des Häppchens, denn ein Newsletter hat keine Ausgabe, in der nichts
+      steht.
+
+   Was zu tun ist, sagt er hier nicht: das ist Beratung und gehört der
+   Beratung (dieselbe Kante wie in beratung-fragen.html). Jeder Punkt hat
+   deshalb genau eine Tür, und die führt ins Gespräch.
+
+   White-Label: Farben, Name und Anrede kommen aus marke.js, system.css ist
+   hier bewusst NICHT eingebunden — das ist die Fläche des Kunden, nicht die
+   von quoroAI. */
+@font-face{font-family:'Manrope';src:url('schriften/manrope.woff2') format('woff2');font-weight:200 800;font-display:swap}
+@font-face{font-family:'Caveat';src:url('schriften/caveat.woff2') format('woff2');font-weight:400 700;font-display:swap}
+:root{
+  --papier:#fafaf7;--tinte:#10131a;--grau:#636c7d;--blau:#2b5fe3;--stift:#1d46c9;
+  --linie:rgba(16,19,26,.1);--karte:#ffffff;--radius:16px;--feder:cubic-bezier(.22,.9,.24,1);
+  /* Der Vorführungs-Schalter schwebt unten fest — der Rechts-Fuß braucht so
+     viel Luft, dass er nicht darunter verschwindet (gemessen wie in
+     uebersicht.html). */
+  --rechtsfuss-luft:104px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--papier);color:var(--tinte);font-family:'Manrope',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:10;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 max(24px,calc((100vw - 820px)/2));
+  background:linear-gradient(var(--papier) 55%, color-mix(in srgb, var(--papier) 1%, transparent));
+}
+nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .marke-logo{height:26px;width:auto;display:block}
+nav .wortmarke [data-marke-name]{display:block}
+nav .wortmarke .marke-wechsel{cursor:pointer;display:inline-block}
+nav .wortmarke .marke-wechsel:hover{color:var(--blau)}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
+nav .zurueck{padding:9px 16px;border-radius:999px;border:0.5px solid var(--linie);background:#fff;font-size:12.5px;font-weight:700;color:var(--tinte);text-decoration:none;transition:border-color .2s}
+nav .zurueck:hover{border-color:var(--blau)}
+
+main{max-width:820px;margin:0 auto;padding:108px 24px 96px}
+.anstrich{width:96px;height:12px;display:block;overflow:visible;margin-bottom:16px}
+.anstrich path{fill:none;stroke:var(--stift);stroke-width:2.5;stroke-linecap:round;opacity:.85}
+.wann{font-family:'Caveat',cursive;font-size:clamp(22px,3.2vw,28px);font-weight:700;color:var(--stift);rotate:-1.5deg;opacity:.92}
+h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-top:2px}
+/* Der Satz, der das Briefing von einem Rundschreiben trennt — er steht ganz
+   oben und nennt zuerst, wie viel weggefallen ist. */
+.bilanz{font-size:16.5px;line-height:1.65;color:var(--tinte);margin-top:14px;max-width:58ch}
+.bilanz b{font-weight:800}
+
+/* ---------- Ein Punkt ---------- */
+.punkt{
+  margin-top:22px;padding:24px 26px;border-radius:var(--radius);
+  background:var(--karte);border:0.5px solid var(--linie);
+  box-shadow:0 10px 30px rgba(16,19,26,.06);
+}
+/* Klein und grau: was in der Welt passiert ist. Es ist der Anlass, nicht die
+   Nachricht — deshalb steht es über dem Eigentlichen und tritt zurück. */
+.p-welt{font-size:13px;color:var(--grau);line-height:1.6;max-width:62ch}
+.p-welt .quelle{white-space:nowrap}
+.p-bei-dir{font-size:19px;line-height:1.55;font-weight:600;letter-spacing:-.015em;margin-top:12px;max-width:52ch}
+.p-bei-dir b{font-weight:800;color:var(--stift)}
+/* Die Herkunft der Zahl nennt ihre Unterlage, führt aber nicht hin: die
+   beiden genannten Papiere liegen in den Entwürfen nicht in `unterlagen.html`
+   (dort stehen Vertrag, Benchmark, Rahmenvertrag, Jahresabschluss, Fotos,
+   Branchenspiegel). Ein Knopf, der woanders hinführt als er sagt, ist
+   schlimmer als kein Knopf — dieselbe Regel wie beim Beleg ohne Tür in
+   beratung-fragen.html. Gestrichelt, damit ihm niemand vergeblich einen
+   Druck gibt. */
+.p-woher{
+  display:inline-block;margin-top:14px;padding:8px 14px;border-radius:999px;
+  border:0.5px dashed var(--linie);background:var(--papier);
+  font-size:12.5px;color:var(--grau);
+}
+/* Der Vorbehalt: wo die Zahl aufhört, sicher zu sein. */
+.p-unsicher{font-size:13.5px;line-height:1.6;color:var(--grau);margin-top:14px;max-width:60ch}
+/* Eigene Zeile, auch wenn davor nur die Herkunftszeile steht: als
+   inline-flex rutschte die Tür neben sie, sobald der Vorbehalt fehlte, und
+   die Karte hatte plötzlich zwei Griffe nebeneinander, die nichts miteinander
+   zu tun haben. */
+.p-tuer{
+  display:flex;width:fit-content;align-items:center;gap:8px;margin-top:18px;
+  min-height:46px;padding:0 20px;border-radius:999px;border:0;
+  background:var(--tinte);color:#fff;font-size:14.5px;font-weight:700;cursor:pointer;
+  transition:background .2s ease;
+}
+.p-tuer:hover{background:var(--blau)}
+.p-tuer svg{width:16px;height:16px}
+.p-tuer svg path{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- Was weggelassen wurde ----------
+   Der Beweis, dass gelesen und nicht verteilt wurde. Zugeklappt, weil es
+   Beiwerk ist — aber vorhanden, weil es das Versprechen einlöst. */
+.weg{margin-top:34px;border-top:0.5px solid var(--linie);padding-top:22px}
+.weg-kopf{
+  display:flex;align-items:center;gap:10px;
+  background:none;border:0;padding:0;cursor:pointer;
+  font-size:15px;font-weight:800;letter-spacing:-.01em;color:var(--tinte);text-align:left;
+}
+.weg-kopf .pfeil{
+  width:22px;height:22px;flex-shrink:0;border-radius:50%;border:0.5px solid var(--linie);
+  display:inline-grid;place-items:center;font-size:11px;color:var(--grau);
+  transition:rotate .25s var(--feder);
+}
+.weg-kopf[aria-expanded="true"] .pfeil{rotate:90deg}
+@media (pointer:coarse){.weg-kopf{min-height:44px}}
+.weg-liste{list-style:none;margin-top:16px;display:flex;flex-direction:column;gap:14px}
+.weg-liste li{font-size:14px;line-height:1.6;padding-left:16px;border-left:2px solid var(--linie);max-width:64ch}
+.weg-liste li b{font-weight:700;display:block}
+.weg-liste li span{color:var(--grau)}
+.weg-rest{font-size:13.5px;color:var(--grau);margin-top:16px}
+
+/* ---------- Der Fuß: was er hier nicht sagt ---------- */
+.fuss{
+  margin-top:34px;padding:20px 22px;border-radius:var(--radius);
+  background:color-mix(in srgb, var(--blau) 5%, var(--papier));
+  border:0.5px solid color-mix(in srgb, var(--blau) 18%, transparent);
+  font-size:14.5px;line-height:1.65;max-width:64ch;
+}
+.fuss b{font-weight:800}
+.ki-hinweis{font-size:11px;color:var(--grau);opacity:.75;margin-top:16px}
+
+/* ---------- Die stille Woche ---------- */
+.still-satz{font-size:16.5px;line-height:1.65;margin-top:14px;max-width:56ch}
+.still-satz b{font-weight:800}
+.still-schluss{font-size:14.5px;color:var(--grau);line-height:1.6;margin-top:18px;max-width:56ch}
+
+/* ---------- Vorführung ---------- */
+.vorfuehrung{
+  position:fixed;right:22px;bottom:calc(14px + env(safe-area-inset-bottom));
+  z-index:20;display:flex;align-items:center;gap:10px;
+  padding:6px 6px 6px 14px;border-radius:999px;
+  background:rgba(255,255,255,.82);border:0.5px solid var(--linie);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 10px 26px rgba(16,19,26,.12);
+}
+.vorfuehrung > span{font-size:12px;color:var(--grau);white-space:nowrap}
+.umschalter{display:inline-flex;gap:4px;padding:4px;border-radius:999px;background:rgba(16,19,26,.05)}
+.umschalter button{
+  border:0;background:none;cursor:pointer;border-radius:999px;
+  padding:6px 13px;font-size:12.5px;font-weight:700;color:var(--grau);
+  transition:background .2s ease,color .2s ease;
+}
+.umschalter button.hier{background:var(--tinte);color:#fff}
+@media (max-width:760px){
+  .vorfuehrung{right:auto;left:50%;translate:-50% 0;padding-left:10px}
+  .vorfuehrung > span{display:none}
+  .umschalter button{padding:6px 11px;font-size:12px}
+}
+
+@media (max-width:700px){
+  nav .wortmarke small{display:none}
+  main{padding:104px 18px 96px}
+  .punkt{padding:20px 20px}
+  .p-tuer{width:100%;justify-content:center}
+}
+</style>
+<script src="marke.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="wortmarke"><img class="marke-logo" alt="" hidden><div><span data-marke-name data-logo-versteckt>Nordholm &amp; Partner</span><small class="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung: Beispielmarke wechseln</small></div></div>
+  <a class="zurueck" href="uebersicht.html">← Übersicht</a>
+</nav>
+
+<main>
+  <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
+  <div class="wann">Donnerstag, 7:00 Uhr.</div>
+
+  <!-- ========== Die Woche mit Treffern ========== -->
+  <div data-woche="treffer">
+    <h1 data-du="Zwei Dinge betreffen dich." data-sie="Zwei Dinge betreffen Sie.">Zwei Dinge betreffen dich.</h1>
+    <p class="bilanz" data-du="Ich habe diese Woche vierzehn Meldungen aus dem Stahlbau gelesen. Zwei rühren an deine Zahlen. Die anderen zwölf habe ich weggelassen — mit Grund, unten steht welcher."
+                      data-sie="Ich habe diese Woche vierzehn Meldungen aus dem Stahlbau gelesen. Zwei rühren an Ihre Zahlen. Die anderen zwölf habe ich weggelassen — mit Grund, unten steht welcher.">Ich habe diese Woche vierzehn Meldungen aus dem Stahlbau gelesen. Zwei rühren an deine Zahlen. Die anderen zwölf habe ich weggelassen — mit Grund, unten steht welcher.</p>
+
+    <article class="punkt">
+      <p class="p-welt">Das Bundeskabinett hat am Dienstag den Entwurf für eine Einfuhrabgabe auf Stahl aus Drittländern beschlossen, 6 Prozent ab Januar. <span class="quelle">Handelsblatt, 12. August</span></p>
+      <p class="p-bei-dir" data-du="Du beziehst 340 Tonnen im Jahr, gut 60 Prozent davon aus der Einfuhr. Das wären rund &lt;b&gt;11.900 € Mehrkosten im Jahr&lt;/b&gt; — bei deiner Marge von 30,4 Prozent sind das 1,2 Punkte."
+                             data-sie="Sie beziehen 340 Tonnen im Jahr, gut 60 Prozent davon aus der Einfuhr. Das wären rund &lt;b&gt;11.900 € Mehrkosten im Jahr&lt;/b&gt; — bei Ihrer Marge von 30,4 Prozent sind das 1,2 Punkte."></p>
+      <span class="p-woher" data-du="Deine Zahl kommt aus: Rohstoffbezug 2025" data-sie="Ihre Zahl kommt aus: Rohstoffbezug 2025">Deine Zahl kommt aus: Rohstoffbezug 2025</span>
+      <p class="p-unsicher" data-du="Sicher ist das noch nicht: der Entwurf muss durch den Bundestag, und über die Höhe wird gestritten. Ich sage Bescheid, wenn er beschlossen ist."
+                            data-sie="Sicher ist das noch nicht: der Entwurf muss durch den Bundestag, und über die Höhe wird gestritten. Ich sage Bescheid, wenn er beschlossen ist.">Sicher ist das noch nicht: der Entwurf muss durch den Bundestag, und über die Höhe wird gestritten. Ich sage Bescheid, wenn er beschlossen ist.</p>
+      <button class="p-tuer" type="button" data-frage="Was heißt die Einfuhrabgabe für meine Preise?">
+        Was heißt das für meine Preise?
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M12.5 6l6 6-6 6"/></svg>
+      </button>
+    </article>
+
+    <article class="punkt">
+      <p class="p-welt">Der Tarifabschluss in der Metall- und Elektroindustrie steht: 4,2 Prozent mehr ab Oktober, Laufzeit 21 Monate. <span class="quelle">IG Metall, 11. August</span></p>
+      <p class="p-bei-dir" data-du="Bei deinen 19 gewerblichen Mitarbeitern sind das rund &lt;b&gt;34.000 € im Jahr&lt;/b&gt;, im laufenden Geschäftsjahr aber nur ein Vierteljahr davon: gut 8.500 €."
+                             data-sie="Bei Ihren 19 gewerblichen Mitarbeitern sind das rund &lt;b&gt;34.000 € im Jahr&lt;/b&gt;, im laufenden Geschäftsjahr aber nur ein Vierteljahr davon: gut 8.500 €."></p>
+      <span class="p-woher" data-du="Deine Zahl kommt aus: Personalliste, Stand Juli" data-sie="Ihre Zahl kommt aus: Personalliste, Stand Juli">Deine Zahl kommt aus: Personalliste, Stand Juli</span>
+      <button class="p-tuer" type="button" data-frage="Was macht der Tarifabschluss mit meiner Kalkulation?">
+        Was macht das mit meiner Kalkulation?
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M12.5 6l6 6-6 6"/></svg>
+      </button>
+    </article>
+
+    <!-- Der Beweis: die Liste dessen, was NICHT kam, mit Grund. -->
+    <div class="weg">
+      <button class="weg-kopf" type="button" aria-expanded="false" aria-controls="weg-treffer">
+        <span class="pfeil" aria-hidden="true">›</span>
+        <span>Zwölf Meldungen habe ich weggelassen. Hier steht, warum.</span>
+      </button>
+      <div id="weg-treffer" hidden>
+        <ul class="weg-liste">
+          <li><b>Neue Förderung für Wasserstoff in der Stahlerzeugung</b><span data-du="Gilt für Erzeuger. Du verarbeitest, du erzeugst nicht." data-sie="Gilt für Erzeuger. Sie verarbeiten, Sie erzeugen nicht.">Gilt für Erzeuger. Du verarbeitest, du erzeugst nicht.</span></li>
+          <li><b>Insolvenz eines Anlagenbauers in Sachsen</b><span data-du="Steht nicht in deiner Lieferantenliste." data-sie="Steht nicht in Ihrer Lieferantenliste.">Steht nicht in deiner Lieferantenliste.</span></li>
+          <li><b>Neue Prüfnorm für Schweißnähte im Schiffbau</b><span data-du="Du baust Hallen und Tragwerke." data-sie="Sie bauen Hallen und Tragwerke.">Du baust Hallen und Tragwerke.</span></li>
+          <li><b>Tarifrunde im öffentlichen Dienst</b><span data-du="Berührt deine Lohnkosten nicht." data-sie="Berührt Ihre Lohnkosten nicht.">Berührt deine Lohnkosten nicht.</span></li>
+        </ul>
+        <p class="weg-rest" data-du="Und acht weitere ohne Bezug zu deinem Betrieb — Meldungen zu Werken über 500 Mitarbeitern, zu Märkten außerhalb Europas und zu Verfahren, die du nicht einsetzt."
+                            data-sie="Und acht weitere ohne Bezug zu Ihrem Betrieb — Meldungen zu Werken über 500 Mitarbeitern, zu Märkten außerhalb Europas und zu Verfahren, die Sie nicht einsetzen.">Und acht weitere ohne Bezug zu deinem Betrieb — Meldungen zu Werken über 500 Mitarbeitern, zu Märkten außerhalb Europas und zu Verfahren, die du nicht einsetzt.</p>
+      </div>
+    </div>
+
+    <p class="fuss" data-du="&lt;b&gt;Was daraus zu tun ist, sage ich hier nicht.&lt;/b&gt; Ich melde, was passiert ist und was es bei dir ausmacht. Was du damit machst, besprichst du mit deiner Beratung — jede der beiden Meldungen öffnet dafür ein Gespräch."
+                     data-sie="&lt;b&gt;Was daraus zu tun ist, sage ich hier nicht.&lt;/b&gt; Ich melde, was passiert ist und was es bei Ihnen ausmacht. Was Sie damit machen, besprechen Sie mit Ihrer Beratung — jede der beiden Meldungen öffnet dafür ein Gespräch."></p>
+  </div>
+
+  <!-- ========== Die stille Woche ==========
+       Kein Ersatzinhalt, keine „Tipps der Woche". Drei Zeilen und Schluss —
+       das ist der Unterschied zu einem Rundschreiben, und er gehört
+       vorgeführt. -->
+  <div data-woche="still" hidden>
+    <h1 data-du="Diese Woche nichts." data-sie="Diese Woche nichts.">Diese Woche nichts.</h1>
+    <p class="still-satz" data-du="Elf Meldungen aus dem Stahlbau gelesen. &lt;b&gt;Keine rührt an deine Zahlen.&lt;/b&gt;"
+                          data-sie="Elf Meldungen aus dem Stahlbau gelesen. &lt;b&gt;Keine rührt an Ihre Zahlen.&lt;/b&gt;"></p>
+
+    <div class="weg">
+      <button class="weg-kopf" type="button" aria-expanded="false" aria-controls="weg-still">
+        <span class="pfeil" aria-hidden="true">›</span>
+        <span>Was ich gelesen und weggelassen habe.</span>
+      </button>
+      <div id="weg-still" hidden>
+        <ul class="weg-liste">
+          <li><b>Stahlpreis am Spotmarkt seitwärts</b><span data-du="Keine Bewegung, die deine Kalkulation ändert." data-sie="Keine Bewegung, die Ihre Kalkulation ändert.">Keine Bewegung, die deine Kalkulation ändert.</span></li>
+          <li><b>Übernahme zweier Händler in Norditalien</b><span data-du="Keiner davon beliefert dich." data-sie="Keiner davon beliefert Sie.">Keiner davon beliefert dich.</span></li>
+          <li><b>Neue Vorschrift für Krananlagen ab 20 Tonnen</b><span data-du="Dein größter Kran trägt 12 Tonnen." data-sie="Ihr größter Kran trägt 12 Tonnen.">Dein größter Kran trägt 12 Tonnen.</span></li>
+        </ul>
+        <p class="weg-rest" data-du="Und acht weitere ohne Bezug zu deinem Betrieb."
+                            data-sie="Und acht weitere ohne Bezug zu Ihrem Betrieb.">Und acht weitere ohne Bezug zu deinem Betrieb.</p>
+      </div>
+    </div>
+
+    <p class="still-schluss" data-du="Nächsten Donnerstag wieder. Wenn vorher etwas passiert, das dich wirklich trifft, warte ich nicht bis dahin."
+                             data-sie="Nächsten Donnerstag wieder. Wenn vorher etwas passiert, das Sie wirklich trifft, warte ich nicht bis dahin.">Nächsten Donnerstag wieder. Wenn vorher etwas passiert, das dich wirklich trifft, warte ich nicht bis dahin.</p>
+  </div>
+
+  <p class="ki-hinweis"><span data-du="Geschrieben von deinem KI-Berater bei " data-sie="Geschrieben von Ihrem KI-Berater bei ">Geschrieben von deinem KI-Berater bei </span><span data-marke-name>Nordholm &amp; Partner</span>. Er ersetzt keine Rechts- oder Steuerberatung.</p>
+</main>
+
+<div class="vorfuehrung">
+  <span>Vorführung</span>
+  <!-- Kein tablist: die Knöpfe laden die Seite neu, es gibt kein Panel, auf
+       das sie zeigen könnten (dieselbe Begründung wie in uebersicht.html). -->
+  <div class="umschalter" role="group" aria-label="Welche Woche wird gezeigt">
+    <button type="button" id="v-treffer" aria-pressed="true" class="hier">Diese Woche</button>
+    <button type="button" id="v-still" aria-pressed="false">Eine stille Woche</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  /* Ohne Kern bleibt die Seite lesbar — dann eben in Standardmarke und Du-Form */
+  var Marke = window.Marke || {anwenden: function(){}, rede: function(du){ return du; }};
+
+  /* Sätze mit Hervorhebung tragen ihre Fassungen als HTML in data-du/data-sie.
+     Marke.anwenden() setzt nur textContent — sonst stünden hier <b>-Zeichen im
+     Text. Deshalb werden diese Stellen hier eingesetzt, VOR dem Aufruf, und
+     danach nicht mehr angefasst. */
+  var sie = (Marke.rede('du','sie') === 'sie');
+  document.querySelectorAll('.p-bei-dir[data-du], .fuss[data-du], .still-satz[data-du]').forEach(function(el){
+    el.innerHTML = sie ? el.dataset.sie : el.dataset.du;
+    /* Aus der Hand von Marke.anwenden() nehmen, sonst überschreibt es das HTML */
+    delete el.dataset.du; delete el.dataset.sie;
+  });
+  Marke.anwenden();
+
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Der Stift zieht seinen Anstrich — wie auf allen Kundenflächen */
+  var svg = document.querySelector('.anstrich');
+  var NS = 'http://www.w3.org/2000/svg';
+  var d = 'M2 6';
+  for (var i = 1; i <= 6; i++) d += ' L' + (2 + 92 * i / 6) + ' ' + (6 + (2 - Math.random() * 4));
+  var p = document.createElementNS(NS, 'path');
+  p.setAttribute('d', d);
+  svg.appendChild(p);
+  if (!reduziert) {
+    var len = p.getTotalLength();
+    p.style.strokeDasharray = len;
+    p.style.strokeDashoffset = len;
+    p.style.transition = 'stroke-dashoffset .55s cubic-bezier(.45,.05,.55,.95) .1s';
+    void p.getBoundingClientRect();
+    p.style.strokeDashoffset = 0;
+  }
+
+  /* ---------- Welche Woche wird gezeigt ---------- */
+  var WOCHE = 'treffer';
+  try { if (sessionStorage.getItem('briefing-woche') === 'still') WOCHE = 'still'; } catch (e) {}
+  document.querySelectorAll('[data-woche]').forEach(function(el){
+    el.hidden = el.dataset.woche !== WOCHE;
+  });
+  var schalter = {treffer: document.getElementById('v-treffer'), still: document.getElementById('v-still')};
+  Object.keys(schalter).forEach(function(k){
+    var an = k === WOCHE;
+    schalter[k].classList.toggle('hier', an);
+    schalter[k].setAttribute('aria-pressed', an ? 'true' : 'false');
+    schalter[k].addEventListener('click', function(){
+      if (k === WOCHE) return;
+      try { sessionStorage.setItem('briefing-woche', k); } catch (e) {}
+      location.reload();
+    });
+  });
+
+  /* ---------- Was weggelassen wurde ---------- */
+  document.querySelectorAll('.weg-kopf').forEach(function(k){
+    var ziel = document.getElementById(k.getAttribute('aria-controls'));
+    k.addEventListener('click', function(){
+      var offen = k.getAttribute('aria-expanded') === 'true';
+      k.setAttribute('aria-expanded', offen ? 'false' : 'true');
+      ziel.hidden = offen;
+    });
+  });
+
+  /* ---------- Die einzige Tür eines Punktes ----------
+     Sie führt ins Gespräch, und die Frage kommt dort AN — dieselbe Brücke wie
+     von der Übersicht (sessionStorage 'starte-frage'). Der Freigabe-Schalter
+     wird nicht angefasst: ein neues Gespräch bringt seinen eigenen Stand mit,
+     und ob die Beratung mitliest, entscheidet der Kunde dort. */
+  document.querySelectorAll('.p-tuer').forEach(function(b){
+    b.addEventListener('click', function(){
+      try { sessionStorage.setItem('starte-frage', b.dataset.frage); } catch (e) {}
+      location.href = 'gespraech.html';
+    });
+  });
+})();
+</script>
+<script src="rechtsfuss.js"></script>
+</body>
+</html>
