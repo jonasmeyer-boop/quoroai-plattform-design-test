@@ -20,7 +20,16 @@
    Was NICHT hierher gehört: Meta-Zeilen („von dir, 4. August"), Fußsätze,
    Griffe, Fundstellen. Das ist die Sicht der Fläche, nicht der Inhalt des
    Dokuments — beim Kunden heißt dasselbe Blatt anders als in der Akte.
-   Marker: BLAETTER-V1 */
+
+   Ein Block darf einen Vorschlag des KI-Beraters tragen (Häppchen D4 Teil 2):
+     {p: 'Der Satz, wie er heute dasteht.',
+      feder: {grund: 'Warum er ihn ändern würde.', neu: 'Der neue Wortlaut.'}}
+   Der Vorschlag gehört zum Inhalt und nicht zur Sicht: er hängt an einem
+   bestimmten Satz, und derselbe Satz steht auf jeder Fläche gleich.
+
+   Geschrieben wird hier nie: die Seiten oben sind die Quelle und bleiben es.
+   Wo offenes Papier entsteht, zieht blatt.js sich eine eigene Fassung.
+   Marker: BLAETTER-V2 */
 window.Blaetter = (function () {
   'use strict';
 
@@ -146,6 +155,42 @@ window.Blaetter = (function () {
       ]
     },
 
+    /* Das eine Blatt, das gerade entsteht ---------------------------------
+       Alles andere hier ist fertiges Papier: hochgeladen, unterschrieben,
+       eingelesen. Der Vermerk ist der Gegenfall — er wird geschrieben, während
+       man ihn ansieht, und der KI-Berater hat dazu drei Vorschläge, die er
+       NICHT selbst hineinschreibt (Häppchen D4 Teil 2). */
+    vermerk: {
+      titel: 'Vermerk zum Preisgespräch', seitenGesamt: 2,
+      seiten: [
+        [{h: 'Vermerk zum Preisgespräch Petersen'},
+         {klein: 'Entwurf, Dr. Anna Vogelsang, {beratung}. Grundlage: Monatsauswertung Juli, Preismodell Benchmark, Fallsammlung Margenprojekte.'},
+         {h: 'Worum es geht'},
+         {p: 'Die C-Kunden zahlen seit 2023 unveränderte Preise, während der Stahleinkauf die Marge Monat für Monat abträgt. Wir schlagen eine Anhebung von vier Prozent zum 1. Oktober vor.',
+          feder: {grund: 'Der Absatz nennt den Vorschlag, aber nicht seine Wirkung — und nicht, was in vergleichbaren Mandaten wirklich passiert ist. Beides steht in euren eigenen Unterlagen.',
+                  neu: 'Die C-Kunden zahlen seit 2023 unveränderte Preise, während der Stahleinkauf die Marge Monat für Monat abträgt. Wir schlagen eine Anhebung von vier Prozent zum 1. Oktober vor. Rechnerisch sind das 38.000 € im Jahr. In vier vergleichbaren Mandaten der Fallsammlung sind dabei zwischen null und neun von je hundert Kunden abgesprungen.'}},
+         {h: 'Die Zahlen dahinter'},
+         {tab: [['', 'heute', 'nach dem Schritt'],
+                ['Rohertragsmarge', '31,4 %', '33,1 %'],
+                ['C-Umsatz im Jahr', '876.000 €', '911.000 €'],
+                ['Wirkung im Jahr', '', '+38.000 €']]},
+         {p: 'Der Branchenspiegel weist für Betriebe dieser Größe einen Median von 35,9 Prozent aus. Auch nach dem Schritt liegt Petersen darunter.'}],
+
+        [{h: 'Wie wir es ihm sagen'},
+         {p: 'Wir gehen mit einer Zahl hinein und lassen uns nicht auf eine Spanne ein.',
+          feder: {grund: 'Eure Hausmethodik sagt das schärfer, und sie sagt auch, warum.',
+                  neu: 'Eine Preisanhebung wird nicht verhandelt, sie wird begründet. Wer mit einer Spanne ins Gespräch geht, hat den unteren Wert schon vergeben.'}},
+         {liste: ['Was sich geändert hat, in Zahlen, ohne Klage.',
+                  'Was gleich bleibt: Lieferzeit, Ansprechpartner, Qualität.',
+                  'Ab wann es gilt, mit Vorlauf für eine letzte Bestellung zum alten Preis.']},
+         {h: 'Was offen ist'},
+         {p: 'Der Rahmenvertrag mit Nordstahl läuft aus. Ob die vier Prozent reichen, hängt daran, was der neue Einkaufspreis wird.',
+          feder: {grund: 'Der Vertrag nennt ein Datum, und es ist nah. Ohne das Datum liest sich der Satz wie eine Sorge statt wie eine Frist.',
+                  neu: 'Der Rahmenvertrag mit Nordstahl endet am 30. September, danach gilt der Tagespreis. Ob die vier Prozent reichen, entscheidet sich am neuen Einkaufspreis — die Verhandlung gehört vor das Preisgespräch, nicht danach.'}},
+         {klein: 'Solange dieser Vermerk ein Entwurf ist, sieht ihn außer euch niemand.'}]
+      ]
+    },
+
     jahresabschluss: {
       titel: 'Jahresabschluss 2025, Entwurf', seitenGesamt: 48,
       seiten: [
@@ -234,7 +279,9 @@ window.Blaetter = (function () {
                   'Was gleich bleibt: Lieferzeit, Ansprechpartner, Qualität.',
                   'Ab wann es gilt, mit genügend Vorlauf für eine letzte Bestellung.']},
          {h: 'Was nicht funktioniert'},
-         {p: 'Eine Anhebung „wegen der allgemeinen Kostenentwicklung" lädt zum Feilschen ein. Eine Anhebung, die auf den Stahlpreis der letzten achtzehn Monate zeigt, nicht.'}]
+         {p: 'Eine Anhebung „wegen der allgemeinen Kostenentwicklung" lädt zum Feilschen ein. Eine Anhebung, die auf den Stahlpreis der letzten achtzehn Monate zeigt, nicht.',
+          feder: {grund: 'Eure eigene Fallsammlung kennt einen Fall, den diese Methodik nicht abdeckt: acht Prozent auf einmal haben dort mehr Kunden gekostet, als die Anhebung eingebracht hat.',
+                  neu: 'Eine Anhebung „wegen der allgemeinen Kostenentwicklung" lädt zum Feilschen ein. Eine Anhebung, die auf den Stahlpreis der letzten achtzehn Monate zeigt, nicht. Und keine Anhebung über fünf Prozent auf einen Schlag: in der Fallsammlung ist das der einzige Fall, in dem der Abgang die Wirkung aufgefressen hat.'}}]
       ]
     },
 
@@ -291,6 +338,18 @@ window.Blaetter = (function () {
                 drin = true; return zelle.split('{beratung}').join(name);
               });
             });
+          } else if (b[k] && typeof b[k] === 'object') {
+            /* Der Vorschlag des KI-Beraters ist ein eigenes Objekt aus Sätzen —
+               auch darin darf der Name der Beratung stehen. */
+            var innen = {}, dabei = false;
+            for (var i in b[k]) {
+              if (!Object.prototype.hasOwnProperty.call(b[k], i)) continue;
+              if (typeof b[k][i] === 'string' && b[k][i].indexOf('{beratung}') !== -1) {
+                innen[i] = b[k][i].split('{beratung}').join(name); dabei = true;
+              } else innen[i] = b[k][i];
+            }
+            neu[k] = dabei ? innen : b[k];
+            if (dabei) drin = true;
           } else neu[k] = b[k];
         }
         return drin ? neu : b;
@@ -309,6 +368,11 @@ window.Blaetter = (function () {
     for (var k in quelle) if (Object.prototype.hasOwnProperty.call(quelle, k)) dok[k] = quelle[k];
     if (sicht) for (var s in sicht) if (Object.prototype.hasOwnProperty.call(sicht, s)) dok[s] = sicht[s];
     if (dok.seiten) dok.seiten = setzeNamen(dok.seiten, (sicht && sicht.beratung) || 'deiner Beratung');
+    /* Die eigene Fassung für offenes Papier macht der Blatt-Blick selbst
+       (blatt.js): setzeNamen reicht Blöcke ohne {beratung} unverändert durch,
+       und wer hineinschreibt, änderte sonst die Quelle für alle Flächen. Sie
+       hier zu ziehen, hinge daran, dass der Aufrufer schreibbar schon beim
+       Holen mitgibt — der Schutz gehört dorthin, wo geschrieben wird. */
     return dok;
   }
 

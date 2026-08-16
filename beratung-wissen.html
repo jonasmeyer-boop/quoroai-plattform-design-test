@@ -30,7 +30,11 @@
    Stelle, die der KI-Berater zitiert. Der gescannte Stapel zeigt seine leeren
    Seiten selbst. Die Zitat-Zeile steht jetzt unter der Zeile: ein Link im
    Aufschlag-Knopf wäre keiner.
-   Marker: BERATUNG-WISSEN-V7 */
+   V8 (Häppchen D4, Teil 2): die Hausmethodik ist offen — sie gehört der
+   Beratung, also steht der Cursor darin, und der KI-Berater hat einen
+   Vorschlag am Rand, der aus der eigenen Fallsammlung kommt. Fremdes Papier
+   (Branchenspiegel vom Fachverband) bleibt gesetzt, dort nur Randnotizen.
+   Marker: BERATUNG-WISSEN-V8 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -357,23 +361,33 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
      Branchenspiegel trägt die Stelle, die er gestern im Petersen-Gespräch
      genannt hat: Abschnitt 5, derselbe Satz, dieselbe Zahl. */
   var BERATUNG = 'Nordholm & Partner';
+  /* Was ihr selbst geschrieben habt, schreibt ihr auch weiter (Häppchen D4
+     Teil 2). Der Branchenspiegel kommt vom Fachverband — fremdes Papier, dort
+     bleibt nur der Rand. Der Unterschied ist keine Feinheit: das Wissen der
+     Beratung ist die Grundlage, aus der der KI-Berater in jedem Mandat
+     zitiert. Wer eine fremde Erhebung darin ändern könnte, hätte am Ende
+     Zahlen, die nirgends herkommen. */
   var WISSEN = {
     branchenspiegel: {meta: 'von dir, 14. Februar',
-      fund: {seite: 2, wort: '35,9 Prozent'},
-      fuss: 'Abschnitt 5 steht auf Seite 2.'},
-    fallsammlung: {meta: 'von Dr. Vogelsang, 28. Juli',
+      fund: {seite: 2, wort: '35,9 Prozent'}, notizbar: true,
+      fuss: 'Vom Fachverband. Abschnitt 5 steht auf Seite 2.'},
+    fallsammlung: {meta: 'von Dr. Vogelsang, 28. Juli', notizbar: true,
       fuss: 'Eure eigenen Fälle, anonymisiert.'},
-    checkliste: {meta: 'von dir, 3. Juli',
+    checkliste: {meta: 'von dir, 3. Juli', notizbar: true,
       fuss: 'Die Reihenfolge, in der ihr Zahlen anfasst.'},
     methodik: {meta: 'von dir, 12. Juni',
-      fuss: 'Wie ihr eine Preisanhebung begleitet.'},
+      schreibbar: true,
+      stand: 'Stand Juni, zuletzt von Dr. Vogelsang',
+      standNeu: 'gerade eben von dir geändert',
+      fuss: 'Eure Hausmethodik. Der KI-Berater hält sich in jedem Mandat daran.'},
     folien: {meta: 'von dir, 9. August',
       fuss: 'Lade die Textfassung hoch, dann klappt es.'}
   };
   function haengeBlattAn(zeile, dok){
     var griff = zeile.querySelector('.d-oeffnen');
     if (!griff || !dok || !window.Blatt) return;
-    griff.setAttribute('aria-label', dok.titel + ' aufschlagen');
+    griff.setAttribute('aria-label', dok.titel +
+      (dok.schreibbar ? ' aufschlagen und weiterschreiben' : ' aufschlagen'));
     griff.addEventListener('click', function(){
       dok.aus = zeile;
       Blatt.zeige(dok);

@@ -31,10 +31,31 @@
        fund: {seite: 2, wort: 'Preisgleitklausel'},   // optional
        ohneText: true,                               // gescannt, nichts zu lesen
        randnotiz: 'die 4 % halten!',                 // optional, Handschrift am Rand
-       griffe: [{wort:'Laden', tat:fn}],             // optional, unten in der Leiste
+       griffe: [{wort:'Laden', tat:fn, stark:true}], // optional, unten in der Leiste
        fuss: 'Liegt in deiner Akte.',                // optional, unten links
        aus: element                                   // Zeile, aus der es aufschlägt
      });
+
+   Schreiben (Häppchen D4 Teil 2) — drei Zusätze, sonst dieselbe Seite:
+       schreibbar: true,        // eigenes Papier: der Cursor steht im Text
+       stand: 'Entwurf, zuletzt von dir vor vier Minuten',   // unten links
+       standNeu: 'Entwurf, gerade eben von dir',             // ab dem ersten Zeichen
+       notizbar: true           // fremdes Papier: nur an den Rand
+   Ein einzelner Block trägt den Vorschlag des KI-Beraters:
+       {p:'…', feder:{grund:'Warum er das vorschlägt.', neu:'Der neue Wortlaut.'}}
+
+   Warum das zwei verschiedene Dinge sind: In ein fremdes Dokument schreibt
+   niemand hinein. Ein Rahmenvertrag, den die Beratung im Blatt-Blick ändern
+   könnte, wäre kein Beleg mehr — man wüsste bei jedem Zitat nicht, ob der Satz
+   je so dastand. Auf fremdem Papier gibt es deshalb nur die Randnotiz; offen
+   ist allein, was der Beratung selbst gehört.
+
+   Und warum die KI nur vorschlägt: Was der KI-Berater schreibt, steht neben dem
+   Blatt, nie darin — bis ein Mensch „Übernehmen" drückt. Danach ist es der Text
+   der Beratung, mit allem, was daran hängt. Ein Vermerk, in dem unbemerkt Sätze
+   auftauchen, die niemand geschrieben hat, ist die eine Sache, die diese
+   Software sich nicht leisten kann.
+   Marker: BLATT-V2
 
    Markenneutral: alle Farben kommen aus den Tokens der Fläche — Kundenflächen
    setzen --blau/--linie/--grau über marke.js, quoroAI-Flächen bringen
@@ -44,8 +65,7 @@
    ist der halbe Sinn der Sache.
 
    Alle Klassen tragen bb- (Blatt-Blick): blatt- ist auf mehreren Flächen schon
-   für anderes vergeben, unter anderem für das Blatt-Symbol in den Zeilen.
-   Marker: BLATT-V1 */
+   für anderes vergeben, unter anderem für das Blatt-Symbol in den Zeilen. */
 window.Blatt = (function () {
   'use strict';
 
@@ -56,7 +76,11 @@ window.Blatt = (function () {
   var offen = false;
   var schicht = null, lauf = null, leiste = null, kopfTitel = null, kopfMeta = null;
   var zaehler = null, zurueckKnopf = null, weiterKnopf = null, griffeKasten = null, fussWort = null;
+  var standWort = null, federBlatt = null, federKnopf = null, notizKnopf = null;
   var seitenEl = [], miniEl = [];
+  var federn = [], federHier = null;
+  var standNeu = '', schonGetippt = false, miniTakt = null;
+  var jetzigesDok = null;
   var jetzt = 0, gesamtDok = 0;
   var faehrtSelbst = 0, faehrtEnde = null;
   var vorherFokus = null, herkunft = null;
@@ -166,13 +190,107 @@ window.Blatt = (function () {
       /* Die Handschrift am Rand: der Gedanke, den jemand daneben geschrieben hat */
       '.bb-notiz{position:absolute;right:14px;top:12px;max-width:40%;text-align:right;rotate:-3deg;' +
         'font-family:Caveat,cursive;font-size:22px;font-weight:700;line-height:1.2;color:' + akzent + ';opacity:.92}' +
+      '.bb-seite .bb-notiz[contenteditable]:empty::before{content:"…";color:' + akzent + ';opacity:.45}' +
+      '.bb-seite .bb-notiz[contenteditable]:focus{background:color-mix(in srgb, ' + akzent + ' 10%, transparent)}' +
+
+      /* ---- Schreiben: der Cursor steht im Papier ----
+         Kein Werkzeugkasten über dem Blatt. Ein Vermerk braucht keine
+         Symbolleiste — er braucht Sätze. Was man sieht, ist die Seite, die
+         später ausgedruckt wird; was man ändert, ändert man dort, wo es steht. */
+      /* Umbrüche überleben: wer im Vermerk Enter drückt, baut einen Absatz,
+         und der muss beim nächsten Aufschlagen noch da sein. Gesichert wird
+         mit Zeilenumbruch im Text, gezeigt wird er nur, wenn das Papier ihn
+         auch stehen lässt. */
+      '.bb-seite p,.bb-seite h4,.bb-seite .bb-klein,.bb-seite li{white-space:pre-wrap}' +
+      '.bb-seite [contenteditable]{outline:none;border-radius:3px;' +
+        'transition:background .18s ' + kurve + '}' +
+      '.bb-seite [contenteditable]:hover{background:rgba(16,19,26,.028)}' +
+      '.bb-seite [contenteditable]:focus{background:color-mix(in srgb, ' + akzent + ' 7%, transparent)}' +
+      /* Ein leerer Absatz fiele auf null zusammen und wäre nicht zu treffen.
+         Nur der Absatz: eine Tabellenzelle ist oft mit Absicht leer — die
+         Ecke über der Kopfspalte etwa —, und „Schreib hier." stünde dort als
+         Aufforderung, wo nichts hingehört. */
+      '.bb-seite p[contenteditable]:empty::before{content:"Schreib hier.";color:#b8b8c0}' +
+      /* Wer schreibt, schreibt irgendwann über den Fuß der Seite hinaus. Ein
+         Umbruch auf die nächste Seite ist Produktarbeit; hier darf das Blatt
+         wenigstens nichts verschlucken — es rollt in sich, ohne Balken, und
+         der Browser zieht den Cursor mit. */
+      '.bb-seite.offen{cursor:text;overflow:auto;scrollbar-width:none}' +
+      '.bb-seite.offen::-webkit-scrollbar{display:none}' +
+      /* Übernommen: der Satz setzt sich einmal sichtbar an seine Stelle. */
+      '.bb-seite .frisch-text{animation:bb-gesetzt 1.4s ' + kurve + ' 1}' +
+      '@keyframes bb-gesetzt{0%,20%{background:color-mix(in srgb, ' + akzent + ' 34%, transparent)}' +
+        '100%{background:transparent}}' +
+
+      /* ---- die Feder: der Vorschlag steht NEBEN dem Blatt, nie darin ---- */
+      '.bb-mit-feder{position:relative;background:color-mix(in srgb, ' + akzent + ' 6%, transparent)}' +
+      '.bb-mit-feder.hier{background:color-mix(in srgb, ' + akzent + ' 15%, transparent)}' +
+      '.bb-feder{position:absolute;left:-5.6%;top:0;bottom:0;width:22px;min-height:26px;' +
+        'border:0;background:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center}' +
+      '.bb-feder .strich{display:block;width:3px;height:calc(100% - 4px);min-height:18px;border-radius:2px;' +
+        'background:' + akzent + ';opacity:.55;transition:opacity .18s ' + kurve + ',width .18s ' + kurve + '}' +
+      '@media (hover:hover){.bb-feder:hover .strich{opacity:1;width:5px}}' +
+      '.bb-feder:focus-visible{outline:2px solid ' + akzent + ';outline-offset:2px;border-radius:4px}' +
+      '.bb-feder[aria-expanded="true"] .strich{opacity:1;width:5px}' +
+
+      /* Der Vorschlag darf nicht das halbe Blatt verdecken: er ist die
+         Nebensache, das Papier ist die Hauptsache. */
+      '.bb-vorschlag{position:relative;z-index:2;border-top:0.5px solid ' + linie + ';background:' + karte + ';' +
+        'color:' + tinte + ';padding:14px 16px 15px;max-height:40vh;overflow-y:auto}' +
+      '.bb-vorschlag[hidden]{display:none}' +
+      '.bb-vorschlag .innen{max-width:' + (BREIT + 40) + 'px;margin:0 auto;display:flex;flex-direction:column;gap:9px}' +
+      /* Am großen Schirm stehen der alte und der neue Wortlaut nebeneinander:
+         untereinander wäre der Kasten so hoch, dass er das halbe Blatt
+         verdeckt — und einen Unterschied liest man ohnehin am besten quer. */
+      '@media (min-width:901px){' +
+        '.bb-vorschlag .innen{display:grid;grid-template-columns:1fr 1fr;' +
+          'column-gap:26px;row-gap:5px;align-items:start}' +
+        '.bb-vorschlag .wer{grid-column:1/-1;grid-row:1}' +
+        '.bb-vorschlag .grund{grid-column:1/-1;grid-row:2}' +
+        '.bb-vorschlag .statt.a{grid-column:1;grid-row:3}' +
+        '.bb-vorschlag .alt{grid-column:1;grid-row:4}' +
+        '.bb-vorschlag .statt.b{grid-column:2;grid-row:3}' +
+        '.bb-vorschlag .wortlaut{grid-column:2;grid-row:4}' +
+        '.bb-vorschlag .tat{grid-column:1/-1;grid-row:5}' +
+      '}' +
+      '.bb-vorschlag .wer{font-size:12.5px;font-weight:600;color:' + akzent + '}' +
+      '.bb-vorschlag .grund{font-size:13px;color:' + grau + ';line-height:1.5;max-width:78ch}' +
+      /* Der vorgeschlagene Wortlaut steht schon im Satz des Papiers: man liest
+         ihn so, wie er auf der Seite stünde, nicht als Systemmeldung. */
+      '.bb-vorschlag .wortlaut{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;' +
+        'font-size:15px;line-height:1.6;color:#1b1b1f;max-width:78ch;' +
+        'border-left:3px solid ' + akzent + ';padding-left:13px;white-space:pre-wrap}' +
+      '.bb-vorschlag .statt{font-size:11px;font-weight:600;letter-spacing:.04em;' +
+        'text-transform:uppercase;color:' + grau + ';margin-top:2px}' +
+      /* Der alte Wortlaut steht durchgestrichen daneben — man sieht in einem
+         Blick, was man hergibt. */
+      '.bb-vorschlag .alt{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;' +
+        'font-size:14px;line-height:1.55;color:#8b8b95;max-width:78ch;' +
+        'border-left:3px solid ' + linie + ';padding-left:13px;white-space:pre-wrap}' +
+      /* Die beiden Knöpfe kleben am Fuß des Vorschlags. Ohne das lägen sie am
+         Handy unter dem Rand: man liest den Vorschlag und findet nicht, wo
+         man ihn annimmt. */
+      '.bb-vorschlag .tat{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px;' +
+        'position:sticky;bottom:-15px;background:' + karte + ';padding:8px 0 15px;margin-bottom:-15px}' +
+      '.bb-vorschlag button{font:inherit;font-size:13.5px;font-weight:600;min-height:44px;padding:0 17px;' +
+        'border-radius:999px;cursor:pointer;border:0.5px solid ' + linie + ';background:' + karte + ';color:' + tinte + '}' +
+      '.bb-vorschlag button.stark{background:' + tinte + ';color:#fff;border-color:' + tinte + '}' +
+      '@media (hover:hover){.bb-vorschlag button:hover{border-color:' + akzent + '}' +
+        '.bb-vorschlag button.stark:hover{background:' + akzent + ';border-color:' + akzent + '}}' +
 
       /* ---- Steuerleiste unten: blättern und die Griffe der Fläche ---- */
       '.bb-steuer{position:relative;z-index:2;display:flex;align-items:center;gap:10px;flex-wrap:wrap;' +
         'padding:10px 16px calc(10px + env(safe-area-inset-bottom));' +
         'border-top:0.5px solid ' + linie + ';background:' + karte + ';color:' + tinte + '}' +
       '.bb-steuer .zaehler{font-size:13px;color:' + grau + ';font-variant-numeric:tabular-nums}' +
+      /* Nichts wird gespeichert, weil nichts zu speichern ist: jedes Zeichen
+         steht. Unten links steht deshalb kein Knopf, sondern der Stand. */
+      '.bb-steuer .stand{font-size:12.5px;color:' + grau + ';line-height:1.4}' +
+      '.bb-steuer .stand b{color:' + tinte + ';font-weight:600}' +
       '.bb-steuer .fusswort{font-size:12.5px;color:' + grau + ';line-height:1.4;flex:1 1 12ch;min-width:0}' +
+      '.bb-steuer button.stark{background:' + tinte + ';color:#fff;border-color:' + tinte + '}' +
+      '@media (hover:hover){.bb-steuer button.stark:hover:not([disabled]){background:' + akzent + ';border-color:' + akzent + '}}' +
+      '.bb-steuer button.feder-knopf{border-color:' + akzent + ';color:' + akzent + '}' +
       '.bb-steuer button{font:inherit;font-size:13.5px;font-weight:600;min-height:44px;padding:0 15px;' +
         'border-radius:999px;cursor:pointer;border:0.5px solid ' + linie + ';background:' + karte + ';color:' + tinte + '}' +
       '@media (hover:hover){.bb-steuer button:hover:not([disabled]){border-color:' + akzent + '}}' +
@@ -202,6 +320,15 @@ window.Blatt = (function () {
         '.bb-raum{padding:0 12px;gap:0}' +
         '.bb-lauf{padding:14px 0 28px}' +
         '.bb-notiz{font-size:19px}' +
+        /* Am Handy teilen sich Papier und Vorschlag einen kleinen Schirm. Der
+           alte Wortlaut ist dort ein Beleg, kein Lesetext: drei Zeilen
+           genügen, um zu sehen, was man hergibt — der ganze Satz steht ja
+           direkt darüber auf der Seite. */
+        '.bb-vorschlag{max-height:32vh}' +
+        /* Der alte Wortlaut fällt am Handy ganz weg: er steht zwei Finger
+           weiter oben auf der Seite und ist dort markiert. Ihn hier noch
+           einmal zu setzen, kostet die halbe Höhe des Blattes für nichts. */
+        '.bb-vorschlag .alt,.bb-vorschlag .statt{display:none}' +
       '}' +
       '@media (prefers-reduced-motion:reduce){' +
         '.bb-seite mark.frisch{animation:none}' +
@@ -240,14 +367,38 @@ window.Blatt = (function () {
     lauf.className = 'bb-lauf';
     raum.append(leiste, lauf);
 
+    /* Der Vorschlag des KI-Beraters wohnt zwischen Papier und Steuerleiste:
+       nah genug, um zur Stelle zu gehören, und außerhalb des Blattes, weil er
+       noch nicht darin steht. */
+    federBlatt = document.createElement('div');
+    federBlatt.className = 'bb-vorschlag';
+    federBlatt.hidden = true;
+    /* Der Vorschlag nimmt den Fokus selbst, statt ihn auf „Übernehmen" zu
+       werfen: dort landet er unten im Kasten, und der Browser scrollt Titel
+       und Grund aus dem Bild — man liest dann „NEU" und einen Satz, ohne zu
+       wissen, warum. */
+    federBlatt.tabIndex = -1;
+    federBlatt.setAttribute('role', 'group');
+    federBlatt.setAttribute('aria-label', 'Vorschlag des KI-Beraters');
+    federBlatt.innerHTML = '<div class="innen"><span class="wer">Der KI-Berater schlägt vor</span>' +
+      '<span class="grund"></span>' +
+      '<span class="statt a">statt</span><span class="alt"></span>' +
+      '<span class="statt b">neu</span><span class="wortlaut"></span>' +
+      '<span class="tat"><button type="button" class="nimm stark">Übernehmen</button>' +
+      '<button type="button" class="wirf">Verwerfen</button></span></div>';
+    federBlatt.querySelector('.nimm').addEventListener('click', nimmFeder);
+    federBlatt.querySelector('.wirf').addEventListener('click', function () { wirfFeder(true); });
+
     var steuer = document.createElement('div');
     steuer.className = 'bb-steuer';
     steuer.innerHTML = '<button type="button" class="vor">Zurück</button>' +
       '<button type="button" class="nach">Weiter</button>' +
       '<span class="zaehler" aria-live="polite"></span>' +
+      '<span class="stand" aria-live="polite"></span>' +
       '<span class="fusswort"></span>' +
       '<span class="griffe"></span>';
     zaehler = steuer.querySelector('.zaehler');
+    standWort = steuer.querySelector('.stand');
     fussWort = steuer.querySelector('.fusswort');
     zurueckKnopf = steuer.querySelector('.vor');
     weiterKnopf = steuer.querySelector('.nach');
@@ -255,7 +406,7 @@ window.Blatt = (function () {
     zurueckKnopf.addEventListener('click', function () { zuSeite(jetzt - 1); });
     weiterKnopf.addEventListener('click', function () { zuSeite(jetzt + 1); });
 
-    schicht.append(veil, band, raum, steuer);
+    schicht.append(veil, band, raum, federBlatt, steuer);
     document.body.appendChild(schicht);
 
     lauf.addEventListener('scroll', merkeSeite, { passive: true });
@@ -282,9 +433,52 @@ window.Blatt = (function () {
     return zahm(merk).replace('\u0001', '<mark class="frisch">').replace('\u0002', '</mark>');
   }
 
-  function baueSeite(bloecke, nr, gesamt, fundWort) {
+  /* Die Feder am Rand: ein Strich in der Marge, mehr nicht. Sie sitzt IM
+     offenen Block und trägt deshalb contenteditable="false" — sonst wäre der
+     Knopf selbst Text, den man versehentlich wegtippt. */
+  function hefteFeder(el, feder, seitenNr) {
+    el.classList.add('bb-mit-feder');
+    var f = document.createElement('button');
+    f.type = 'button';
+    f.className = 'bb-feder';
+    f.contentEditable = 'false';
+    f.setAttribute('aria-expanded', 'false');
+    f.setAttribute('aria-label', 'Der KI-Berater schlägt an dieser Stelle etwas vor');
+    f.innerHTML = '<span class="strich"></span>';
+    el.appendChild(f);
+    var eintrag = { el: el, knopf: f, feder: feder, seite: seitenNr };
+    f.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      zeigeFeder(eintrag);
+    });
+    federn.push(eintrag);
+  }
+
+  /* Eine Fassung, die nur diesem Dokument gehört: flach kopierte Blöcke,
+     kopierte Listen, kopierte Tabellenzeilen, kopierter Vorschlag. */
+  function eigeneFassung(seiten) {
+    return seiten.map(function (seite) {
+      return seite.map(function (b) {
+        var neu = {};
+        for (var k in b) {
+          if (!Object.prototype.hasOwnProperty.call(b, k)) continue;
+          if (Array.isArray(b[k])) {
+            neu[k] = b[k].map(function (z) { return Array.isArray(z) ? z.slice() : z; });
+          } else if (b[k] && typeof b[k] === 'object') {
+            var innen = {};
+            for (var i in b[k]) if (Object.prototype.hasOwnProperty.call(b[k], i)) innen[i] = b[k][i];
+            neu[k] = innen;
+          } else neu[k] = b[k];
+        }
+        return neu;
+      });
+    });
+  }
+
+  function baueSeite(bloecke, nr, gesamt, fundWort, papierOffen) {
     var seite = document.createElement('div');
-    seite.className = 'bb-seite';
+    seite.className = 'bb-seite' + (papierOffen ? ' offen' : '');
     var treffer = { getroffen: false };
     bloecke.forEach(function (b) {
       var el;
@@ -299,10 +493,15 @@ window.Blatt = (function () {
           cap.textContent = b.bildtext;
           el.appendChild(cap);
         }
-      } else if (b.h) {
+      /* Gefragt wird, ob der Schlüssel DA ist — nicht, ob etwas darin steht.
+         Wer eine Überschrift leert, hat immer noch eine Überschrift; wäre sie
+         hier nur „falsch", käme sie beim nächsten Aufschlagen als Absatz
+         wieder, und der nachher hineingeschriebene Titel landete in einem
+         Feld, das niemand mehr liest. */
+      } else if (b.h !== undefined) {
         el = document.createElement('h4');
         el.innerHTML = mitFund(b.h, fundWort, treffer);
-      } else if (b.klein) {
+      } else if (b.klein !== undefined) {
         el = document.createElement('div');
         el.className = 'bb-klein';
         el.innerHTML = mitFund(b.klein, fundWort, treffer);
@@ -320,6 +519,10 @@ window.Blatt = (function () {
           reihe.forEach(function (zelle) {
             var td = document.createElement(i === 0 ? 'th' : 'td');
             td.innerHTML = mitFund(zelle, fundWort, treffer);
+            /* Bei der Tabelle ist die Zelle offen, nicht das Gitter: wer das
+               ganze <table> editierbar macht, verliert beim ersten Enter die
+               Zeilenstruktur. */
+            if (papierOffen) { td.setAttribute('contenteditable', 'true'); td.__zelle = [b, i, tr.children.length]; }
             tr.appendChild(td);
           });
           el.appendChild(tr);
@@ -328,6 +531,13 @@ window.Blatt = (function () {
         el = document.createElement('p');
         el.innerHTML = mitFund(b.p || '', fundWort, treffer);
       }
+      if (papierOffen && !b.bild && !b.tab) el.setAttribute('contenteditable', 'true');
+      /* Das Element weiß, aus welchem Block es entstanden ist. Nur so kann,
+         was jemand hineinschreibt, beim Schließen wieder dorthin zurück —
+         sonst stünde beim zweiten Aufschlagen der alte Text da, und der
+         Entwurf wäre ein Bild von einem Entwurf. */
+      if (papierOffen) el.__block = b;
+      if (b.feder && papierOffen) hefteFeder(el, b.feder, nr);
       seite.appendChild(el);
     });
     seite.appendChild(seitenzahl(nr, gesamt));
@@ -361,6 +571,13 @@ window.Blatt = (function () {
     var rahmen = document.createElement('div');
     rahmen.className = 'rahmen';
     var klon = seite.cloneNode(true);
+    /* Der Klon ist ein Bild, keine Bedienung: Federn und offene Stellen fliegen
+       heraus, sonst stünden in der Miniaturleiste Knöpfe, die der Tabulator
+       ansteuert und niemand sieht. */
+    Array.prototype.forEach.call(klon.querySelectorAll('button'), function (b) { b.remove(); });
+    Array.prototype.forEach.call(klon.querySelectorAll('[contenteditable]'), function (c) {
+      c.removeAttribute('contenteditable');
+    });
     klon.style.width = BREIT + 'px';
     klon.style.height = HOCH + 'px';
     klon.style.maxWidth = 'none';
@@ -445,10 +662,267 @@ window.Blatt = (function () {
     }
   }
 
+  /* ---------- Der Stift der KI und der Stift des Menschen ----------
+     Der Vorschlag wird gezeigt, nicht eingesetzt. Erst „Übernehmen" macht ihn
+     zum Text der Beratung; „Verwerfen" nimmt die Feder weg und lässt den Satz,
+     wie er war. Ein dritter Weg — die KI schreibt und man merkt es hinterher —
+     existiert hier nicht. */
+  function zeigeFeder(eintrag) {
+    if (federHier === eintrag) { wirfFeder(false); return; }
+    if (federHier) {
+      federHier.el.classList.remove('hier');
+      federHier.knopf.setAttribute('aria-expanded', 'false');
+    }
+    federHier = eintrag;
+    eintrag.el.classList.add('hier');
+    eintrag.knopf.setAttribute('aria-expanded', 'true');
+    federBlatt.querySelector('.grund').textContent = eintrag.feder.grund || '';
+    /* Was heute dasteht, wird aus dem Blatt gelesen und nicht aus den Daten:
+       hat jemand den Satz inzwischen selbst umgeschrieben, muss er SEINEN
+       Satz sehen — sonst nimmt er einen Vorschlag an und merkt erst danach,
+       dass er die eigene Fassung damit weggeräumt hat. */
+    federBlatt.querySelector('.alt').textContent = lies(eintrag.el);
+    federBlatt.querySelector('.wortlaut').textContent = eintrag.feder.neu || '';
+    federBlatt.hidden = false;
+    /* Erst das Panel einblenden, dann die Stelle ins Bild holen: das Panel
+       nimmt bis zu 38vh, und ein Vorschlag, dessen Satz man nicht sieht, ist
+       eine Behauptung. */
+    zuSeite(eintrag.seite - 1);
+    holInsBild(eintrag.el);
+    federBlatt.scrollTop = 0;
+    federBlatt.focus();
+  }
+
+  /* Der Absatz kommt in die Mitte des Leseraums, wenn er nicht ohnehin
+     bequem dasteht. Gerechnet wird von Hand: scrollIntoView würde auch die
+     Seite in sich verschieben und die Kopfzeile des Blattes wegschieben. */
+  function holInsBild(el) {
+    if (!el || !lauf) return;
+    requestAnimationFrame(function () {
+      var r = el.getBoundingClientRect(), rl = lauf.getBoundingClientRect();
+      if (r.top >= rl.top + 8 && r.bottom <= rl.bottom - 8) return;
+      var ziel = lauf.scrollTop + (r.top - rl.top) - Math.max(14, (rl.height - r.height) / 2);
+      haltAn();
+      faehrtSelbst = 1;
+      faehrtEnde = setTimeout(fahrtEnde, 'onscrollend' in lauf ? 2600 : 560);
+      lauf.scrollTo({ top: ziel, behavior: reduziert ? 'auto' : 'smooth' });
+    });
+  }
+
+  /* zu: nur zuklappen. weg: die Feder ist erledigt und verschwindet. */
+  function schliesseFeder(weg) {
+    if (!federHier) return;
+    federHier.el.classList.remove('hier');
+    federHier.knopf.setAttribute('aria-expanded', 'false');
+    if (weg) {
+      federHier.el.classList.remove('bb-mit-feder');
+      federHier.knopf.remove();
+      /* Übernommen wie verworfen: der Vorschlag ist erledigt und kommt beim
+         nächsten Aufschlagen nicht wieder. Eine Entscheidung, die man jedes
+         Mal neu treffen muss, ist keine. */
+      if (federHier.el.__block) delete federHier.el.__block.feder;
+      var i = federn.indexOf(federHier);
+      if (i > -1) federn.splice(i, 1);
+      zeigeFedernStand();
+    }
+    federHier = null;
+    federBlatt.hidden = true;
+  }
+
+  function wirfFeder(weg) {
+    var el = federHier && federHier.el;
+    schliesseFeder(weg);
+    if (el && el.isContentEditable) el.focus();
+  }
+
+  function nimmFeder() {
+    if (!federHier) return;
+    var el = federHier.el, neu = federHier.feder.neu || '';
+    schliesseFeder(true);
+    setzeText(el, neu);
+    el.classList.add('frisch-text');
+    setTimeout(function () { el.classList.remove('frisch-text'); }, 1500);
+    getippt();
+    if (el.isContentEditable) el.focus();
+  }
+
+  /* Übernehmen muss sich zurücknehmen lassen. Ein direktes textContent = …
+     geht am Gedächtnis des Browsers vorbei: Strg+Z holte den eigenen Satz
+     nicht zurück, und mit dem Sichern wäre er endgültig weg. Über die
+     Eingabe-Kette geschrieben, ist der Schritt ein Schritt wie jeder andere. */
+  function setzeText(el, text) {
+    if (!el.isContentEditable) { el.textContent = text; return; }
+    el.focus();
+    var sel = window.getSelection();
+    var r = document.createRange();
+    r.selectNodeContents(el);
+    sel.removeAllRanges();
+    sel.addRange(r);
+    var ging = false;
+    try { ging = document.execCommand('insertText', false, text); } catch (e) { ging = false; }
+    if (!ging || lies(el) !== text) el.textContent = text;
+  }
+
+  /* Der Strich in der Marge ist klein und am Handy gar nicht zu treffen. Wie
+     viele Vorschläge offen sind, steht deshalb auch unten — ein Druck führt
+     zum nächsten, quer über die Seiten. */
+  /* Wer einen Absatz komplett löscht, löscht den Feder-Knopf gleich mit — er
+     steht ja darin. Dann muss auch der Vorschlag weg sein, sonst zählt die
+     Leiste unten drei und führt ins Leere. */
+  function raeumeFedern() {
+    var vorher = federn.length;
+    federn = federn.filter(function (f) {
+      if (f.knopf.isConnected) return true;
+      /* Der Knopf ist weggetippt worden. Dann muss auch alles andere weg, was
+         zu ihm gehörte: die Tönung des Absatzes, die sonst den Rest der
+         Sitzung stehen bliebe, und der Vorschlag im Block — sonst käme er
+         beim nächsten Aufschlagen wieder, obwohl seine Marke längst weg ist. */
+      f.el.classList.remove('bb-mit-feder', 'hier');
+      if (f.el.__block) delete f.el.__block.feder;
+      return false;
+    });
+    if (federHier && federn.indexOf(federHier) === -1) {
+      federHier = null;
+      federBlatt.hidden = true;
+    }
+    if (federn.length !== vorher) zeigeFedernStand();
+  }
+
+  function zeigeFedernStand() {
+    if (!federKnopf) return;
+    if (!federn.length) { federKnopf.hidden = true; return; }
+    federKnopf.hidden = false;
+    federKnopf.textContent = federn.length === 1
+      ? 'Ein Vorschlag des KI-Beraters'
+      : federn.length + ' Vorschläge des KI-Beraters';
+  }
+
+  function naechsteFeder() {
+    raeumeFedern();
+    if (!federn.length) return;
+    var ab = federHier ? federn.indexOf(federHier) + 1 : 0;
+    zeigeFeder(federn[ab % federn.length]);
+  }
+
+  /* ---------- Der Stand: geschrieben ist gespeichert ---------- */
+  function getippt() {
+    if (!schonGetippt && standNeu) {
+      schonGetippt = true;
+      standWort.innerHTML = '<b>' + zahm(standNeu) + '</b>';
+      /* Stand blieb bisher womöglich versteckt, weil das Blatt keinen hatte —
+         geschrieben hat man jetzt trotzdem. */
+      standWort.style.display = '';
+    }
+    raeumeFedern();
+    /* Die Miniaturen sind Klone der Seite. Wer tippt und links das alte Wort
+       stehen sieht, traut der Leiste nicht mehr — also wird die Miniatur der
+       Seite neu gezogen, sobald die Finger stillstehen. */
+    clearTimeout(miniTakt);
+    miniTakt = setTimeout(frischeMini, 450);
+  }
+
+  /* Nachgezogen wird die Seite, in die geschrieben wurde — nicht die, die der
+     Zähler gerade nennt. Am großen Schirm stehen zwei Seiten nebeneinander im
+     Blick; wer in die untere tippt, ohne zu scrollen, sähe sonst die obere
+     Miniatur neu und die eigene alt. */
+  function frischeMini() {
+    var i = jetzt;
+    var wo = document.activeElement;
+    while (wo && wo !== lauf) {
+      if (wo.classList && wo.classList.contains('bb-seite')) {
+        var k = seitenEl.indexOf(wo);
+        if (k > -1) i = k;
+        break;
+      }
+      wo = wo.parentNode;
+    }
+    var seite = seitenEl[i], alt = miniEl[i];
+    if (!seite || !alt || !alt.parentNode) return;
+    var neu = baueMini(seite, i);
+    if (alt.classList.contains('hier')) {
+      neu.classList.add('hier');
+      neu.setAttribute('aria-current', 'true');
+    }
+    alt.parentNode.replaceChild(neu, alt);
+    miniEl[i] = neu;
+  }
+
+  /* ---------- Zurück ins Dokument ----------
+     Es gibt keinen Speichern-Knopf, weil es nichts zu speichern gibt — aber
+     dann muss das Geschriebene auch dort landen, wo das Dokument steht. Sonst
+     stünde beim zweiten Aufschlagen der alte Satz da, und „die Akte ist ein
+     Arbeitsraum" wäre eine Behauptung, die beim zweiten Druck zusammenfällt.
+     Zustand über den Tab hinaus gibt es in dieser Vorführung trotzdem nicht:
+     ein Neuladen setzt alles zurück, wie überall hier. */
+  /* Ein Block ist eine Zeichenkette, kein HTML. textContent verschluckt dabei
+     jeden Umbruch: „Erste Zeile" Enter „Zweite Zeile" käme als ein Wortbrei
+     zurück. innerText liest, was tatsächlich als Zeile dasteht. */
+  function lies(el) {
+    var t = el.innerText !== undefined ? el.innerText : el.textContent;
+    /* Der Browser hängt an ein contenteditable gern eine leere Schlusszeile. */
+    return String(t).replace(/\n+$/, '');
+  }
+
+  function sichere() {
+    if (!jetzigesDok) return;
+    var notizen = {};
+    seitenEl.forEach(function (seite, i) {
+      Array.prototype.forEach.call(seite.querySelectorAll('[contenteditable="true"]'), function (el) {
+        if (el.__zelle) {
+          var z = el.__zelle;
+          if (z[0].tab && z[0].tab[z[1]]) z[0].tab[z[1]][z[2]] = lies(el);
+          return;
+        }
+        var b = el.__block;
+        if (!b) return;
+        if (b.liste) {
+          b.liste = Array.prototype.map.call(el.querySelectorAll('li'), lies);
+        } else if (b.h !== undefined) b.h = lies(el);
+        else if (b.klein !== undefined) b.klein = lies(el);
+        else if (!b.tab && !b.bild) b.p = lies(el);
+      });
+      var n = seite.querySelector('.bb-notiz');
+      if (n && n.textContent.trim()) notizen[i + 1] = n.textContent.trim();
+    });
+    jetzigesDok.notizen = notizen;
+    /* Die alte Kurzform für Seite 1 darf nicht zusätzlich wirken, sonst stünde
+       eine gelöschte Notiz beim nächsten Mal wieder da. */
+    delete jetzigesDok.randnotiz;
+  }
+
+  /* ---------- Die Randnotiz: was man auf fremdes Papier schreiben darf ----- */
+  function notizAnDenRand() {
+    var seite = seitenEl[jetzt];
+    if (!seite) return;
+    var n = seite.querySelector('.bb-notiz');
+    if (!n) {
+      n = document.createElement('div');
+      n.className = 'bb-notiz';
+      seite.appendChild(n);
+      /* Eine leere Handschrift ist keine Notiz — sie geht wieder weg, statt als
+         unsichtbarer Fleck auf der Seite zu bleiben. Der Horcher hängt nur an
+         der frisch gebauten Notiz: beim zweiten Druck auf denselben Rand käme
+         er sonst ein zweites Mal dazu. */
+      n.addEventListener('blur', function () {
+        if (!n.textContent.trim()) n.remove();
+        else getippt();
+      });
+    }
+    n.setAttribute('contenteditable', 'true');
+    n.focus();
+    var r = document.createRange();
+    r.selectNodeContents(n);
+    r.collapse(false);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }
+
   /* ---------- Auf und zu ---------- */
   function zeige(dok) {
     if (!schicht) baueSchicht();
     offen = true;
+    jetzigesDok = dok;
     vorherFokus = document.activeElement;
     herkunft = dok.aus || null;
 
@@ -464,6 +938,32 @@ window.Blatt = (function () {
     leiste.textContent = '';
     seitenEl = [];
     miniEl = [];
+    federn = [];
+    federHier = null;
+    federBlatt.hidden = true;
+    clearTimeout(miniTakt);
+
+    /* Ein gescannter Stapel hat keinen Text — auf dem kann man auch keinen
+       ändern. Offen ist nur, wo Sätze stehen. */
+    var papierOffen = !!dok.schreibbar && !dok.ohneText;
+    schonGetippt = false;
+    /* Auf fremdem Papier braucht die Fläche nichts zu sagen: dass eine
+       Randnotiz steht, ist überall dasselbe. */
+    standNeu = dok.standNeu || (dok.notizbar && !papierOffen ? 'Deine Randnotiz steht.' : '');
+
+    /* Offenes Papier bekommt eigene Blöcke ---------------------------------
+       Beim Sichern wird in die Blöcke zurückgeschrieben. Kämen sie aus der
+       gemeinsamen Quelle (blaetter.js reicht Blöcke ohne {beratung}
+       unverändert durch), landete der getippte Satz im Rahmenvertrag, den
+       das Gespräch und die Unterlagen des Kunden ebenfalls zeigen. Die Kopie
+       hängt deshalb an DIESER Stelle — dort, wo geschrieben wird — und nicht
+       daran, dass ein Aufrufer sie vorher bestellt hat. Sie ersetzt die Seiten
+       im übergebenen Dokument, damit das Geschriebene beim nächsten
+       Aufschlagen noch da ist. */
+    if (papierOffen && dok.seiten && !dok.__eigen) {
+      dok.seiten = eigeneFassung(dok.seiten);
+      dok.__eigen = true;
+    }
 
     var seiten = dok.seiten || [];
     var gesamt = dok.seitenGesamt || seiten.length || 1;
@@ -480,7 +980,7 @@ window.Blatt = (function () {
     } else {
       seiten.forEach(function (bloecke, i) {
         seitenEl.push(baueSeite(bloecke, i + 1, gesamt,
-          (fund && fund.seite === i + 1) ? fund.wort : null));
+          (fund && fund.seite === i + 1) ? fund.wort : null, papierOffen));
       });
     }
 
@@ -507,28 +1007,69 @@ window.Blatt = (function () {
       lauf.appendChild(rest);
     }
 
-    var alteNotiz = schicht.querySelector('.bb-notiz');
-    if (alteNotiz) alteNotiz.remove();
-    if (dok.randnotiz && seitenEl.length) {
+    /* Randnotizen: die Kurzform randnotiz meint Seite 1, notizen nennt die
+       Seite selbst — so kommt zurück, was beim letzten Mal an den Rand
+       geschrieben wurde. */
+    var notizen = {};
+    if (dok.randnotiz) notizen[1] = dok.randnotiz;
+    if (dok.notizen) for (var nk in dok.notizen) {
+      if (Object.prototype.hasOwnProperty.call(dok.notizen, nk)) notizen[nk] = dok.notizen[nk];
+    }
+    Object.keys(notizen).forEach(function (nr) {
+      var seite = seitenEl[+nr - 1];
+      if (!seite) return;
       var notiz = document.createElement('div');
       notiz.className = 'bb-notiz';
-      notiz.textContent = dok.randnotiz;
-      seitenEl[0].appendChild(notiz);
-      /* Auch die Miniatur der ersten Seite trägt sie — sie ist ein Klon, der
-         vor der Notiz entstanden ist. */
-      var mk = miniEl[0] && miniEl[0].querySelector('.bb-seite');
+      notiz.textContent = notizen[nr];
+      seite.appendChild(notiz);
+      /* Auch die Miniatur trägt sie — sie ist ein Klon, der vor der Notiz
+         entstanden ist. */
+      var mk = miniEl[+nr - 1] && miniEl[+nr - 1].querySelector('.bb-seite');
       if (mk) mk.appendChild(notiz.cloneNode(true));
-    }
+    });
 
     fussWort.textContent = dok.fuss || '';
+    standWort.textContent = dok.stand || '';
+    standWort.style.display = dok.stand ? '' : 'none';
+
     griffeKasten.textContent = '';
+    federKnopf = null;
+    notizKnopf = null;
+
+    if (federn.length) {
+      federKnopf = document.createElement('button');
+      federKnopf.type = 'button';
+      federKnopf.className = 'feder-knopf';
+      federKnopf.addEventListener('click', naechsteFeder);
+      griffeKasten.appendChild(federKnopf);
+      zeigeFedernStand();
+    }
+
+    /* Auf fremdem Papier ist der Rand der einzige Platz, der einem gehört. */
+    if (dok.notizbar) {
+      notizKnopf = document.createElement('button');
+      notizKnopf.type = 'button';
+      notizKnopf.textContent = 'An den Rand schreiben';
+      notizKnopf.addEventListener('click', notizAnDenRand);
+      griffeKasten.appendChild(notizKnopf);
+    }
+
     (dok.griffe || []).forEach(function (g) {
       var b = document.createElement('button');
       b.type = 'button';
+      if (g.stark) b.className = 'stark';
       b.textContent = g.wort;
       b.addEventListener('click', function () { g.tat(dok); });
       griffeKasten.appendChild(b);
     });
+
+    /* Derselbe Horcher, immer angemeldet: er hört nur, wo etwas offen ist, und
+       zweimal anmelden geht bei gleicher Funktion nicht. */
+    lauf.addEventListener('input', getippt);
+    if (papierOffen || dok.notizbar) {
+      schicht.setAttribute('aria-label', (dok.titel || 'Dokument') +
+        (papierOffen ? ', offen zum Schreiben' : ', gesetzt, mit Platz für Randnotizen'));
+    }
 
     schicht.hidden = false;
     document.documentElement.style.overflow = 'hidden';
@@ -578,6 +1119,9 @@ window.Blatt = (function () {
        Maße null, und der Zähler stünde beim Wiederaufschlagen auf der
        letzten Seite. */
     haltAn();
+    clearTimeout(miniTakt);
+    schliesseFeder(false);
+    sichere();
     schicht.hidden = true;
     document.documentElement.style.overflow = '';
     /* Zurück auf den Knopf, der aufgeschlagen hat. Nicht auf die Zeile: die ist
@@ -599,9 +1143,20 @@ window.Blatt = (function () {
     /* Die Ebene fängt Escape ab und gibt ihn nicht weiter: unter ihr steht auf
        manchen Flächen ein Regal oder eine Liste, die auf denselben Druck
        zumacht — ein Escape darf nicht zwei Dinge schließen. */
-    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); schliesse(); return; }
-    if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); zuSeite(jetzt + 1); return; }
-    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); zuSeite(jetzt - 1); return; }
+    var imText = document.activeElement && document.activeElement.isContentEditable;
+    if (e.key === 'Escape') {
+      e.preventDefault(); e.stopPropagation();
+      /* Escape geht rückwärts durch das, was aufgeklappt ist: erst der
+         Vorschlag, dann der Cursor im Papier, erst dann das Blatt. Wer beim
+         Schreiben Escape drückt, will nicht das halbe Dokument verlassen. */
+      if (federHier) { var k = federHier.knopf; schliesseFeder(false); if (k.isConnected) k.focus(); return; }
+      if (imText) { document.activeElement.blur(); schicht.querySelector('.bb-zu').focus(); return; }
+      schliesse();
+      return;
+    }
+    /* Im offenen Text gehören die Pfeile dem Cursor, nicht dem Blättern. */
+    if (!imText && (e.key === 'ArrowRight' || e.key === 'PageDown')) { e.preventDefault(); zuSeite(jetzt + 1); return; }
+    if (!imText && (e.key === 'ArrowLeft' || e.key === 'PageUp')) { e.preventDefault(); zuSeite(jetzt - 1); return; }
     if (e.key !== 'Tab') return;
     /* Modal heißt modal: der Fokus verlässt die Ebene nicht, sonst tippt man
        blind in der Fläche darunter herum. */
@@ -609,7 +1164,7 @@ window.Blatt = (function () {
        und ein unsichtbarer letzter Halt hieße, dass Tab aus der Ebene heraus
        in die Fläche dahinter fällt. */
     var greifbar = Array.prototype.filter.call(
-      schicht.querySelectorAll('button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'),
+      schicht.querySelectorAll('button:not([disabled]), [href], [contenteditable="true"], [tabindex]:not([tabindex="-1"])'),
       function (el) { return el.offsetParent !== null || el === document.activeElement; });
     if (!greifbar.length) return;
     var erster = greifbar[0], letzter = greifbar[greifbar.length - 1];

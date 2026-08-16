@@ -26,7 +26,13 @@
    Blatt und sein Name sind der Griff, die Seiten stehen in blaetter.js, der
    Leseraum ist blatt.js — dieselben Seiten, die der Kunde in seinen
    Unterlagen sieht und die der KI-Berater als Beleg zitiert.
-   Marker: BERATUNG-AKTE-V7 (Anschrift deckt sich mit dem Rechnungspapier) */
+   V8 (Häppchen D4, Teil 2): hier wird geschrieben. Der Vermerk zum
+   Preisgespräch ist ein Entwurf — offenes Papier, in dem der Cursor steht,
+   mit drei Vorschlägen des KI-Beraters am Rand, die erst durch „Übernehmen"
+   Text der Beratung werden. Ein Entwurf hat keine Freigabe: die Kapseln
+   entstehen erst beim Fertigstellen. Fremdes Papier bleibt gesetzt, dort
+   schreibt man nur an den Rand.
+   Marker: BERATUNG-AKTE-V8 (Anschrift deckt sich mit dem Rechnungspapier) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -159,6 +165,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 .frei .zustand-wort{font-size:10.5px;font-weight:600;white-space:nowrap}
 .frei button[aria-pressed="false"] .zustand-wort{color:var(--nebel-400)}
 .dok.intern{border-style:dashed;background:var(--nebel-050)}
+/* Ein Blatt, das gerade geschrieben wird, trägt einen Strich in der Kante —
+   dieselbe Marge-Feder wie im Blatt-Blick, nur an der Zeile. */
+.dok.schreibt{box-shadow:inset 3px 0 0 var(--lila-400), 0 8px 24px rgba(16,19,26,.06)}
+.dok .frei .noch{font-size:11px;color:var(--nebel-500);align-self:center;white-space:nowrap}
 .dok .hand{font-family:'Caveat',cursive;font-size:17px;font-weight:700;color:var(--lila-700);rotate:-1.5deg;white-space:nowrap}
 
 /* ---------- Kundenzugang & Tarif nebeneinander ---------- */
@@ -248,6 +258,19 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   <h3>Dokumente, und wer sie sieht</h3>
   <section class="tafel" aria-label="Dokumente mit Freigabe">
     <div class="doks">
+      <div class="dok schreibt" data-dok="vermerk">
+        <button class="d-oeffnen" type="button">
+          <span class="blatt-icon" aria-hidden="true"></span>
+          <span class="d-text"><span class="d-name">Vermerk zum Preisgespräch</span><br><span class="d-meta">Entwurf, 2 Seiten, zuletzt von dir vor vier Minuten</span></span>
+        </button>
+        <!-- Die Handschrift sagt etwas, das sonst nirgends steht — dass der
+             Entwurf noch nicht freigegeben ist, sagt schon der graue Satz
+             daneben. Zweimal dasselbe wäre eine Zeile verschenkt. -->
+        <span class="hand">für Donnerstag.</span>
+        <span class="frei">
+          <span class="noch">Ein Entwurf wird nicht freigegeben.</span>
+        </span>
+      </div>
       <div class="dok" data-dok="monatsauswertung">
         <button class="d-oeffnen" type="button">
           <span class="blatt-icon" aria-hidden="true"></span>
@@ -291,8 +314,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       </div>
     </div>
     <div class="fuss-griffe">
+      <button class="knopf leise" id="neues-blatt" type="button">Neues Blatt schreiben</button>
       <button class="bald knopf leise" type="button">Dokument hochladen</button>
-      <div class="tarif-fuss" style="margin-top:8px;flex-basis:100%">Ein Druck auf den Namen schlägt das Dokument auf, hier, ohne Herunterladen. Was die KI liest, kann sie dem Kunden im Gespräch zitieren, mit Fundstelle, wie im <a href="beratung-mitlesen.html" style="color:var(--lila-700)">freigegebenen Gespräch</a>.</div>
+      <div class="tarif-fuss" style="margin-top:8px;flex-basis:100%">Ein Druck auf den Namen schlägt das Dokument auf, hier, ohne Herunterladen. Ein eigenes Blatt ist dabei offen — der Cursor steht im Text, und was der KI-Berater vorschlägt, steht daneben, bis du es übernimmst. Fremdes Papier bleibt gesetzt; dort schreibst du an den Rand. Was die KI liest, kann sie dem Kunden im Gespräch zitieren, mit Fundstelle, wie im <a href="beratung-mitlesen.html" style="color:var(--lila-700)">freigegebenen Gespräch</a>.</div>
     </div>
   </section>
 
@@ -336,14 +360,15 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   });
 
   var hinweisTimer = null;
-  function demoHinweis(){
+  function demoHinweisText(text){
     var h = document.getElementById('demo-hinweis');
+    if (text) h.textContent = text;
     h.style.opacity = .95; h.style.translate = '-50% 0';
     clearTimeout(hinweisTimer);
-    hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2200);
+    hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2600);
   }
   document.querySelectorAll('.bald').forEach(function(el){
-    el.addEventListener('click', demoHinweis);
+    el.addEventListener('click', function(){ demoHinweisText('Diese Fläche entsteht gerade.'); });
   });
 
   /* ---------- Der Blatt-Blick: die Akte ist ein Arbeitsraum ----------
@@ -355,18 +380,70 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   /* Die Beratung dieser Vorführung. Auf den Kundenflächen kommt der Name aus
      marke.js — im Papier steht er nicht fest (blaetter.js). */
   var BERATUNG = 'Nordholm & Partner';
+  /* Was der Beratung gehört, ist offen; was von außen kam, bleibt gesetzt
+     (Häppchen D4 Teil 2). In einen Rahmenvertrag, den man hier ändern könnte,
+     wäre kein Beleg mehr — man wüsste bei keinem Zitat, ob der Satz je so
+     dastand. Auf fremdem Papier gibt es deshalb nur den Rand. */
   var AKTE = {
-    monatsauswertung: {meta: '8 Seiten, von dir, 4. August',
+    vermerk: {meta: 'Entwurf, 2 Seiten, für das Gespräch am Donnerstag',
+      schreibbar: true,
+      stand: 'Entwurf, zuletzt von dir vor vier Minuten',
+      standNeu: 'Entwurf, gerade eben von dir',
+      fuss: 'Niemand außer euch sieht ihn.'},
+    monatsauswertung: {meta: '8 Seiten, von dir, 4. August', notizbar: true,
       fuss: 'Liegt beim Kunden in den Unterlagen.'},
     rahmenvertrag: {meta: '14 Seiten, vom Kunden, 12. Juni',
-      fund: {seite: 2, wort: 'Preisgleitklausel'},
-      fuss: 'Der KI-Berater zitiert daraus Abschnitt 3.'},
+      fund: {seite: 2, wort: 'Preisgleitklausel'}, notizbar: true,
+      fuss: 'Fremdes Papier. Der KI-Berater zitiert daraus Abschnitt 3.'},
     benchmark: {meta: '12 Seiten, vom KI-Berater erstellt, gestern',
       fuss: 'Im Gespräch entstanden, in die Akte gelegt.',
+      notizbar: true,
       randnotiz: 'mit ihm durchgehen!'},
-    honorar: {meta: '2 Seiten, von dir, 28. Juli',
+    honorar: {meta: '2 Seiten, von dir, 28. Juli', notizbar: true,
       fuss: 'Weder der Kunde noch die KI sehen dieses Blatt.'}
   };
+
+  /* ---------- Fertigstellen: erst dann gibt es etwas freizugeben ----------
+     Ein Entwurf hat keine Freigabe-Kapseln, weil es nichts zu entscheiden
+     gibt: was noch geschrieben wird, kann niemand sehen. Mit dem Fertigstellen
+     wird aus dem Entwurf ein Dokument — und in derselben Sekunde steht die
+     Frage da, wer es lesen darf. Beide Kapseln beginnen zu. */
+  function stelleFertig(zeile){
+    if (!zeile || !zeile.classList.contains('schreibt')) return;
+    zeile.classList.remove('schreibt');
+    zeile.querySelector('.d-meta').textContent = '2 Seiten, von dir, gerade eben';
+    var hand = zeile.querySelector('.hand');
+    if (hand) hand.remove();
+    zeile.querySelector('.frei').innerHTML =
+      '<button type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">nur Beratung</span></button>' +
+      '<button type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">KI liest nicht</span></button>';
+    kippbar(Array.prototype.slice.call(zeile.querySelectorAll('.frei button')));
+    /* Geändert wird das Dokument, das die Fläche in der Hand hält — der
+       geschriebene Text steht darin und darf beim Fertigstellen nicht
+       verlorengehen. Fertig heißt: gesetzt. Ab jetzt nur noch der Rand. */
+    var dok = DOKS.vermerk;
+    if (dok) {
+      delete dok.schreibbar;
+      delete dok.standNeu;
+      delete dok.griffe;
+      dok.stand = '';
+      dok.notizbar = true;
+      dok.meta = '2 Seiten, von dir, gerade eben';
+      dok.fuss = 'Fertig. Jetzt entscheidest du, wer es sieht.';
+    }
+    /* Auch das gesprochene Wort stimmt wieder: „weiterschreiben" wäre nach
+       dem Fertigstellen eine Zusage, die der Griff nicht mehr einlöst. */
+    var griff = zeile.querySelector('.d-oeffnen');
+    if (griff) griff.setAttribute('aria-label',
+      zeile.querySelector('.d-name').textContent + ' aufschlagen');
+    demoHinweisText('Fertig. Jetzt steht die Frage da, wer ihn lesen darf — beide Kapseln beginnen zu.');
+  }
+  AKTE.vermerk.griffe = [{wort: 'Fertigstellen', stark: true, tat: function(){
+    var zeile = document.querySelector('.dok[data-dok="vermerk"]');
+    Blatt.schliesse();
+    stelleFertig(zeile);
+  }}];
+  var DOKS = {};
   document.querySelectorAll('.dok[data-dok]').forEach(function(zeile){
     var griff = zeile.querySelector('.d-oeffnen');
     var name = zeile.dataset.dok;
@@ -377,17 +454,87 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     AKTE[name].beratung = BERATUNG;
     /* Auch wenn hier ein Eintrag steht: kennt blaetter.js den Namen nicht, gibt
        es keine Seiten — und dann keinen Knopf, der so tut. */
-    if (!Blaetter.hol(name, AKTE[name])) { griff.disabled = true; return; }
-    griff.setAttribute('aria-label', zeile.querySelector('.d-name').textContent + ' aufschlagen');
+    /* Ein Dokument, einmal geholt und behalten. Wer hineinschreibt oder etwas
+       an den Rand notiert, findet es beim nächsten Aufschlagen wieder — bei
+       jedem Druck neu zu holen hieße, das Geschriebene jedes Mal zu verlieren.
+       Über ein Neuladen der Seite hinaus hält es trotzdem nichts; das ist die
+       Grenze einer Vorführung ohne Rückseite. */
+    var dok = Blaetter.hol(name, AKTE[name]);
+    if (!dok) { griff.disabled = true; return; }
+    DOKS[name] = dok;
+    griff.setAttribute('aria-label', zeile.querySelector('.d-name').textContent +
+      (AKTE[name].schreibbar ? ' aufschlagen und weiterschreiben' : ' aufschlagen'));
     griff.addEventListener('click', function(){
-      var dok = Blaetter.hol(name, AKTE[name]);
       dok.aus = zeile;
       Blatt.zeige(dok);
     });
   });
 
+  /* ---------- Ein neues Blatt ----------
+     Es beginnt leer und offen, mit dem einen, was schon feststeht: wer es
+     schreibt und wann. Ein Titel wird nicht abgefragt — man schreibt ihn in
+     die Überschrift, wo er später steht.
+
+     Und es kommt wirklich in die Akte: „In die Akte legen" hängt die Zeile
+     hier ein, mit dem Titel, der oben auf der Seite steht. Ein Blatt, das nur
+     behauptet, es läge irgendwo, wäre auf einer Fläche, auf der jedes andere
+     Blatt sein Geschriebenes behält, der einzige Bruch. */
+  var neueBlaetter = 0;
+  document.getElementById('neues-blatt').addEventListener('click', function(){
+    if (!window.Blatt) return;
+    var knopf = this;
+    var blatt = {
+      titel: 'Ohne Titel',
+      meta: 'Entwurf, gerade angelegt',
+      schreibbar: true,
+      stand: 'Entwurf, noch kein Wort',
+      standNeu: 'Entwurf, gerade eben von dir',
+      fuss: 'Noch nirgends abgelegt — erst „In die Akte legen" gibt ihm seine Zeile.',
+      seiten: [[{h: 'Ohne Titel'},
+                {klein: 'Entwurf, Dr. Anna Vogelsang, ' + BERATUNG + ', 16. August 2026.'},
+                {p: ''}]],
+      aus: knopf
+    };
+    blatt.griffe = [{wort: 'In die Akte legen', stark: true, tat: function(){
+      Blatt.schliesse();
+      legAb(blatt);
+    }}];
+    Blatt.zeige(blatt);
+  });
+
+  function legAb(blatt){
+    /* Der Titel steht in der Überschrift, nicht in einem Feld daneben —
+       geholt wird er von dort, wo ihn jemand hingeschrieben hat. */
+    var kopf = blatt.seiten[0][0];
+    var name = (kopf && kopf.h || '').trim() || 'Ohne Titel';
+    blatt.titel = name;
+    delete blatt.griffe;
+    var zeile = document.createElement('div');
+    zeile.className = 'dok schreibt';
+    zeile.dataset.dok = 'neu-' + (++neueBlaetter);
+    zeile.innerHTML =
+      '<button class="d-oeffnen" type="button">' +
+        '<span class="blatt-icon" aria-hidden="true"></span>' +
+        '<span class="d-text"><span class="d-name"></span><br>' +
+        '<span class="d-meta">Entwurf, 1 Seite, von dir, gerade eben</span></span>' +
+      '</button>' +
+      '<span class="frei"><span class="noch">Ein Entwurf wird nicht freigegeben.</span></span>';
+    zeile.querySelector('.d-name').textContent = name;
+    var griff = zeile.querySelector('.d-oeffnen');
+    griff.setAttribute('aria-label', name + ' aufschlagen und weiterschreiben');
+    griff.addEventListener('click', function(){
+      blatt.aus = zeile;
+      Blatt.zeige(blatt);
+    });
+    document.querySelector('.doks').appendChild(zeile);
+    blatt.aus = zeile;
+    blatt.fuss = 'Liegt in der Akte Petersen.';
+    demoHinweisText('„' + name + '" liegt jetzt in der Akte — als Entwurf, den außer euch niemand sieht.');
+  }
+
   /* ---------- Freigabe-Kapseln: Zustand wird gekippt ---------- */
-  document.querySelectorAll('.frei button').forEach(function(b){
+  function kippbar(liste){
+    liste.forEach(function(b){
     b.addEventListener('click', function(){
       var an = b.getAttribute('aria-pressed') !== 'true';
       b.setAttribute('aria-pressed', String(an));
@@ -402,7 +549,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         wort.textContent = an ? 'KI liest es' : 'KI liest nicht';
       }
     });
-  });
+    });
+  }
+  kippbar(Array.prototype.slice.call(document.querySelectorAll('.frei button')));
 
   /* ---------- Kundenzugang ---------- */
   var gesperrt = false;
