@@ -20,7 +20,16 @@
    Hand ruhen ließ, hatte keinen Zeiger mehr. Dasselbe beim Verlassen des
    Fensters und beim Tabwechsel. Ab jetzt gilt: entweder der Komet oder der
    Systempfeil, nie nichts.
-   Marker: ZEIGER-KOMET-V4 */
+   V5 (Jonas, 2026-08-16): Der Schweif lief deutlich rechts neben dem Kopf —
+   man sah zwei Zeiger. Ein canvas ist eine ersetzte Box: inset:0 dehnt sie
+   nicht, sie nimmt ihre Attributgröße als CSS-Größe, und die war
+   innerWidth × devicePixelRatio. Auf jedem skalierten Bildschirm (Windows
+   125 %, Retina) wurde der Schweif damit um genau diesen Faktor nach rechts
+   unten gestreckt, während der Kopf als normales div richtig stand. Auf einem
+   Bildschirm mit Faktor 1 fällt das nie auf — deshalb hat es keine Prüfung
+   hier gefunden, sondern Jonas' Auge. Die Fläche bekommt jetzt CSS-Maße, und
+   gemessen wird sie selbst statt innerWidth (das zählt den Rollbalken mit).
+   Marker: ZEIGER-KOMET-V5 */
 (function(){
   'use strict';
   if (!window.matchMedia('(pointer:fine) and (hover:hover)').matches) return;
@@ -33,7 +42,12 @@
   stil.textContent =
     'html.komet-zeiger,html.komet-zeiger *{cursor:none!important}' +
     'html.komet-zeiger input,html.komet-zeiger textarea,html.komet-zeiger select,html.komet-zeiger [contenteditable]{cursor:auto!important}' +
-    '#komet-schweif{position:fixed;inset:0;z-index:998;pointer-events:none}' +
+    /* width/height MÜSSEN hier stehen. Ein canvas ist eine ersetzte Box:
+       inset:0 dehnt sie nicht, sie nimmt ihre Attributgröße als CSS-Größe —
+       und die ist innerWidth × devicePixelRatio. Ohne diese zwei Zeilen ist
+       der Schweif auf jedem Bildschirm mit Skalierung um genau diesen Faktor
+       nach rechts unten gestreckt, während der Kopf richtig steht. */
+    '#komet-schweif{position:fixed;inset:0;width:100%;height:100%;z-index:998;pointer-events:none}' +
     '#komet-kopf{position:fixed;left:0;top:0;z-index:999;pointer-events:none;opacity:0;' +
       'width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:999px;' +
       'background:radial-gradient(circle at 35% 35%, #fff 0%, var(--lila-500, #8478ec) 35%, var(--lila-700, #5a4cd6) 100%);' +
@@ -52,11 +66,16 @@
      Mausbewegung verrät, wo der Komet stehen muss (siehe zeige/verstecke). */
 
   var ctx = schweif.getContext('2d');
-  var dpr = 1;
+  var dpr = 1, breit = 0, hoch = 0;
+  /* Gemessen wird die Fläche selbst, nicht innerWidth: die zählt den
+     Rollbalken mit, die Fläche nicht. Ein Unterschied von 15px verschiebt
+     jeden Schweifpunkt. */
   function messe(){
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    schweif.width = innerWidth * dpr;
-    schweif.height = innerHeight * dpr;
+    var r = schweif.getBoundingClientRect();
+    breit = r.width; hoch = r.height;
+    schweif.width = Math.round(breit * dpr);
+    schweif.height = Math.round(hoch * dpr);
   }
   messe();
   window.addEventListener('resize', messe);
@@ -148,7 +167,7 @@
     while (spur.length && jetzt - spur[0].t > SCHWEIF_DAUER) spur.shift();
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    ctx.clearRect(0, 0, breit, hoch);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     /* Glow ohne shadowBlur (Review: der langsamste Canvas-Pfad): erst ein
