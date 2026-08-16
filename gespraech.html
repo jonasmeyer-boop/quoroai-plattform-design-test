@@ -6,7 +6,11 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V55
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V56
+   V56 (Issue #58): das Kopfband ist bis zur Unterkante deckend, und die Kamera
+   hält am Ende so, dass das erste noch sichtbare Stück unter dem Band beginnt.
+   Vorher stand der Knopf „Freigeben“ mittig und der Satz, WOFÜR man freigibt,
+   halb hinter dem Band.
    (V51: Häppchen D2, ein Mensch spricht in denselben Strang — aus drei Reviews:
    Ankunft, Abschied, Anlagen, Warteschlange und die Kante des Grenzfalls.
    V55: Häppchen D4 — was gesetzte Seiten hat, öffnet der gemeinsame
@@ -63,7 +67,18 @@ nav{
   display:flex;align-items:center;justify-content:space-between;
   /* Breiter als die Textspalte: die Griffe brauchen Platz, sonst bricht die Zeile um */
   padding:0 max(24px,calc((100vw - 1080px)/2));
-  background:linear-gradient(var(--papier) 55%, color-mix(in srgb, var(--papier) 1%, transparent));
+  /* Deckend bis zur Unterkante. Der Verlauf begann bei 55 % der Bandhoehe —
+     genau dort steht die zweite Kopfzeile, und beim Rollen druckte der Inhalt
+     durch sie hindurch, Buchstaben ueber Buchstaben (Pruefung 2026-08-16,
+     Issue #58). Die weiche Kante bleibt; sie liegt jetzt UNTER dem Band,
+     wo kein Text steht. */
+  background:var(--papier);
+  pointer-events:none;
+}
+/* Die weiche Kante des Kopfbands: liegt unter dem Band, nicht darin. */
+nav::after{
+  content:'';position:absolute;left:0;right:0;top:100%;height:22px;
+  background:linear-gradient(var(--papier), color-mix(in srgb, var(--papier) 1%, transparent));
   pointer-events:none;
 }
 nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px;min-width:0}
@@ -1033,6 +1048,32 @@ body.blatt-offen{overflow:hidden}
       }
       requestAnimationFrame(tick);
     }
+    /* Am Ende nicht einfach unten anliegen bleiben: das Kopfband schneidet dann
+       die oberste Zeile des letzten Stücks an. Bei einer Karte mit Knopf trifft
+       es genau den Satz, der sagt, WOFÜR man freigibt — der Knopf stand mittig
+       und gut sichtbar, die Bedingung dazu halb hinter dem Band
+       (Prüfung 2026-08-16, Issue #58, dort Nr. 33 und Nr. 4).
+       Passt das Stück auf den Schirm, rücken wir es unter das Band. Passt es
+       nicht, bleibt unten anliegend richtig — sonst verschwände der Knopf. */
+    function ausrichten(){
+      var laeufe = document.querySelectorAll('.lauf');
+      var letzter = laeufe[laeufe.length - 1];
+      if (!letzter) return;
+      var band = document.querySelector('nav');
+      var kopf = (band ? band.getBoundingClientRect().height : 60) + 14;
+      /* Gesucht ist nicht das letzte Stück, sondern das erste noch sichtbare —
+         das ist das, was oben angeschnitten wird. */
+      var kinder = letzter.children;
+      for (var i = 0; i < kinder.length; i++) {
+        var r = kinder[i].getBoundingClientRect();
+        if (r.bottom <= kopf) continue;          /* längst durchgelaufen */
+        if (r.top >= kopf) return;               /* steht frei, nichts zu tun */
+        if (r.height > window.innerHeight - kopf) return;  /* passt nicht, unten anliegend ist richtiger */
+        /* Nur nach oben rücken: nach unten würde das Ende aus dem Bild fallen. */
+        window.scrollTo({top: Math.max(0, window.scrollY + r.top - kopf), behavior: reduziert ? 'auto' : 'smooth'});
+        return;
+      }
+    }
     return {
       laeuft: function(){ return an; },
       start: function(){
@@ -1044,13 +1085,33 @@ body.blatt-offen{overflow:hidden}
       halt: function(){
         an = false;
         document.documentElement.style.scrollBehavior = '';
-      }
+        /* Erst wenn die Schrift steht, darf gerückt werden — mitten im
+           Schreiben wäre es ein Ruckeln. */
+        setTimeout(ausrichten, reduziert ? 0 : 260);
+      },
+      ausrichten: ausrichten
     };
   })();
 
   function runter(){
     if (reduziert || kamera.laeuft()) return;
     window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+    /* Auch der einzelne Sprung ans Ende darf das letzte Stück nicht anschneiden.
+       Gewartet wird, bis das weiche Scrollen wirklich steht — eine feste Frist
+       hätte es mitten im Lauf abgewürgt und die Seite vor dem Ende geparkt. */
+    warteAufRuhe(kamera.ausrichten);
+  }
+
+  /* Ruft f auf, sobald sich die Scrollhöhe zwei Bilder lang nicht mehr ändert.
+     scrollend kennen nicht alle Browser, deshalb wird gemessen statt gehorcht. */
+  function warteAufRuhe(f){
+    var letzte = -1, gleich = 0, runden = 0;
+    (function schau(){
+      if (window.scrollY === letzte) gleich++; else { gleich = 0; letzte = window.scrollY; }
+      /* 90 Bilder sind gut anderthalb Sekunden — länger scrollt kein Browser. */
+      if (gleich >= 2 || ++runden > 90) { f(); return; }
+      requestAnimationFrame(schau);
+    })();
   }
   function euro(n){ return n.toLocaleString('de-DE') + ' €'; }
   function zufall(a, b){ return a + Math.random() * (b - a); }

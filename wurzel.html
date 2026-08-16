@@ -21,7 +21,9 @@
    stadt-weiss.jpg: stadt.jpg mit ffmpeg auf reines Weiß gezogen
    (colorlevels 0.93), sonst zeichnet multiply ein graues Rechteck auf die
    weiße Seite.
-   Marker: WURZEL-V5 (V4: die Abrechnung führt in den gezeichneten
+   V6 (Issue #58): der Vorführungs-Kasten sagt, was er ist — „Vorführung:
+   Lage der Adresse wechseln" —, auch am Telefon.
+   Marker: WURZEL-V6 (V4: die Abrechnung führt in den gezeichneten
    Plattformbereich plattform.html; die Hinweiszeile ist weg, sie hatte mit
    dem Knopf ihren einzigen Text verloren. V5: Impressum und Datenschutz
    führen auf quoro-impressum.html und quoro-datenschutz.html — eine
@@ -124,10 +126,16 @@ body.erwacht .modell .aurora{opacity:1}
   .vorfuehrung{
     right:auto;left:50%;top:auto;translate:-50% 0;
     bottom:calc(12px + env(safe-area-inset-bottom));padding-left:10px;gap:6px;
+    flex-direction:column;
   }
-  .vorfuehrung > span{display:none}
+  /* Der Satz bleibt auch am Telefon stehen — ohne ihn sehen die drei Knöpfe
+     aus wie eine Einstellung der Seite. Er rückt über sie statt zu
+     verschwinden. */
+  .vorfuehrung > span{font-size:11.5px}
   .umschalter button{padding:6px 10px;font-size:12px}
-  .fuss{padding-bottom:86px}
+  /* Der Kasten ist mit seiner Zeile zweizeilig und 106px hoch — 86 ließen
+     Impressum und Datenschutz darunter verschwinden. */
+  .fuss{padding-bottom:126px}
   h1{font-size:clamp(22px,6.2vw,28px)}
 }
 </style>
@@ -173,8 +181,13 @@ body.erwacht .modell .aurora{opacity:1}
   </div>
 </div>
 
+<!-- Das Wort „Vorführung" allein reichte nicht: der Kasten sah aus wie eine
+     Einstellung der Seite, und wer „Adresse ohne Beratung" drückte, stand vor
+     einer Fehlerseite, ohne zu wissen, dass er sie selbst geholt hat
+     (Prüfung 2026-08-16, Issue #58, Nr. 96). Auf uebersicht.html steht
+     dieselbe Sache seit je verständlich. -->
 <div class="vorfuehrung glas-dick">
-  <span>Vorführung</span>
+  <span>Vorführung: Lage der Adresse wechseln</span>
   <div class="umschalter" role="tablist" aria-label="Lage der Adresse">
     <button type="button" id="l-fremde" class="hier" role="tab" aria-selected="true">Fremde Beratung</button>
     <button type="button" id="l-wir" role="tab" aria-selected="false">Wir selbst</button>

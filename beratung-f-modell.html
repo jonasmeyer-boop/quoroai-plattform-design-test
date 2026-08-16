@@ -105,7 +105,10 @@
    Und die Zentrale hat die Tür bekommen, die ihr fehlte: „Termine und
    Übergaben". Die Fläche war gezeichnet, aber nur über eine Zeile in einem
    Mandatsraum zu erreichen.
-   Marker: BERATUNG-F-MODELL-V46 (die Räume hängen aneinander) */
+   V47 (Issue #58): der Tisch hat einen Griff und misst selbst, ob er ein Haus
+   verdeckt — dann kommt er zugeklappt hoch. Er lag bei 1440x900 über Petersen
+   Stahlbau, bei 1152x648 über dreien.
+   Marker: BERATUNG-F-MODELL-V47 (die Räume hängen aneinander) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -305,7 +308,25 @@ body.drin #blitz{animation:durchbruch .6s ease-out}
   display:flex;flex-direction:column;gap:8px;max-width:min(430px,calc(100vw - 48px));
   transition:opacity .4s ease;
 }
-#tisch .t-titel{font-size:12px;font-weight:600;color:var(--grau)}
+#tisch .t-titel{
+  display:inline-flex;align-items:center;gap:8px;align-self:flex-start;
+  border:0;background:none;padding:4px 2px;cursor:pointer;
+  font-family:inherit;font-size:12px;font-weight:600;color:var(--grau);
+}
+#tisch .t-titel:hover .t-tut,#tisch .t-titel:focus-visible .t-tut{color:var(--blau)}
+#tisch .t-titel:focus-visible{outline:3px solid var(--blau);outline-offset:3px;border-radius:8px}
+#tisch .t-zahl{
+  display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;
+  border-radius:999px;background:rgba(16,19,26,.08);
+  font-size:11px;font-weight:700;color:var(--tinte);
+}
+#tisch .t-tut{font-weight:500;text-decoration:underline;text-underline-offset:2px}
+/* Zugeklappt bleibt nur der Griff — das Modell darunter wird wieder sichtbar
+   und anklickbar. */
+#tisch.zu .t-reihe{display:none}
+@media (pointer:coarse){
+  #tisch .t-titel{min-height:44px}
+}
 #tisch .t-reihe{display:flex;flex-direction:column;gap:8px}
 #tisch .t-zettel{
   display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;
@@ -649,8 +670,14 @@ body.gezoomt #zonen{display:block}
      data-hilfe-wenn="body:not(.gezoomt)"
      data-hilfe-name="Auf deinem Tisch"
      data-hilfe="Was heute deine Hand braucht, quer über alle Mandate. Jeder Zettel führt genau an die Stelle, um die es geht — die Liste ist keine Ablage, sie leert sich.">
-  <div class="t-titel" data-du="Auf deinem Tisch" data-sie="Auf Ihrem Tisch">Auf deinem Tisch</div>
-  <div class="t-reihe">
+  <!-- Der Titel ist der Griff: der Stapel deckte sonst das Haus zu, um das es
+       geht (Prüfung 2026-08-16, Issue #58). Ein Knopf, keine Überschrift. -->
+  <button class="t-titel" id="t-griff" type="button" aria-expanded="true" aria-controls="t-reihe">
+    <span class="t-wort" data-du="Auf deinem Tisch" data-sie="Auf Ihrem Tisch">Auf deinem Tisch</span>
+    <span class="t-zahl">3</span>
+    <span class="t-tut">zuklappen</span>
+  </button>
+  <div class="t-reihe" id="t-reihe">
   <a class="t-zettel" href="beratung-termine.html#petersen">
     <span class="t-text"><b>Herr Petersen möchte ein Gespräch mit einem Menschen</b><span>Petersen Stahlbau, Wunsch: Freitag, 9:00</span></span>
     <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">liegt vor</span></span>
@@ -1270,6 +1297,63 @@ body.gezoomt #zonen{display:block}
     if (direkt) oeffne(location.hash.slice(1), true);
   } else {
     starteFilm();
+  }
+
+  /* ---------- Der Tisch deckt kein Haus zu ----------
+     Der Zettelstapel steht fest unten links und lag bei 1440x900 über dem
+     Haus von Petersen Stahlbau, bei 1152x648 über dreien — ein Klick landete
+     auf dem Zettel statt auf dem Haus (Prüfung 2026-08-16, Issue #58, Nr. 49).
+     Statt einer Bildschirmgrenze zu raten, misst der Tisch selbst: Überdeckt
+     er eine Zone, kommt er zugeklappt hoch. Wer ihn selbst gestellt hat,
+     behält seine Wahl — auch beim Wechsel der Fenstergröße. */
+  var tisch = document.getElementById('tisch');
+  var griff = document.getElementById('t-griff');
+  if (tisch && griff) {
+    var reihe = document.getElementById('t-reihe');
+    /* Gespeichert wird die Wahl selbst, nicht nur dass eine getroffen wurde:
+       ein bloßes Merkzeichen ließ den Tisch nach dem Neuladen wieder offen
+       stehen UND schaltete die Messung ab — ein Klick hätte also für den Rest
+       der Sitzung genau das zurückgeholt, was hier repariert wird. */
+    var gestellt = null;
+    try { gestellt = sessionStorage.getItem('tisch-gestellt'); } catch (e) {}
+    if (gestellt !== 'zu' && gestellt !== 'auf') gestellt = null;
+
+    griff.querySelector('.t-zahl').textContent = reihe.children.length;
+
+    function stelle(zu){
+      tisch.classList.toggle('zu', zu);
+      griff.setAttribute('aria-expanded', zu ? 'false' : 'true');
+      griff.querySelector('.t-tut').textContent = zu ? 'aufklappen' : 'zuklappen';
+    }
+    function verdecktEinHaus(){
+      var t = tisch.getBoundingClientRect();
+      var zonen = document.querySelectorAll('.zone');
+      for (var i = 0; i < zonen.length; i++) {
+        var z = zonen[i].getBoundingClientRect();
+        if (z.width && z.left < t.right && z.right > t.left && z.top < t.bottom && z.bottom > t.top) return true;
+      }
+      return false;
+    }
+    function pruefe(){
+      if (gestellt) { stelle(gestellt === 'zu'); return; }
+      /* Zum Messen muss er offen sein — zugeklappt überdeckt er nie etwas. */
+      var warZu = tisch.classList.contains('zu');
+      if (warZu) tisch.classList.remove('zu');
+      var stoert = verdecktEinHaus();
+      stelle(stoert);
+    }
+    griff.addEventListener('click', function(){
+      var zu = !tisch.classList.contains('zu');
+      gestellt = zu ? 'zu' : 'auf';
+      try { sessionStorage.setItem('tisch-gestellt', gestellt); } catch (e) {}
+      stelle(zu);
+    });
+    pruefe();
+    var takt = null;
+    window.addEventListener('resize', function(){
+      clearTimeout(takt);
+      takt = setTimeout(pruefe, 200);
+    });
   }
 })();
 </script>

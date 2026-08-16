@@ -40,7 +40,10 @@
    Höhengrenze, damit sie im Querformat nicht oben hinausläuft, und folgt
    dem Fenster. Und das Dock sagt seine Höhe als --uhr-hoehe an, statt dass
    jede Fläche mit eigenem Chrom unten raten muss.
-   Marker: UHR-V3 */
+   V4 (Issue #58): am Telefon ist das Dock eine deckende Leiste an der Kante
+   statt einer schwebenden Glaskapsel. Die Kapsel lag bei jedem Scrollstand
+   über dem Text und schnitt einmal den Hauptknopf mitten im Wort ab.
+   Marker: UHR-V4 */
 window.Uhr = (function () {
   'use strict';
 
@@ -241,8 +244,23 @@ window.Uhr = (function () {
         /* Kein eigener bottom-Wert mehr für die Liste: sie setzt sich beim
            Öffnen über die gemessene Oberkante des Docks, an jedem Fenster. */
         '.uhr-dock,.uhr-liste{right:12px;left:12px;width:auto}' +
-        '.uhr-dock{bottom:calc(12px + env(safe-area-inset-bottom))}' +
-        '.uhr-dock.ruht{left:auto}' +
+        /* Kein schwebender Knopf mehr, sondern eine Leiste an der Kante.
+           Schwebend lag die Ruhe-Kapsel bei jedem Scrollstand mitten im Text
+           und schnitt einmal den Hauptknopf „Antwort übergeben" mitten im
+           Wort ab (Prüfung 2026-08-16, Issue #58, Nr. 73). Eine Leiste mit
+           eigener Kante ist eine zweite Ebene, die man als solche sieht —
+           eine Kapsel über Buchstaben ist ein Fehler. */
+        /* Deckend, nicht milchig: durch die Glasleiste schimmerte der Knopf
+           „Antwort übergeben" halb hindurch und war mitten im Wort
+           abgeschnitten — durchscheinend über Buchstaben liest sich wie ein
+           Fehler, nicht wie eine Ebene. */
+        '.uhr-dock{left:0;right:0;bottom:0;border-radius:0;background:#fff;' +
+          'backdrop-filter:none;-webkit-backdrop-filter:none;' +
+          'border:0;border-top:0.5px solid rgba(16,19,26,.14);' +
+          'padding:10px 14px calc(10px + env(safe-area-inset-bottom));' +
+          'box-shadow:0 -8px 24px rgba(24,21,47,.10)}' +
+        '.uhr-dock.ruht{left:0;width:auto;padding:8px 14px calc(8px + env(safe-area-inset-bottom));' +
+          'display:flex;justify-content:flex-end}' +
         '.uhr-zeit{font-size:20px}' +
         '.uhr-tat{padding:0 16px}' +
       '}' +
@@ -338,8 +356,28 @@ window.Uhr = (function () {
     });
   }
 
+  /* Der sichere Rand des Geräts, einmal gemessen. Ohne Kerbe ist er 0. */
+  var kanteGemessen = null;
+  function sichereKante() {
+    if (kanteGemessen !== null) return kanteGemessen;
+    var probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;left:-9999px;bottom:0;width:1px;height:env(safe-area-inset-bottom,0px)';
+    document.body.appendChild(probe);
+    kanteGemessen = probe.getBoundingClientRect().height || 0;
+    probe.remove();
+    return kanteGemessen;
+  }
+
+  /* --uhr-hoehe ist das, was die Flächen an Polster brauchen — ohne den
+     sicheren Rand: den rechnen sie selbst dazu (rechtsfuss.js, das Modell,
+     der Kalender). Seit das Dock am Telefon an der Kante klebt, steckt der
+     Rand in seiner eigenen Höhe; ungekürzt stünde er zweimal in derselben
+     Rechnung und ließe unter dem Fuß ein totes Feld. */
   function misstHoehe() {
-    document.documentElement.style.setProperty('--uhr-hoehe', Math.round(dock.getBoundingClientRect().height) + 'px');
+    var r = dock.getBoundingClientRect();
+    var hoch = r.height;
+    if (r.bottom >= window.innerHeight - 1) hoch -= sichereKante();
+    document.documentElement.style.setProperty('--uhr-hoehe', Math.max(0, Math.round(hoch)) + 'px');
   }
 
   /* ---------- Anzeige ---------- */

@@ -7,7 +7,9 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
 /* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür
-   Marker: UEBERSICHT-V26 (das wöchentliche Briefing hat eine Zeile und einen
+   V27 (Issue #58): Kopfband deckend, Sprungziele halten Abstand zum Band, und
+   der Vorführungs-Schalter steht am Telefon im Fluss statt über dem Text.
+   Marker: UEBERSICHT-V27 (das wöchentliche Briefing hat eine Zeile und einen
    Glocken-Eintrag, Häppchen E3; V26 aus dem Review: Überschrift und Titel der
    Zeile folgen der Anrede der Marke, wie alle Nachbarn)
    (V22: die Vorschläge des ersten Tages sind wortgleich mit denen im Gespräch —
@@ -85,7 +87,18 @@ nav{
   position:fixed;top:0;left:0;right:0;z-index:10;height:60px;
   display:flex;align-items:center;justify-content:space-between;
   padding:0 max(24px,calc((100vw - 880px)/2));
-  background:linear-gradient(var(--papier) 55%, color-mix(in srgb, var(--papier) 1%, transparent));
+  /* Deckend bis zur Unterkante. Der Verlauf begann bei 55 % der Bandhoehe —
+     genau dort steht die zweite Kopfzeile, und beim Rollen druckte der Inhalt
+     durch sie hindurch, Buchstaben ueber Buchstaben (Pruefung 2026-08-16,
+     Issue #58). Die weiche Kante bleibt; sie liegt jetzt UNTER dem Band,
+     wo kein Text steht. */
+  background:var(--papier);
+  pointer-events:none;
+}
+/* Die weiche Kante des Kopfbands: liegt unter dem Band, nicht darin. */
+nav::after{
+  content:'';position:absolute;left:0;right:0;top:100%;height:22px;
+  background:linear-gradient(var(--papier), color-mix(in srgb, var(--papier) 1%, transparent));
   pointer-events:none;
 }
 nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
@@ -105,6 +118,10 @@ div.zeile{cursor:default}
 div.zeile:hover{border-color:var(--linie);translate:none}
 
 main{max-width:880px;margin:0 auto;padding:108px 24px 96px}
+/* Wohin die Seite selbst springt, darf nicht unter dem Kopfband anfangen:
+   das Band ist 60 hoch, die weiche Kante 22 — darunter beginnt Lesbares
+   (Prüfung 2026-08-16, Issue #58, dort Nr. 4). */
+main section,main .brief{scroll-margin-top:96px}
 
 /* Auftakt: Gruß + Eingangstür ins Gespräch */
 .anstrich{width:96px;height:12px;display:block;overflow:visible;margin-bottom:16px}
@@ -224,9 +241,23 @@ section{margin-top:52px}
 }
 .umschalter button.hier{background:var(--tinte);color:#fff}
 @media (max-width:760px){
-  .vorfuehrung{right:auto;left:50%;translate:-50% 0;padding-left:10px}
-  .vorfuehrung > span{display:none}
-  .umschalter button{padding:6px 11px;font-size:12px}
+  /* Am Telefon steht der Schalter im Fluss, nicht schwebend. Schwebend war er
+     380 von 390 Punkten breit und lag bei jedem Scrollstand über dem Text —
+     wer lesen wollte, musste ihn erst wegschieben und traf dabei den Knopf
+     (Prüfung 2026-08-16, Issue #58, dort Nr. 21). Ein Schalter, den man
+     einmal am Anfang stellt, gehört ans Seitenende. */
+  .vorfuehrung{
+    position:static;translate:none;
+    justify-content:center;margin:0 auto 26px;width:max-content;max-width:100%;
+    padding-left:10px;
+    backdrop-filter:none;-webkit-backdrop-filter:none;
+    box-shadow:none;background:rgba(255,255,255,.6);
+  }
+  .vorfuehrung > span{display:inline}
+  .umschalter button{padding:9px 14px;font-size:12.5px;min-height:44px}
+  /* Die Luft unter dem Rechts-Fuß war für die schwebende Pille reserviert.
+     Steht sie im Fluss, ist sie nur noch ein leeres Feld. */
+  :root{--rechtsfuss-luft:20px}
 }
 .kopfzeile{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
 .kopfzeile h2{font-size:13px;font-weight:800;color:var(--grau)}

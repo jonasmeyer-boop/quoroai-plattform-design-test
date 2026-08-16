@@ -37,7 +37,9 @@
    V2 (Issue #49): die Krume kommt aus dem Baustein krume.js und trägt
    alle drei Stufen — Zentrale, Ankommen, hier. Bisher stand nur der
    Rückweg um eine Stufe da.
-   Marker: BERATUNG-IMPORT-V2 (die Krume kommt aus einer Quelle) */
+   V3 (Issue #58): nach dem Einsetzen beginnen die Spaltenkarten über dem
+   klebenden Abschluss-Balken, statt darunter zu liegen.
+   Marker: BERATUNG-IMPORT-V3 (die Krume kommt aus einer Quelle) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select,textarea{font-family:inherit}
@@ -1015,6 +1017,18 @@ h2.abschnitt + .was{font-size:14px;color:var(--nebel-600);margin-top:6px;max-wid
     fehlerEl.hidden = true;
     zeichneLage2();
     zeigeLage(2);
+    /* Nicht ganz nach oben stehen bleiben: der klebende Abschluss-Balken sitzt
+       an der Unterkante und deckte dort 86 der 105 Punkte der dritten
+       Spaltenkarte zu — ausgerechnet die, die geprüft werden soll
+       (Prüfung 2026-08-16, Issue #58, Nr. 114). Wir rücken die Spalten so
+       hoch, dass sie über dem Balken anfangen. */
+    var spalten = document.getElementById('spalten');
+    if (spalten) requestAnimationFrame(function(){
+      var band = document.querySelector('nav');
+      var kopf = (band ? band.getBoundingClientRect().height : 60) + 16;
+      var o = spalten.getBoundingClientRect().top;
+      if (o > kopf) window.scrollTo({top: window.scrollY + o - kopf, behavior: 'auto'});
+    });
   }
 
   document.getElementById('beispiel').addEventListener('click', function(){
