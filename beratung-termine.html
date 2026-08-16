@@ -22,7 +22,12 @@
    V6 nach Code-Review: ein eigener Gegenvorschlag verschiebt nichts, die
    Standzeile zählt ihre Zettel selbst, und die Ersatzfenster liegen in der
    Zukunft dieser Woche.
-   Marker: BERATUNG-TERMINE-V6 */
+   V7 (Häppchen E2): der Termin am Donnerstag trägt seine Tür zum Protokoll —
+   dort wird gefragt, mitgeschrieben und daraus Arbeit (beratung-protokoll.html).
+   Nur er: gezeichnet ist in der Vorführung dieses eine Protokoll, und eine Tür,
+   die an jedem Termin steht und überall auf dasselbe Blatt führt, wäre eine
+   Behauptung. Der Satz über der Liste sagt es.
+   Marker: BERATUNG-TERMINE-V7 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -169,6 +174,17 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   color:var(--lila-800);background:var(--lila-100);
   padding:4px 10px;border-radius:999px;
 }
+/* Die Tür zum Protokoll gehört an den Termin selbst: dort wird gefragt, ob
+   mitgeschrieben werden darf, und dort wird aus dem Gespräch Arbeit
+   (Häppchen E2). Ein Termin ohne diese Tür wäre ein Eintrag im Kalender. */
+.termin-zeile .t-tuer{
+  flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--lila-700);
+  text-decoration:none;padding:7px 13px;border-radius:999px;
+  border:0.5px solid var(--nebel-200);background:var(--flaeche);
+  transition:border-color .2s ease;
+}
+.termin-zeile .t-tuer:hover{border-color:var(--lila-500)}
+@media (pointer:coarse){.termin-zeile .t-tuer{min-height:44px;display:inline-flex;align-items:center}}
 .termin-zeile.leer{border-style:dashed;box-shadow:none;background:transparent}
 .termin-zeile.leer .t-wann{color:var(--nebel-500);font-weight:500}
 /* der neue Termin gleitet in die Liste */
@@ -307,12 +323,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   </section>
 
   <h3>Deine Termine</h3>
-  <p style="font-size:13px;color:var(--nebel-600);margin-top:6px">Was hier steht, sind die Termine deiner Mandate. Die ganze Woche und wer wann Luft hat, steht in <a href="beratung-kalender.html">der Woche</a>.</p>
+  <p style="font-size:13px;color:var(--nebel-600);margin-top:6px">Was hier steht, sind die Termine deiner Mandate. Die ganze Woche und wer wann Luft hat, steht in <a href="beratung-kalender.html">der Woche</a>. Zu jedem Termin gehört sein Protokoll — gezeichnet ist in dieser Vorführung der Donnerstag.</p>
   <div class="termine" id="termine">
     <div class="termin-zeile">
       <div class="tag-blatt" aria-hidden="true"><div class="tb-tag">DO</div><div class="tb-zeit">10:00</div></div>
       <div><div class="t-wann">Donnerstag, 10:00 bis 11:00, Petersen Stahlbau</div><div class="t-mit">Dr. Anna Vogelsang, Preis und Marge</div></div>
       <span class="t-art">Videocall</span>
+      <a class="t-tuer" href="beratung-protokoll.html">Protokoll</a>
     </div>
     <div class="termin-zeile" data-termin="cordes">
       <div class="tag-blatt" aria-hidden="true"><div class="tb-tag">DI</div><div class="tb-zeit">11:30</div></div>

@@ -27,7 +27,9 @@
    V6 (Nach-Review zu C4): der Fortschrittsstrich der Leiter hängt an den
    Stationen statt an einer Prozentmarke — die saß 29px unter dem Punkt,
    auf dem man steht.
-   Marker: BERATUNG-MANDAT-V6 */
+   V7 (Häppchen E2): eine Aufgabe trägt ihre Herkunft — den Termin, in dem
+   der Satz gefallen ist, aus dem sie entstanden ist.
+   Marker: BERATUNG-MANDAT-V7 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -170,6 +172,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 .aufgabe .zustand-wort{font-size:10.5px;font-weight:600;white-space:nowrap;color:var(--nebel-500)}
 .aufgabe .a-text b{display:block;font-size:14px;font-weight:600;letter-spacing:-.01em;line-height:1.4}
 .aufgabe .a-text span{font-size:12px;color:var(--nebel-600)}
+/* Die Herkunft einer Aufgabe ist Meta, keine Handlung: sie steht in Grau und
+   führt zu dem Termin, in dem der Satz gefallen ist (Häppchen E2). */
+.aufgabe .a-text span a{color:var(--nebel-600);text-decoration:underline;text-decoration-color:var(--nebel-300);text-underline-offset:2px}
+.aufgabe .a-text span a:hover{color:var(--lila-700)}
 .aufgabe.erledigt .a-text b{color:var(--nebel-500);text-decoration:line-through;text-decoration-thickness:1px}
 .aufgabe .wer{
   margin-left:auto;flex-shrink:0;font-size:11px;font-weight:600;
@@ -304,7 +310,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       </div>
       <div class="aufgabe">
         <button class="kippe" type="button" aria-pressed="false" aria-labelledby="a3"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">offen</span></button>
-        <span class="a-text"><b id="a3">Preisliste durchrechnen</b><span>übernimmt der KI-Berater, sobald die Staffeln stehen</span></span>
+        <span class="a-text"><b id="a3">Preisliste durchrechnen</b><span>übernimmt der KI-Berater, sobald die Staffeln stehen. Entstanden im Termin am 6. August, <a href="beratung-protokoll.html#frueher">bei den Protokollen</a></span></span>
         <span class="wer ki">KI-Berater</span>
       </div>
       <div class="aufgabe">

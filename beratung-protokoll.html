@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Protokoll</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Protokoll: aus einem Termin mit einem Menschen
+   wird Arbeit, ohne Abtippen (Häppchen E2, Issue #43).
+
+   Drei Dinge hatte dieses Häppchen zu entscheiden, und alle drei stehen als
+   sichtbarer Ablauf auf dieser Fläche statt als Erklärung daneben:
+
+   1. DER MOMENT DER AUFNAHME ist keine Einstellung der Beratung, sondern eine
+      Frage an den anderen. Der Knopf „Mitschreiben" existiert erst, nachdem
+      Herr Petersen ja gesagt hat — vorher gibt es nur den Knopf „ihn fragen".
+      Wer heimlich mitschneidet, macht sich strafbar (§ 201 StGB, das
+      nichtöffentlich gesprochene Wort); ein Häkchen in den AGB der Beratung
+      ändert daran nichts. Sagt er nein, endet der Weg nicht — er führt zu
+      eigenen Notizen, und die sind etwas anderes als ein Protokoll.
+   2. WÄHREND DER AUFNAHME trägt der Raum eine Kante, nicht die Ecke einen
+      Punkt. Wer hereinkommt, sieht am ganzen Fenster, dass mitgeschrieben
+      wird, und die Zeile darunter sagt seit wann und dass er es weiß.
+   3. WAS BLEIBT, IST DAS BLATT. Mit dem Beenden wird die Tonspur gelöscht, und
+      man sieht es. Deshalb trägt das Protokoll auch keine Zeitmarken: es gäbe
+      nichts mehr, wohin sie führen.
+
+   Das Protokoll selbst ist Pauspapier (Entscheidung 2026-08-16, wie in
+   beratung-fragen.html und auf der Zeichentafel der Akte): ein Entwurf, der
+   der Beratung erst gehört, wenn eine Hand danach greift. Die Zitate gehören
+   dem, der sie gesagt hat, und tragen die Kante in seiner Farbe.
+
+   Der eigentliche Weg des Häppchens ist der vom Satz zur Aufgabe: unter dem
+   Protokoll liegen drei Karten, jede mit dem Satz, aus dem sie entstanden ist.
+   Eine geht ans Mandat, eine ist schon da (und sagt es), eine ist gar keine
+   Arbeit der Beratung, sondern eine Bitte an den Kunden. Ein KI-Berater, der
+   aus jedem Halbsatz eine Aufgabe macht, erzeugt Arbeit, statt sie abzunehmen.
+
+   Chrome ist quoroAI (system.css, Entscheidung 2026-08-12), Hilfe-Ebene im
+   Kopfband, Uhr-Dock und Komet wie überall im Cockpit.
+
+   Aus den beiden Code-Reviews vor der Freigabe: das Verwerfen des Blattes
+   nimmt die Karten daraus mit (sie standen sonst als Arbeit ohne Grund weiter
+   offen); die Standzeile unterscheidet „ihren Weg gegangen" von „daraus wurde
+   Arbeit" und zählt ihre Karten selbst; der gemerkte Satz trägt keine Zeit
+   mehr, weil es keine Tonspur gibt, in die sie führen könnte; die Überschrift
+   der früheren Protokolle hat ihren Abstand zum Kopfband, sonst landet der
+   Sprung aus dem Mandat dahinter; der Hinweis startet leer, sonst meldet das
+   Vorlesen dauernd „Diese Fläche entsteht gerade"; und kommt die Seite aus dem
+   Zwischenspeicher des Browsers zurück, laufen Uhr und Kante wieder mit dem
+   Band zusammen.
+   Marker: BERATUNG-PROTOKOLL-V1 */
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,textarea{font-family:inherit}
+
+/* ========== quoroAI-Chrom (wie in den anderen Cockpit-Räumen) ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;word-spacing:2px}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+/* Unter 1360px reicht die Krume in die Inhaltsspalte und wird die zweite
+   Zeile des Kopfbands (Entscheidung 2026-08-14). */
+@media (max-width:1360px){
+  nav{height:118px;padding-bottom:58px}
+  #krume{z-index:90}
+}
+
+/* ========== Seite ========== */
+main{max-width:820px;margin:0 auto;padding:136px 24px 90px}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px;max-width:58ch}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:32px}
+
+.tafel{
+  margin-top:12px;border-radius:var(--radius-karte);padding:22px 24px;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+
+/* ---------- Der Termin ---------- */
+.termin-kopf{display:flex;align-items:center;gap:16px}
+.tag-blatt{
+  width:52px;flex-shrink:0;border-radius:12px;overflow:hidden;text-align:center;
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 6px 16px rgba(24,21,47,.08);
+}
+.tag-blatt .tb-tag{font-size:11px;font-weight:700;letter-spacing:.06em;color:#fff;background:linear-gradient(180deg,var(--lila-500),var(--lila-700));padding:3px 0}
+.tag-blatt .tb-zeit{font-size:16px;font-weight:600;padding:8px 0 7px;font-variant-numeric:tabular-nums}
+.termin-kopf .t-wann{font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.35}
+.termin-kopf .t-mit{font-size:13px;color:var(--nebel-600);margin-top:2px}
+
+/* Die Frage vor der Aufnahme. Sie steht nicht als Hinweis klein darunter,
+   sondern als der Weg, den man gehen muss: es gibt hier keinen Knopf, der
+   ohne sein Ja mitschreibt. */
+.zustimmung{
+  margin-top:18px;padding:16px 18px;border-radius:var(--radius-innen);
+  background:var(--bernstein-fond);border-left:3px solid var(--bernstein);
+  font-size:14px;line-height:1.6;
+}
+.zustimmung b{font-weight:600;color:var(--bernstein)}
+.zustimmung .z-text{margin-top:6px}
+.griffe{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;align-items:center}
+.griffe .knopf{min-height:44px;padding:0 20px;font-size:14px}
+.nebensatz{font-size:12.5px;color:var(--nebel-500);line-height:1.55}
+.nebensatz button{
+  background:none;border:0;padding:0;cursor:pointer;font:inherit;
+  color:var(--lila-700);text-decoration:underline;text-decoration-color:var(--lila-300);
+  text-underline-offset:3px;
+}
+.nebensatz button:hover{text-decoration-color:var(--lila-600)}
+
+/* Das Wort des Kunden: Zitat mit Kante in seiner Farbe, wie im Mitlesen-Blatt
+   und auf den Zetteln in „Termine und Übergaben". */
+.kundenwort{
+  margin-top:16px;padding:12px 16px;border-left:3px solid var(--kunden-farbe,#2b5fe3);
+  border-radius:0 12px 12px 0;
+  background:color-mix(in srgb, var(--kunden-farbe,#2b5fe3) 5%, var(--flaeche));
+  font-size:15px;line-height:1.55;
+}
+.kundenwort .kw-wer{display:block;font-size:12px;font-weight:600;color:var(--nebel-600);margin-top:6px}
+.kundenwort.kommt{opacity:0;translate:0 8px;animation:ankunft .4s var(--kurve) forwards}
+.hand{font-family:'Caveat',cursive;font-size:20px;font-weight:700;color:var(--lila-700);rotate:-1.2deg;display:inline-block;margin-top:12px}
+
+/* ---------- Es wird mitgeschrieben ----------
+   Die Kante gehört dem Raum, nicht einer Ecke: wer hereinkommt, sieht am
+   ganzen Fenster, dass gerade aufgenommen wird. Ein Punkt in einer Leiste
+   wäre genau die Deko, die hier niemand suchen darf. */
+#raum-kante{
+  position:fixed;inset:0;z-index:95;pointer-events:none;
+  border:2.5px solid var(--rot);border-radius:14px;
+  box-shadow:inset 0 0 34px rgba(192,50,70,.13);
+  opacity:0;transition:opacity .45s ease;
+}
+body.mitschrift #raum-kante{opacity:.82;animation:atem 3.6s ease-in-out infinite}
+@keyframes atem{0%,100%{opacity:.82}50%{opacity:.42}}
+
+.band{
+  margin-top:18px;padding:16px 18px;border-radius:var(--radius-innen);
+  background:var(--rot-fond);border:0.5px solid rgba(192,50,70,.22);
+}
+.band .b-zeile{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.band .b-uhr{
+  font-family:var(--schrift-schau);font-weight:var(--schau-gewicht);
+  font-size:26px;line-height:1;font-variant-numeric:tabular-nums;color:var(--rot);
+}
+.band .b-satz{font-size:13.5px;line-height:1.55;color:var(--nebel-700);flex:1 1 240px}
+.band .b-satz b{font-weight:600;color:var(--tinte)}
+/* Der Pegel zeigt, dass zugehört wird — er zeigt keine Lautstärke, die es in
+   einer Vorführung nicht gibt, sondern nur, dass die Leitung offen ist. */
+.pegel{display:flex;align-items:flex-end;gap:3px;height:26px;flex-shrink:0}
+.pegel i{
+  display:block;width:3px;height:100%;border-radius:2px;
+  background:color-mix(in srgb, var(--rot) 55%, #fff);
+  transform-origin:50% 100%;transform:scaleY(.3);
+  animation:pegeln 1.15s ease-in-out infinite;
+}
+@keyframes pegeln{0%,100%{transform:scaleY(.22)}50%{transform:scaleY(1)}}
+.band .b-griffe{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.band .b-griffe .knopf{min-height:42px;padding:0 18px;font-size:13.5px}
+.merker{font-size:12.5px;color:var(--nebel-600);line-height:1.55}
+.merker b{color:var(--tinte);font-weight:600}
+
+/* Die Notizen, wenn er nein gesagt hat. Bewusst dieselbe Größe wie das Band:
+   der Weg ohne Aufnahme ist kein Notbehelf, er ist der zweite gültige Weg. */
+.notizen{margin-top:18px}
+.notizen label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.notizen textarea{
+  width:100%;min-height:130px;resize:vertical;line-height:1.6;font-size:16px;
+  padding:14px 16px;border-radius:var(--radius-innen);
+  border:1px solid var(--nebel-200);background:var(--flaeche);color:var(--tinte);
+}
+.notizen textarea:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+
+/* die ruhige Endkarte, wenn etwas seinen Weg gegangen ist */
+.abgelegt{
+  display:flex;align-items:center;gap:12px;margin-top:16px;
+  padding:13px 16px;border-radius:var(--radius-innen);
+  background:var(--gruen-fond);font-size:14px;line-height:1.5;
+}
+.abgelegt b{font-weight:600}
+/* Der Satz über die gelöschte Tonspur ist kein Erfolg, sondern eine Tatsache:
+   ruhiges Grau, keine grüne Karte. */
+.geloescht{
+  margin-top:16px;padding:13px 16px;border-radius:var(--radius-innen);
+  background:var(--nebel-100);font-size:13.5px;line-height:1.6;color:var(--nebel-700);
+}
+.geloescht b{color:var(--tinte);font-weight:600}
+
+/* ---------- Das Protokoll: Pauspapier auf dem Tisch ---------- */
+.bogen{
+  position:relative;border-radius:var(--radius-karte);padding:22px 24px;margin-top:12px;
+  scroll-margin-top:136px;
+  background:linear-gradient(180deg, rgba(245,244,254,.92), rgba(255,255,255,.9));
+  border:1px solid var(--lila-200);
+  box-shadow:0 16px 44px rgba(59,52,134,.13);
+  rotate:-.35deg;
+  transition:rotate .5s var(--kurve), background .5s ease, border-color .5s ease, box-shadow .5s ease;
+}
+/* Der Bogen taucht erst am Ende des Termins auf und bringt seine eigene
+   Bewegung mit. Ohne diese Ausnahme liefe zusätzlich die Ankunft der Seite —
+   und zwar ein zweites Mal, sobald „neu" abfällt: der Bogen wäre da und
+   sprünge dann noch einmal von unten herein. */
+main > .bogen{animation:none;opacity:1;translate:none}
+.bogen.neu{opacity:0;translate:0 -12px;animation:aufgelegt .55s var(--kurve) forwards}
+@keyframes aufgelegt{to{opacity:1;translate:0 0}}
+.bogen .b-herkunft{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--lila-700);
+}
+.bogen .b-herkunft img{width:15px;height:15px;display:block}
+.bogen .b-titel{font-size:18px;font-weight:600;letter-spacing:-.01em;line-height:1.3;margin-top:8px}
+.bogen .b-meta{font-size:12.5px;color:var(--nebel-600);margin-top:4px}
+.bogen h4{
+  font-family:var(--schrift-text);font-size:12px;font-weight:600;letter-spacing:0;
+  color:var(--nebel-600);margin-top:20px;
+}
+.bogen .b-text{font-size:15px;line-height:1.65;margin-top:8px}
+.bogen .b-text p + p{margin-top:10px}
+.bogen .b-text ul{margin:0 0 0 20px;list-style:none}
+.bogen .b-text ul li{position:relative;padding-left:2px}
+.bogen .b-text ul li::before{content:"—";position:absolute;left:-20px;color:var(--nebel-400)}
+.bogen .b-text li + li{margin-top:7px}
+.bogen .b-text b{font-weight:600}
+/* Ein gemerkter Satz trägt die Hand desjenigen, der ihn gemerkt hat — im
+   Gespräch gedrückt, hier wiedergefunden. */
+.kundenwort .kw-gemerkt{
+  display:inline-block;font-family:'Caveat',cursive;font-size:17px;font-weight:700;
+  color:var(--lila-700);rotate:-1.2deg;margin-top:6px;
+}
+.bogen .griffe{margin-top:20px}
+.bogen .griffe .knopf{min-height:42px;padding:0 18px;font-size:14px}
+.bogen.verworfen{opacity:.5;filter:saturate(.5)}
+
+/* In Tinte gedrückt: derselbe Wechsel wie in „Selber fragen" — was hinausgeht,
+   trägt die Marke der Beratung, nicht die von quoroAI. */
+.bogen.uebernommen{
+  rotate:0deg;background:var(--flaeche);
+  border-color:var(--marken-farbe);
+  box-shadow:0 18px 50px rgba(43,95,227,.16);
+}
+.bogen.uebernommen .b-herkunft{color:var(--marken-farbe)}
+.bogen.uebernommen .knopf.primaer{
+  background:linear-gradient(180deg, color-mix(in srgb, var(--marken-farbe) 88%, #fff), var(--marken-farbe));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55), inset 0 -2px 5px rgba(0,0,0,.18), 0 10px 24px rgba(43,95,227,.34);
+}
+.marken-marke{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--marken-farbe);
+}
+.marken-marke .punkt{width:13px;height:13px;border-radius:4px;background:var(--marken-farbe);flex-shrink:0}
+.ausgang{margin-top:18px}
+.ausgang label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.ausgang textarea{
+  width:100%;min-height:190px;resize:vertical;line-height:1.6;font-size:16px;
+  padding:14px 16px;border-radius:var(--radius-innen);
+  border:1px solid var(--nebel-200);background:var(--flaeche);color:var(--tinte);
+}
+.ausgang textarea:focus{outline:none;border-color:var(--marken-farbe);box-shadow:0 0 0 4px rgba(43,95,227,.12)}
+.ausgang .hand{color:var(--marken-farbe)}
+
+/* ---------- Vom Satz zur Aufgabe ----------
+   Jede Karte trägt den Satz, aus dem sie entstanden ist. Ohne ihn wäre sie
+   eine Behauptung des KI-Beraters; mit ihm kann man in zwei Sekunden prüfen,
+   ob er richtig zugehört hat. */
+.karten{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.karte-a{
+  border-radius:var(--radius-karte);padding:18px 20px;
+  background:linear-gradient(180deg, rgba(245,244,254,.9), rgba(255,255,255,.92));
+  border:1px solid var(--lila-200);
+  box-shadow:0 12px 32px rgba(59,52,134,.10);
+  rotate:-.25deg;
+  transition:rotate .4s var(--kurve), opacity .4s ease, filter .4s ease;
+}
+.karte-a:nth-child(even){rotate:.22deg}
+.karte-a .k-was{font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.35}
+.karte-a .k-wann{font-size:12.5px;color:var(--nebel-600);margin-top:3px}
+.karte-a .k-weil{
+  margin-top:12px;padding:10px 14px;border-left:3px solid var(--kunden-farbe,#2b5fe3);
+  border-radius:0 12px 12px 0;
+  background:color-mix(in srgb, var(--kunden-farbe,#2b5fe3) 5%, var(--flaeche));
+  font-size:14px;line-height:1.55;
+}
+.karte-a .k-weil .kw-wer{display:block;font-size:12px;font-weight:600;color:var(--nebel-600);margin-top:5px}
+/* Der KI-Berater sagt selbst, wenn eine Karte keine neue Arbeit ist. */
+.karte-a .k-schon{
+  margin-top:12px;padding:10px 14px;border-radius:var(--radius-innen);
+  background:var(--lila-050);border:0.5px solid var(--lila-200);
+  font-size:13.5px;line-height:1.55;color:var(--nebel-700);
+}
+.karte-a .k-schon b{color:var(--tinte);font-weight:600}
+.wer-wahl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}
+.wer-wahl .w-label{font-size:12.5px;color:var(--nebel-600)}
+.wer-wahl button{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-300);
+  background:var(--flaeche);font-size:13px;font-weight:600;color:var(--tinte);
+  cursor:pointer;transition:border-color .2s,background .2s,color .2s;
+}
+.wer-wahl button:hover{border-color:var(--lila-500)}
+.wer-wahl button[aria-pressed="true"]{background:var(--tinte);color:#fff;border-color:var(--tinte)}
+.karte-a .griffe{margin-top:14px}
+.karte-a .griffe .knopf{min-height:42px;padding:0 16px;font-size:13.5px}
+.karte-a.verworfen{opacity:.5;filter:saturate(.5)}
+.karten-stand{font-size:12.5px;color:var(--nebel-500);margin-top:14px;line-height:1.55}
+
+/* ---------- Frühere Protokolle ----------
+   Die Aufgabe am Mandat verlinkt hierher; ohne den Abstand landet die
+   Überschrift hinter dem fixierten Kopfband. */
+#frueher{scroll-margin-top:136px}
+.frueher{margin-top:12px;display:flex;flex-direction:column;gap:9px}
+.frueher a{
+  display:flex;align-items:center;gap:16px;text-decoration:none;color:inherit;
+  padding:13px 18px;border-radius:var(--radius-innen);
+  border:0.5px solid var(--nebel-200);background:var(--flaeche);
+  box-shadow:0 8px 24px rgba(16,19,26,.06);
+  transition:border-color .2s ease;
+}
+.frueher a:hover{border-color:var(--lila-400)}
+.frueher .f-wann{font-size:14.5px;font-weight:600;letter-spacing:-.01em}
+.frueher .f-was{font-size:12.5px;color:var(--nebel-600);margin-top:2px}
+.frueher .f-daraus{
+  margin-left:auto;flex-shrink:0;font-size:11px;font-weight:600;
+  color:var(--lila-800);background:var(--lila-100);
+  padding:4px 10px;border-radius:999px;
+}
+
+#demo-hinweis{
+  position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:96;
+  pointer-events:none;font-family:'Caveat',cursive;font-size:21px;font-weight:700;
+  color:var(--lila-700);opacity:0;rotate:-1deg;
+  transition:opacity .3s ease,translate .3s var(--kurve);
+}
+.fuss-satz{font-size:13px;color:var(--nebel-500);margin-top:26px;line-height:1.6;max-width:64ch}
+.fuss-satz a{color:var(--lila-700)}
+
+@media (prefers-reduced-motion: reduce){
+  main > *{animation:none;opacity:1;translate:none}
+  .bogen,.bogen.neu,.kundenwort.kommt{animation:none;opacity:1;translate:none;transition:none}
+  body.mitschrift #raum-kante{animation:none;opacity:.8}
+  .pegel i{animation:none;transform:scaleY(.55)}
+}
+@media (max-width:700px){
+  nav{padding:0 18px;padding-bottom:58px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
+  .tafel,.bogen{padding:18px 18px}
+  .karte-a{padding:16px 16px}
+  /* Am Finger ist ein halber Knopf kein Ziel: die Griffe nehmen die Zeile. */
+  .griffe .knopf,.band .b-griffe .knopf{flex:1 1 100%;min-height:48px}
+  .karte-a .griffe .knopf{flex:1 1 100%;min-height:46px}
+  .wer-wahl button{flex:1 1 40%;min-height:44px}
+  .band .b-uhr{font-size:30px}
+  .frueher a{flex-wrap:wrap;gap:10px 16px}
+  .frueher .f-daraus{margin-left:0}
+  /* Das Kopfband ist hier 118px hoch und die Krume liegt auf 70px — der
+     Hinweis muss unter beide, sonst deckt er den Rückweg zu. */
+  #demo-hinweis{top:124px}
+  #frueher{scroll-margin-top:150px}
+}
+</style>
+</head>
+<body class="quoro"
+      data-hilfe-titel="Protokoll"
+      data-hilfe-satz="Aus einem Gespräch mit einem Menschen wird hier Arbeit, ohne dass jemand abtippt. Mitgeschrieben wird nur, wenn der andere zugestimmt hat; was bleibt, ist das Blatt, nicht die Tonspur.">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <div class="nav-rechts" style="display:flex;align-items:center;gap:10px"><span data-hilfe-knopf></span><a class="vorschlaege" href="index.html">Alle Vorschläge</a></div>
+</nav>
+
+<a id="krume" href="beratung-termine.html"><span class="zurueck">← Termine</span><span>/</span><b>Protokoll</b></a>
+
+<!-- Die Kante des Raums, solange mitgeschrieben wird. Sie ist reine Anzeige;
+     gesagt wird es im Band, das sie begleitet. -->
+<div id="raum-kante" aria-hidden="true"></div>
+
+<main>
+  <div class="kopf">
+    <h1>Protokoll</h1>
+    <div class="stand">Der Termin mit Herrn Petersen. Was hier entsteht, ist ein Entwurf deines KI-Beraters — die Arbeit daraus beginnt erst, wenn du eine Karte ans Mandat heftest.</div>
+  </div>
+
+  <h3>Der Termin</h3>
+  <section class="tafel" id="termin" aria-label="Der Termin und die Mitschrift">
+    <div class="termin-kopf">
+      <div class="tag-blatt" aria-hidden="true"><div class="tb-tag">DO</div><div class="tb-zeit">10:00</div></div>
+      <div>
+        <div class="t-wann">Donnerstag, 10:00 bis 11:00, Petersen Stahlbau</div>
+        <div class="t-mit">Preis und Marge, Dr. Anna Vogelsang und Herr Petersen, Videocall</div>
+      </div>
+    </div>
+
+    <!-- Zustand 1: gefragt ist noch nicht. Es gibt hier bewusst keinen Knopf,
+         der ohne sein Ja mitschreibt. -->
+    <div id="schritt-fragen"
+         data-hilfe-name="Erst fragen, dann mitschreiben"
+         data-hilfe="Ein Gespräch mitzuschneiden, ohne dass der andere es weiß, ist strafbar — und keine Zustimmung, die deine Beratung in ihren Bedingungen für ihn erteilen könnte. Deshalb steht hier kein Aufnahme-Knopf, bevor Herr Petersen gefragt wurde.">
+      <div class="zustimmung">
+        <b>Mitschreiben darf nur, wer gefragt hat.</b>
+        <div class="z-text">Herr Petersen muss zustimmen, und er muss es im Termin tun, nicht irgendwann in einem Haken. Ohne sein Ja gibt es kein Protokoll, sondern deine eigenen Notizen — das ist etwas anderes, und es sieht hinterher auch anders aus.</div>
+      </div>
+      <div class="griffe">
+        <button class="knopf primaer" id="fragen" type="button">Herrn Petersen fragen</button>
+        <span class="nebensatz">Der KI-Berater fragt ihn hörbar im Gespräch, du musst den Satz nicht selbst sagen.</span>
+      </div>
+    </div>
+
+    <!-- Zustand 2: seine Antwort. Sie ist keine Wahl der Beratung — deshalb
+         kommt sie von selbst, und der andere Ausgang steht als Nebensatz da,
+         sichtbar als das, was er ist: der zweite Weg der Vorführung. -->
+    <div id="schritt-antwort" hidden>
+      <div class="kundenwort kommt" style="--kunden-farbe:#2b5fe3">
+        „Ja, machen Sie ruhig. Dann muss ich nicht selbst mitkritzeln."
+        <span class="kw-wer">Herr Petersen, 10:02</span>
+      </div>
+      <div class="griffe">
+        <button class="knopf primaer" id="starten" type="button">Mitschreiben, seit 10:02</button>
+        <span class="nebensatz">Und wenn er nein sagt? <button type="button" id="doch-nein">Diesen Weg zeigen</button></span>
+      </div>
+    </div>
+
+    <!-- Zustand 3: es läuft -->
+    <div id="schritt-laeuft" hidden
+         data-hilfe-name="Woran man sieht, dass mitgeschrieben wird"
+         data-hilfe="Solange aufgenommen wird, trägt das ganze Fenster eine Kante. Kein Punkt in einer Ecke, den man übersieht — und die Zeile daneben sagt, seit wann es läuft und dass Herr Petersen es weiß.">
+      <div class="band">
+        <div class="b-zeile">
+          <span class="b-uhr" id="uhr-lauf">00:00</span>
+          <span class="pegel" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+          <span class="b-satz" role="status"><b>Es wird mitgeschrieben.</b> Herr Petersen hat um 10:02 zugestimmt, und er sieht dieselbe Kante auf seiner Seite.</span>
+        </div>
+        <div class="b-griffe">
+          <button class="knopf sekundaer" id="merken" type="button">Diese Stelle merken</button>
+          <button class="knopf primaer" id="beenden" type="button">Termin beenden</button>
+          <span class="merker" id="merker" role="status" aria-live="polite">Noch nichts gemerkt.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zustand 4: er hat nein gesagt -->
+    <div id="schritt-nein" hidden>
+      <div class="kundenwort" style="--kunden-farbe:#2b5fe3">
+        „Lieber nicht, wenn es recht ist."
+        <span class="kw-wer">Herr Petersen, 10:02</span>
+      </div>
+      <div class="zustimmung">
+        <b>Dann wird nicht mitgeschrieben.</b>
+        <div class="z-text">Kein Ton, kein Protokoll, keine Aufgabenentwürfe. Was du hier tippst, sind deine Notizen — sie kommen in die Akte, aber sie behaupten nicht, das Gesagte wiederzugeben.</div>
+      </div>
+      <div class="notizen feld">
+        <label for="notiz">Deine Notizen zum Termin</label>
+        <textarea id="notiz" placeholder="Was du dir merken willst. Niemand außer dir liest es, bis du es weitergibst."></textarea>
+      </div>
+      <div class="griffe">
+        <button class="knopf primaer" id="notiz-ablegen" type="button">In die Akte Petersen legen</button>
+        <button class="knopf leise" id="doch-fragen" type="button">Später noch einmal fragen</button>
+      </div>
+      <div class="abgelegt" id="notiz-fertig" role="status" aria-live="polite" hidden></div>
+    </div>
+
+    <!-- Zustand 5: beendet. Die Tonspur ist weg, und das steht da. -->
+    <div id="schritt-ende" hidden>
+      <div class="geloescht" role="status" aria-live="polite">
+        <b>Der Termin ist beendet, die Aufnahme gelöscht.</b> 58 Minuten Ton sind nirgends mehr gespeichert — bei quoroAI nicht und bei deiner Beratung nicht. Was bleibt, ist das Blatt darunter. Deshalb trägt es auch keine Zeitmarken: es gäbe nichts mehr, wohin sie führen.
+      </div>
+      <div class="abgelegt">
+        <span><b>1,0 Std.</b> stehen als erfasste Zeit auf dem Mandat, mit dem Termin als Grund. <a href="beratung-mandat.html">Im Mandat ansehen</a></span>
+      </div>
+    </div>
+  </section>
+
+  <h3 id="h-protokoll" hidden>Das Protokoll</h3>
+  <section class="bogen" id="protokoll" hidden aria-label="Protokoll des Termins"
+           data-hilfe-name="Das Protokoll ist ein Entwurf"
+           data-hilfe="Es liegt durchscheinend obenauf und gehört dir erst, wenn du danach greifst — dieselbe Sprache wie überall, wo dein KI-Berater etwas beiträgt. Die Zitate gehören dem, der sie gesagt hat.">
+    <span class="b-herkunft"><img src="bilder/quoro-icon.svg" alt="" width="15" height="15">Protokoll deines KI-Beraters</span>
+    <div class="b-titel">Preis und Marge, Termin vom Donnerstag</div>
+    <div class="b-meta">58 Minuten, Dr. Anna Vogelsang und Herr Petersen. Aus der Mitschrift, die Herr Petersen um 10:02 erlaubt hat.</div>
+
+    <h4>Worum es ging</h4>
+    <div class="b-text">
+      <p>Der Margenverlust von 3,1 Punkten ist ein Preisproblem, kein Ausschussproblem — darüber waren sich beide Seiten nach zwanzig Minuten einig. Der Rest des Termins ging um die Frage, wie steil der Preisschritt ausfällt und wen er trifft.</p>
+    </div>
+
+    <h4>Was entschieden wurde</h4>
+    <div class="b-text">
+      <ul>
+        <li>Der Preisschritt kommt, <b>4,5 Prozent auf die Serienteile</b>, wirksam zum 1. Oktober.</li>
+        <li>Die zwölf A-Kunden bleiben in diesem Jahr unberührt. Herr Petersen will sie selbst anrufen, bevor irgendein Brief hinausgeht.</li>
+        <li>Über die C-Kunden wird erst geredet, wenn die Nordstahl-Konditionen auf dem Tisch liegen.</li>
+      </ul>
+    </div>
+
+    <h4>Was gesagt wurde</h4>
+    <div class="kundenwort" data-zitat="1" style="--kunden-farbe:#2b5fe3">
+      „Wenn Sie mir bis Freitag sagen, wo die Grenze liegt, ziehe ich es im September durch."
+      <span class="kw-wer">Herr Petersen</span>
+    </div>
+    <div class="kundenwort" data-zitat="2" style="--kunden-farbe:#2b5fe3">
+      „Die zwölf großen ruf ich selber an. Das mache ich seit dreißig Jahren so, und daran ändert kein Preisschritt was."
+      <span class="kw-wer">Herr Petersen</span>
+    </div>
+    <div class="kundenwort" data-zitat="3" style="--kunden-farbe:#2b5fe3">
+      „Die Nordstahl-Sache liegt bei mir auf dem Schreibtisch, ich schicke Ihnen die Konditionen."
+      <span class="kw-wer">Herr Petersen</span>
+    </div>
+
+    <div class="griffe"
+         data-hilfe-name="Die Ausgänge des Protokolls"
+         data-hilfe="Das Blatt bleibt bei dir, solange du nichts tust. Gibst du es an Herrn Petersen weiter, wechselt es sichtbar in deine Marke — ab da ist es dein Protokoll, nicht das der Software.">
+      <button class="knopf primaer" type="button" data-tu="akte">Als Blatt in die Akte Petersen</button>
+      <button class="knopf sekundaer" type="button" data-tu="an-kunden">In deinem Namen an Herrn Petersen</button>
+      <button class="knopf gefahr" type="button" data-tu="verwerfen">Verwerfen</button>
+    </div>
+    <div class="abgelegt" id="protokoll-fertig" role="status" aria-live="polite" hidden></div>
+  </section>
+
+  <h3 id="h-karten" hidden>Was daraus zu tun ist</h3>
+  <div class="karten" id="karten" hidden>
+
+    <!-- Karte 1: die echte Aufgabe. Sie trägt den Satz, aus dem sie kommt,
+         und die Zuständigkeit ist wählbar — der KI-Berater rät, er bestimmt
+         nicht. -->
+    <section class="karte-a" data-karte="staffeln" aria-label="Aufgabenentwurf: Staffeln bis Freitag schneiden"
+             data-hilfe-name="Vom Satz zur Aufgabe"
+             data-hilfe="Jede Karte trägt den Satz, aus dem sie entstanden ist. So siehst du in zwei Sekunden, ob dein KI-Berater richtig zugehört hat — und niemand muss ein Protokoll nach Aufgaben durchkämmen.">
+      <div class="k-was">Staffeln neu schneiden und die Grenze festlegen</div>
+      <div class="k-wann">bis Freitag, sonst verschiebt sich die Umstellung um einen Monat</div>
+      <div class="k-weil" style="--kunden-farbe:#2b5fe3">
+        „Wenn Sie mir bis Freitag sagen, wo die Grenze liegt, ziehe ich es im September durch."
+        <span class="kw-wer">Herr Petersen im Termin</span>
+      </div>
+      <div class="wer-wahl" role="group" aria-label="Wer übernimmt">
+        <span class="w-label">Übernimmt:</span>
+        <button type="button" data-wer="du" aria-pressed="true">Du</button>
+        <button type="button" data-wer="ki" aria-pressed="false">Dein KI-Berater</button>
+      </div>
+      <div class="griffe">
+        <button class="knopf primaer" type="button" data-tu="heften">Ans Mandat heften</button>
+        <button class="knopf gefahr" type="button" data-tu="verwerfen">Verwerfen</button>
+      </div>
+      <div class="abgelegt" role="status" aria-live="polite" hidden></div>
+    </section>
+
+    <!-- Karte 2: der KI-Berater erkennt, dass es die Aufgabe schon gibt.
+         Ein Entwurf, der Doppelarbeit erzeugt, wäre schlechter als keiner. -->
+    <section class="karte-a" data-karte="preisliste" aria-label="Aufgabenentwurf: Preisliste durchrechnen">
+      <div class="k-was">Preisliste mit den neuen Staffeln durchrechnen</div>
+      <div class="k-wann">danach, wenn die Grenze steht</div>
+      <div class="k-schon"><b>Die gibt es schon.</b> Sie steht seit dem 6. August als offene Aufgabe am Mandat, zuständig ist dein KI-Berater. Ich lege sie nicht zweimal an.</div>
+      <div class="griffe">
+        <button class="knopf sekundaer" type="button" data-tu="ansehen">Am Mandat ansehen</button>
+        <button class="knopf leise" type="button" data-tu="weg">Karte wegnehmen</button>
+      </div>
+      <div class="abgelegt" role="status" aria-live="polite" hidden></div>
+    </section>
+
+    <!-- Karte 3: keine Arbeit der Beratung, sondern eine Bitte an den Kunden.
+         Der Unterschied ist der halbe Wert der Fläche — sonst landet die
+         Zusage des Kunden als Aufgabe bei dem, der sie nicht erfüllen kann. -->
+    <section class="karte-a" data-karte="nordstahl" aria-label="Bitte an den Kunden: Nordstahl-Konditionen">
+      <div class="k-was">Die Nordstahl-Konditionen liegen bei ihm, nicht bei dir</div>
+      <div class="k-wann">er hat sie zugesagt, ohne sie schickst du keine C-Kunden-Rechnung</div>
+      <div class="k-weil" style="--kunden-farbe:#2b5fe3">
+        „Die Nordstahl-Sache liegt bei mir auf dem Schreibtisch, ich schicke Ihnen die Konditionen."
+        <span class="kw-wer">Herr Petersen im Termin</span>
+      </div>
+      <div class="k-schon">Das ist keine Aufgabe für dich. Als <b>Bitte</b> steht sie in seinem Portal, mit dem Grund daran — und sie erinnert ihn, ohne dass du es tun musst.</div>
+      <div class="griffe">
+        <button class="knopf primaer" type="button" data-tu="bitte">Als Bitte an Herrn Petersen stellen</button>
+        <button class="knopf gefahr" type="button" data-tu="verwerfen">Verwerfen</button>
+      </div>
+      <div class="abgelegt" role="status" aria-live="polite" hidden></div>
+    </section>
+  </div>
+  <div class="karten-stand" id="karten-stand" hidden></div>
+
+  <h3 id="frueher">Frühere Protokolle</h3>
+  <div class="frueher">
+    <a href="#" data-frueher>
+      <div class="tag-blatt" aria-hidden="true"><div class="tb-tag">MI</div><div class="tb-zeit">6.8.</div></div>
+      <div><div class="f-wann">Analyse besprochen, 6. August</div><div class="f-was">44 Minuten, mit Herrn Petersen. Daraus kam die Aufgabe „Preisliste durchrechnen".</div></div>
+      <span class="f-daraus">2 Aufgaben</span>
+    </a>
+    <a href="#" data-frueher>
+      <div class="tag-blatt" aria-hidden="true"><div class="tb-tag">DI</div><div class="tb-zeit">22.7.</div></div>
+      <div><div class="f-wann">Erstes Gespräch zur Marge, 22. Juli</div><div class="f-was">1 Stunde 10, mit Herrn Petersen und seinem Buchhalter.</div></div>
+      <span class="f-daraus">3 Aufgaben</span>
+    </a>
+  </div>
+
+  <p class="fuss-satz"
+     data-hilfe-name="Was der Kunde sieht"
+     data-hilfe="Nichts hiervon, solange du es nicht schickst. Er weiß, dass mitgeschrieben wurde — er hat ja zugestimmt —, aber das Protokoll ist deine Arbeit, kein Automatismus.">Herr Petersen sieht dieses Blatt nicht, bevor du es ihm schickst. Was du ihm gibst, geht als dein Wort in sein Portal, so wie die Entwürfe aus <a href="beratung-fragen.html">Selber fragen</a>. Der Termin selbst steht in <a href="beratung-kalender.html">der Woche</a>.</p>
+</main>
+
+<!-- Leer, bis es etwas zu sagen gibt: der Hinweis ist nur durchsichtig, nicht
+     weg — mit Text darin läse ihn das Vorlesen als Meldung einer Fläche, die
+     fertig ist. -->
+<div id="demo-hinweis" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll('main > *').forEach(function(el, i){
+    el.style.setProperty('--verz', (i * 0.06) + 's');
+  });
+
+  var hinweisTimer = null;
+  function demoHinweis(text){
+    var h = document.getElementById('demo-hinweis');
+    h.textContent = text;
+    h.style.opacity = .95; h.style.translate = '-50% 0';
+    clearTimeout(hinweisTimer);
+    hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2600);
+  }
+
+  function zeige(id, an){ document.getElementById(id).hidden = !an; }
+
+  /* ---------- Erst fragen ----------
+     Der Aufnahme-Knopf entsteht erst mit seiner Antwort. Ihn vorher zu
+     zeigen und beim Druck nach der Zustimmung zu fragen wäre dasselbe
+     Versprechen in der falschen Reihenfolge: dann wäre die Aufnahme die
+     Regel und sein Ja die Formalie. */
+  document.getElementById('fragen').addEventListener('click', function(){
+    zeige('schritt-fragen', false);
+    zeige('schritt-antwort', true);
+    var w = document.querySelector('#schritt-antwort .kundenwort');
+    if (!reduziert) { w.classList.remove('kommt'); void w.offsetWidth; w.classList.add('kommt'); }
+  });
+
+  document.getElementById('doch-nein').addEventListener('click', function(){
+    zeige('schritt-antwort', false);
+    zeige('schritt-nein', true);
+  });
+  document.getElementById('doch-fragen').addEventListener('click', function(){
+    zeige('schritt-nein', false);
+    zeige('schritt-fragen', true);
+    demoHinweis('Zurück auf Anfang. Er kann später ja sagen.');
+  });
+  document.getElementById('notiz-ablegen').addEventListener('click', function(){
+    var feld = document.getElementById('notiz');
+    if (!feld.value.trim()) { feld.focus(); return; }
+    document.querySelector('#schritt-nein .notizen').hidden = true;
+    document.querySelector('#schritt-nein .griffe').hidden = true;
+    var fertig = document.getElementById('notiz-fertig');
+    fertig.hidden = false;
+    fertig.innerHTML = '<span>Liegt als <b>deine Notiz</b> in der Akte Petersen, mit dem heutigen Datum und deinem Namen daran. Kein Protokoll, und es gibt sich auch nicht als eines aus. <a href="beratung-akte.html">In die Akte</a></span>';
+  });
+
+  /* ---------- Es läuft ----------
+     Die Uhr zählt echt: sie ist die einzige Zahl auf dieser Fläche, die in
+     der Vorführung wirklich stimmt. */
+  var lauf = null, sekunden = 0, gemerkt = 0;
+  var ZITATE = 3;
+
+  function zeitwort(s){
+    var m = Math.floor(s / 60), r = s % 60;
+    return (m < 10 ? '0' : '') + m + ':' + (r < 10 ? '0' : '') + r;
+  }
+
+  document.getElementById('starten').addEventListener('click', function(){
+    zeige('schritt-antwort', false);
+    zeige('schritt-laeuft', true);
+    document.body.classList.add('mitschrift');
+    /* Die Pegelbalken laufen versetzt, sonst schlagen neun Balken im
+       Gleichtakt und das sieht aus wie eine Grafik, nicht wie Zuhören. */
+    document.querySelectorAll('.pegel i').forEach(function(b, i){
+      b.style.animationDelay = (-i * 0.13) + 's';
+      b.style.animationDuration = (0.95 + (i % 4) * 0.16) + 's';
+    });
+    lauf = setInterval(function(){
+      sekunden++;
+      document.getElementById('uhr-lauf').textContent = zeitwort(sekunden);
+    }, 1000);
+  });
+
+  /* Merken heißt: dieser Satz bekommt im Protokoll deine Hand. Die Marke
+     zeigt die Zeit, zu der du gedrückt hast — sie ist echt. Danach ist sie
+     nur noch ein Wort auf dem Blatt, weil es keine Tonspur mehr gibt, in die
+     sie springen könnte. */
+  var MARKEN = [];
+  document.getElementById('merken').addEventListener('click', function(){
+    if (gemerkt >= ZITATE) {
+      demoHinweis('Alle drei Stellen dieser Vorführung sind gemerkt.');
+      return;
+    }
+    gemerkt++;
+    MARKEN.push(zeitwort(sekunden));
+    document.getElementById('merker').innerHTML = gemerkt === 1
+      ? 'Eine Stelle gemerkt, bei <b>' + MARKEN[0] + '</b>.'
+      : gemerkt + ' Stellen gemerkt, zuletzt bei <b>' + MARKEN[gemerkt - 1] + '</b>.';
+  });
+
+  document.getElementById('beenden').addEventListener('click', function(){
+    clearInterval(lauf);
+    document.body.classList.remove('mitschrift');
+    zeige('schritt-laeuft', false);
+    zeige('schritt-ende', true);
+    protokollLegen();
+  });
+
+  /* ---------- Das Protokoll legt sich hin ---------- */
+  function protokollLegen(){
+    var bogen = document.getElementById('protokoll');
+    document.getElementById('h-protokoll').hidden = false;
+    bogen.hidden = false;
+    if (!reduziert) {
+      bogen.classList.add('neu');
+      setTimeout(function(){ bogen.classList.remove('neu'); }, 650);
+    }
+    /* Die gemerkten Stellen tragen deine Hand, in der Reihenfolge, in der du
+       gedrückt hast. Wer nichts gemerkt hat, findet auch nichts markiert —
+       eine Fläche, die Merker erfindet, führt genau das vor, was sie nicht
+       kann. */
+    for (var i = 1; i <= gemerkt; i++) {
+      var z = bogen.querySelector('[data-zitat="' + i + '"]');
+      if (!z || z.querySelector('.kw-gemerkt')) continue;
+      var m = document.createElement('span');
+      m.className = 'kw-gemerkt';
+      /* Ohne Zeitangabe, und zwar aus demselben Grund, aus dem das ganze Blatt
+         keine trägt: die Tonspur ist gelöscht. Die Zeit, zu der du gedrückt
+         hast, steht im Band, solange es läuft — auf dem Blatt wäre sie eine
+         Marke ohne Ziel. */
+      m.textContent = 'im Termin gemerkt';
+      z.appendChild(m);
+    }
+    document.getElementById('h-karten').hidden = false;
+    document.getElementById('karten').hidden = false;
+    kartenStand();
+    setTimeout(function(){
+      bogen.scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block:'start'});
+    }, reduziert ? 0 : 160);
+  }
+
+  /* ---------- Die Ausgänge des Protokolls ---------- */
+  function ablegen(el, satz){
+    var griffe = el.querySelector('.griffe');
+    if (griffe) griffe.hidden = true;
+    var karte = el.querySelector('.abgelegt');
+    karte.hidden = false;
+    karte.innerHTML = satz;
+  }
+
+  /* Derselbe Wechsel wie in „Selber fragen": das Pauspapier wird in die Tinte
+     der Beratung gedrückt, der Text landet in einem Feld. Was ohne Hand
+     hinausginge, wäre kein Protokoll der Beratung, sondern eines der
+     Software — und der Kunde bekäme die Zusammenfassung einer Maschine über
+     ein Gespräch, in dem er selbst saß. */
+  var ENTWURF_AN_KUNDEN =
+    'Guten Tag Herr Petersen,\n\n' +
+    'anbei, was wir heute besprochen haben:\n\n' +
+    '— Der Preisschritt kommt: 4,5 Prozent auf die Serienteile, wirksam zum 1. Oktober.\n' +
+    '— Ihre zwölf A-Kunden bleiben in diesem Jahr unberührt. Sie rufen sie selbst an, bevor etwas hinausgeht.\n' +
+    '— Über die C-Kunden sprechen wir, sobald die Nordstahl-Konditionen vorliegen.\n\n' +
+    'Wo die Grenze der Staffeln liegt, sage ich Ihnen bis Freitag.\n\n' +
+    'Viele Grüße\nAnna Vogelsang';
+
+  function inTinteDruecken(bogen){
+    bogen.classList.add('uebernommen');
+    bogen.style.setProperty('--marken-farbe', '#2b5fe3');
+    var herkunft = bogen.querySelector('.b-herkunft');
+    herkunft.hidden = true;
+    var marke = document.createElement('span');
+    marke.className = 'marken-marke';
+    marke.innerHTML = '<span class="punkt"></span>Nordholm &amp; Partner';
+    herkunft.after(marke);
+    bogen.querySelector('.griffe').hidden = true;
+
+    var block = document.createElement('div');
+    block.className = 'ausgang';
+    block.innerHTML =
+      '<div class="ausgang-feld">' +
+        '<label for="ausgang-protokoll">Das geht an Herrn Petersen, mit deinem Namen daran</label>' +
+        '<textarea id="ausgang-protokoll"></textarea>' +
+      '</div>' +
+      '<div class="griffe">' +
+        '<button class="knopf primaer" type="button" data-tu="absenden">Absenden</button>' +
+        '<button class="knopf leise" type="button" data-tu="doch-nicht">Doch nicht schicken</button>' +
+      '</div>' +
+      '<span class="hand">ab hier ist es dein Protokoll.</span>';
+    bogen.querySelector('.abgelegt').before(block);
+    block.querySelector('textarea').value = ENTWURF_AN_KUNDEN;
+    binden(bogen);
+    block.querySelector('textarea').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block:'center'});
+  }
+
+  var TUN_PROTOKOLL = {
+    'akte': function(bogen){
+      ablegen(bogen, '<span>Liegt als Blatt in der <b>Akte Petersen</b>, mit dem heutigen Datum. <a href="beratung-akte.html">In die Akte</a></span>');
+    },
+    'an-kunden': function(bogen){ inTinteDruecken(bogen); },
+    /* Wer das Blatt verwirft, verwirft die Karten daraus mit: sie sind aus
+       seinen Sätzen entstanden und stünden sonst als Arbeit da, deren Grund
+       es nicht mehr gibt. Was schon geheftet oder gestellt wurde, bleibt —
+       das ist unterwegs, und die Zeile sagt es. */
+    'verwerfen': function(bogen){
+      bogen.classList.add('verworfen');
+      var offen = 0;
+      document.querySelectorAll('.karte-a').forEach(function(k){
+        if (!k.querySelector('.abgelegt').hidden) return;
+        offen++;
+        k.classList.add('verworfen');
+        var wahl = k.querySelector('.wer-wahl');
+        if (wahl) wahl.hidden = true;
+        ablegen(k, '<span>Mit dem Protokoll verworfen. Den Satz, aus dem diese Karte kam, gibt es nicht mehr.</span>');
+      });
+      kartenStand();
+      ablegen(bogen, offen === KARTEN_ZAHL
+        ? '<span>Verworfen, und die ' + zahlKlein(KARTEN_ZAHL) + ' Karten daraus gleich mit. Die Aufnahme war schon gelöscht — von diesem Termin bleibt jetzt nur, was du dir selbst notiert hast.</span>'
+        : '<span>Verworfen, und die Karten, die noch hier lagen, gleich mit. Was du vorher geheftet oder gestellt hast, bleibt — das ist schon unterwegs.</span>');
+    },
+    'absenden': function(bogen){
+      var feld = bogen.querySelector('.ausgang textarea');
+      if (!feld.value.trim()) { feld.focus(); return; }
+      bogen.querySelector('.ausgang .ausgang-feld').hidden = true;
+      bogen.querySelector('.ausgang .griffe').hidden = true;
+      bogen.querySelector('.ausgang .hand').hidden = true;
+      ablegen(bogen, '<span>Steht in seinem Portal, als dein Wort, mit deinem Namen daran. Eine Kopie liegt in der <a href="beratung-akte.html">Akte Petersen</a>.</span>');
+    },
+    'doch-nicht': function(bogen){
+      var ausgang = bogen.querySelector('.ausgang');
+      if (ausgang) ausgang.remove();
+      var marke = bogen.querySelector('.marken-marke');
+      if (marke) marke.remove();
+      bogen.querySelector('.b-herkunft').hidden = false;
+      bogen.classList.remove('uebernommen');
+      bogen.style.removeProperty('--marken-farbe');
+      bogen.querySelector('.griffe').hidden = false;
+      demoHinweis('Nichts geschickt. Das Blatt liegt wieder da.');
+    }
+  };
+
+  /* ---------- Die Karten ---------- */
+  var KARTEN_ZAHL = document.querySelectorAll('.karte-a').length;
+  /* Die Zahlen kommen aus dem Markup, die Wörter aus dieser Liste — dieselbe
+     Lösung wie in „Termine und Übergaben". Eine Standzeile, die „Drei" sagt,
+     während vier Karten liegen, ist schlimmer als gar keine. */
+  var ZAHLWORT = ['Keine', 'Eine', 'Zwei', 'Drei', 'Vier', 'Fünf', 'Sechs'];
+  var ZAHLWORT_KLEIN = ['keine', 'eine', 'zwei', 'drei', 'vier', 'fünf', 'sechs'];
+  function zahl(n){ return ZAHLWORT[n] || n; }
+  function zahlKlein(n){ return ZAHLWORT_KLEIN[n] || n; }
+
+  function kartenStand(){
+    /* Erledigt heißt nicht Arbeit: eine verworfene Karte ist ihren Weg
+       gegangen, aber es ist nichts aus ihr geworden. Die Zeile muss beides
+       auseinanderhalten, sonst feiert sie am Ende drei Absagen als Ertrag. */
+    var karten = document.querySelectorAll('.karte-a');
+    var erledigt = 0, arbeit = 0;
+    karten.forEach(function(k){
+      if (k.querySelector('.abgelegt').hidden) return;
+      erledigt++;
+      if (!k.classList.contains('verworfen')) arbeit++;
+    });
+    var el = document.getElementById('karten-stand');
+    el.hidden = false;
+    if (erledigt === 0) {
+      el.textContent = zahl(KARTEN_ZAHL) + ' Entwürfe aus 58 Minuten. Keiner davon ist Arbeit, solange er hier liegt.';
+    } else if (erledigt < KARTEN_ZAHL) {
+      el.textContent = zahl(erledigt) + ' von ' + zahlKlein(KARTEN_ZAHL) + ' Karten ' +
+        (erledigt === 1 ? 'ist' : 'sind') + ' ihren Weg gegangen.';
+    } else {
+      el.textContent = arbeit === 0
+        ? 'Alle Karten sind verworfen. Aus diesem Termin ist keine Aufgabe geworden — auch das ist eine Entscheidung.'
+        : 'Alle Karten sind ihren Weg gegangen. Aus 58 Minuten Gespräch ist Arbeit geworden, ohne dass du ein Wort abgetippt hast.';
+    }
+  }
+
+  var TUN_KARTE = {
+    'heften': function(karte){
+      var gewaehlt = karte.querySelector('.wer-wahl button[aria-pressed="true"]');
+      var wer = gewaehlt && gewaehlt.dataset.wer === 'ki' ? 'deinem KI-Berater' : 'dir';
+      var wahl = karte.querySelector('.wer-wahl');
+      if (wahl) wahl.hidden = true;
+      ablegen(karte, '<span>Steht als offene Aufgabe am <b>Mandat Petersen</b>, zuständig bei ' + wer + ', fällig Freitag. Der Satz von Herrn Petersen hängt als Grund daran. <a href="beratung-mandat.html">Im Mandat ansehen</a></span>');
+      kartenStand();
+    },
+    'ansehen': function(karte){
+      ablegen(karte, '<span>Nichts angelegt, es gibt sie ja schon. <a href="beratung-mandat.html">Zur Aufgabe am Mandat</a></span>');
+      kartenStand();
+    },
+    'weg': function(karte){
+      karte.classList.add('verworfen');
+      ablegen(karte, '<span>Weggenommen. Die Aufgabe am Mandat bleibt, wie sie war.</span>');
+      kartenStand();
+    },
+    'bitte': function(karte){
+      ablegen(karte, '<span>Steht ab jetzt als <b>Bitte</b> in seinem Portal, oben auf seiner Übersicht, mit dem Grund daran: ohne die Konditionen geht es bei den C-Kunden nicht weiter. Er bekommt eine Erinnerung, du keine Arbeit.</span>');
+      kartenStand();
+    },
+    'verwerfen': function(karte){
+      karte.classList.add('verworfen');
+      ablegen(karte, '<span>Verworfen. Nichts davon ist irgendwo gelandet.</span>');
+      kartenStand();
+    }
+  };
+
+  function binden(behaelter){
+    behaelter.querySelectorAll('[data-tu]').forEach(function(b){
+      if (b.dataset.gebunden) return;
+      b.dataset.gebunden = '1';
+      b.addEventListener('click', function(){
+        var istKarte = behaelter.classList.contains('karte-a');
+        var tun = (istKarte ? TUN_KARTE : TUN_PROTOKOLL)[b.dataset.tu];
+        if (tun) tun(behaelter);
+      });
+    });
+  }
+  binden(document.getElementById('protokoll'));
+  document.querySelectorAll('.karte-a').forEach(binden);
+
+  document.querySelectorAll('.wer-wahl').forEach(function(gruppe){
+    gruppe.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){
+        gruppe.querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', 'false'); });
+        b.setAttribute('aria-pressed', 'true');
+      });
+    });
+  });
+
+  /* Die früheren Protokolle sind in dieser Vorführung nicht gezeichnet — ein
+     Knopf, der nirgendwohin führt, sagt das besser als ein Link, der auf
+     dieselbe Seite zurückfällt. */
+  document.querySelectorAll('[data-frueher]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      demoHinweis('In der Vorführung ist nur der Donnerstag gezeichnet.');
+    });
+  });
+
+  /* Wer die Seite verlässt, während es läuft, soll die Kante nicht als
+     Geisterrahmen zurücklassen — und die Uhr nicht weiterzählen. */
+  window.addEventListener('pagehide', function(){
+    clearInterval(lauf);
+    document.body.classList.remove('mitschrift');
+  });
+  /* Kommt die Seite aus dem Zwischenspeicher des Browsers zurück (Safari und
+     Firefox halten sie beim Zurückgehen fest), ist der Raum genau so, wie
+     pagehide ihn verlassen hat: das Band behauptet „Es wird mitgeschrieben",
+     die Uhr steht und die Kante fehlt. Beides muss wieder zusammenpassen. */
+  window.addEventListener('pageshow', function(e){
+    if (!e.persisted) return;
+    if (document.getElementById('schritt-laeuft').hidden) return;
+    document.body.classList.add('mitschrift');
+    clearInterval(lauf);
+    lauf = setInterval(function(){
+      sekunden++;
+      document.getElementById('uhr-lauf').textContent = zeitwort(sekunden);
+    }, 1000);
+  });
+})();
+</script>
+<script src="hilfe.js"></script>
+<script src="uhr.js"></script>
+<script src="zeiger.js"></script>
+<script src="rechtsfuss.js"></script>
+</body>
+</html>
