@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wie ihr arbeitet</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Wie ihr arbeitet: die Mandatsvorlagen einer
+   Beratung (Häppchen E4, Issue #45, Produkt-Paket #116).
+
+   Die Frage des Häppchens war: wie legt eine Beratung ihre Art zu arbeiten
+   einmal hin, ohne dass daraus ein Formular wird, das niemand ausfüllt?
+
+   1. Eine Vorlage wird nicht erfunden, sondern BEMERKT. Der KI-Berater hat
+      die vier gelaufenen Mandate nebeneinandergelegt: drei gingen denselben
+      Weg. Der Vorschlag hängt damit an einer eigenen Zahl, wie alles, was er
+      ungefragt meldet (Entscheidung 2026-08-16, E3) — und die Abweichung
+      steht dabei: bei Bäckerei Freitag kam er in ein laufendes Projekt.
+   2. Der Moment der Fläche: aus dem Mandat wird die Vorlage, und der Kunde
+      bleibt sichtbar zurück. Petersens Zahlen, Namen und Termine heben sich
+      ab und fallen weg; darunter steht, welche sieben Stellen zurückgeblieben
+      sind und warum. Eine Vorlage, die stillschweigend die Marge des letzten
+      Kunden in den nächsten trägt, ist ein Datenleck mit Zeitverzögerung.
+   3. Der Vorschlag liegt bis dahin als Pauspapier da (Entscheidung
+      2026-08-16): er gehört der Beratung erst, wenn eine Hand danach greift.
+      Mit dem Griff richtet sich der Bogen und wird die zweite Vorlage.
+   4. Die Vorlage gibt den WEG, nicht das ZIEL. Was sie nicht wissen kann,
+      steht als Frage in ihr drin und wird beim Anlegen gestellt.
+   5. Eine geänderte Vorlage rührt laufende Mandate nicht an — sonst schreibt
+      ein Häkchen hier neun Kundenpläne um, die längst besprochen sind.
+   6. Der Rückweg: was von Hand eingefügt wird, zählt er. Dreimal derselbe
+      Schritt ist ein Vorschlag, die Vorlage zu ändern — kein automatisches
+      Lernen.
+
+   Abgegrenzt vom Wissen der Beratung (beratung-wissen.html): dort liegt die
+   Hausmethodik, aus der der KI-Berater ANTWORTET. Hier liegt der Bauplan,
+   nach dem ein Mandat AUFGEBAUT wird. Zwei verschiedene Dinge, deshalb zwei
+   Räume.
+
+   Der Meilenstein-Pfad ist bewusst dieselbe Form wie in beratung-mandat.html
+   (Achse am großen Schirm, Leiter am Handy, Fortschrittsstrich an den
+   Stationen) — das Mandat aus der Vorlage soll aussehen wie ein Mandat.
+
+   Chrome ist quoroAI (system.css, Entscheidung 2026-08-12), Hilfe-Ebene im
+   Kopfband, Uhr-Dock und Komet wie überall im Cockpit.
+   Marker: BERATUNG-VORLAGEN-V1 */
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,textarea{font-family:inherit}
+
+/* ========== quoroAI-Chrom (wie in den anderen Cockpit-Räumen) ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;word-spacing:2px}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+/* Unter 1360px reicht die Krume in die Inhaltsspalte und wird die zweite
+   Zeile des Kopfbands (Entscheidung 2026-08-14). */
+@media (max-width:1360px){
+  nav{height:118px;padding-bottom:58px}
+  #krume{z-index:90}
+}
+
+/* ========== Seite ========== */
+main{max-width:880px;margin:0 auto;padding:136px 24px 90px}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:6px;max-width:62ch;line-height:1.6}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:40px}
+.h3-satz{font-size:14px;color:var(--nebel-600);line-height:1.6;max-width:64ch;margin-top:4px}
+
+/* ---------- Die Vorlage als Karte ---------- */
+.vorlage{
+  position:relative;margin-top:14px;border-radius:var(--radius-karte);padding:22px 24px;
+  background:var(--flaeche);border:0.5px solid var(--nebel-200);
+  box-shadow:0 12px 34px rgba(24,21,47,.06);
+  scroll-margin-top:150px;
+}
+.v-kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.v-name{font-family:var(--schrift-schau);font-size:21px;letter-spacing:-.01em;word-spacing:1.5px}
+.v-meta{font-size:13px;color:var(--nebel-600);margin-top:3px;line-height:1.55}
+.v-laeuft{
+  flex-shrink:0;font-size:12px;font-weight:600;color:var(--nebel-600);
+  padding:5px 12px;border-radius:var(--radius-kapsel);background:var(--nebel-100);
+}
+
+/* Die Stationen einer Vorlage: eine Leiter, nicht eine Tabelle. Eine Vorlage
+   ist ein Weg, und ein Weg hat eine Richtung. */
+.stationen{list-style:none;margin:18px 0 0;padding:0 0 0 26px}
+.stationen li{position:relative;padding:0 0 18px}
+.stationen li:last-child{padding-bottom:0}
+.stationen li::before{
+  content:"";position:absolute;left:-26px;top:4px;width:13px;height:13px;border-radius:50%;
+  background:#fff;border:2px solid var(--nebel-300);box-sizing:border-box;
+}
+.stationen li::after{
+  content:"";position:absolute;left:-20px;top:19px;bottom:-2px;width:2px;border-radius:2px;
+  background:var(--nebel-200);
+}
+.stationen li:last-child::after{display:none}
+.stationen .s-kopf{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.stationen .s-name{font-size:15.5px;font-weight:600;letter-spacing:-.01em}
+.stationen .s-wann{font-size:12.5px;color:var(--nebel-500);font-variant-numeric:tabular-nums}
+
+/* Aufgaben einer Station, mit ihrer Zuständigkeit. „Der Kunde" ist eine
+   eigene Zuständigkeit: was er zuliefern muss, gehört in sein Portal, nicht
+   in die Liste dessen, der es nicht erfüllen kann (Entscheidung E2). */
+.s-aufgaben{list-style:none;margin:9px 0 0;display:flex;flex-direction:column;gap:6px}
+.s-aufgaben li{
+  display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+  font-size:13.5px;line-height:1.5;padding:0;
+}
+.s-aufgaben li::before,.s-aufgaben li::after{display:none}
+.s-aufgaben .wer{
+  flex-shrink:0;font-size:11px;font-weight:600;
+  padding:3px 9px;border-radius:var(--radius-kapsel);color:var(--nebel-600);background:var(--nebel-100);
+}
+.s-aufgaben .wer.ki{color:var(--lila-800);background:var(--lila-100)}
+.s-aufgaben .wer.kunde{color:var(--bernstein);background:var(--bernstein-fond)}
+
+/* Was die Vorlage nicht wissen kann, steht als Frage in ihr drin. */
+.s-frage{
+  display:inline-block;margin-top:9px;padding:7px 12px;border-radius:var(--radius-innen);
+  background:var(--nebel-100);font-size:12.5px;color:var(--nebel-700);line-height:1.5;
+}
+.s-frage b{font-weight:600;color:var(--tinte)}
+
+/* Die Kante: eine Änderung hier rührt laufende Mandate nicht an. */
+.kante{
+  margin-top:18px;padding:12px 15px;border-radius:var(--radius-innen);
+  background:var(--nebel-100);font-size:13px;line-height:1.6;color:var(--nebel-700);
+}
+.kante b{color:var(--tinte);font-weight:600}
+
+/* ---------- Der Vorschlag: Pauspapier auf dem Tisch ----------
+   Dieselbe Sprache wie die Entwürfe auf der Werkbank und das Protokoll
+   (Entscheidung 2026-08-16): was die KI beiträgt, liegt durchscheinend und
+   leicht schief da und gehört der Beratung noch nicht. */
+#bogen{
+  rotate:-.35deg;
+  background:linear-gradient(180deg, rgba(245,244,254,.92), rgba(255,255,255,.9));
+  border:1px solid var(--lila-200);
+  box-shadow:0 16px 44px rgba(59,52,134,.13);
+  transition:rotate .6s var(--kurve), background .6s ease, border-color .6s ease, box-shadow .6s ease;
+}
+#bogen.eigen{
+  rotate:0deg;
+  background:var(--flaeche);
+  border:0.5px solid var(--nebel-200);
+  box-shadow:0 12px 34px rgba(24,21,47,.06);
+}
+.b-herkunft{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--lila-700);
+}
+.b-herkunft img{width:15px;height:15px;display:block}
+#bogen.eigen .b-herkunft{color:var(--nebel-500)}
+#bogen.eigen .b-herkunft img{opacity:.4}
+
+/* Der Befund, aus dem der Vorschlag kommt — eine Zahl, kein Gefühl. */
+.befund{
+  margin-top:16px;display:flex;flex-direction:column;gap:9px;
+  font-size:14px;line-height:1.6;
+}
+.befund .zeile{display:flex;gap:12px;align-items:baseline}
+.befund .zeile .marke{
+  flex-shrink:0;width:78px;font-size:12px;font-weight:600;color:var(--nebel-500);
+  font-variant-numeric:tabular-nums;
+}
+.befund .zeile.abweichung .marke{color:var(--bernstein)}
+.einschraenkung{
+  margin-top:14px;font-size:13px;line-height:1.6;color:var(--nebel-600);
+  padding-left:14px;border-left:2px solid var(--nebel-200);
+}
+
+/* Der Moment: die konkreten Stellen heben sich ab und fallen weg. */
+.konkret{
+  color:var(--tinte);
+  transition:opacity .45s ease, translate .45s var(--kurve), filter .45s ease;
+}
+/* Solange der Bogen ein Vorschlag ist, trägt jede kundeneigene Stelle ihre
+   Herkunft — sonst liest sie sich, als gehörte sie zur Methode. */
+.konkret i{font-style:normal;color:var(--nebel-500)}
+.entkernt .konkret{opacity:0;translate:0 -10px;filter:blur(2px)}
+/* Nach dem Fallen muss die Stelle auch ihren Platz hergeben — sonst schiebt
+   ein unsichtbarer Satz die Form, die bleiben soll, an den rechten Rand. */
+.entkernt.leer .konkret{display:none}
+.form{
+  display:none;color:var(--nebel-600);
+  opacity:0;translate:0 8px;
+  transition:opacity .45s ease .35s, translate .45s var(--kurve) .35s;
+}
+.entkernt .form{display:inline;opacity:1;translate:0 0}
+/* Ohne Bewegung fällt nichts, es ist einfach weg. */
+@media (prefers-reduced-motion: reduce){
+  .konkret,.form{transition:none}
+  .entkernt .konkret{display:none}
+}
+
+/* Was zurückgeblieben ist. Ein Verteiler zeigt seinen Ausschuss nie
+   (dieselbe Regel wie beim Briefing, E3). */
+.geblieben{
+  margin-top:20px;padding:16px 18px;border-radius:var(--radius-innen);
+  background:var(--nebel-050);border:0.5px solid var(--nebel-200);
+}
+.geblieben .z-kopf{font-size:13px;font-weight:600;color:var(--tinte)}
+.geblieben ul{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.geblieben li{font-size:13px;line-height:1.55;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
+.geblieben li .stelle{color:var(--nebel-700)}
+.geblieben li .grund{color:var(--nebel-500);font-size:12.5px}
+
+.griffe{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;align-items:center}
+.griffe .knopf{min-height:42px;padding:0 18px;font-size:14px}
+.griffe .merk{font-size:12.5px;color:var(--nebel-500);line-height:1.5}
+.hand{
+  font-family:'Caveat',cursive;font-size:20px;font-weight:700;color:var(--lila-700);
+  rotate:-1.2deg;display:inline-block;margin-top:12px;
+}
+
+/* ---------- Anwenden ---------- */
+.platzhalter{
+  margin-top:14px;padding:18px 20px;border-radius:var(--radius-karte);
+  border:1px dashed var(--nebel-300);background:var(--nebel-050);
+  font-size:13.5px;color:var(--nebel-600);line-height:1.6;
+}
+#angewandt{scroll-margin-top:150px}
+.start{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.start .label{font-size:13px;font-weight:600;color:var(--nebel-600)}
+.start button{
+  padding:9px 14px;border-radius:12px;border:0.5px solid var(--nebel-300);
+  background:var(--flaeche);font-size:13.5px;font-weight:600;cursor:pointer;color:var(--tinte);
+  transition:border-color .2s,background .2s,color .2s;
+}
+.start button.gewaehlt{background:var(--tinte);color:#fff;border-color:var(--tinte)}
+.start button:focus-visible{outline:3px solid var(--lila-400);outline-offset:2px}
+
+/* Der Pfad des entstandenen Mandats — dieselbe Form wie im Mandat selbst
+   (beratung-mandat.html): Achse am großen Schirm, Leiter am Handy. */
+.pfad-rolle{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:18px}
+#pfad{width:100%;min-width:660px;height:auto;display:block;overflow:visible}
+#pfad .grund{fill:none;stroke:var(--nebel-300);stroke-width:2;stroke-dasharray:5 6;stroke-linecap:round}
+#pfad circle.station{fill:#fff;stroke:var(--nebel-300);stroke-width:2}
+#pfad .voran{fill:none;stroke:var(--lila-600);stroke-width:2.6;stroke-linecap:round}
+#pfad circle.station.geschafft{fill:var(--lila-600);stroke:var(--lila-600)}
+#pfad circle.station.jetzt{fill:#fff;stroke:var(--lila-600);stroke-width:3}
+#pfad text.geschafft-t{fill:var(--nebel-500)}
+/* Die von Hand eingefügte Station ist die einzige, die auffallen soll —
+   deshalb steht ihre Kennzeichnung nach den Zustands-Regeln. */
+#pfad circle.station.eigenhand{fill:#fff;stroke:var(--lila-600);stroke-width:2;stroke-dasharray:3 3}
+#pfad text{font-family:var(--schrift-text);font-size:9.5px;fill:var(--nebel-600)}
+#pfad text.m-name{font-weight:600;fill:var(--tinte);font-size:10.5px}
+#pfad text.m-hand{fill:var(--lila-700);font-weight:600}
+.pfad-leiter{display:none}
+@media (max-width:700px){
+  .pfad-rolle{display:none}
+  .pfad-leiter{display:block;list-style:none;margin:16px 0 0;padding:0 0 0 26px}
+  .pfad-leiter li{position:relative;padding:0 0 16px}
+  .pfad-leiter li:last-child{padding-bottom:0}
+  .pfad-leiter li::after{
+    content:"";position:absolute;left:-20px;top:17px;bottom:-4px;width:2px;border-radius:2px;
+    background:var(--nebel-300);
+  }
+  .pfad-leiter li:last-child::after{display:none}
+  .pfad-leiter li::before{
+    content:"";position:absolute;left:-26px;top:4px;width:13px;height:13px;border-radius:50%;
+    background:#fff;border:2px solid var(--nebel-300);box-sizing:border-box;
+  }
+  .pfad-leiter li.geschafft::before{background:var(--lila-600);border-color:var(--lila-600)}
+  .pfad-leiter li.geschafft::after{background:var(--lila-600)}
+  .pfad-leiter li.jetzt::before{border-color:var(--lila-600);border-width:3px}
+  .pfad-leiter li.eigenhand::before{background:#fff;border-color:var(--lila-600);border-style:dashed}
+  .pfad-leiter b{display:block;font-size:14px;font-weight:600;letter-spacing:-.01em}
+  .pfad-leiter span{display:block;font-size:12.5px;color:var(--nebel-600);margin-top:1px}
+  .pfad-leiter .woher{font-size:11.5px;color:var(--nebel-500)}
+  .pfad-leiter li.eigenhand .woher{color:var(--lila-700);font-weight:600}
+}
+/* Woher eine Station kommt: aus der Vorlage oder von Hand. Grau ist hier das
+   Normale — auffallen soll, was jemand selbst eingefügt hat. */
+.woher-legende{
+  margin-top:14px;font-size:12.5px;color:var(--nebel-500);line-height:1.6;
+}
+.woher-legende b{color:var(--lila-700);font-weight:600}
+
+/* Der Rückweg: dreimal von Hand ist ein Vorschlag. */
+.rueckweg{
+  margin-top:18px;padding:16px 18px;border-radius:var(--radius-innen);
+  background:var(--lila-050);border:0.5px solid var(--lila-200);
+}
+.rueckweg .r-satz{font-size:14px;line-height:1.6}
+.rueckweg .r-satz b{font-weight:600}
+.rueckweg .r-fuss{font-size:12.5px;color:var(--nebel-600);margin-top:8px;line-height:1.55}
+.rueckweg.getan{background:var(--gruen-fond);border-color:rgba(23,116,82,.25)}
+.rueckweg.getan .r-satz b{color:var(--gruen)}
+
+@media (prefers-reduced-motion: reduce){
+  main > *{animation:none;opacity:1;translate:none}
+  #bogen{transition:none}
+}
+@media (max-width:700px){
+  nav{padding:0 18px;padding-bottom:58px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
+  .vorlage{padding:18px 18px}
+  .griffe .knopf{flex:1 1 100%;min-height:48px}
+  .start button{flex:1 1 auto}
+  .befund .zeile{flex-wrap:wrap}
+  .befund .zeile .marke{width:auto}
+}
+</style>
+</head>
+<body class="quoro"
+      data-hilfe-titel="Wie ihr arbeitet"
+      data-hilfe-satz="Eine Vorlage ist der Weg, den ihr in jedem Mandat geht: welche Meilensteine, in welcher Reihenfolge, wer was tut. Ein neues Mandat startet damit nicht leer. Was euer KI-Berater sagt, steht woanders — in eurem Wissen.">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <div class="nav-rechts" style="display:flex;align-items:center;gap:10px"><span data-hilfe-knopf></span><a class="vorschlaege" href="index.html">Alle Vorschläge</a></div>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Wie ihr arbeitet</b></a>
+
+<main>
+  <div class="kopf">
+    <h1>Wie ihr arbeitet</h1>
+    <div class="stand">Eine Vorlage ist der Weg, den ihr in jedem Mandat dieser Art geht: welche Meilensteine, in welcher Reihenfolge, wer was tut. Ein neues Mandat startet damit nicht leer. Was euer KI-Berater <i>sagt</i>, gehört nicht hierher, sondern in euer <a href="beratung-wissen.html">Wissen</a>.</div>
+  </div>
+
+  <h3 data-hilfe-name="Eure Vorlagen"
+      data-hilfe="Jede Vorlage ist ein Bauplan für Mandate einer Art. Sie steht hier einmal, und jedes neue Mandat dieser Art bekommt sie beim Anlegen. Wer sie ändert, ändert nur das nächste Mandat, nie die laufenden.">Eure Vorlagen</h3>
+  <p class="h3-satz">Eine liegt hinterlegt. Eine zweite geht ihr, ohne sie hinterlegt zu haben.</p>
+
+  <section class="vorlage" aria-label="Vorlage Nachfolge in Etappen">
+    <div class="v-kopf">
+      <div>
+        <div class="v-name">Nachfolge in Etappen</div>
+        <div class="v-meta">6 Meilensteine, angelegt im Februar, zuletzt geändert am 4. Mai von Dr. Anna Vogelsang</div>
+      </div>
+      <span class="v-laeuft">9 Mandate laufen danach</span>
+    </div>
+    <ol class="stationen" aria-label="Sechs Meilensteine">
+      <li><div class="s-kopf"><span class="s-name">Bestandsaufnahme</span><span class="s-wann">Woche 0 bis 4</span></div></li>
+      <li><div class="s-kopf"><span class="s-name">Bewertung</span><span class="s-wann">Woche 4 bis 10</span></div></li>
+      <li><div class="s-kopf"><span class="s-name">Käuferkreis</span><span class="s-wann">Woche 10 bis 20</span></div></li>
+      <li><div class="s-kopf"><span class="s-name">Verhandlung</span><span class="s-wann">Woche 20 bis 34</span></div></li>
+      <li><div class="s-kopf"><span class="s-name">Übergabe</span><span class="s-wann">Woche 34 bis 52</span></div></li>
+      <li><div class="s-kopf"><span class="s-name">Ein Jahr danach</span><span class="s-wann">Woche 104</span></div></li>
+    </ol>
+    <div class="kante"
+         data-hilfe-name="Was eine Änderung anfasst"
+         data-hilfe="Eine Vorlage ist ein Bauplan, kein Fernsteuerungspult. Was du hier änderst, gilt ab dem nächsten Mandat. Die laufenden behalten ihren Plan — er ist mit den Kunden besprochen.">
+      <b>Änderst du diese Vorlage, ändert sich keines der neun laufenden Mandate.</b> Deren Pläne sind mit den Kunden besprochen; ein Häkchen hier darf sie nicht umschreiben. Die Änderung gilt ab dem nächsten Mandat.
+    </div>
+  </section>
+
+  <h3 data-hilfe-name="Der Vorschlag"
+      data-hilfe="Dein KI-Berater erfindet keine Vorlage. Er hat gelesen, wie deine vier Mandate tatsächlich gelaufen sind, und den Weg gefunden, den drei von ihnen gegangen sind. Solange der Bogen durchscheinend liegt, gehört er dir noch nicht.">Was du machst, ohne es hinterlegt zu haben</h3>
+  <p class="h3-satz">Dein KI-Berater hat die vier gelaufenen Mandate nebeneinandergelegt.</p>
+
+  <section class="vorlage" id="bogen" aria-label="Vorschlag für eine Vorlage">
+    <div class="b-herkunft" id="b-herkunft"><img src="bilder/quoro-icon.svg" alt="" width="15" height="15"><span id="b-herkunft-wort">Vorschlag, gehört dir noch nicht</span></div>
+    <div class="v-kopf" style="margin-top:8px">
+      <div>
+        <div class="v-name">Preis und Marge</div>
+        <div class="v-meta" id="b-meta">Vier Meilensteine, gefunden in Petersen Stahlbau, Cordes Logistik und MTS Maschinenbau</div>
+      </div>
+    </div>
+
+    <div class="befund">
+      <div class="zeile"><span class="marke">3 von 4</span><span>Mandaten gingen denselben Weg: Analyse, Preismodell, Umsetzung, Wirksam. In dieser Reihenfolge, ohne Ausnahme.</span></div>
+      <div class="zeile"><span class="marke">14 Wochen</span><span>vom Start bis zur Wirkung, im Schnitt. Am kürzesten 11 bei Cordes, am längsten 17 bei MTS.</span></div>
+      <div class="zeile abweichung"><span class="marke">1 anders</span><span>Bäckerei Freitag hatte keine Analyse — dort bist du in ein laufendes Projekt gekommen, die Zahlen lagen schon auf dem Tisch.</span></div>
+    </div>
+
+    <p class="einschraenkung">Vier Mandate sind wenig. Was hier steht, ist die Form von dreien, nicht das Gesetz deiner Beratung.</p>
+
+    <ol class="stationen" id="stationen" aria-label="Vier Meilensteine des Vorschlags">
+      <li>
+        <div class="s-kopf"><span class="s-name">Analyse</span><span class="s-wann">Woche 0 bis 3</span></div>
+        <ul class="s-aufgaben">
+          <li><span class="wer ki">KI-Berater</span><span>Zahlen holen und lesen</span></li>
+          <li><span class="wer ki">KI-Berater</span><span>Deckungsbeitrag je Kundengruppe rechnen</span></li>
+          <li><span class="wer">du</span><span>Erstgespräch führen</span></li>
+        </ul>
+        <span class="s-frage"><span class="konkret"><i>noch aus Petersen:</i> Ziel: die Marge zurück über 33 Prozent</span><span class="form"><b>Ziel des Mandats</b> — wird beim Anlegen gefragt</span></span>
+      </li>
+      <li>
+        <div class="s-kopf"><span class="s-name">Preismodell</span><span class="s-wann">Woche 3 bis 8</span></div>
+        <ul class="s-aufgaben">
+          <li><span class="wer">du</span><span>Staffeln entwerfen</span></li>
+          <li><span class="wer ki">KI-Berater</span><span>Wirkung durchrechnen</span></li>
+          <li><span class="wer">du</span><span>Preisliste mit dem Kunden abstimmen</span></li>
+        </ul>
+        <span class="s-frage"><span class="konkret"><i>noch aus Petersen:</i> rechnerisch +38.000 € im Jahr, A- und B-Kunden bleiben unberührt</span><span class="form"><b>Welche Kundengruppen unberührt bleiben</b> — wird beim Anlegen gefragt</span></span>
+      </li>
+      <li>
+        <div class="s-kopf"><span class="s-name">Umsetzung</span><span class="s-wann">Woche 8 bis 14</span></div>
+        <ul class="s-aufgaben">
+          <li><span class="wer ki">KI-Berater</span><span>Anschreiben an die betroffenen Kunden entwerfen</span></li>
+          <li><span class="wer">du</span><span>Umstellung begleiten</span></li>
+          <li><span class="wer kunde">der Kunde</span><span>Alte Preisliste und Kundenschnitt hochladen</span></li>
+        </ul>
+        <span class="s-frage"><span class="konkret"><i>noch aus Petersen:</i> Ansprechpartner: Herr Petersen, fachlich Frau Dr. Vogelsang</span><span class="form"><b>Wer auf beiden Seiten zuständig ist</b> — wird beim Anlegen gefragt</span></span>
+      </li>
+      <li>
+        <div class="s-kopf"><span class="s-name">Wirksam</span><span class="s-wann">Woche 14</span></div>
+        <ul class="s-aufgaben">
+          <li><span class="wer ki">KI-Berater</span><span>Nachrechnen, ob es gewirkt hat</span></li>
+          <li><span class="wer">du</span><span>Ergebnis vorlegen</span></li>
+        </ul>
+        <span class="s-frage"><span class="konkret"><i>noch aus Petersen:</i> wirksam ab Woche 6, Oktober</span><span class="form"><b>Woche 14 nach Start</b> — rechnet sich beim Anlegen aus</span></span>
+      </li>
+    </ol>
+
+    <div class="geblieben" id="zurueckgeblieben" hidden
+         data-hilfe-wenn="#bogen.eigen"
+         data-hilfe="Eine Vorlage darf die Zahlen des letzten Kunden nicht in den nächsten tragen. Hier steht, was beim Herauslösen zurückgeblieben ist — Stelle für Stelle, mit dem Grund.">
+      <div class="z-kopf">Sieben Stellen sind zurückgeblieben. Sie gehören Petersen, nicht deiner Methode.</div>
+      <ul>
+        <li><span class="stelle">„Marge zurück über 33 Prozent"</span><span class="grund">sein Ziel, nicht deine Methode</span></li>
+        <li><span class="stelle">„+38.000 € im Jahr"</span><span class="grund">seine Rechnung, an seinen Umsätzen</span></li>
+        <li><span class="stelle">„A- und B-Kunden bleiben unberührt"</span><span class="grund">sein Kundenschnitt</span></li>
+        <li><span class="stelle">„Herr Petersen", „Frau Dr. Vogelsang"</span><span class="grund">Namen</span></li>
+        <li><span class="stelle">„ab Woche 6, Oktober"</span><span class="grund">ein Datum, aus seinem Start gerechnet</span></li>
+        <li><span class="stelle">Unterlage „Preismodell Benchmark", 12 Seiten</span><span class="grund">liegt in seiner Akte und bleibt dort</span></li>
+        <li><span class="stelle">9,2 Stunden im August</span><span class="grund">auf sein Mandat gebucht</span></li>
+      </ul>
+    </div>
+
+    <div class="griffe" id="b-griffe">
+      <button class="knopf primaer" type="button" id="uebernehmen">Daraus eine Vorlage machen</button>
+      <button class="knopf leise" type="button" id="verwerfen">Nicht nötig</button>
+      <span class="merk">Petersens Zahlen und Namen bleiben zurück, du siehst welche.</span>
+    </div>
+    <div class="hand" id="b-hand" hidden>gehört jetzt dir.</div>
+    <div class="kante" id="b-kante" hidden>
+      <b>Ab jetzt bekommt jedes neue Preis-und-Marge-Mandat diese vier Meilensteine.</b> Die vier laufenden behalten ihre eigenen Pläne — auch Petersen, aus dem sie stammt.
+    </div>
+  </section>
+
+  <h3 data-hilfe-name="Anwenden"
+      data-hilfe="Beim Anlegen eines Mandats wählst du die Vorlage und den Start. Aus dem Start rechnen sich alle Termine. Was die Vorlage nicht wissen kann, wird gefragt — das Ziel gibst du.">Anwenden</h3>
+  <p class="h3-satz" id="anwenden-satz">Ein neues Mandat bekommt die Vorlage beim Anlegen, sobald sie steht.</p>
+
+  <div class="platzhalter" id="platzhalter">Was eine Vorlage im Alltag tut, steht hier, sobald sie existiert.</div>
+
+  <div id="angewandt" hidden>
+    <section class="vorlage" aria-label="Neues Mandat aus der Vorlage">
+      <div class="v-kopf">
+        <div>
+          <div class="v-name">Rehbein Elektrotechnik</div>
+          <div class="v-meta">Neues Mandat, angelegt aus der Vorlage <b>Preis und Marge</b></div>
+        </div>
+      </div>
+      <div class="start" role="group" aria-label="Start des Mandats">
+        <span class="label">Start</span>
+        <button type="button" data-start="2026-09-01" class="gewaehlt" aria-pressed="true">1. September</button>
+        <button type="button" data-start="2026-09-15" aria-pressed="false">15. September</button>
+        <button type="button" data-start="2026-10-01" aria-pressed="false">1. Oktober</button>
+      </div>
+      <ol class="stationen" id="angewandt-stationen" aria-label="Vier Meilensteine mit Terminen"></ol>
+      <div class="s-frage" style="margin-top:18px">Zwei Fragen sind offen: <b>das Ziel des Mandats</b> und <b>wer auf beiden Seiten zuständig ist</b>. Die Vorlage gibt den Weg, das Ziel gibst du.</div>
+    </section>
+
+    <h3 data-hilfe-name="Ein Mandat aus der Vorlage"
+        data-hilfe="Im Mandat selbst sieht man, woher jede Station kommt: aus der Vorlage oder von Hand eingefügt. Ohne diese Herkunft wüsste in drei Monaten niemand mehr, was der Bauplan war und was die Ausnahme.">Ein Mandat, das aus einer Vorlage kam</h3>
+    <p class="h3-satz">So sieht Rehbein sechs Wochen später aus. Der Pfad ist derselbe wie in jedem Mandat — nur trägt jede Station, woher sie kommt.</p>
+
+    <section class="vorlage" aria-label="Meilenstein-Pfad des Mandats Rehbein">
+      <div class="pfad-rolle"><svg id="pfad" viewBox="0 0 760 108" role="img" aria-label="Fünf Meilensteine: Analyse, Preismodell, Zwischenprüfung der Kalkulation von Hand eingefügt, Umsetzung, Wirksam">
+        <line class="grund" x1="60" y1="38" x2="700" y2="38"></line>
+      </svg></div>
+      <ol class="pfad-leiter" id="pfad-leiter" aria-label="Fünf Meilensteine"></ol>
+      <p class="woher-legende">Vier Stationen kommen aus der Vorlage. Eine hast du <b>selbst eingefügt</b>: die Zwischenprüfung der Kalkulation, weil Rehbein drei Werke getrennt rechnet.</p>
+
+      <div class="rueckweg" id="rueckweg">
+        <div class="r-satz"><b>Diese Zwischenprüfung hast du zum dritten Mal von Hand eingefügt.</b> Vorher bei Cordes und bei MTS, jedes Mal an derselben Stelle. Soll sie in die Vorlage?</div>
+        <div class="r-fuss">Die drei laufenden Mandate behalten, was sie haben — sie haben den Schritt ja schon.</div>
+        <div class="griffe">
+          <button class="knopf sekundaer" type="button" id="aufnehmen">In die Vorlage aufnehmen</button>
+          <button class="knopf leise" type="button" id="nicht-aufnehmen">Bleibt eine Ausnahme</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll('main > *').forEach(function(el, i){
+    el.style.setProperty('--verz', (i * 0.06) + 's');
+  });
+
+  /* ---------- Eine Quelle für die Stationen des angewandten Mandats ----------
+     Die Termine sind gerechnet, nicht getippt: Startdatum plus Wochenversatz.
+     Derselbe Datensatz trägt die Liste und den Pfad — sonst behaupten die
+     beiden Formen nach der ersten Änderung Verschiedenes. */
+  /* Die Wochen sind dieselben wie in der Vorlage darüber; die von Hand
+     eingefügte Station sitzt mitten in der Umsetzung. */
+  var STATIONEN = [
+    {name:'Analyse',     woche:0,  bis:3,  woher:'vorlage'},
+    {name:'Preismodell', woche:3,  bis:8,  woher:'vorlage'},
+    {name:'Umsetzung',   woche:8,  bis:14, woher:'vorlage'},
+    {name:'Zwischenprüfung der Kalkulation', woche:10, bis:null, woher:'hand'},
+    {name:'Wirksam',     woche:14, bis:null, woher:'vorlage'}
+  ];
+  var MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli',
+                'August','September','Oktober','November','Dezember'];
+
+  /* Das Jahr steht nur da, wo es sich ändert: bei einem Start im Oktober
+     liegt „Wirksam" im Januar, und ein Datum ohne Jahr behauptete dann, es
+     sei schon vorbei. */
+  function datum(startISO, wochen){
+    var t = new Date(startISO + 'T12:00:00');
+    t.setDate(t.getDate() + wochen * 7);
+    var startJahr = +startISO.slice(0, 4);
+    return t.getDate() + '. ' + MONATE[t.getMonth()]
+      + (t.getFullYear() === startJahr ? '' : ' ' + t.getFullYear());
+  }
+
+  var start = '2026-09-01';
+
+  /* Beim Anlegen hat das Mandat genau das, was die Vorlage hergibt — die
+     Zwischenprüfung fügt die Beratung erst sechs Wochen später von Hand ein.
+     Deshalb führt diese Liste nur die Stationen aus der Vorlage; der Pfad
+     weiter unten zeigt das Mandat von heute, mit beidem. */
+  function zeichneListe(){
+    var ol = document.getElementById('angewandt-stationen');
+    ol.textContent = '';
+    STATIONEN.filter(function(s){ return s.woher === 'vorlage'; }).forEach(function(s){
+      var li = document.createElement('li');
+      var kopf = document.createElement('div');
+      kopf.className = 's-kopf';
+      var name = document.createElement('span');
+      name.className = 's-name';
+      name.textContent = s.name;
+      var wann = document.createElement('span');
+      wann.className = 's-wann';
+      wann.textContent = s.bis === null
+        ? 'ab ' + datum(start, s.woche)
+        : datum(start, s.woche) + ' bis ' + datum(start, s.bis);
+      kopf.appendChild(name);
+      kopf.appendChild(wann);
+      li.appendChild(kopf);
+      ol.appendChild(li);
+    });
+  }
+
+  /* Sechs Wochen nach dem Start — das ist der Stand, den die Überschrift
+     ansagt. Ein Pfad ohne Fortschritt würde sechs Wochen Stillstand
+     behaupten, deshalb wird er mitgerechnet statt getippt: geschafft ist
+     eine Station, deren Ende hinter uns liegt; die erste offene ist die,
+     auf der man steht. */
+  var STAND = 6;
+  function geschafft(s){ return (s.bis === null ? s.woche : s.bis) <= STAND; }
+
+  /* Der Pfad: dieselbe Achse wie im Mandat, gerechnet aus denselben Daten.
+     Am Handy zeigt die Leiter darunter dasselbe (das SVG ist dort aus). */
+  function zeichnePfad(){
+    var svg = document.getElementById('pfad');
+    var NS = 'http://www.w3.org/2000/svg';
+    /* alles außer der Grundlinie neu setzen */
+    Array.prototype.slice.call(svg.querySelectorAll('circle,text,line.voran')).forEach(function(e){ e.remove(); });
+    var x0 = 60, x1 = 700;
+    var schritt = (x1 - x0) / (STATIONEN.length - 1);
+    var jetztIndex = STATIONEN.findIndex(function(s){ return !geschafft(s); });
+
+    if (jetztIndex > 0) {
+      var voran = document.createElementNS(NS, 'line');
+      voran.setAttribute('class', 'voran');
+      voran.setAttribute('x1', x0); voran.setAttribute('y1', 38);
+      voran.setAttribute('x2', x0 + jetztIndex * schritt); voran.setAttribute('y2', 38);
+      svg.appendChild(voran);
+    }
+
+    STATIONEN.forEach(function(s, i){
+      var x = x0 + i * schritt;
+      var c = document.createElementNS(NS, 'circle');
+      c.setAttribute('class', 'station'
+        + (geschafft(s) ? ' geschafft' : '')
+        + (i === jetztIndex ? ' jetzt' : '')
+        + (s.woher === 'hand' ? ' eigenhand' : ''));
+      c.setAttribute('cx', x); c.setAttribute('cy', 38); c.setAttribute('r', 7);
+      svg.appendChild(c);
+      /* Lange Namen brechen: sonst überlappen sich zwei Beschriftungen */
+      var teile = s.name.length > 16 ? s.name.split(' der ') : [s.name];
+      if (teile.length === 2) teile[0] += ' der';
+      teile.forEach(function(t, z){
+        var tx = document.createElementNS(NS, 'text');
+        tx.setAttribute('class', 'm-name' + (s.woher === 'hand' ? ' m-hand' : ''));
+        tx.setAttribute('x', x); tx.setAttribute('y', 64 + z * 12);
+        tx.setAttribute('text-anchor', 'middle');
+        tx.textContent = t;
+        svg.appendChild(tx);
+      });
+      var d = document.createElementNS(NS, 'text');
+      d.setAttribute('class', geschafft(s) ? 'geschafft-t' : '');
+      d.setAttribute('x', x); d.setAttribute('y', 64 + teile.length * 12 + 2);
+      d.setAttribute('text-anchor', 'middle');
+      d.textContent = datum(start, s.woche) + (geschafft(s) ? ', geschafft' : (i === jetztIndex ? ', läuft' : ''));
+      svg.appendChild(d);
+    });
+
+    var leiter = document.getElementById('pfad-leiter');
+    leiter.textContent = '';
+    STATIONEN.forEach(function(s, i){
+      var li = document.createElement('li');
+      li.className = (geschafft(s) ? 'geschafft ' : '')
+        + (i === jetztIndex ? 'jetzt ' : '')
+        + (s.woher === 'hand' ? 'eigenhand' : '');
+      var b = document.createElement('b'); b.textContent = s.name;
+      var sp = document.createElement('span');
+      sp.textContent = s.bis === null
+        ? 'ab ' + datum(start, s.woche)
+        : datum(start, s.woche) + ' bis ' + datum(start, s.bis);
+      var w = document.createElement('span');
+      w.className = 'woher';
+      w.textContent = s.woher === 'hand' ? 'von dir eingefügt' : 'aus der Vorlage';
+      li.appendChild(b); li.appendChild(sp); li.appendChild(w);
+      leiter.appendChild(li);
+    });
+  }
+
+  function neuZeichnen(){ zeichneListe(); zeichnePfad(); }
+
+  document.querySelectorAll('.start button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.start button').forEach(function(x){
+        x.classList.remove('gewaehlt');
+        x.setAttribute('aria-pressed', 'false');
+      });
+      b.classList.add('gewaehlt');
+      b.setAttribute('aria-pressed', 'true');
+      start = b.dataset.start;
+      neuZeichnen();
+    });
+  });
+
+  /* ---------- Der Moment: aus dem Mandat wird die Vorlage ----------
+     Die konkreten Stellen heben sich ab und fallen weg, die Form bleibt
+     stehen — und darunter steht, was zurückgeblieben ist. Erst danach
+     gehört der Bogen der Beratung: er richtet sich und wird weiß. */
+  var bogen = document.getElementById('bogen');
+  var uebernommen = false;
+
+  function uebernehmen(){
+    if (uebernommen) return;
+    uebernommen = true;
+
+    bogen.classList.add('entkernt');
+    document.getElementById('zurueckgeblieben').hidden = false;
+
+    var fertig = function(){
+      bogen.classList.add('eigen', 'leer');
+      document.getElementById('b-herkunft-wort').textContent = 'Eure Vorlage, seit heute';
+      document.getElementById('b-meta').textContent =
+        'Vier Meilensteine, herausgelöst aus drei gelaufenen Mandaten';
+      document.getElementById('b-griffe').hidden = true;
+      document.getElementById('b-hand').hidden = false;
+      document.getElementById('b-kante').hidden = false;
+
+      document.getElementById('platzhalter').hidden = true;
+      document.getElementById('anwenden-satz').textContent =
+        'Rehbein Elektrotechnik ist das erste Mandat, das sie bekommt. Aus dem Start rechnen sich alle Termine.';
+      document.getElementById('angewandt').hidden = false;
+      neuZeichnen();
+      if (!reduziert) {
+        document.getElementById('angewandt').scrollIntoView({behavior:'smooth', block:'start'});
+      }
+    };
+    if (reduziert) fertig(); else setTimeout(fertig, 900);
+  }
+  document.getElementById('uebernehmen').addEventListener('click', uebernehmen);
+
+  /* Verwerfen ist eine gültige Entscheidung, aber keine Tür, die zufällt:
+     der Knopf bleibt stehen (Entscheidung 2026-08-14, jede Sackgasse bekommt
+     einen Ausgang). */
+  document.getElementById('verwerfen').addEventListener('click', function(){
+    if (uebernommen) return;
+    var g = document.getElementById('b-griffe');
+    g.textContent = '';
+    var zurueck = document.createElement('button');
+    zurueck.type = 'button';
+    zurueck.className = 'knopf leise';
+    zurueck.textContent = 'Doch anlegen';
+    zurueck.addEventListener('click', uebernehmen);
+    var s = document.createElement('span');
+    s.className = 'merk';
+    s.textContent = 'Verworfen. Von selbst schlägt er sie erst wieder vor, wenn ein fünftes Mandat denselben Weg geht.';
+    g.appendChild(zurueck);
+    g.appendChild(s);
+  });
+
+  /* ---------- Der Rückweg: dreimal von Hand ist ein Vorschlag ---------- */
+  var rueckweg = document.getElementById('rueckweg');
+  function rueckwegSchliessen(satz, fuss){
+    rueckweg.querySelector('.griffe').remove();
+    rueckweg.querySelector('.r-satz').innerHTML = '<b>' + satz + '</b>';
+    rueckweg.querySelector('.r-fuss').textContent = fuss;
+  }
+  document.getElementById('aufnehmen').addEventListener('click', function(){
+    rueckweg.classList.add('getan');
+    rueckwegSchliessen(
+      'Aufgenommen. Die Vorlage hat jetzt fünf Meilensteine.',
+      'Rehbein, Cordes und MTS behalten ihre Pläne unverändert — sie haben den Schritt schon. Das nächste Mandat bekommt ihn von Anfang an.');
+  });
+  document.getElementById('nicht-aufnehmen').addEventListener('click', function(){
+    rueckwegSchliessen(
+      'Bleibt eine Ausnahme.',
+      'Er fragt nicht wieder danach. Fügst du sie ein viertes Mal ein, steht sie hier erneut.');
+  });
+
+  neuZeichnen();
+})();
+</script>
+<script src="hilfe.js"></script>
+<script src="uhr.js"></script>
+<script src="zeiger.js"></script>
+<script src="rechtsfuss.js"></script>
+</body>
+</html>
