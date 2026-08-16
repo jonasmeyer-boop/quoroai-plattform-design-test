@@ -77,7 +77,12 @@
    Regel wie beim Text: was die KI beiträgt, steht daneben, bis ein Mensch es
    annimmt — eine Skizze, in der über Nacht ein Kasten mehr steht, wäre keine
    Handzeichnung mehr.
-   Marker: BLATT-V4
+   V5 (Nach-Review zu Teil 3): „Strich zurück" bringt auch mehrere mit einer
+   Berührung radierte Nachbarn zurück, ein übernommener Vorschlag geht aufs
+   Pauspapier zurück statt ins Nichts, die Blätterknöpfe zählen das Dokument
+   und nicht die Vorführung, und das Pauspapier zählt nicht als eigener
+   Inhalt der Tafel.
+   Marker: BLATT-V5
 
    Markenneutral: alle Farben kommen aus den Tokens der Fläche — Kundenflächen
    setzen --blau/--linie/--grau über marke.js, quoroAI-Flächen bringen
@@ -571,7 +576,7 @@ window.Blatt = (function () {
   }
 
   /* ---------- Die Tafel: gezeichnet, nicht getippt (Häppchen D4 Teil 3) ----
-     Striche stehen im Maß der Tafel (1000 × 740), nicht in Bildschirmpunkten:
+     Striche stehen im Maß der Tafel (1000 × 1290), nicht in Bildschirmpunkten:
      nur so ist dieselbe Zeichnung am Handy, auf dem Blatt und in der
      fingernagelgroßen Miniatur dieselbe Zeichnung. Und die Miniatur ist ein
      Klon der Seite — mit einem Canvas wäre sie leer geblieben. */
@@ -686,12 +691,17 @@ window.Blatt = (function () {
     zeigeLeereTafel(svg);
     if (zeichenbar) hoercheAufDenStift(svg);
     tafeln.push(svg);
-    if (!letzteTafel) letzteTafel = svg;
+    /* Strg+Z gehört nur einer Tafel, auf der man auch zeichnen darf — sonst
+       schluckt die Ebene den Griff auf einem gesetzten Blatt und tut nichts. */
+    if (zeichenbar && !letzteTafel) letzteTafel = svg;
     return wrap;
   }
 
   function zeigeLeereTafel(svg) {
-    var leer = !svg.querySelector('.tinte .strich, .marker .strich, .worte text');
+    /* Nur die eigenen Schichten: was auf dem Pauspapier liegt, gehört der
+       Beratung noch nicht — eine Tafel, auf der allein der Vorschlag der KI
+       steht, ist leer und sagt das auch. */
+    var leer = !svg.querySelector(':scope > .tinte .strich, :scope > .marker .strich, :scope > .worte text');
     svg.__wrap.classList.toggle('leer', leer);
   }
 
@@ -818,10 +828,33 @@ window.Blatt = (function () {
     if (!svg || !svg.__undo || !svg.__undo.length) return;
     var s = svg.__undo.pop();
     if (s.typ === 'strich') s.el.remove();
-    else if (s.typ === 'pause') s.wo.forEach(function (el) { el.remove(); });
-    else if (s.typ === 'weg') s.wo.forEach(function (w) { w.eltern.insertBefore(w.el, w.danach); });
+    else if (s.typ === 'pause') legeZurueckAufsPauspapier(svg, s);
+    else if (s.typ === 'weg') {
+      /* Rückwärts einhängen: wer mit einer Berührung drei nebeneinander
+         liegende Striche wegradiert hat, dessen erster Anker („komm wieder
+         vor diesen") zeigt auf einen Strich, der selbst noch draußen ist.
+         Von hinten nach vorne steht jeder Anker schon wieder da. */
+      for (var i = s.wo.length - 1; i >= 0; i--) {
+        var w = s.wo[i];
+        if (w.danach && w.danach.parentNode === w.eltern) w.eltern.insertBefore(w.el, w.danach);
+        else w.eltern.appendChild(w.el);
+      }
+    }
     zeigeLeereTafel(svg);
     getippt();
+  }
+
+  /* Ein übernommener Vorschlag geht nicht ins Nichts zurück, sondern dorthin,
+     wo er herkam: aufs Pauspapier. Wer übernimmt und es sich in derselben
+     Sekunde anders überlegt, soll den Vorschlag noch daliegen haben — ihn
+     durch ein Strg+Z endgültig zu verlieren, wäre die härteste Strafe für
+     den kleinsten Irrtum. */
+  function legeZurueckAufsPauspapier(svg, s) {
+    s.wo.forEach(function (el) { el.remove(); });
+    if (!s.feder || !s.el || !s.el.isConnected) return;
+    if (s.el.__block) s.el.__block.feder = s.feder;
+    hefteFeder(s.el, s.feder, s.seite, svg);
+    zeigeFedernStand();
   }
 
   /* ---------- Der Stift der KI: Pauspapier über der Tafel ---------- */
@@ -857,7 +890,7 @@ window.Blatt = (function () {
       neu.push(el);
     });
     g.remove();
-    svg.__undo.push({ typ: 'pause', wo: neu });
+    svg.__undo.push({ typ: 'pause', wo: neu, el: eintrag.el, feder: eintrag.feder, seite: eintrag.seite });
     zeichneNach(neu);
     zeigeLeereTafel(svg);
     getippt();
@@ -1108,8 +1141,12 @@ window.Blatt = (function () {
     zurueckKnopf.disabled = jetzt <= 0;
     weiterKnopf.disabled = jetzt >= gesamt - 1;
     /* Bei einer einzigen Seite gibt es nichts zu blättern. Zwei tote Knöpfe
-       sind auf dem großen Schirm Lärm und am Handy eine ganze Zeile. */
-    zurueckKnopf.hidden = weiterKnopf.hidden = gesamt < 2;
+       sind auf dem großen Schirm Lärm und am Handy eine ganze Zeile.
+       Gezählt wird das Dokument: der Jahresabschluss hat 48 Seiten, von denen
+       die Vorführung eine setzt — dort sagt der Zähler „Seite 1 von 48", und
+       ein Blatt ohne Blätterknöpfe daneben wäre die Behauptung, es gäbe
+       nichts weiter. */
+    zurueckKnopf.hidden = weiterKnopf.hidden = gesamtDok < 2;
     miniEl.forEach(function (m, i) {
       m.classList.toggle('hier', i === jetzt);
       if (i === jetzt) m.setAttribute('aria-current', 'true');
