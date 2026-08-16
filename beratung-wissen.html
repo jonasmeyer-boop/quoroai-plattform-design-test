@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="system.css">
 <script src="blaetter.js"></script>
 <script src="blatt.js"></script>
+<script src="sicher.js"></script>
 <style>
 /* quoroai-plattform-design, Wissen: sechster Raum hinter den Cockpit-Türen
    (Paket 6, Reihenfolge-Entscheidung 2026-08-13). Die Wissensablage der
@@ -42,7 +43,14 @@
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
    V12: der Demo-Hinweis startet leer, räumt seinen Satz mit sich weg und wird
    gesprochen (role=status) — er war die einzige Rückmeldung des Uploads.
-   Marker: BERATUNG-WISSEN-V12 (die Krume kommt aus einer Quelle) */
+   V13 (Paket A4, Issue #56): Vor dem Entfernen steht die Rückfrage. Sie nennt
+   den Namen, die Zahl der Abschnitte, dass es keinen Papierkorb gibt und was
+   das erneute Einlesen wieder kostet (sicher.js).
+   V14 (Nutzerprüfung 2026-08-16): Die Bestätigung nach dem Entfernen stand am
+   Fuß der Liste — 25 Bildpunkte unter der Fensterkante. Die Zeile war weg, der
+   Nachweis dafür außerhalb des Bildes. Jetzt rollt die Meldung ins Bild, wenn
+   sie nicht ganz dasteht, und ist eine Live-Region.
+   Marker: BERATUNG-WISSEN-V14 (die Bestätigung steht im Bild) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -317,7 +325,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         <span class="d-fehler">Aus dem Scan kam kein Text heraus — die Seiten sind Bilder. Lade die Textfassung hoch, dann klappt es.</span>
       </div>
     </div>
-    <div class="bestaetigt" id="meldung" hidden></div>
+    <!-- role="status": nach dem Entfernen ist dieser Satz der einzige
+         Nachweis, dass wirklich etwas weg ist. Ungesprochen wäre er keiner.
+         Er startet leer, sonst läse ihn das Vorlesen beim Betreten mit. -->
+    <div class="bestaetigt" id="meldung" role="status" aria-live="polite" hidden></div>
     <div id="summe" aria-live="polite"></div>
   </section>
 
@@ -444,15 +455,22 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     m.className = 'bestaetigt' + (still ? ' still' : '');
     m.textContent = text;
     m.hidden = false;
+    /* Der Satz stand am Fuß der Liste — bei 1440 × 1000 begann er 25 Bildpunkte
+       UNTER der Fensterkante. Die Zeile verschwand, und der Nachweis, dass sie
+       weg ist, lag außerhalb des Bildes (Nutzerprüfung 2026-08-16). Gerollt
+       wird nur, wenn er wirklich nicht ganz dasteht. */
+    var k = m.getBoundingClientRect();
+    if (k.top < 60 || k.bottom > (window.innerHeight || 0) - 12) {
+      m.scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'center'});
+    }
   }
 
-  /* ---------- Entfernen: die Abschnitte gehen mit ---------- */
-  doks.addEventListener('click', function(e){
-    var knopf = e.target.closest('.entf');
-    if (!knopf) return;
-    var zeile = knopf.closest('.dok');
-    var name = zeile.querySelector('.d-name').textContent;
-    var hatteAbschnitte = +zeile.dataset.abschnitte > 0;
+  /* ---------- Entfernen: die Abschnitte gehen mit ----------
+     Das hier ist der teuerste Knopf dieser Fläche: es gibt keinen Papierkorb,
+     und wer das Verbandswerk wiederhaben will, lädt es neu hoch und bezahlt
+     das Einlesen ein zweites Mal. Also steht vor dem Entfernen die Rückfrage,
+     und in ihr steht beides — der Umfang und der Preis (sicher.js, Issue #56). */
+  function entferne(zeile, name, hatteAbschnitte){
     zeile.classList.add('geht');
     setTimeout(function(){
       zeile.remove();
@@ -461,6 +479,35 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         ? '„' + name + '" ist weg, seine Abschnitte auch. Der KI-Berater kann ab sofort nicht mehr daraus zitieren.'
         : '„' + name + '" ist weg.', true);
     }, reduziert ? 0 : 280);
+  }
+  doks.addEventListener('click', function(e){
+    var knopf = e.target.closest('.entf');
+    if (!knopf) return;
+    var zeile = knopf.closest('.dok');
+    var name = zeile.querySelector('.d-name').textContent;
+    var abschnitte = +zeile.dataset.abschnitte;
+    var hatteAbschnitte = abschnitte > 0;
+    /* Ohne den Baustein fragt notfalls der Browser — ungefragt entfernt
+       diese Fläche nichts. */
+    if (!window.Sicher) {
+      if (window.confirm('„' + name + '" aus dem Wissen entfernen? Es gibt keinen Papierkorb.')) entferne(zeile, name, hatteAbschnitte);
+      return;
+    }
+    Sicher.frage({
+      frage: 'Aus dem Wissen entfernen?',
+      was: name,
+      punkte: [
+        hatteAbschnitte
+          ? abschnitte + ' Abschnitte gehen mit. Der KI-Berater kann danach in keinem Mandat mehr daraus zitieren.'
+          : 'Aus dieser Datei kam kein Text heraus — es geht kein Abschnitt verloren.',
+        'Einen Papierkorb gibt es nicht.',
+        'Noch einmal hochladen geht, das Einlesen kostet dann wieder ' + euro(+zeile.dataset.cent) + '.'
+      ],
+      ja: 'Entfernen',
+      gefahr: true,
+      aus: knopf,
+      dann: function(){ entferne(zeile, name, hatteAbschnitte); }
+    });
   });
 
   /* ---------- Der Moment: das Einlesen ist sichtbar ----------

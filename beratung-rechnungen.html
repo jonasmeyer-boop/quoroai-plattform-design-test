@@ -43,7 +43,38 @@
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
    V11: der Demo-Hinweis startet leer, räumt seinen Satz mit sich weg und wird
    gesprochen (role=status) — er war die einzige Rückmeldung mehrerer Griffe.
-   Marker: BERATUNG-RECHNUNGEN-V11 (die Krume kommt aus einer Quelle) */
+   V12 (Issue #60): der Stichtag hält, was er verspricht. Der vorgefertigte
+   Entwurf holt seine Positionen auf demselben Weg wie jeder neue (holeAlles)
+   — vorher blieben 728,40 € von vor seinem Stichtag im Vorrat liegen. Was
+   trotzdem liegen bleibt, sagt seinen Grund. Die Zeile ohne Stundensatz
+   nennt beide Mandate beim Namen, statt wie ein Widerspruch zur Position
+   darüber zu klingen. Und die Mahnfarbe folgt dem Zahlungsziel statt dem
+   Alter der Rechnung: eine laufende Frist steht als „noch 5 Tage Zeit" da.
+   V13 (Welle 2): Petersen ist ein Pauschalmandat, wie sein Beratungsvertrag
+   es sagt (blaetter.js, Ziffer 2) und wie die Kundenflächen es längst
+   rechnen — 2.400,00 € netto im Monat, alle Stunden abgegolten, zehn Tage
+   fällig. Die 180,00 € je Stunde waren ein Rest aus einem älteren
+   Entwurfsstand und stehen nur noch auf der Fehlrechnung 2026-0079, die
+   genau deshalb storniert wurde; der Storno sagt jetzt warum. Ein
+   Pauschalmandat trägt keinen Stundensatz mehr im Vorrat. Und der Absender
+   ist wieder derselbe wie in marke.js: Große Elbstraße 145, DE812345678,
+   HRB 148920, dazu eine IBAN mit richtiger Prüfziffer.
+   V14 (Welle 3): ein Blatt, eine Fälligkeit. Petersens Juli-Rechnung stand
+   hier als 2026-0086 vom 05.08. mit Fälligkeit 15.08., beim Kunden aber als
+   RE-2026-084 vom 01.08. mit Fälligkeit 11.08. — zwei Fälligkeiten für
+   dasselbe Blatt. Es gilt die Kette des Vertrags: Ziffer 2 stellt die
+   Rechnung am ersten Tag des Folgemonats und macht sie in zehn Tagen fällig,
+   also 01.08. und 11.08.2026. Damit ist sie die erste August-Rechnung und
+   heißt 2026-0084; MTS' Abschlag vom 02.08. wird 2026-0085, Cordes'
+   Pauschale vom 03.08. wird 2026-0086, damit die Nummern der Reihenfolge des
+   Stellens folgen. Nachziehen muss beratung-auswertungen.html.
+   V15: Das „Heute" kommt aus der Lage (lage.js) statt aus einem eigenen
+   `HEUTE = '14.08.2026'`. Vier Tage Unterschied hatten Folgen: „noch 3 Tage
+   Zeit" stand an einer Rechnung, deren Frist durch war, „seit 3 Tagen
+   überfällig" an einer, die sieben Tage offen ist, und jede neu gestellte
+   Rechnung entstand rückdatiert. Was jetzt geschieht, trägt außerdem eine
+   Uhrzeit statt des Wortes „jetzt".
+   Marker: BERATUNG-RECHNUNGEN-V16 (ein Blatt, eine Fälligkeit) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -147,6 +178,9 @@ a.beleg-zeile{
 .beleg-zeile .b-titel{font-size:14px;font-weight:600;letter-spacing:-.01em;line-height:1.4}
 .beleg-zeile .b-meta{font-size:12px;color:var(--nebel-600);margin-top:2px}
 .beleg-zeile .b-meta .frist{color:var(--bernstein);font-weight:600}
+/* Eine laufende Frist ist eine Auskunft, keine Mahnung — sie bekommt Tinte,
+   nicht Bernstein. */
+.beleg-zeile .b-meta .frist-laeuft{color:var(--nebel-700);font-weight:600}
 .beleg-zeile .b-recht{margin-left:auto;flex-shrink:0;display:flex;align-items:center;gap:14px}
 .beleg-zeile .b-betrag{font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .beleg-zeile .b-betrag.minus{color:var(--nebel-600)}
@@ -205,6 +239,9 @@ a.beleg-zeile{
 .oz .oz-meta{font-size:12px;color:var(--nebel-600);margin-top:2px}
 .oz .oz-meta.kein-satz{color:var(--bernstein)}
 .oz .oz-betrag{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+/* Der Ausweg ist ein Griff, kein Satzlink — ohne diese Zeile schlägt die
+   Unterstreichung aller Verweise im quoroAI-Chrom durch. */
+.oz a.knopf{display:inline-flex;align-items:center;text-decoration:none;color:var(--tinte)}
 /* Was nicht auf die Rechnung darf, sieht auch nicht danach aus: gestrichelt
    und blass, ohne Knopf — die Zeile erklärt sich, statt sich anzubieten. */
 .oz.gedeckt{background:var(--nebel-050);border-style:dashed}
@@ -328,6 +365,9 @@ a.beleg-zeile{
   .historie .h-wer{display:none}
 }
 </style>
+<!-- lage.js bringt window.Lage: das eine „Heute" des Entwurfs und das Rechnen
+     mit Tagesabständen. Muss vor allem stehen, was daraus liest. -->
+<script src="lage.js"></script>
 <script src="krume.js"></script>
 </head>
 <body class="quoro"
@@ -363,11 +403,14 @@ a.beleg-zeile{
         </div>
         <div class="feld">
           <label for="neu-stichtag">Stichtag, bis einschließlich</label>
-          <input id="neu-stichtag" type="date" value="2026-08-14">
+          <!-- Der Vorschlag ist das Heute der Lage (lage.js), gesetzt beim Laden:
+               ein neuer Entwurf zählt bis heute, solange niemand einen anderen
+               Stichtag wählt. Fest im Markup stand hier der 14.08.2026. -->
+          <input id="neu-stichtag" type="date" value="2026-08-18">
         </div>
         <button class="knopf sekundaer" id="neu-anlegen" type="button">Entwurf anlegen</button>
       </div>
-      <div class="klein">Der Entwurf holt sich mit, was die Abrede des Mandats hergibt: bei Aufwand die berechenbaren Stunden, bei einer Pauschale die Rate des Monats, in beiden Fällen die weiterberechenbaren Auslagen. Der Stichtag entscheidet über alle drei. Eine Nummer bekommt der Entwurf erst beim Stellen — ein verworfener reißt keine Lücke.</div>
+      <div class="klein">Der Entwurf holt sich alles, was bis zum Stichtag angefallen ist und berechnet werden darf: bei Aufwand die Stunden jedes Mandats mit hinterlegtem Satz, bei einer Pauschale die Rate des Monats, in beiden Fällen die weiterberechenbaren Auslagen. Liegen bleiben nur drei Dinge, und jedes steht am Entwurf mit seinem Grund: was nach dem Stichtag liegt, Stunden auf einem Mandat ohne hinterlegten Satz, und Auslagen, die nicht weiterberechnet werden. Eine Nummer bekommt der Entwurf erst beim Stellen — ein verworfener reißt keine Lücke.</div>
     </section>
 
     <h3 id="liste-kopf">Alle Belege <a class="zu-daten" href="#daten">Rechnungsdaten ansehen →</a></h3>
@@ -390,16 +433,16 @@ a.beleg-zeile{
     <h3 style="margin-top:0">Wer stellt die Rechnung</h3>
     <section class="tafel" aria-label="Absender">
       <div class="feldreihe">
-        <div class="feld breit"><label for="rd-firma">Firma</label><input id="rd-firma" value="Nordholm &amp; Partner GmbH"></div>
-        <div class="feld"><label for="rd-strasse">Straße und Nummer</label><input id="rd-strasse" value="Alsterufer 12"></div>
-        <div class="feld"><label for="rd-ort">PLZ und Ort</label><input id="rd-ort" value="20354 Hamburg"></div>
+        <div class="feld breit"><label for="rd-firma">Firma</label><input id="rd-firma" value="Nordholm &amp; Partner Unternehmensberatung GmbH"></div>
+        <div class="feld"><label for="rd-strasse">Straße und Nummer</label><input id="rd-strasse" value="Große Elbstraße 145"></div>
+        <div class="feld"><label for="rd-ort">PLZ und Ort</label><input id="rd-ort" value="22767 Hamburg"></div>
       </div>
     </section>
 
     <h3>Steuer</h3>
     <section class="tafel" aria-label="Steuer">
       <div class="feldreihe">
-        <div class="feld"><label for="rd-ustid">USt-IdNr.</label><input id="rd-ustid" value="DE318245991"><div class="hilfe">USt-IdNr. oder Steuernummer — eines von beiden verlangt § 14 UStG.</div></div>
+        <div class="feld"><label for="rd-ustid">USt-IdNr.</label><input id="rd-ustid" value="DE812345678"><div class="hilfe">USt-IdNr. oder Steuernummer — eines von beiden verlangt § 14 UStG.</div></div>
         <div class="feld"><label for="rd-satz">Steuersatz in Prozent</label><input id="rd-satz" value="19" inputmode="numeric"></div>
       </div>
       <label class="haken"><input type="checkbox" id="rd-klein"> Kleinunternehmer nach § 19 UStG — dann ohne Umsatzsteuer, mit Pflichthinweis auf jeder Rechnung</label>
@@ -408,16 +451,16 @@ a.beleg-zeile{
     <h3>Wohin gezahlt wird</h3>
     <section class="tafel" aria-label="Bankverbindung">
       <div class="feldreihe">
-        <div class="feld"><label for="rd-iban">IBAN</label><input id="rd-iban" value="DE71 2005 0550 0123 4567 89"></div>
+        <div class="feld"><label for="rd-iban">IBAN</label><input id="rd-iban" value="DE05 2005 0550 0123 4567 89"></div>
         <div class="feld"><label for="rd-bic">BIC und Bank</label><input id="rd-bic" value="HANSDEHH0XX, Hanseatische Bank"></div>
-        <div class="feld"><label for="rd-ziel">Zahlungsziel in Tagen</label><input id="rd-ziel" value="14" inputmode="numeric"></div>
+        <div class="feld"><label for="rd-ziel">Zahlungsziel in Tagen</label><input id="rd-ziel" value="14" inputmode="numeric"><div class="hilfe">Gilt für alle Kunden. Steht im Vertrag eines Mandats etwas anderes, gilt dort der Vertrag — bei Petersen Stahlbau zehn Tage.</div></div>
       </div>
     </section>
 
     <h3>Fußzeile</h3>
     <section class="tafel" aria-label="Fußzeile">
       <div class="feldreihe">
-        <div class="feld breit"><label for="rd-fuss">Geschäftsführung, Registergericht</label><input id="rd-fuss" value="Geschäftsführung: Dr. Anna Vogelsang, Amtsgericht Hamburg HRB 118 245"></div>
+        <div class="feld breit"><label for="rd-fuss">Geschäftsführung, Registergericht</label><input id="rd-fuss" value="Geschäftsführung: Dr. Anna Vogelsang, Jens Nordholm. Amtsgericht Hamburg HRB 148920"></div>
       </div>
       <div class="fuss-griffe">
         <button class="knopf primaer" id="rd-speichern" type="button">Speichern</button>
@@ -454,17 +497,36 @@ a.beleg-zeile{
   }
 
   /* ---------- Die Welt: eine Beratung, vier Kunden, ein Stapel Belege ----------
-     „Heute" ist in dieser Vorführung der 14. August 2026 — derselbe Tag,
-     an dem im Stadtmodell die Rechnung von MTS Maschinenbau 12 Tage offen ist. */
-  var HEUTE = '14.08.2026';
+     „Heute" kommt aus der Lage (lage.js): Dienstag, der 18. August 2026, kurz
+     vor zehn. Hier stand bis dahin ein eigenes `HEUTE = '14.08.2026'`. Daraus
+     wurden Fristen, die vier Tage zu freundlich waren („noch 3 Tage Zeit" für
+     eine Rechnung, die längst durch war), und neu gestellte Rechnungen, die
+     rückdatiert entstanden. Der Stichtag eines Rechnungsentwurfs ist etwas
+     anderes und bleibt: er steht am Entwurf und heißt dort auch Stichtag. */
+  var Lage = window.Lage;
+  var HEUTE = Lage.heuteKurz();
+  /* Was jetzt geschieht, bekommt eine Uhrzeit statt des Wortes „jetzt":
+     „18.08.2026, 9:40 Uhr". */
+  var JETZT = Lage.zeitstempel();
+  /* Der Vorschlag im Stichtag-Feld ist heute — nicht ein Datum, das im Markup
+     festwächst. */
+  document.getElementById('neu-stichtag').value = Lage.heuteISO();
   /* Die Rechnungsdaten sind die eine Quelle: das Papier liest hier, die
-     Rechnungsdaten-Seite schreibt hierhin. */
+     Rechnungsdaten-Seite schreibt hierhin.
+
+     Wer die Beratung IST, steht aber nicht hier, sondern in marke.js unter
+     `recht` — dieselbe Anschrift, dieselbe USt-IdNr. und dasselbe Register,
+     die im Impressum und in der Datenschutzerklärung der Kundenflächen
+     stehen. Diese Fläche trug vorher eine zweite, andere Adresse derselben
+     Firma. Zwei Anschriften für einen Absender sind kein Entwurfsfehler,
+     sondern eine falsche Rechnung. Bankverbindung wie in rechnungen.html
+     (BANKEN['Nordholm & Partner']); die IBAN-Prüfziffer stimmt jetzt. */
   var ABSENDER = {
-    firma: 'Nordholm & Partner GmbH',
-    anschrift: 'Alsterufer 12, 20354 Hamburg',
-    ustid: 'USt-IdNr. DE318245991',
-    bank: 'DE71 2005 0550 0123 4567 89, HANSDEHH0XX (Hanseatische Bank)',
-    fuss: 'Geschäftsführung: Dr. Anna Vogelsang, Amtsgericht Hamburg HRB 118 245',
+    firma: 'Nordholm & Partner Unternehmensberatung GmbH',
+    anschrift: 'Große Elbstraße 145, 22767 Hamburg',
+    ustid: 'USt-IdNr. DE812345678',
+    bank: 'DE05 2005 0550 0123 4567 89, HANSDEHH0XX (Hanseatische Bank)',
+    fuss: 'Geschäftsführung: Dr. Anna Vogelsang, Jens Nordholm. Amtsgericht Hamburg HRB 148920',
     zielTage: 14,
     steuersatz: 19,
     kleinunternehmer: false
@@ -483,9 +545,32 @@ a.beleg-zeile{
      „aufwand" berechnet Stunden. Eine Pauschale deckt sie ab — auf einem
      Pauschalmandat wird keine Stunde einzeln gestellt, sonst wäre die
      Pauschale keine. Braucht ein Pauschalkunde etwas darüber hinaus, ist das
-     ein eigenes Mandat mit eigener Abrede, keine Rechnung nebenher. */
+     ein eigenes Mandat mit eigener Abrede, keine Rechnung nebenher.
+
+     Petersen war hier bis 2026-08-16 ein Aufwandsmandat zu 180,00 € je
+     Stunde. Das war falsch, und zwar an der stärksten Stelle, die es gibt:
+     der Beratungsvertrag (blaetter.js, Ziffer 2) vereinbart eine monatliche
+     Pauschale von 2.400,00 € netto, die ALLE Leistungen nach Ziffer 1 deckt,
+     „gleichgültig wie viele Stunden dafür anfallen". Die Kundenflächen
+     rechnen längst so: rechnungen.html trägt eine Zeile über 2.856,00 €
+     brutto, leistungen.html führt beide Mandate des Kunden — „Preis und
+     Marge" und „Jahresabschluss 2025" — unter derselben Pauschale. Damit ist
+     auch die andere denkbare Lesart erledigt, ein zweites Mandat laufe
+     daneben nach Aufwand: es läuft keines. Die 180,00 € sind ein Rest aus
+     einem älteren Entwurfsstand. Sie stehen nur noch dort, wo sie hingehören
+     — auf der Fehlrechnung 2026-0079, die genau deshalb storniert wurde.
+
+     zielTage: Ziffer 2 des Vertrags macht die Rechnung nach zehn Tagen
+     fällig. Das ist die Abrede DIESES Mandats und geht dem Hausziel aus den
+     Rechnungsdaten (vierzehn Tage) vor.
+     frueherJahr/frueherBis: die Pauschalen für Mai bis Juli 2026 sind
+     gestellt — beim Kunden als RE-2026-058, RE-2026-071 und RE-2026-084.
+     Sichtbar im Stapel ist davon nur die letzte; ohne diese beiden Felder
+     böte ein Entwurf mit Stichtag im Mai oder Juni die Rate ein zweites Mal
+     an. Dieselbe Sperre wie bei MTS. */
   var ABREDEN = {
-    petersen: {art: 'aufwand', wort: 'nach Aufwand'},
+    petersen: {art: 'monatspauschale', wort: 'über eine Monatspauschale von 2.400 €', cent: 240000,
+               zielTage: 10, frueherJahr: '2026', frueherBis: '2026-06'},
     cordes:   {art: 'monatspauschale', wort: 'über eine Monatspauschale von 2.750 €', cent: 275000},
     freitag:  {art: 'aufwand', wort: 'nach Aufwand und Auslagen'},
     mts:      {art: 'jahrespauschale', wort: 'über eine Jahrespauschale von 27.000 € in zwölf Abschlägen',
@@ -500,24 +585,35 @@ a.beleg-zeile{
      keinen Stundensatz, es bleibt liegen statt den Lauf abzubrechen.
      bis = letzter Tag, an dem gearbeitet wurde — der Stichtag der neuen
      Rechnung entscheidet, was davon mitkommt.
-     Auf Cordes und MTS laufen ebenfalls Stunden — sie sind gedeckt und
-     stehen im Entwurf als das da, statt zu verschwinden. Bei Cordes ist es
-     die Geschichte, die beratung-marge.html erzählt: zu viele Stunden in
-     einer zu kleinen Pauschale. */
+     Auf den drei Pauschalmandaten laufen ebenfalls Stunden — sie sind
+     gedeckt und stehen im Entwurf als das da, statt zu verschwinden. Bei
+     Cordes ist es die Geschichte, die beratung-marge.html erzählt: zu viele
+     Stunden in einer zu kleinen Pauschale.
+
+     Ein Pauschalmandat trägt darum auch keinen Stundensatz mehr (satz: null).
+     Vorher stand hier bei Cordes und MTS je einer, den keine Rechnung je
+     benutzt — beratung-marge.html sagt für dieselben Mandate seit jeher
+     „kein Stundensatz vereinbart". Eine Zahl, die nirgends hinführt, ist
+     genau die Art Vorrat, aus der später wieder ein Widerspruch wird. */
   var STUNDEN = {
     petersen: [
-      {mandat: 'Preis und Marge', satz: 18000, min: 210, bis: '2026-08-13'},
-      {mandat: 'Zweitmeinung', satz: null, min: 90, bis: '2026-08-11'}
+      /* Dieselben Stunden, die der Kunde in leistungen.html für den August
+         sieht: 9,2 Std. auf „Preis und Marge", 5,0 Std. auf „Jahresabschluss
+         2025", beide zuletzt am 12. August. Die Pauschale deckt sie ab —
+         welche Stunde „berechenbar" wäre, ist auf diesem Mandat keine Frage
+         mehr. */
+      {mandat: 'Preis und Marge', satz: null, min: 552, bis: '2026-08-12'},
+      {mandat: 'Jahresabschluss 2025', satz: null, min: 300, bis: '2026-08-12'}
     ],
     cordes: [
-      {mandat: 'Frachtmarge', satz: 10000, min: 480, bis: '2026-08-12'},
-      {mandat: 'Steuerfrage', satz: 10000, min: 45, bis: '2026-07-29'}
+      {mandat: 'Frachtmarge', satz: null, min: 480, bis: '2026-08-12'},
+      {mandat: 'Steuerfrage', satz: null, min: 45, bis: '2026-07-29'}
     ],
     freitag: [
       {mandat: 'Personal und Kosten', satz: 15000, min: 300, bis: '2026-08-08'}
     ],
     mts: [
-      {mandat: 'Standortstrategie', satz: 15000, min: 120, bis: '2026-07-22'}
+      {mandat: 'Standortstrategie', satz: null, min: 120, bis: '2026-07-22'}
     ]
   };
   /* Auslagen, erfasst am Mandat (beratung-zeiten.html), noch nicht berechnet.
@@ -526,6 +622,9 @@ a.beleg-zeile{
      trotzdem — die Zeile sagt es, sie verbietet nichts. */
   var AUSLAGEN = {
     petersen: [
+      /* Die Pauschale deckt Stunden, nicht Auslagen: Ziffer 2 des Vertrags
+         rechnet sie ausdrücklich gesondert und einzeln ab. Deshalb steht
+         diese Fahrt anders als die von Cordes zum Weiterberechnen da. */
       {was: 'Bahnfahrt Oldenburg und zurück', cent: 9840, am: '2026-08-11', weiter: true, beleg: true}
     ],
     cordes: [
@@ -543,57 +642,92 @@ a.beleg-zeile{
     var t = String(iso || '').split('-');
     return t.length === 3 ? t[2] + '.' + t[1] + '.' + t[0] : HEUTE;
   }
-  /* Das Fälligkeitsdatum rechnet das eingestellte Zahlungsziel — es steht nie fest. */
+  /* Das Fälligkeitsdatum rechnet das eingestellte Zahlungsziel — es steht nie
+     fest. Gerechnet wird in der Lage (lage.js), damit hier keine zweite
+     Kalenderrechnung neben der der anderen Flächen steht. */
   function plusTage(datum, tage){
-    var t = String(datum).split('.');
-    var d = new Date(Number(t[2]), Number(t[1]) - 1, Number(t[0]));
-    d.setDate(d.getDate() + (isFinite(tage) ? tage : 0));
-    function zwei(n){ return String(n).padStart(2, '0'); }
-    return zwei(d.getDate()) + '.' + zwei(d.getMonth() + 1) + '.' + d.getFullYear();
+    return Lage.kurzDatum(Lage.plusTage(datum, isFinite(tage) ? tage : 0));
+  }
+  /* Wie viele Tage bis zum Zahlungsziel, vom Heute der Lage aus. Positiv
+     heißt, die Frist läuft noch; null heißt heute; negativ heißt überfällig.
+
+     Vorher zählte die Liste das ALTER einer Rechnung („seit 11 Tagen offen")
+     und setzte es ab dem neunten Tag in Mahnfarbe. Bei einem Zahlungsziel von
+     14 Tagen standen damit drei Rechnungen in Mahnfarbe, deren Frist noch
+     zwei bis fünf Tage lief. Gemahnt wird nach dem Zahlungsziel, nicht nach
+     dem Alter.
+
+     Den Wortlaut liefert Lage.frist(); was daran gemahnt wird, entscheidet
+     diese Fläche — die Lage kennt keine Farbe. */
+  function frist(faellig){
+    var f = Lage.frist(faellig);
+    return {wort: f.text, mahnt: f.tage <= 0};
   }
 
   /* Positionen tragen Cent. Steuer entsteht auf die Summe, kaufmännisch gerundet —
      eine Rundung je Rechnung, nicht je Position. */
   var BELEGE = [
+    /* Dieser Entwurf trägt seine Positionen NICHT von Hand: er holt sie beim
+       Laden auf demselben Weg wie jeder neu angelegte (siehe holeAlles).
+       Von Hand geschrieben blieben Stunden und eine Auslage von vor seinem
+       Stichtag im Vorrat liegen — 728,40 €, die der Satz über dem Knopf
+       ausdrücklich versprochen hatte. */
     {id: 'e1', art: 'rechnung', status: 'draft', nummer: null, kunde: 'petersen', stichtag: '2026-08-14',
-     intro: 'Für die Leistungen im August 2026 erlauben wir uns zu berechnen:',
-     positionen: [{was: 'Preis und Marge', art: 'stunden', her: '01.08.2026 bis 12.08.2026, 6 Std. × 180,00 €', cent: 108000,
-       zeit: {mandat: 'Preis und Marge', satz: 18000, min: 360, bis: '2026-08-12'}}],
+     angelegt: '12.08.2026, 17:41',
+     intro: 'Für die Betreuung im August 2026 erlauben wir uns zu berechnen:',
+     positionen: [],
      historie: [
-       {wann: '12.08.2026, 17:41', wer: 'Dr. Vogelsang', was: 'Entwurf angelegt'},
-       {wann: '12.08.2026, 17:41', wer: 'System', was: 'Position angelegt: Preis und Marge, 6 Std. × 180,00 €'}
+       {wann: '12.08.2026, 17:41', wer: 'Dr. Vogelsang', was: 'Entwurf angelegt, Stichtag 14.08.2026'}
      ]},
-    {id: 'r84', art: 'rechnung', status: 'issued', nummer: '2026-0086', kunde: 'petersen',
-     gestellt: '05.08.2026', faellig: '19.08.2026', tageOffen: 9,
-     intro: 'Für die Leistungen im Juli 2026 erlauben wir uns zu berechnen:',
+    /* Die Juli-Rechnung des Pauschalmandats: eine Zeile, 2.400,00 € netto,
+       2.856,00 € brutto. Genau dieses Blatt liegt beim Kunden in
+       rechnungen.html und leistungen.html — dort mit dem Vorsatz, den die
+       Kundenfläche druckt: RE-2026-084. Vorher standen hier 28 Std. × 180,00 €
+       plus eine Auslage von 360,00 € — 6.426,00 € brutto für einen Monat, den
+       der Kunde mit 2.856,00 € bezahlt hat.
+
+       Datum und Fälligkeit kamen bis 2026-08-16 aus derselben Aufwands-Zeit:
+       gestellt am 05.08., fällig am 15.08. Ein Klick zeigte damit zwei
+       Fälligkeiten — beim Kunden den 11.08., hier den 15.08. Es gilt der
+       Vertrag: Ziffer 2 stellt die Rechnung „am ersten Tag des Folgemonats"
+       und macht sie „innerhalb von zehn Tagen" fällig. Für den Juli ist das
+       der 01.08.2026 und der 11.08.2026 — die Kette, die rechnungen.html,
+       leistungen.html und uebersicht.html seit jeher führen. Mit dem
+       früheren Datum rückt die Rechnung auch in der Nummernfolge an ihren
+       Platz: sie ist die erste im August und heißt deshalb 2026-0084, MTS'
+       Abschlag vom 02.08. wird 2026-0085 und Cordes' Pauschale vom 03.08.
+       wird 2026-0086. Fortlaufend heißt hier: in der Reihenfolge, in der
+       gestellt wurde. */
+    {id: 'r84', art: 'rechnung', status: 'issued', nummer: '2026-0084', kunde: 'petersen',
+     gestellt: '01.08.2026', faellig: '11.08.2026',
+     intro: 'Für die Betreuung im Juli 2026 erlauben wir uns zu berechnen:',
      positionen: [
-       {was: 'Preis und Marge', art: 'stunden', her: '01.07.2026 bis 31.07.2026, 28 Std. × 180,00 €', cent: 504000,
-        zeit: {mandat: 'Preis und Marge', satz: 18000, min: 1680, bis: '2026-07-31'}},
-       {was: 'Bahnfahrt Oldenburg und zurück', art: 'auslage', her: 'Auslage vom 22.07.2026, Beleg liegt vor', cent: 36000}
+       {was: 'Monatspauschale Juli 2026', art: 'pauschale', monat: '2026-07',
+        her: 'Pauschale nach Abrede, 2.400,00 € im Monat', cent: 240000}
      ],
      historie: [
-       {wann: '05.08.2026, 09:12', wer: 'Dr. Vogelsang', was: 'Entwurf angelegt'},
-       {wann: '05.08.2026, 09:14', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0086'},
-       {wann: '05.08.2026, 09:15', wer: 'System', was: 'Per Mail verschickt an buchhaltung@petersen-stahlbau.de'}
+       {wann: '01.08.2026, 09:12', wer: 'System', was: 'Entwurf angelegt, Monatspauschale Juli 2026 eingesetzt'},
+       {wann: '01.08.2026, 09:14', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0084'},
+       {wann: '01.08.2026, 09:15', wer: 'System', was: 'Per Mail verschickt an buchhaltung@petersen-stahlbau.de'}
      ]},
-    {id: 'r83', art: 'rechnung', status: 'issued', nummer: '2026-0085', kunde: 'cordes',
-     gestellt: '03.08.2026', faellig: '17.08.2026', tageOffen: 11,
+    {id: 'r83', art: 'rechnung', status: 'issued', nummer: '2026-0086', kunde: 'cordes',
+     gestellt: '03.08.2026', faellig: '17.08.2026',
      intro: 'Für die Betreuung im August 2026 erlauben wir uns zu berechnen:',
      positionen: [{was: 'Monatspauschale August 2026', art: 'pauschale', monat: '2026-08',
        her: 'Pauschale nach Abrede, 2.750,00 € im Monat', cent: 275000}],
      historie: [
        {wann: '03.08.2026, 15:20', wer: 'System', was: 'Entwurf angelegt, Monatspauschale August 2026 eingesetzt'},
-       {wann: '03.08.2026, 15:22', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0085'},
+       {wann: '03.08.2026, 15:22', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0086'},
        {wann: '03.08.2026, 15:22', wer: 'System', was: 'Per Mail verschickt an rechnung@cordes-logistik.de'}
      ]},
-    {id: 'r82', art: 'rechnung', status: 'issued', nummer: '2026-0084', kunde: 'mts',
-     gestellt: '02.08.2026', faellig: '16.08.2026', tageOffen: 12,
+    {id: 'r82', art: 'rechnung', status: 'issued', nummer: '2026-0085', kunde: 'mts',
+     gestellt: '02.08.2026', faellig: '16.08.2026',
      intro: 'Auf die Jahrespauschale 2026 erlauben wir uns den Abschlag für August zu berechnen:',
      positionen: [{was: 'Abschlag auf die Jahrespauschale 2026', art: 'abschlag', monat: '2026-08',
        her: 'Achter von zwölf Abschlägen, August 2026', cent: 225000}],
      historie: [
        {wann: '02.08.2026, 11:03', wer: 'System', was: 'Entwurf angelegt, Abschlag 8 von 12 eingesetzt'},
-       {wann: '02.08.2026, 11:06', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0084'},
+       {wann: '02.08.2026, 11:06', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0085'},
        {wann: '02.08.2026, 11:06', wer: 'System', was: 'Per Mail verschickt an buchhaltung@mts-maschinenbau.de'}
      ]},
     {id: 'r81', art: 'rechnung', status: 'paid', nummer: '2026-0083', kunde: 'freitag',
@@ -625,19 +759,26 @@ a.beleg-zeile{
        {wann: '02.07.2026, 08:38', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0081'},
        {wann: '14.07.2026, 07:50', wer: 'Dr. Vogelsang', was: 'Als bezahlt vermerkt'}
      ]},
+    /* Das Lehrstück des Stapels, und der einzige Ort, an dem die 180,00 €
+       noch stehen dürfen: im ersten Monat des Mandats hat jemand die Stunden
+       einzeln gestellt, obwohl die Pauschale seit dem 1. Mai läuft. Zwei
+       Tage später ist es aufgefallen. Der Kunde hatte den Mai da längst
+       korrekt bekommen — 2.400,00 € Pauschale plus 150,00 € Auslage, seine
+       Rechnung RE-2026-058 vom 1. Juni. Beide Belege sagen den Grund, statt
+       ihn im Wort „storniert" zu verstecken. */
     {id: 'r80', art: 'storno', status: 'issued', nummer: '2026-0080', kunde: 'petersen',
      gestellt: '14.06.2026', reverses: 'r79',
-     intro: 'Storno zur Rechnung 2026-0079 vom 12.06.2026.',
+     intro: 'Storno zur Rechnung 2026-0079 vom 12.06.2026. Die Stunden sind mit der Monatspauschale für Mai 2026 abgegolten und durften nicht einzeln berechnet werden.',
      positionen: [{was: 'Preis und Marge', art: 'stunden', her: '01.05.2026 bis 31.05.2026, 8 Std. × 180,00 €', cent: -144000}],
      historie: [{wann: '14.06.2026, 09:02', wer: 'Dr. Vogelsang', was: 'Als Stornorechnung 2026-0080 zur Rechnung 2026-0079 entstanden'}]},
     {id: 'r79', art: 'rechnung', status: 'cancelled', nummer: '2026-0079', kunde: 'petersen',
-     gestellt: '12.06.2026', faellig: '26.06.2026',
+     gestellt: '12.06.2026', faellig: '22.06.2026',
      intro: 'Für die Leistungen im Mai 2026 erlauben wir uns zu berechnen:',
      positionen: [{was: 'Preis und Marge', art: 'stunden', her: '01.05.2026 bis 31.05.2026, 8 Std. × 180,00 €', cent: 144000}],
      historie: [
        {wann: '12.06.2026, 14:00', wer: 'Dr. Vogelsang', was: 'Entwurf angelegt'},
        {wann: '12.06.2026, 14:03', wer: 'Dr. Vogelsang', was: 'Gestellt als 2026-0079'},
-       {wann: '14.06.2026, 09:02', wer: 'Dr. Vogelsang', was: 'Storniert — der Beleg dazu ist die Stornorechnung 2026-0080'}
+       {wann: '14.06.2026, 09:02', wer: 'Dr. Vogelsang', was: 'Storniert — seit dem 1. Mai 2026 gilt die Monatspauschale nach Ziffer 2 des Beratungsvertrags, sie deckt jede Stunde ab. Der Mai ist mit der Pauschale abgerechnet, der Beleg dazu ist die Stornorechnung 2026-0080'}
      ]}
   ];
   var naechsteNummer = 87;
@@ -814,6 +955,64 @@ a.beleg-zeile{
           : ' über ' + euro(g.cent))
       + '. Erst zum Jahresende fällig.';
   }
+  /* ---------- Was der Stichtag hereinholt ----------
+     Eine Stelle für beide Wege: für den Entwurf, den der Knopf anlegt, und
+     für den, der beim Laden schon im Stapel liegt. Der vorgefertigte Entwurf
+     trug seine Position vorher von Hand — und im Vorrat blieben Stunden und
+     eine Auslage von VOR seinem Stichtag liegen, zusammen 728,40 €, obwohl
+     der Satz über dem Knopf das Gegenteil versprach.
+
+     Liegen bleibt nur, was wirklich nicht darf, und die Fläche sagt jedes
+     Mal warum: Stunden nach dem Stichtag, Stunden auf einem Mandat ohne
+     hinterlegten Satz, Auslagen, die nicht weiterberechnet werden. */
+  function holeAlles(b, wann){
+    var abrede = ABREDEN[b.kunde];
+    var stichtag = b.stichtag;
+    function notiere(was){ b.historie.push({wann: wann, wer: 'System', was: was}); }
+
+    if (abrede.art !== 'aufwand'){
+      var monat = String(stichtag).slice(0, 7);
+      var schon = rateBeleg(b.kunde, monat);
+      var schluss = schlussBeleg(b.kunde, monat.slice(0, 4));
+      var rate = ratePosition(b.kunde, monat);
+      if (!schon && !schluss){
+        b.positionen.push(rate);
+        notiere('Position angelegt: ' + rate.was + ', ' + euro(rate.cent));
+      } else {
+        /* Sonst entsteht hier ein leerer Entwurf, der nicht sagt warum. Die
+           Begründung steht zwar unten in der Gruppe „Nach der Abrede" — der
+           Weg, auf dem er entstand, muss sie aber auch tragen. */
+        notiere(rate.was + ' kommt nicht mit: '
+          + (schon ? 'die Rate ist schon gestellt' : 'die Schlussrechnung ' + monat.slice(0, 4) + ' steht bereits'));
+      }
+    } else {
+      var pool = STUNDEN[b.kunde];
+      for (var i = pool.length - 1; i >= 0; i--){
+        var z = pool[i];
+        if (z.satz == null){
+          notiere(z.mandat + ' kommt nicht mit: für dieses Mandat ist kein Stundensatz hinterlegt');
+          continue;
+        }
+        if (z.bis > stichtag){
+          notiere(z.mandat + ' kommt nicht mit: die Stunden liegen nach dem Stichtag');
+          continue;
+        }
+        pool.splice(i, 1);
+        b.positionen.push(zeitPosition(z));
+        notiere('Position angelegt: ' + z.mandat + ', ' + stunden(z) + ' Std. × ' + euro(z.satz));
+      }
+    }
+
+    var beutel = AUSLAGEN[b.kunde];
+    for (var k = beutel.length - 1; k >= 0; k--){
+      var a = beutel[k];
+      if (!a.weiter || a.am > stichtag) continue;
+      beutel.splice(k, 1);
+      b.positionen.push(auslagePosition(a));
+      notiere('Position angelegt: ' + a.was + ', Auslage ' + euro(a.cent));
+    }
+  }
+
   function euro(cent){
     var minus = cent < 0;
     var s = (Math.abs(cent) / 100).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -866,8 +1065,10 @@ a.beleg-zeile{
     var offene = BELEGE.filter(istOffen);
     var gestellte = BELEGE.filter(function(b){ return b.status !== 'draft' && b.status !== 'cancelled' && b.art === 'rechnung'; });
     var summe = offene.reduce(function(s, b){ return s + offenerBetrag(b); }, 0);
+    /* An die Summe gehört der Kreis, über den sie zählt — sonst steht eine
+       Zahl da, von der niemand weiß, wie viele Belege sie meint. */
     var wort = offene.length === 0 ? 'Nichts offen'
-      : offene.length + ' offen, zusammen ' + euro(summe);
+      : offene.length + ' von ' + gestellte.length + ' gestellten Rechnungen offen, zusammen ' + euro(summe);
     var kopf = document.getElementById('kopf-stand');
     kopf.querySelector('.zustand-wort').textContent = wort;
     var kapsel = kopf.querySelector('.zustand');
@@ -905,11 +1106,15 @@ a.beleg-zeile{
       else if (offenerBetrag(b) <= 0) teile.push('vollständig gutgeschrieben');
       else teile.push('zahlbar bis ' + b.faellig);
       meta.textContent = teile.join(', ');
-      if (istOffen(b) && b.tageOffen >= 9){
+      /* Die Frist steht an jeder offenen Rechnung, und die Farbe folgt ihr:
+         solange sie läuft, ist das eine Auskunft, kein Vorwurf. */
+      if (istOffen(b)){
+        var f = frist(b.faellig);
         meta.appendChild(document.createTextNode(', '));
-        var frist = document.createElement('span'); frist.className = 'frist';
-        frist.textContent = 'seit ' + b.tageOffen + ' Tagen offen';
-        meta.appendChild(frist);
+        var fristEl = document.createElement('span');
+        fristEl.className = f.mahnt ? 'frist' : 'frist-laeuft';
+        fristEl.textContent = f.wort;
+        meta.appendChild(fristEl);
       }
       text.appendChild(titel); text.appendChild(document.createElement('br')); text.appendChild(meta);
       var recht = document.createElement('span'); recht.className = 'b-recht';
@@ -1005,7 +1210,7 @@ a.beleg-zeile{
     var offen = abschnitt('Was noch offen ist', 'Was noch offen ist');
     var offenListe = el('div');
     offen.s.appendChild(offenListe);
-    offen.s.appendChild(el('div', 'klein', 'Was auf einem Entwurf liegt, ist gesperrt — Stunden wie Auslagen. Erst das Herausnehmen der Position gibt sie wieder frei. Ein Mandat ohne Stundensatz bleibt liegen, statt den Lauf abzubrechen, und dieselbe Rate holt sich kein zweiter Beleg.'));
+    offen.s.appendChild(el('div', 'klein', 'Hier steht, was der Stichtag NICHT mitgenommen hat, und jede Zeile sagt warum. Was auf einem Entwurf liegt, ist gesperrt — Stunden wie Auslagen; erst das Herausnehmen der Position gibt sie wieder frei. Stunden auf einem Mandat ohne hinterlegten Satz bleiben liegen, statt den Lauf abzubrechen, und dieselbe Rate holt sich kein zweiter Beleg.'));
     wurzel.appendChild(offen.h); wurzel.appendChild(offen.s);
 
     /* Anschreiben */
@@ -1015,7 +1220,7 @@ a.beleg-zeile{
     ta.placeholder = 'Für die Leistungen im August 2026 erlauben wir uns zu berechnen:';
     ta.addEventListener('change', function(){
       b.intro = ta.value.trim();
-      b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Anschreiben geändert'});
+      b.historie.push({wann: JETZT, wer: 'Du', was: 'Anschreiben geändert'});
     });
     an.s.appendChild(ta);
     wurzel.appendChild(an.h); wurzel.appendChild(an.s);
@@ -1050,12 +1255,12 @@ a.beleg-zeile{
           b.positionen.splice(idx, 1);
           if (p.zeit){
             STUNDEN[b.kunde].push(p.zeit);
-            b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Position herausgenommen: ' + p.was + ' — die Stunden sind wieder frei'});
+            b.historie.push({wann: JETZT, wer: 'Du', was: 'Position herausgenommen: ' + p.was + ' — die Stunden sind wieder frei'});
           } else if (p.auslage){
             AUSLAGEN[b.kunde].push(p.auslage);
-            b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Position herausgenommen: ' + p.was + ' — die Auslage ist wieder offen'});
+            b.historie.push({wann: JETZT, wer: 'Du', was: 'Position herausgenommen: ' + p.was + ' — die Auslage ist wieder offen'});
           } else {
-            b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Position herausgenommen: ' + p.was});
+            b.historie.push({wann: JETZT, wer: 'Du', was: 'Position herausgenommen: ' + p.was});
           }
           frisch();
         });
@@ -1089,13 +1294,20 @@ a.beleg-zeile{
           k.addEventListener('click', opt.tun);
           z.appendChild(k);
         }
+        /* Eine Zeile, die etwas verweigert, muss den Weg zeigen, auf dem es
+           doch geht — sonst ist sie eine Sackgasse mit Begründung. */
+        if (opt.weg){
+          var w = el('a', 'knopf leise', opt.wegWort);
+          w.href = opt.weg;
+          z.appendChild(w);
+        }
         liste.appendChild(z);
         return z;
       }
 
       /* 1 · Was die Abrede hergibt — nur auf Pauschalmandaten */
       if (pauschal){
-        var monat = String(b.stichtag || '2026-08-14').slice(0, 7);
+        var monat = String(b.stichtag || Lage.heuteISO()).slice(0, 7);
         var jahr = monat.slice(0, 4);
         var g = gruppe('Nach der Abrede');
         var schon = rateBeleg(b.kunde, monat);
@@ -1127,7 +1339,7 @@ a.beleg-zeile{
         } else {
           zeile(g, rate.was, rate.her, {betrag: rate.cent, knopf: 'Rate holen', tun: function(){
             b.positionen.push(ratePosition(b.kunde, monat));
-            b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Position angelegt: ' + rate.was + ', ' + euro(rate.cent)});
+            b.historie.push({wann: JETZT, wer: 'Du', was: 'Position angelegt: ' + rate.was + ', ' + euro(rate.cent)});
             frisch();
           }});
         }
@@ -1148,7 +1360,7 @@ a.beleg-zeile{
             zeile(g, 'Schlussrechnung ' + jahr, schlussSatz(b.kunde, jahr),
               {betrag: rest, knopf: 'Schlussrechnung', tun: function(){
                 schlussPositionen(b.kunde, jahr).forEach(function(p){ b.positionen.push(p); });
-                b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Schlussrechnung ' + jahr + ' angelegt: Jahrespauschale ' + euro(abrede.cent) + ', verrechnet mit ' + bisher.anzahl + ' Abschlägen über ' + euro(bisher.cent)});
+                b.historie.push({wann: JETZT, wer: 'Du', was: 'Schlussrechnung ' + jahr + ' angelegt: Jahrespauschale ' + euro(abrede.cent) + ', verrechnet mit ' + bisher.anzahl + ' Abschlägen über ' + euro(bisher.cent)});
                 frisch();
               }});
           }
@@ -1171,13 +1383,28 @@ a.beleg-zeile{
             (abrede.art === 'monatspauschale' ? 'Monatspauschale' : 'Jahrespauschale') + ' gedeckt, nicht einzeln berechenbar',
             {gedeckt: true});
         } else if (z.satz == null){
-          zeile(gStd, z.mandat, std + ' Std. bis ' + deutsch(z.bis) + ' — dieses Mandat hat keinen Stundensatz', {warnung: true});
+          /* Der Vorwurf war berechtigt: „dieses Mandat hat keinen
+             Stundensatz" stand zwei Zeilen unter einer Position, die mit
+             einem Satz rechnet — und es klang, als widerspräche sich das
+             Blatt. Es sind zwei Mandate desselben Kunden. Also nennt die
+             Zeile beide beim Namen.
+             Der Fall entsteht nur auf einem Aufwandsmandat: auf einem
+             Pauschalmandat greift der Zweig darüber, dort ist jede Stunde
+             gedeckt, ob ein Satz hinterlegt ist oder nicht. */
+          var mitSatz = b.positionen.filter(function(p){ return p.art === 'stunden' && p.zeit; });
+          var woher = mitSatz.length
+            ? ' Die ' + euro(mitSatz[0].zeit.satz) + ' je Stunde auf diesem Entwurf gehören zum Mandat „' + mitSatz[0].was + '".'
+            : '';
+          zeile(gStd, z.mandat,
+            std + ' Std. bis ' + deutsch(z.bis) + ' — für das Mandat „' + z.mandat + '" ist kein Stundensatz hinterlegt.' + woher +
+            ' Erst mit einem Satz am Mandat wird daraus eine Position.',
+            {warnung: true, weg: 'beratung-mandat.html', wegWort: 'Satz am Mandat hinterlegen'});
         } else {
           zeile(gStd, z.mandat, std + ' Std. bis ' + deutsch(z.bis) + ', ' + euro(z.satz) + ' je Stunde',
             {betrag: Math.round(z.min / 60 * z.satz), knopf: 'Stunden holen', tun: function(){
               pool.splice(idx, 1);
               b.positionen.push(zeitPosition(z));
-              b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Position angelegt: ' + z.mandat + ', ' + std + ' Std. × ' + euro(z.satz)});
+              b.historie.push({wann: JETZT, wer: 'Du', was: 'Position angelegt: ' + z.mandat + ', ' + std + ' Std. × ' + euro(z.satz)});
               frisch();
             }});
         }
@@ -1199,7 +1426,7 @@ a.beleg-zeile{
           {betrag: a.cent, warnung: !a.beleg, knopf: 'Auslage holen', tun: function(){
             beutel.splice(idx, 1);
             b.positionen.push(auslagePosition(a));
-            b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Position angelegt: ' + a.was + ', Auslage ' + euro(a.cent)});
+            b.historie.push({wann: JETZT, wer: 'Du', was: 'Position angelegt: ' + a.was + ', Auslage ' + euro(a.cent)});
             frisch();
           }});
       });
@@ -1216,7 +1443,7 @@ a.beleg-zeile{
            der Gruppe — hier oben liest ihn auch, wer nicht scrollt.
            Die Historie taugt dafür nicht: ein Entwurf zeigt sie gar nicht. */
         if (b.positionen.length === 0 && ABREDEN[b.kunde].art !== 'aufwand'){
-          var m = String(b.stichtag || '2026-08-14').slice(0, 7);
+          var m = String(b.stichtag || Lage.heuteISO()).slice(0, 7);
           var laeuft = rateBeleg(b.kunde, m);
           var schlussDa = schlussBeleg(b.kunde, m.slice(0, 4));
           if (!laeuft && schlussDa && schlussDa !== b){
@@ -1248,7 +1475,7 @@ a.beleg-zeile{
         return;
       }
       b.positionen.push({was: was, art: 'frei', her: 'Fester Betrag', cent: cent});
-      b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Position angelegt: ' + was + ', fester Betrag ' + euro(cent)});
+      b.historie.push({wann: JETZT, wer: 'Du', was: 'Position angelegt: ' + was + ', fester Betrag ' + euro(cent)});
       i1.value = ''; i2.value = '';
       frisch();
     });
@@ -1262,9 +1489,14 @@ a.beleg-zeile{
       b.intro = document.getElementById('anschreiben').value.trim() || b.intro;
       b.status = 'issued';
       b.nummer = '2026-' + String(naechsteNummer++).padStart(4, '0');
-      b.gestellt = HEUTE; b.faellig = plusTage(HEUTE, ABSENDER.zielTage); b.tageOffen = 0;
+      /* Das Hausziel aus den Rechnungsdaten gilt, solange die Abrede des
+         Mandats nichts anderes sagt. Petersens Beratungsvertrag macht die
+         Rechnung nach zehn Tagen fällig — stünde hier stur das Hausziel,
+         verspräche die Fläche dem Kunden etwas anderes als sein Vertrag. */
+      var ziel = ABREDEN[b.kunde].zielTage;
+      b.gestellt = HEUTE; b.faellig = plusTage(HEUTE, ziel != null ? ziel : ABSENDER.zielTage);
       friereEin(b);
-      b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Gestellt als ' + b.nummer + ' — ab hier ändert sich nichts mehr'});
+      b.historie.push({wann: JETZT, wer: 'Du', was: 'Gestellt als ' + b.nummer + ' — ab hier ändert sich nichts mehr'});
       frischGestellt = b.id;
       zeige('b-' + b.id);
     });
@@ -1361,8 +1593,12 @@ a.beleg-zeile{
     var stand = el('div', 'b-stand');
     var teile = [KUNDEN[b.kunde].name];
     if (b.status === 'paid') teile.push('bezahlt am ' + b.bezahlt);
-    else if (b.status === 'cancelled') teile.push('storniert — die Nummer bleibt vergeben, die Stunden sind wieder frei');
-    else if (b.art === 'rechnung') teile.push('zahlbar bis ' + b.faellig);
+    /* „die Stunden sind wieder frei" gilt nur, wenn welche zurückkamen. Auf
+       einem Pauschalmandat gibt es keine berechenbaren Stunden — der Satz
+       hätte dort einen Vorrat versprochen, den es nicht gibt. */
+    else if (b.status === 'cancelled') teile.push('storniert — die Nummer bleibt vergeben'
+      + (b.positionen.some(function(p){ return p.zeit; }) ? ', die Stunden sind wieder frei' : ''));
+    else if (b.art === 'rechnung') teile.push('zahlbar bis ' + b.faellig + ', ' + frist(b.faellig).wort);
     stand.appendChild(document.createTextNode(teile.join(', ') + '. '));
     if (b.reverses){
       var ziel = beleg(b.reverses);
@@ -1412,7 +1648,7 @@ a.beleg-zeile{
     if (b.status !== 'cancelled'){
       var mail = el('button', 'knopf sekundaer', 'Per Mail schicken'); mail.type = 'button';
       mail.addEventListener('click', function(){
-        b.historie.push({wann: HEUTE + ', jetzt', wer: 'System', was: 'Per Mail verschickt an ' + KUNDEN[b.kunde].mail});
+        b.historie.push({wann: JETZT, wer: 'System', was: 'Per Mail verschickt an ' + KUNDEN[b.kunde].mail});
         meldung.className = 'bestaetigt'; meldung.hidden = false;
         meldung.textContent = 'Geht an ' + KUNDEN[b.kunde].mail + ' — mit dem PDF im Anhang, vom geprüften Absender deiner Marke.';
         mail.textContent = 'Noch einmal schicken';
@@ -1425,7 +1661,7 @@ a.beleg-zeile{
       var bezahlt = el('button', 'knopf primaer', 'Als bezahlt vermerken'); bezahlt.type = 'button';
       bezahlt.addEventListener('click', function(){
         b.status = 'paid'; b.bezahlt = HEUTE;
-        b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Als bezahlt vermerkt'});
+        b.historie.push({wann: JETZT, wer: 'Du', was: 'Als bezahlt vermerkt'});
         zeige('b-' + b.id);
       });
       griffe.appendChild(bezahlt);
@@ -1461,8 +1697,8 @@ a.beleg-zeile{
              Schlussrechnung, dass ein Abschlag gutgeschrieben wurde. */
           neu.positionen.push({was: p.was, art: p.art, monat: p.monat, her: p.her, cent: -p.cent});
         });
-        neu.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Als Gutschrift ' + neu.nummer + ' zur Rechnung ' + b.nummer + ' entstanden'});
-        b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Gutschrift ' + neu.nummer + ' erstellt'});
+        neu.historie.push({wann: JETZT, wer: 'Du', was: 'Als Gutschrift ' + neu.nummer + ' zur Rechnung ' + b.nummer + ' entstanden'});
+        b.historie.push({wann: JETZT, wer: 'Du', was: 'Gutschrift ' + neu.nummer + ' erstellt'});
         BELEGE.unshift(neu);
         frischGestellt = neu.id;
         location.hash = 'b-' + neu.id;
@@ -1480,7 +1716,7 @@ a.beleg-zeile{
           positionen: b.positionen.map(function(p){ return {was: p.was, art: p.art, monat: p.monat, her: p.her, cent: -p.cent}; }),
           historie: []
         };
-        neu.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Als Stornorechnung ' + neu.nummer + ' zur Rechnung ' + b.nummer + ' entstanden'});
+        neu.historie.push({wann: JETZT, wer: 'Du', was: 'Als Stornorechnung ' + neu.nummer + ' zur Rechnung ' + b.nummer + ' entstanden'});
         b.status = 'cancelled';
         /* Das Storno gibt die Stunden wirklich frei — sie kommen in den Pool
            des Kunden zurück und stehen im nächsten Entwurf wieder bereit. */
@@ -1492,7 +1728,7 @@ a.beleg-zeile{
         var frei = [];
         if (zurueck) frei.push((zurueck / 60).toLocaleString('de-DE', {maximumFractionDigits: 1}) + ' Std.');
         if (auslagenZurueck) frei.push(auslagenZurueck === 1 ? 'eine Auslage' : auslagenZurueck + ' Auslagen');
-        b.historie.push({wann: HEUTE + ', jetzt', wer: 'Du', was: 'Storniert — der Beleg dazu ist die Stornorechnung ' + neu.nummer + (frei.length ? '. ' + frei.join(' und ') + ' sind wieder frei.' : '.')});
+        b.historie.push({wann: JETZT, wer: 'Du', was: 'Storniert — der Beleg dazu ist die Stornorechnung ' + neu.nummer + (frei.length ? '. ' + frei.join(' und ') + ' sind wieder frei.' : '.')});
         BELEGE.unshift(neu);
         frischGestellt = neu.id;
         location.hash = 'b-' + neu.id;
@@ -1559,50 +1795,15 @@ a.beleg-zeile{
      wurden, bleiben liegen und stehen beim nächsten Mal wieder da. */
   document.getElementById('neu-anlegen').addEventListener('click', function(){
     var kunde = document.getElementById('neu-kunde').value;
-    var stichtag = document.getElementById('neu-stichtag').value || '2026-08-14';
+    var stichtag = document.getElementById('neu-stichtag').value || Lage.heuteISO();
     var neu = {
       id: 'e' + (++entwurfZaehler), art: 'rechnung', status: 'draft', nummer: null,
       kunde: kunde, stichtag: stichtag, intro: '', positionen: [],
-      historie: [{wann: HEUTE + ', jetzt', wer: 'Du', was: 'Entwurf angelegt, Stichtag ' + deutsch(stichtag)}]
+      historie: [{wann: JETZT, wer: 'Du', was: 'Entwurf angelegt, Stichtag ' + deutsch(stichtag)}]
     };
-    /* Was von selbst mitkommt, richtet sich nach der Abrede: ein
-       Pauschalmandat bekommt seine Rate, ein Aufwandsmandat seine Stunden.
-       Auslagen kommen bei beiden mit — sofern sie weiterberechnet werden
-       dürfen und vor dem Stichtag entstanden sind. */
-    var abrede = ABREDEN[kunde];
-    if (abrede.art !== 'aufwand'){
-      var monat = stichtag.slice(0, 7);
-      var schon = rateBeleg(kunde, monat);
-      var schluss = schlussBeleg(kunde, monat.slice(0, 4));
-      var rate = ratePosition(kunde, monat);
-      if (!schon && !schluss){
-        neu.positionen.push(rate);
-        neu.historie.push({wann: HEUTE + ', jetzt', wer: 'System', was: 'Position angelegt: ' + rate.was + ', ' + euro(rate.cent)});
-      } else {
-        /* Sonst entsteht hier ein leerer Entwurf, der nicht sagt warum. Die
-           Begründung steht zwar unten in der Gruppe „Nach der Abrede" — der
-           Weg, auf dem er entstand, muss sie aber auch tragen. */
-        neu.historie.push({wann: HEUTE + ', jetzt', wer: 'System', was: rate.was + ' kommt nicht mit: '
-          + (schon ? 'die Rate ist schon gestellt' : 'die Schlussrechnung ' + monat.slice(0, 4) + ' steht bereits')});
-      }
-    } else {
-      var pool = STUNDEN[kunde];
-      for (var i = pool.length - 1; i >= 0; i--){
-        var z = pool[i];
-        if (z.satz == null || z.bis > stichtag) continue;
-        pool.splice(i, 1);
-        neu.positionen.push(zeitPosition(z));
-        neu.historie.push({wann: HEUTE + ', jetzt', wer: 'System', was: 'Position angelegt: ' + z.mandat + ', ' + stunden(z) + ' Std. × ' + euro(z.satz)});
-      }
-    }
-    var beutel = AUSLAGEN[kunde];
-    for (var k = beutel.length - 1; k >= 0; k--){
-      var a = beutel[k];
-      if (!a.weiter || a.am > stichtag) continue;
-      beutel.splice(k, 1);
-      neu.positionen.push(auslagePosition(a));
-      neu.historie.push({wann: HEUTE + ', jetzt', wer: 'System', was: 'Position angelegt: ' + a.was + ', Auslage ' + euro(a.cent)});
-    }
+    /* Was von selbst mitkommt, richtet sich nach der Abrede — und zwar auf
+       genau demselben Weg wie beim vorgefertigten Entwurf. */
+    holeAlles(neu, JETZT);
     BELEGE.unshift(neu);
     location.hash = 'b-' + neu.id;
   });
@@ -1651,7 +1852,8 @@ a.beleg-zeile{
     m.className = 'bestaetigt'; m.style.background = '';
     m.textContent = 'Gespeichert. Jede neue Rechnung trägt das ab sofort'
       + (klein ? ', ohne Umsatzsteuer und mit dem Hinweis nach § 19 UStG' : '')
-      + '. Was schon gestellt ist, bleibt wie es ist.';
+      + '. Beim Zahlungsziel geht die Abrede des Mandats vor, wo eine steht.'
+      + ' Was schon gestellt ist, bleibt wie es ist.';
     m.hidden = false;
     maleKopf();
   });
@@ -1660,6 +1862,14 @@ a.beleg-zeile{
      mitbekommen — sonst würde ein Speichern alte Belege umschreiben. */
   BELEGE.forEach(function(b){
     if (b.status !== 'draft' && !b.absender) friereEin(b);
+  });
+  /* Der Entwurf, der beim Öffnen schon dasteht, holt sich seinen Inhalt auf
+     demselben Weg wie jeder neue. Sonst gölte die Zusage über dem Knopf
+     ausgerechnet für den einen Entwurf nicht, den man als Erstes sieht. */
+  BELEGE.forEach(function(b){
+    if (b.status === 'draft' && b.positionen.length === 0){
+      holeAlles(b, b.angelegt || (JETZT));
+    }
   });
 
   /* Direkteinstieg über den Hash, sonst die Liste */

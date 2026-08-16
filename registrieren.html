@@ -9,7 +9,7 @@
 <style>
 /* quoroai-plattform-design · Registrieren ist die quoroAI-Tür der Beratung
    (Chronik 2026-08-13) — und die Tür baut: jedes gültige Feld ist eine echte
-   Baustufe des Modells (Machart nach currily Entwurf C, Jonas 2026-08-13;
+   Baustufe des Modells (Machart nach Entwurf C, Jonas 2026-08-13;
    nur die Machart — Bilder, Farben, Schrift sind quoroAI). Die Stufen sitzen
    auf auf Sicht geprüften Phasen des Aufbau-Films: 12 Grundplatte, 40 Rohbau,
    72 Gebäude, 104 bezugsfertig. Beim Anlegen geht das Abendlicht an
@@ -35,7 +35,16 @@
    den Satz, den die Entscheidung vom 2026-08-16 abgeschafft hat, und hier war
    er wirklich zu sehen. Jetzt „Dieser Griff ist im Entwurf nicht gezeichnet.",
    gesprochen (role=status), und der Hinweis startet leer.
-   Marker: REGISTRIEREN-V8 */
+   V9 (Issue #53, Ärger 86): Vor dem Anlegen stand keine Zeile darüber, ob das
+   etwas kostet. Jetzt steht sie über dem Knopf, mit den Listenpreisen aus
+   plattform.html (149,00 € je Beratung und Monat, je Kunde mit Zugang 19,00 €
+   bis 149,00 €, Mengenrabatt ab 25 Zugängen, tagegenaue Teilung). Wer über
+   eine Einladung kommt, liest dort, dass ihn das nichts kostet.
+   V10: Die Staffel stimmte nicht. „Ab 25 Zugängen kommt ein Mengenrabatt
+   dazu" ließ den Rabatt erst dort beginnen — plattform.html rechnet 25 % ab
+   dem ersten Zugang, 35 % ab 25 und 45 % ab 100. Wer sich hier anmeldet,
+   hatte sonst eine andere Zahl im Kopf als seine erste Abrechnung zeigt.
+   Marker: REGISTRIEREN-V10 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input{font-family:inherit}
@@ -93,6 +102,19 @@ h1{font-size:24px;margin-top:16px}
 }
 .neben:hover{color:var(--lila-700)}
 .hinweis{font-size:12px;color:var(--nebel-500);margin-top:14px}
+/* Was es kostet, muss VOR dem Anlegen dastehen (Ärger 86 der Nutzerprüfung).
+   Die Zahlen sind die Listenpreise aus plattform.html — dieselbe Quelle, aus
+   der quoroAI die Beratung abrechnet. */
+.kosten{
+  margin-top:16px;padding:12px 14px;border-radius:12px;
+  border:1px solid var(--nebel-200,rgba(0,0,0,.08));
+  background:rgba(255,255,255,.5);
+  font-size:12.5px;line-height:1.55;color:var(--nebel-600);
+}
+.kosten b{color:var(--tinte);font-weight:700}
+.kosten dl{margin-top:6px;display:grid;grid-template-columns:auto 1fr;gap:2px 12px}
+.kosten dt{color:var(--nebel-600)}
+.kosten dd{font-weight:700;color:var(--tinte);white-space:nowrap}
 
 /* ---------- die dritte Tür: die Einladung ---------- */
 /* Wer einlädt, steht ganz oben — vor allem anderen. Eine Einladung ohne
@@ -208,6 +230,21 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
         <div class="feld"><label for="pass">Dein Passwort</label><input id="pass" type="password" autocomplete="new-password" placeholder="mindestens 12 Zeichen"></div>
         <div class="fehler" id="fehler-neu" aria-live="polite"></div>
         <div class="gesendet" id="gesendet" hidden><b>Post ist raus, und das Licht ist an.</b> Bestätige deine E-Mail, dann geht es weiter in deine Zentrale.</div>
+        <div class="kosten">
+          <b>Das Anlegen kostet nichts, und es wird keine Zahlungsangabe verlangt.</b>
+          Läuft die Beratung, rechnet quoroAI monatlich ab:
+          <dl>
+            <dt>Für deine Beratung</dt><dd>149,00 €</dd>
+            <dt>Listenpreis je Kunde mit Zugang</dt><dd>19,00 € bis 149,00 €</dd>
+          </dl>
+          <!-- Die Staffel stand hier falsch: „ab 25 Zugängen kommt ein
+               Mengenrabatt dazu" ließ den Rabatt aussehen, als beginne er
+               erst dort. plattform.html rechnet in Wahrheit ab dem ersten
+               Zugang mit 25 %. Wer sich hier anmeldet, hat sonst eine andere
+               Zahl im Kopf als die Abrechnung später zeigt. -->
+          Je Kunde entscheidet der Umfang. Vom Listenpreis gehen 25 % ab, ab 25 Zugängen 35 %, ab 100 Zugängen 45 %.
+          Alle Preise zuzüglich Umsatzsteuer, angebrochene Monate werden tagegenau geteilt.
+        </div>
         <button class="knopf primaer" id="anlegen" type="button">Beratung anlegen</button>
       </div>
 
@@ -234,7 +271,7 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
         <!-- 1: noch kein Konto — es entsteht hier, nicht auf einem Umweg -->
         <div class="ein-lage" id="e-neu">
           <h1>Willkommen im Team.</h1>
-          <p class="erklaer">Die Einladung ging an <b>a.vogelsang@nordholm-partner.de</b>. Name und Passwort, mehr fehlt nicht.</p>
+          <p class="erklaer">Die Einladung ging an <b>a.vogelsang@nordholm-partner.de</b>. Name und Passwort, mehr fehlt nicht. Für dich kostet das nichts — abgerechnet wird mit Nordholm &amp; Partner.</p>
           <div class="feld"><label for="e-name">Name</label><input id="e-name" type="text" autocomplete="name" placeholder="Vor- und Nachname"></div>
           <div class="feld"><label for="e-pass">Dein Passwort</label><input id="e-pass" type="password" autocomplete="new-password" placeholder="mindestens 12 Zeichen"></div>
           <div class="fehler" id="fehler-ein" aria-live="polite"></div>

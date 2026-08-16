@@ -6,7 +6,11 @@
 <title>Verwaltung der Beratung</title>
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="system.css">
+<!-- lage.js bringt window.Lage: das „Heute" des Entwurfs aus einer Quelle,
+     damit ein Versand-Datum nicht fest im Skript steht. -->
+<script src="lage.js"></script>
 <script src="vermerk.js"></script>
+<script src="sicher.js"></script>
 <style>
 /* quoroai-plattform-design, Verwaltung: neunter Raum hinter den Cockpit-Türen
    (Paket 9, Reihenfolge-Entscheidung 2026-08-13). Drei Dinge, die derselbe
@@ -35,7 +39,16 @@
    V7 (Häppchen C4): „Unterweisung lesen" hat am Finger seine 44px.
    V8 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
-   Marker: BERATUNG-VERWALTUNG-V8 (die Krume kommt aus einer Quelle) */
+   V9 (Paket A4, Issue #56): „Entfernen" wirft einen Menschen aus dem Team und
+   stand zehn Bildpunkte neben „Übernehmen". Jetzt trennt die beiden ein eigener
+   Abstand, und vor dem Hinauswerfen steht die Rückfrage mit Name und Rolle
+   (sicher.js). Das Umstufen fragt weiterhin nicht — es ist zurückzunehmen.
+   V10 (Nutzerprüfung 2026-08-16): Der Sicherheitsabstand aus V9 wirkte nur am
+   großen Schirm. Schmal ersetzte ihn ein `margin-left:auto`, dem die
+   Rollenwahl (`flex:1`) jeden freien Platz wegnahm — bei 760 blieben 10
+   Bildpunkte, bei 430 und 390 lag „Entfernen" genau unter „Übernehmen". Jetzt
+   trägt der Abstand in jeder Breite: fester Rand zur Seite, row-gap nach unten.
+   Marker: BERATUNG-VERWALTUNG-V11 (der Abstand trägt in jeder Breite) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -136,7 +149,16 @@ section[id]{scroll-margin-top:150px}
 .mitglied .m-nachweis .zustand{width:38px;height:17px}
 .mitglied .m-nachweis .n-wort{font-size:12.5px;color:var(--nebel-600)}
 .mitglied .m-nachweis .n-wort.offen{color:var(--rot)}
-.m-griffe{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+/* Bricht die Reihe um, trägt der Abstand nach unten: das row-gap ist der
+   Sicherheitsabstand für den Fall, dass „Entfernen" in einer eigenen Zeile
+   landet — dieselben 34 Bildpunkte wie zur Seite. Ohne ihn lagen die beiden
+   Knöpfe bei 430 und 390 Bildpunkten genau übereinander, 10 Bildpunkte
+   auseinander (Nutzerprüfung 2026-08-16). */
+.m-griffe{display:flex;align-items:center;column-gap:10px;row-gap:34px;flex-wrap:wrap}
+/* Der Weg hinaus liegt nicht neben dem Weg zur nächsten Rolle. Zehn Bildpunkte
+   zwischen „Übernehmen" und „Entfernen" waren eine Falle für jede Hand, die
+   zittert oder es eilig hat (Issue #56). */
+.m-griffe .m-weg{margin-left:24px}
 select.rolle{
   min-height:40px;padding:0 12px;font-size:14px;color:var(--tinte);
   background:var(--flaeche);border:1px solid var(--nebel-300);border-radius:var(--radius-innen);
@@ -232,6 +254,13 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
   .mitglied{align-items:flex-start}
   .m-griffe{width:100%}
   .m-griffe select.rolle{flex:1}
+  /* Hier stand `margin-left:auto`, und das war der Fehler: die Rollenwahl
+     nimmt sich als `flex:1` den ganzen freien Platz, also blieb dem `auto`
+     nichts zu verteilen — gemessen 10 Bildpunkte bei 760, und bei 430 und 390
+     lag „Entfernen" 10 Bildpunkte GENAU unter „Übernehmen". Der Abstand ist
+     jetzt wieder ein gemessener; bricht die Zeile, trägt das row-gap oben,
+     und „Entfernen" beginnt links, während „Übernehmen" rechts endet. */
+  .m-griffe .m-weg{margin-left:24px}
   .zwei-felder{grid-template-columns:1fr}
   .qr-block{grid-template-columns:1fr}
   .qr-rahmen{justify-self:center}
@@ -504,16 +533,40 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
 
       var entfernen = document.createElement('button');
       entfernen.type = 'button';
-      entfernen.className = 'textknopf';
+      entfernen.className = 'textknopf m-weg';
       entfernen.textContent = 'Entfernen';
       entfernen.disabled = gesperrt;
-      entfernen.addEventListener('click', function(){
+      function wirfHinaus(){
         TEAM = TEAM.filter(function(x){ return x.id !== m.id; });
         delete offeneWahl[m.id];
         meldung(m.name + ' hat keinen Zugang mehr. Die Arbeit an den Mandaten bleibt stehen, nur der Zugriff ist weg.');
         maleTeam();
         maleBereitschaft();
         maleGelesen();
+      }
+      /* „Übernehmen" stuft um, „Entfernen" wirft einen Menschen hinaus, und
+         die beiden standen zehn Bildpunkte nebeneinander. Jetzt trennt sie ein
+         eigener Abstand (.m-weg), und vor dem Hinauswerfen steht die Rückfrage
+         mit Namen und Rolle (sicher.js, Issue #56). Das Umstufen fragt weiter
+         nicht: es ist mit demselben Griff zurückzunehmen. */
+      entfernen.addEventListener('click', function(){
+        if (!window.Sicher) {
+          if (window.confirm(m.name + ' aus dem Team entfernen? Zurück geht es nur über eine neue Einladung.')) wirfHinaus();
+          return;
+        }
+        Sicher.frage({
+          frage: 'Aus dem Team entfernen?',
+          was: m.name,
+          punkte: [
+            rollenWort(m.rolle) + ' in dieser Beratung, ' + m.mail,
+            'Kommt danach an kein Mandat mehr heran. Die geleistete Arbeit bleibt stehen, nur der Zugang ist weg.',
+            'Zurück geht es nur über eine neue Einladung.'
+          ],
+          ja: 'Entfernen',
+          gefahr: true,
+          aus: entfernen,
+          dann: wirfHinaus
+        });
       });
 
       griffe.appendChild(wahl);
@@ -557,7 +610,7 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
         nochmal.addEventListener('click', function(){
           /* Die Frist wandert mit: eine Mail, deren Link beim Empfänger
              schon tot ist, ist keine Einladung. */
-          e.versand = {art:'verschickt', datum:'2026-08-14'};
+          e.versand = {art:'verschickt', datum:(window.Lage ? Lage.heuteISO() : '2026-08-18')};
           e.bis = '2026-08-21';
           maleEinladungen();
         });
@@ -628,7 +681,7 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
       rolle: rolle,
       bis: '2026-08-21',
       token: zufallsWort(12),
-      versand: {art:'verschickt', datum:'2026-08-14'}
+      versand: {art:'verschickt', datum:(window.Lage ? Lage.heuteISO() : '2026-08-18')}
     });
     feld.value = '';
     maleEinladungen();
@@ -704,6 +757,25 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
       knopf.className = zfAn ? 'knopf leise klein' : 'knopf primaer klein';
       knopf.textContent = zfAn ? 'Zweiten Faktor entfernen' : 'Zweiten Faktor einrichten';
       knopf.addEventListener('click', function(){
+        /* Denselben Schutz wie das Hinauswerfen aus dem Team verdient das
+           Abschalten des zweiten Faktors: ein Druck, und das Konto hängt
+           wieder allein am Passwort (Issue #56). Einrichten fragt nicht —
+           dabei geht nichts verloren. */
+        if (zfAn && window.Sicher) {
+          Sicher.frage({
+            frage: 'Zweiten Faktor entfernen?',
+            was: 'Der zusätzliche Code bei der Anmeldung',
+            punkte: [
+              'Dein Konto hängt danach allein am Passwort. Wer es kennt, sieht alles, was du siehst.',
+              'Neu einrichten kannst du ihn jederzeit, mit einem neuen Geheimnis.'
+            ],
+            ja: 'Entfernen',
+            gefahr: true,
+            aus: knopf,
+            dann: function(){ zfAn = false; maleZf(); }
+          });
+          return;
+        }
         if (zfAn) { zfAn = false; maleZf(); return; }
         maleQr();
         document.getElementById('zf-code').value = '';
@@ -842,7 +914,7 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
     knopf.className = 'knopf primaer';
     knopf.textContent = 'Gelesen';
     knopf.addEventListener('click', function(){
-      ich.unterwiesen = '2026-08-14';
+      ich.unterwiesen = (window.Lage ? Lage.heuteISO() : '2026-08-18');
       maleTeam(ich.id);
       maleBereitschaft();
       maleGelesen();

@@ -8,7 +8,28 @@
 <style>
 /* quoroai-plattform-design · Das wöchentliche Briefing beim Kunden
    V4 (Issue #58): das Kopfband ist bis zur Unterkante deckend.
-   Marker: BRIEFING-V4 (Häppchen E3, Issue #44)
+   V5 (Denkfehler 4 der Nutzerprüfung): Das Briefing erscheint nicht mehr an
+   einem namenlosen Donnerstag. Die Glocke datiert dasselbe Briefing auf
+   Dienstag, den 18.08., 7:00 — die Zeile hier sagte „Donnerstag", und damit
+   standen zwei Tage für eine Sendung. Sie kommt jetzt aus der Lage
+   (lage.js). Auch die Meldungen aus der Welt sind datiert: „am Dienstag"
+   und „ab Januar" tragen ihr Datum und ihr Jahr.
+   V6 (Issue #55, zweite Hälfte): Dieses Blatt lieferte die 11.900 € aus,
+   die `beratung-radar.html` daneben angehalten hatte. Genau das war der
+   Vorwurf: Herr Petersen hört dreimal „das steht in eurem Wissen nicht, ich
+   gebe die Frage weiter" und bekommt zwei Tage später um 7:00 automatisch
+   eine Zahl zu genau dieser Frage. Der Radar wurde repariert, das Blatt des
+   Kunden nicht — und ein halb repariertes Versprechen ist schlimmer als gar
+   keines. Beide Seiten hängen jetzt am selben Zustand aus `radar.js`: was
+   angehalten ist, steht hier nicht.
+   An seiner Stelle steht keine Lücke, sondern der ehrliche Satz — dass er
+   die Antwort schuldig ist und sie von der Beratung kommt, nicht von ihm.
+   Auch die Zählung oben zieht mit: aus „Zwei Dinge betreffen dich" wird
+   „Eine Sache betrifft dich", sonst zählt das Blatt etwas mit, das es
+   verschweigt. Wird die Lücke drüben geschlossen, steht der Punkt wieder
+   hier — und der Wortlaut, den die Beratung ins Wissen geschrieben hat,
+   steht darunter.
+   Marker: BRIEFING-V6 (Häppchen E3, Issue #44)
    V2 (Code-Review vor der Freigabe): die Herkunft der Zahl führt nicht mehr
    in die Unterlagen (die beiden Papiere liegen dort nicht), die Tür eines
    Punktes steht auf eigener Zeile, und die Beträge brechen nicht mehr vor
@@ -116,6 +137,29 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
   border:0.5px dashed var(--linie);background:var(--papier);
   font-size:12.5px;color:var(--grau);
 }
+/* ---------- Was er schuldig bleibt ----------
+   Kein Fehlerkasten und kein Warnton: eine offene Frage ist nichts
+   Schlimmes, sie ist nur nicht beantwortet. Deshalb dieselbe Karte, nur
+   ohne Schatten und mit gestrichelter Kante — sie steht sichtbar neben den
+   fertigen Punkten, statt sich als einer auszugeben. */
+.punkt.offen{
+  background:var(--papier);border:0.5px dashed rgba(16,19,26,.22);box-shadow:none;
+}
+.punkt.offen .p-bei-dir{font-weight:600}
+.punkt.offen .p-bei-dir b{color:var(--tinte)}
+/* Der Satz, mit dem er es beim Kunden stehen gelassen hat — wörtlich, damit
+   der Kunde ihn wiedererkennt. */
+.p-wortlaut{
+  margin-top:14px;padding:12px 16px;border-left:2px solid var(--stift);
+  font-size:14.5px;line-height:1.6;color:var(--grau);max-width:56ch;
+}
+/* Die Antwort der Beratung, wenn sie inzwischen da ist. */
+.p-antwort{
+  margin-top:14px;padding:14px 16px;border-radius:12px;
+  background:color-mix(in srgb, var(--blau) 6%, var(--papier));
+  font-size:14.5px;line-height:1.6;max-width:58ch;
+}
+.p-antwort b{font-weight:800;display:block;margin-bottom:4px}
 /* Der Vorbehalt: wo die Zahl aufhört, sicher zu sein. */
 .p-unsicher{font-size:13.5px;line-height:1.6;color:var(--grau);margin-top:14px;max-width:60ch}
 /* Eigene Zeile, auch wenn davor nur die Herkunftszeile steht: als
@@ -200,6 +244,15 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
 }
 </style>
 <script src="marke.js"></script>
+<!-- lage.js bringt window.Lage: das „Heute" des Entwurfs und die Termine
+     der Woche, eine Quelle für alle Flächen. Diese Fläche hängt keine Glocke
+     ins Chrom, sie braucht nur den Tag — sonst stünde hier ein anderer als
+     in der Meldung, die auf dieses Briefing zeigt. -->
+<script src="lage.js"></script>
+<!-- radar.js sagt, was von diesem Blatt angehalten ist. Es liefert nur Daten
+     und Zustände, kein Aussehen — genau deshalb darf es sich diese
+     White-Label-Fläche mit dem quoroAI-Cockpit teilen. -->
+<script src="radar.js"></script>
 </head>
 <body>
 
@@ -210,30 +263,61 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
 
 <main>
   <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
-  <div class="wann">Donnerstag, 7:00 Uhr.</div>
+  <!-- Erscheinungszeit aus der Lage: dieselbe, die die Glocke für die
+       Meldung „Dein Briefing liegt da" nennt. -->
+  <div class="wann" id="wann">Dienstag, 18.08.2026, 7:00 Uhr.</div>
 
   <!-- ========== Die Woche mit Treffern ========== -->
   <div data-woche="treffer">
-    <h1 data-du="Zwei Dinge betreffen dich." data-sie="Zwei Dinge betreffen Sie.">Zwei Dinge betreffen dich.</h1>
+    <!-- Die Zählung ist nicht Deko: hält die Beratung einen Punkt an, zählt
+         das Blatt sonst etwas mit, das es verschweigt. data-du-offen /
+         data-sie-offen sind die Fassungen für genau diesen Fall. -->
+    <h1 data-du="Zwei Dinge betreffen dich." data-sie="Zwei Dinge betreffen Sie."
+        data-du-offen="Eine Sache betrifft dich, und eine bin ich dir schuldig."
+        data-sie-offen="Eine Sache betrifft Sie, und eine bin ich Ihnen schuldig.">Zwei Dinge betreffen dich.</h1>
     <p class="bilanz" data-du="Ich habe diese Woche vierzehn Meldungen aus dem Stahlbau gelesen. Zwei rühren an deine Zahlen. Die anderen zwölf habe ich weggelassen — mit Grund, unten steht welcher."
-                      data-sie="Ich habe diese Woche vierzehn Meldungen aus dem Stahlbau gelesen. Zwei rühren an Ihre Zahlen. Die anderen zwölf habe ich weggelassen — mit Grund, unten steht welcher.">Ich habe diese Woche vierzehn Meldungen aus dem Stahlbau gelesen. Zwei rühren an deine Zahlen. Die anderen zwölf habe ich weggelassen — mit Grund, unten steht welcher.</p>
+                      data-sie="Ich habe diese Woche vierzehn Meldungen aus dem Stahlbau gelesen. Zwei rühren an Ihre Zahlen. Die anderen zwölf habe ich weggelassen — mit Grund, unten steht welcher."
+                      data-du-offen="Ich habe diese Woche vierzehn Meldungen aus dem Stahlbau gelesen. Zwei rühren an deine Zahlen — zu einer davon habe ich dir keine Zahl gerechnet, weil deine Beratung die Frage noch nicht beantwortet hat. Die anderen zwölf habe ich weggelassen, mit Grund, unten steht welcher."
+                      data-sie-offen="Ich habe diese Woche vierzehn Meldungen aus dem Stahlbau gelesen. Zwei rühren an Ihre Zahlen — zu einer davon habe ich Ihnen keine Zahl gerechnet, weil Ihre Beratung die Frage noch nicht beantwortet hat. Die anderen zwölf habe ich weggelassen, mit Grund, unten steht welcher.">Ich habe diese Woche vierzehn Meldungen aus dem Stahlbau gelesen. Zwei rühren an deine Zahlen. Die anderen zwölf habe ich weggelassen — mit Grund, unten steht welcher.</p>
 
-    <article class="punkt">
-      <p class="p-welt">Das Bundeskabinett hat am Dienstag den Entwurf für eine Einfuhrabgabe auf Stahl aus Drittländern beschlossen, 6 Prozent ab Januar. <span class="quelle">Handelsblatt, 12. August</span></p>
+    <!-- ===== Der angehaltene Punkt =====
+         Was die Beratung im Cockpit angehalten hat, steht hier nicht — und
+         an seiner Stelle keine Lücke, sondern der Grund. Welcher der beiden
+         Kästen erscheint, entscheidet radar.js, nicht diese Fläche. -->
+    <article class="punkt offen" data-punkt-offen="zoll" hidden>
+      <p class="p-welt">Das Bundeskabinett hat am Dienstag, 11.08.2026, den Entwurf für eine Einfuhrabgabe auf Stahl aus Drittländern beschlossen, 6 Prozent ab Januar 2027. <span class="quelle">Handelsblatt, 12. August 2026</span></p>
+      <p class="p-bei-dir" data-du="Was das für deinen Betrieb heißt, sage ich dir hier nicht — ich weiß es noch nicht."
+                           data-sie="Was das für Ihren Betrieb heißt, sage ich Ihnen hier nicht — ich weiß es noch nicht.">Was das für deinen Betrieb heißt, sage ich dir hier nicht — ich weiß es noch nicht.</p>
+      <p class="p-wortlaut" data-du="Dreimal hast du mich danach gefragt, und dreimal habe ich dasselbe gesagt: „Was die geplante Einfuhrabgabe für euch bedeutet, steht in eurem Wissen nicht. Ich gebe die Frage an deine Beratung weiter.“ Dort liegt sie noch."
+                            data-sie="Dreimal haben Sie mich danach gefragt, und dreimal habe ich dasselbe gesagt: „Was die geplante Einfuhrabgabe für Sie bedeutet, steht in Ihrem Wissen nicht. Ich gebe die Frage an Ihre Beratung weiter.“ Dort liegt sie noch.">Dreimal hast du mich danach gefragt, und dreimal habe ich dasselbe gesagt: „Was die geplante Einfuhrabgabe für euch bedeutet, steht in eurem Wissen nicht. Ich gebe die Frage an deine Beratung weiter.“ Dort liegt sie noch.</p>
+      <p class="p-unsicher" data-du="Eine Zahl könnte ich dir ausrechnen. Ich stelle sie dir nicht ungefragt ins Blatt, solange deine Beratung nicht gesagt hat, was gilt — sonst beantworte ich dir von selbst, was ich dir im Gespräch dreimal schuldig geblieben bin."
+                            data-sie="Eine Zahl könnte ich Ihnen ausrechnen. Ich stelle sie Ihnen nicht ungefragt ins Blatt, solange Ihre Beratung nicht gesagt hat, was gilt — sonst beantworte ich Ihnen von selbst, was ich Ihnen im Gespräch dreimal schuldig geblieben bin.">Eine Zahl könnte ich dir ausrechnen. Ich stelle sie dir nicht ungefragt ins Blatt, solange deine Beratung nicht gesagt hat, was gilt — sonst beantworte ich dir von selbst, was ich dir im Gespräch dreimal schuldig geblieben bin.</p>
+      <button class="p-tuer" type="button" data-frage="Wie steht es um meine Frage zur Einfuhrabgabe?">
+        Nachfragen, wie es damit steht
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M12.5 6l6 6-6 6"/></svg>
+      </button>
+    </article>
+
+    <article class="punkt" data-punkt="zoll">
+      <p class="p-welt">Das Bundeskabinett hat am Dienstag, 11.08.2026, den Entwurf für eine Einfuhrabgabe auf Stahl aus Drittländern beschlossen, 6 Prozent ab Januar 2027. <span class="quelle">Handelsblatt, 12. August 2026</span></p>
       <p class="p-bei-dir" data-sie-html="Sie beziehen 340 Tonnen im Jahr, gut 60 Prozent davon aus der Einfuhr. Das wären rund &lt;b&gt;11.900&nbsp;€ Mehrkosten im Jahr&lt;/b&gt; — bei Ihrer Marge von 30,4 Prozent sind das 1,2 Punkte.">Du beziehst 340 Tonnen im Jahr, gut 60 Prozent davon aus der Einfuhr. Das wären rund <b>11.900&nbsp;€ Mehrkosten im Jahr</b> — bei deiner Marge von 30,4 Prozent sind das 1,2 Punkte.</p>
       <span class="p-woher" data-du="Deine Zahl kommt aus: Rohstoffbezug 2025" data-sie="Ihre Zahl kommt aus: Rohstoffbezug 2025">Deine Zahl kommt aus: Rohstoffbezug 2025</span>
       <p class="p-unsicher" data-du="Sicher ist das noch nicht: der Entwurf muss durch den Bundestag, und über die Höhe wird gestritten. Ich sage Bescheid, wenn er beschlossen ist."
                             data-sie="Sicher ist das noch nicht: der Entwurf muss durch den Bundestag, und über die Höhe wird gestritten. Ich sage Bescheid, wenn er beschlossen ist.">Sicher ist das noch nicht: der Entwurf muss durch den Bundestag, und über die Höhe wird gestritten. Ich sage Bescheid, wenn er beschlossen ist.</p>
+      <!-- Steht die Antwort der Beratung inzwischen im Wissen, geht sie
+           wörtlich mit — sie ist der Grund, warum die Zahl überhaupt
+           hinausdarf. Gefüllt von radar.js, sonst leer und versteckt. -->
+      <div class="p-antwort" data-antwort="zoll" hidden></div>
       <button class="p-tuer" type="button" data-frage="Was heißt die Einfuhrabgabe für meine Preise?">
         Was heißt das für meine Preise?
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M12.5 6l6 6-6 6"/></svg>
       </button>
     </article>
 
-    <article class="punkt">
-      <p class="p-welt">Der Tarifabschluss in der Metall- und Elektroindustrie steht: 4,2 Prozent mehr ab Oktober, Laufzeit 21 Monate. <span class="quelle">IG Metall, 11. August</span></p>
+    <article class="punkt" data-punkt="tarif">
+      <p class="p-welt">Der Tarifabschluss in der Metall- und Elektroindustrie steht: 4,2 Prozent mehr ab Oktober 2026, Laufzeit 21 Monate. <span class="quelle">IG Metall, 11. August 2026</span></p>
       <p class="p-bei-dir" data-sie-html="Bei Ihren 19 gewerblichen Mitarbeitern sind das rund &lt;b&gt;34.000&nbsp;€ im Jahr&lt;/b&gt;, im laufenden Geschäftsjahr aber nur ein Vierteljahr davon: gut 8.500&nbsp;€.">Bei deinen 19 gewerblichen Mitarbeitern sind das rund <b>34.000&nbsp;€ im Jahr</b>, im laufenden Geschäftsjahr aber nur ein Vierteljahr davon: gut 8.500&nbsp;€.</p>
-      <span class="p-woher" data-du="Deine Zahl kommt aus: Personalliste, Stand Juli" data-sie="Ihre Zahl kommt aus: Personalliste, Stand Juli">Deine Zahl kommt aus: Personalliste, Stand Juli</span>
+      <span class="p-woher" data-du="Deine Zahl kommt aus: Personalliste, Stand Juli 2026" data-sie="Ihre Zahl kommt aus: Personalliste, Stand Juli 2026">Deine Zahl kommt aus: Personalliste, Stand Juli 2026</span>
       <button class="p-tuer" type="button" data-frage="Was macht der Tarifabschluss mit meiner Kalkulation?">
         Was macht das mit meiner Kalkulation?
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M12.5 6l6 6-6 6"/></svg>
@@ -258,7 +342,10 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
       </div>
     </div>
 
-    <p class="fuss" data-sie-html="&lt;b&gt;Was daraus zu tun ist, sage ich hier nicht.&lt;/b&gt; Ich melde, was passiert ist und was es bei Ihnen ausmacht. Was Sie damit machen, besprechen Sie mit Ihrer Beratung — jede der beiden Meldungen öffnet dafür ein Gespräch."><b>Was daraus zu tun ist, sage ich hier nicht.</b> Ich melde, was passiert ist und was es bei dir ausmacht. Was du damit machst, besprichst du mit deiner Beratung — jede der beiden Meldungen öffnet dafür ein Gespräch.</p>
+    <!-- „jede der beiden Meldungen" zählte mit, was inzwischen angehalten
+         sein kann. Der Satz zählt deshalb nicht mehr, er zeigt auf die
+         Punkte selbst — richtig in beiden Fällen. -->
+    <p class="fuss" data-sie-html="&lt;b&gt;Was daraus zu tun ist, sage ich hier nicht.&lt;/b&gt; Ich melde, was passiert ist und was es bei Ihnen ausmacht. Was Sie damit machen, besprechen Sie mit Ihrer Beratung — jeder Punkt hier oben öffnet dafür ein Gespräch."><b>Was daraus zu tun ist, sage ich hier nicht.</b> Ich melde, was passiert ist und was es bei dir ausmacht. Was du damit machst, besprichst du mit deiner Beratung — jeder Punkt hier oben öffnet dafür ein Gespräch.</p>
   </div>
 
   <!-- ========== Die stille Woche ==========
@@ -285,8 +372,10 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
       </div>
     </div>
 
-    <p class="still-schluss" data-du="Nächsten Donnerstag wieder. Wenn vorher etwas passiert, das dich wirklich trifft, warte ich nicht bis dahin."
-                             data-sie="Nächsten Donnerstag wieder. Wenn vorher etwas passiert, das Sie wirklich trifft, warte ich nicht bis dahin.">Nächsten Donnerstag wieder. Wenn vorher etwas passiert, das dich wirklich trifft, warte ich nicht bis dahin.</p>
+    <!-- {versand} füllt radar.js mit dem nächsten Versandtermin — derselbe,
+         den das Cockpit über der Vorschau nennt. -->
+    <p class="still-schluss" data-du="Am {versand}, wieder. Wenn vorher etwas passiert, das dich wirklich trifft, warte ich nicht bis dahin."
+                             data-sie="Am {versand}, wieder. Wenn vorher etwas passiert, das Sie wirklich trifft, warte ich nicht bis dahin.">Am Dienstag, 25.08.2026, wieder. Wenn vorher etwas passiert, das dich wirklich trifft, warte ich nicht bis dahin.</p>
   </div>
 
   <p class="ki-hinweis"><span data-du="Geschrieben von deinem KI-Berater bei " data-sie="Geschrieben von Ihrem KI-Berater bei ">Geschrieben von deinem KI-Berater bei </span><span data-marke-name>Nordholm &amp; Partner</span>. Er ersetzt keine Rechts- oder Steuerberatung.</p>
@@ -313,6 +402,37 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
      Text. Deshalb werden diese Stellen hier eingesetzt, VOR dem Aufruf, und
      danach nicht mehr angefasst. */
   var sie = (Marke.rede('du','sie') === 'sie');
+
+  /* ---------- Was angehalten ist, steht hier nicht ----------
+     Der Zustand kommt aus radar.js — derselbe, den das Cockpit der Beratung
+     setzt. Vorher stand die Wahrheit zweimal: der Radar hielt den Punkt zur
+     offenen Lücke an, und dieses Blatt lieferte die Zahl trotzdem aus. Fehlt
+     der Baustein, gilt der vorsichtige Fall: der Punkt bleibt zurück. Lieber
+     einmal zu wenig gesagt als eine Zahl, die der Kunde nicht bekommen
+     sollte. Das läuft VOR Marke.anwenden(), weil die Zählung oben ihre
+     Fassung wechselt und anwenden() sie danach schreibt. */
+  var Radar = window.Radar || null;
+  function geht(thema){ return Radar ? Radar.geht(thema) : (thema !== 'zoll'); }
+
+  var etwasOffen = false;
+  document.querySelectorAll('.punkt[data-punkt]').forEach(function(p){
+    var laeuft = geht(p.dataset.punkt);
+    p.hidden = !laeuft;
+    if (!laeuft) etwasOffen = true;
+  });
+  document.querySelectorAll('[data-punkt-offen]').forEach(function(p){
+    p.hidden = geht(p.dataset.punktOffen);
+  });
+
+  /* Zählt das Blatt oben zwei Dinge, während es eines verschweigt, ist der
+     erste Satz schon falsch. Die Fassungen dafür stehen im Markup. */
+  if (etwasOffen) {
+    document.querySelectorAll('[data-du-offen]').forEach(function(el){
+      el.dataset.du = el.dataset.duOffen;
+      el.dataset.sie = el.dataset.sieOffen;
+    });
+  }
+
   document.querySelectorAll('[data-sie-html]').forEach(function(el){
     if (sie) el.innerHTML = el.dataset.sieHtml;
     /* Das Attribut heißt bewusst nicht data-sie: Marke.anwenden() setzt
@@ -320,6 +440,40 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
     delete el.dataset.sieHtml;
   });
   Marke.anwenden();
+
+  /* ---------- Wann dieses Briefing erschienen ist ----------
+     Aus der Lage (lage.js), nicht aus einem festen Wochentag: die Glocke
+     zeigt dieselbe Sendung, und stünde hier ein anderer Tag, hätte derselbe
+     Brief zwei Erscheinungstage. Bleibt der Baustein aus, steht der Satz
+     schon im Markup — leer darf die Zeile nie sein. */
+  var Lage = window.Lage || null;
+  if (Lage && Lage.tage) {
+    var heute = Lage.tage()[Lage.heute()];
+    if (heute) {
+      document.getElementById('wann').textContent =
+        heute.kurz + ', ' + heute.kurzdatum + '2026, ' + Lage.zeitWort(7) + ' Uhr.';
+    }
+  }
+
+  /* Der nächste Versandtermin steht in radar.js, damit das Cockpit über
+     seiner Vorschau denselben Tag nennt. Ohne Baustein bleibt der Satz
+     stehen, wie er im Markup steht. */
+  var versand = (Radar && Radar.versand().mitJahr) || 'Dienstag, 25.08.2026';
+  document.querySelectorAll('.still-schluss').forEach(function(el){
+    el.textContent = el.textContent.replace('{versand}', versand);
+  });
+
+  /* Die Antwort, die die Beratung ins Wissen geschrieben hat: sie geht
+     wörtlich mit, ohne Betrag, weil sie für alle Mandate gleich gilt. */
+  document.querySelectorAll('[data-antwort]').forEach(function(el){
+    var text = Radar ? Radar.antwort(el.dataset.antwort) : '';
+    if (!text) return;
+    el.hidden = false;
+    var titel = document.createElement('b');
+    titel.textContent = Marke.rede('Das sagt deine Beratung dazu', 'Das sagt Ihre Beratung dazu');
+    el.appendChild(titel);
+    el.appendChild(document.createTextNode(text));
+  });
 
   var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

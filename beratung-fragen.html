@@ -78,7 +78,33 @@
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
    V9: der Demo-Hinweis startet leer und räumt seinen Satz mit sich weg
    (siehe beratung-akte.html V16).
-   Marker: BERATUNG-FRAGEN-V9 (die Krume kommt aus einer Quelle) */
+   V10 (Issue #59): an jede Zahl im Lage-Bogen gehört der Kreis, über den sie
+   zählt. Die Stunden zählen seit Jahresbeginn und je Mandat, Cordes' 22.000 €
+   sind acht Monatsraten und keine Jahressumme, und die offene Rechnung steht
+   mit ihrem Datum da statt mit „seit neun Tagen" — die neun Tage stimmten nur
+   am Stichtag 14.08. und lasen sich am 18.08. als Fehler.
+   V11 (Welle 2, Issue #55): zwei Falschaussagen sind raus.
+   Der Petersen-Bogen behauptete „Das ist der ganze Margenverlust von 3,1
+   Punkten, nicht der Ausschuss" — beide Hälften falsch. Der ganze Verlust
+   sind 5,8 Punkte (36,2 auf 30,4), die 3,1 gehören dem Preisdruck, und der
+   Ausschuss steht mit 0,9 im eigenen Wasserfall des Beraters
+   (beratung-mitlesen.html). Jetzt derselbe Wortlaut wie im Protokoll.
+   Und der Lage-Bogen sagte „Petersen trägt dich". Petersen ist ein
+   Pauschalmandat (2.400 € im Monat seit dem 1. Mai 2026) und damit das
+   kleinste der vier; getragen wird die Beratung von MTS Maschinenbau, das
+   mit 4.826 € den größten Deckungsbeitrag lässt — dem Mandat, das seit dem
+   22. Juli still ist. Der ganze Absatz ist neu gedacht, nicht umgezahlt.
+   Achtung bei der 30,4: sie steht im Entwurf für ZWEI Größen — Petersens
+   eigene Rohertragsmarge (die hier gemeint ist und bleibt) und die Marge
+   der Beratung an dem Mandat (die jetzt 28,5 % ist).
+   Aus dem Review zu V11: „Deshalb hängt alles an Freitag" las sich im selben
+   Bogen als Bäckerei Freitag; der Kausalkleber „dadurch" schrieb dem
+   Stahlpreis alle 5,8 Punkte zu; und die Überfälligkeit der Petersen-Rechnung
+   steht nicht mehr als Tageszahl da, weil leistungen.html dasselbe Blatt auf
+   den 1. August 2026 mit Fälligkeit 11. August datiert, beratung-rechnungen.html
+   auf den 5. mit Fälligkeit 15. Solange die beiden sich widersprechen,
+   behauptet dieser Bogen keine Anzahl von Tagen darüber.
+   Marker: BERATUNG-FRAGEN-V11 (Petersen trägt nicht, MTS trägt) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -374,11 +400,17 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
              data-hilfe="Deine Kunden bekommen eine Antwort, du bekommst einen Entwurf — er liegt durchscheinend obenauf und gehört dir erst, wenn du danach greifst. Jeder Beleg darunter ist eine Tür zu der Unterlage, aus der die Zahl kommt.">
       <span class="b-herkunft"><img src="bilder/quoro-icon.svg" alt="" width="15" height="15">Entwurf deines KI-Beraters</span>
       <div class="b-frage">„Entwirf mir die Preisargumentation für Donnerstag."</div>
-      <div class="b-meta">Über Petersen Stahlbau, heute um 7:41 gefragt. Der Termin steht Donnerstag, 10:00.</div>
+      <div class="b-meta">Über Petersen Stahlbau, heute um 7:41 gefragt. Der Termin steht am Donnerstag, 20.08.2026, 10:00.</div>
       <div class="b-text">
         <p>Drei Sätze, in dieser Reihenfolge:</p>
         <ol>
-          <li>Der Stahlpreis ist seit April um 14 Prozent gestiegen, eure Preise stehen seit Januar. Das ist der ganze Margenverlust von 3,1 Punkten, nicht der Ausschuss.</li>
+          <!-- Issue #55: hier stand „Das ist der ganze Margenverlust von 3,1
+               Punkten, nicht der Ausschuss." Beide Hälften waren falsch. Der
+               ganze Verlust sind 5,8 Punkte (36,2 auf 30,4), die 3,1 gehören
+               dem Preisdruck, und der Ausschuss steht mit 0,9 im eigenen
+               Wasserfall des Beraters (beratung-mitlesen.html). Der Wortlaut
+               ist derselbe wie im Protokoll des Termins. -->
+          <li>Der Stahlpreis ist seit April um 14 Prozent gestiegen, eure Preise stehen seit Januar. Eure Rohertragsmarge ist von 36,2 auf 30,4 Prozent gefallen, das sind 5,8 Punkte, und der Verlust hat drei Adressen: 3,1 Punkte der Preisdruck, 1,8 der Stahlpreis, 0,9 der Ausschuss. Der Preis ist der größte Brocken — der Ausschuss wird davon nicht kleiner.</li>
           <li>Ein Preisschritt von 4,5 Prozent auf die Serienteile holt 2,4 Punkte zurück und liegt unter dem, was der Wettbewerb im Frühjahr genommen hat.</li>
           <li>Der Einkauf bei Nordstahl läuft am 30. September aus. Wer erst danach über Preise redet, verhandelt ohne Zahlen.</li>
         </ol>
@@ -541,15 +573,44 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
            12,4 Stunden, 214 € je Stunde und 4 Stunden für die Bäckerei —
            keine davon war irgendwo nachzuschlagen, und 6.426 € durch 12,4
            Stunden sind auch nicht 214 €. */
-        '<p><b>Petersen trägt dich.</b> 250 Stunden, 38.350 € Honorar, macht 153 € je Stunde, und 30 Prozent bleiben. Die letzte Rechnung über 6.426 € ist seit neun Tagen offen — das ist kein Streit, das ist ihre Zahlungsfrist.</p>' +
-        '<p><b>Die Bäckerei ist knapp kalkuliert und läuft trotzdem ruhig:</b> 82 Stunden, 31 Prozent bleiben. Nur berechnet ist dort seit dem Juni nichts — 5 Stunden und zwei Auslagen, zusammen 1.054 €, liegen unabgerechnet herum.</p>' +
-        '<p><b>Cordes kostet dich gerade.</b> 211 Stunden auf eine Pauschale von 22.000 €, davon bleiben 12 Prozent — nicht einmal die Hälfte von Petersen. Und die Steuerfrage, die seit heute früh bei dir liegt, hält die nächsten Stunden auf.</p>' +
+        /* Jede Zahl trägt ihren Kreis (Issue #59): Stunden und Honorar zählen
+           über das Jahr seit dem 1. Januar 2026 und über dieses eine Mandat,
+           nicht über die Beratung. Und die Rechnung steht mit ihrem Datum da
+           statt mit einer Tagesspanne — „seit neun Tagen" stimmte nur am
+           Stichtag 14.08. und stand am 18.08. schon falsch da. */
+        /* Welle 2: der erste Absatz hieß „Petersen trägt dich" und rechnete
+           mit 250 Stunden, 38.350 € Honorar, 153 € je Stunde und 30 Prozent.
+           Petersen ist aber ein PAUSCHALMANDAT — 2.400 € im Monat seit dem
+           1. Mai 2026 (Beratungsvertrag Ziffer 2, Leistungsnachweis in
+           leistungen.html), also 9.600 € auf 57 Stunden. Damit ist es das
+           KLEINSTE der vier Mandate, und auf die Frage „welches trägt mich"
+           fällt eine andere Antwort. Gerechnet wird sie über das, was am Ende
+           bleibt (Honorar minus Vollkosten, beratung-marge.html):
+             MTS      18.000 €, 26,8 %  →  4.826 €
+             Freitag  10.760 €, 31,0 %  →  3.336 €
+             Petersen  9.600 €, 28,5 %  →  2.738 €
+             Cordes   22.000 €, 12,1 %  →  2.658 €
+           MTS trägt also am meisten — ausgerechnet das Mandat, das gerade
+           still wird. Cordes hat das größte Honorar und lässt am wenigsten
+           übrig. Die Reihenfolge der Absätze folgt der Antwort: erst was
+           trägt, dann was kostet. */
+        '<p><b>MTS trägt dich — und geht gerade.</b> 132 Stunden seit Jahresbeginn, 18.000 € aus acht Abschlägen auf die Jahrespauschale von 27.000 €, davon bleiben 26,8 Prozent. Das sind 4.826 €, und damit lässt dieses Mandat mehr übrig als jedes der drei anderen. Seit dem 22. Juli 2026 kommt von dort keine Frage mehr, das sind 27 Tage, und die Pauschale läuft weiter — das sieht aus wie Gewinn und ist ein Kunde, der gerade geht.</p>' +
+        '<p><b>Cordes kostet dich gerade.</b> 211 Stunden seit Jahresbeginn auf 22.000 € Pauschalhonorar, acht Monate zu 2.750 € — das größte Honorar der vier und der kleinste Rest: 12,1 Prozent, 2.658 €. Und die Steuerfrage, die seit heute früh bei dir liegt, hält die nächsten Stunden auf.</p>' +
+        '<p><b>Die Bäckerei rechnet sich, wird aber nicht berechnet:</b> 82 Stunden seit Jahresbeginn, 10.760 € Honorar, 31,0 Prozent bleiben — die beste Quote der vier. Nur gestellt ist dort seit dem Juni nichts: 5 Stunden und zwei Auslagen, zusammen 1.054 €, liegen unabgerechnet herum.</p>' +
+        '<p><b>Petersen ist dein kleinstes Mandat, nicht dein tragendes.</b> Es läuft seit dem 1. Mai 2026 auf eine Pauschale von 2.400 € im Monat, macht 9.600 € in vier Monaten; darauf liegen 57 Stunden, und 28,5 Prozent bleiben. Je Stunde kommen damit 168 € an — das ist Honorar geteilt durch Stunden, kein vereinbarter Satz: bei einer Pauschale gibt es keinen. Die Rechnung vom 5. August 2026 über 2.856,00 € war am 15. August 2026 fällig — zehn Tage, so steht es in seinem Vertrag — und ist noch offen.</p>' +
         /* Vorher stand hier nur „seit drei Wochen still" und darunter der Griff
            „Anruf bei MTS in die Woche legen". In der Woche lief der Rückruf
            aber gestern früh, und am Freitag steht das Angebot. Ein Vorschlag,
            der in die Woche legen will, was dort schon steht, ist ein Berater,
            der den Kalender nicht gelesen hat. */
-        '<p><b>MTS ist das eigentliche Problem.</b> Drei Wochen keine Frage, und die Jahrespauschale läuft weiter — das sieht aus wie Gewinn und ist ein Kunde, der gerade geht. Angerufen wurde schon: Tarek hatte den Rückruf gestern um 9:00. Am Freitag um 13:00 sitzt du selbst im Angebotsgespräch, und bis dahin hängt das Mandat an diesem einen Termin.</p>',
+        /* „Deshalb hängt alles an Freitag" ging nicht: zwei Absätze höher
+           steht die Bäckerei Freitag, und der Wochentag las sich als Kunde.
+           Außerdem zeigte „deshalb" nach der Umsortierung auf den
+           Petersen-Absatz, gemeint war MTS. Beides steht jetzt im Satz.
+           Ein Datumsformat im ganzen Bogen: ausgeschrieben, wie in den vier
+           Absätzen darüber. Vorher standen „5. August 2026" und
+           „17.08.2026" nebeneinander. */
+        '<p><b>Bei MTS hängt gerade alles an dem Termin am 21. August 2026.</b> Angerufen wurde dort schon: Tarek hatte den Rückruf am Montag, dem 17. August 2026, um 9:00. Am Freitag, dem 21. August 2026, um 13:00 sitzt du selbst im Angebotsgespräch. Bis dahin hängt das Mandat, das dich am meisten trägt, an diesem einen Termin.</p>',
       belege: [
         {text:'Zeiten und Auslagen im August', href:'beratung-zeiten.html'},
         {text:'Marge und Sätze', href:'beratung-marge.html'},

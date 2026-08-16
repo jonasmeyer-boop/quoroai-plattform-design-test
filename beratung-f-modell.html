@@ -40,8 +40,8 @@
    das Wissen. V23: die Zentrale-Tür „Rechnungen" führt nach
    beratung-rechnungen.html, die MTS-Türen zur offenen Rechnung ebenso,
    und die Rechnungsbeträge kommen jetzt aus dem Rechnungs-Raum
-   (2.677,50 € MTS, 6.426 € Petersen, zusammen 12.376 € offen — MTS' Rechnung
-   ist der achte Abschlag auf die Jahrespauschale, Häppchen B5).
+   (2.677,50 € MTS, 2.856,00 € Petersen — MTS' Rechnung ist der achte
+   Abschlag auf die Jahrespauschale, Häppchen B5).
    V24: die Zentrale-Tür „Verwaltung" führt nach beratung-verwaltung.html,
    und daneben steht der Nachweis-Stand des Teams (3 von 5 unterwiesen,
    deiner fehlt) — der Hinweis bleibt im Cockpit stehen, bis bestätigt ist.
@@ -54,8 +54,7 @@
    V32: die Zentrale hat eine Tür „Fünf Auswertungen" — die fünf festen
    Bilder des Geschäfts, gleich hinter den Zahlen, aus denen sie entstehen.
    V35: die offenen Beträge folgen den Abreden — MTS' Rechnung ist ein
-   Abschlag auf die Jahrespauschale, Cordes' die Monatspauschale, zusammen
-   stehen 12.376 € offen (Häppchen B5).
+   Abschlag auf die Jahrespauschale, Cordes' die Monatspauschale (Häppchen B5).
    V37 (Häppchen C3): die Hilfe-Ebene hängt im Kopfband, die Zentrale hat eine
    Tür „Ankommen", und die Erklärstellen gelten je nach Zustand — draußen die
    Stadt, drinnen der Raum (data-hilfe-wenn).
@@ -108,7 +107,31 @@
    V47 (Issue #58): der Tisch hat einen Griff und misst selbst, ob er ein Haus
    verdeckt — dann kommt er zugeklappt hoch. Er lag bei 1440x900 über Petersen
    Stahlbau, bei 1152x648 über dreien.
-   Marker: BERATUNG-F-MODELL-V47 (die Räume hängen aneinander) */
+   V48 (Issue #59): an jede Summe und jede Anzahl gehört der Kreis, über den
+   sie zählt. Die Zentrale sagt jetzt „3 von 6 gestellten Rechnungen offen,
+   zusammen 8.806,00 €" — im Wortlaut des Rechnungs-Kopfes, damit niemand
+   die Summe des Kundenregisters für einen Widerspruch hält; sie zählt
+   über 12 der 187 Mandate, diese über die vier des Modells. Die große Zahl
+   der Zentrale sind 32 Fragen im August und nicht mehr 126 in einer Woche:
+   dieselbe Zahl steht in den vier Kundenakten als verbrauchtes Kontingent
+   (17 + 9 + 6 + 0 von 140 gebuchten), und 126 in einer Woche war dagegen
+   nicht zu halten. Die Schilder an den Gebäuden zählen wieder das, was ihr
+   Erklärsatz verspricht — MTS trug 0 und hatte zwei wartende Zeilen.
+   Und die Termine kommen aus der Lage (lage.js) statt von Hand: „Wunsch:
+   Freitag, 9:00" und „Termin Donnerstag, 10:00" sind datiert, und die drei
+   „Gespräche diese Woche" heißen Termine, weil sie welche sind.
+   V49 (Welle 3): die letzten Zahlen aus der Aufwands-Zeit sind weg. Petersen
+   ist ein Pauschalmandat — offen ist eine Rechnung über 2.856,00 € statt
+   6.426 €, gestellt am 1. August 2026 statt am 5. August (Ziffer 2 des
+   Beratungsvertrags stellt am ersten Tag des Folgemonats und macht in zehn
+   Tagen fällig), und die drei offenen Rechnungen des Modells sind zusammen
+   8.806,00 € statt 12.376,00 €. MTS' Abschlag heißt jetzt 2026-0085, weil
+   Petersens Rechnung als erste im August 2026-0084 wurde.
+   Dazu zwei Kreise: die 30,4 % sind die Rohertragsmarge des KUNDEN über sein
+   ganzes Geschäft — was die Beratung an dem Mandat verdient, sind 28,5 %
+   (beratung-marge.html). Und „ab Woche 6 wirksam" trägt sein Datum, den
+   12.10.2026, statt eine Woche ohne Anfang zu nennen.
+   Marker: BERATUNG-F-MODELL-V49 (Petersen ist ein Pauschalmandat) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -634,11 +657,16 @@ body.gezoomt #zonen{display:block}
     <div id="wolken" aria-hidden="true"><i></i><i></i></div>
     <div id="puls" aria-hidden="true"></div>
     <svg id="stift-lage" aria-hidden="true"></svg>
-    <div class="stift-text" id="stift-mts" style="left:13.5%;top:60.5%">seit 3 Wochen still!</div>
+    <div class="stift-text" id="stift-mts" style="left:13.5%;top:60.5%">seit dem 22. Juli still!</div>
     <div class="stift-text blau" id="stift-cordes" style="left:57%;top:66.5%">Steuerfrage wartet!</div>
 
+    <!-- Die Zahl am Schild zählt, was im Raum unter „Was wartet" steht — das
+         sagt der Erklärsatz am Gebäude, und daran hielt sie sich nicht
+         (Issue #59): MTS trug 0 und hatte zwei Zeilen, die Bäckerei trug 0
+         und hatte eine. Eine 0 verschwindet per CSS, also standen genau die
+         beiden Mandate ohne Schild da, um die es geht. -->
     <button class="zone" data-ziel="mts" style="--l:13%;--t:35%;--w:20%;--h:22%;--chipt:42%">
-      <span class="chip">MTS Maschinenbau<span class="zahl" data-zahl="0">0</span></span>
+      <span class="chip">MTS Maschinenbau<span class="zahl" data-zahl="2">2</span></span>
     </button>
     <button class="zone" data-ziel="zentrale" style="--l:34.5%;--t:13%;--w:21%;--h:41%;--chipt:32%"
             data-hilfe-wenn="body:not(.gezoomt)"
@@ -649,14 +677,14 @@ body.gezoomt #zonen{display:block}
     <button class="zone" data-ziel="petersen" style="--l:25%;--t:52%;--w:16.5%;--h:19%;--chipt:58%"
             data-hilfe-wenn="body:not(.gezoomt)"
             data-hilfe-name="Ein Gebäude je Mandat"
-            data-hilfe="Jeder Kunde hat sein Haus. Die Zahl am Schild sagt, wie viel dort auf dich wartet, und die Stiftnotiz daneben ist das, was der KI-Berater dir aufgeschrieben hat. Neue Mandate bekommen ihr Haus, sobald du deine Kundenliste einliest.">
+            data-hilfe="Jeder Kunde hat sein Haus. Die Zahl am Schild sagt, wie viele Zeilen im Raum unter „Was wartet“ stehen, und die Stiftnotiz daneben ist das, was der KI-Berater dir aufgeschrieben hat. Neue Mandate bekommen ihr Haus, sobald du deine Kundenliste einliest.">
       <span class="chip">Petersen Stahlbau<span class="zahl" data-zahl="2">2</span></span>
     </button>
     <button class="zone" data-ziel="cordes" style="--l:57%;--t:32%;--w:12%;--h:25%;--chipt:48%">
       <span class="chip">Cordes Logistik<span class="zahl" data-zahl="1">1</span></span>
     </button>
     <button class="zone" data-ziel="freitag" style="--l:43.5%;--t:63%;--w:18%;--h:19%;--chipt:42%">
-      <span class="chip">Bäckerei Freitag<span class="zahl" data-zahl="0">0</span></span>
+      <span class="chip">Bäckerei Freitag<span class="zahl" data-zahl="1">1</span></span>
     </button>
   </div>
 </div>
@@ -679,7 +707,7 @@ body.gezoomt #zonen{display:block}
   </button>
   <div class="t-reihe" id="t-reihe">
   <a class="t-zettel" href="beratung-termine.html#petersen">
-    <span class="t-text"><b>Herr Petersen möchte ein Gespräch mit einem Menschen</b><span>Petersen Stahlbau, Wunsch: Freitag, 9:00</span></span>
+    <span class="t-text"><b>Herr Petersen möchte ein Gespräch mit einem Menschen</b><span>Petersen Stahlbau, Wunsch: <span data-lage="wunsch">Freitag, 21.08., 9:00</span></span></span>
     <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">liegt vor</span></span>
   </a>
   <a class="t-zettel" href="beratung-mitlesen.html">
@@ -701,13 +729,19 @@ body.gezoomt #zonen{display:block}
 <div id="zonen">
   <section class="inhalt" data-uhr-polster data-raum="petersen">
     <div class="kopf">
-      <div><h2>Petersen Stahlbau</h2><div class="stand">3 Gespräche diese Woche, Termin Donnerstag, 10:00</div></div>
-      <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">1 Gespräch freigegeben</span></span>
+      <div><h2>Petersen Stahlbau</h2><div class="stand" data-lage="p-stand">3 Termine diese Woche, der nächste heute, 18.08., 15:00</div></div>
+      <!-- „1 Gespräch freigegeben" ohne den Kreis las sich wie „eines von
+           dreien" — gemeint sind die beiden Gespräche, die unten stehen. -->
+      <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">1 von 2 Gesprächen freigegeben</span></span>
     </div>
     <div class="held">
       <div class="tafel-glas">
         <div class="gross" data-zaehl>30,4 %</div>
-        <div class="deut">Marge heute, seit April im Sinkflug</div>
+        <!-- Der Kreis gehört an die Zahl: 30,4 % ist die Rohertragsmarge des
+             KUNDEN über sein ganzes Geschäft. Was die Beratung an diesem
+             Mandat verdient, sind 28,5 % (beratung-marge.html). Beide Zahlen
+             standen im Entwurf als „Marge" da. -->
+        <div class="deut">Rohertragsmarge des Kunden heute, über sein ganzes Geschäft, seit April im Sinkflug</div>
         <svg class="zieh" viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden="true">
           <defs><linearGradient id="verlauf-p" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a5b00" stop-opacity=".2"/><stop offset="1" stop-color="#9a5b00" stop-opacity="0"/></linearGradient></defs>
           <path class="fuell" fill="url(#verlauf-p)" d="M2 8 L18 10 L34 9 L50 14 L66 18 L82 24 L98 30 L98 36 L2 36 Z"/>
@@ -717,24 +751,37 @@ body.gezoomt #zonen{display:block}
       </div>
       <div class="ki">
         <span class="v-name">KI-Vorschlag</span>
-        <span class="v-satz">Preismodell umstellen: rechnerisch +38.000 € im Jahr, ab Woche 6 wirksam.</span>
+        <!-- „ab Woche 6" stand ohne Anfang da (Denkfehler 4 der Nutzerprüfung).
+             Der Fahrplan zählt ab der Freigabe des Preismodells, erbeten bis
+             Freitag, den 04.09.2026; Woche 6 beginnt dann am 12.10.2026
+             (beratung-mandat.html). Hier steht das Datum. -->
+        <span class="v-satz">Preismodell umstellen: rechnerisch +38.000 € im Jahr über alle C-Kunden, wirksam ab dem 12.10.2026.</span>
         <a class="knopf primaer" href="beratung-mandat.html" style="text-decoration:none">Vorschlag ansehen</a>
       </div>
     </div>
     <div class="kpis">
-      <div class="karte"><div class="wert" data-zaehl>6.426 €</div><div class="label">offene Forderungen</div><div class="delta amber">eine Rechnung seit 9 Tagen</div></div>
-      <div class="karte"><div class="wert" data-zaehl>3</div><div class="label">Gespräche diese Woche</div><div class="delta">eines freigegeben</div></div>
+      <!-- Petersen ist ein Pauschalmandat: 2.400,00 € netto im Monat,
+           2.856,00 € brutto (blaetter.js, Ziffer 2). Offen ist genau eine
+           Rechnung, die Pauschale für den Juli — 2.856,00 €, nicht die
+           6.426 € aus der Aufwands-Zeit. Zahlen und Daten kommen aus
+           beratung-rechnungen.html. -->
+      <div class="karte"><div class="wert" data-zaehl>2.856,00 €</div><div class="label">offene Forderung dieses Mandats, aus einer Rechnung</div><div class="delta amber">Monatspauschale Juli, gestellt am 1. August, fällig war der 11. August 2026</div></div>
+      <!-- Vorher „3 Gespräche diese Woche / eines freigegeben": zwei Kreise in
+           einer Karte. Die 3 sind Termine der Woche, das eine freigegebene ist
+           ein Gespräch mit dem KI-Berater. Jetzt zählt die Karte nur Termine,
+           und zwar aus der Lage (lage.js). -->
+      <div class="karte"><div class="wert" data-zaehl data-lage="p-termine-zahl">3</div><div class="label" data-lage="p-termine-label">Termine diese Woche, 17. bis 21.08.</div><div class="delta" data-lage="p-termine-delta">dazu eine Anfrage für Freitag, 21.08., 9:00</div></div>
     </div>
     <h3>Was wartet</h3>
     <div class="zeilen">
-      <a class="zeile" href="beratung-termine.html#petersen"><span><span class="z-titel">Gespräch mit einem Menschen</span><br><span class="z-meta">Wunsch: Freitag, 9:00, über den KI-Berater</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">Zeit bestätigen</span></span></a>
+      <a class="zeile" href="beratung-termine.html#petersen"><span><span class="z-titel">Gespräch mit einem Menschen</span><br><span class="z-meta">Wunsch: <span data-lage="wunsch">Freitag, 21.08., 9:00</span>, über den KI-Berater</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">Zeit bestätigen</span></span></a>
       <a class="zeile" href="beratung-mitlesen.html"><span><span class="z-titel">„Warum schrumpft meine Marge?"</span><br><span class="z-meta">freigegeben gestern, 16:40</span></span><span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">mitlesen</span></span></a>
     </div>
     <h3>Gespräche und Unterlagen</h3>
     <div class="zeilen">
       <div class="zeile zu"><span><span class="z-titel">Wie läuft mein Geschäft?</span><br><span class="z-meta">Montag, 9:12. Herr Petersen hat es nicht freigegeben, also liest hier niemand mit.</span></span><span class="z-typ">Gespräch, privat</span></div>
       <a class="zeile" href="beratung-akte.html?mandat=petersen"><span><span class="z-titel">Preismodell Benchmark</span><br><span class="z-meta">gestern in die Akte gelegt, 12 Seiten</span></span><span class="z-typ">Unterlage</span></a>
-      <a class="zeile" href="beratung-protokoll.html"><span><span class="z-titel">Termin Donnerstag, 10:00</span><br><span class="z-meta">Dr. Anna Vogelsang, Preis und Marge</span></span><span class="z-typ">Videocall</span></a>
+      <a class="zeile" href="beratung-protokoll.html"><span><span class="z-titel">Termin <span data-lage="p-termin-do">Donnerstag, 20.08., 10:00 bis 11:00</span></span><br><span class="z-meta">Dr. Anna Vogelsang, Preis und Marge</span></span><span class="z-typ">Videocall</span></a>
     </div>
     <div class="tueren">
       <!-- Die Tür in die Zentrale, und zwar in jedem Mandatsraum (Issue #49).
@@ -777,8 +824,8 @@ body.gezoomt #zonen{display:block}
       </div>
     </div>
     <div class="kpis">
-      <div class="karte"><div class="wert" data-zaehl>4</div><div class="label">Gespräche im August</div><div class="delta">alle nur für den Kunden</div></div>
-      <div class="karte"><div class="wert" data-zaehl>6,5</div><div class="label">Std. im August</div><div class="delta">Leistungsnachweis offen</div></div>
+      <div class="karte"><div class="wert" data-zaehl>4</div><div class="label">Gespräche im August, dieses Mandat</div><div class="delta">alle nur für den Kunden</div></div>
+      <div class="karte"><div class="wert" data-zaehl>6,5</div><div class="label">Std. im August, dieses Mandat</div><div class="delta">Leistungsnachweis offen</div></div>
     </div>
     <h3>Was wartet</h3>
     <div class="zeilen">
@@ -826,13 +873,13 @@ body.gezoomt #zonen{display:block}
       </div>
     </div>
     <div class="kpis">
-      <div class="karte"><div class="wert" data-zaehl>6</div><div class="label">Gespräche im Juli</div><div class="delta">keines freigegeben</div></div>
+      <div class="karte"><div class="wert" data-zaehl>6</div><div class="label">Gespräche im Juli, dieses Mandat</div><div class="delta">keines freigegeben</div></div>
       <div class="karte"><div class="wert" data-zaehl>1.650 €</div><div class="label">Leistungsnachweis Juni</div><div class="delta">bezahlt am 21. Juli</div></div>
-      <div class="karte"><div class="wert" data-zaehl>1.054 €</div><div class="label">noch nicht berechnet</div><div class="delta amber">5 Stunden und zwei Auslagen</div></div>
+      <div class="karte"><div class="wert" data-zaehl>1.054 €</div><div class="label">seit dem 1. Juli noch nicht berechnet</div><div class="delta amber">5 Stunden und zwei Auslagen, 304 € davon</div></div>
     </div>
     <h3>Was wartet</h3>
     <div class="zeilen">
-      <a class="zeile" href="beratung-rechnungen.html"><span><span class="z-titel">Seit dem Juni ist nichts gestellt</span><br><span class="z-meta">5 Stunden bis zum 8. August, dazu 304 € weiterberechenbare Auslagen</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">abrechnen</span></span></a>
+      <a class="zeile" href="beratung-rechnungen.html"><span><span class="z-titel">Seit dem Juni ist nichts gestellt</span><br><span class="z-meta">5 Stunden vom 1. Juli bis zum 8. August 2026, dazu 304 € Auslagen — das Mandat läuft nach Aufwand und Auslagen, beides ist weiterberechenbar</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">abrechnen</span></span></a>
     </div>
     <h3>Gespräche und Unterlagen</h3>
     <div class="zeilen">
@@ -843,7 +890,7 @@ body.gezoomt #zonen{display:block}
            Der Montag war dann der falsche der beiden: in der Woche ist heute
            Dienstag, die Personalquote liegt hinter uns. Der nächste ist der
            Donnerstag. -->
-      <a class="zeile" href="beratung-kalender.html"><span><span class="z-titel">Nächster Termin</span><br><span class="z-meta">Donnerstag, 10:00, Zwischenstand Personal — bei Miriam Krohn, du sitzt zur selben Stunde bei Petersen</span></span><span class="z-typ">Termin</span></a>
+      <a class="zeile" href="beratung-kalender.html"><span><span class="z-titel">Nächster Termin</span><br><span class="z-meta"><span data-lage="f-termin">Donnerstag, 20.08., 10:00 bis 11:00</span>, Zwischenstand Personal — bei Miriam Krohn, du sitzt zur selben Stunde bei Petersen</span></span><span class="z-typ">Termin</span></a>
     </div>
     <div class="tueren">
       <!-- Zwei Türen weniger, beide aus demselben Grund: hinter ihnen liegt für
@@ -858,13 +905,13 @@ body.gezoomt #zonen{display:block}
 
   <section class="inhalt" data-uhr-polster data-raum="mts">
     <div class="kopf">
-      <div><h2>MTS Maschinenbau</h2><div class="stand">letzte Frage am 22. Juli, davor wöchentlich</div></div>
-      <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">seit 3 Wochen still</span></span>
+      <div><h2>MTS Maschinenbau</h2><div class="stand">letzte Frage am 22. Juli 2026, das sind 27 Tage; davor wöchentlich</div></div>
+      <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">seit dem 22. Juli still</span></span>
     </div>
     <div class="held">
       <div class="tafel-glas">
         <div class="gross" data-zaehl>0 Fragen</div>
-        <div class="deut">seit 3 Wochen, davor kam jede Woche eine</div>
+        <div class="deut">seit dem 22. Juli 2026, das sind 27 Tage; davor kam jede Woche eine</div>
         <svg class="zieh" viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden="true">
           <defs><linearGradient id="verlauf-m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a5b00" stop-opacity=".2"/><stop offset="1" stop-color="#9a5b00" stop-opacity="0"/></linearGradient></defs>
           <path class="fuell" fill="url(#verlauf-m)" d="M2 10 L18 6 L34 12 L50 8 L66 22 L82 30 L98 31 L98 36 L2 36 Z"/>
@@ -886,12 +933,14 @@ body.gezoomt #zonen{display:block}
       </div>
     </div>
     <div class="kpis">
-      <div class="karte"><div class="wert" data-zaehl>2.677,50 €</div><div class="label">offener Abschlag</div><div class="delta amber">seit 12 Tagen</div></div>
-      <div class="karte"><div class="wert" data-zaehl>11,2</div><div class="label">Std. im Juli</div><div class="delta">Halbjahresblick kam gut an</div></div>
+      <!-- Datum statt Tagesspanne, wie bei Petersen: „seit 12 Tagen" stimmte
+           am Stichtag 14.08. und stand am 18.08. schon falsch da. -->
+      <div class="karte"><div class="wert" data-zaehl>2.677,50 €</div><div class="label">offener Abschlag, der achte von zwölf</div><div class="delta amber">gestellt am 2. August 2026</div></div>
+      <div class="karte"><div class="wert" data-zaehl>11,2</div><div class="label">Std. im Juli, dieses Mandat</div><div class="delta">Halbjahresblick kam gut an</div></div>
     </div>
     <h3>Was wartet</h3>
     <div class="zeilen">
-      <a class="zeile" href="beratung-rechnungen.html#b-r82"><span><span class="z-titel">Offener Abschlag 2026-0084</span><br><span class="z-meta">2.677,50 €, seit 12 Tagen</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">erinnern</span></span></a>
+      <a class="zeile" href="beratung-rechnungen.html#b-r82"><span><span class="z-titel">Offener Abschlag 2026-0085</span><br><span class="z-meta">2.677,50 €, gestellt am 2. August 2026</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">erinnern</span></span></a>
       <a class="zeile" href="beratung-kalender.html"><span><span class="z-titel">Vorschlag des KI-Beraters</span><br><span class="z-meta">Halbjahresblick als eigenes Mandat anbieten, das kam zuletzt gut an</span><br><span class="z-hand">Freitag liegt es auf dem Tisch.</span></span><span class="z-fuell"><span class="zustand vorschlag" role="img" aria-label="Vorschlag" title="Vorschlag"></span><span class="zustand-wort">Vorschlag</span></span></a>
     </div>
     <div class="tueren">
@@ -909,8 +958,13 @@ body.gezoomt #zonen{display:block}
     </div>
     <div class="held">
       <div class="tafel-glas">
-        <div class="gross" data-zaehl>126 Fragen</div>
-        <div class="deut" data-du="hat dein KI-Berater diese Woche beantwortet, aus 4 Mandaten" data-sie="hat Ihr KI-Berater diese Woche beantwortet, aus 4 Mandaten">hat dein KI-Berater diese Woche beantwortet, aus 4 Mandaten</div>
+        <!-- 32, nicht 126 (Issue #59): dieselbe Zahl steht in den vier
+             Kundenakten als verbrauchtes Kontingent — 17 bei Petersen, 9 bei
+             Cordes, 6 bei der Bäckerei, 0 bei MTS. 126 in einer Woche waren
+             gegen 140 gebuchte Fragen im Monat nicht zu halten, und wer die
+             Akten aufschlug, fand die Hälfte davon in einem ganzen Monat. -->
+        <div class="gross" data-zaehl>32 Fragen</div>
+        <div class="deut" data-du="hat dein KI-Berater im August beantwortet, über die vier Mandate des Modells, von 140 gebuchten" data-sie="hat Ihr KI-Berater im August beantwortet, über die vier Mandate des Modells, von 140 gebuchten">hat dein KI-Berater im August beantwortet, über die vier Mandate des Modells, von 140 gebuchten</div>
         <svg class="zieh" viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden="true">
           <defs><linearGradient id="verlauf-z" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6f63e8" stop-opacity=".22"/><stop offset="1" stop-color="#6f63e8" stop-opacity="0"/></linearGradient></defs>
           <path class="fuell" fill="url(#verlauf-z)" d="M2 28 L18 25 L34 26 L50 20 L66 21 L82 14 L98 8 L98 36 L2 36 Z"/>
@@ -919,7 +973,7 @@ body.gezoomt #zonen{display:block}
       </div>
       <div class="tafel-glas ruhig">
         <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">eine wartet</span></span>
-        <span style="font-size:14.5px;line-height:1.5" data-du="4 Fragen hat er an dich übergeben. Drei sind beantwortet, die Steuerfrage von Cordes wartet noch." data-sie="4 Fragen hat er an Sie übergeben. Drei sind beantwortet, die Steuerfrage von Cordes wartet noch.">4 Fragen hat er an dich übergeben. Drei sind beantwortet, die Steuerfrage von Cordes wartet noch.</span>
+        <span style="font-size:14.5px;line-height:1.5" data-du="4 dieser Fragen hat er im August an dich übergeben. Drei sind beantwortet, die Steuerfrage von Cordes wartet noch." data-sie="4 dieser Fragen hat er im August an Sie übergeben. Drei sind beantwortet, die Steuerfrage von Cordes wartet noch.">4 dieser Fragen hat er im August an dich übergeben. Drei sind beantwortet, die Steuerfrage von Cordes wartet noch.</span>
       </div>
     </div>
     <h3 data-du="Deine Mandate, ein Griff je Gebäude" data-sie="Ihre Mandate, ein Griff je Gebäude">Deine Mandate, ein Griff je Gebäude</h3>
@@ -933,7 +987,7 @@ body.gezoomt #zonen{display:block}
       <button class="flotte-karte" type="button" data-zu="petersen">
         <span class="f-kopf"><b>Petersen Stahlbau</b><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span></span>
         <span class="f-zahl">30,4 %</span>
-        <span class="f-deut">Marge fällt, Preismodell liegt bereit</span>
+        <span class="f-deut">Rohertragsmarge des Kunden fällt, Preismodell liegt bereit</span>
       </button>
       <button class="flotte-karte" type="button" data-zu="cordes">
         <span class="f-kopf"><b>Cordes Logistik</b><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span></span>
@@ -948,7 +1002,7 @@ body.gezoomt #zonen{display:block}
       <button class="flotte-karte" type="button" data-zu="mts">
         <span class="f-kopf"><b>MTS Maschinenbau</b><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span></span>
         <span class="f-zahl">0 Fragen</span>
-        <span class="f-deut">seit 3 Wochen still, Angebot liegt Freitag an</span>
+        <span class="f-deut">seit dem 22. Juli still, Angebot liegt <span data-lage="mts-angebot">Freitag, 21.08.</span> an</span>
       </button>
     </div>
     <h3 data-hilfe-wenn="body.gezoomt"
@@ -956,7 +1010,15 @@ body.gezoomt #zonen{display:block}
         data-hilfe="Deine Marke, deine Stunden, dein Team — die drei Zahlen, an denen du merkst, ob die Beratung als Betrieb rund läuft. Sie gehören dir und keinem Mandat.">So tritt er auf</h3>
     <div class="karten">
       <div class="karte"><div class="wert" style="font-size:18px;color:#2b5fe3">Nordholm &amp; Partner</div><div class="label">Marke und Anrede der Kundenflächen</div><div class="proben" aria-label="Markenfarben"><span class="probe p-blau" title="Akzent"></span><span class="probe p-stift" title="Stift"></span><span class="probe p-tinte" title="Tinte"></span><span class="probe p-papier" title="Papier"></span><span class="anrede-wert" data-du="per Du" data-sie="per Sie">per Du</span></div></div>
-      <div class="karte"><div class="wert">34,0</div><div class="label">Std. im August, alle Mandate</div><div class="delta amber">3 Rechnungen offen, 12.376 €</div></div>
+      <!-- Der Kreis gehört an die Summe (Issue #59): die Summe allein stand
+           gegen die des Kundenregisters, und beide Zahlen sind richtig.
+           Der Wortlaut ist der des Rechnungs-Kopfes, damit es eine Handschrift
+           bleibt.
+           Seit Petersen als Pauschalmandat rechnet, sind es 8.806,00 € statt
+           12.376,00 €: 2.677,50 € MTS, 3.272,50 € Cordes, 2.856,00 € Petersen
+           (beratung-rechnungen.html). Das Kundenregister zählt über 12 der
+           187 Mandate und steht deshalb höher. -->
+      <div class="karte"><div class="wert">34,0</div><div class="label">Std. im August, über die vier Mandate des Modells</div><div class="delta amber">3 von 6 gestellten Rechnungen offen, zusammen 8.806,00 €</div></div>
       <div class="karte"><div class="wert">3 von 5</div><div class="label">im Team sind KI-unterwiesen</div><div class="delta amber" data-du="deiner fehlt noch" data-sie="Ihrer fehlt noch">deiner fehlt noch</div></div>
     </div>
     <div class="tueren"
@@ -996,6 +1058,73 @@ body.gezoomt #zonen{display:block}
   <button class="weiter" type="button">Überspringen</button>
 </div>
 
+<script src="lage.js"></script>
+<script>
+/* ---------- Termine und Anfragen kommen aus der Lage (lage.js) ----------
+   Fünf Stellen dieser Fläche trugen ihre Termine von Hand und undatiert:
+   „Wunsch: Freitag, 9:00", „Termin Donnerstag, 10:00", „3 Gespräche diese
+   Woche". Ein Wochentag ohne Datum ist kein Zeitpunkt, und eine Anzahl ohne
+   Kreis ist keine Zahl — die drei „Gespräche" waren in Wahrheit Termine, und
+   die Karte daneben zählte mit „eines freigegeben" etwas ganz anderes.
+   Steht die Lage nicht bereit, bleibt der geschriebene Stand stehen; die
+   Fläche zeigt dann dasselbe, nur ohne Nachrechnen. */
+(function(){
+  'use strict';
+  if (!window.Lage) return;
+
+  function setz(name, text){
+    document.querySelectorAll('[data-lage="' + name + '"]').forEach(function(el){
+      el.textContent = text;
+    });
+  }
+  var TAGE = Lage.tage();
+  /* „Freitag, 21.08., 9:00" — Tag, Datum, Beginn. Das Ende gehört an einen
+     festen Termin, nicht an einen Wunsch. */
+  function beginn(t){
+    return TAGE[t.tag].kurz + ', ' + TAGE[t.tag].kurzdatum + ', ' + Lage.zeitWort(t.von);
+  }
+
+  var alle = Lage.termine();
+  function fuerKunden(name){
+    return alle.filter(function(t){ return t.kunde === name; });
+  }
+
+  /* ----- Petersen: drei feste Termine, dazu die eine offene Anfrage ----- */
+  var p = fuerKunden('Petersen Stahlbau');
+  var pFest = p.filter(function(t){ return !t.angefragt; });
+  var pAnfrage = p.filter(function(t){ return t.angefragt; })[0];
+  var jetzt = Lage.heute() * 24 + Lage.jetzt();
+  var pNaechster = pFest.filter(function(t){ return t.tag * 24 + t.bis > jetzt; })
+                        .sort(function(a, b){ return (a.tag * 24 + a.von) - (b.tag * 24 + b.von); })[0];
+
+  if (pAnfrage) setz('wunsch', beginn(pAnfrage));
+  setz('p-termine-zahl', String(pFest.length));
+  setz('p-termine-label', 'Termine diese Woche, ' + TAGE[0].kurzdatum + ' bis ' + TAGE[TAGE.length - 1].kurzdatum);
+  setz('p-termine-delta', pAnfrage
+    ? 'dazu eine Anfrage für ' + beginn(pAnfrage)
+    : 'keine offene Anfrage');
+  if (pNaechster) {
+    var wer = Lage.person(pNaechster.wer);
+    setz('p-stand', pFest.length + ' Termine diese Woche, der nächste am ' +
+      beginn(pNaechster) + (wer ? ', bei ' + wer.name : ''));
+  }
+  /* Der Termin, dessen Protokoll gezeichnet ist: der eigene bei Petersen. */
+  var pDo = pFest.filter(function(t){ return t.wer === Lage.ich() && t.ziel; })[0];
+  if (pDo) setz('p-termin-do', Lage.terminWann(pDo));
+
+  /* ----- Bäckerei Freitag: der nächste Termin, nicht der erste der Woche ----- */
+  var f = fuerKunden('Bäckerei Freitag')
+    .filter(function(t){ return !t.angefragt && t.tag * 24 + t.bis > jetzt; })
+    .sort(function(a, b){ return (a.tag * 24 + a.von) - (b.tag * 24 + b.von); })[0];
+  if (f) setz('f-termin', Lage.terminWann(f));
+
+  /* ----- MTS: das Angebotsgespräch am Ende der Woche ----- */
+  var m = fuerKunden('MTS Maschinenbau')
+    .filter(function(t){ return !t.angefragt && t.tag * 24 + t.bis > jetzt; })
+    .sort(function(a, b){ return (b.tag * 24 + b.von) - (a.tag * 24 + a.von); })[0];
+  if (m) setz('mts-angebot', beginn(m));
+})();
+</script>
 <script>
 (function(){
   'use strict';

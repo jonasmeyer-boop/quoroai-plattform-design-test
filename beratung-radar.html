@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="system.css">
 <style>
 /* quoroai-plattform-design, Was er von selbst meldet: Wissenslücken-Radar und
-   die Briefings, die Donnerstag früh zu den Kunden gehen (Häppchen E3,
+   die Briefings, die dienstags früh zu den Kunden gehen (Häppchen E3,
    Issue #44).
 
    Die Frage des Häppchens war: welche Form hat eine Meldung, um die niemand
@@ -59,7 +59,33 @@
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
    V6: der Demo-Hinweis startet leer und räumt seinen Satz mit sich weg
    (siehe beratung-akte.html V16).
-   Marker: BERATUNG-RADAR-V6 (die Krume kommt aus einer Quelle) */
+   V7 (Issue #55): Eine offene Lücke hält den Radar-Punkt zum selben Thema von
+   selbst an. Vorher hörte Herr Petersen dreimal „das steht in eurem Wissen
+   nicht, ich gebe die Frage weiter" — und bekam zwei Tage später um 7:00
+   automatisch eine Zahl zu genau dieser Frage. Das entwertet die Ehrlichkeit
+   davor. Die Fläche sagte es sogar selbst („Dieselbe Frage steht oben als
+   offene Lücke") und schickte den Punkt trotzdem hinaus. Kein zweiter
+   Zustand: es ist derselbe Anhalten-Zustand wie am Knopf, nur ohne Hand, und
+   der Vermerk nennt den Grund. Er löst sich, sobald die Lücke ins Wissen
+   geschrieben oder als „keine Lücke" abgeräumt wird — und von Hand, wer den
+   Punkt trotzdem hinausschicken will.
+   V8 (Issue #55, zweite Hälfte): V7 war nur das halbe Paket und dadurch
+   gefährlicher als gar nichts. Diese Fläche hielt den Punkt an — und
+   `briefing.html`, das genau dieses Blatt beim Kunden IST, lieferte die
+   angehaltenen 11.900 € trotzdem aus. Der Zustand steht jetzt im geteilten
+   Baustein `radar.js` (Daten und Zustand, kein Aussehen — wie lage.js), und
+   beide Seiten hängen daran. Anhalten, Loslassen und die ins Wissen
+   geschriebene Antwort wandern von hier auf das Blatt des Kunden.
+   Außerdem: der Versandtag. Vorher stand an 21 Stellen „Donnerstag", während
+   das Blatt des Kunden auf Dienstag datiert war — zwei Tage für dieselbe
+   Sendung. Es gilt der Dienstag, weil die gemeinsame Lage (lage.js) die
+   Meldung „Dein Briefing liegt da" auf Dienstag, 7:00 legt und die Glocke des
+   Kunden auf genau dieses Blatt zeigt. Das Blatt von heute früh liegt beim
+   Kunden; angehalten werden kann nur die nächste Sendung, Dienstag in einer
+   Woche — die Termine kommen aus `Radar.versand()`.
+   Und Denkfehler 4: „gestern", „seit gestern", „am Dienstag", „ab Januar"
+   tragen jetzt ihr Datum.
+   Marker: BERATUNG-RADAR-V8 (das Blatt des Kunden hängt an derselben Wahrheit) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -147,10 +173,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 }
 .wartende li b{font-weight:600}
 .wartende li .seit{color:var(--nebel-500);font-size:12.5px}
-/* Der Wechsel: aus „wartet seit" wird „bekommt Donnerstag". Grün ist hier
+/* Der Wechsel: aus „wartet seit" wird „bekommt es am Dienstag". Grün ist hier
    kein Etikett, sondern der Unterschied, den der Klick gemacht hat. */
 /* visibility statt nur opacity: durchsichtig steht der Satz weiter im
-   Vorlese-Baum, und dann hörte man „bekommt es Donnerstag im Briefing",
+   Vorlese-Baum, und dann hörte man „bekommt es im nächsten Briefing",
    bevor jemand geklickt hat. */
 .wartende li .antwort{
   font-size:12.5px;font-weight:600;color:var(--gruen);
@@ -216,7 +242,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 .k-satz b{font-weight:600;color:var(--bernstein)}
 .k-satz a{color:var(--bernstein)}
 
-/* ---------- Was Donnerstag früh hinausgeht ---------- */
+/* ---------- Was am Dienstag früh hinausgeht ---------- */
 .kunde{
   margin-top:14px;border-radius:var(--radius-karte);padding:20px 22px;
   background:var(--flaeche);border:0.5px solid var(--nebel-200);
@@ -262,6 +288,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   background:var(--bernstein-fond);font-size:13px;line-height:1.55;color:var(--nebel-700);
 }
 .p-vermerk b{color:var(--bernstein);font-weight:600}
+.p-vermerk a{color:var(--bernstein)}
 .p-vermerk button{
   border:0;background:none;padding:0;margin-left:6px;
   font-size:13px;font-weight:600;color:var(--bernstein);cursor:pointer;text-decoration:underline;
@@ -303,6 +330,11 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 }
 </style>
 <script src="krume.js"></script>
+<!-- lage.js bringt das „Heute" des Entwurfs, radar.js daraus den
+     Versandtermin und den Zustand jedes Punktes. Beides teilt sich diese
+     Fläche mit briefing.html — dem Blatt, das der Kunde davon bekommt. -->
+<script src="lage.js"></script>
+<script src="radar.js"></script>
 </head>
 <body class="quoro"
       data-krume-raum="zentrale" data-krume-hier="Was er von selbst meldet"
@@ -327,22 +359,25 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   <!-- Lücke 1: der Moment der Fläche. Ein Satz ins Wissen, und drei Kunden
        hören auf zu warten. -->
   <section class="luecke" id="l-zoll" aria-label="Wissenslücke Einfuhrabgabe auf Stahl"
+           data-sperrt="zoll" data-sperr-grund="deine Antwort zur Einfuhrabgabe"
            data-hilfe-name="Eine Lücke ist ein Satz, kein Thema"
            data-hilfe="Oben steht wörtlich, womit er das Gespräch verlassen hat. Darunter, wen es getroffen hat und was dich das gekostet hat: dieselbe Antwort, dreimal von Hand geschrieben.">
     <div class="l-zitat">„Was die geplante Einfuhrabgabe für euch bedeutet, steht in eurem Wissen nicht. Ich gebe die Frage an deine Beratung weiter."</div>
     <div class="l-zitat-wer"><img src="bilder/quoro-icon.svg" alt="" width="14" height="14">So hat er es dreimal gesagt</div>
 
     <div class="l-titel">Die Einfuhrabgabe auf Stahl</div>
-    <div class="l-meta">Zuletzt gestern um 16:40, im Gespräch mit Herrn Petersen.</div>
+    <!-- Datiert, nicht relativ (Denkfehler 4): dieselbe Stelle steht in der
+         Glocke des Kunden, und „gestern" allein hieße dort ein anderer Tag. -->
+    <div class="l-meta" id="zoll-zuletzt">Zuletzt gestern, 17.08., 16:40 Uhr, im Gespräch mit Herrn Petersen.</div>
 
     <div class="l-preis">Du hast die Antwort <b>dreimal einzeln geschrieben</b>, in drei Gesprächen. <a href="beratung-zeiten.html">2,1 Stunden im August</a> — für einen Satz, den er von nun an selbst sagen könnte.</div>
 
     <div class="wartende">
       <div class="w-kopf">Wer darauf wartet</div>
       <ul>
-        <li data-wartet><b>Petersen Stahlbau</b><span class="seit">seit gestern</span><span class="antwort">bekommt es Donnerstag im Briefing</span></li>
-        <li data-wartet><b>Cordes Logistik</b><span class="seit">seit Montag</span><span class="antwort">bekommt es Donnerstag im Briefing</span></li>
-        <li data-wartet><b>MTS Maschinenbau</b><span class="seit">seit dem 5. August</span><span class="antwort">bekommt es Donnerstag im Briefing</span></li>
+        <li data-wartet><b>Petersen Stahlbau</b><span class="seit">seit gestern, 17.08.</span><span class="antwort">bekommt es am <span data-versand="kurz">Dienstag, 25.08.</span> im Briefing</span></li>
+        <li data-wartet><b>Cordes Logistik</b><span class="seit">seit Montag, 10.08.</span><span class="antwort">bekommt es am <span data-versand="kurz">Dienstag, 25.08.</span> im Briefing</span></li>
+        <li data-wartet><b>MTS Maschinenbau</b><span class="seit">seit dem 5. August 2026</span><span class="antwort">bekommt es am <span data-versand="kurz">Dienstag, 25.08.</span> im Briefing</span></li>
       </ul>
     </div>
 
@@ -357,9 +392,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   <!-- Lücke 2: nicht Wissen fehlt, sondern eine Unterlage. Der Ausgang ist
        eine Bitte beim Kunden — und die nennt ihren Grund (Entscheidung
        2026-08-15). -->
-  <section class="luecke" id="l-anlagen" aria-label="Wissenslücke Anlagenliste Cordes">
+  <section class="luecke" id="l-anlagen" aria-label="Wissenslücke Anlagenliste Cordes"
+           data-sperrt="maut" data-sperr-grund="die Anlagenliste von Cordes">
     <div class="l-zitat">„Den Fuhrpark kenne ich aus seiner eigenen Übersicht. Was darin steuerlich zählt, steht dort nicht — keine Nutzungsdauern, keine Restbuchwerte."</div>
-    <div class="l-zitat-wer"><img src="bilder/quoro-icon.svg" alt="" width="14" height="14">Sagt er seit dem 14. Mai bei jeder Frage zur Abschreibung</div>
+    <div class="l-zitat-wer"><img src="bilder/quoro-icon.svg" alt="" width="14" height="14">Sagt er seit dem 14. Mai 2026 bei jeder Frage zur Abschreibung</div>
 
     <div class="l-titel">Die steuerliche Anlagenliste 2026 von Cordes</div>
     <div class="l-meta">Hier fehlt kein Wissen, sondern eine Unterlage. Vier Antworten hat er mit diesem Vorbehalt gegeben.</div>
@@ -382,11 +418,11 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     <div class="l-titel">Steuerfragen</div>
     <div class="l-meta">Die häufigste Übergabe von allen. Und die einzige, die so bleiben soll.</div>
 
-    <p class="k-satz"><b>Das ist keine Lücke, sondern deine Kante.</b> Du hast sie am 3. August gesetzt: was Steuerrecht ist, sagt er keinem Kunden, auch wenn er es könnte. Die Stunden dafür stehen in deiner Rechnung, nicht in seinem Konto. <a href="beratung-ki-berater.html">Wo deine Kanten stehen</a></p>
+    <p class="k-satz"><b>Das ist keine Lücke, sondern deine Kante.</b> Du hast sie am 3. August 2026 gesetzt: was Steuerrecht ist, sagt er keinem Kunden, auch wenn er es könnte. Die Stunden dafür stehen in deiner Rechnung, nicht in seinem Konto. <a href="beratung-ki-berater.html">Wo deine Kanten stehen</a></p>
   </section>
 
-  <h3 data-hilfe-name="Was Donnerstag früh hinausgeht"
-      data-hilfe="Jeder Kunde bekommt sein eigenes Briefing, und darin steht nur, was an einer Zahl aus seiner Akte hängt. Du gibst nichts frei — Schweigen darf dich keine Arbeit kosten. Du kannst einen Punkt anhalten, wenn du ihn lieber selbst sagst.">Was Donnerstag früh hinausgeht</h3>
+  <h3 data-hilfe-name="Was am Dienstag früh hinausgeht"
+      data-hilfe="Jeder Kunde bekommt sein eigenes Briefing, und darin steht nur, was an einer Zahl aus seiner Akte hängt. Das Blatt von heute früh liegt schon bei ihm; hier steht die nächste Sendung. Du gibst nichts frei — Schweigen darf dich keine Arbeit kosten. Du kannst einen Punkt anhalten, wenn du ihn lieber selbst sagst.">Was am <span data-versand="kurz">Dienstag, 25.08.</span>, früh hinausgeht</h3>
   <p class="h3-satz">Er hat diese Woche 41 Branchenmeldungen gelesen. Drei davon rühren an eine Zahl aus einer eurer Akten. <span id="stille-satz">Zwei von vier Kunden bekommen deshalb nichts.</span></p>
 
   <section class="kunde" data-kunde="petersen" aria-label="Briefing für Petersen Stahlbau">
@@ -396,7 +432,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     </div>
 
     <div class="punkt" data-punkt="zoll">
-      <div class="p-welt">Das Kabinett hat am Dienstag den Entwurf zur Einfuhrabgabe auf Stahl beschlossen, 6 Prozent ab Januar.</div>
+      <div class="p-welt">Das Kabinett hat am Dienstag, 11.08.2026, den Entwurf zur Einfuhrabgabe auf Stahl beschlossen, 6 Prozent ab Januar 2027.</div>
       <div class="p-bei-ihm">Bei ihm sind das <b>340 Tonnen im Jahr</b>, gut 60 Prozent davon aus der Einfuhr — rund <b>11.900&nbsp;€ Mehrkosten</b>, gerechnet auf seine Mengen aus 2025.</div>
       <div class="p-quelle" id="zoll-quelle">Seine Zahl kommt aus dem <a href="beratung-akte.html?mandat=petersen">Rohstoffbezug in seiner Akte</a>. Dieselbe Frage steht oben als offene Lücke.</div>
       <div class="p-griffe">
@@ -405,7 +441,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     </div>
 
     <div class="punkt" data-punkt="tarif">
-      <div class="p-welt">Der Tarifabschluss in der Metall- und Elektroindustrie steht: 4,2 Prozent ab Oktober.</div>
+      <div class="p-welt">Der Tarifabschluss in der Metall- und Elektroindustrie steht: 4,2 Prozent ab Oktober 2026, Laufzeit 21 Monate.</div>
       <div class="p-bei-ihm">Bei ihm sind das <b>19 gewerbliche Mitarbeiter</b> und rund <b>34.000&nbsp;€ im Jahr</b>, ab Oktober also gut 8.500&nbsp;€ im laufenden Geschäftsjahr.</div>
       <div class="p-quelle">Seine Zahl kommt aus der Personalliste in seiner Akte.</div>
       <div class="p-griffe">
@@ -425,7 +461,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       <span class="k-ungezeichnet">Sein Blatt ist noch nicht gezeichnet</span>
     </div>
     <div class="punkt" data-punkt="maut">
-      <div class="p-welt">Die Maut für schwere Lkw steigt zum Januar um 4,3 Cent je Kilometer.</div>
+      <div class="p-welt">Die Maut für schwere Lkw steigt zum Januar 2027 um 4,3 Cent je Kilometer.</div>
       <div class="p-bei-ihm">Bei ihm sind das <b>11 Zugmaschinen</b> und rund <b>18.400&nbsp;€ im Jahr</b>, gerechnet auf seine Fahrleistung aus 2025.</div>
       <div class="p-quelle">Seine Zahl kommt aus der <a href="beratung-akte.html?mandat=cordes">Fahrleistung in seiner Akte</a> — die steuerliche Anlagenliste 2026 fehlt ihm dafür noch, das steht oben.</div>
       <div class="p-griffe">
@@ -440,7 +476,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     <div class="k-kopf">
       <div><span class="k-name">Bäckerei Freitag</span> <span class="k-zahl">nichts</span></div>
     </div>
-    <p class="still-satz">Neun Meldungen aus dem Backhandwerk gelesen, keine rührt an ihre Zahlen. <b>Sie bekommt Donnerstag nichts</b> — und merkt davon nichts.</p>
+    <p class="still-satz">Neun Meldungen aus dem Backhandwerk gelesen, keine rührt an ihre Zahlen. <b>Sie bekommt am <span data-versand="kurz">Dienstag, 25.08.</span> nichts</b> — und merkt davon nichts.</p>
   </section>
 
   <section class="kunde still" data-kunde="mts" aria-label="Briefing für MTS Maschinenbau">
@@ -459,9 +495,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
        gilt für alle drei gleich, und für MTS ließe sich ohnehin keine rechnen. -->
   <template id="vorlage-nachtrag">
     <div class="punkt" data-punkt="nachtrag">
-      <div class="p-welt">Aus deinem Wissen, heute von dir geschrieben.</div>
+      <div class="p-welt">Aus deinem Wissen, heute, <span data-heute="kurz">18.08.</span>, von dir geschrieben.</div>
       <div class="p-bei-ihm"><b>Deine Antwort zur Einfuhrabgabe</b> geht wörtlich mit — ohne Betrag, sie gilt für alle drei gleich.</div>
-      <div class="p-quelle">Steht seit heute in deinem <a href="beratung-wissen.html">Wissen</a>.</div>
+      <div class="p-quelle">Steht seit heute, <span data-heute="kurz">18.08.</span>, in deinem <a href="beratung-wissen.html">Wissen</a>.</div>
       <div class="p-griffe">
         <button class="anhalten" type="button">Anhalten, ich sage es selbst</button>
       </div>
@@ -470,7 +506,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
   <p class="fuss-satz"
      data-hilfe-name="Du gibst nichts frei"
-     data-hilfe="Es gibt hier bewusst keinen Freigabe-Knopf. Bei zweihundert Kunden wäre wöchentliches Freigeben eine Behauptung, und Schweigen darf dich keine Arbeit kosten. Anhalten kannst du jeden Punkt.">Du gibst nichts frei — was hier steht, geht Donnerstag um 7:00 hinaus, in der Stimme deines KI-Beraters und in deiner Marke. Er meldet, was ist, und was es bei diesem Betrieb ausmacht. Was daraus zu tun ist, sagt er nicht: das ist Beratung, und die kommt von dir. Auf dem Blatt des Kunden trägt jeder Punkt dafür eine Tür in sein Gespräch — gibt er es frei, findest du es unter <a href="beratung-mitlesen.html">Mitlesen</a>.</p>
+     data-hilfe="Es gibt hier bewusst keinen Freigabe-Knopf. Bei zweihundert Kunden wäre wöchentliches Freigeben eine Behauptung, und Schweigen darf dich keine Arbeit kosten. Anhalten kannst du jeden Punkt.">Du gibst nichts frei — was hier steht, geht am <span data-versand="lang">Dienstag, 25.08.2026, 7:00 Uhr</span> hinaus, in der Stimme deines KI-Beraters und in deiner Marke. Er meldet, was ist, und was es bei diesem Betrieb ausmacht. Was daraus zu tun ist, sagt er nicht: das ist Beratung, und die kommt von dir. Auf dem Blatt des Kunden trägt jeder Punkt dafür eine Tür in sein Gespräch — gibt er es frei, findest du es unter <a href="beratung-mitlesen.html">Mitlesen</a>.</p>
 </main>
 
 <div id="demo-hinweis" role="status" aria-live="polite"></div>
@@ -479,6 +515,29 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 (function(){
   'use strict';
   var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Ein Versandtermin für beide Seiten ----------
+     Ohne den Baustein bleibt stehen, was im Markup steht — richtig ist es
+     dort schon, es soll nur nicht zweimal gepflegt werden. */
+  var VERSAND = (window.Radar && window.Radar.versand())
+             || {kurz:'Dienstag, 25.08.', lang:'Dienstag, 25.08.2026, 7:00 Uhr', tag:'Dienstag'};
+  var AUSGABE = (window.Radar && window.Radar.ausgabe()) || {kurz:'Dienstag, 18.08.'};
+  /* Nur das Datum, ohne den Wochentag: „heute" nennt den Tag schon. */
+  var HEUTE_KURZ = AUSGABE.kurz.replace(/^[^,]+,\s*/, '');
+  document.querySelectorAll('[data-versand]').forEach(function(el){
+    el.textContent = VERSAND[el.dataset.versand] || el.textContent;
+  });
+  /* „heute" allein wäre relativ — der Tag steht daneben. */
+  function heuteFuellen(wurzel){
+    wurzel.querySelectorAll('[data-heute]').forEach(function(el){
+      el.textContent = HEUTE_KURZ;
+    });
+  }
+  heuteFuellen(document);
+  var zuletzt = document.getElementById('zoll-zuletzt');
+  if (zuletzt && window.Lage && window.Lage.wannWort) {
+    zuletzt.textContent = 'Zuletzt ' + window.Lage.wannWort(0, 16.67) + ', im Gespräch mit Herrn Petersen.';
+  }
 
   document.querySelectorAll('main > *').forEach(function(el, i){
     el.style.setProperty('--verz', (i * 0.06) + 's');
@@ -513,6 +572,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   /* Sein Vorschlag steht neben dem Feld, nicht darin. Ins Feld kommt er erst,
      wenn eine Hand ihn holt — dieselbe Regel wie auf der Zeichentafel
      (Entscheidung 2026-08-16). */
+  /* Was die Beratung ins Wissen geschrieben hat, je Thema — gemerkt beim
+     Schreiben, verschickt erst beim Bescheidgeben. */
+  var GESCHRIEBEN = {};
+
   var VORSCHLAG = 'Die geplante Einfuhrabgabe von 6 Prozent gilt ab Januar für Rohstahl aus Drittländern. EU-Ware ist nicht betroffen. Wer heute mehr als die Hälfte einführt, sollte bis November prüfen, ob sich der Bezug innerhalb der EU rechnet — die Preisdifferenz liegt derzeit bei 4 bis 5 Prozent.';
 
   var TUN = {
@@ -557,7 +620,19 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       if (!feld.value.trim()) { feld.focus(); return; }
       karte.querySelector('.schreiben').remove();
       karte.classList.add('zu');
-      ablegen(karte, '<span>Steht seit heute in deinem <b><a href="beratung-wissen.html">Wissen</a></b>, für alle Mandate. Ab jetzt beantwortet er die Frage selbst, statt sie dir hinzulegen.</span>');
+      ablegen(karte, '<span>Steht seit heute, ' + HEUTE_KURZ + ', in deinem <b><a href="beratung-wissen.html">Wissen</a></b>, für alle Mandate. Ab jetzt beantwortet er die Frage selbst, statt sie dir hinzulegen.</span>');
+
+      /* Der Wortlaut wird gemerkt, aber noch nicht verschickt: ins Wissen
+         schreiben heißt nicht, heute jemanden anzuschreiben. Auf das Blatt
+         des Kunden kommt er erst mit „Bescheid geben". */
+      GESCHRIEBEN[karte.dataset.sperrt || karte.id] = feld.value.trim();
+
+      /* Jetzt erst darf der Punkt zum selben Thema laufen: die Frage, mit der
+         er beim Kunden stehen geblieben ist, ist beantwortet. */
+      var gab = entsperren(karte);
+      var quelle0 = karte.id === 'l-zoll' ? document.getElementById('zoll-quelle') : null;
+      if (gab && quelle0) quelle0.innerHTML = 'Seine Zahl kommt aus dem <a href="beratung-akte.html?mandat=petersen">Rohstoffbezug in seiner Akte</a>. Die Frage dazu hast du eben beantwortet, der Punkt läuft wieder.';
+      if (gab) demoHinweis('Die Lücke ist zu. Sein Punkt läuft wieder.');
 
       /* Der zweite Schritt, und er ist wirklich ein zweiter: ins Wissen
          schreiben heißt nicht, heute jemanden anzuschreiben. */
@@ -566,7 +641,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       zs.innerHTML =
         '<div class="zs-frage">Drei warten seit Tagen auf genau diesen Satz. <b>Sie fragen von allein nicht noch einmal.</b></div>' +
         '<div class="griffe">' +
-          '<button class="knopf sekundaer" type="button" data-tu="bescheid">Allen dreien Donnerstag Bescheid geben</button>' +
+          '<button class="knopf sekundaer" type="button" data-tu="bescheid">Allen dreien am ' + VERSAND.kurz + ' Bescheid geben</button>' +
           '<button class="knopf leise" type="button" data-tu="nur-wissen">Nur ins Wissen, ich rede selbst</button>' +
         '</div>';
       karte.querySelector('.abgelegt').after(zs);
@@ -583,10 +658,15 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       });
       karte.querySelector('.wartende .w-kopf').textContent = 'Wer darauf gewartet hat';
       var k = karte.querySelector('.abgelegt');
-      k.innerHTML = '<span>Steht in deinem <b><a href="beratung-wissen.html">Wissen</a></b>. Petersen, Cordes und MTS bekommen den Satz am Donnerstag in ihrem Briefing.</span>';
+      k.innerHTML = '<span>Steht in deinem <b><a href="beratung-wissen.html">Wissen</a></b>. Petersen, Cordes und MTS bekommen den Satz am ' + VERSAND.kurz + ' in ihrem Briefing.</span>';
+
+      /* Erst jetzt geht der Wortlaut wirklich hinaus — und damit auf das
+         Blatt des Kunden, das briefing.html zeigt. */
+      var thema = karte.dataset.sperrt || karte.id;
+      if (window.Radar && GESCHRIEBEN[thema]) window.Radar.setzeAntwort(thema, GESCHRIEBEN[thema]);
 
       /* Die untere Hälfte der Fläche muss mitziehen. Steht dort weiter „MTS:
-         nichts", während oben behauptet wird, MTS bekomme Donnerstag etwas,
+         nichts", während oben behauptet wird, MTS bekomme etwas,
          widerspricht sich die Fläche in ihrer eigenen Kernaussage. */
       var vorlage = document.getElementById('vorlage-nachtrag');
       ['petersen','cordes','mts'].forEach(function(name){
@@ -594,6 +674,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         if (!kunde || kunde.querySelector('[data-punkt="nachtrag"]')) return;
         var neu = vorlage.content.firstElementChild.cloneNode(true);
         kunde.appendChild(neu);
+        heuteFuellen(neu);
         anhaltenBinden(neu);
         /* Der Satz der stillen Karte erklärte, warum nichts hinausgeht. Bleibt
            er stehen, widerspricht er der Kopfzahl direkt darüber. */
@@ -638,12 +719,14 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     },
 
     woche: function(karte){
-      ablegen(karte, '<span>Steht als Aufgabe in <b><a href="beratung-kalender.html">deiner Woche</a></b>, Donnerstagvormittag. Die drei warten so lange weiter.</span>');
+      ablegen(karte, '<span>Steht als Aufgabe in <b><a href="beratung-kalender.html">deiner Woche</a></b>, am Donnerstag, 20.08., vormittags. Die drei warten so lange weiter.</span>');
     },
 
     'keine-luecke': function(karte){
       karte.classList.add('weg');
       ablegen(karte, '<span>Aus dem Radar genommen. Er übergibt weiter, wenn die Frage kommt.</span>');
+      /* Wer sagt, das sei keine Lücke, hält damit auch keinen Punkt mehr auf. */
+      entsperren(karte);
     }
   };
 
@@ -668,12 +751,17 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   var ANGEHALTEN_WORT = ['', 'einer angehalten', 'zwei angehalten', 'drei angehalten'];
 
   function zaehle(){
-    var ohne = 0, kunden = document.querySelectorAll('.kunde');
+    var ohne = 0, gehalten = 0, kunden = document.querySelectorAll('.kunde');
     kunden.forEach(function(k){
       var alle = k.querySelectorAll('.punkt');
       var still = k.querySelectorAll('.punkt.angehalten').length;
       var offen = alle.length - still;
-      if (offen === 0) ohne++;
+      /* Zwei verschiedene Gründe, warum ein Kunde nichts bekommt: es rührt
+         nichts an seine Zahlen, oder alles ist angehalten. Der Satz darüber
+         darf sie nicht in einen Topf werfen — sonst behauptet er „nichts
+         rührt an ihre Zahlen" über einen Betrieb, bei dem etwas ansteht. */
+      if (alle.length === 0) ohne++;
+      else if (offen === 0) gehalten++;
       k.classList.toggle('still', offen === 0);
       var wort = ZAHLWORT[offen] || (offen + ' Punkte');
       if (still) wort += ', ' + (ANGEHALTEN_WORT[still] || still + ' angehalten');
@@ -688,7 +776,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       3: 'Drei von vier Kunden bekommen deshalb nichts.',
       4: 'Kein einziger Kunde bekommt deshalb etwas.'
     };
-    document.getElementById('stille-satz').textContent = OHNE_SATZ[ohne] || '';
+    var GEHALTEN_SATZ = {
+      1: ' Bei einem weiteren ist alles angehalten.',
+      2: ' Bei zwei weiteren ist alles angehalten.',
+      3: ' Bei drei weiteren ist alles angehalten.'
+    };
+    document.getElementById('stille-satz').textContent =
+      (OHNE_SATZ[ohne] || '') + (gehalten ? (GEHALTEN_SATZ[gehalten] || '') : '');
   }
 
   /* Nicht freigeben, anhalten. Der Punkt bleibt sichtbar stehen und lässt sich
@@ -707,18 +801,92 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       /* Erst einhängen, dann füllen — eine Live-Region, die fertig
          beschrieben ins Dokument kommt, sagt beim Auftauchen nichts. */
       punkt.appendChild(v);
-      v.innerHTML = '<b>Angehalten.</b> Dieser Punkt geht Donnerstag nicht hinaus. Er steht als Notiz in deiner Woche, damit du ihn nicht vergisst.<button type="button">Doch hinausgehen lassen</button>';
+      v.innerHTML = '<b>Angehalten.</b> Dieser Punkt geht am ' + VERSAND.kurz + ' nicht hinaus. Er steht als Notiz in deiner Woche, damit du ihn nicht vergisst.<button type="button">Doch hinausgehen lassen</button>';
+      /* Und er steht auch nicht auf dem Blatt des Kunden: dieselbe Wahrheit,
+         die briefing.html liest. */
+      merke(punkt, 'gesperrt');
       v.querySelector('button').addEventListener('click', function(){
         v.remove();
         punkt.classList.remove('angehalten');
         b.hidden = false;
+        merke(punkt, 'frei');
         zaehle();
       });
       zaehle();
-      demoHinweis('Angehalten. Der Rest geht Donnerstag hinaus.');
+      demoHinweis('Angehalten. Der Rest geht am ' + VERSAND.kurz + ' hinaus.');
     });
   }
   document.querySelectorAll('.punkt').forEach(anhaltenBinden);
+
+  /* ---------- Eine offene Lücke hält ihren eigenen Punkt an ----------
+     Der Kunde hat dreimal gehört „das weiß ich nicht, ich gebe es weiter".
+     Ginge zwei Tage später eine Zahl zu genau dieser Frage automatisch bei
+     ihm ein, wäre die Ehrlichkeit davor nichts mehr wert. Also: solange die
+     Lücke offen ist, ist der Punkt zum selben Thema angehalten — von selbst,
+     im selben Zustand wie am Knopf, und mit dem Grund an der Karte. */
+  /* Die Brücke zum Blatt des Kunden. Ein angehaltener Punkt ist dort keine
+     andere Sache — er fehlt einfach, und briefing.html sagt an seiner Stelle,
+     warum. Ohne diese eine Zeile liefe die halbe Reparatur wieder
+     auseinander: der Radar hielte an, das Blatt lieferte trotzdem aus. */
+  function merke(punkt, wert){
+    var thema = punkt.dataset.punkt;
+    if (!window.Radar || !thema) return;
+    if (wert === 'gesperrt') window.Radar.sperren(thema);
+    else window.Radar.freigeben(thema);
+  }
+
+  function sperrGriff(punkt, grund, luecke){
+    var b = punkt.querySelector('.anhalten');
+    if (b) b.hidden = true;
+    punkt.classList.add('gesperrt', 'angehalten');
+    var v = document.createElement('div');
+    v.className = 'p-vermerk';
+    punkt.appendChild(v);
+    v.innerHTML = '<b>Angehalten, solange ' + grund + ' fehlt.</b> Genau diese Frage hat er beim Kunden offengelassen — er darf sie nicht am ' + VERSAND.kurz + ' früh von selbst beantworten. Auf seinem Blatt steht an dieser Stelle, dass du die Antwort noch schuldig bist. <a href="#' + luecke.id + '">Zur Lücke oben</a>' +
+      '<button type="button">Trotzdem hinausgehen lassen</button>';
+    merke(punkt, 'gesperrt');
+    v.querySelector('button').addEventListener('click', function(){
+      loesen(punkt);
+      demoHinweis('Der Punkt geht am ' + VERSAND.kurz + ' hinaus, obwohl die Lücke offen ist.');
+    });
+  }
+
+  function loesen(punkt){
+    punkt.classList.remove('gesperrt', 'angehalten');
+    var v = punkt.querySelector('.p-vermerk');
+    if (v) v.remove();
+    var b = punkt.querySelector('.anhalten');
+    if (b) b.hidden = false;
+    merke(punkt, 'frei');
+    zaehle();
+  }
+
+  /* Gibt zurück, ob wirklich etwas losgelassen wurde — nur dann meldet die
+     Fläche es auch. */
+  function entsperren(luecke){
+    var thema = luecke.dataset.sperrt;
+    if (!thema) return false;
+    var los = document.querySelectorAll('.punkt.gesperrt[data-punkt="' + thema + '"]');
+    los.forEach(loesen);
+    return los.length > 0;
+  }
+
+  /* Der Radar ist die Quelle des Zustands: beim Laden schreibt er den
+     gezeichneten Ausgangsstand, damit auf dem Blatt des Kunden nicht die
+     Entscheidung eines früheren Durchgangs stehen bleibt, während hier
+     wieder von vorn gezeigt wird. */
+  var offeneThemen = [];
+  document.querySelectorAll('.luecke[data-sperrt]').forEach(function(luecke){
+    offeneThemen.push(luecke.dataset.sperrt);
+  });
+  if (window.Radar) window.Radar.zuruecksetzen(offeneThemen);
+
+  document.querySelectorAll('.luecke[data-sperrt]').forEach(function(luecke){
+    document.querySelectorAll('.punkt[data-punkt="' + luecke.dataset.sperrt + '"]').forEach(function(p){
+      sperrGriff(p, luecke.dataset.sperrGrund, luecke);
+    });
+  });
+
   zaehle();
 })();
 </script>

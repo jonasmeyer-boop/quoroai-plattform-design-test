@@ -34,7 +34,7 @@
    sind so gewählt, dass sie sich zu genau diesen Honoraren aufaddieren (das
    Skript prüft das und meldet sich in der Konsole, wenn jemand eine Zahl
    ändert, ohne die andere mitzurechnen). Die drei offenen Rechnungen sind
-   dieselben wie in beratung-rechnungen.html und ergeben die 12.376 €, die
+   dieselben wie in beratung-rechnungen.html und ergeben die 8.806,00 €, die
    das Modell in der Zentrale nennt.
 
    Die Bilder sind aus demselben Glas wie alles andere: jede Säule und jeder
@@ -68,6 +68,8 @@
    es Wort und Ziffer („Zwei von 13"). Alle sechs Zustände sind mit Kopien
    der Fläche im Browser nachgestellt: leer, heute gestellt, gestern
    gestellt, ein Tag Restfrist, eine überfällige, dreizehn überfällige.
+   („Ein Tag Restfrist" ist seit V9 der Normalfall dieser Fläche: Petersens
+   Rechnung liegt neun Tage bei zehn Tagen Zahlungsziel.)
    V5 (Häppchen B5): die Abreden sind jetzt durchgerechnet — Cordes' und
    MTS' offene Rechnungen sind ihre Monatspauschale und ihr achter Abschlag,
    nicht mehr Einzelrechnungen neben einer Pauschale, die für sie keinen Platz
@@ -75,7 +77,36 @@
    Euro von ihrer Summe ab.
    V7 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
-   Marker: BERATUNG-AUSWERTUNGEN-V7 (die Krume kommt aus einer Quelle) */
+   V8 (Issue #59): an jede Summe gehört der Kreis, über den sie zählt. Der
+   Kopf sagt jetzt, dass alle fünf Bilder über die vier Modell-Mandate
+   rechnen und nicht über die 187 des Registers (Ärger 110). Bild 2 nennt die
+   Honorarsumme, gegen die sein Prozentsatz zählt. Bild 4 sagt „Drei von
+   sechs gestellten Rechnungen sind offen, zusammen 8.806,00 €" — derselbe
+   Wortlaut wie der Kopf von beratung-rechnungen.html.
+   V9 (Welle 2): Petersen ist ein Pauschalmandat — 2.400 € im Monat seit dem
+   1. Mai 2026 (Beratungsvertrag Ziffer 2, Leistungsnachweis in
+   leistungen.html), nicht 38.350 € nach Aufwand. Das zieht durch alle fünf
+   Bilder: Honorar 60.360 € statt 89.110 €, 482 erfasste Stunden statt 675,
+   Petersens offene Rechnung 2.856,00 € statt 6.426 €, die Summe der drei
+   offenen Forderungen 8.806,00 € statt 12.376 €. Damit ist Petersen das
+   KLEINSTE der vier Mandate, nicht das größte.
+   Zwei Folgen, die keine reine Zahl sind: das Zahlungsziel hängt jetzt an
+   der einzelnen Rechnung (Petersens Vertrag sagt zehn Tage, das Haus
+   vierzehn), also steht die Frist-Kante in Bild 4 an jeder Zeile — und
+   Bild 4 nennt die Rechnung mit der
+   kürzesten RESTFRIST statt der ältesten. Die Achse von Bild 5 reicht bis
+   180 €, weil Petersens Listensatz-Mix bei 174 € liegt und sonst still am
+   rechten Rand kleben würde. Petersen steht dort neu in Bernstein: 174,39 €
+   versprechen die Sätze der Köpfe, angekommen sind 168,42 €, das sind knapp
+   sechs Euro. Das ist gewollt und die Aussage des Bildes — eine Pauschale
+   setzt keinen Stundensatz durch, sie deckt Stunden ab. Der Fußsatz sagt
+   genau das schon.
+   V11: Der Tag kommt aus der Lage (lage.js) statt aus einem eigenen
+   `HEUTE_TAG = 14`. Daran hingen der schraffierte August und das Alter jeder
+   offenen Rechnung, das als 13, 12 und 11 getippt dastand; es wird jetzt aus
+   dem Tag des Stellens gerechnet. Gegen den 18. August sind alle drei
+   Rechnungen über ihrer Frist — das sagt die Fläche jetzt auch.
+   Marker: BERATUNG-AUSWERTUNGEN-V11 (Petersen ist ein Pauschalmandat) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -235,6 +266,12 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
    statt über der Gruppe — dieselbe Aussage, in der Form, die die Zeile
    hergibt. */
 .zeilen-marke{display:none}
+/* Bild 4: jede Rechnung hat ihre eigene Frist — beim Hausziel vierzehn Tage,
+   bei Petersen Stahlbau zehn, weil sein Vertrag es so sagt. Eine Kante quer
+   über die Gruppe stünde dort für drei verschiedene Fristen und wäre eine
+   Lüge in einer Linie. Deshalb steht sie hier an jeder Zeile, auch am
+   großen Bildschirm. */
+.zeilen-marke.eigene-frist{display:block;top:-3px;bottom:-3px}
 .marke-wort{font-size:11.5px;color:var(--nebel-500);margin-top:10px;text-align:right}
 .marke-wort b{color:var(--nebel-700);font-weight:600}
 .rohr.knapp .fuell{background:linear-gradient(180deg, #eebb59 0%, #c88f28 100%);
@@ -333,6 +370,9 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
   .legende div{font-size:12px}
 }
 </style>
+<!-- lage.js bringt window.Lage: das eine „Heute" des Entwurfs und das Rechnen
+     mit Tagesabständen. Muss vor allem stehen, was daraus liest. -->
+<script src="lage.js"></script>
 <script src="krume.js"></script>
 </head>
 <body class="quoro"
@@ -423,10 +463,13 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
   });
 
   /* ================= Die Welt =================
-     Heute ist der 14. August 2026 — derselbe Tag wie auf dem Rechnungspapier
-     und im Stadtmodell. Alles, was „seit Jahresbeginn" heißt, meint den
-     1. Januar bis heute. */
-  var HEUTE_TAG = 14, TAGE_IM_AUGUST = 31;
+     Das „Heute" kommt aus der Lage (lage.js): Dienstag, der 18. August 2026.
+     Hier stand ein eigenes `HEUTE_TAG = 14`, und daran hingen der schraffierte
+     August und das Alter jeder offenen Rechnung — vier Tage zu jung.
+     Alles, was „seit Jahresbeginn" heißt, meint den 1. Januar bis zu diesem
+     Tag. */
+  var Lage = window.Lage;
+  var HEUTE_TAG = Lage.heuteDatum().getDate(), TAGE_IM_AUGUST = 31;
 
   /* Dasselbe Team wie in beratung-marge.html und beratung-verwaltung.html,
      mit denselben Namen, Rollen und Verkaufssätzen. Der Kostensatz, den
@@ -451,14 +494,24 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
      wann jemand Rechnungen schreibt, statt wann gearbeitet wurde.
      Pauschalen sind gerechnet, nicht getippt: acht Monate zu 2.750 € sind
      Cordes' 22.000 €, ein Zwölftel von 27.000 € achtmal ist MTS' 18.000 €.
-     Die Juli-Zahl von Petersen (5.400 €) und die Juni-Zahl von Freitag
-     (1.650 €) sind genau die Rechnungen 2026-0086 und 2026-0083 aus
-     beratung-rechnungen.html. */
-  var PAUSCHALE = {cordes: 2750, mts: 27000 / 12};
+     Die Juli-Zahl von Petersen (2.400 €) und die Juni-Zahl von Freitag
+     (1.650 €) sind genau die Rechnungen 2026-0084 und 2026-0083 aus
+     beratung-rechnungen.html.
+     Petersen steht seit Welle 2 als Pauschalmandat: 2.400 € im Monat, und
+     der Vertrag beginnt am 1. Mai 2026 — Januar bis April sind deshalb null,
+     Mai bis August tragen je eine Rate, zusammen 9.600 €. Die Stunden sind
+     dieselben wie in beratung-marge.html. Vier Monate zu null im Verlauf
+     sind keine Lücke, sondern der Beginn des Mandats.
+     `ab` ist der erste Monat, in dem die Pauschale läuft (0 = Januar). */
+  var PAUSCHALE = {
+    petersen: {rate: 2400,      ab: 4},   /* Vertrag ab 1. Mai 2026 */
+    cordes:   {rate: 2750,      ab: 0},
+    mts:      {rate: 27000 / 12, ab: 0}
+  };
   var MANDATE = [
-    {id:'petersen', name:'Petersen Stahlbau', honorar:38350,
-     abrede:'nach Aufwand', stunden:[['anna',62],['miriam',148],['sabine',40]],
-     monate:[5200, 4860, 6300, 5940, 4320, 3780, 5400, 2550]},
+    {id:'petersen', name:'Petersen Stahlbau', honorar:9600,
+     abrede:'Pauschale, 2.400 € im Monat', stunden:[['anna',34],['miriam',13],['sabine',10]],
+     pauschale:'petersen'},
     {id:'cordes', name:'Cordes Logistik', honorar:22000,
      abrede:'Pauschale, 2.750 € im Monat', stunden:[['jens',33],['tarek',126],['sabine',52]],
      pauschale:'cordes'},
@@ -476,7 +529,8 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
 
   MANDATE.forEach(function(m){
     if (m.pauschale) {
-      m.monate = MONATSNAMEN.map(function(){ return PAUSCHALE[m.pauschale]; });
+      var p = PAUSCHALE[m.pauschale];
+      m.monate = MONATSNAMEN.map(function(_, i){ return i >= p.ab ? p.rate : 0; });
     }
     m.std = 0; m.listenwert = 0;
     m.stunden.forEach(function(p){
@@ -505,20 +559,42 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
   MANDATE.forEach(function(m){ m.anteil = m.honorar / HONORAR; });
 
   /* Die drei offenen Rechnungen aus beratung-rechnungen.html, brutto wie auf
-     dem Papier. Zusammen 12.376 € — die Zahl, die das Modell in der Zentrale
-     nennt. Zwei davon sind Raten einer Abrede: MTS' achter Abschlag auf die
-     Jahrespauschale (2.250 € netto) und Cordes' Monatspauschale August
-     (2.750 € netto). `tage` ist das Alter am 14.08.2026, `ziel` das
-     Zahlungsziel der Beratung.
+     dem Papier. Zusammen 8.806,00 € — die Zahl, die das Modell in der
+     Zentrale nennt. Alle drei sind Raten einer Abrede: MTS' achter Abschlag
+     auf die Jahrespauschale (2.250 € netto), Cordes' Monatspauschale August
+     (2.750 € netto) und Petersens Monatspauschale (2.400 € netto,
+     2.856,00 € brutto). `gestelltISO` ist der Tag, an dem sie gestellt wurde
+     — ihr Alter rechnet die Lage daraus; `ziel` ist das Zahlungsziel, das für
+     GENAU DIESE Rechnung gilt.
      Die Beträge tragen Cent, deshalb rechnet dieses Bild mit eurokomma und
      nicht mit euro — sonst wichen die drei Balken zusammen um einen Euro von
      ihrer eigenen Summe ab. */
+  /* Das Zahlungsziel des Hauses. Steht im Vertrag eines Mandats etwas
+     anderes, gilt der Vertrag — genauso rechnet beratung-rechnungen.html.
+     Bei Petersen macht Ziffer 2 des Beratungsvertrags die Rechnung nach zehn
+     Tagen fällig, nicht nach vierzehn. Warum die Kante deshalb an jeder
+     Zeile steht, sagt der CSS-Kommentar bei .eigene-frist. */
   var ZIEL_TAGE = 14;
+  /* Der Kreis, über den Bild 4 zählt: sechs gestellte Rechnungen liegen in
+     beratung-rechnungen.html (2026-0081 bis 2026-0086; Entwürfe und die
+     stornierte 2026-0079 zählen dort wie hier nicht mit). Drei davon sind
+     offen. Ohne diese Zahl liest sich „8.806,00 € offen" wie eine Summe über
+     alles, was die Beratung je gestellt hat. */
+  var GESTELLTE_RECHNUNGEN = 6;
   var FORDERUNGEN = [
-    {nummer:'2026-0084', kunde:'MTS Maschinenbau',   brutto:2677.50, gestellt:'2.\u00a0August',  tage:12},
-    {nummer:'2026-0085', kunde:'Cordes Logistik',    brutto:3272.50, gestellt:'3.\u00a0August',  tage:11},
-    {nummer:'2026-0086', kunde:'Petersen Stahlbau',  brutto:6426,    gestellt:'5.\u00a0August',  tage: 9}
+    /* Petersens Rechnung ist die erste im August: der Vertrag stellt am ersten
+       Tag des Folgemonats (blaetter.js, Ziffer 2). Fortlaufend hei\u00dft in der
+       Reihenfolge des Stellens \u2014 deshalb tr\u00e4gt sie die 0084 und nicht die
+       0086, und ihre Ziffern decken sich mit der RE-2026-084, die der Kunde
+       in rechnungen.html sieht. Ein Anruf findet damit dasselbe Blatt. */
+    {nummer:'2026-0084', kunde:'Petersen Stahlbau',  brutto:2856,    gestellt:'1.\u00a0August',  gestelltISO:'2026-08-01', ziel:10},
+    {nummer:'2026-0085', kunde:'MTS Maschinenbau',   brutto:2677.50, gestellt:'2.\u00a0August',  gestelltISO:'2026-08-02', ziel:ZIEL_TAGE},
+    {nummer:'2026-0086', kunde:'Cordes Logistik',    brutto:3272.50, gestellt:'3.\u00a0August',  gestelltISO:'2026-08-03', ziel:ZIEL_TAGE}
   ];
+  /* Das Alter jeder Rechnung wird gerechnet, nicht getippt: `tage` stand hier
+     als 13, 12 und 11 und war gegen den 14.08. gerechnet. Eine Zahl, die
+     stillsteht, w\u00e4hrend der Entwurf weiterr\u00fcckt, wird irgendwann falsch. */
+  FORDERUNGEN.forEach(function(f){ f.tage = Lage.tageSeit(f.gestelltISO); });
   /* Die letzte bezahlte Rechnung, ebenfalls von dort: 2026-0083, gestellt am
      8. Juli, bezahlt am 21. Juli. */
   var ZULETZT_BEZAHLT = {nummer:'2026-0083', kunde:'Bäckerei Freitag', brutto:1963.50, tage:13};
@@ -573,9 +649,17 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
   }
 
   /* ================= Der Kopf ================= */
+  /* Der Kreis steht im ersten Satz, nicht im Kleingedruckten (Issue #59):
+     alle fünf Bilder rechnen über die vier Mandate des Modells. Im Register
+     stehen 187 — wer das nicht liest, hält die 58.636 € dort und die
+     8.806,00 € hier für einen Widerspruch. */
   document.getElementById('stand').innerHTML =
-    'Seit Jahresbeginn, Stand 14. August 2026. ' + euro(HONORAR) + ' Honorar auf ' +
+    /* Der Stand kommt aus der Lage, nicht aus dem Satz: hier stand der
+       14. August, während die Fläche daneben den 18. führte. */
+    'Seit Jahresbeginn, Stand ' + Lage.heuteLang() + '. ' + euro(HONORAR) + ' Honorar auf ' +
     wort(MANDATE.length) + ' Mandaten, ' + std(STUNDEN) + ' erfasst. ' +
+    'Alle fünf Bilder rechnen über <b>diese ' + wort(MANDATE.length) + ' Mandate des Modells</b> — ' +
+    'im <a href="beratung-kunden.html">Register</a> stehen 187, und über die zählt hier nichts. ' +
     'Diese Fläche sehen <b>Inhaber und Partner</b>.';
 
   /* ================= 1 · Kommt genug rein? ================= */
@@ -630,7 +714,8 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
     document.getElementById('fuss-1').innerHTML =
       'Die gestrichelte Linie ist der Schnitt der ' + wort(voll.length) + ' vollen Monate. ' +
       'Der August ist schraffiert, weil er noch läuft: ' + HEUTE_TAG + ' von ' + TAGE_IM_AUGUST +
-      ' Tagen sind vorbei, die beiden Pauschalen stehen aber schon voll darin. ' +
+      ' Tagen sind vorbei, die ' + wort(MANDATE.filter(function(m){ return m.pauschale; }).length) +
+      ' Pauschalen stehen aber schon voll darin. ' +
       'Gezählt wird nach dem Monat der Leistung, nicht nach dem Tag der Rechnung. ' +
       '<b>Pauschalmandate stehen mit ihrer Monatsrate</b> — und nur damit: eine Pauschale deckt ' +
       'die Stunden ab, neben ihr wird nichts einzeln gestellt.';
@@ -668,7 +753,8 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
     var groesster = sortiert[0];
     var zweiGroesste = sortiert[0].anteil + sortiert[1].anteil;
     document.getElementById('antwort-2').innerHTML =
-      '<b class="warn">' + groesster.name + ' trägt ' + proz(groesster.anteil * 100) + '</b> des Honorars. ' +
+      '<b class="warn">' + groesster.name + ' trägt ' + proz(groesster.anteil * 100) + '</b> des Honorars ' +
+      'aus den ' + wort(MANDATE.length) + ' Mandaten, ' + euro(HONORAR) + ' zusammen. ' +
       'Mit ' + sortiert[1].name + ' zusammen sind es <b>' + proz(zweiGroesste * 100) + '</b> — fällt einer davon weg, ' +
       'fehlt mehr, als die anderen auffangen.';
     document.getElementById('marke-2').innerHTML =
@@ -760,43 +846,48 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
        Tage liegt, sähe bei festem Maß aus wie eine mit 20 — und das ist
        genau der Fall, für den es dieses Bild gibt. Das Maß wächst mit der
        ältesten Rechnung und lässt die Frist immer sichtbar. */
-    var deckel = Math.max(20, Math.max.apply(null, FORDERUNGEN.map(function(f){ return f.tage; })) * 1.25);
+    /* Das Maß muss auch die längste FRIST fassen, nicht nur die älteste
+       Rechnung — sonst läge die Kante eines Mandats mit langem Zahlungsziel
+       außerhalb der Röhre und wäre unsichtbar. */
+    var deckel = Math.max(20,
+      Math.max.apply(null, FORDERUNGEN.map(function(f){ return f.tage; })) * 1.25,
+      Math.max.apply(null, FORDERUNGEN.map(function(f){ return f.ziel; })) * 1.1);
     var summe = offen.reduce(function(s, f){ return s + f.brutto; }, 0);
-    var aelteste = offen[0];
-    var ueberfaellig = offen.filter(function(f){ return f.tage > ZIEL_TAGE; });
+    var ueberfaellig = offen.filter(function(f){ return f.tage > f.ziel; });
 
     offen.forEach(function(f, i){
-      var spaet = f.tage > ZIEL_TAGE;
+      var spaet = f.tage > f.ziel;
       var z = document.createElement('div');
       z.className = 'b-zeile';
       z.innerHTML =
         '<div class="b-name"></div>' +
         '<div class="b-spur"><span class="rohr liegt' + (spaet ? ' knapp' : '') + '" role="img">' +
           '<span class="fuell"></span></span>' +
-          '<span class="b-marke streng zeilen-marke" style="--bei:' + (ZIEL_TAGE / deckel).toFixed(4) + '"></span>' +
+          '<span class="b-marke streng zeilen-marke eigene-frist" style="--bei:' + (f.ziel / deckel).toFixed(4) + '"></span>' +
         '</div>' +
         '<div class="b-wert zahl"></div>';
       z.querySelector('.b-name').innerHTML = f.kunde + '<small>' + f.nummer + ', gestellt am ' + f.gestellt + '</small>';
       z.querySelector('.b-wert').innerHTML = eurokomma(f.brutto) +
-        '<small>' + f.tage + ' Tage offen</small>';
+        '<small>' + f.tage + ' von ' + f.ziel + ' Tagen Frist</small>';
       var rohr = z.querySelector('.rohr');
       rohr.setAttribute('aria-label', f.kunde + ', ' + f.nummer + ': ' + eurokomma(f.brutto) + ', seit ' +
-        f.tage + ' Tagen offen' + (spaet ? ', überfällig' : ', im Ziel'));
+        f.tage + ' Tagen offen, Zahlungsziel ' + f.ziel + ' Tage' + (spaet ? ', überfällig' : ', im Ziel'));
       fuellen(rohr, f.tage / deckel, i);
       el.appendChild(z);
     });
-    el.appendChild(kante(ZIEL_TAGE / deckel));
 
     /* Alle Fälle zählen und beugen, statt eine Lage zu behaupten: „ein von
        drei Rechnungen sind", „null Tage bleiben ihr", „seit 1 Tagen" und
        „in ein Tag fällig" sind Sätze, die jeder für einen Fehler hält — zu
        Recht. Zwei Beugungen, die nur Deutsch kennt: nach „seit" und „in"
-       steht der Dativ, also „seit einem Tag" und „in einem Tag". */
-    function seitTagen(n){
-      return n === 0 ? 'liegt seit heute' : n === 1 ? 'liegt seit einem Tag' : 'liegt seit ' + n + ' Tagen';
+       steht der Dativ, also „seit einem Tag" und „in einem Tag".
+       Beide Zahlen als Ziffer, weil sie im selben Satz nebeneinanderstehen:
+       „seit 9 Tagen … in zwei Tagen" wäre ein Satz mit zwei Schriften. */
+    function seitWann(n){
+      return n === 0 ? 'seit heute' : n === 1 ? 'seit einem Tag' : 'seit ' + n + ' Tagen';
     }
     function inTagen(n){
-      return n === 0 ? 'heute fällig' : n === 1 ? 'morgen fällig' : 'in ' + wort(n) + ' Tagen fällig';
+      return n === 0 ? 'heute fällig' : n === 1 ? 'morgen fällig' : 'in ' + n + ' Tagen fällig';
     }
     var antwort4 = document.getElementById('antwort-4');
     if (!offen.length) {
@@ -805,33 +896,66 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
       antwort4.innerHTML = '<b>Keine Rechnung steht offen.</b> Zuletzt bezahlt: ' +
         ZULETZT_BEZAHLT.kunde + ', ' + ZULETZT_BEZAHLT.nummer + ' nach ' + ZULETZT_BEZAHLT.tage + ' Tagen.';
     } else {
-      var rest = ZIEL_TAGE - aelteste.tage;
+      /* Nicht die ÄLTESTE Rechnung ist die dringendste, seit jedes Mandat
+         seine eigene Frist hat: eine Rechnung, die neun von zehn Tagen liegt,
+         ist eher fällig als eine, die zwölf von vierzehn liegt. Der Satz nennt
+         deshalb die mit der kürzesten Restfrist und sagt dazu, wessen
+         Rechnung das ist. */
+      var knappste = offen.slice().sort(function(a, b){
+        return (a.ziel - a.tage) - (b.ziel - b.tage);
+      })[0];
+      var rest = knappste.ziel - knappste.tage;
       antwort4.innerHTML = ueberfaellig.length === 0
-        ? '<b>' + eurokomma(summe) + '</b> stehen offen, verteilt auf ' +
-          /* „eine Rechnung", nicht „ein Rechnung" — wort() kennt kein
-             Geschlecht, und Rechnung ist weiblich. */
-          (offen.length === 1 ? 'eine Rechnung' : wort(offen.length) + ' Rechnungen') +
-          '. <b>Keine ist überfällig</b> — die älteste ' +
-          seitTagen(aelteste.tage) + ' und ist ' + inTagen(rest) + '.'
+        /* Der Kreis vor der Summe, im Wortlaut der Rechnungsfläche:
+           „3 von 6 gestellten Rechnungen offen, zusammen 8.806,00 €"
+           (Issue #59). Vorher stand die Summe allein da, und im Register
+           standen zwei Klicks weiter 58.636 € — beide richtig, beide ohne
+           Angabe, worüber sie zählen. */
+        ? '<b>' + anzahlWortGross(offen.length) + ' von ' + wort(GESTELLTE_RECHNUNGEN) +
+          ' gestellten Rechnungen ' + (offen.length === 1 ? 'ist offen' : 'sind offen') +
+          ', zusammen ' + eurokomma(summe) + '.</b> <b>Keine ist überfällig</b> — am knappsten liegt ' +
+          knappste.kunde + ': ' + seitWann(knappste.tage) + ' bei ' + knappste.ziel +
+          ' Tagen Zahlungsziel, ' + inTagen(rest) + '.'
         /* Entweder beide Zahlen als Wort oder beide als Ziffer: „Zwei von 13"
            ist ein Satz mit zwei Schriften. Über zwölf hat wort() kein Wort
            mehr, also fallen dann beide auf Ziffern zurück. */
-        : '<b class="warn">' + (function(){
+        : (function(){
             var beideWorte = ueberfaellig.length <= 12 && offen.length <= 12;
             var vonWie = beideWorte ? wort(offen.length) : String(offen.length);
-            if (ueberfaellig.length === 1) return 'Eine von ' + vonWie + ' Rechnungen ist über der Frist';
-            return (beideWorte ? anzahlWortGross(ueberfaellig.length) : String(ueberfaellig.length)) +
-              ' von ' + vonWie + ' Rechnungen sind über der Frist';
-          })() +
-          '</b>, zusammen ' +
-          eurokomma(ueberfaellig.reduce(function(s, f){ return s + f.brutto; }, 0)) + ' von ' + eurokomma(summe) + '.';
+            var betrag = eurokomma(ueberfaellig.reduce(function(s, f){ return s + f.brutto; }, 0));
+            /* Sind es alle, heißt es „alle drei" — „Drei von drei" und
+               „8.806,00 € von 8.806,00 €" sind derselbe Satz zweimal. */
+            if (ueberfaellig.length === offen.length) {
+              return '<b class="warn">' + (offen.length === 1
+                  ? 'Die einzige offene Rechnung ist über ihrer Frist'
+                  : 'Alle ' + vonWie + ' offenen Rechnungen sind über ihrer Frist') +
+                '</b>, zusammen ' + betrag + '.';
+            }
+            return '<b class="warn">' + (ueberfaellig.length === 1
+                ? 'Eine von ' + vonWie + ' offenen Rechnungen ist über ihrer Frist'
+                : (beideWorte ? anzahlWortGross(ueberfaellig.length) : String(ueberfaellig.length)) +
+                  ' von ' + vonWie + ' offenen Rechnungen sind über ihrer Frist') +
+              '</b>, zusammen ' + betrag + ' von ' + eurokomma(summe) + '.';
+          })();
     }
     /* Ohne Balken keine Kante — ein Satz über eine Linie, die nicht da ist,
        schickt das Auge auf die Suche. */
     var markeEl = document.getElementById('marke-4');
     markeEl.hidden = !offen.length;
     markeEl.innerHTML =
-      'Die Kante ist das Zahlungsziel der Beratung, <b>' + ZIEL_TAGE + ' Tage</b>. Rechts davon wird eine Rechnung bernsteinfarben.';
+      'Die Kante in jeder Zeile ist das Zahlungsziel, das für diese Rechnung gilt: im Haus <b>' +
+      ZIEL_TAGE + ' Tage</b>' +
+      (function(){
+        var anders = offen.filter(function(f){ return f.ziel !== ZIEL_TAGE; });
+        if (!anders.length) return '';
+        /* Beide Zahlen als Ziffer: „14 Tage" neben „zehn" wäre ein Satz mit
+           zwei Schriften — derselbe Fehler, den der Antwortsatz oben
+           ausdrücklich vermeidet. */
+        return ', ' + anders.map(function(f){
+          return 'bei ' + f.kunde + ' <b>' + f.ziel + '</b>';
+        }).join(' und ') + ', so steht es im Vertrag des Mandats';
+      })() +
+      '. Rechts der Kante wird eine Rechnung bernsteinfarben.';
     /* Der letzte Zahlungseingang steht in der Antwort, sobald nichts offen
        ist; dann gehört er nicht ein zweites Mal in die Fußzeile. */
     document.getElementById('fuss-4').textContent =
@@ -844,7 +968,13 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
 
   /* ================= 5 · Setzen wir unsere Preise durch? ================= */
   (function(){
-    var VON = 100, BIS = 160;   /* die Achse; kein Nullpunkt, weil hier zwei Punkte liegen und kein Balken misst */
+    /* Die Achse; kein Nullpunkt, weil hier zwei Punkte liegen und kein
+       Balken misst. Sie reicht bis 180 €, seit Petersen ein Pauschalmandat
+       ist: dort arbeitet überwiegend die Inhaberin (210 € Listensatz), der
+       Mix liegt bei rund 174 € und angekommen sind rund 168 €. Bei 160 €
+       klemmten beide Punkte am rechten Rand aneinander — ein Bild, das eine
+       Lücke von sechs Euro als null zeigt. */
+    var VON = 100, BIS = 180;
     function lage(wert){ return Math.max(0, Math.min(1, (wert - VON) / (BIS - VON))); }
 
     var el = document.getElementById('preise');

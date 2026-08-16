@@ -6,7 +6,41 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V56
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V61
+   V61 (Nutzerprüfung 2026-08-16): „Welche Termine stehen an?" wurde aus einer
+   Handliste beantwortet und verschwieg Herrn Petersen zwei seiner drei Termine
+   dieser Woche — dieselbe Fläche, deren Glocke längst aus der Lage liest.
+   Die Antwort kommt jetzt ebenfalls aus lage.js, samt der offenen Anfrage.
+   Dazu Fingermaß für den Rückweg, „Gespräche", die Markenzeile, die Glocke und
+   den Freigabe-Schalter (alle unter 40px), und die Liste früherer Gespräche
+   trägt Datum statt „Montag, 9:12".
+   V60 (Welle 3, Denkfehler 4): Der Fahrplan des Preismodells zählte in Wochen,
+   ohne dass irgendwo stand, wann Woche 1 beginnt. Er zählt ab der Freigabe;
+   erbeten ist sie bis Freitag, den 04.09.2026, Woche 1 ist dann die Woche ab
+   dem 07.09.2026, wirksam wird es am 12.10.2026 — dieselben Daten wie in
+   beratung-mandat.html. Die Stationen tragen jetzt Daten statt Wochenzahlen,
+   und der Satz davor nennt den Anfang. „In vier Wochen kommst du hin" war
+   dazu falsch: von der Freigabe bis zur Wirksamkeit sind es sechs. Der
+   Vorlauf der C-Kunden heißt jetzt überall drei Wochen (bitten.js zog nach)
+   und steht als Datum da: informiert am 21.09.2026, wirksam am 12.10.2026.
+   V59 (Reste der Nutzerprüfung): Das Startjahr des Wasserfalls heißt 2025, wie
+   überall sonst im Entwurf — 2024 stand gegen den eigenen Satz „im letzten
+   Jahr". Dieselbe Änderung steht in beratung-mitlesen.html, weil beide Seiten
+   dasselbe Gespräch zeigen. Die 30,4 % heißen jetzt beim Namen
+   „Rohertragsmarge" (die des Kunden — nicht die 28,5 % Marge, die die Beratung
+   am Mandat verdient). Und an den 20.550 € steht der Kreis: die Forderungen
+   seiner Kunden an IHN, überfällig seit dem 09.08.2026.
+   V58 (Issue #53 und #55): Die Preisantwort nennt im ersten Satz 2.400,00 €
+   netto, 2.856,00 € brutto, Laufzeit und Kündigungsfrist und legt den
+   Beratungsvertrag als Karte daneben — er öffnet sich, statt nur erwähnt zu
+   werden. Die Margen-Antwort spricht die 5,8 Punkte aus, die ihr Bild zeigt.
+   Und die Uhr kommt aus der Lage, nicht mehr vom Rechner: „Guten Morgen." zu
+   Meldungen von 9:20, nicht „Guten Abend." Das Vorführ-Hirn wird nur noch
+   gefragt, wo es wohnt (Port 8787) — sonst 404 in jeder Konsolenprüfung.
+   V57 (Issue #57): die Glocke liest aus der Lage (lage.js) statt aus einer
+   zweiten, hier abgeschriebenen Liste — „Dr. Anna Vogelsang hat geschrieben"
+   fehlte ausgerechnet hier. Der Termin-Fahrplan nennt die Anfrage als Anfrage
+   und steht datiert.
    V56 (Issue #58): das Kopfband ist bis zur Unterkante deckend, und die Kamera
    hält am Ende so, dass das erste noch sichtbare Stück unter dem Band beginnt.
    Vorher stand der Knopf „Freigeben“ mittig und der Satz, WOFÜR man freigibt,
@@ -874,8 +908,33 @@ body.blatt-offen{overflow:hidden}
   /* solange die Handschrift „ich schreibe noch" über dem Feld steht, tritt der Schalter zurück */
   #eingabe:has(#warte-hinweis.da) #freigabe{opacity:.15;pointer-events:none}
 }
+
+/* ---------- Fingermaß (Nutzerprüfung 2026-08-16) ----------
+   Bei 390px maßen der runde Rückweg 35 × 35, „Gespräche" 91 × 35, die
+   Markenzeile 142 × 24 und der Freigabe-Schalter 234 × 37. Unter 40px trifft
+   ein Daumen nicht zuverlässig; das Muster kommt aus uebersicht.html.
+   `pointer:coarse` steht mit dabei, weil ein Finger auch auf einem breiten
+   Schirm ein Finger bleibt.
+
+   Der Block steht am ENDE der Datei: bei gleicher Spezifität gewinnt die
+   spätere Regel, und weiter oben sähe der Override richtig aus und wirkte nie
+   (die Grundregeln für die Griffe stehen bei 126, der 880er-Block bei 147). */
+@media (pointer:coarse),(max-width:700px){
+  #uebersicht-griff,#gespraeche-griff,#akte-griff{height:44px}
+  #zurueck-griff{width:44px;height:44px}
+  /* Die Glocke kommt aus glocke.js und ist dort 35 × 35; ihr Symbol misst
+     18px und sitzt zentriert, das Bild bleibt also gleich groß. */
+  nav .griffe .glocke-knopf{width:44px;height:44px}
+  /* Der Name der Marke führt zur Übersicht — ein freistehender Griff, auch
+     wenn er wie eine Überschrift aussieht. */
+  nav .marke-heim{min-height:44px}
+  /* Der Schalter „Nur für dich / Beratung liest mit" entscheidet, wer das
+     Gespräch lesen darf. Ein Fehlgriff daran ist teuer. */
+  #freigabe{min-height:44px;align-items:center}
+}
 </style>
 <script src="marke.js"></script>
+<script src="lage.js"></script>
 <script src="glocke.js"></script>
 <script src="bitten.js"></script>
 <script src="blaetter.js"></script>
@@ -995,6 +1054,23 @@ body.blatt-offen{overflow:hidden}
      Gespräche, keine Neuigkeiten aus dem fünften Monat und keine Startfragen
      nach Zahlen, die noch niemand gesehen hat. */
   var ersterTag = !!(window.Bitten && Bitten.lage() === 'erster-tag');
+  /* ---------- Die Uhr der Vorführung ----------
+     Das „Heute" des Entwurfs ist Dienstag, der 18.08.2026, kurz vor zehn; es
+     steht in der Lage (lage.js) und nirgends sonst. Vorher fragte diese
+     Fläche an drei Stellen die echte Uhr des Rechners — dann stand „Guten
+     Abend." über einer Akte, deren Meldungen von morgens um 9:20 sind, und
+     ein Kapitel trug „heute, 20:13" neben „heute, 18.08., 9:20 Uhr".
+     Jede neue Frage rückt die Uhr um zwei Minuten vor, damit die Kapitel
+     einer Akte nicht alle auf derselben Minute stehen. */
+  var VORFUEHR = (function(){
+    var uhr = (window.Lage && Lage.jetzt) ? Lage.jetzt() : 9.67;
+    return {
+      stunde: function(){ return Math.floor(uhr); },
+      weiter: function(){ uhr += 2 / 60; },
+      zeit: function(){ return window.Lage ? Lage.zeitWort(uhr) : '9:40'; },
+      wann: function(){ return window.Lage ? Lage.wannWort(Lage.heute(), uhr) : 'heute, 18.08., 9:40 Uhr'; }
+    };
+  })();
   /* Die eine Frage, die den Kunden anspricht statt nur zu benennen — und
      deshalb die einzige, die der Anrede folgen muss. Die Probe im Drehbuch
      greift auf „von mir" und trifft beide Formen. */
@@ -1828,10 +1904,7 @@ body.blatt-offen{overflow:hidden}
     var el = document.getElementById('marke-name');
     return el ? el.textContent : 'deiner Beratung';
   }
-  function uhrzeit(){
-    var d = new Date();
-    return d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
-  }
+  function uhrzeit(){ return VORFUEHR.zeit(); }
 
   function baueBeitrag(d){
     var k = karteAus(
@@ -1913,8 +1986,8 @@ body.blatt-offen{overflow:hidden}
   /* Vorführung: was Dr. Vogelsang der Reihe nach zurückschreibt. Im Produkt
      tippt hier ein Mensch. */
   var ANTWORTEN = [
-    function(){ return rede('Angekommen. Ich sehe es mir bis Donnerstag an und bringe die Zahlen mit — wenn es vorher brennt, ruf mich an.',
-                            'Angekommen. Ich sehe es mir bis Donnerstag an und bringe die Zahlen mit — wenn es vorher brennt, rufen Sie mich an.'); },
+    function(){ return rede('Angekommen. Ich sehe es mir bis Donnerstag, 20.08., an und bringe die Zahlen mit — wenn es vorher brennt, ruf mich an.',
+                            'Angekommen. Ich sehe es mir bis Donnerstag, 20.08., an und bringe die Zahlen mit — wenn es vorher brennt, rufen Sie mich an.'); },
     function(){ return rede('Notiert, das nehme ich in den Termin mit. Der KI-Berater hat deine Zahlen, ich muss dich also nichts zweimal fragen.',
                             'Notiert, das nehme ich in den Termin mit. Der KI-Berater hat Ihre Zahlen, ich muss Sie also nichts zweimal fragen.'); }
   ];
@@ -2034,8 +2107,8 @@ body.blatt-offen{overflow:hidden}
       meldeMensch(aktuellesKapitel, function(){
         return vonMenschAngekuendigt() || (wieder
           ? 'Wieder da, ich lese ab jetzt mit.'
-          : rede('Ich bin’s, Anna Vogelsang. Ich lese ab jetzt mit — das spart uns am Donnerstag das halbe Nacherzählen. Was du hier siehst, sehe ich auch: schreib mir einfach, wenn dir eine Zahl komisch vorkommt.',
-                 'Ich bin’s, Anna Vogelsang. Ich lese ab jetzt mit — das spart uns am Donnerstag das halbe Nacherzählen. Was Sie hier sehen, sehe ich auch: schreiben Sie mir einfach, wenn Ihnen eine Zahl komisch vorkommt.'));
+          : rede('Ich bin’s, Anna Vogelsang. Ich lese ab jetzt mit — das spart uns am Donnerstag, 20.08., das halbe Nacherzählen. Was du hier siehst, sehe ich auch: schreib mir einfach, wenn dir eine Zahl komisch vorkommt.',
+                 'Ich bin’s, Anna Vogelsang. Ich lese ab jetzt mit — das spart uns am Donnerstag, 20.08., das halbe Nacherzählen. Was Sie hier sehen, sehe ich auch: schreiben Sie mir einfach, wenn Ihnen eine Zahl komisch vorkommt.'));
       });
     }, reduziert ? 700 : (vonMenschWartet ? 1800 : 5500));
   }
@@ -2413,39 +2486,42 @@ body.blatt-offen{overflow:hidden}
   })();
 
   /* ---------- Die Glocke: was passiert ist, ohne dass du fragen musst ----------
-     Der Baustein steckt in glocke.js; hier steht nur, was drinsteht und wohin
-     jeder Eintrag führt. Titel und Text sind Funktionen, weil der Wortlaut an
-     der Anrede der Beratung hängt. */
-  Glocke.baue({eintraege: ersterTag ? [
-    {titel: function(){ return rede('Dein Zugang ist da', 'Ihr Zugang ist da'); },
-      text: function(){ return rede('Dr. Anna Vogelsang hat deine Akte angelegt.', 'Dr. Anna Vogelsang hat Ihre Akte angelegt.'); },
-      zeit: 'gerade eben', neu: true,
-      tue: function(){ frageStellen(brauchtFrage(), true); }},
-    {titel: function(){ return rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'); },
-      text: function(){ return 'Drei Dinge, damit die Analyse anlaufen kann.'; },
-      zeit: 'gerade eben', neu: true,
-      tue: function(){ frageStellen(brauchtFrage(), true); }},
-    /* Der Kennenlern-Termin steht in der Glocke der Übersicht, wo er auch
-       hinführt. Hier fehlte ihm das Ziel: die Termin-Frage spielt das Drehbuch
-       des fünften Monats ab, und das gibt es am ersten Tag nicht. */
-  ] : [
-    {titel: function(){ return rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'); },
-      text: function(){ return 'Der unterschriebene Rahmenvertrag Stahl fehlt Dr. Anna Vogelsang.'; },
-      zeit: 'vor 20 Minuten', neu: true,
-      tue: function(){ frageStellen(brauchtFrage(), true); }},
-    {titel: function(){ return rede('Dein Termin steht', 'Ihr Termin steht'); },
-      text: function(){ return rede('Donnerstag, 10:00 mit Dr. Anna Vogelsang — sie hat deine Anfrage angenommen.', 'Donnerstag, 10:00 mit Dr. Anna Vogelsang — sie hat Ihre Anfrage angenommen.'); },
-      zeit: 'gerade eben', neu: true,
-      tue: function(){ frageStellen('Welche Termine stehen an?', true); }},
-    {titel: function(){ return rede('Neues Dokument für dich', 'Neues Dokument für Sie'); },
-      text: function(){ return rede('Preismodell Benchmark liegt in deinen Unterlagen.', 'Preismodell Benchmark liegt in Ihren Unterlagen.'); },
-      zeit: 'vor 2 Stunden', neu: true,
-      tue: function(){ blattBlick.oeffne('Preismodell Benchmark', '12 Seiten, eben erstellt'); }},
-    {titel: function(){ return rede('Antwort auf deine Anfrage', 'Antwort auf Ihre Anfrage'); },
-      text: function(){ return 'Das Jahresgespräch ist bestätigt.'; },
-      zeit: 'gestern', neu: false,
-      tue: function(){ frageStellen('Welche Termine stehen an?', true); }}
-  ]});
+     Der Baustein steckt in glocke.js, die Einträge stehen in der Lage — in
+     derselben Quelle, aus der auch die Übersicht liest (Issue #57). Vorher
+     stand hier eine zweite, von Hand abgeschriebene Liste: „Dr. Anna
+     Vogelsang hat geschrieben" fehlte darin ausgerechnet hier, wo man mit
+     dem Gespräch beschäftigt ist, und die Zahl an der Glocke war eine andere
+     als drüben. Diese Fläche sagt jetzt nur noch, wohin ein Ziel führt. */
+  Glocke.baue({
+    lage: ersterTag ? 'erster-tag' : 'laufend',
+    rede: rede,
+    ziele: ersterTag ? {
+      brief: function(){ frageStellen(brauchtFrage(), true); },
+      zuliefern: function(){ frageStellen(brauchtFrage(), true); },
+      /* Die Termin-Frage spielt das Drehbuch des fünften Monats ab, und das
+         gibt es am ersten Tag nicht. Der Eintrag verschwindet trotzdem nicht,
+         sondern führt dorthin, wo der Kennenlern-Termin wirklich steht —
+         an die Termine der Übersicht, nicht an ihren Anfang. */
+      termine: function(){ location.href = 'uebersicht.html#termine'; }
+    } : {
+      brief: function(){ frageStellen(brauchtFrage(), true); },
+      zuliefern: function(){ frageStellen(brauchtFrage(), true); },
+      briefing: function(){ location.href = 'briefing.html'; },
+      /* Der Eintrag führt an die Stelle, um die es geht: in das Gespräch, in
+         dem sie geschrieben hat, mit dessen Freigabe-Stand und ihrem Beitrag. */
+      'gespraech-marge': function(){
+        try {
+          sessionStorage.setItem('starte-frage', 'Warum schrumpft meine Marge?');
+          sessionStorage.setItem('freigabe', '1');
+          sessionStorage.setItem('von-mensch', '1');
+        } catch (e) {}
+        location.reload();
+      },
+      termine: function(){ frageStellen('Welche Termine stehen an?', true); },
+      anfragen: function(){ frageStellen('Welche Termine stehen an?', true); },
+      unterlagen: function(){ blattBlick.oeffne('Preismodell Benchmark', '12 Seiten, gestern erstellt'); }
+    }
+  });
 
   /* ---------- Die Gesprächsliste: jedes Gespräch hat seinen Raum ---------- */
   var gespraechsliste = (function(){
@@ -2458,10 +2534,17 @@ body.blatt-offen{overflow:hidden}
        im Produkt lädt hier der gespeicherte Verlauf. */
     /* Am ersten Tag gibt es keine früheren Gespräche. Die Liste bleibt leer,
        statt drei Gespräche zu erfinden, die niemand geführt hat (D3). */
+    /* Datiert, und zwar aus der Lage: „gestern, 16:40" neben „Montag, 9:12"
+       waren zwei Schreibweisen für denselben Tag, und die zweite ließ das
+       Datum ganz weg — zwei Handbreit unter einer Glocke, die jede Meldung
+       mit Datum schreibt (Nutzerprüfung 2026-08-16). */
+    function wann(tag, uhr, ersatz){
+      return window.Lage ? Lage.wannWort(tag, uhr) : ersatz;
+    }
     var FRUEHERE = ersterTag ? [] : [
-      {frage: 'Warum schrumpft meine Marge?', zeit: 'gestern, 16:40', geteilt: true},
-      {frage: 'Wie läuft mein Geschäft?', zeit: 'Montag, 9:12', geteilt: false},
-      {frage: 'Was bringt mir das Preismodell?', zeit: '5. August', geteilt: false}
+      {frage: 'Warum schrumpft meine Marge?', zeit: wann(0, 16 + 40/60, 'gestern, 17.08., 16:40 Uhr'), geteilt: true},
+      {frage: 'Wie läuft mein Geschäft?', zeit: wann(0, 9 + 12/60, 'gestern, 17.08., 9:12 Uhr'), geteilt: false},
+      {frage: 'Was bringt mir das Preismodell?', zeit: '5. August 2026', geteilt: false}
     ];
     function zeile(titel, meta, status, statusKlasse){
       var z = document.createElement('button');
@@ -2703,9 +2786,8 @@ body.blatt-offen{overflow:hidden}
     sec.className = 'kapitel';
     sec.innerHTML = '<h2 class="frage"><span class="f-text"></span><span class="kapitel-zeit"></span></h2><div class="lauf"></div>';
     sec.querySelector('.f-text').textContent = frage;
-    var jetzt = new Date();
-    sec.querySelector('.kapitel-zeit').textContent =
-      'heute, ' + jetzt.getHours() + ':' + String(jetzt.getMinutes()).padStart(2, '0');
+    VORFUEHR.weiter();
+    sec.querySelector('.kapitel-zeit').textContent = VORFUEHR.wann();
     sec.querySelector('.frage').addEventListener('click', function(){
       if (sec.classList.contains('zu')) klappeAuf(sec);
       else if (sec !== aktuellesKapitel) klappeZu(sec);
@@ -2866,6 +2948,98 @@ body.blatt-offen{overflow:hidden}
     nichtMehrBeschaeftigt();
   }
 
+  /* ---------- „Welche Termine stehen an?" kommt aus der Lage ----------
+     Denkfehler 1 der Nutzerprüfung, an dieser Fläche zum zweiten Mal: die
+     Glocke oben liest längst aus lage.js, die Antwort auf diese Frage stand
+     daneben als Handliste — und verschwieg Herrn Petersen zwei seiner drei
+     Termine dieser Woche (den Videocall am Dienstag mit Sabine Röttger und den
+     Vor-Ort-Besuch am Mittwoch mit Miriam Krohn). Wer beim Anruf nachfragt,
+     hört von der Beratung eine andere Wahrheit als von seinem KI-Berater.
+
+     Gebaut wird die Liste einmal beim Laden — die Termine der Lage stehen
+     fest. Die Sätze bleiben Funktionen, weil ein Markenwechsel mitten in der
+     Vorführung die Anrede umstellt. */
+  var MEIN_MANDANT = 'Petersen Stahlbau';
+  var ZAHLWORT_T = ['Kein', 'Ein', 'Zwei', 'Drei', 'Vier', 'Fünf', 'Sechs'];
+
+  function meineTermine(){
+    if (!window.Lage) return [];
+    var h = Lage.heute(), jetzt = Lage.jetzt();
+    return Lage.termine().filter(function(t){
+      if (t.kunde !== MEIN_MANDANT || t.angefragt || t.intern) return false;
+      /* Was heute schon vorbei ist, „steht" nicht mehr an. */
+      return t.tag > h || (t.tag === h && t.bis > jetzt);
+    }).sort(function(a, b){ return (a.tag - b.tag) || (a.von - b.von); });
+  }
+
+  function meineAnfrage(){
+    if (!window.Lage) return null;
+    var offen = Lage.termine().filter(function(t){
+      return t.kunde === MEIN_MANDANT && t.angefragt;
+    });
+    return offen.length ? offen[0] : null;
+  }
+
+  /* Ein Termin, der nicht bei der Beratung liegt: er steht in der Lage als
+     Meldung, nicht als Termin — der KI-Berater hat ihn nur ausgerichtet. */
+  function fremderTermin(){
+    if (!window.Lage) return null;
+    var m = Lage.meldungen(ersterTag ? 'erster-tag' : 'laufend').filter(function(x){
+      return x.id === 'jahresgespraech';
+    });
+    /* Roh, nicht aufgelöst: ob du oder Sie gilt, entscheidet erst der Moment
+       des Sprechens — die Vorführung wechselt die Marke im Stehen. */
+    return m.length ? m[0].text : null;
+  }
+
+  function termineSchritte(){
+    var liste = meineTermine();
+    var schritte = [{t: function(){
+      var n = liste.length;
+      if (!n) return rede('Bei deiner Beratung steht diese Woche nichts mehr an.',
+                          'Bei Ihrer Beratung steht diese Woche nichts mehr an.');
+      return (n === 1 ? 'Ein Termin steht fest' : (ZAHLWORT_T[n] || n) + ' Termine stehen fest') +
+             rede(', alle mit deiner Beratung:', ', alle mit Ihrer Beratung:');
+    }}];
+
+    liste.forEach(function(t){
+      var wer = Lage.person(t.wer);
+      schritte.push({termin: {
+        tag: Lage.tagKuerzel(t.tag),
+        zeit: Lage.zeitWort(t.von),
+        wann: Lage.terminWann(t),
+        mit: t.was + (wer ? ', bei ' + wer.name : ''),
+        form: t.form
+      }});
+    });
+
+    var fremd = fremderTermin();
+    if (fremd) schritte.push({t: function(){
+      return Lage.wortlaut(fremd, anredeSie) + rede(' Das läuft nicht über deine Beratung, ich habe es nur ausgerichtet.',
+                          ' Das läuft nicht über Ihre Beratung, ich habe es nur ausgerichtet.');
+    }});
+
+    /* Was noch nicht entschieden ist, ist kein Termin — und genau das muss
+       dastehen. Vorher meldete die Glocke ihn als angenommen, während er bei
+       der Beratung noch unentschieden lag (Ärger 30). */
+    var w = meineAnfrage();
+    if (w) schritte.push({t: function(){
+      var wer = Lage.person(w.wer);
+      var wann = Lage.tage()[w.tag];
+      var satz = ' bei ' + (wer ? wer.name : 'deiner Beratung') + ': „' + w.was +
+                 '", Wunschfenster ' + wann.kurz + ', ' + wann.kurzdatum + ', ' +
+                 Lage.zeitWort(w.von) + '. Entschieden ist sie noch nicht.';
+      return rede('Dazu liegt deine Anfrage', 'Dazu liegt Ihre Anfrage') + satz;
+    }});
+
+    schritte.push({t: function(){
+      return rede('Absagen oder verschieben geht direkt bei deiner Beratung — sag mir einfach Bescheid, ich richte es aus.',
+                  'Absagen oder verschieben geht direkt bei Ihrer Beratung — sagen Sie mir einfach Bescheid, ich richte es aus.');
+    }});
+    schritte.push({chips: ['Buch mir einen Menschen', 'Wie läuft mein Geschäft?']});
+    return schritte;
+  }
+
   /* ---------- Drehbuch ---------- */
   var SKRIPTE = [
     { probe: /(läuft|lauf|geschäft|geht es|zahlen|überblick)/i,
@@ -2875,11 +3049,16 @@ body.blatt-offen{overflow:hidden}
         {reihe: [
           {art:'kpi', wert:412000, format:'€', label:'Umsatz Q3, hochgerechnet', delta:'8 % über Plan'},
           {art:'kpi', wert:82, format:'%', label:'Auslastung deines Teams'},
-          {art:'kpi', wert:20550, format:'€', label:'offene Forderungen', delta:'eine Rechnung seit 9 Tagen', ton:'amber', sk:'kpi-forderung'}
+          /* Der Kreis gehört an die Summe (Ärger 13): das sind die Rechnungen,
+             die Petersens eigene Kunden IHM schulden — nicht die Rechnung
+             seiner Beratung an ihn (2.856,00 €). Ohne den Kreis lasen zwei
+             Testpersonen hier einen Widerspruch. Das Datum statt „seit 9
+             Tagen": heute ist der 18.08.2026. */
+          {art:'kpi', wert:20550, format:'€', label:'offene Forderungen deiner Kunden an dich', delta:'eine davon überfällig seit dem 09.08.2026', ton:'amber', sk:'kpi-forderung'}
         ]},
         {skizze: [
           {art:'kreis', ziel:'kpi-forderung'},
-          {art:'notiz', ziel:'kpi-forderung', text:'seit 9 Tagen!', wo:'unten'}
+          {art:'notiz', ziel:'kpi-forderung', text:'offen seit 09.08.!', wo:'unten'}
         ]},
         {t: 'Und so lief das letzte halbe Jahr:'},
         {kurve: {von:'März', bis:'August', alt:'Umsatz steigt seit März deutlich'}},
@@ -2893,10 +3072,14 @@ body.blatt-offen{overflow:hidden}
     { probe: /(warum|marge|rendite|gewinn|schrumpft)/i,
       frage: 'Warum schrumpft meine Marge?',
       schritte: [
-        {t: 'Ich habe sie zerlegt. Von 36,2 Prozent im letzten Jahr auf 30,4 heute, und der Verlust hat drei Adressen:'},
+        /* Die Gesamtzahl steht im Text, nicht nur im Bild (Issue #55): 36,2
+           minus 30,4 sind 5,8 Punkte, und genau diese Summe zerlegen die drei
+           Balken darunter. Wer sie ausspricht, kann sie später nicht mit dem
+           größten Einzelposten verwechseln. */
+        {t: 'Ich habe sie zerlegt: deine Rohertragsmarge, von 36,2 Prozent im Jahr 2025 auf 30,4 heute, das sind 5,8 Punkte. Der Verlust hat drei Adressen:'},
         {wasserfall: {
           format: '%',
-          start: {name:'2024', wert:36.2},
+          start: {name:'2025', wert:36.2},
           schritte: [
             {name:'Preisdruck', wert:-3.1},
             {name:'Stahlpreis', wert:-1.8},
@@ -2937,7 +3120,7 @@ body.blatt-offen{overflow:hidden}
       frage: 'Was bringt mir das Preismodell?',
       schritte: [
         {t: 'Kurz gesagt:'},
-        {hero: {wert:38000, vorzeichen:'+', label:'im Jahr, ohne einen einzigen neuen Kunden', unter:'rechnerisch ab Woche 6 wirksam', sk:'hero'}},
+        {hero: {wert:38000, vorzeichen:'+', label:'im Jahr, ohne einen einzigen neuen Kunden', unter:'rechnerisch, wirksam ab dem 12.10.2026', sk:'hero'}},
         {t: 'Deine Marge macht dabei diesen Schritt:'},
         {vergleich: {vorher:{label:'Marge heute', wert:'30,4 %'}, nachher:{label:'mit Preismodell', wert:'33,9 %'}, sk:'vergleich', nachherSk:'vergleich-neu'}},
         {skizze: [{art:'kreis', ziel:'vergleich-neu'}, {art:'notiz', ziel:'vergleich-neu', text:'zurück über 33!', wo:'unten'}]},
@@ -2947,15 +3130,28 @@ body.blatt-offen{overflow:hidden}
         {liste: [
           'Staffeln neu schneiden — A- und B-Kunden bleiben unberührt.',
           'Preisliste einmal sauber durchrechnen lassen.',
-          'C-Kunden vier Wochen vorher informieren, mit Begründung.'
+          'C-Kunden am 21.09.2026 informieren, mit Begründung — drei Wochen, bevor der neue Preis gilt.'
         ]},
-        {t: 'Und so kommst du hin, in vier Wochen:'},
+        /* Denkfehler 4 der Nutzerprüfung: der Fahrplan zählte in Wochen, und
+           nirgends stand, wann Woche 1 beginnt. Er zählt ab der Freigabe des
+           Preismodells; erbeten ist sie bis Freitag, den 04.09.2026, Woche 1
+           ist dann die Woche ab Montag, dem 07.09.2026. Deshalb tragen die
+           Stationen ihr Datum, dieselben wie in beratung-mandat.html.
+           „In vier Wochen" war dazu falsch: von der Freigabe bis zur
+           Wirksamkeit sind es sechs. */
+        {t: function(){ return rede('Der Fahrplan zählt ab deiner Freigabe. Gibst du bis Freitag, dem 04.09.2026 frei, sieht er im Jahr 2026 so aus:',
+                                    'Der Fahrplan zählt ab Ihrer Freigabe. Geben Sie bis Freitag, dem 04.09.2026 frei, sieht er im Jahr 2026 so aus:'); }},
         {fahrplan: {schritte: [
-          {wann:'Woche 1', was:'Staffeln schneiden'},
-          {wann:'Woche 2', was:'Preisliste rechnen'},
-          {wann:'Woche 3', was:'Kunden informieren'},
-          {wann:'Woche 6', was:'wirksam'}
-        ], alt:'Fahrplan über vier Schritte bis Woche 6', sk:'fahrplan'}},
+          /* Ohne Jahreszahl, und zwar gemessen: mit „ab 07.09.2026" stoßen die
+             vier Beschriftungen am Telefon (390 px) aneinander — die Tafel
+             skaliert mit dem viewBox und schrumpft die Schrift auf sieben
+             Pixel. Das Jahr steht im Satz darüber und in der Bildbeschreibung;
+             die Stationen tragen Tag und Monat. */
+          {wann:'ab 07.09.', was:'Staffeln schneiden'},
+          {wann:'ab 14.09.', was:'Preisliste rechnen'},
+          {wann:'am 21.09.', was:'Kunden informieren'},
+          {wann:'ab 12.10.', was:'wirksam'}
+        ], alt:'Fahrplan über vier Schritte: Staffeln schneiden ab dem 7. September 2026, Preisliste rechnen ab dem 14. September, Kunden informieren am 21. September, wirksam ab dem 12. Oktober 2026', sk:'fahrplan'}},
         {belege: [
           {titel:'Preismodell Benchmark', abschnitt:'1', art:'akte', auszug:'Bei plus vier Prozent auf C-Kunden und fünf Prozent Mengenverlust bleibt ein Ergebnisplus von 38.000 Euro jährlich — die Rechnung hält selbst bei acht Prozent Verlust noch 24.000 Euro.'}
         ]},
@@ -2997,18 +3193,12 @@ body.blatt-offen{overflow:hidden}
       ]},
     { probe: /(termine|kalender|steht an|anstehen)/i,
       frage: 'Welche Termine stehen an?',
-      schritte: [
-        {t: 'Zwei Dinge stehen an:'},
-        {termin: {tag: 'DO', zeit: '10:00', wann: 'Donnerstag, 10:00–11:00', mit: 'Preis und Marge mit Dr. Anna Vogelsang', form: 'Videocall'}},
-        {termin: {tag: 'DI', zeit: '14:30', wann: 'nächsten Dienstag, 14:30–15:00', mit: 'Jahresgespräch mit deinem Steuerbüro', form: 'vor Ort'}},
-        {t: 'Absagen oder verschieben geht direkt bei deiner Beratung — sag mir einfach Bescheid, ich richte es aus.'},
-        {chips: ['Buch mir einen Menschen', 'Wie läuft mein Geschäft?']}
-      ]},
+      schritte: termineSchritte()},
     { probe: /(mensch|termin|berater|buch|anruf|sprechen)/i,
       frage: 'Buch mir einen Menschen.',
       schritte: [
         {t: 'Gern. Für Preis und Marge ist Dr. Anna Vogelsang die Richtige. Ich lege ihr eine Anfrage hin — gib ihr ein Wunschfenster mit:'},
-        {kalender: ['Donnerstag, 10:00', 'Donnerstag, 16:00', 'Freitag, 9:00']}
+        {kalender: ['Mittwoch, 19.08., 9:00', 'Donnerstag, 20.08., 14:00', 'Freitag, 21.08., 11:00']}
       ]},
     /* Grenz-Momente zum Vorführen: 'kontingent', 'ausgelastet', 'ausfall' tippen */
     { probe: /kontingent/i,
@@ -3084,10 +3274,20 @@ body.blatt-offen{overflow:hidden}
       { probe: /(kostet|kosten|preis|honorar|pauschale|teuer|rechnung)/i,
         frage: 'Was kostet mich das?',
         schritte: [
+          /* Die Zahl steht im ersten Satz, nicht hinter einer Tür (Issue #53).
+             Vorher standen hier drei Absätze ohne ein einziges Eurozeichen und
+             der Verweis „steht im Vertrag" — drei Testpersonen haben an genau
+             dieser Stelle aufgehört. Die Beträge sind dieselben wie in
+             blaetter.js (Beratungsvertrag, Ziffer 2) und auf der Rechnung. */
           {t: function(){
-            return rede('Eine Pauschale im Monat, und die deckt alles ab: mich, Dr. Anna Vogelsang und jede Stunde, die wir für dich arbeiten. Der Betrag steht im Beratungsvertrag, der in deinen Unterlagen liegt.',
-                        'Eine Pauschale im Monat, und die deckt alles ab: mich, Dr. Anna Vogelsang und jede Stunde, die wir für Sie arbeiten. Der Betrag steht im Beratungsvertrag, der in Ihren Unterlagen liegt.');
+            return rede('Du zahlst eine Pauschale von 2.400,00 € netto im Monat, mit Umsatzsteuer 2.856,00 €. Die deckt alles ab: mich, Dr. Anna Vogelsang und jede Stunde, die wir für dich arbeiten. Der Vertrag läuft zwölf Monate bis zum 30. April 2027, kündbar mit drei Monaten Frist. Er liegt in deinen Unterlagen.',
+                        'Sie zahlen eine Pauschale von 2.400,00 € netto im Monat, mit Umsatzsteuer 2.856,00 €. Die deckt alles ab: mich, Dr. Anna Vogelsang und jede Stunde, die wir für Sie arbeiten. Der Vertrag läuft zwölf Monate bis zum 30. April 2027, kündbar mit drei Monaten Frist. Er liegt in Ihren Unterlagen.');
           }},
+          /* Der Weg zum Vertrag, nicht bloß der Hinweis auf ihn: die
+             Dokument-Karte öffnet dasselbe gesetzte Blatt wie in den
+             Unterlagen (GESETZT, blaetter.js) — mit Pauschale, Laufzeit und
+             Kündigungsfrist auf Seite 1. */
+          {dokument: {name:'Beratungsvertrag', meta:'4 Seiten, Pauschale und Laufzeit stehen auf Seite 1'}},
           /* Kein Gedankenstrich direkt hinter der Marke: die Auszeichnung
              schluckt den Abstand davor und es klebt „Auslagen—" zusammen. */
           {t: function(){
@@ -3096,8 +3296,8 @@ body.blatt-offen{overflow:hidden}
           }, marken:['merk-auslagen']},
           {skizze: [{art:'unterstreich', ziel:'merk-auslagen'}]},
           {t: function(){
-            return rede('Und du siehst jederzeit, wofür: sobald wir loslegen, steht jede Stunde in deinem Leistungsnachweis, mit dem, was dabei herausgekommen ist.',
-                        'Und Sie sehen jederzeit, wofür: sobald wir loslegen, steht jede Stunde in Ihrem Leistungsnachweis, mit dem, was dabei herausgekommen ist.');
+            return rede('Und du siehst jederzeit, wofür: sobald wir loslegen, steht jede Stunde in deinem Leistungsnachweis, mit dem, was dabei herausgekommen ist. Berechnet wird keine davon einzeln, die Pauschale deckt sie ab.',
+                        'Und Sie sehen jederzeit, wofür: sobald wir loslegen, steht jede Stunde in Ihrem Leistungsnachweis, mit dem, was dabei herausgekommen ist. Berechnet wird keine davon einzeln, die Pauschale deckt sie ab.');
           }},
           {chips: [brauchtFrage, 'Wie arbeiten wir zusammen?']}
         ]}
@@ -3225,9 +3425,17 @@ body.blatt-offen{overflow:hidden}
   /* ---------- Das Vorführ-Hirn: echte Antworten vom lokalen Server ---------- */
   var hirnAn = false;
   var hirnVerlauf = [];
-  fetch('/hirn-status').then(function(r){ return r.json(); }).then(function(s){
-    if (s && s.bereit) { hirnAn = true; document.body.classList.add('hirn'); }
-  }).catch(function(){ /* kein Server: Drehbuch */ });
+  /* Gefragt wird nur dort, wo das Hirn überhaupt wohnt: hirn/server.mjs hört
+     fest auf 127.0.0.1:8787 (docs/wissen/vorfuehr-hirn.md). Überall sonst —
+     python3 -m http.server, der öffentliche Spiegel, eine Datei im Browser —
+     gibt es den Endpunkt nicht, und die Anfrage hinterließ bei jedem Laden
+     einen 404 in der Konsole. Abgefangen war er, aber jede Konsolenprüfung
+     dieses Projekts fing damit mit einem roten Eintrag an. */
+  if (location.port === '8787') {
+    fetch('/hirn-status').then(function(r){ return r.json(); }).then(function(s){
+      if (s && s.bereit) { hirnAn = true; document.body.classList.add('hirn'); }
+    }).catch(function(){ /* Server da, Hirn nicht bereit: Drehbuch */ });
+  }
 
   /* Zerlegt ankommenden Text in Wort-Häppchen für den Spielplan (löst *Marken* auf) */
   function neuerZerleger(spielplan){
@@ -3338,7 +3546,7 @@ body.blatt-offen{overflow:hidden}
       if (d.art === 'donut') k = baueDonut(d);
       if (d.art === 'dokument') k = baueDokument(d);
       if (d.art === 'bitte' && d.id) k = baueBitte(d.id);
-      if (d.art === 'kalender') k = baueKalender(d.slots || ['Donnerstag, 10:00', 'Donnerstag, 16:00', 'Freitag, 9:00']);
+      if (d.art === 'kalender') k = baueKalender(d.slots || ['Mittwoch, 19.08., 9:00', 'Donnerstag, 20.08., 14:00', 'Freitag, 21.08., 11:00']);
       if (d.art === 'bestaetigung') k = baueBestaetigung(d.text || 'Erledigt', d.sk);
       if (!k) return;
       if (klein) {
@@ -3705,7 +3913,7 @@ body.blatt-offen{overflow:hidden}
     if (offeneBitten) startChips.unshift({text: brauchtFrage(), zahl: offeneBitten, braucht: true});
 
     /* Der Gruß kennt die Uhrzeit — wie ein Berater, nicht wie ein Formular */
-    var stunde = new Date().getHours();
+    var stunde = VORFUEHR.stunde();
     vorgruss.textContent = stunde < 5 ? 'Gute Nacht.' : (stunde < 11 ? 'Guten Morgen.' : (stunde < 18 ? 'Guten Tag.' : 'Guten Abend.'));
 
     /* Der Stift zieht seinen Anstrich von Hand: leicht zittrig, nie zweimal gleich */

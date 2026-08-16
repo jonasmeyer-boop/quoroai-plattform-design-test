@@ -6,6 +6,9 @@
 <title>Mitlesen, Petersen Stahlbau</title>
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="system.css">
+<!-- lage.js bringt window.Lage: Termine und Anfragen aus einer Quelle.
+     Hier hängt keine Glocke im Chrom, gebraucht wird das Wunschfenster. -->
+<script src="lage.js"></script>
 <script src="blaetter.js"></script>
 <script src="blatt.js"></script>
 <style>
@@ -32,7 +35,18 @@
    auf der Seite mit dem zitierten Satz.
    V11 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
-   Marker: BERATUNG-MITLESEN-V11 (die Krume kommt aus einer Quelle) */
+   V12 (Denkfehler 4 der Nutzerprüfung): Alles Relative ist datiert. „gestern"
+   allein sagt nichts, wenn zwei Flächen an verschiedenen Tagen gelesen werden,
+   und das Wunschfenster („Freitag, 9:00") stand hier ohne Datum, während es
+   in der Lage (lage.js) als Anfrage mit Tag und Spanne liegt. Es kommt jetzt
+   von dort — dieselbe Anfrage, die die Beratung auf ihrem Zettel entscheidet.
+   V13 (Reste der Nutzerprüfung): Das Startjahr des Wasserfalls heißt 2025 statt
+   2024 — 2024 stand gegen den eigenen Satz „im letzten Jahr" und gegen den
+   Rest des Entwurfs (Jahresabschluss 2025, Branchenspiegel 2025). Der Satz über
+   dem Bild ist wortgleich mit dem Drehbuch in gespraech.html und nennt die
+   5,8 Punkte. In der Leiste steht, welche Marge das Blatt zeigt: die
+   Rohertragsmarge des Kunden (30,4 %), nicht die eigene am Mandat (28,5 %).
+   Marker: BERATUNG-MITLESEN-V13 (die Krume kommt aus einer Quelle) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -305,6 +319,15 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
 .quelle.liest .q-auszug{border-left-color:var(--lila-400);color:var(--nebel-700)}
 .quelle.puls{translate:0 -3px}
 
+/* Kein Kasten: die Einordnung ist eine Randnotiz zu den Quellen darüber, kein
+   eigener Gegenstand. Sie soll neben den Zahlen leise stehen. */
+#einordnung{
+  font-size:12.5px;line-height:1.6;color:var(--nebel-600);
+  padding-left:12px;border-left:2px solid var(--nebel-300);
+}
+#einordnung b{color:var(--nebel-700)}
+#einordnung a{color:var(--lila-800)}
+
 #kosten{
   border-radius:var(--radius-karte);padding:18px 20px;
   background:rgba(255,255,255,.58);border:1px solid rgba(255,255,255,.65);
@@ -379,11 +402,11 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
 <main>
   <div class="kopf">
     <h1>„Warum schrumpft meine Marge?"</h1>
-    <div class="stand">Gespräch zwischen Herrn Petersen und dem KI-Berater, gestern ab 16:02</div>
+    <div class="stand">Gespräch zwischen Herrn Petersen und dem KI-Berater, gestern, Montag, 17.08.2026, ab 16:02</div>
   </div>
 
   <div id="freigabe-leiste" class="glas-lila">
-    <div class="fl-text"><b>Freigegeben, also darfst du mitreden.</b> Herr Petersen hat dieses Gespräch gestern um 16:40 für seine Beratung freigegeben. Du liest mit — und kannst am Ende der Abschrift hineinschreiben; er sieht es sofort. Nimmt er die Freigabe zurück, endet beides. Seine anderen Gespräche bleiben privat, bis er sie freigibt.</div>
+    <div class="fl-text"><b>Freigegeben, also darfst du mitreden.</b> Herr Petersen hat dieses Gespräch gestern, am Montag, 17.08.2026, um 16:40 für seine Beratung freigegeben. Du liest mit — und kannst am Ende der Abschrift hineinschreiben; er sieht es sofort. Nimmt er die Freigabe zurück, endet beides. Seine anderen Gespräche bleiben privat, bis er sie freigibt.</div>
     <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Freigegeben" title="Freigegeben"></span><span class="zustand-wort">freigegeben</span></span>
   </div>
 
@@ -393,15 +416,18 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
 
       <section class="kapitel">
         <h2 class="frage"><span>„Warum schrumpft meine Marge?"</span><span class="zeit"><b>Herr Petersen</b>, 16:02</span></h2>
-        <p>Ich habe sie zerlegt. Von 36,2 Prozent im letzten Jahr auf 30,4 heute, und der Verlust hat drei Adressen:</p>
+        <!-- Wortgleich mit dem Drehbuch in gespraech.html: derselbe Satz, den
+             Herr Petersen liest. Wer hier eine Silbe ändert, muss sie dort
+             mitändern, sonst zeigen Kundensicht und Mitlesen zwei Gespräche. -->
+        <p>Ich habe sie zerlegt: deine Rohertragsmarge, von 36,2 Prozent im Jahr 2025 auf 30,4 heute, das sind 5,8 Punkte. Der Verlust hat drei Adressen:</p>
 
         <div class="b-karte" id="wasserfall">
           <svg viewBox="0 0 300 148" role="img" aria-label="Wasserfall: die Marge fällt von 36,2 auf 30,4 Prozent, durch Preisdruck, Stahlpreis und Ausschuss">
-            <text class="wert-t" x="30" y="16" text-anchor="middle">36,2</text>
+            <text class="wert-t" x="30" y="16" text-anchor="middle">36,2 %</text>
             <text class="wert-t" x="88" y="16" text-anchor="middle">−3,1</text>
             <text class="wert-t" x="146" y="53" text-anchor="middle">−1,8</text>
             <text class="wert-t" x="204" y="75" text-anchor="middle">−0,9</text>
-            <text class="wert-t" x="262" y="86" text-anchor="middle">30,4</text>
+            <text class="wert-t" x="262" y="86" text-anchor="middle">30,4 %</text>
             <rect x="10" y="21.6" width="40" height="98.4" rx="3" fill="#2b5fe3"></rect>
             <rect x="68" y="21.6" width="40" height="37.2" rx="3" fill="#e3a02b" opacity=".85"></rect>
             <rect x="126" y="58.8" width="40" height="21.6" rx="3" fill="#e3a02b" opacity=".85"></rect>
@@ -411,7 +437,7 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
             <line x1="108" y1="58.8" x2="126" y2="58.8"></line>
             <line x1="166" y1="80.4" x2="184" y2="80.4"></line>
             <line x1="224" y1="91.2" x2="242" y2="91.2"></line>
-            <text x="30" y="134" text-anchor="middle">2024</text>
+            <text x="30" y="134" text-anchor="middle">2025</text>
             <text x="88" y="134" text-anchor="middle">Preisdruck</text>
             <text x="146" y="134" text-anchor="middle">Stahlpreis</text>
             <text x="204" y="134" text-anchor="middle">Ausschuss</text>
@@ -456,7 +482,10 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
         <p>Gern. Für Preis und Marge ist Dr. Anna Vogelsang die Richtige. Ich lege ihr eine Anfrage hin, gib ihr ein Wunschfenster mit:</p>
         <div class="b-karte">
           <div class="anfrage-kopf"><h3>Gespräch mit Dr. Anna Vogelsang</h3><span class="anfrage-status">angefragt</span></div>
-          <div class="anfrage-zeile">Wunschfenster von Herrn Petersen: Freitag, 9:00. Die Anfrage liegt auf deinem Tisch im Cockpit.</div>
+          <!-- Das Wunschfenster kommt aus der Lage (Anfrage w1) — dieselbe,
+               die auf dem Zettel der Beratung unentschieden liegt. Ohne den
+               Baustein bleibt derselbe Satz stehen. -->
+          <div class="anfrage-zeile"><span id="wunschfenster">Wunschfenster von Herrn Petersen: Freitag, 21.08., 9:00 bis 9:45.</span> Die Anfrage liegt auf deinem Tisch im Cockpit.</div>
         </div>
       </section>
 
@@ -492,6 +521,11 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
         <div class="q-auszug">Der volle Rechenweg zum Preismodell, vom KI-Berater erstellt und in die Akte des Mandats gelegt.</div>
       </button>
 
+      <!-- Zwei Margen, die sich verwechseln lassen: die des Kunden im Blatt und
+           die eigene am Mandat. Der Hinweis steht in der Leiste, nicht im
+           Blatt — was hier steht, sieht nur die Beratung. -->
+      <div id="einordnung">Die 30,4 Prozent im Blatt sind die Rohertragsmarge <b>von Herrn Petersen</b>. Was <b>Nordholm &amp; Partner</b> an diesem Mandat verdient, sind 28,5 Prozent — der Rechenweg steht unter <a href="beratung-marge.html">Marge und Sätze</a>.</div>
+
       <h2>Was dieses Gespräch kostet</h2>
       <div id="kosten">
         <div class="gross">0,84&nbsp;€</div>
@@ -522,6 +556,18 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
   document.querySelectorAll('main > *').forEach(function(el, i){
     el.style.setProperty('--verz', (i * 0.08) + 's');
   });
+
+  /* Das Wunschfenster aus der Lage: dieselbe offene Anfrage, die auf dem
+     Zettel der Beratung liegt. Abgeschrieben stand hier ein Freitag ohne
+     Datum und ohne Ende — entschieden wird aber über eine Spanne. */
+  (function(){
+    var L = window.Lage;
+    if (!L || !L.termine) return;
+    var w = L.termine().filter(function(t){ return t.angefragt; })[0];
+    if (!w) return;
+    document.getElementById('wunschfenster').textContent =
+      'Wunschfenster von Herrn Petersen: ' + L.terminWann(w) + '.';
+  })();
 
   /* Der Wasserfall und der Stift-Kreis wachen auf, sobald sie im Blick sind */
   if ('IntersectionObserver' in window && !reduziert) {

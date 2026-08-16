@@ -34,7 +34,16 @@
    wird aus den Zahlen abgelesen statt behauptet.
    V4 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
-   Marker: BERATUNG-ABRECHNUNG-V4 (die Krume kommt aus einer Quelle) */
+   V5 (Issue #60): die Plattformgebühr trägt ihre Herleitung. Sie ist der
+   größte einzelne Posten dieser Rechnung — bei vier Zugängen 41 Prozent der
+   Endsumme — und stand als einzige ohne Preis und ohne Tage da, während jede
+   Zugangszeile darüber ihre Rechnung zeigte. Jetzt steht dort „18 von 31
+   Tagen à 149,00 €", auf dem Blatt wie im Beleg für die Buchhaltung.
+   V6: Der Tag, bis zu dem gezählt wird, kommt aus der Lage (lage.js) — und er
+   steht ausgeschrieben da. „Gezählt wird bis heute" über einem Zeitraum
+   „1. bis 14. August 2026" war zweimal falsch: der Entwurf steht am 18.,
+   und ein Zeitraum, der sich „heute" nennt, sagt nicht, welcher Tag das ist.
+   Marker: BERATUNG-ABRECHNUNG-V6 (die Plattformgebühr zeigt Preis und Tage) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -127,8 +136,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 .lage .offen a b{color:var(--bernstein)}
 .lage .offen a:hover b{text-decoration:underline;text-underline-offset:4px}
 
-/* Der eine Moment: die Strecke des Monats. Links steht, was bis heute
-   aufgelaufen ist, rechts, wo der Monat landet, wenn sich nichts ändert —
+/* Der eine Moment: die Strecke des Monats. Links steht, was bis zum
+   gezählten Tag aufgelaufen ist, rechts, wo der Monat landet, wenn sich nichts ändert —
    und die Kerbe zeigt, wo der Vormonat stand. Der Balken läuft beim
    Ankommen einmal auf seinen Stand; danach ist die Fläche ruhig. */
 .strecke{margin-top:22px;position:relative}
@@ -196,6 +205,10 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
 .summen{margin-top:16px;border-top:1px solid var(--nebel-300);padding-top:12px;font-size:13.5px}
 .summen div{display:flex;justify-content:space-between;gap:24px;padding:3px 0}
 .summen dt,.summen .was{color:var(--nebel-600)}
+/* Die Herleitung der Plattformgebühr steht in derselben Schrift wie die der
+   Zugangszeilen darüber — ein Posten von 41 Prozent der Endsumme darf nicht
+   der einzige ohne Preis und Tage sein. */
+.summen dt .p-her{color:var(--nebel-500)}
 .summen .gesamt{font-weight:700;border-top:1px solid var(--nebel-300);margin-top:6px;padding-top:9px}
 .summen .gesamt .was{color:var(--tinte)}
 .nur-gebuehr{font-size:13.5px;color:var(--nebel-600)}
@@ -271,6 +284,9 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   .zeile .z-recht{gap:10px}
 }
 </style>
+<!-- lage.js bringt window.Lage: das eine „Heute" des Entwurfs und das Rechnen
+     mit Tagesabständen. Muss vor allem stehen, was daraus liest. -->
+<script src="lage.js"></script>
 <script src="krume.js"></script>
 </head>
 <body class="quoro"
@@ -286,7 +302,7 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   <div id="ansicht-stand">
     <div class="kopf">
       <h1>Was quoroAI berechnet</h1>
-      <div class="stand">Deine eigene Rechnung: was diese Plattform dich diesen Monat kostet, woraus sich der Betrag zusammensetzt und was davon noch offen ist. Gezählt wird bis heute, nicht bis zum Monatsende.</div>
+      <div class="stand">Deine eigene Rechnung: was diese Plattform dich diesen Monat kostet, woraus sich der Betrag zusammensetzt und was davon noch offen ist. Gezählt wird tagegenau bis zum <span id="kopf-stichtag">18.08.2026</span>, nicht bis zum Monatsende.</div>
     </div>
 
     <section class="lage" aria-label="Der laufende Monat">
@@ -303,7 +319,7 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
         </div>
         <span class="kerbe" id="kerbe" aria-hidden="true" hidden></span>
         <div class="marken">
-          <span>bis heute <b id="marke-heute"></b></span>
+          <span>bis zum <span id="marke-bis">18.08.</span> <b id="marke-heute"></b></span>
           <span id="marke-ende"></span>
         </div>
         <div class="vormonat" id="marke-vormonat" hidden></div>
@@ -314,10 +330,10 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
     <div id="aufstellung-hier"></div>
 
     <h3>Dein Rabatt</h3>
-    <section class="tafel" aria-label="Wholesale-Staffel">
+    <section class="tafel" aria-label="Mengenrabatt-Staffel">
       <div class="staffel" id="staffel"></div>
       <div class="naechste" id="naechste"></div>
-      <div class="klein">Der Rabatt gilt für die Listenpreise deiner Kundenzugänge, nicht für die Plattformgebühr. Gezählt wird, wie viele Zugänge im jeweiligen Monat aktiv waren — ein Zugang, der am 14. dazukommt, zählt für diesen Monat mit.</div>
+      <div class="klein">Der Rabatt gilt für die Listenpreise deiner Kundenzugänge, nicht für die Plattformgebühr. Gezählt wird, wie viele Zugänge im jeweiligen Monat aktiv waren — ein Zugang, der mitten im Monat dazukommt, zählt für diesen Monat mit, tagegenau ab seinem ersten Tag.</div>
     </section>
 
     <h3>Verlauf</h3>
@@ -349,7 +365,13 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   };
   var STAFFEL = [{ab:0,proz:25},{ab:25,proz:35},{ab:100,proz:45}];
   var GEBUEHR = 14900;
-  var HEUTE = '2026-08-14';
+  /* Der Tag, bis zu dem gezählt wird, kommt aus der Lage (lage.js): Dienstag,
+     der 18. August 2026. Hier stand ein eigenes '2026-08-14' und darüber der
+     Satz „Gezählt wird bis heute" — beides zusammen war eine Behauptung über
+     einen Tag, an dem der Entwurf gar nicht steht. Der Tag wird jetzt
+     ausgeschrieben, nicht „heute" genannt. */
+  var Lage = window.Lage;
+  var HEUTE = Lage.heuteISO();
 
   function rabattFuer(zugaenge){
     var p = 0;
@@ -435,7 +457,11 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
       monat:monat, gezaehltBis:ende, tageImMonat:tage,
       zeilen:zeilen, zugaenge:zugaenge,
       zwischensumme:zwischensumme, rabattProzent:proz, rabatt:rabatt,
-      gebuehr:gebuehr, gesamt:zwischensumme - rabatt + gebuehr
+      /* gebuehrTage kommt mit: die Gebühr wird tagegenau geteilt wie jede
+         Zugangszeile, und wer sie liest, soll dieselbe Herleitung sehen
+         statt sie ein zweites Mal auszurechnen. */
+      gebuehr:gebuehr, gebuehrTage:eigeneTage, einzelGebuehr:GEBUEHR,
+      gesamt:zwischensumme - rabatt + gebuehr
     };
   }
 
@@ -475,18 +501,28 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
                  '<span class="p-betrag">' + euro(z.betrag) + '</span></div>';
         }).join('') + '</div>';
 
+    /* Die Plattformgebühr ist der größte einzelne Posten dieser Rechnung —
+       bei vier Zugängen 41 Prozent der Endsumme. Sie stand trotzdem als
+       nackter Betrag da, ohne Preis und ohne Tage, während jede
+       Kundenzugangs-Zeile darüber ihre Herleitung trug. Jetzt rechnet sie
+       sich genauso nach: „18 von 31 Tagen à 149,00 €". */
+    var gebuehrHer = daten.gebuehrTage < daten.tageImMonat
+      ? daten.gebuehrTage + ' von ' + daten.tageImMonat + ' Tagen à ' + euro(daten.einzelGebuehr)
+      : 'ganzer Monat à ' + euro(daten.einzelGebuehr);
+
     var jeZugang = daten.zugaenge > 0
       ? '<p class="je-zugang">Das sind <b>' + euro(Math.round(daten.gesamt / daten.zugaenge)) +
-        '</b> je Kundenzugang, Plattformgebühr eingerechnet.</p>'
+        '</b> je Kundenzugang, gerechnet über die ' + daten.zugaenge +
+        ' Zugänge dieses Monats, Plattformgebühr eingerechnet.</p>'
       : '';
 
     return '<section class="tafel aufstellung ' + (klasse||'') + '" aria-label="Aufstellung">' + posten +
       '<dl class="summen">' +
         '<div><dt>Listenpreise, ' + zugaengeWort(daten.zugaenge) + '</dt><dd>' + euro(daten.zwischensumme) + '</dd></div>' +
         (daten.zwischensumme > 0
-          ? '<div><dt>Dein Wholesale-Rabatt ' + daten.rabattProzent + ' %</dt><dd>' + euro(-daten.rabatt) + '</dd></div>'
+          ? '<div><dt>Dein Mengenrabatt ' + daten.rabattProzent + ' %</dt><dd>' + euro(-daten.rabatt) + '</dd></div>'
           : '') +
-        '<div><dt>Plattformgebühr</dt><dd>' + euro(daten.gebuehr) + '</dd></div>' +
+        '<div><dt>Plattformgebühr <span class="p-her">' + gebuehrHer + '</span></dt><dd>' + euro(daten.gebuehr) + '</dd></div>' +
         '<div class="gesamt"><dt class="was">Zu zahlen</dt><dd>' + euro(daten.gesamt) + '</dd></div>' +
       '</dl>' + jeZugang + '</section>';
   }
@@ -542,6 +578,7 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
     var strecke = document.getElementById('strecke');
     if (ganzer && ganzer.gesamt > 0) {
       strecke.hidden = false;
+      document.getElementById('marke-bis').textContent = datum(HEUTE).slice(0, 6);
       document.getElementById('marke-heute').textContent = euro(laufend.gesamt);
       document.getElementById('marke-ende').innerHTML =
         'zum Monatsende rund <b>' + euro(ganzer.gesamt) + '</b>';
@@ -582,7 +619,7 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
     }
 
     document.getElementById('gezaehlt-bis').textContent =
-      monatsLabel(DIESER_MONAT) + ', gezählt bis zum ' + teile(HEUTE).t + '.';
+      monatsLabel(DIESER_MONAT) + ', gezählt bis zum ' + datum(HEUTE);
     document.getElementById('aufstellung-hier').innerHTML = aufstellung(laufend);
 
     zeichneStaffel(laufend.zugaenge);
@@ -702,8 +739,11 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
     });
     if (d.zeilen.length === 0) zeilen.push('kein Kundenzugang in diesem Monat');
     zeilen.push('', 'Listenpreise ' + euro(d.zwischensumme));
-    if (d.zwischensumme > 0) zeilen.push('Wholesale-Rabatt ' + d.rabattProzent + ' %: ' + euro(-d.rabatt));
-    zeilen.push('Plattformgebühr ' + euro(d.gebuehr), 'Zu zahlen ' + euro(d.gesamt), '',
+    if (d.zwischensumme > 0) zeilen.push('Mengenrabatt ' + d.rabattProzent + ' %: ' + euro(-d.rabatt));
+    zeilen.push('Plattformgebühr (' + (d.gebuehrTage < d.tageImMonat
+                  ? d.gebuehrTage + '/' + d.tageImMonat + ' Tage à ' + euro(d.einzelGebuehr)
+                  : 'ganzer Monat à ' + euro(d.einzelGebuehr)) + '): ' + euro(d.gebuehr),
+                'Zu zahlen ' + euro(d.gesamt), '',
                 'Abgeschlossen am ' + datum(a.abgeschlossen),
                 a.bezahlt ? 'Bezahlt am ' + datum(a.bezahlt) : 'Noch nicht bezahlt', '',
                 '— Vorführung, Demo-Daten; im Produkt ein echtes PDF');
@@ -760,6 +800,8 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
     e.preventDefault();
     location.hash = '';
   });
+
+  document.getElementById('kopf-stichtag').textContent = datum(HEUTE);
 
   route();
 })();

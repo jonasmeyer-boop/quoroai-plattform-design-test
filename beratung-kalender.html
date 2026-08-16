@@ -46,7 +46,12 @@
    statt eine Fläche zu versprechen, die niemand mehr baut.
    V4 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
-   Marker: BERATUNG-KALENDER-V4 (die Krume kommt aus einer Quelle) */
+   V5 (Issue #57): Team, Woche und Termine stehen nicht mehr hier, sondern in
+   der Lage (lage.js) — derselben Quelle, aus der beratung-termine.html
+   „Deine Termine" baut. Vorher kannte nur diese Fläche den Freitag bei MTS
+   Maschinenbau. Und die Standzeile nennt den Kreis, über den sie zählt: das
+   Raster zeigt zehn Kästen, gemeldet waren neun (Ärger 79).
+   Marker: BERATUNG-KALENDER-V5 (Termine kommen aus einer Quelle) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -360,6 +365,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 }
 </style>
 <script src="krume.js"></script>
+<!-- Die Lage: eine Quelle für Termine und Meldungen (Issue #57) -->
+<script src="lage.js"></script>
 </head>
 <body class="quoro"
       data-krume-raum="zentrale" data-krume-hier="Die Woche">
@@ -444,10 +451,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   });
 
   /* ---------- Was diese Woche wahr ist ----------
-     Team und Mandate stimmen mit beratung-verwaltung.html und dem Modell
-     überein; die drei Termine, die auch anderswo stehen (Cordes am Dienstag,
-     Petersen am Donnerstag, das Wunschfenster am Freitag), tragen dieselben
-     Zeiten wie dort. */
+     Steht nicht mehr hier, sondern in der Lage (lage.js): Team, Woche und
+     Termine kommen aus einer Quelle, aus der auch beratung-termine.html liest.
+     Was hier bleibt, ist nur, was diese Fläche allein angeht — Abwesenheiten
+     und die eingeplante Mandatsarbeit. */
   /* Raster von 8 bis 19 Uhr. Am Finger steht nur ein Tag im Bild, also ist
      Höhe billig und Breite teuer — dort bekommt die Stunde mehr Platz, damit
      auch ein halbstündiger Block zwei Zeilen tragen kann. Maßstabstreu bleibt
@@ -456,42 +463,16 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   function stundenhoehe(){ return window.matchMedia('(max-width:820px)').matches ? 78 : 54; }
   var ARBEIT_VON = 9, ARBEIT_BIS = 17;
 
-  var TEAM = [
-    {id:'a', name:'Dr. Anna Vogelsang', kurz:'Anna V.',   rolle:'Inhaberin', soll:7},
-    {id:'j', name:'Jens Nordholm',      kurz:'Jens N.',   rolle:'Partner',   soll:7},
-    {id:'m', name:'Miriam Krohn',       kurz:'Miriam K.', rolle:'Beraterin', soll:8},
-    {id:'t', name:'Tarek Aydin',        kurz:'Tarek A.',  rolle:'Berater',   soll:8},
-    {id:'s', name:'Sabine Röttger',     kurz:'Sabine R.', rolle:'Assistenz', soll:8}
-  ];
-  var ICH = 'a';
-
-  var TAGE = [
-    {kurz:'Montag',     datum:'17. August'},
-    {kurz:'Dienstag',   datum:'18. August'},
-    {kurz:'Mittwoch',   datum:'19. August'},
-    {kurz:'Donnerstag', datum:'20. August'},
-    {kurz:'Freitag',    datum:'21. August'}
-  ];
-
-  var termine = [
-    {id:'t1', tag:0, von:8.5,  bis:9,    wer:'*', was:'Wochenrunde', intern:true},
-    {id:'t2', tag:0, von:9,    bis:10,   wer:'t', kunde:'MTS Maschinenbau', was:'Rückruf nach drei stillen Wochen', form:'Telefonat'},
-    {id:'t3', tag:0, von:14,   bis:15.5, wer:'m', kunde:'Bäckerei Freitag', was:'Personalquote', form:'vor Ort'},
-    {id:'t4', tag:1, von:11.5, bis:12,   wer:'a', kunde:'Cordes Logistik', was:'Fuhrpark und Finanzierung', form:'Telefonat',
-     wunsch:{tag:2, von:16, bis:16.5, von_wem:'Herrn Cordes'}},
-    {id:'t5', tag:1, von:15,   bis:16,   wer:'s', kunde:'Petersen Stahlbau', was:'Unterlagen durchgehen', form:'Videocall'},
-    {id:'t6', tag:2, von:10,   bis:11.5, wer:'m', kunde:'Petersen Stahlbau', was:'Zahlen für das Preismodell', form:'vor Ort'},
-    {id:'t7', tag:3, von:10,   bis:11,   wer:'a', kunde:'Petersen Stahlbau', was:'Preis und Marge', form:'Videocall'},
-    /* Zwei zur selben Stunde: der Donnerstag zeigt, dass sich Termine im
-       Raster nebeneinanderstellen statt übereinanderzuliegen. */
-    {id:'t8', tag:3, von:10,   bis:11,   wer:'m', kunde:'Bäckerei Freitag', was:'Zwischenstand Personal', form:'Videocall'},
-    {id:'t9', tag:3, von:14,   bis:15,   wer:'t', kunde:'Cordes Logistik', was:'Frachtraten', form:'Videocall'},
-    {id:'t10', tag:4, von:13,  bis:14,   wer:'a', kunde:'MTS Maschinenbau', was:'Angebot besprechen', form:'Videocall'},
-    /* Die offene Anfrage aus beratung-termine.html steht hier als Fenster, das
-       noch niemandem gehört — entschieden wird sie dort, nicht hier. */
-    {id:'w1', tag:4, von:9, bis:9.75, wer:'a', kunde:'Petersen Stahlbau', was:'Gespräch mit einem Menschen',
-     form:'Videocall', angefragt:true, ziel:'beratung-termine.html#petersen'}
-  ];
+  /* Team, Woche und Termine kommen aus der Lage (lage.js) — derselben
+     Quelle, aus der beratung-termine.html „Deine Termine" baut. Vorher stand
+     die Liste nur hier, und der Zettel nebenan führte drei von Hand
+     geschriebene Zeilen, in denen der Freitag bei MTS Maschinenbau fehlte
+     (Issue #57). Das Aussehen bleibt Sache dieser Fläche; die Lage liefert
+     nur Daten. */
+  var TEAM = Lage.team();
+  var ICH = Lage.ich();
+  var TAGE = Lage.tage();
+  var termine = Lage.termine();
 
   var abwesend = [
     {wer:'j', von:3, bis:4, art:'Urlaub'},
@@ -504,10 +485,11 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     a:[3,2.5,4,2,2], j:[4,4,3,0,0], m:[2,3,2,3.5,2], t:[3,4,4,2,1], s:[5,4,0,5,4]
   };
 
-  /* Heute ist Dienstag, der 18. August, kurz vor zehn: der Montag liegt hinter
-     uns, der Anruf bei Cordes um 11:30 ist der nächste Termin — und genau den
-     möchte Herr Cordes seit heute früh verschieben. */
-  var HEUTE = 1, JETZT = 9.67;
+  /* Heute ist Dienstag, der 18. August 2026, kurz vor zehn: der Montag liegt
+     hinter uns, der Anruf bei Cordes um 11:30 ist der nächste Termin — und
+     genau den möchte Herr Cordes seit heute früh verschieben. Welcher Tag
+     „heute" ist, weiß die Lage, nicht diese Fläche. */
+  var HEUTE = Lage.heute(), JETZT = Lage.jetzt();
   var werGewaehlt = 'alle';
   var tagGewaehlt = HEUTE;
 
@@ -552,10 +534,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     return (g % 1 ? String(g).replace('.', ',') : g) + ' Std.';
   }
 
-  function zeitWort(h){
-    var st = Math.floor(h), mi = Math.round((h - st) * 60);
-    return st + ':' + (mi < 10 ? '0' : '') + mi;
-  }
+  /* Eine Rechnung, nicht zwei: die Lage schreibt die Uhrzeit. */
+  function zeitWort(h){ return Lage.zeitWort(h); }
 
   /* ---------- Der Kopf: was die Woche in einem Satz ist ---------- */
   function standSetzen(){
@@ -567,8 +547,16 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         : 'von ' + TAGE[a.von].kurz + ' bis ' + TAGE[a.bis].kurz;
       return p.name + ' ' + tage + ' (' + a.art + ')';
     });
-    var satz = termine.filter(function(t){ return !t.angefragt && !t.intern; }).length + ' Termine stehen, ' +
-      (offen === 1 ? 'einer wartet auf deine Entscheidung' : offen + ' warten auf deine Entscheidung') + '.';
+    /* An jede Summe gehört der Kreis, über den sie zählt: das Raster zeigt
+       zehn Kästen, gemeldet waren neun — die Wochenrunde am Montag fehlte in
+       der Zahl (Ärger 79). */
+    var stehend = termine.filter(function(t){ return !t.angefragt; });
+    var mitMandat = stehend.filter(function(t){ return !t.intern; });
+    var intern = stehend.filter(function(t){ return t.intern; });
+    var satz = stehend.length + ' Termine trägt diese Woche: ' + mitMandat.length + ' mit Mandaten';
+    if (intern.length === 1) satz += ' und die ' + intern[0].was + ' am ' + TAGE[intern[0].tag].kurz;
+    else if (intern.length) satz += ' und ' + intern.length + ' interne';
+    satz += '. ' + (offen === 1 ? 'Einer wartet auf deine Entscheidung' : offen + ' warten auf deine Entscheidung') + '.';
     if (wegWer.length) satz += ' Nicht da: ' + wegWer.join(', ') + '.';
     document.getElementById('stand').textContent = satz;
   }

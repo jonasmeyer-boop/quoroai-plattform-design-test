@@ -30,7 +30,7 @@
    4. Die Vorlage gibt den WEG, nicht das ZIEL. Was sie nicht wissen kann,
       steht als Frage in ihr drin und wird beim Anlegen gestellt.
    5. Eine geänderte Vorlage rührt laufende Mandate nicht an — sonst schreibt
-      ein Häkchen hier neun Kundenpläne um, die längst besprochen sind.
+      ein Häkchen hier die vier Kundenpläne um, die längst besprochen sind.
    6. Der Rückweg: was von Hand eingefügt wird, zählt er. Dreimal derselbe
       Schritt ist ein Vorschlag, die Vorlage zu ändern — kein automatisches
       Lernen.
@@ -68,7 +68,23 @@
    prefers-reduced-motion ein.
    V4 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
-   Marker: BERATUNG-VORLAGEN-V4 (die Krume kommt aus einer Quelle) */
+   V5 (Welle 2): zwei Reste aus der Nutzerprüfung.
+   Ärger 121: die Fläche zählte an drei Stellen „neun laufende Mandate" und
+   zehn Zeilen tiefer „deine vier laufenden Mandate". Vier ist richtig; drei
+   davon gehen den Weg Preis und Marge, Bäckerei Freitag weicht ab, und nach
+   der Vorlage „Nachfolge in Etappen" läuft gerade keines. Jede dieser Zahlen
+   nennt jetzt ihren Kreis.
+   Denkfehler 4: „Woche 3" ohne Anfang. Eine Vorlage kann kein Datum tragen,
+   weil sie das Startdatum nicht kennt — also sagt sie jetzt, ab wann die
+   Wochen zählen, und der Satz überlebt auch das Übernehmen. Wo die Fläche
+   ein konkretes Mandat zitiert (Petersen), steht das Datum: Woche 6 seines
+   Fahrplans ist der 12.10.2026, gerechnet ab der Freigabe des Preismodells,
+   die bis Freitag, den 04.09.2026 erbeten ist (siehe beratung-mandat.html).
+   Achtung, zwei Nullpunkte: die Vorlage zählt ab dem START des Mandats
+   (Petersen: Mai 2026), sein Fahrplan ab der FREIGABE. Deshalb ist der
+   12.10.2026 weder Woche 14 noch Woche 6 nach Mai — beide Bezüge stehen
+   deshalb im Text, sonst rechnet jemand nach und findet einen Fehler.
+   Marker: BERATUNG-VORLAGEN-V5 (jede Zahl nennt ihren Kreis, jede Woche ihren Anfang) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -380,7 +396,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
   <h3 data-hilfe-name="Eure Vorlagen"
       data-hilfe="Jede Vorlage ist ein Bauplan für Mandate einer Art. Sie steht hier einmal, und jedes neue Mandat dieser Art bekommt sie beim Anlegen. Wer sie ändert, ändert nur das nächste Mandat, nie die laufenden.">Eure Vorlagen</h3>
-  <p class="h3-satz" id="vorlagen-satz">Eine liegt hinterlegt. Eine zweite geht ihr, ohne sie hinterlegt zu haben.</p>
+  <p class="h3-satz" id="vorlagen-satz">Eine liegt hinterlegt. Eine zweite geht ihr, ohne sie hinterlegt zu haben. Die Wochen in einer Vorlage zählen ab dem Start des Mandats — Woche 0 ist die Woche, in der es angelegt wird, nicht diese hier.</p>
 
   <section class="vorlage" aria-label="Vorlage Nachfolge in Etappen">
     <div class="v-kopf">
@@ -388,7 +404,12 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         <div class="v-name">Nachfolge in Etappen</div>
         <div class="v-meta">6 Meilensteine, angelegt im Februar, zuletzt geändert am 4. Mai von Dr. Anna Vogelsang</div>
       </div>
-      <span class="v-laeuft">9 Mandate laufen danach</span>
+      <!-- Ärger 121: hier stand „9 Mandate laufen danach", zehn Zeilen
+           tiefer „deine vier laufenden Mandate". Vier ist richtig — drei der
+           vier gehen den Weg Preis und Marge, Bäckerei Freitag weicht ab,
+           und die Nachfolge geht keines. Eine Zahl ohne ihren Kreis war
+           genau der Grund, warum die neun so lange stehen blieb. -->
+      <span class="v-laeuft">0 von 4 Mandaten laufen danach</span>
     </div>
     <ol class="stationen" aria-label="Sechs Meilensteine">
       <li><div class="s-kopf"><span class="s-name">Bestandsaufnahme</span><span class="s-wann">Woche 0 bis 4</span></div></li>
@@ -401,7 +422,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     <div class="kante"
          data-hilfe-name="Was eine Änderung anfasst"
          data-hilfe="Eine Vorlage ist ein Bauplan, kein Fernsteuerungspult. Was du hier änderst, gilt ab dem nächsten Mandat. Die laufenden behalten ihren Plan — er ist mit den Kunden besprochen.">
-      <b>Änderst du diese Vorlage, ändert sich keines der neun laufenden Mandate.</b> Deren Pläne sind mit den Kunden besprochen; ein Häkchen hier darf sie nicht umschreiben. Die Änderung gilt ab dem nächsten Mandat.
+      <b>Änderst du eine Vorlage, ändert sich keines deiner vier laufenden Mandate.</b> Deren Pläne sind mit den Kunden besprochen; ein Häkchen hier darf sie nicht umschreiben. Die Änderung gilt ab dem nächsten Mandat.
     </div>
   </section>
 
@@ -411,7 +432,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   <h3 id="vorschlag-h3"
       data-hilfe-name="Der Vorschlag"
       data-hilfe="Dein KI-Berater erfindet keine Vorlage. Er hat gelesen, wie deine vier Mandate tatsächlich laufen, und den Weg gefunden, den drei von ihnen gehen. Solange der Bogen durchscheinend liegt, gehört er dir noch nicht."><span id="vorschlag-titel">Was du machst, ohne es hinterlegt zu haben</span></h3>
-  <p class="h3-satz" id="vorschlag-satz">Dein KI-Berater hat deine vier laufenden Mandate nebeneinandergelegt.</p>
+  <p class="h3-satz" id="vorschlag-satz">Dein KI-Berater hat deine vier laufenden Mandate nebeneinandergelegt. Auch hier zählen die Wochen ab dem Start des Mandats; ein Datum bekommen sie erst, wenn eines angelegt wird.</p>
 
   <section class="vorlage" id="bogen" aria-label="Vorschlag für eine Vorlage">
     <div class="b-herkunft" id="b-herkunft"><img src="bilder/quoro-icon.svg" alt="" width="15" height="15"><span id="b-herkunft-wort">Vorschlag, gehört dir noch nicht</span></div>
@@ -465,7 +486,12 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
           <li><span class="wer ki">KI-Berater</span><span>Nachrechnen, ob es gewirkt hat</span></li>
           <li><span class="wer">du</span><span>Ergebnis vorlegen</span></li>
         </ul>
-        <span class="s-frage"><span class="konkret"><i>noch aus Petersen:</i> wirksam ab Woche 6, Oktober</span><span class="form"><b>Woche 14 nach Start</b> — rechnet sich beim Anlegen aus</span></span>
+        <!-- Zwei verschiedene Nullpunkte, deshalb stehen sie beide da: die
+             Vorlage zählt ab dem Start des Mandats, Petersens eigener
+             Fahrplan ab der Freigabe des Preismodells. Ohne diesen Zusatz
+             rechnet jeder nach und findet, dass Mai 2026 plus 14 Wochen
+             nicht der 12.10.2026 ist. -->
+        <span class="s-frage"><span class="konkret"><i>noch aus Petersen:</i> wirksam ab Woche 6 seines Fahrplans, gerechnet ab der Freigabe, also ab dem 12.10.2026</span><span class="form"><b>Woche 14 nach Start des Mandats</b> — rechnet sich beim Anlegen aus</span></span>
       </li>
     </ol>
 
@@ -479,7 +505,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         <li><span class="stelle">„+38.000 € im Jahr"</span><span class="grund">seine Rechnung, an seinen Umsätzen</span></li>
         <li><span class="stelle">„A- und B-Kunden bleiben unberührt"</span><span class="grund">sein Kundenschnitt</span></li>
         <li><span class="stelle">„Herr Petersen", „Frau Dr. Vogelsang"</span><span class="grund">Namen</span></li>
-        <li><span class="stelle">„ab Woche 6, Oktober"</span><span class="grund">ein Datum, aus seinem Start gerechnet</span></li>
+        <li><span class="stelle">„ab dem 12.10.2026"</span><span class="grund">ein Datum, aus seinem Fahrplan gerechnet</span></li>
         <li><span class="stelle">Unterlage „Preismodell Benchmark", 12 Seiten</span><span class="grund">liegt in seiner Akte und bleibt dort</span></li>
         <li><span class="stelle">9,2 Stunden im August</span><span class="grund">auf sein Mandat gebucht</span></li>
       </ul>
@@ -739,10 +765,16 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
       /* Was die Überschriften behaupten, stimmt jetzt nicht mehr: es liegt
          nichts mehr unhinterlegt herum. */
-      document.getElementById('vorlagen-satz').textContent = 'Seit eben liegen zwei hinterlegt.';
+      /* Der Bezugspunkt der Wochen darf beim Umschreiben nicht verloren
+         gehen — sonst steht „Woche 3" nach dem Griff wieder ohne Anfang da
+         (Denkfehler 4 der Nutzerprüfung). */
+      document.getElementById('vorlagen-satz').textContent =
+        'Seit eben liegen zwei hinterlegt. Die Wochen in einer Vorlage zählen ab dem Start des Mandats — ' +
+        'Woche 0 ist die Woche, in der es angelegt wird, nicht diese hier.';
       document.getElementById('vorschlag-titel').textContent = 'Was du gemacht hast, ohne es hinterlegt zu haben';
       document.getElementById('vorschlag-satz').textContent =
-        'Dein KI-Berater hatte deine vier laufenden Mandate nebeneinandergelegt.';
+        'Dein KI-Berater hatte deine vier laufenden Mandate nebeneinandergelegt. Auch hier zählen die ' +
+        'Wochen ab dem Start des Mandats; ein Datum bekommen sie erst, wenn eines angelegt wird.';
       var h3 = document.getElementById('vorschlag-h3');
       h3.setAttribute('data-hilfe-name', 'Eure zweite Vorlage');
       h3.setAttribute('data-hilfe',

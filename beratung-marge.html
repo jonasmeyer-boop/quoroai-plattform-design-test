@@ -31,10 +31,13 @@
    Balken mit zwei Lesarten wäre eine Falle, und ein Balken, der in einer
    Sicht nichts unterscheidet, behauptet trotzdem etwas (siehe V2).
 
-   Die Zahlen decken sich mit der Kundenliste (beratung-kunden.html: 30,4 /
-   12,1 / 31,0 / 26,8 Prozent) — sie werden hier aus Stunden, Sätzen und
-   Honoraren gerechnet, nicht abgeschrieben. Der Tarifverlauf deckt sich mit
-   beratung-abrechnung.html (Eröffnungsdaten und Tarife der vier Zugänge).
+   Die Zahlen sollen sich mit der Kundenliste decken (beratung-kunden.html) —
+   sie werden hier aus Stunden, Sätzen und Honoraren gerechnet, nicht
+   abgeschrieben. Seit Petersen als Pauschalmandat rechnet (V8), sind es
+   28,5 / 12,1 / 31,0 / 26,8 Prozent; beratung-kunden.html ist nachgezogen und
+   trägt für Petersen dieselben 28,5 Prozent. Der Tarifverlauf
+   deckt sich mit beratung-abrechnung.html (Eröffnungsdaten und Tarife der
+   vier Zugänge).
 
    V2 (Code-Review): Fremde Mandate waren nur optisch weg — mit der
    Tabulatortaste erreichbar und für den Screenreader lesbar, samt der
@@ -48,7 +51,20 @@
    V5 (Häppchen C3): Hilfe-Ebene im Kopfband.
    V6 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
-   Marker: BERATUNG-MARGE-V6 (die Krume kommt aus einer Quelle) */
+   V7 (Issue #60): der vereinbarte Mandatssatz steht hier, nicht nur auf der
+   Rechnung — und daneben der Rechenweg zu dem, was je Stunde wirklich
+   ankam. Vorher standen zwei Zahlen unbeschriftet nebeneinander, und was
+   dazwischen liegt, erklärte keine Fläche. Der frühere Vergleich mit dem Mix
+   der Listensätze ist weg: eine dritte Zahl in derselben Spalte hätte die
+   Frage nur verdreifacht.
+   V8 (Welle 2): Petersen ist ein Pauschalmandat, wie sein Beratungsvertrag
+   es sagt — 2.400 € im Monat seit dem 1. Mai 2026, vier Monate, 9.600 €
+   Honorar, 57 erfasste Stunden, 28,5 % Marge. Der Rechenweg vom Satz zum
+   Honorar bleibt und hängt jetzt am einzigen Mandat, das wirklich nach
+   Stunden abrechnet: Bäckerei Freitag. Der frühere Petersen-Rechenweg
+   (30 nicht berechnete Stunden, 1.250 € Nachlass) war erfunden — kein
+   Entwurf sagte, warum das Honorar unter dem Satz lag — und ist weg.
+   Marker: BERATUNG-MARGE-V9 (Petersen ist ein Pauschalmandat) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -221,6 +237,19 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
 .satzsatz{font-size:13px;color:var(--nebel-600);margin-top:12px;line-height:1.6}
 .satzsatz b{color:var(--tinte);font-weight:600}
 .satzsatz.warnung b{color:var(--bernstein)}
+/* Der Rechenweg vom vereinbarten Satz zu dem, was wirklich berechnet wurde.
+   Er steht als Aufstellung da, nicht als Fließtext: die Frage der Prüfung war
+   „woher kommt die Differenz", und die beantwortet nur eine Liste, die sich
+   nachrechnen lässt. */
+.rechenweg{margin-top:12px;border-radius:10px;border:0.5px solid var(--nebel-200);
+  background:var(--flaeche);overflow:hidden}
+.rw{display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  padding:9px 12px;font-size:13px;color:var(--nebel-600);border-top:0.5px solid var(--nebel-200)}
+.rw:first-child{border-top:0}
+.rw b{font-weight:600;color:var(--tinte);font-variant-numeric:tabular-nums;white-space:nowrap}
+.rw.kopf{background:var(--nebel-100)}
+.rw.ergebnis{background:var(--lila-050);color:var(--tinte);font-weight:600}
+.rw.ergebnis b{color:var(--lila-700)}
 .aufriss .tuer{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .aufriss .tuer .knopf{min-height:44px;padding:0 16px;font-size:14px;text-decoration:none}
 
@@ -386,16 +415,46 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
 
      Die Beträge müssen zur Abrede passen: acht Monatspauschalen zu 2.750 €
      sind 22.000 €, acht Zwölftel einer Jahrespauschale von 27.000 € sind
-     18.000 €. Wer hier eine Zahl ändert, rechnet die Abrede mit. */
+     18.000 €. Wer hier eine Zahl ändert, rechnet die Abrede mit.
+
+     satz = der VEREINBARTE Mandatssatz je Stunde. Er steht so auf jeder
+     Rechnung (beratung-rechnungen.html: Freitag 150,00 €) und ist etwas
+     anderes als das, was am Ende je Stunde angekommen ist. Genau diese zwei
+     Größen standen hier vorher unbeschriftet nebeneinander — ein Satz auf der
+     Rechnung, ein Durchschnitt hier, und keine Fläche erklärte, was dazwischen
+     liegt. Deshalb trägt jedes Aufwandsmandat seinen Satz UND den Rechenweg
+     dahin, wo das Honorar wirklich landete.
+     Auf einem Pauschalmandat gibt es keinen Stundensatz; was dort je Stunde
+     ankommt, ist eine Kennzahl und wird auch so genannt.
+
+     Petersen stand hier bis 2026-08-16 als Aufwandsmandat zu 180,00 € mit
+     38.350 € Honorar aus 250 Stunden. Beides war falsch. Der Beratungsvertrag
+     (blaetter.js, Ziffer 2) vereinbart eine Monatspauschale von 2.400,00 €
+     netto, die jede Stunde deckt, und der Leistungsnachweis des Kunden
+     (leistungen.html) sagt: das Mandat läuft seit dem 1. Mai 2026, also vier
+     Monate. Vier Pauschalen sind 9.600 € — dieselbe Rechenart wie bei Cordes
+     und MTS. Die Stunden folgen der internen Honorar-Kalkulation in
+     blaetter.js: rund vierzehn im Monat, davon neun bei Dr. Vogelsang. Damit
+     landet die Marge bei 28,5 % — genau der Zahl, die diese Kalkulation
+     nennt, und knapp über der Hausgrenze von 27 %.
+     Der Rechenweg vom Satz zum Honorar bleibt, wo er hingehört: bei den
+     Aufwandsmandaten. Von den vieren ist das jetzt nur noch Bäckerei
+     Freitag. */
   var MANDATE = [
-    {id:'petersen', name:'Petersen Stahlbau', seit:'seit März 2025', honorar:38350,
-     abrede:'nach Aufwand', stunden:[['anna',62],['miriam',148],['sabine',40]]},
+    {id:'petersen', name:'Petersen Stahlbau', seit:'seit Mai 2026', honorar:9600,
+     abrede:'Pauschale, 2.400 € im Monat', satz:null,
+     stunden:[['anna',34],['miriam',13],['sabine',10]]},
     {id:'cordes', name:'Cordes Logistik', seit:'seit 2021', honorar:22000,
-     abrede:'Pauschale, 2.750 € im Monat', stunden:[['jens',33],['tarek',126],['sabine',52]]},
+     abrede:'Pauschale, 2.750 € im Monat', satz:null,
+     stunden:[['jens',33],['tarek',126],['sabine',52]]},
     {id:'freitag', name:'Bäckerei Freitag', seit:'seit 2018', honorar:10760,
-     abrede:'nach Aufwand und Auslagen', stunden:[['miriam',58],['sabine',24]]},
+     abrede:'nach Aufwand und Auslagen', satz:150,
+     abzug:[{was:'12 Std. nicht berechnet', betrag:1800},
+            {was:'weiterberechnete Auslagen', betrag:-260}],
+     stunden:[['miriam',58],['sabine',24]]},
     {id:'mts', name:'MTS Maschinenbau', seit:'seit 2022', honorar:18000,
-     abrede:'Jahrespauschale, 27.000 € in zwölf Abschlägen', stunden:[['anna',26],['tarek',88],['sabine',18]]}
+     abrede:'Jahrespauschale, 27.000 € in zwölf Abschlägen', satz:null,
+     stunden:[['anna',26],['tarek',88],['sabine',18]]}
   ];
 
   /* Wer diese Fläche als Beraterin ansieht: Miriam Krohn. Sie arbeitet an
@@ -404,18 +463,28 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
   var ICH = 'miriam';
 
   MANDATE.forEach(function(m){
-    m.kosten = 0; m.std = 0; m.listenwert = 0;
+    m.kosten = 0; m.std = 0;
     m.stunden.forEach(function(p){
       var k = mensch(p[0]);
-      m.kosten     += k.kosten  * p[1];
-      m.listenwert += k.verkauf * p[1];
-      m.std        += p[1];
+      m.kosten += k.kosten * p[1];
+      m.std    += p[1];
     });
     m.db      = m.honorar - m.kosten;
     m.dbProz  = m.db / m.honorar * 100;
     m.real    = m.honorar / m.std;       /* was je Stunde angekommen ist */
-    m.listen  = m.listenwert / m.std;    /* was die Sätze versprochen hätten */
     m.meins   = m.stunden.some(function(p){ return p[0] === ICH; });
+
+    /* Der Rechenweg vom vereinbarten Satz zum berechneten Honorar. Was die
+       Abzüge nicht erklären, steht als eigene Zeile da — eine Fläche, die
+       eine Differenz verschweigt, ist genau der Fehler, den die Prüfung
+       gefunden hat. Lieber „nicht zugeordnet" als lautlos. */
+    if (m.satz != null){
+      m.abzug = m.abzug || [];
+      m.vollwert = m.std * m.satz;
+      var abgezogen = m.abzug.reduce(function(s, a){ return s + a.betrag; }, 0);
+      var rest = m.vollwert - abgezogen - m.honorar;
+      if (Math.abs(rest) >= 0.005) m.abzug.push({was:'nicht zugeordnet', betrag:rest});
+    }
   });
 
   /* Die Summe oben zählt genau das zusammen, was darunter auch steht —
@@ -423,13 +492,12 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
      einer Liste mit zweien. */
   function summiere(feld){
     var s = feld.reduce(function(s, m){
-      s.honorar += m.honorar; s.kosten += m.kosten; s.std += m.std; s.listenwert += m.listenwert;
+      s.honorar += m.honorar; s.kosten += m.kosten; s.std += m.std;
       return s;
-    }, {honorar:0, kosten:0, std:0, listenwert:0, anzahl:feld.length});
+    }, {honorar:0, kosten:0, std:0, anzahl:feld.length});
     s.db     = s.honorar - s.kosten;
     s.dbProz = s.db / s.honorar * 100;
     s.real   = s.honorar / s.std;
-    s.listen = s.listenwert / s.std;
     return s;
   }
   var SUMME = summiere(MANDATE);
@@ -543,7 +611,19 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
       '</button>' +
       '<div class="aufriss weich" hidden></div>';
     el.querySelector('.m-name').textContent = m.name;
-    el.querySelector('.m-meta').textContent = m.abrede + ', ' + std(m.std) + ', ' + euro(m.honorar) + ' Honorar';
+    /* Der vereinbarte Satz steht in der geschlossenen Zeile — er ist die
+       Zahl, die der Kunde auf seiner Rechnung sieht, und sie darf nicht
+       erst hinter einem Aufklappen auftauchen. */
+    el.querySelector('.m-meta').textContent = m.abrede
+      + (m.satz != null ? ', ' + eurokomma(m.satz) + ' je Stunde vereinbart' : '')
+      /* Der Kreis gehört an die Stundenzahl: hier zählen ALLE Beschäftigten,
+         die auf das Mandat gebucht haben. Der Kunde sieht in leistungen.html
+         eine kleinere Zahl (46,2 Std.), weil dort nur die Posten seiner
+         eigenen Mandate von zwei Menschen stehen. Beide sind richtig — ohne
+         den Kreis liest sich das als Widerspruch. */
+      + ', ' + std(m.std) + ' erfasst über ' + m.stunden.length
+      + (m.stunden.length === 1 ? ' Beschäftigten' : ' Beschäftigte')
+      + ', ' + euro(m.honorar) + ' berechnet';
     m.el      = el;
     m.roehre  = el.querySelector('.roehre');
     m.aufriss = el.querySelector('.aufriss');
@@ -566,7 +646,7 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
 
   var saetzeEl = document.getElementById('saetze');
   saetzeEl.innerHTML =
-    '<div class="s-zeile titel"><span>Wer</span><span>Satz</span><span>Kosten</span><span>bleibt</span></div>';
+    '<div class="s-zeile titel"><span>Wer</span><span>Listensatz</span><span>Kosten</span><span>bleibt</span></div>';
   TEAM.forEach(function(k){
     var z = document.createElement('div');
     z.className = 's-zeile';
@@ -589,7 +669,7 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
     document.getElementById('stand').textContent = kann
       ? 'Was von einem Honorar übrig bleibt, nachdem die Stunden bezahlt sind. Seit Jahresbeginn, über die ' +
         anzahlWort(SUMME.anzahl) + ' Mandate des Modells.'
-      : 'Was je Stunde ankommt, gegen das, was die Sätze versprechen. Seit Jahresbeginn, über die ' +
+      : 'Was vereinbart ist, und was je Stunde wirklich angekommen ist. Seit Jahresbeginn, über die ' +
         anzahlWort(MEINE.anzahl) + ' Mandate, an denen du arbeitest.';
     document.getElementById('titel-gesamt').textContent =
       kann ? 'Die Beratung, seit Jahresbeginn' : 'Deine Mandate, seit Jahresbeginn';
@@ -604,7 +684,8 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
     } else {
       document.getElementById('g-zahl').textContent = eurokomma(MEINE.real);
       document.getElementById('g-wort').textContent =
-        'kommen auf deinen Mandaten im Schnitt je Stunde an. Die Sätze versprechen ' + eurokomma(MEINE.listen) + '.';
+        'kommen auf deinen ' + anzahlWort(MEINE.anzahl) + ' Mandaten im Schnitt je Stunde an — nach Nachlässen und nicht ' +
+        'berechneten Stunden. Das ist kein Stundensatz; der vereinbarte steht bei jedem Mandat einzeln.';
       document.getElementById('g-legende').innerHTML =
         '<div class="marke-bleibt"><b>' + euro(MEINE.honorar) + '</b>Honorar auf deinen ' + anzahlWort(MEINE.anzahl) + ' Mandaten</div>' +
         '<div><b>' + std(MEINE.std) + '</b>dort erfasste Stunden, deine und die der anderen</div>';
@@ -626,15 +707,18 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
       m.el.querySelector('.zeile').tabIndex = fort ? -1 : 0;
       m.el.classList.toggle('duenn', kann && m.dbProz < 20);
       m.el.querySelector('.m-wert').textContent = kann ? proz(m.dbProz) : eurokomma(m.real);
-      m.el.querySelector('.m-wort').textContent = kann ? 'bleiben' : 'je Stunde';
+      m.el.querySelector('.m-wort').textContent = kann ? 'bleiben' : 'angekommen je Std.';
       m.aufriss.innerHTML = aufrissInhalt(m);
     });
     fremdHinweis.hidden = kann;
 
     /* --- Sätze --- */
+    /* Der Listensatz ist der Ausgangspunkt der Verhandlung, nicht das, was
+       ein Mandat zahlt. Ohne diesen Satz stünden hier fünf Zahlen, die keiner
+       Rechnung entsprechen. */
     document.getElementById('was-saetze').textContent = kann
-      ? 'Was der Kunde je Stunde zahlt, was die Stunde kostet, und was dazwischen bleibt.'
-      : 'Was der Kunde je Stunde zahlt. Was eine Stunde kostet, ist eine Gehaltsangabe — deine eigene siehst du.';
+      ? 'Der Listensatz je Kopf, was die Stunde kostet, und was dazwischen bleibt. Was ein Mandat wirklich zahlt, steht in seiner Abrede weiter oben — bei Bäckerei Freitag etwa 150,00 € je Stunde, gleich wer arbeitet, und bei Petersen Stahlbau gar kein Stundensatz, sondern eine Pauschale.'
+      : 'Der Listensatz je Kopf. Was ein Mandat wirklich zahlt, steht in seiner Abrede weiter oben. Was eine Stunde kostet, ist eine Gehaltsangabe — deine eigene siehst du.';
     TEAM.forEach(function(k){
       var selbst = (k.id === ICH && !kann);
       var zeigen = kann || selbst;
@@ -655,7 +739,7 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
 
   function aufrissInhalt(m){
     var kann = darfKosten();
-    var reihen = '<div class="kopfzeile titel"><span>Wer</span><span>Std.</span><span>Satz</span><span>Kosten</span></div>';
+    var reihen = '<div class="kopfzeile titel"><span>Wer</span><span>Std.</span><span>Listensatz</span><span>Kosten</span></div>';
     m.stunden.forEach(function(p){
       var k = mensch(p[0]);
       var selbst = (k.id === ICH && !kann);
@@ -670,14 +754,41 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
         '</div>';
     });
 
-    var satz = kann
-      ? '<p class="satzsatz' + (m.dbProz < 20 ? ' warnung' : '') + '">' +
-          'Die Sätze versprechen <b>' + eurokomma(m.listen) + '</b> je Stunde. Angekommen sind <b>' + eurokomma(m.real) + '</b>. ' +
-          'Nach Kosten von ' + euro(m.kosten) + ' bleiben <b>' + euro(m.db) + '</b>, also ' + proz(m.dbProz) + '.</p>'
-      : '<p class="satzsatz">Die Sätze versprechen <b>' + eurokomma(m.listen) + '</b> je Stunde. Angekommen sind <b>' + eurokomma(m.real) + '</b>. ' +
-          'Was die Stunden gekostet haben, sieht nur die Leitung.</p>';
+    /* Zwei Zahlen, zwei Namen. Der vereinbarte Satz ist die Abrede und steht
+       auf jeder Rechnung; was je Stunde ankam, ist ein Durchschnitt danach.
+       Dazwischen liegt der Rechenweg — Zeile für Zeile, damit die Differenz
+       niemand mehr suchen muss. */
+    var weg = '';
+    if (m.satz != null){
+      weg = '<div class="rechenweg">' +
+        '<div class="rw kopf"><span>' + std(m.std) + ' zum vereinbarten Satz von ' + eurokomma(m.satz) + ' je Stunde</span>' +
+          '<b>' + eurokomma(m.vollwert) + '</b></div>' +
+        m.abzug.map(function(a){
+          return '<div class="rw"><span>' + a.was + '</span><b>' +
+            (a.betrag >= 0 ? '−' + eurokomma(a.betrag) : '+' + eurokomma(-a.betrag)) + '</b></div>';
+        }).join('') +
+        '<div class="rw ergebnis"><span>berechnet, im Schnitt ' + eurokomma(m.real) + ' je Stunde</span>' +
+          '<b>' + eurokomma(m.honorar) + '</b></div>' +
+      '</div>';
+    }
 
-    return '<div class="koepfe">' + reihen + '</div>' + satz +
+    var satz;
+    if (m.satz != null){
+      satz = kann
+        ? '<p class="satzsatz' + (m.dbProz < 20 ? ' warnung' : '') + '">Nach Kosten von ' + euro(m.kosten) +
+            ' bleiben <b>' + euro(m.db) + '</b>, also ' + proz(m.dbProz) + ' des berechneten Honorars.</p>'
+        : '<p class="satzsatz">Was die Stunden gekostet haben, sieht nur die Leitung.</p>';
+    } else {
+      var kennzahl = 'Für dieses Mandat ist <b>kein Stundensatz</b> vereinbart, sondern eine ' + m.abrede +
+        '. Auf die ' + std(m.std) + ' gerechnet, die darin stecken, kommen <b>' + eurokomma(m.real) +
+        '</b> je Stunde an — eine Kennzahl, kein Satz. ';
+      satz = kann
+        ? '<p class="satzsatz' + (m.dbProz < 20 ? ' warnung' : '') + '">' + kennzahl +
+            'Nach Kosten von ' + euro(m.kosten) + ' bleiben <b>' + euro(m.db) + '</b>, also ' + proz(m.dbProz) + '.</p>'
+        : '<p class="satzsatz">' + kennzahl + 'Was die Stunden gekostet haben, sieht nur die Leitung.</p>';
+    }
+
+    return '<div class="koepfe">' + reihen + '</div>' + weg + satz +
       '<div class="tuer">' +
         '<a class="knopf leise" href="beratung-mandat.html">Mandat öffnen</a>' +
         '<a class="knopf leise" href="beratung-zeiten.html">Zeiten</a>' +

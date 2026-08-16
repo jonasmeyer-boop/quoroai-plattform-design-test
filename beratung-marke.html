@@ -40,7 +40,22 @@
    V6 (Häppchen C3): Hilfe-Ebene im Kopfband.
    V7 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
-   Marker: BERATUNG-MARKE-V7 (die Krume kommt aus einer Quelle) */
+   V8 (Paket A4, Issue #56): Eine Sehprobe schrieb Name, Farben, Logo, Anrede
+   und die Anbieterangaben um, ohne Weg zurück. Sie tut es weiter — Ansehen soll
+   leicht bleiben —, aber darunter steht jetzt der Stand von vorher und ein
+   Knopf, der ihn zurückholt.
+   V9 (Denkfehler 4 der Nutzerprüfung, Ärger 30 zum zweiten Mal): Die Musterzeile
+   im Postfach behauptete einen bestätigten Termin am „Donnerstag, 10:00" —
+   dieselbe Anfrage liegt auf dem Zettel der Beratung unentschieden, und zwar
+   für ein anderes Fenster. Was dort im Postfach liegt, kommt jetzt aus der
+   Lage (lage.js): angefragt heißt angefragt, und das Fenster trägt sein
+   Datum.
+   V10 (Nutzerprüfung 2026-08-16): „Speichern" warf den Weg zurück aus der
+   Sehprobe wortlos weg — danach trug jede Kundenfläche die fremde Marke samt
+   fremdem Impressum. Genau der unumkehrbare Griff ohne Rückfrage, eine Stufe
+   später als gedacht. Jetzt fragt sicher.js nach, aber nur, solange es einen
+   Weg zurück gibt; wer seine eigenen Angaben speichert, wird nicht gefragt.
+   Marker: BERATUNG-MARKE-V11 (auch das Speichern einer Sehprobe fragt nach) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -139,6 +154,17 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 }
 .sehprobe button:hover{border-color:var(--lila-500)}
 .sehprobe .tupfer{width:12px;height:12px;border-radius:4px;border:0.5px solid rgba(16,19,26,.12)}
+.sehprobe-zurueck{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  margin-top:10px;padding:10px 13px;border-radius:var(--radius-innen);
+  background:var(--lila-050);font-size:12.5px;line-height:1.5;color:var(--nebel-700);
+}
+.sehprobe-zurueck button{
+  min-height:36px;padding:0 14px;border-radius:999px;border:0.5px solid var(--lila-300);
+  background:var(--flaeche);font-size:12.5px;font-weight:600;color:var(--lila-700);cursor:pointer;
+  transition:border-color .2s,background .2s;
+}
+.sehprobe-zurueck button:hover{border-color:var(--lila-500);background:#fff}
 
 /* Der Spiegel: ein Miniatur-Kundenfenster, das die Regler sofort tragen */
 #spiegel{
@@ -278,6 +304,14 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   .adresse-stand .a-satz code{font-size:12.5px}
 }
 </style>
+<!-- lage.js bringt window.Lage: die Termine und die offene Anfrage aus
+     einer Quelle. Die Musterzeile im Postfach darf nichts behaupten, was
+     der Zettel der Beratung anders weiß. -->
+<script src="lage.js"></script>
+<!-- Die Rückfrage vor dem Unumkehrbaren (sicher.js, Issue #56): „Speichern"
+     macht aus einer Sehprobe den Stand der Beratung und wirft den Weg zurück
+     zu den eigenen Angaben weg — samt fremdem Impressum. -->
+<script src="sicher.js"></script>
 <script src="krume.js"></script>
 </head>
 <body class="quoro"
@@ -316,7 +350,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         <div class="feld" style="margin-top:16px">
           <label for="m-logo">Logo, Adresse eines Bildes</label>
           <input id="m-logo" type="text" placeholder="https://" autocomplete="off">
-          <div class="hilfe">Ohne Logo steht der Name. Mit Logo steht das Logo — wie bei der Sehprobe currily.</div>
+          <div class="hilfe">Ohne Logo steht der Name. Mit Logo steht das Logo — wie bei der Sehprobe Kestner Beratung.</div>
         </div>
         <div class="anrede-wahl" role="group" aria-label="Anrede der Kunden">
           <span class="wort">Anrede</span>
@@ -327,6 +361,11 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         <div class="sehprobe" aria-label="Beispielmarken">
           <span class="wort">Sehprobe:</span>
         </div>
+        <!-- Eine Sehprobe schreibt Name, vier Farben, Logo, Anrede und die
+             Anbieterangaben um. Statt vorher zu fragen, steht der Weg zurück
+             danach hier — ansehen soll leicht bleiben, und zurück muss es
+             genauso leicht gehen (Issue #56). -->
+        <div class="sehprobe-zurueck" id="sehprobe-zurueck" role="status" hidden></div>
       </div>
       <div>
         <div id="spiegel" aria-label="Vorschau der Kundenfläche">
@@ -449,7 +488,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     <div class="postfach" id="postfach">
       <div class="p-wort">So liegt es im Postfach deines Kunden</div>
       <div class="p-von" id="p-von">Nordholm &amp; Partner <span>&lt;beratung@nordholm-partner.de&gt;</span></div>
-      <div class="p-betreff" id="p-betreff">Dein Termin am Donnerstag, 10:00 — bestätigt</div>
+      <div class="p-betreff" id="p-betreff">Deine Terminanfrage für Freitag, 21.08., 9:00 bis 9:45 ist angekommen</div>
     </div>
   </section>
 </main>
@@ -522,7 +561,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     'Nordholm & Partner': 'nordholm-partner.de',
     'Waldmann Consulting': 'waldmann-consulting.de',
     'Steinbach & Cie.': 'steinbach-cie.de',
-    'currily': 'currily.de'
+    'Kestner Beratung': 'kestner-beratung.de'
   };
   function domainZu(mk){ return DOMAINS[mk.name] || 'deine-domain.de'; }
 
@@ -547,6 +586,78 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     pruefeAdresse(true);
   }
 
+  /* ---------- Der Weg zurück aus einer Sehprobe (Issue #56) ----------
+     Eine Sehprobe ansehen ist harmlos gemeint und war es nicht: ein Druck
+     schrieb Name, vier Farben, Logo, Anrede und die Anbieterangaben um, und
+     zurück kam man nur, indem man alles von Hand wieder eintippte. Eine
+     Rückfrage davor wäre hier das falsche Mittel — man sieht Sehproben an,
+     um zu vergleichen, und würde bei jedem Vergleich gefragt. Also merkt
+     sich die Fläche den Stand davor und bietet ihn danach an. */
+  function standNehmen(){
+    var s = {felder: {}, kasten: {}, farben: {}};
+    ['m-name', 'm-logo', 'v-mail'].forEach(function(id){ s.felder[id] = document.getElementById(id).value; });
+    REGLER.forEach(function(r){ s.farben[r.id] = document.getElementById(r.id).value; });
+    PFLICHT.forEach(function(p){
+      s.felder[p.id] = document.getElementById(p.id).value;
+      if (p.ohne) s.kasten[p.ohne] = document.getElementById(p.ohne).checked;
+    });
+    s.sie = sie;
+    s.marke = gezeigteMarke;
+    s.adresse = document.getElementById('f-adresse').textContent;
+    s.eingetragen = {};
+    Object.keys(eingetragen).forEach(function(k){ s.eingetragen[k] = eingetragen[k]; });
+    return s;
+  }
+  function standSetzen(s){
+    Object.keys(s.felder).forEach(function(id){ document.getElementById(id).value = s.felder[id]; });
+    REGLER.forEach(function(r){
+      document.getElementById(r.id).value = s.farben[r.id];
+      spiegel.style.setProperty(r.var, s.farben[r.id]);
+    });
+    PFLICHT.forEach(function(p){
+      if (!p.ohne) return;
+      var kasten = document.getElementById(p.ohne);
+      kasten.checked = s.kasten[p.ohne];
+      document.getElementById(p.id).disabled = kasten.checked;
+    });
+    sie = s.sie;
+    gezeigteMarke = s.marke;
+    eingetragen = s.eingetragen;
+    document.getElementById('f-adresse').textContent = s.adresse;
+    maleLogo();
+    maleAnrede();
+    maleName();
+    maleSperre();
+    pruefeAdresse(true);
+  }
+
+  var zurueckZeile = document.getElementById('sehprobe-zurueck');
+  var standDavor = null;
+  function biegeZurueckAn(vorherName, mitRecht){
+    zurueckZeile.replaceChildren();
+    var satz = document.createElement('span');
+    var was = mitRecht
+      ? 'Name, Farben, Logo, Anrede und die Anbieterangaben stehen jetzt auf der Sehprobe.'
+      : 'Name, Farben, Logo und Anrede stehen jetzt auf der Sehprobe, deine Anbieterangaben sind geblieben.';
+    satz.textContent = vorherName ? was + ' Vorher stand hier ' + vorherName + '.' : was;
+    var knopf = document.createElement('button');
+    knopf.type = 'button';
+    knopf.textContent = 'Zurück zu meinen Angaben';
+    knopf.addEventListener('click', function(){
+      if (!standDavor) return;
+      standSetzen(standDavor);
+      standDavor = null;
+      zurueckZeile.hidden = true;
+      zurueckZeile.replaceChildren();
+      /* Der Hinweis, dass die Sehprobe die Anbieterangaben stehen ließ, hat
+         sich mit ihr erledigt. */
+      document.getElementById('k-eigen').hidden = true;
+    });
+    zurueckZeile.appendChild(satz);
+    zurueckZeile.appendChild(knopf);
+    zurueckZeile.hidden = false;
+  }
+
   var sehprobe = document.querySelector('.sehprobe');
   MARKEN.forEach(function(mk){
     var b = document.createElement('button');
@@ -556,13 +667,69 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     tupfer.style.background = mk.blau;
     b.appendChild(tupfer);
     b.appendChild(document.createTextNode(mk.name));
-    b.addEventListener('click', function(){ trageMarke(mk); });
+    b.addEventListener('click', function(){
+      /* Nur der erste Sprung merkt sich etwas: wer sich durch alle vier
+         Sehproben klickt, will am Ende zu SEINEM Stand zurück, nicht zur
+         vorletzten Sehprobe. */
+      var vorher = standDavor ? standDavor.felder['m-name'] : document.getElementById('m-name').value.trim();
+      if (!standDavor) standDavor = standNehmen();
+      /* Eingetippte Anbieterangaben rührt die Sehprobe nicht an — dann darf
+         die Zeile darunter auch nicht behaupten, sie stünden auf der Probe. */
+      var mitRecht = !selbstGetippt();
+      probeRecht = mitRecht;
+      trageMarke(mk);
+      biegeZurueckAn(vorher, mitRecht);
+    });
     sehprobe.appendChild(b);
   });
 
-  document.getElementById('speichern').addEventListener('click', function(){
+  /* Hat die zuletzt angesehene Sehprobe auch die Anbieterangaben umgeschrieben?
+     Dann steht mit dem Speichern ein fremdes Impressum fest, und die Rückfrage
+     muss das sagen. */
+  var probeRecht = false;
+
+  var speichernKnopf = document.getElementById('speichern');
+
+  /* ---------- Speichern fragt nach, solange ein Weg zurück da ist ----------
+     Die Sehprobe selbst fragt bewusst nicht: man sieht sie an, um zu
+     vergleichen, und eine Rückfrage bei jedem Vergleich brächte niemandem
+     bei, wann es ernst ist. Ernst wird es genau eine Stufe später — hier.
+     „Speichern" warf den Weg zurück wortlos weg, und danach trug jede
+     Kundenfläche die fremde Marke samt fremdem Impressum (Nutzerprüfung
+     2026-08-16). Wer seine eigenen Angaben speichert, wird weiter nicht
+     gefragt: da gibt es nichts zurückzuholen. */
+  speichernKnopf.addEventListener('click', function(){
+    if (!standDavor) { speichere(); return; }
+    var name = document.getElementById('m-name').value.trim() || 'die Sehprobe';
+    var eigen = standDavor.felder['m-name'];
+    var punkte = ['Name, Farben, Logo und Anrede der Sehprobe werden der Stand deiner Beratung — auf jeder Fläche, die deine Kunden sehen.'];
+    if (probeRecht) punkte.push('Auch die Anbieterangaben stehen dann auf ' + name + ': Anschrift, Vertretung, Telefon und E-Mail. Das ist dein Impressum.');
+    punkte.push(eigen
+      ? 'Der Weg zurück zu deinen eigenen Angaben verschwindet damit — vorher stand hier ' + eigen + '.'
+      : 'Der Weg zurück zu deinen eigenen Angaben verschwindet damit.');
+    if (!window.Sicher) {
+      if (window.confirm('Die Sehprobe ' + name + ' als deinen Stand speichern?\n\n' + punkte.join('\n'))) speichere();
+      return;
+    }
+    Sicher.frage({
+      frage: 'Die Sehprobe als deinen Stand speichern?',
+      was: name,
+      punkte: punkte,
+      ja: 'Speichern',
+      gefahr: probeRecht,
+      aus: speichernKnopf,
+      dann: speichere
+    });
+  });
+
+  function speichere(){
     var m = document.getElementById('m-meldung');
     m.hidden = false;
+    /* Gespeichert heißt: das hier ist jetzt der Stand. Ein „Zurück" darauf
+       wäre ein Weg zurück, den das Gespeicherte nicht mitginge. */
+    standDavor = null;
+    zurueckZeile.hidden = true;
+    zurueckZeile.replaceChildren();
     /* Passt der Stand zu einer Beispielmarke, wandert er in die gemeinsame
        Quelle (sessionStorage), die marke.js auf jeder Kundenfläche liest —
        erst dadurch ist "ab sofort" wahr. Eigene Regler-Werte hat die
@@ -584,7 +751,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     } else {
       m.textContent = 'Gespeichert für diesen Raum. Die Kundenflächen der Vorführung tragen die vier Sehproben — eigene Regler-Werte kommen im Produkt aus deinem Profil.';
     }
-  });
+    probeRecht = false;
+  }
 
   /* ---------- Anbieterkennzeichnung: die Sperre vor dem Livegang ----------
      § 5 DDG gilt ab dem ersten öffentlichen Aufruf, nicht ab dem ersten
@@ -762,6 +930,14 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     stand.appendChild(kapsel);
     stand.appendChild(text);
   }
+  /* Das Fenster der offenen Anfrage, aus der Lage. Ohne den Baustein bleibt
+     dasselbe Fenster als fester Wortlaut — ein Betreff ohne Datum wäre der
+     Fehler, den diese Zeile gerade abgelegt hat. */
+  function anfrageFenster(){
+    var L = window.Lage;
+    var w = L && L.termine ? L.termine().filter(function(t){ return t.angefragt; })[0] : null;
+    return w ? L.terminWann(w) : 'Freitag, 21.08., 9:00 bis 9:45';
+  }
   function malePostfach(){
     var adresse = mail.value.trim();
     var n = document.getElementById('v-name').value.trim() || document.getElementById('m-name').value.trim() || 'Deine Beratung';
@@ -771,9 +947,12 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     var klein = document.createElement('span');
     klein.textContent = '<' + adresse + '>';
     von.appendChild(klein);
-    document.getElementById('p-betreff').textContent = sie
-      ? 'Ihr Termin am Donnerstag, 10:00 — bestätigt'
-      : 'Dein Termin am Donnerstag, 10:00 — bestätigt';
+    /* Der Betreff nimmt den Stand aus der Lage. Eine Musterzeile ist eine
+       Vorschau, keine Ausnahme: schrieb sie „bestätigt", während dieselbe
+       Anfrage auf dem Zettel der Beratung noch offen lag, hatte die Beratung
+       im Postfach des Kunden zugesagt, ohne zugesagt zu haben. */
+    document.getElementById('p-betreff').textContent =
+      (sie ? 'Ihre Terminanfrage für ' : 'Deine Terminanfrage für ') + anfrageFenster() + ' ist angekommen';
   }
   document.getElementById('v-name').addEventListener('input', function(){
     if (pruefTimer === null) pruefeAdresse(); else malePostfach();

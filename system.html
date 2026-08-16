@@ -7,7 +7,8 @@
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="system.css">
 <style>
-/* Marker: SYSTEM-V12 · Die Krume steht im Katalog; Der Zeiger ist der Komet (zeiger.js); Knöpfe sind Glaskörper; Text in Tinte, dick und dünn; Zustände als Füllstand im Glas; Glas-Look (Jonas, 2026-08-12): Apple-Glas als Material
+/* Marker: SYSTEM-V13 · Die Zeiten im Glocken-Schaukasten kommen aus der Lage;
+   Die Krume steht im Katalog; Der Zeiger ist der Komet (zeiger.js); Knöpfe sind Glaskörper; Text in Tinte, dick und dünn; Zustände als Füllstand im Glas; Glas-Look (Jonas, 2026-08-12): Apple-Glas als Material
    für Chrom auf weißem Grund, das Lila leuchtet dahinter. Tokens in system.css. */
 
 *{margin:0;padding:0;box-sizing:border-box}
@@ -374,15 +375,25 @@ footer .rahmen{border-top:0.5px solid var(--nebel-200);padding-top:24px}
   <div class="rahmen">quoroAI-Designsystem. Tokens und Bausteine in system.css, die Entscheidungen dazu in der Chronik.</div>
 </footer>
 
+<script src="lage.js"></script>
 <script src="glocke.js"></script>
 <script src="vermerk.js"></script>
 <script>
 (function(){
   'use strict';
+  /* Die Zeiten kommen aus der gemeinsamen Lage (Lage.wannWort), nicht von
+     Hand. Hier stand „gestern, 16:40" und „heute, 8:12" — genau das Format,
+     das die Lage verbietet: relativ und undatiert. Der Schaukasten ist die
+     Fläche, von der abgeschrieben wird; wer den Baustein hier abliest, baut
+     den Fehler nach. Fehlt lage.js, bleibt eine datierte Notfassung stehen. */
+  var wann = (window.Lage && Lage.wannWort) ? Lage.wannWort : function(tag, uhr){
+    var st = Math.floor(uhr), mi = Math.round((uhr - st) * 60);
+    return (tag === 1 ? 'heute, 18.08.' : 'gestern, 17.08.') + ', ' + st + ':' + (mi < 10 ? '0' : '') + mi + ' Uhr';
+  };
   Glocke.baue({ziel: document.querySelector('[data-glocke]'), eintraege: [
-    {titel: 'Neue Freigabe', text: 'Herr Petersen hat „Warum schrumpft meine Marge?" freigegeben.', zeit: 'gestern, 16:40', neu: true},
-    {titel: 'Übergabe vom KI-Berater', text: 'Cordes Logistik: eine Steuerfrage wartet auf Antwort.', zeit: 'heute, 8:12', neu: true},
-    {titel: 'Rechnung beglichen', text: 'Bäckerei Freitag hat die Juli-Rechnung bezahlt.', zeit: 'gestern', neu: false}
+    {titel: 'Neue Freigabe', text: 'Herr Petersen hat „Warum schrumpft meine Marge?" freigegeben.', zeit: wann(0, 16.67), neu: true},
+    {titel: 'Übergabe vom KI-Berater', text: 'Cordes Logistik: eine Steuerfrage wartet auf Antwort.', zeit: wann(1, 8.2), neu: true},
+    {titel: 'Rechnung beglichen', text: 'Bäckerei Freitag hat die Juli-Rechnung bezahlt.', zeit: wann(0, 11.5), neu: false}
   ]});
 
   var schau = document.getElementById('vermerk-schau');

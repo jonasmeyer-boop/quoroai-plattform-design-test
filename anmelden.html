@@ -6,7 +6,7 @@
 <title>Dein Berater – Anmelden</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Anmelden: die Tür zum Kundenbereich · Marker: ANMELDEN-V12 (kein Mittelpunkt als Trenner)
+/* quoroai-plattform-design · Anmelden: die Tür zum Kundenbereich · Marker: ANMELDEN-V13 (Ausweg ohne Code-App)
    (V4: Einladung annehmen (#zugang), Anmelde-Link (#link) und Passwort neu setzen
    (#neu) dazugezeichnet; Direkteinstieg je Ablauf über den Hash, im Produkt sind
    das eigene Routen. V5: Registrieren wieder herausgenommen — Kunden registrieren
@@ -17,7 +17,15 @@
    (Gitter, gezeichneter Umriss, dann belichtet), dieselbe Materialisierung,
    mit der das Gespräch seine Karten baut (GESPRAECH-V36). Nach der
    Zwei-Faktor-Prüfung belichtet die Karte ganz und die Seite geht in die
-   Übersicht. Ein Fancy-Moment, sonst bleibt die Tür ruhig.) */
+   Übersicht. Ein Fancy-Moment, sonst bleibt die Tür ruhig.
+   V13 (Issue #61): Die sechs Kästchen waren eine Sackgasse. Jetzt heißt das
+   Ding „Code-App", mit dem Halbsatz daneben, was es ist; darunter führt
+   „Ich habe keine Code-App auf dem Handy" zu zwei echten Wegen — Ziffern per
+   E-Mail oder die App einrichten, beide mit der Telefonnummer der Beratung.
+   Dazu: Fehler stehen am Feld und sagen die Wahrheit, jedes bedienbare Ding
+   trägt einen sichtbaren Tastatur-Ring, die Punkte-Platzhalter in den
+   Passwortfeldern sind weg, und der Gruß begrüßt auch den, der zum ersten
+   Mal kommt.) */
 @font-face{font-family:'Manrope';src:url('schriften/manrope.woff2') format('woff2');font-weight:200 800;font-display:swap}
 @font-face{font-family:'Caveat';src:url('schriften/caveat.woff2') format('woff2');font-weight:400 700;font-display:swap}
 :root{
@@ -121,7 +129,50 @@ input:focus{border-color:var(--blau)}
   background:color-mix(in srgb, var(--blau) 6%, transparent);font-size:14px;
 }
 .gesendet .handschrift{font-family:'Caveat',cursive;font-size:24px;color:var(--stift);display:block;rotate:-1.5deg}
+/* Eine lange Adresse muss am Handy umbrechen dürfen, statt die Karte zu sprengen */
+.gesendet .adresse{display:block;overflow-wrap:anywhere}
 .fehler{font-size:13px;color:#a06008;font-weight:700;text-align:center;margin-top:12px;min-height:1.2em}
+/* Der Fehler gehört an sein Feld, nicht ans Ende des Formulars: direkt
+   darunter, linksbündig zum Feld, ohne Leerraum wenn nichts zu sagen ist. */
+.feld-fehler{font-size:13px;color:#a06008;font-weight:700;margin-top:6px;line-height:1.35}
+/* Leer nimmt sie keinen Platz weg, bleibt aber im Baum stehen — ein
+   display:none-Bereich wird von Vorlesern nicht mehr beobachtet. */
+.feld-fehler:empty{margin-top:0}
+input[aria-invalid="true"]{border-color:#a06008}
+/* Die zwei echten Auswege, wenn die sechs Ziffern nicht kommen */
+.wahl{
+  display:block;width:100%;text-align:left;margin-top:12px;padding:14px 16px;
+  border:0.5px solid var(--linie);border-radius:14px;background:var(--papier);
+  cursor:pointer;transition:border-color .2s ease,background .2s ease;
+}
+.wahl:hover{border-color:var(--blau);background:#fff}
+.wahl b{display:block;font-size:14.5px;font-weight:800;color:var(--tinte)}
+.wahl span{display:block;font-size:13px;color:var(--grau);margin-top:2px}
+/* Ist der Code raus, ist die Wahl vorbei: die Frage nach dem Weg würde sonst
+   neben ihrer eigenen Antwort stehen bleiben. */
+#s-hilfe.schickt .erklaer,#s-hilfe.schickt .wahl{display:none}
+.schritte{margin-top:16px;padding-left:20px;font-size:14px;color:var(--tinte)}
+.schritte li{margin-top:10px}
+.schritte li span{color:var(--grau);font-size:13px;display:block}
+.schluessel{
+  margin-top:14px;padding:14px 16px;border-radius:14px;border:0.5px dashed var(--linie);
+  background:var(--papier);text-align:center;
+}
+.schluessel b{display:block;font-size:18px;font-weight:800;letter-spacing:.14em;font-variant-numeric:tabular-nums}
+.schluessel small{display:block;font-size:12px;color:var(--grau);margin-top:4px}
+.anruf{font-size:13px;color:var(--grau);text-align:center;margin-top:16px;line-height:1.5}
+.anruf b{color:var(--tinte);font-weight:800;white-space:nowrap}
+/* Mit der Tastatur allein muss man sehen, wo man steht: ein Ring an JEDEM
+   bedienbaren Ding. Steht ganz am Ende und mit doppelter Pseudoklasse, weil
+   die Felder weiter oben `outline:none` setzen — bei gleichem Gewicht gewinnt
+   sonst die spätere Regel, und der Ring war unsichtbar (gemessen, nicht
+   geraten: outline-style kam als „none" heraus). */
+input:focus-visible:focus-visible,
+button:focus-visible:focus-visible,
+[role=button]:focus-visible:focus-visible,
+a:focus-visible:focus-visible{
+  outline:3px solid var(--blau);outline-offset:3px;
+}
 </style>
 <script src="marke.js"></script>
 </head>
@@ -135,11 +186,14 @@ input:focus{border-color:var(--blau)}
 
     <!-- Schritt 1: Anmelden -->
     <div class="schritt" id="s-anmelden">
-      <div class="gruss">Willkommen zurück.</div>
+      <!-- „Willkommen zurück" stimmt nur für den, der schon einmal da war.
+           Wer zum ersten Mal kommt, wird hier nicht begrüßt, sondern verwirrt. -->
+      <div class="gruss" data-du="Hallo!" data-sie="Guten Tag.">Hallo!</div>
+      <p class="erklaer" data-du="Hier geht es in deinen Bereich bei deiner Beratung." data-sie="Hier geht es in Ihren Bereich bei Ihrer Beratung.">Hier geht es in deinen Bereich bei deiner Beratung.</p>
       <div class="gesendet" id="neu-gesetzt" role="status" aria-live="polite" hidden><span class="handschrift">Passwort steht!</span><span data-du="Melde dich jetzt mit dem neuen an — das alte gilt nicht mehr." data-sie="Melden Sie sich jetzt mit dem neuen an — das alte gilt nicht mehr.">Melde dich jetzt mit dem neuen an — das alte gilt nicht mehr.</span></div>
-      <div class="zeile"><label for="email">E-Mail</label><input id="email" type="email" autocomplete="email" placeholder="du@deine-firma.de" data-du-ph="du@deine-firma.de" data-sie-ph="name@ihre-firma.de"></div>
-      <div class="zeile"><label for="pass">Passwort</label><input id="pass" type="password" autocomplete="current-password" placeholder="••••••••••"></div>
-      <div class="fehler" id="f1" aria-live="polite"></div>
+      <div class="zeile"><label for="email">E-Mail</label><input id="email" type="email" autocomplete="email" placeholder="du@deine-firma.de" data-du-ph="du@deine-firma.de" data-sie-ph="name@ihre-firma.de" aria-describedby="f-email"><div class="feld-fehler" id="f-email" aria-live="polite"></div></div>
+      <!-- Punkte als Platzhalter lassen ein leeres Feld ausgefüllt aussehen -->
+      <div class="zeile"><label for="pass">Passwort</label><input id="pass" type="password" autocomplete="current-password" aria-describedby="f-pass"><div class="feld-fehler" id="f-pass" aria-live="polite"></div></div>
       <button class="haupt" id="anmelden" type="button">Anmelden</button>
       <button class="neben" id="zu-link" type="button">Lieber per Anmelde-Link, ohne Passwort</button>
       <button class="neben" id="zu-vergessen" type="button">Passwort vergessen?</button>
@@ -148,7 +202,10 @@ input:focus{border-color:var(--blau)}
     <!-- Schritt 2: Zwei-Faktor -->
     <div class="schritt" id="s-zwei" hidden>
       <div class="gruss">Fast drin.</div>
-      <p class="erklaer" data-du="Tipp die sechs Ziffern aus deiner Codes-App ein — der zweite Schlüssel zu deinem Bereich." data-sie="Tippen Sie die sechs Ziffern aus Ihrer Codes-App ein — der zweite Schlüssel zu Ihrem Bereich.">Tipp die sechs Ziffern aus deiner Codes-App ein — der zweite Schlüssel zu deinem Bereich.</p>
+      <!-- „Codes-App" sagt kein Mensch. Der Name steht jetzt mit dem Halbsatz
+           daneben, der erklärt, was das ist und woher die Ziffern kommen. -->
+      <p class="erklaer" id="zwei-text" data-du="Tipp die sechs Ziffern aus der Code-App auf deinem Handy ein — das ist die kleine App, die alle 30 Sekunden neue Ziffern zeigt." data-sie="Tippen Sie die sechs Ziffern aus der Code-App auf Ihrem Handy ein — das ist die kleine App, die alle 30 Sekunden neue Ziffern zeigt.">Tipp die sechs Ziffern aus der Code-App auf deinem Handy ein — das ist die kleine App, die alle 30 Sekunden neue Ziffern zeigt.</p>
+      <p class="erklaer" id="zwei-text-mail" hidden data-du="Tipp die sechs Ziffern aus unserer E-Mail ein. Sie gelten zehn Minuten." data-sie="Tippen Sie die sechs Ziffern aus unserer E-Mail ein. Sie gelten zehn Minuten.">Tipp die sechs Ziffern aus unserer E-Mail ein. Sie gelten zehn Minuten.</p>
       <div class="ziffern" id="ziffern">
         <input inputmode="numeric" maxlength="1" aria-label="Ziffer 1">
         <input inputmode="numeric" maxlength="1" aria-label="Ziffer 2">
@@ -159,7 +216,45 @@ input:focus{border-color:var(--blau)}
       </div>
       <div class="fehler" id="f2" aria-live="polite"></div>
       <button class="haupt" id="pruefen" type="button">Weiter</button>
+      <!-- Die dritte Zeile: der Ausweg, der bisher fehlte -->
+      <button class="neben" id="zu-hilfe" type="button">Ich habe keine Code-App auf dem Handy</button>
       <button class="neben" id="zurueck-1" type="button">Zurück</button>
+    </div>
+
+    <!-- Schritt 2b: kein Code zur Hand — die zwei echten Wege -->
+    <div class="schritt" id="s-hilfe" hidden>
+      <div class="gruss">Kein Problem.</div>
+      <p class="erklaer" data-du="Die sechs Ziffern sind der zweite Schlüssel zu deinem Bereich — damit niemand hineinkommt, der nur dein Passwort kennt. Es gibt zwei Wege dorthin." data-sie="Die sechs Ziffern sind der zweite Schlüssel zu Ihrem Bereich — damit niemand hineinkommt, der nur Ihr Passwort kennt. Es gibt zwei Wege dorthin.">Die sechs Ziffern sind der zweite Schlüssel zu deinem Bereich — damit niemand hineinkommt, der nur dein Passwort kennt. Es gibt zwei Wege dorthin.</p>
+      <button class="wahl" id="wahl-mail" type="button">
+        <b>Die sechs Ziffern per E-Mail schicken</b>
+        <span data-du="Kommt sofort an die Adresse, mit der du dich eben angemeldet hast." data-sie="Kommt sofort an die Adresse, mit der Sie sich eben angemeldet haben.">Kommt sofort an die Adresse, mit der du dich eben angemeldet hast.</span>
+      </button>
+      <button class="wahl" id="wahl-einrichten" type="button">
+        <b>Die Code-App auf dem Handy einrichten</b>
+        <span data-du="Einmal eingerichtet, zeigt sie dir die Ziffern künftig selbst. Dauert drei Minuten." data-sie="Einmal eingerichtet, zeigt sie Ihnen die Ziffern künftig selbst. Dauert drei Minuten.">Einmal eingerichtet, zeigt sie dir die Ziffern künftig selbst. Dauert drei Minuten.</span>
+      </button>
+      <div class="gesendet" id="gesendet-code" role="status" aria-live="polite" hidden><span class="handschrift">Ist unterwegs!</span><span data-du="Die sechs Ziffern gehen gerade an diese Adresse:" data-sie="Die sechs Ziffern gehen gerade an diese Adresse:">Die sechs Ziffern gehen gerade an diese Adresse:</span><b class="adresse" id="code-adresse">du@deine-firma.de</b><span>Sie gelten zehn Minuten.</span></div>
+      <button class="haupt" id="code-eintippen" type="button" hidden>Ziffern eintippen</button>
+      <p class="anruf" data-du="Kommst du nicht weiter? Deine Beratung hilft am Telefon, montags bis freitags von 8 bis 18 Uhr." data-sie="Kommen Sie nicht weiter? Ihre Beratung hilft am Telefon, montags bis freitags von 8 bis 18 Uhr.">Kommst du nicht weiter? Deine Beratung hilft am Telefon, montags bis freitags von 8 bis 18 Uhr.</p>
+      <p class="anruf"><b data-marke-recht="telefon">+49 40 5544120</b></p>
+      <button class="neben" id="zurueck-hilfe" type="button">Zurück zu den Ziffern</button>
+    </div>
+
+    <!-- Schritt 2c: die Code-App einrichten -->
+    <div class="schritt" id="s-einrichten" hidden>
+      <div class="gruss">In drei Schritten.</div>
+      <ol class="schritte">
+        <li data-du="Such im App-Laden deines Handys nach „Authenticator“ und lade eine der Apps. Sie kosten nichts." data-sie="Suchen Sie im App-Laden Ihres Handys nach „Authenticator“ und laden Sie eine der Apps. Sie kosten nichts.">Such im App-Laden deines Handys nach „Authenticator“ und lade eine der Apps. Sie kosten nichts.</li>
+        <li data-du="Öffne die App und tipp den Schlüssel von unten ein — oder halte die Kamera auf das Muster, das dir deine Beratung geschickt hat." data-sie="Öffnen Sie die App und tippen Sie den Schlüssel von unten ein — oder halten Sie die Kamera auf das Muster, das Ihnen Ihre Beratung geschickt hat.">Öffne die App und tipp den Schlüssel von unten ein — oder halte die Kamera auf das Muster, das dir deine Beratung geschickt hat.</li>
+        <li data-du="Ab jetzt zeigt die App sechs Ziffern, die sich alle 30 Sekunden ändern. Die tippst du hier ein." data-sie="Ab jetzt zeigt die App sechs Ziffern, die sich alle 30 Sekunden ändern. Die tippen Sie hier ein.">Ab jetzt zeigt die App sechs Ziffern, die sich alle 30 Sekunden ändern. Die tippst du hier ein.</li>
+      </ol>
+      <div class="schluessel">
+        <b>4KJ7 2QWE 9ZXC 1MNB</b>
+        <small data-du="Dein Schlüssel, in der Vorführung ein Beispiel. Er gehört nur dir — gib ihn niemandem weiter." data-sie="Ihr Schlüssel, in der Vorführung ein Beispiel. Er gehört nur Ihnen — geben Sie ihn niemandem weiter.">Dein Schlüssel, in der Vorführung ein Beispiel. Er gehört nur dir — gib ihn niemandem weiter.</small>
+      </div>
+      <button class="haupt" id="einrichten-fertig" type="button">Die App zeigt mir Ziffern, weiter</button>
+      <p class="anruf"><span data-du="Lieber gemeinsam am Telefon? Deine Beratung erreichst du unter" data-sie="Lieber gemeinsam am Telefon? Ihre Beratung erreichen Sie unter">Lieber gemeinsam am Telefon? Deine Beratung erreichst du unter</span> <b data-marke-recht="telefon">+49 40 5544120</b></p>
+      <button class="neben" id="zurueck-einrichten" type="button">Zurück</button>
     </div>
 
     <!-- Schritt 3: Passwort vergessen -->
@@ -197,7 +292,7 @@ input:focus{border-color:var(--blau)}
       <div class="gruss">Fast geschafft.</div>
       <p class="erklaer" data-du="Wähle ein neues Passwort, das alte gilt danach nicht mehr." data-sie="Wählen Sie ein neues Passwort, das alte gilt danach nicht mehr.">Wähle ein neues Passwort, das alte gilt danach nicht mehr.</p>
       <div class="zeile"><label for="n-pass">Neues Passwort</label><input id="n-pass" type="password" autocomplete="new-password" placeholder="mindestens 12 Zeichen"></div>
-      <div class="zeile"><label for="n-pass2">Noch einmal, zur Sicherheit</label><input id="n-pass2" type="password" autocomplete="new-password" placeholder="••••••••••"></div>
+      <div class="zeile"><label for="n-pass2">Noch einmal, zur Sicherheit</label><input id="n-pass2" type="password" autocomplete="new-password"></div>
       <div class="fehler" id="f-neu" aria-live="polite"></div>
       <button class="haupt" id="neu-speichern" type="button">Passwort speichern</button>
     </div>
@@ -255,18 +350,35 @@ input:focus{border-color:var(--blau)}
   }
 
   function zeige(id){
-    ['s-anmelden', 's-zwei', 's-vergessen', 's-link', 's-zugang', 's-neu'].forEach(function(s){
+    ['s-anmelden', 's-zwei', 's-hilfe', 's-einrichten', 's-vergessen', 's-link', 's-zugang', 's-neu'].forEach(function(s){
       document.getElementById(s).hidden = s !== id;
     });
     if (id !== 's-anmelden') document.getElementById('neu-gesetzt').hidden = true;
   }
+
+  /* Der Fehler steht am Feld, nicht am Formularende — und er sagt, was
+     wirklich fehlt: leer ist etwas anderes als falsch geschrieben. */
+  function meldung(feldId, text){
+    var feld = document.getElementById(feldId);
+    var stelle = document.getElementById('f-' + feldId);
+    stelle.textContent = text || '';
+    if (text) feld.setAttribute('aria-invalid', 'true');
+    else feld.removeAttribute('aria-invalid');
+  }
+  ['email', 'pass'].forEach(function(id){
+    /* Wer die Stelle ausbessert, soll die Rüge nicht weiter vor sich haben */
+    document.getElementById(id).addEventListener('input', function(){ meldung(id, ''); });
+  });
   document.getElementById('anmelden').addEventListener('click', function(){
     var email = document.getElementById('email').value.trim();
     var pass = document.getElementById('pass').value;
-    var f = document.getElementById('f1');
-    if (!email || email.indexOf('@') === -1) { f.textContent = 'Die E-Mail sieht noch nicht richtig aus.'; return; }
-    if (!pass) { f.textContent = 'Ohne Passwort geht es nicht.'; return; }
-    f.textContent = '';
+    var erstes = null;
+    if (!email) { meldung('email', Marke.rede('Trag hier deine E-Mail-Adresse ein.', 'Tragen Sie hier Ihre E-Mail-Adresse ein.')); erstes = erstes || 'email'; }
+    else if (email.indexOf('@') === -1) { meldung('email', 'In dieser Adresse fehlt das Zeichen @.'); erstes = erstes || 'email'; }
+    else meldung('email', '');
+    if (!pass) { meldung('pass', Marke.rede('Trag hier dein Passwort ein.', 'Tragen Sie hier Ihr Passwort ein.')); erstes = erstes || 'pass'; }
+    else meldung('pass', '');
+    if (erstes) { document.getElementById(erstes).focus(); return; }
     zeige('s-zwei');
     document.querySelector('#ziffern input').focus();
   });
@@ -274,7 +386,12 @@ input:focus{border-color:var(--blau)}
     if (e.key === 'Enter') document.getElementById('anmelden').click();
   });
   document.getElementById('zu-vergessen').addEventListener('click', function(){ zeige('s-vergessen'); });
-  document.getElementById('zurueck-1').addEventListener('click', function(){ zeige('s-anmelden'); });
+  document.getElementById('zurueck-1').addEventListener('click', function(){
+    /* Beim nächsten Anlauf gilt wieder die App, nicht die alte E-Mail */
+    document.getElementById('zwei-text').hidden = false;
+    document.getElementById('zwei-text-mail').hidden = true;
+    zeige('s-anmelden');
+  });
   document.getElementById('zurueck-2').addEventListener('click', function(){
     document.getElementById('gesendet').hidden = true;
     document.getElementById('senden').hidden = false;
@@ -286,6 +403,7 @@ input:focus{border-color:var(--blau)}
   felder.forEach(function(feld, i){
     feld.addEventListener('input', function(){
       feld.value = feld.value.replace(/\D/g, '').slice(0, 1);
+      document.getElementById('f2').textContent = '';
       if (feld.value && i < felder.length - 1) felder[i + 1].focus();
     });
     feld.addEventListener('keydown', function(e){
@@ -296,11 +414,65 @@ input:focus{border-color:var(--blau)}
   document.getElementById('pruefen').addEventListener('click', function(){
     var code = felder.map(function(f){ return f.value; }).join('');
     var f2 = document.getElementById('f2');
-    if (code.length < 6) { f2.textContent = 'Es fehlen noch Ziffern.'; return; }
+    /* Kein Kästchen gefüllt ist etwas anderes als zwei Kästchen offen */
+    if (!code.length) {
+      f2.textContent = Marke.rede('Tipp die sechs Ziffern in die Kästchen.', 'Tippen Sie die sechs Ziffern in die Kästchen.');
+      felder[0].focus(); return;
+    }
+    if (code.length < 6) {
+      var offen = 6 - code.length;
+      f2.textContent = offen === 1 ? 'Es fehlt noch eine Ziffer.' : 'Es fehlen noch ' + offen + ' Ziffern.';
+      (felder.filter(function(f){ return !f.value; })[0] || felder[5]).focus();
+      return;
+    }
     f2.textContent = '';
     /* der Eintritt: die Karte geht nach vorn und die Übersicht übernimmt */
     document.body.classList.add('geht');
     setTimeout(function(){ location.href = 'uebersicht.html'; }, reduziert ? 0 : 480);
+  });
+
+  /* ---------- kein Code zur Hand: die zwei Auswege ---------- */
+  function zurueckZuZiffern(perMail){
+    document.getElementById('zwei-text').hidden = !!perMail;
+    document.getElementById('zwei-text-mail').hidden = !perMail;
+    zeige('s-zwei');
+    felder.forEach(function(f){ f.value = ''; });
+    document.getElementById('f2').textContent = '';
+    felder[0].focus();
+  }
+  document.getElementById('zu-hilfe').addEventListener('click', function(){
+    zeige('s-hilfe');
+    document.getElementById('wahl-mail').focus();
+  });
+  document.getElementById('zurueck-hilfe').addEventListener('click', function(){
+    /* Wer den Umweg abbricht, findet die Wahl beim nächsten Mal wieder vor */
+    document.getElementById('gesendet-code').hidden = true;
+    document.getElementById('code-eintippen').hidden = true;
+    document.getElementById('s-hilfe').classList.remove('schickt');
+    zurueckZuZiffern(false);
+  });
+  document.getElementById('wahl-mail').addEventListener('click', function(){
+    var adresse = document.getElementById('email').value.trim();
+    document.getElementById('code-adresse').textContent = adresse || 'm.petersen@petersen-stahlbau.de';
+    document.getElementById('gesendet-code').hidden = false;
+    document.getElementById('code-eintippen').hidden = false;
+    document.getElementById('s-hilfe').classList.add('schickt');
+    document.getElementById('code-eintippen').focus();
+  });
+  document.getElementById('code-eintippen').addEventListener('click', function(){
+    document.getElementById('gesendet-code').hidden = true;
+    document.getElementById('code-eintippen').hidden = true;
+    document.getElementById('s-hilfe').classList.remove('schickt');
+    zurueckZuZiffern(true);
+  });
+  document.getElementById('wahl-einrichten').addEventListener('click', function(){
+    zeige('s-einrichten');
+    document.getElementById('einrichten-fertig').focus();
+  });
+  document.getElementById('einrichten-fertig').addEventListener('click', function(){ zurueckZuZiffern(false); });
+  document.getElementById('zurueck-einrichten').addEventListener('click', function(){
+    zeige('s-hilfe');
+    document.getElementById('wahl-einrichten').focus();
   });
 
   document.getElementById('senden').addEventListener('click', function(){

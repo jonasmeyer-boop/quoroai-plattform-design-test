@@ -12,7 +12,8 @@
    mit. Deshalb läuft dieser Baustein in beiden Welten.
 
    Aufruf: <span data-glocke></span> ins Chrom setzen, danach
-   Glocke.baue({eintraege: [{titel, text, zeit, neu, tue}]}).
+   Glocke.baue({lage: 'laufend', ziele: {...}, rede: rede}) — oder, für den
+   Schaukasten, weiterhin Glocke.baue({eintraege: [{titel, text, zeit, neu, tue}]}).
 
    V2 (Review): das Fenster erbt kein nowrap mehr aus der Kopfzeile (im
    Gespräch lief der Text sonst aus der Karte); ein Klick auf einen Eintrag
@@ -20,7 +21,22 @@
    der neuen Fläche zurückzuholen; ein Klick daneben lässt den Fokus, wo er
    hingeht; gelesene Einträge sagen dem Screenreader nicht mehr „neu“; eine
    frische Lage über setze() räumt den laufenden Gelesen-Timer ab.
-   Marker: GLOCKE-V2 */
+
+   V3 (Issue #57): die Einträge stehen nicht mehr in der Fläche, sondern in
+   der Lage (siehe unten). Vorher schrieb jede Fläche ihre eigene Liste ab —
+   die Übersicht sechs Einträge, das Gespräch fünf, mit anderer Reihenfolge,
+   anderen Zeiten und einem Termin, der hier schon angenommen war und dort
+   noch offen lag. Die Fläche sagt jetzt nur noch, WOHIN ein Eintrag führt.
+   Auch die Zahl an der Glocke wird nirgends nachgerechnet: sie kommt aus
+   der Lage (Lage.neueMeldungen), bis der Blick sie auf null setzt.
+
+   V4: Die Lage wohnt in ihrer eigenen Datei, lage.js — sie trug hier nur
+   deshalb, weil eine Regel dieser Runde neue Dateien verbot. **lage.js muss
+   VOR glocke.js geladen werden.** Am Finger ist die Glocke 44px statt 35px
+   (Issue #51); die Pillenhöhe von 35px trifft ein Daumen nicht zuverlässig.
+   Marker: GLOCKE-V4 */
+
+
 window.Glocke = (function () {
   'use strict';
 
@@ -57,6 +73,12 @@ window.Glocke = (function () {
       /* eigene Regel, weil display:inline-flex sonst [hidden] übertrumpft —
          nicht jede Fläche bringt ein globales [hidden]{display:none} mit */
       '.glocke-knopf .zahl[hidden],.glocke-fenster[hidden]{display:none}' +
+      /* Am Finger 44px: die Pillenhöhe von 35px trifft ein Daumen nicht
+         zuverlässig (Issue #51). Breite Geräte mit Touch bekommen sie
+         ebenfalls — dort steht die Glocke in keiner engen Pillenreihe. */
+      '@media (pointer:coarse),(max-width:700px){' +
+        '.glocke-knopf{width:44px;height:44px}' +
+        '.glocke-knopf svg{width:20px;height:20px}}' +
       '.glocke-fenster{position:absolute;top:calc(100% + 10px);right:0;z-index:60;' +
         /* eigene Zeilenführung: die Kopfzeilen, in denen die Glocke hängt,
            setzen oft white-space:nowrap — geerbt liefe der Text aus der Karte */
@@ -83,13 +105,43 @@ window.Glocke = (function () {
     document.head.appendChild(s);
   }
 
+  /* Aus der Lage werden Einträge: Wortlaut nach der Anrede der Beratung,
+     Zeit datiert aus der Quelle, Ziel aus der Fläche. Kennt die Fläche ein
+     Ziel nicht (im Gespräch gibt es am ersten Tag keine Termin-Antwort),
+     führt der Eintrag auf die Übersicht statt ins Leere — verschwinden darf
+     er nicht, sonst fehlt er wieder genau dort, wo man ihn braucht. */
+  function ausLage(lageId, opts) {
+    var ziele = opts.ziele || {};
+    var rede = opts.rede || function (du) { return du; };
+    var ersatz = opts.ersatz || 'uebersicht.html';
+    return window.Lage.meldungen(lageId).map(function (m) {
+      return {
+        titel: function () { return rede(Lage.wortlaut(m.titel, false), Lage.wortlaut(m.titel, true)); },
+        text:  function () { return rede(Lage.wortlaut(m.text, false), Lage.wortlaut(m.text, true)); },
+        zeit: m.zeit,
+        neu: m.neu,
+        tue: typeof ziele[m.ziel] === 'function'
+          ? ziele[m.ziel]
+          : function () { location.href = ersatz; }
+      };
+    });
+  }
+
   function baue(opts) {
     stil();
     opts = opts || {};
     var halter = opts.ziel || document.querySelector('[data-glocke]');
     if (!halter) return null;
-    var eintraege = opts.eintraege || [];
     var titel = opts.titel || 'Neuigkeiten';
+
+    /* Zwei Wege herein. Der eine ist der richtige: die Fläche nennt ihre Lage
+       und sagt, wohin ein Ziel führt — die Einträge selbst kommen aus der
+       Quelle, damit keine Fläche mehr ihre eigene Liste schreibt (Issue #57).
+       Der andere ist für den Schaukasten (system.html), der Beispieleinträge
+       zeigt und keine Lage hat. */
+    var quelle = opts.lage || null;
+    var eintraege = quelle ? ausLage(quelle, opts) : (opts.eintraege || []);
+    var gelesen = false;
 
     halter.classList.add('glocke-halter');
     halter.textContent = '';
@@ -120,7 +172,11 @@ window.Glocke = (function () {
 
     var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    /* Die Zahl wird nicht nachgerechnet, sie kommt aus der Quelle — sonst
+       stand auf der einen Fläche 5 und auf der anderen 3. Erst der Blick
+       setzt sie auf null, und das weiß nur diese Glocke. */
     function neueZahl() {
+      if (quelle) return gelesen ? 0 : window.Lage.neueMeldungen(quelle);
       return eintraege.filter(function (e) { return e.neu; }).length;
     }
     function maleZahl() {
@@ -194,6 +250,7 @@ window.Glocke = (function () {
          gesehen hat, sonst verschwindet das „neu" vor dem Lesen. */
       alsGelesen = setTimeout(function () {
         alsGelesen = null;
+        gelesen = true;
         offen.forEach(function (n) { n.neu = false; });
         liste.querySelectorAll('.glocke-eintrag').forEach(function (e) { e.classList.add('gelesen'); });
         /* Erst wegblenden, dann wirklich aus dem Text nehmen — solange das
@@ -231,6 +288,10 @@ window.Glocke = (function () {
            würde sonst einen gerade eingetroffenen Eintrag abstempeln,
            bevor ihn jemand sehen konnte. */
         if (alsGelesen) { clearTimeout(alsGelesen); alsGelesen = null; }
+        /* Eine von Hand gesetzte Lage kommt nicht aus der Quelle — dann zählt
+           die Glocke wieder selbst, sonst zeigte sie die Zahl der alten. */
+        quelle = null;
+        gelesen = false;
         eintraege = neue || [];
         if (!fenster.hidden) male();
         maleZahl();

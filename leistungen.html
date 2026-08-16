@@ -6,12 +6,43 @@
 <title>Dein Berater – Leistungsnachweis</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Leistungsnachweis: was die Beratung gearbeitet hat · Marker: LEISTUNGEN-V8
+/* quoroai-plattform-design · Leistungsnachweis: was die Beratung gearbeitet hat · Marker: LEISTUNGEN-V12
+   V10 (Welle 3): der Nachweis nennt jetzt auch seine Gesamtsumme, mit dem
+   Kreis dazu — 46,2 Std. über beide Mandate und über die vier Monate seit
+   dem 1. Mai 2026. Vorher musste man vier Monate im Kopf addieren. Der Kreis
+   ist nötig, weil die Beratung intern eine andere Zahl führt (57 Std. in
+   beratung-marge.html, über drei Beschäftigte). Das sind zwei Kreise, kein
+   Widerspruch: hier stehen die Stunden, die auf den beiden Mandaten DIESES
+   Kunden erfasst sind.
+   Die Rechnungskette dieser Seite ist die des Vertrags und bleibt es:
+   Rechnung am ersten Tag des Folgemonats, zehn Tage Zahlungsziel
+   (blaetter.js, Ziffer 2) — RE-2026-084 vom 1. August 2026, fällig war der
+   11. August. beratung-rechnungen.html ist auf diese Daten nachgezogen.
    V8 (Issue #58): das Kopfband ist bis zur Unterkante deckend.
    (V4: Rückweg heißt überall „← Übersicht". V5 nach Code-Review: die Posten von
    „Preis und Marge" decken sich jetzt mit dem Mandats-Raum BERATUNG-MANDAT und
    der Geschichte — die Staffeln sind noch nicht geschnitten, sie stehen ab
-   September an; Summe 9,2 Std. wie drüben.) */
+   September an; Summe 9,2 Std. wie drüben.)
+
+   V9 (Issue #53/#54): Die Seite kannte nur den laufenden Monat, während die
+   Rechnungen den Mai, Juni und Juli betrafen — keine Rechnung ließ sich gegen
+   die Stunden halten, obwohl die Seite genau dafür da ist. Jetzt gibt es einen
+   Monatswechsler über alle vier Monate des Mandats, und jeder Monat nennt
+   seine Rechnung mit Nummer, Datum und Betrag (rechnungen.html#RE-…); die
+   Rechnung verweist umgekehrt auf ihren Monat (leistungen.html#2026-07).
+   Auf der ganzen Seite stand vorher kein Eurozeichen — jetzt steht im Kopf,
+   was der Monat kostet: die Pauschale aus dem Beratungsvertrag (blaetter.js,
+   Ziffer 2), 2.400,00 € netto, 2.856,00 € brutto. Sie deckt jede Stunde ab;
+   deshalb ist die alte Marke „ohne Berechnung" weg — sie versprach eine
+   Stundenabrechnung, die es hier nicht gibt.
+   Die Benchmark-Auswertung stand am 8. August als berechenbare Stunde und
+   gleichzeitig als Pauschale auf der Rechnung vom 1. August: Rechnung vor der
+   Leistung. Sie gehört in den August und wird mit der Rechnung vom
+   1. September abgegolten, RE-2026-084 deckt den Juli.
+   V11: Der neue Monatswechsler war am Telefon nur 35 Pixel hoch — unter den
+   44, die ein Daumen sicher trifft; er ist jetzt so hoch wie seine Nachbarn.
+   Und der „Stand" im Kopf kommt aus der Lage (lage.js) statt aus einem hier
+   abgeschriebenen 14. August. */
 @font-face{font-family:'Manrope';src:url('schriften/manrope.woff2') format('woff2');font-weight:200 800;font-display:swap}
 @font-face{font-family:'Caveat';src:url('schriften/caveat.woff2') format('woff2');font-weight:400 700;font-display:swap}
 :root{
@@ -51,13 +82,44 @@ main{max-width:880px;margin:0 auto;padding:108px 24px 96px}
 .anstrich path{fill:none;stroke:var(--stift);stroke-width:2.5;stroke-linecap:round;opacity:.85}
 h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-height:1.15}
 .unter{color:var(--grau);font-size:15px;margin-top:4px}
-.summe{
-  display:inline-flex;align-items:baseline;gap:10px;margin-top:20px;
-  padding:14px 22px;border-radius:var(--radius);border:0.5px solid var(--linie);
-  background:#fff;box-shadow:0 8px 24px rgba(16,19,26,.06);
+/* Der Monatswechsler: die Seite kannte nur den laufenden Monat, die
+   Rechnungen aber vier. */
+.wechsler{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.wechsler button{
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:13px;font-weight:700;color:var(--tinte);cursor:pointer;
+  transition:border-color .2s,background .2s,color .2s;
 }
-.summe .zahl{font-size:30px;font-weight:800;letter-spacing:-.02em;color:var(--blau);font-variant-numeric:tabular-nums}
-.summe .wofuer{font-size:13px;color:var(--grau)}
+/* Am Telefon war der Wechsler 35 Pixel hoch — unter den 44, die ein Daumen
+   sicher trifft, und damit schmaler als jede Nachbartaste (gemessen bei 390
+   Pixeln Breite). */
+@media (pointer:coarse),(max-width:700px){
+  .wechsler button{min-height:44px;padding:0 16px}
+}
+.wechsler button:hover{border-color:var(--blau)}
+.wechsler button[aria-selected="true"]{background:var(--blau);border-color:var(--blau);color:#fff}
+/* Der Kopf: was der Monat an Stunden hat und was er kostet — beides an einer
+   Stelle, damit man das eine gegen das andere halten kann. */
+.kopf{
+  margin-top:18px;padding:20px 24px;border-radius:var(--radius);
+  border:0.5px solid var(--linie);background:#fff;box-shadow:0 8px 24px rgba(16,19,26,.06);
+  display:grid;grid-template-columns:auto 1fr;gap:8px 32px;align-items:baseline;
+}
+.kopf .zahl{font-size:34px;font-weight:800;letter-spacing:-.02em;color:var(--blau);font-variant-numeric:tabular-nums;white-space:nowrap}
+.kopf .wofuer{font-size:13.5px;color:var(--grau)}
+.kopf .preis{grid-column:1/-1;margin-top:12px;padding-top:14px;border-top:0.5px solid var(--linie);display:flex;flex-wrap:wrap;gap:6px 28px}
+.kopf .preis div{min-width:0}
+.kopf .preis dt{font-size:11.5px;font-weight:800;color:var(--grau)}
+.kopf .preis dd{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kopf .preis dd small{font-size:11.5px;font-weight:600;color:var(--grau);display:block;white-space:normal}
+.kopf .abrede{grid-column:1/-1;font-size:13px;color:var(--grau);margin-top:12px;max-width:64ch}
+.kopf .beleg{grid-column:1/-1;margin-top:10px;font-size:13.5px}
+.kopf .beleg a{color:var(--blau);font-weight:700}
+/* Die Summe über das ganze Mandat, mit dem Kreis, über den sie zählt. Ohne
+   sie musste man vier Monate im Kopf addieren, um zu wissen, was insgesamt
+   gearbeitet wurde. */
+.kopf .seither{grid-column:1/-1;margin-top:8px;font-size:13px;color:var(--grau)}
+.kopf .seither b{color:var(--tinte);font-variant-numeric:tabular-nums}
 section{margin-top:44px}
 h2{font-size:13px;font-weight:800;color:var(--grau)}
 .mandat-summe{font-size:12.5px;color:var(--grau);font-weight:600}
@@ -74,14 +136,21 @@ h2{font-size:13px;font-weight:800;color:var(--grau)}
 .posten .was{font-size:14.5px;font-weight:700;min-width:0}
 .posten .wer{font-size:12.5px;color:var(--grau);margin-top:2px}
 .posten .dauer{margin-left:auto;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
-.posten .frei{font-size:11px;font-weight:800;color:var(--grau);background:rgba(16,19,26,.05);padding:3px 9px;border-radius:999px;white-space:nowrap}
-.fuss{font-size:12.5px;color:var(--grau);margin-top:28px;max-width:60ch}
+.fuss{font-size:12.5px;color:var(--grau);margin-top:28px;max-width:64ch}
 @media (max-width:700px){
   nav .wortmarke small{display:none}
-  .posten{flex-wrap:wrap}
-  .posten .dauer{margin-left:0}
+  /* Die Dauer bleibt am rechten Rand ihrer Zeile. Umbrach sie stattdessen,
+     stand sie bei langen Posten unter dem Text und bei kurzen daneben —
+     dieselbe Liste in zwei Formen. Umbrechen darf der Text, nicht die Zahl. */
+  .posten{gap:10px}
+  .posten>div{flex:1 1 auto;min-width:0}
+  .kopf{grid-template-columns:1fr;padding:18px 18px}
+  .kopf .preis{gap:12px}
 }
 </style>
+<!-- lage.js bringt window.Lage: das eine „Heute" des Entwurfs. Muss vor
+     allem stehen, was daraus liest. -->
+<script src="lage.js"></script>
 <script src="marke.js"></script>
 </head>
 <body>
@@ -94,30 +163,24 @@ h2{font-size:13px;font-weight:800;color:var(--grau)}
   <h1>Leistungsnachweis</h1>
   <p class="unter" data-du="Was deine Beratung für dich gearbeitet hat — Stunde für Stunde." data-sie="Was Ihre Beratung für Sie gearbeitet hat — Stunde für Stunde.">Was deine Beratung für dich gearbeitet hat — Stunde für Stunde.</p>
 
-  <div class="summe"><span class="zahl">14,2 Std.</span><span class="wofuer">im August, davon 2,0 Std. ohne Berechnung</span></div>
+  <div class="wechsler" id="wechsler" role="tablist" aria-label="Monat wählen"></div>
 
-  <section>
-    <div class="kopfzeile"><h2>Preis und Marge</h2><span class="mandat-summe">9,2 Std.</span></div>
-    <div class="karte">
-      <div class="posten"><div><div class="was">Preismodell geprüft und mitgerechnet</div><div class="wer">Dr. Anna Vogelsang, 12. August</div></div><span class="dauer">1,2 Std.</span></div>
-      <div class="posten"><div><div class="was">Freigegebenes Gespräch begleitet</div><div class="wer">Dr. Anna Vogelsang, 12. August</div></div><span class="dauer">0,4 Std.</span></div>
-      <div class="posten"><div><div class="was">Benchmark Metallzulieferer ausgewertet</div><div class="wer">Dr. Anna Vogelsang, 8. August</div></div><span class="dauer">3,0 Std.</span></div>
-      <div class="posten"><div><div class="was">Rückfrage zur Preisgleitklausel geprüft</div><div class="wer">J. Brandt, 7. August</div></div><span class="frei">ohne Berechnung</span><span class="dauer">1,0 Std.</span></div>
-      <div class="posten"><div><div class="was">Erstgespräch Marge, Unterlagen gesichtet</div><div class="wer">Dr. Anna Vogelsang, 5. August</div></div><span class="dauer">2,6 Std.</span></div>
-      <div class="posten"><div><div class="was">Monatsauswertung Juli besprochen</div><div class="wer">Dr. Anna Vogelsang, 4. August</div></div><span class="dauer">1,0 Std.</span></div>
-    </div>
-  </section>
+  <div class="kopf" id="kopf">
+    <span class="zahl"></span>
+    <span class="wofuer"></span>
+    <dl class="preis">
+      <div><dt>Pauschale im Monat</dt><dd class="p-netto"><span class="wert"></span><small>netto</small></dd></div>
+      <div><dt>Zu zahlen im Monat</dt><dd class="p-brutto"><span class="wert"></span><small>brutto, mit 19 % Umsatzsteuer</small></dd></div>
+      <div><dt>Rechnerisch je Stunde</dt><dd class="p-satz"><span class="wert"></span><small></small></dd></div>
+    </dl>
+    <p class="abrede" data-du="Es wird keine Stunde einzeln berechnet. Die Pauschale aus dem Beratungsvertrag deckt jede Stunde ab — arbeitet die Beratung mehr, zahlst du nicht mehr." data-sie="Es wird keine Stunde einzeln berechnet. Die Pauschale aus dem Beratungsvertrag deckt jede Stunde ab — arbeitet die Beratung mehr, zahlen Sie nicht mehr.">Es wird keine Stunde einzeln berechnet. Die Pauschale aus dem Beratungsvertrag deckt jede Stunde ab — arbeitet die Beratung mehr, zahlst du nicht mehr.</p>
+    <p class="beleg"></p>
+    <p class="seither"></p>
+  </div>
 
-  <section>
-    <div class="kopfzeile"><h2>Jahresabschluss 2025</h2><span class="mandat-summe">5,0 Std.</span></div>
-    <div class="karte">
-      <div class="posten"><div><div class="was">Entwurf mit dem Steuerbüro abgestimmt</div><div class="wer">J. Brandt, 12. August</div></div><span class="dauer">2,5 Std.</span></div>
-      <div class="posten"><div><div class="was">Rückstellungen geprüft und dokumentiert</div><div class="wer">J. Brandt, 6. August</div></div><span class="dauer">1,5 Std.</span></div>
-      <div class="posten"><div><div class="was">Kurzabstimmung am Telefon</div><div class="wer">Dr. Anna Vogelsang, 4. August</div></div><span class="frei">ohne Berechnung</span><span class="dauer">1,0 Std.</span></div>
-    </div>
-  </section>
+  <div id="mandate"></div>
 
-  <p class="fuss" data-du='Jede Stunde erscheint hier, sobald sie erfasst ist. Berechnet wird nur, was nicht als „ohne Berechnung" gekennzeichnet ist — die Rechnung dazu findest du unter Rechnungen.' data-sie='Jede Stunde erscheint hier, sobald sie erfasst ist. Berechnet wird nur, was nicht als „ohne Berechnung" gekennzeichnet ist — die Rechnung dazu finden Sie unter Rechnungen.'>Jede Stunde erscheint hier, sobald sie erfasst ist. Berechnet wird nur, was nicht als „ohne Berechnung" gekennzeichnet ist — die Rechnung dazu findest du unter Rechnungen.</p>
+  <p class="fuss" data-du="Jede Stunde erscheint hier, sobald sie erfasst ist. Alle Stunden eines Monats sind mit der Pauschale dieses Monats abgegolten; nur Auslagen kommen gesondert auf die Rechnung." data-sie="Jede Stunde erscheint hier, sobald sie erfasst ist. Alle Stunden eines Monats sind mit der Pauschale dieses Monats abgegolten; nur Auslagen kommen gesondert auf die Rechnung.">Jede Stunde erscheint hier, sobald sie erfasst ist. Alle Stunden eines Monats sind mit der Pauschale dieses Monats abgegolten; nur Auslagen kommen gesondert auf die Rechnung.</p>
 </main>
 <script>
 (function(){
@@ -141,6 +204,220 @@ h2{font-size:13px;font-weight:800;color:var(--grau)}
     void p.getBoundingClientRect();
     p.style.strokeDashoffset = 0;
   }
+
+  /* Das „Heute" dieses Entwurfs kommt aus der Lage (lage.js) — Dienstag, der
+     18. August 2026. Vorher stand hier der 14. August abgeschrieben, und die
+     Fläche stand damit auf einem anderen Tag als das Gespräch daneben. */
+  var HEUTE_LANG = window.Lage.heuteLang();
+  /* Die Pauschale steht im Beratungsvertrag (blaetter.js, Ziffer 2) und auf
+     jeder Rechnung (rechnungen.html). Hier steht sie in Cent, damit der
+     rechnerische Stundenwert nicht auseinanderläuft. */
+  var PAUSCHALE_CENT = 240000;
+  var USATZ = 0.19;
+
+  function euro(cent){
+    return (cent / 100).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
+  }
+  function std(zahl){
+    return zahl.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' Std.';
+  }
+
+  /* Vier Monate, so lange läuft das Mandat: der Vertrag beginnt am
+     1. Mai 2026. Jeder Monat trägt seine Rechnung, damit sich Stunden und
+     Rechnung gegeneinander halten lassen. */
+  var MONATE = [
+    {id: '2026-05', name: 'Mai 2026', kurz: 'Mai',
+     rechnung: {nr: 'RE-2026-058', datum: '1. Juni 2026', brutto: 303450,
+                zusatz: 'darin 150,00 € Auslage für den Branchenspiegel, bezahlt am 10. Juni 2026'},
+     mandate: [
+       {name: 'Jahresabschluss 2025', posten: [
+         {was: 'Unterlagen und Kontenrahmen gesichtet', wer: 'J. Nordholm', tag: '27. Mai 2026', dauer: 2.0},
+         {was: 'Auftaktgespräch in Oldenburg', wer: 'Dr. Anna Vogelsang', tag: '12. Mai 2026', dauer: 3.0}
+       ]},
+       {name: 'Preis und Marge', posten: [
+         {was: 'Branchenspiegel Metallzulieferer besorgt und gelesen', wer: 'J. Nordholm', tag: '19. Mai 2026', dauer: 2.5},
+         {was: 'Mandat aufgenommen, Zugänge eingerichtet', wer: 'Dr. Anna Vogelsang', tag: '4. Mai 2026', dauer: 1.0}
+       ]}
+     ]},
+    {id: '2026-06', name: 'Juni 2026', kurz: 'Juni',
+     rechnung: {nr: 'RE-2026-071', datum: '1. Juli 2026', brutto: 285600, zusatz: 'bezahlt am 9. Juli 2026'},
+     mandate: [
+       {name: 'Jahresabschluss 2025', posten: [
+         {was: 'Bilanzentwurf gelesen und angemerkt', wer: 'J. Nordholm', tag: '26. Juni 2026', dauer: 2.5},
+         {was: 'Rückstellungen zusammengestellt', wer: 'J. Nordholm', tag: '17. Juni 2026', dauer: 2.0},
+         {was: 'Abstimmung mit dem Steuerbüro', wer: 'Dr. Anna Vogelsang', tag: '5. Juni 2026', dauer: 2.0}
+       ]},
+       {name: 'Preis und Marge', posten: [
+         {was: 'Unterlagen zum Preismodell gesichtet', wer: 'Dr. Anna Vogelsang', tag: '19. Juni 2026', dauer: 2.0},
+         {was: 'Staffeln der C-Kunden aufgenommen', wer: 'J. Nordholm', tag: '11. Juni 2026', dauer: 1.5},
+         {was: 'Kurzabstimmung am Telefon', wer: 'Dr. Anna Vogelsang', tag: '3. Juni 2026', dauer: 1.0}
+       ]}
+     ]},
+    {id: '2026-07', name: 'Juli 2026', kurz: 'Juli',
+     rechnung: {nr: 'RE-2026-084', datum: '1. August 2026', brutto: 285600,
+                zusatz: 'fällig war der 11. August 2026, noch offen'},
+     mandate: [
+       {name: 'Preis und Marge', posten: [
+         {was: 'Monatsauswertung Juni durchgesprochen', wer: 'Dr. Anna Vogelsang', tag: '28. Juli 2026', dauer: 1.0},
+         {was: 'Zahlen der C-Kunden aufbereitet', wer: 'J. Nordholm', tag: '22. Juli 2026', dauer: 2.4},
+         {was: 'Rahmenvertrag Stahl gelesen, Preisgleitklausel notiert', wer: 'Dr. Anna Vogelsang', tag: '15. Juli 2026', dauer: 1.8},
+         {was: 'Preismodell aufgenommen', wer: 'Dr. Anna Vogelsang', tag: '8. Juli 2026', dauer: 2.8}
+       ]},
+       {name: 'Jahresabschluss 2025', posten: [
+         {was: 'Kontenabstimmung mit dem Steuerbüro', wer: 'J. Nordholm', tag: '24. Juli 2026', dauer: 2.5},
+         {was: 'Inventurwerte geprüft', wer: 'J. Nordholm', tag: '10. Juli 2026', dauer: 2.0}
+       ]}
+     ]},
+    {id: '2026-08', name: 'August 2026', kurz: 'August', laufend: true,
+     /* Der laufende Monat hat noch keine Rechnung — die frühere Fassung stellte
+        die Benchmark-Auswertung vom 8. August auf die Rechnung vom 1. August. */
+     kommt: 'Die Rechnung für August 2026 wird am 1. September 2026 gestellt, wieder über die Pauschale.',
+     mandate: [
+       {name: 'Preis und Marge', posten: [
+         {was: 'Preismodell geprüft und mitgerechnet', wer: 'Dr. Anna Vogelsang', tag: '12. August 2026', dauer: 1.2},
+         {was: 'Freigegebenes Gespräch begleitet', wer: 'Dr. Anna Vogelsang', tag: '12. August 2026', dauer: 0.4},
+         {was: 'Benchmark Metallzulieferer ausgewertet', wer: 'Dr. Anna Vogelsang', tag: '8. August 2026', dauer: 3.0},
+         {was: 'Rückfrage zur Preisgleitklausel geprüft', wer: 'J. Nordholm', tag: '7. August 2026', dauer: 1.0},
+         {was: 'Erstgespräch Marge, Unterlagen gesichtet', wer: 'Dr. Anna Vogelsang', tag: '5. August 2026', dauer: 2.6},
+         {was: 'Monatsauswertung Juli besprochen', wer: 'Dr. Anna Vogelsang', tag: '4. August 2026', dauer: 1.0}
+       ]},
+       {name: 'Jahresabschluss 2025', posten: [
+         {was: 'Entwurf mit dem Steuerbüro abgestimmt', wer: 'J. Nordholm', tag: '12. August 2026', dauer: 2.5},
+         {was: 'Rückstellungen geprüft und dokumentiert', wer: 'J. Nordholm', tag: '6. August 2026', dauer: 1.5},
+         {was: 'Kurzabstimmung am Telefon', wer: 'Dr. Anna Vogelsang', tag: '4. August 2026', dauer: 1.0}
+       ]}
+     ]}
+  ];
+
+  function summe(m){
+    var s = 0;
+    m.mandate.forEach(function(md){ md.posten.forEach(function(po){ s += po.dauer; }); });
+    return Math.round(s * 10) / 10;
+  }
+  function mandatsSumme(md){
+    var s = 0;
+    md.posten.forEach(function(po){ s += po.dauer; });
+    return Math.round(s * 10) / 10;
+  }
+
+  var kopf = document.getElementById('kopf');
+  var raum = document.getElementById('mandate');
+  var wechsler = document.getElementById('wechsler');
+  var knoepfe = {};
+
+  function zeige(m){
+    var ges = summe(m);
+    var brutto = Math.round(PAUSCHALE_CENT * (1 + USATZ));
+
+    kopf.querySelector('.zahl').textContent = std(ges);
+    kopf.querySelector('.wofuer').textContent = m.laufend
+      ? 'im ' + m.name + ', über beide Mandate, Stand ' + HEUTE_LANG
+      : 'im ' + m.name + ', über beide Mandate';
+
+    kopf.querySelector('.p-netto .wert').textContent = euro(PAUSCHALE_CENT);
+    kopf.querySelector('.p-brutto .wert').textContent = euro(brutto);
+    var satz = kopf.querySelector('.p-satz');
+    if (ges > 0) {
+      satz.querySelector('.wert').textContent = euro(Math.round(PAUSCHALE_CENT / ges));
+      satz.querySelector('small').textContent = euro(PAUSCHALE_CENT) + ' netto geteilt durch ' + std(ges);
+    } else {
+      satz.querySelector('.wert').textContent = '—';
+      satz.querySelector('small').textContent = 'noch keine Stunde erfasst';
+    }
+
+    var beleg = kopf.querySelector('.beleg');
+    beleg.innerHTML = '';
+    if (m.rechnung) {
+      beleg.appendChild(document.createTextNode('Abgerechnet mit '));
+      var a = document.createElement('a');
+      a.href = 'rechnungen.html#' + m.rechnung.nr;
+      a.textContent = 'Rechnung ' + m.rechnung.nr;
+      beleg.appendChild(a);
+      beleg.appendChild(document.createTextNode(
+        ' vom ' + m.rechnung.datum + ', ' + euro(m.rechnung.brutto) + ' brutto' +
+        (m.rechnung.zusatz ? ' — ' + m.rechnung.zusatz : '') + '.'));
+    } else {
+      beleg.textContent = m.kommt;
+    }
+
+    /* An jede Summe gehört der Kreis, über den sie zählt. Diese hier zählt
+       über beide Mandate dieses Kunden und über alle Monate seit dem
+       Vertragsbeginn — sie ist ausdrücklich nicht dasselbe wie die Stunden,
+       die die Beratung intern auf dem Mandat führt: dort zählen auch
+       Menschen mit, die nicht auf diesen beiden Mandaten arbeiten. Was hier
+       steht, ist der Nachweis für den Kunden. */
+    var seither = kopf.querySelector('.seither');
+    seither.textContent = '';
+    var alles = 0;
+    MONATE.forEach(function(mm){ alles += summe(mm); });
+    alles = Math.round(alles * 10) / 10;
+    seither.appendChild(document.createTextNode(Marke.rede(
+      'Seit dem Beginn des Mandats am 1. Mai 2026 sind auf deinen beiden Mandaten zusammen ',
+      'Seit dem Beginn des Mandats am 1. Mai 2026 sind auf Ihren beiden Mandaten zusammen ')));
+    var starke = document.createElement('b');
+    starke.textContent = std(alles);
+    seither.appendChild(starke);
+    var zahlwort = ['keinen', 'einen', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben', 'acht', 'neun', 'zehn', 'elf', 'zwölf'];
+    var wieViele = zahlwort[MONATE.length] || String(MONATE.length);
+    seither.appendChild(document.createTextNode(
+      ' erfasst, über ' + wieViele + (MONATE.length === 1 ? ' Monat' : ' Monate') +
+      '. Bezahlt wird davon nichts nach Stunden — es gilt die Pauschale.'));
+
+    raum.innerHTML = '';
+    m.mandate.forEach(function(md){
+      var sec = document.createElement('section');
+      var kz = document.createElement('div');
+      kz.className = 'kopfzeile';
+      var h2 = document.createElement('h2');
+      h2.textContent = md.name;
+      var ms = document.createElement('span');
+      ms.className = 'mandat-summe';
+      ms.textContent = std(mandatsSumme(md)) + ' im ' + m.name;
+      kz.appendChild(h2); kz.appendChild(ms);
+      sec.appendChild(kz);
+
+      var karte = document.createElement('div');
+      karte.className = 'karte';
+      md.posten.forEach(function(po){
+        var zeile = document.createElement('div');
+        zeile.className = 'posten';
+        zeile.innerHTML = '<div><div class="was"></div><div class="wer"></div></div><span class="dauer"></span>';
+        zeile.querySelector('.was').textContent = po.was;
+        zeile.querySelector('.wer').textContent = po.wer + ', ' + po.tag;
+        zeile.querySelector('.dauer').textContent = std(po.dauer);
+        karte.appendChild(zeile);
+      });
+      sec.appendChild(karte);
+      raum.appendChild(sec);
+    });
+
+    Object.keys(knoepfe).forEach(function(id){
+      knoepfe[id].setAttribute('aria-selected', id === m.id ? 'true' : 'false');
+    });
+  }
+
+  MONATE.forEach(function(m){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('role', 'tab');
+    b.setAttribute('aria-selected', 'false');
+    b.textContent = m.laufend ? m.kurz + ' 2026, laufend' : m.name;
+    b.addEventListener('click', function(){
+      try { history.replaceState(null, '', '#' + m.id); } catch (e) {}
+      zeige(m);
+    });
+    knoepfe[m.id] = b;
+    wechsler.appendChild(b);
+  });
+
+  /* rechnungen.html verweist als leistungen.html#2026-07 hierher. */
+  function ausHash(){
+    var id = location.hash.slice(1);
+    for (var i = 0; i < MONATE.length; i++) if (MONATE[i].id === id) return MONATE[i];
+    return MONATE[MONATE.length - 1];
+  }
+  zeige(ausHash());
+  window.addEventListener('hashchange', function(){ zeige(ausHash()); });
 })();
 </script>
 <script src="rechtsfuss.js"></script>

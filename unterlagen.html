@@ -8,7 +8,23 @@
 <style>
 /* quoroai-plattform-design · Unterlagen: alles, was die Beratung freigegeben hat
    V13 (Issue #58): das Kopfband ist bis zur Unterkante deckend.
-   Marker: UNTERLAGEN-V13 (V9: Häppchen D1, die offene Bitte um eine Unterlage
+   V14 (Paket A4, Issue #56): Die Bitte um eine Unterlage fragt vor dem Verschicken
+   nach — mit Dateiname und Empfänger (sicher.js, bitten.js) —, sagt danach, an wen
+   sie ging, und lässt sich eine Minute lang zurücknehmen; dann geht das Blatt hier
+   auch wieder aus dem Bestand.
+   V15 (Denkfehler 4 und Issue #53): Die Zusammenfassung des Beratungsvertrags
+   nennt Pauschale, Umsatzsteuer, Laufzeit und Kündigungsfrist mit Zahl und
+   Datum, statt sie zu umschreiben — die Prüfung hat „monatliche Pauschale"
+   ohne Betrag als Auslassung gelesen. Und keine Fassung steht mehr relativ
+   da: „heute" und „gestern" tragen ihr Datum, die Tage kommen aus der Lage
+   (lage.js), die Jahreszahl steht bei jedem Dokumentdatum.
+   V16 (Nutzerprüfung 2026-08-16): Bei 390 Bildpunkten zerfiel die Zeile
+   „Rahmenvertrag Stahl" — die Namensspalte ging auf 0 Bildpunkte Breite und
+   180 hoch, der Text lief als Ein-Wort-Säule senkrecht durch, die Pille lag
+   über dem Symbol. Der Name bekommt jetzt die ganze erste Zeile. Dazu
+   Fingermaß für „↓ Laden" und „Fassungen" (35 bzw. 31 Bildpunkte hoch) und
+   der Vorführ-Griff im Kopfband verschwindet schmal wirklich.
+   Marker: UNTERLAGEN-V16 (V9: Häppchen D1, die offene Bitte um eine Unterlage
    steht über dem Bestand. V10: Häppchen D3 — am ersten Tag liegt hier genau ein
    Dokument, der Beratungsvertrag. Ein neuer Kunde mit fünf Beratungsdokumenten
    in der Akte wäre eine Behauptung. V11: Häppchen D4 — die Unterlage wird
@@ -180,13 +196,49 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
 #demo-hinweis.da{opacity:.95;translate:-50% 0}
 
 @media (max-width:700px){
-  .dok .kopf{flex-wrap:wrap}
+  /* Der teuerste Anblick der Vorführung stand hier: bei 390 Bildpunkten
+     zerfiel „Rahmenvertrag Stahl" in eine senkrechte Ein-Wort-Säule, weil
+     `.d-oeffnen` als `flex:1` (Basis 0) neben zwei nicht schrumpfenden
+     Knöpfen und der Pille auf 0 Bildpunkte Breite zusammenging — der Text
+     lief 180 Bildpunkte hoch daran hinunter, und „Fassung 2" lag über dem
+     Symbol. Umbrechen allein half nicht, weil die Basis 0 blieb.
+     Jetzt bekommt der Name die ganze erste Zeile; Zustand und Griffe stehen
+     darunter, der Zustand links, die Griffe rechts. */
+  .dok .kopf{flex-wrap:wrap;row-gap:12px}
+  .dok .d-oeffnen{flex:1 1 100%;min-width:100%}
+  .dok .status{margin-left:0}
+  .dok .aktionen{margin-left:auto}
   .dok .auszug,.dok .warnung{margin-left:20px}
   .dok .fassungen{padding-left:20px}
-  nav .wortmarke small{display:none}
+  /* Die zweite Klasse gewann gegen `nav .wortmarke small` — der Vorführ-Griff
+     stand schmal weiter da, 190 × 18 groß, und war als Tippziel unbrauchbar.
+     Auf schmalen Fenstern gehört er weg, wie im Gespräch auch. */
+  nav .wortmarke small,
+  nav .wortmarke .marke-wechsel{display:none}
+}
+
+/* ---------- Fingermaß (Nutzerprüfung 2026-08-16) ----------
+   Bei 390px maßen fünfmal „↓ Laden" 82 × 35, „Fassungen" 100 × 35 und das
+   „↓ Laden" in der aufgeklappten Fassungsliste 76 × 31. Unter 40px trifft ein
+   Daumen nicht zuverlässig; das Muster kommt aus uebersicht.html.
+   `pointer:coarse` steht dabei, weil ein Finger auch auf einem breiten Schirm
+   ein Finger bleibt. Der Block steht am Ende der Datei: bei gleicher
+   Spezifität gewinnt die spätere Regel. */
+@media (pointer:coarse),(max-width:700px){
+  .dok .aktionen button,
+  .dok .fassung button{
+    min-height:44px;display:inline-flex;align-items:center;justify-content:center;
+  }
 }
 </style>
 <script src="marke.js"></script>
+<!-- lage.js bringt window.Lage mit — die eine Quelle für das „Heute" des
+     Entwurfs und die Termine der Woche. Diese Fläche hängt keine Glocke ins
+     Chrom; sie braucht die Lage, damit die Fristen der Bitten datiert sind
+     und nicht hier eine zweite Woche entsteht. Vor bitten.js, sonst stünde
+     der Baustein beim Bauen der Fristen ohne Quelle da. -->
+<script src="lage.js"></script>
+<script src="sicher.js"></script>
 <script src="bitten.js"></script>
 <script src="blaetter.js"></script>
 <script src="blatt.js"></script>
@@ -270,6 +322,21 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
      Am ersten Tag (Häppchen D3, Lage aus bitten.js) liegt genau ein Dokument
      hier: der Beratungsvertrag, den die offene Abnahme oben meint. Alles andere
      wäre eine Akte, die ein neuer Kunde nicht haben kann. */
+  /* Datiert statt relativ (Denkfehler 4 der Nutzerprüfung): „heute" und
+     „gestern" helfen beim Lesen, aber nie allein — sonst weiß niemand, ob
+     eine Fassung von dieser oder der letzten Woche ist. Welcher Tag welches
+     Datum trägt, sagt die Lage (lage.js), damit hier keine zweite Woche
+     entsteht; ohne den Baustein bleibt dieselbe Woche als fester Wortlaut. */
+  var Lage = window.Lage || null;
+  var TAGE_ERSATZ = ['17.08.2026', '18.08.2026', '19.08.2026', '20.08.2026', '21.08.2026'];
+  function tagDatum(i){
+    var t = Lage && Lage.tage && Lage.tage()[i];
+    return t ? t.kurzdatum + '2026' : (TAGE_ERSATZ[i] || TAGE_ERSATZ[1]);
+  }
+  function heuteZahl(){ return Lage && Lage.heute ? Lage.heute() : 1; }
+  function heuteDatum(){ return tagDatum(heuteZahl()); }
+  function gesternDatum(){ return tagDatum(heuteZahl() - 1); }
+
   var ersterTag = !!(window.Bitten && Bitten.lage() === 'erster-tag');
   /* Die Seiten der Dokumente stehen in blaetter.js, einmal für alle Flächen —
      derselbe Rahmenvertrag, den die Beratung in der Akte sieht (Häppchen D4).
@@ -284,35 +351,39 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
   var DOKUMENTE = ersterTag ? [
     blatt('beratungsvertrag', {
      titel: 'Beratungsvertrag',
-     meta: Marke.rede('4 Seiten, heute, von deiner Beratung', '4 Seiten, heute, von Ihrer Beratung'), status: 'neu',
-     text: 'Monatliche Pauschale, Laufzeit zwölf Monate, Kündigungsfrist drei Monate. Enthalten sind der KI-Berater, die Beratungsleistung und die laufende Auswertung. Auslagen werden einzeln abgerechnet.',
+     meta: Marke.rede('4 Seiten, heute, ' + heuteDatum() + ', von deiner Beratung', '4 Seiten, heute, ' + heuteDatum() + ', von Ihrer Beratung'), status: 'neu',
+     /* Die Zusammenfassung nennt die Zahlen, statt sie zu umschreiben
+        (Issue #53): „monatliche Pauschale" ohne Betrag hat in der Prüfung
+        jeder für eine Auslassung gehalten. Dieselben Zahlen stehen an der
+        Abnahme in bitten.js. */
+     text: '2.400,00 € netto im Monat, mit Umsatzsteuer 2.856,00 €. Laufzeit zwölf Monate bis zum 30. April 2027, Kündigungsfrist drei Monate, also bis zum 31. Januar 2027. Enthalten sind der KI-Berater, die Beratungsleistung und die laufende Auswertung; jede Stunde ist damit abgegolten. Auslagen werden einzeln abgerechnet.',
      fassungen: []})
   ] : [
     blatt('benchmark', {
-     titel: 'Preismodell Benchmark', meta: '12 Seiten, gestern, Fassung 1', status: 'neu',
+     titel: 'Preismodell Benchmark', meta: '12 Seiten, gestern, ' + gesternDatum() + ', Fassung 1', status: 'neu',
      text: 'Preisanpassung von vier Prozent auf die C-Kunden bringt 38.000 Euro im Jahr. Staffeln neu geschnitten, A- und B-Kunden unberührt. Branchenschnitt sechs Prozent darüber.',
      randnotiz: 'die 4 % halten!',
      fassungen: []}),
     blatt('rahmenvertrag', {
      titel: 'Rahmenvertrag Stahl',
-     meta: Marke.rede('Fassung 2 vom 4. August, von deiner Beratung', 'Fassung 2 vom 4. August, von Ihrer Beratung'), status: 'Fassung 2',
+     meta: Marke.rede('Fassung 2 vom 4. August 2026, von deiner Beratung', 'Fassung 2 vom 4. August 2026, von Ihrer Beratung'), status: 'Fassung 2',
      text: 'Preisgleitklausel nach Ziffer 3.2 endet zum 30. September. Danach gilt der Tagespreis des Lieferanten, sofern kein neuer Rahmen vereinbart ist. Kündigungsfrist drei Monate.',
-     fassungen: [{name: 'Fassung 1', meta: 'vom 12. Mai'}]}),
+     fassungen: [{name: 'Fassung 1', meta: 'vom 12. Mai 2026'}]}),
     blatt('jahresabschluss', {
      titel: 'Jahresabschluss 2025, Entwurf',
-     meta: '48 Seiten, 28. Juli', status: 'geteilt',
+     meta: '48 Seiten, 28. Juli 2026', status: 'geteilt',
      text: 'Umsatzerlöse 4,1 Millionen Euro, Rohertrag 31,8 Prozent, Eigenkapitalquote 38 Prozent. Vorbehaltlich der Schlussbuchungen des Steuerbüros.',
      fassungen: []}),
     blatt('fotos', {
      titel: 'Fotos Halle 2, Begehung',
-     meta: '9 Bilder, 15. Juli', status: 'geteilt',
+     meta: '9 Bilder, 15. Juli 2026', status: 'geteilt',
      warnung: Marke.rede('Aus diesen Bildern kann dein Berater nicht zitieren — sie enthalten keinen lesbaren Text.', 'Aus diesen Bildern kann Ihr Berater nicht zitieren — sie enthalten keinen lesbaren Text.'),
      text: 'Begehung Halle zwei Fotos Anbau Brandschutz',
      fassungen: []}),
     /* Derselbe Branchenspiegel wie im Wissen der Beratung: derselbe Name,
        dieselbe Seitenzahl. Zwei Namen für ein Dokument wären zwei Dokumente. */
     blatt('branchenspiegel', {
-     titel: 'Branchenspiegel Metallzulieferer 2025', meta: '38 Seiten, 2. Juli', status: 'geteilt',
+     titel: 'Branchenspiegel Metallzulieferer 2025', meta: '38 Seiten, 2. Juli 2026', status: 'geteilt',
      text: 'Zulieferer mit 20 bis 80 Mitarbeitenden erzielen im Median 35,9 Prozent Rohertragsmarge. Unteres Quartil 31,2 Prozent. Energiekosten je Tonne gestiegen.',
      fassungen: []})
   ];
@@ -401,20 +472,28 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
       if (Bitten.stand(b) !== 'erledigt' || b.abgelegt) return;
       b.abgelegt = true;
       var name = String(Bitten.eingabe(b) || '');
+      var wer = String(b.wer || '');
       var dok = {titel: name || 'Deine Unterlage',
-                 meta: Marke.rede('von dir, gerade eben', 'von Ihnen, gerade eben'),
+                 /* Wer sie bekommen hat, steht hier genauso wie in der
+                    Rückfrage davor — sonst müsste der Kunde raten, wohin sein
+                    Blatt gegangen ist. */
+                 /* Datiert, nicht nur „gerade eben": diese Zeile steht morgen
+                    noch in der Liste, und dann ist „gerade eben" gelogen. */
+                 meta: (wer ? Marke.rede('von dir an ' + wer, 'von Ihnen an ' + wer)
+                            : Marke.rede('von dir', 'von Ihnen')) + ', heute, ' + heuteDatum(),
                  status: Marke.rede('von dir', 'von Ihnen'),
                  text: Marke.rede('Diese Unterlage hast du gerade geschickt. Deine Beratung hat sie.',
                                   'Diese Unterlage haben Sie gerade geschickt. Ihre Beratung hat sie.'),
                  seitenGesamt: 1,
                  seiten: [[
                    {h: name || Marke.rede('Deine Unterlage', 'Ihre Unterlage')},
-                   {klein: Marke.rede('Von dir geschickt, gerade eben.', 'Von Ihnen geschickt, gerade eben.')},
+                   {klein: Marke.rede('Von dir geschickt, heute, ' + heuteDatum() + '.', 'Von Ihnen geschickt, heute, ' + heuteDatum() + '.')},
                    {p: Marke.rede('Deine Beratung hat sie. In der Vorführung steht hier kein Inhalt — im Produkt öffnet sich an dieser Stelle deine Datei, Seite für Seite.',
                                   'Ihre Beratung hat sie. In der Vorführung steht hier kein Inhalt — im Produkt öffnet sich an dieser Stelle Ihre Datei, Seite für Seite.')}
                  ]],
                  fassungen: []};
       DOKUMENTE.unshift(dok);
+      b.blatt = dok;
       liste.prepend(baueEinen(dok));
       /* Steht im Suchfeld etwas, gilt es auch für das neue Blatt — sonst
          stünde es über einer gefilterten Liste, in die es nicht gehört, und
@@ -426,6 +505,22 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
      sie hier vor — nicht erst, wenn er sie ein zweites Mal schickt. */
   zeigeGeschickte();
   if (window.Bitten) Bitten.abonniere(zeigeGeschickte);
+
+  /* Zurückgenommen heißt: die Beratung hat das Blatt nicht mehr — dann darf es
+     auch hier nicht weiter im Bestand liegen. Sonst nähme der Knopf es der
+     Beratung weg und ließe den Kunden im Glauben, es sei angekommen. */
+  document.addEventListener('bitte-zurueckgenommen', function(e){
+    if (!window.Bitten) return;
+    var b = Bitten.finde(e.detail && e.detail.id);
+    if (!b || !b.blatt) return;
+    var dok = b.blatt;
+    b.blatt = null;
+    b.abgelegt = false;
+    var i = DOKUMENTE.indexOf(dok);
+    if (i !== -1) DOKUMENTE.splice(i, 1);
+    if (dok.el) dok.el.remove();
+    filtere();
+  });
 
   /* Volltextsuche mit Trefferauszug — filtert sofort beim Tippen */
   var feld = document.getElementById('suchfeld');

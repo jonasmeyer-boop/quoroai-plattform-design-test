@@ -12,7 +12,7 @@
    (Produkt: /mandate/[id]). Meilensteine, Aufgaben, Zeiterfassung.
    Der Meilenstein-Pfad zeichnet sich bei der Ankunft und trägt den Stift:
    die Stationen sitzen auf dem Fahrplan aus dem Kundengespräch (Analyse,
-   Preismodell, Staffeln, wirksam ab Woche 6). Aufgaben kippen per Kapsel
+   Preismodell, Staffeln, wirksam ab dem 12.10.2026). Aufgaben kippen per Kapsel
    auf erledigt und tragen ihre Zuständigkeit (du, der KI-Berater), die
    Zeiterfassung hat ein Schnell-Erfassen mit Dauer-Chips, die Summe fließt
    in den Leistungsnachweis. Chrome ist quoroAI (system.css).
@@ -31,7 +31,22 @@
    der Satz gefallen ist, aus dem sie entstanden ist.
    V8 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
-   Marker: BERATUNG-MANDAT-V8 (die Krume kommt aus einer Quelle) */
+   V9 (Welle 2): Denkfehler 4 der Nutzerprüfung — „Woche 6, Oktober" und
+   „Woche 3, vier Wochen vor der Umstellung" standen ohne Anfang da. Der
+   Fahrplan zählt ab der Freigabe des Preismodells durch den Kunden; die ist
+   bis Freitag, den 04.09.2026 erbeten (dieselbe Frist, mit der die Bitte an
+   den Kunden datiert ist). Woche 1 ist dann die Woche ab Montag, dem
+   07.09.2026, Woche 3 ab dem 21.09.2026, Woche 6 ab dem 12.10.2026 — die
+   Stationen tragen jetzt diese Daten, und unter dem Pfad steht, woher sie
+   kommen. „Vier Wochen vor der Umstellung" steht nicht mehr dabei: der
+   Fahrplan setzt „Kunden informieren" auf Woche 3 und „wirksam" auf Woche 6
+   (gespraech.html, uebersicht.html), das sind drei Wochen — während bitten.js
+   dem Kunden „vier Wochen Vorlauf" zusagt. Solange die beiden sich nicht
+   einig sind, behauptet diese Fläche keinen Abstand, sondern nennt das Datum.
+   Außerdem: „seit März 2025" im Kopf war ein Rest aus der Zeit, als Petersen
+   als Aufwandsmandat gerechnet wurde. Der Beratungsvertrag läuft seit dem
+   1. Mai 2026 (blaetter.js Ziffer 2, leistungen.html).
+   Marker: BERATUNG-MANDAT-V9 (jede Woche nennt ihren Anfang) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -110,6 +125,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 #pfad text.geschafft-t{fill:var(--nebel-500)}
 .pfad-hand{font-family:'Caveat',cursive;font-size:19px;font-weight:700;color:var(--lila-700);rotate:-1.2deg;display:inline-block;margin-top:8px;margin-left:calc(36% - 46px)}
 /* Die Leiter ist die Handy-Form des Pfads; am großen Schirm gilt die Achse. */
+/* Wo der Fahrplan anfängt zu zählen. Ohne diesen Satz steht „Woche 6" ohne
+   Anfang da (Denkfehler 4 der Nutzerprüfung) — und weil der Anfang selbst
+   noch nicht feststeht, steht er hier und nicht an jeder Station. */
+.fahrplan-anfang{font-size:12.5px;color:var(--nebel-600);line-height:1.6;max-width:70ch;margin-top:14px}
 .pfad-leiter{display:none}
 @media (max-width:700px){
   .pfad-rolle,.pfad-hand{display:none}
@@ -247,14 +266,17 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   <div class="kopf">
     <div>
       <h1>Preis und Marge</h1>
-      <div class="stand">Das Mandat bei Petersen Stahlbau, seit März 2025. Ziel: die Marge zurück über 33 Prozent.</div>
+      <!-- „seit März 2025" war ein Rest: der Beratungsvertrag läuft seit dem
+           1. Mai 2026 (blaetter.js Ziffer 2, leistungen.html), und beide
+           Mandate des Kunden hängen an derselben Monatspauschale. -->
+      <div class="stand">Das Mandat bei Petersen Stahlbau, seit Mai 2026. Ziel: die Marge zurück über 33 Prozent.</div>
     </div>
     <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Mandat läuft" title="Mandat läuft"></span><span class="zustand-wort">läuft</span></span>
   </div>
 
   <h3>Meilensteine</h3>
   <section class="tafel" aria-label="Meilensteine">
-    <div class="pfad-rolle"><svg id="pfad" viewBox="0 0 720 96" role="img" aria-label="Vier Meilensteine: Analyse geschafft, Preismodell läuft, Staffeln ab September, wirksam ab Woche 6">
+    <div class="pfad-rolle"><svg id="pfad" viewBox="0 0 720 96" role="img" aria-label="Vier Meilensteine: Analyse geschafft, Preismodell liegt beim Kunden, Staffeln ab September, wirksam ab dem 12. Oktober 2026">
       <line class="grund" x1="60" y1="38" x2="660" y2="38"></line>
       <line class="voran" id="voran" x1="60" y1="38" x2="260" y2="38"></line>
       <circle class="station geschafft" cx="60" cy="38" r="7"></circle>
@@ -269,7 +291,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       <text class="m-name" x="460" y="66" text-anchor="middle">Staffeln umsetzen</text>
       <text x="460" y="80" text-anchor="middle">ab September</text>
       <text class="m-name" x="660" y="66" text-anchor="middle">Wirksam</text>
-      <text x="660" y="80" text-anchor="middle">Woche 6, Oktober</text>
+      <text x="660" y="80" text-anchor="middle">ab 12.10.2026</text>
     </svg></div>
     <span class="pfad-hand">hier stehst du.</span>
     <!-- Auf dem Handy ist der Pfad eine Leiter statt einer Achse: die vier
@@ -280,8 +302,15 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       <li class="geschafft"><b>Analyse</b><span>Juli, geschafft</span></li>
       <li class="jetzt"><b>Preismodell</b><span>liegt beim Kunden</span><em>hier stehst du.</em></li>
       <li><b>Staffeln umsetzen</b><span>ab September</span></li>
-      <li><b>Wirksam</b><span>Woche 6, Oktober</span></li>
+      <li><b>Wirksam</b><span>ab 12.10.2026</span></li>
     </ol>
+    <!-- Denkfehler 4 der Nutzerprüfung: „Woche 6" stand ohne Anfang da. Der
+         Fahrplan zählt ab der Freigabe des Preismodells durch den Kunden —
+         die liegt noch bei ihm. Erbeten ist sie bis Freitag, den 04.09.2026;
+         Woche 1 ist dann die Woche ab Montag, dem 07.09.2026, und Woche 6
+         beginnt am 12.10.2026. Deshalb tragen die Stationen ihr Datum und
+         nicht ihre Wochennummer. -->
+    <p class="fahrplan-anfang">Der Fahrplan zählt ab der Freigabe des Preismodells durch Herrn Petersen. Sie liegt noch bei ihm; erbeten ist sie bis Freitag, den 04.09.2026. Woche 1 ist dann die Woche ab Montag, dem 07.09.2026. Verschiebt sich die Freigabe, verschieben sich alle Termine dahinter mit.</p>
   </section>
 
   <h3>Aufgaben</h3>
@@ -294,7 +323,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       </div>
       <div class="aufgabe">
         <button class="kippe" type="button" aria-pressed="false" aria-labelledby="a2"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">offen</span></button>
-        <span class="a-text"><b id="a2">Staffeln neu schneiden</b><span>Woche 1 des Fahrplans, A- und B-Kunden bleiben unberührt</span></span>
+        <span class="a-text"><b id="a2">Staffeln neu schneiden</b><span>Woche 1 des Fahrplans, ab dem 07.09.2026. A- und B-Kunden bleiben unberührt</span></span>
         <span class="wer">du</span>
       </div>
       <div class="aufgabe">
@@ -304,7 +333,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       </div>
       <div class="aufgabe">
         <button class="kippe" type="button" aria-pressed="false" aria-labelledby="a4"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">offen</span></button>
-        <span class="a-text"><b id="a4">C-Kunden-Anschreiben entwerfen</b><span>Woche 3, vier Wochen vor der Umstellung</span></span>
+        <span class="a-text"><b id="a4">C-Kunden-Anschreiben entwerfen</b><span>Woche 3 des Fahrplans, ab dem 21.09.2026, vor der Umstellung</span></span>
         <span class="wer">du</span>
       </div>
     </div>

@@ -38,7 +38,14 @@
    Vogelperspektive — beim ersten Mal mitten im neun Sekunden langen
    Aufbau-Film. Sie nennt jetzt ihren Raum, die Zentrale, und führt
    hinein. Gebaut wird sie vom Baustein krume.js.
-   Marker: BERATUNG-ZEITEN-V7 (die Krume kommt aus einer Quelle) */
+   V8 (Issue #60): die Auslage heißt hier, wie sie auf der Rechnung heißt,
+   und der Satz über den Auslagen führt als Verweis dorthin, wo sie landen.
+   V9: Die Fläche lebte auf einem Donnerstag, der nirgends stand — Wochenleiste
+   „Do 1:42", Uhrzeiten am Nachmittag (14:03, 12:40, 11:40), während der Entwurf
+   Dienstagvormittag ist. Jetzt hängt sie an der Lage (lage.js): der Tag, die
+   Woche, die Uhrzeit und der Termin-Vorschlag kommen von dort, und keine
+   Uhrzeit liegt mehr hinter dem Jetzt der Lage.
+   Marker: BERATUNG-ZEITEN-V9 (die Fläche steht auf dem Dienstag der Lage) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -252,6 +259,9 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
   .wochen-glas{height:64px}
 }
 </style>
+<!-- lage.js bringt window.Lage: das eine „Heute" des Entwurfs, die Woche und
+     die Termine. Muss vor allem stehen, was daraus liest. -->
+<script src="lage.js"></script>
 <script src="krume.js"></script>
 </head>
 <body class="quoro"
@@ -269,17 +279,21 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
   </div>
 
   <h3>Was der Tag hergibt</h3>
-  <p class="was">Aus Terminen, mitgelesenen Gesprächen und gelesenen Unterlagen. Übernommen wird nur, was du übernimmst; Weggewischtes kommt heute nicht wieder.</p>
+  <p class="was">Aus Terminen, mitgelesenen Gesprächen und gelesenen Unterlagen. Was von einem früheren Tag liegen geblieben ist, steht mit seinem Datum dabei. Übernommen wird nur, was du übernimmst; Weggewischtes kommt heute nicht wieder.</p>
   <div id="vorschlaege">
 
-    <section class="zettel" data-vorschlag data-mandat="Petersen Stahlbau" data-dauer="3600"
-             data-was="Termin: Preis und Marge" aria-label="Vorschlag: Termin bei Petersen Stahlbau">
+    <!-- Dieser Zettel wird aus der Lage (lage.js) gefüllt: der zuletzt zu Ende
+         gegangene Termin, an dem du saßt. Von Hand geschrieben stand hier der
+         Termin bei Petersen von 10:00 bis 11:00 als erledigt — der liegt in
+         der Lage am Donnerstag und hat noch gar nicht stattgefunden. Gibt es
+         keinen beendeten Termin, verschwindet der Zettel. -->
+    <section class="zettel" data-vorschlag id="vorschlag-termin" hidden>
       <div class="v-kopf">
         <div>
-          <b>Der Termin bei Petersen stand von 10:00 bis 11:00</b>
-          <div class="v-meta">Videocall mit Dr. Anna Vogelsang, bestätigt am Dienstag. Auf der Uhr steht dafür nichts.</div>
+          <b data-v-titel></b>
+          <div class="v-meta" data-v-meta></div>
         </div>
-        <div class="v-mass">1:00<small>Stunden</small></div>
+        <div class="v-mass" data-v-mass></div>
       </div>
       <div class="griffe">
         <button class="knopf primaer" type="button" data-uebernehmen>Übernehmen</button>
@@ -307,7 +321,7 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
       <div class="v-kopf">
         <div>
           <b>Die BWA Juli der Bäckerei Freitag lag 18 Minuten offen</b>
-          <div class="v-meta">Gestern hochgeladen, heute um 11:40 von dir geöffnet.</div>
+          <div class="v-meta">Gestern hochgeladen, heute um 8:40 von dir geöffnet.</div>
         </div>
         <div class="v-mass">18<small>Minuten</small></div>
       </div>
@@ -348,7 +362,7 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
   </div>
 
   <h3>Auslagen</h3>
-  <p class="was">Fahrtkosten, Bahn, Hotel, Material — was du für ein Mandat auslegst. Was weiterberechnet werden darf, steht beim nächsten Rechnungsentwurf von selbst darin.</p>
+  <p class="was">Fahrtkosten, Bahn, Hotel, Material — was du für ein Mandat auslegst. Was weiterberechnet werden darf, steht beim nächsten <a href="beratung-rechnungen.html">Rechnungsentwurf</a> von selbst darin, sobald sein Stichtag hinter dem Tag der Auslage liegt.</p>
   <div class="auslagen" id="auslagen"></div>
   <div class="nachtrag">
     <div class="schritt">Für wen</div>
@@ -370,37 +384,40 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
     <button class="knopf primaer" type="button" id="auslage-eintragen">Eintragen</button>
   </div>
 
+  <!-- Hier stehen Kolleginnen und Kollegen, nicht du selbst: deine eigene Uhr
+       ist das Dock unten. Vorher lief hier Dr. Anna Vogelsang — die Person, die
+       diese Fläche bedient —, und daneben ein Markus Rehm, den das Team der
+       Lage nicht kennt. Beide Uhrzeiten lagen am Nachmittag, während der
+       Entwurf am Dienstagvormittag steht. -->
   <h3>Im Team läuft gerade</h3>
   <div class="team">
     <div class="team-zeile">
       <span class="zustand aktiv team-glas" role="img" aria-label="Uhr läuft" title="Uhr läuft"></span>
       <div>
-        <div class="t-wer">Dr. Anna Vogelsang</div>
-        <div class="t-woran">Petersen Stahlbau</div>
+        <div class="t-wer">Miriam Krohn</div>
+        <div class="t-woran">Bäckerei Freitag</div>
       </div>
-      <span class="t-seit">seit 14:03</span>
+      <span class="t-seit">seit 8:55</span>
     </div>
     <div class="team-zeile">
       <span class="zustand entwurf team-glas" role="img" aria-label="Keine Uhr" title="Keine Uhr"></span>
       <div>
-        <div class="t-wer">Markus Rehm</div>
-        <div class="t-woran">keine Uhr, zuletzt 12:40 angehalten</div>
+        <div class="t-wer">Jens Nordholm</div>
+        <div class="t-woran">keine Uhr, zuletzt 9:05 angehalten</div>
       </div>
-      <span class="t-seit">3:15 heute</span>
+      <span class="t-seit">1:05 heute</span>
     </div>
   </div>
   <p class="regel">Anhalten kann jede Uhr nur der Mensch, dem sie gehört. Die Leitung sieht, dass sie läuft, und sonst nichts — auch nicht als Inhaberin.</p>
 
   <h3>Diese Woche</h3>
+  <!-- Die Leiste wird aus der Lage (lage.js) gebaut. Von Hand geschrieben
+       stand hier ein Donnerstag als „heute", mit drei vollen Tagen davor —
+       ein dritter Wochentag neben dem Dienstag der Lage und dem Stichtag der
+       Abrechnung. Welcher Tag heute ist, entscheidet jetzt die Lage. -->
   <div class="woche">
-    <div class="wochen-reihe" id="wochen-reihe">
-      <div class="wochen-tag"><div class="wochen-glas" style="--stand:.88"></div><div class="wt-tag">Mo</div><div class="wt-std">7:05</div></div>
-      <div class="wochen-tag"><div class="wochen-glas" style="--stand:1"></div><div class="wt-tag">Di</div><div class="wt-std">8:00</div></div>
-      <div class="wochen-tag"><div class="wochen-glas" style="--stand:.79"></div><div class="wt-tag">Mi</div><div class="wt-std">6:20</div></div>
-      <div class="wochen-tag"><div class="wochen-glas heute" id="glas-heute" style="--stand:.2"></div><div class="wt-tag">Do</div><div class="wt-std" id="wt-heute">1:42</div></div>
-      <div class="wochen-tag"><div class="wochen-glas leer"></div><div class="wt-tag">Fr</div><div class="wt-std" style="color:var(--nebel-400)">–</div></div>
-    </div>
-    <p class="wochen-fuss" id="wochen-fuss">Bisher <b>22:47</b> von den 32 Stunden, die diese Woche auf Mandaten liegen sollen. Ein voller Balken sind acht Stunden.</p>
+    <div class="wochen-reihe" id="wochen-reihe"></div>
+    <p class="wochen-fuss" id="wochen-fuss"></p>
   </div>
 </main>
 
@@ -413,6 +430,20 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
   document.querySelectorAll('main > *').forEach(function(el, i){
     el.style.setProperty('--verz', (i * 0.05) + 's');
   });
+
+  /* ---------- Der Tag kommt aus der Lage ----------
+     Diese Fläche lebte auf einem Donnerstag, den nirgends jemand ausgesprochen
+     hat. Jetzt sagt die Lage (lage.js), welcher Tag heute ist, wie spät es ist
+     und welche Termine dahinter liegen. */
+  var Lage = window.Lage;
+  var ICH = Lage.person(Lage.ich());
+  /* Was am Tag auf Mandaten liegen soll — dieselbe Zahl, mit der die Woche in
+     beratung-kalender.html rechnet, statt einer hier getippten. */
+  var SOLL_TAG = ICH.soll;
+
+  /* Was an den Tagen vor heute schon erfasst ist. Der heutige Tag steht nicht
+     hier: er wird aus der Uhr gerechnet, und die Tage danach sind noch leer. */
+  var WOCHE_VORHER = [7 * 3600 + 300];
 
   /* ---------- Heute erfasst ---------- */
   var listeEl = document.getElementById('eintraege');
@@ -498,22 +529,46 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
     summe();
   }
 
+  function uhrWort(sek){
+    var h = Math.floor(sek/3600), m = Math.round((sek%3600)/60);
+    if (m === 60) { h += 1; m = 0; }
+    return h + ':' + (m<10?'0':'') + m;
+  }
+
+  /* Die Wochenleiste: ein Kästchen je Tag der Lage, heute markiert, die Tage
+     danach leer. Welcher Tag „heute" ist, steht nirgends mehr im Markup. */
+  var reiheEl = document.getElementById('wochen-reihe');
+  var HEUTE = Lage.heute();
+  Lage.tage().forEach(function(t, i){
+    var d = document.createElement('div');
+    d.className = 'wochen-tag';
+    var kommt = i > HEUTE;
+    var sek = i < HEUTE ? (WOCHE_VORHER[i] || 0) : 0;
+    d.innerHTML =
+      '<div class="wochen-glas' + (i === HEUTE ? ' heute' : (kommt ? ' leer' : '')) + '"' +
+        (i === HEUTE ? ' id="glas-heute"' : '') +
+        ' style="--stand:' + (kommt ? 0 : Math.min(1, sek / (SOLL_TAG * 3600))).toFixed(3) + '"></div>' +
+      '<div class="wt-tag">' + Lage.tagKuerzel(i) + '</div>' +
+      '<div class="wt-std"' + (i === HEUTE ? ' id="wt-heute"' : (kommt ? ' style="color:var(--nebel-400)"' : '')) + '>' +
+        (kommt ? '\u2013' : uhrWort(sek)) + '</div>';
+    reiheEl.appendChild(d);
+  });
+
   function summe(){
     var laeuft = Uhr.laeuft();
     var sek = (laeuft ? laeuft.dauer : 0);
     alle().forEach(function(e){ sek += e.dauer; });
-    var h = Math.floor(sek/3600), m = Math.round((sek%3600)/60);
-    if (m === 60) { h += 1; m = 0; }
-    document.getElementById('summe-heute').textContent = h + ':' + (m<10?'0':'') + m;
+    document.getElementById('summe-heute').textContent = uhrWort(sek);
 
     /* Der heutige Balken und der Wochenstand hängen an derselben Zahl. */
-    document.getElementById('wt-heute').textContent = h + ':' + (m<10?'0':'') + m;
-    document.getElementById('glas-heute').style.setProperty('--stand', Math.min(1, sek/28800).toFixed(3));
-    var wocheSek = (7*3600+300) + (8*3600) + (6*3600+1200) + sek;
-    var wh = Math.floor(wocheSek/3600), wm = Math.round((wocheSek%3600)/60);
-    if (wm === 60) { wh += 1; wm = 0; }
+    document.getElementById('wt-heute').textContent = uhrWort(sek);
+    document.getElementById('glas-heute').style.setProperty('--stand', Math.min(1, sek/(SOLL_TAG*3600)).toFixed(3));
+    var wocheSek = WOCHE_VORHER.reduce(function(a, b){ return a + b; }, 0) + sek;
+    var wochenSoll = SOLL_TAG * Lage.tage().length;
     document.getElementById('wochen-fuss').innerHTML =
-      'Bisher <b>' + wh + ':' + (wm<10?'0':'') + wm + '</b> von den 32 Stunden, die diese Woche auf Mandaten liegen sollen. Ein voller Balken sind acht Stunden.';
+      'Bisher <b>' + uhrWort(wocheSek) + '</b> von den ' + wochenSoll +
+      ' Stunden, die diese Woche auf Mandaten liegen sollen. Ein voller Balken sind ' +
+      SOLL_TAG + ' Stunden, dein Tagessoll.';
 
     var kopfSatz = document.getElementById('stand');
     kopfSatz.textContent = laeuft
@@ -569,6 +624,43 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
       document.getElementById('keine-vorschlaege').hidden = offen > 0;
     }, reduziert ? 0 : 320);
   }
+  /* Der Termin-Vorschlag kommt aus der Lage: der zuletzt zu Ende gegangene
+     Termin, an dem Dr. Anna Vogelsang saß — die interne Wochenrunde zählt
+     mit, denn auch sie ist Zeit. Ein Termin, der noch bevorsteht oder über
+     dessen Verschiebung noch entschieden wird, taucht hier nicht auf: er ist
+     nicht geleistet. */
+  (function(){
+    var jetzt = Lage.heute() * 24 + Lage.jetzt();
+    var vorbei = Lage.termine().filter(function(t){
+      if (t.angefragt) return false;
+      if (t.wunsch) return false;            /* über die Verschiebung wird noch entschieden */
+      if (!(t.wer === Lage.ich() || t.wer === '*')) return false;
+      return (t.tag * 24 + t.bis) <= jetzt;
+    }).sort(function(a, b){
+      return (b.tag * 24 + b.bis) - (a.tag * 24 + a.bis);
+    })[0];
+
+    var zettel = document.getElementById('vorschlag-termin');
+    if (!vorbei) return;
+    zettel.hidden = false;
+    zettel.dataset.mandat = vorbei.intern ? 'Eigene Beratung, nicht abrechenbar' : vorbei.kunde;
+    zettel.dataset.dauer = Math.round((vorbei.bis - vorbei.von) * 3600);
+    zettel.dataset.was = 'Termin: ' + vorbei.was;
+    zettel.setAttribute('aria-label', 'Vorschlag: ' + vorbei.was +
+      (vorbei.kunde ? ' bei ' + vorbei.kunde : ''));
+    zettel.querySelector('[data-v-titel]').textContent =
+      (vorbei.intern ? vorbei.was : 'Der Termin bei ' + vorbei.kunde) +
+      ' stand am ' + Lage.terminWann(vorbei);
+    zettel.querySelector('[data-v-meta]').textContent =
+      (vorbei.intern ? 'Intern, mit dem ganzen Team' : vorbei.form + ', ' + vorbei.was) +
+      '. Auf der Uhr steht dafür nichts.';
+    var mass = zettel.querySelector('[data-v-mass]');
+    var min = Math.round((vorbei.bis - vorbei.von) * 60);
+    mass.innerHTML = min >= 60
+      ? uhrWort(min * 60) + '<small>Stunden</small>'
+      : min + '<small>Minuten</small>';
+  })();
+
   document.querySelectorAll('[data-vorschlag]').forEach(function(z){
     z.querySelector('[data-uebernehmen]').addEventListener('click', function(){ nimm(z); });
     z.querySelector('[data-wischen]').addEventListener('click', function(){ weg(z); });
@@ -629,7 +721,9 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
   };
   var AUSLAGEN = [
     {mandat: 'Bäckerei Freitag', was: 'Warenanalyse, Laborkosten', cent: 21500, am: '04.08.2026', weiter: true,  beleg: true},
-    {mandat: 'Cordes Logistik',  was: 'Fahrtkosten Bremen',        cent:  2880, am: '06.08.2026', weiter: false, beleg: true},
+    /* Wortgleich mit beratung-rechnungen.html — dieselbe Auslage darf nicht
+       auf zwei Flächen zwei Namen tragen. */
+    {mandat: 'Cordes Logistik',  was: 'Fahrt Bremen, 96 km × 0,30 €', cent: 2880, am: '06.08.2026', weiter: false, beleg: true},
     {mandat: 'Bäckerei Freitag', was: 'Übernachtung Wilhelmshaven', cent: 8900, am: '07.08.2026', weiter: true,  beleg: false},
     {mandat: 'Petersen Stahlbau', was: 'Bahnfahrt Oldenburg und zurück', cent: 9840, am: '11.08.2026', weiter: true, beleg: true}
   ];
@@ -743,7 +837,7 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
       mandat: auslageMandat.name,
       was: auslageArt,
       cent: cent,
-      am: '14.08.2026',
+      am: Lage.heuteKurz(),
       weiter: weiterHaken.checked,
       beleg: document.getElementById('auslage-beleg').checked
     };

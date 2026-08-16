@@ -68,7 +68,18 @@
    dem Petersen-Raum hereinkam, hatte vorher keinen Weg zurück in ihn.
    V5: der Hinweis räumt seinen Satz erst nach der Überblendung weg — im
    selben Zug geleert verschwand er schlagartig, statt zu verklingen.
-   Marker: BERATUNG-PROTOKOLL-V5 (die Krume kommt aus einer Quelle) */
+   V6 (Denkfehler 4 der Nutzerprüfung): Der Termin steht datiert da. „Donnerstag,
+   10:00 bis 11:00" ließ offen, welcher Donnerstag gemeint ist — die Zeile kommt
+   jetzt aus der Lage (lage.js), aus demselben Termin, den die Woche und der
+   Zettel der Beratung zeigen. Die Frist der Aufgabe („bis Freitag") trägt ihr
+   Datum, im Entwurf ans Mandat wie im Brief an Herrn Petersen. Die Zitate
+   bleiben unangetastet: was jemand gesagt hat, wird nicht nachdatiert.
+   V7 (Issue #55): „Worum es ging" gibt den Margenverlust vollständig wieder.
+   Vorher stand dort der Teilbetrag 3,1 Punkte als Gesamtverlust, dem falschen
+   Treiber zugeschrieben, und der Ausschuss wurde bestritten — obwohl das
+   Balkenbild im Gespräch 5,8 Punkte zeigt: Preisdruck 3,1, Stahlpreis 1,8,
+   Ausschuss 0,9. Der Ausschuss ist der kleinste Posten, aber kein Nichts.
+   Marker: BERATUNG-PROTOKOLL-V7 (der Margenverlust steht vollständig da) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -409,6 +420,10 @@ main > .bogen{animation:none;opacity:1;translate:none}
   .frueher .f-daraus{margin-left:0}
 }
 </style>
+<!-- lage.js bringt window.Lage: die Termine der Woche aus einer Quelle.
+     Diese Fläche hängt keine Glocke ins Chrom, sie braucht den Termin —
+     abgeschrieben wäre er wieder ein zweiter. -->
+<script src="lage.js"></script>
 <script src="krume.js"></script>
 </head>
 <body class="quoro"
@@ -436,7 +451,9 @@ main > .bogen{animation:none;opacity:1;translate:none}
     <div class="termin-kopf">
       <div class="tag-blatt" aria-hidden="true"><div class="tb-tag">DO</div><div class="tb-zeit">10:00</div></div>
       <div>
-        <div class="t-wann">Donnerstag, 10:00 bis 11:00, Petersen Stahlbau</div>
+        <!-- Wortlaut aus der Lage (Termin t7), damit hier nicht ein zweiter
+             Donnerstag entsteht. Ohne den Baustein bleibt derselbe Satz stehen. -->
+        <div class="t-wann" id="t-wann">Donnerstag, 20.08., 10:00 bis 11:00, Petersen Stahlbau</div>
         <div class="t-mit">Preis und Marge, Dr. Anna Vogelsang und Herr Petersen, Videocall</div>
       </div>
     </div>
@@ -525,18 +542,18 @@ main > .bogen{animation:none;opacity:1;translate:none}
            data-hilfe-name="Das Protokoll ist ein Entwurf"
            data-hilfe="Es liegt durchscheinend obenauf und gehört dir erst, wenn du danach greifst — dieselbe Sprache wie überall, wo dein KI-Berater etwas beiträgt. Die Zitate gehören dem, der sie gesagt hat.">
     <span class="b-herkunft"><img src="bilder/quoro-icon.svg" alt="" width="15" height="15">Protokoll deines KI-Beraters</span>
-    <div class="b-titel">Preis und Marge, Termin vom Donnerstag</div>
+    <div class="b-titel" id="b-titel">Preis und Marge, Termin vom Donnerstag, 20.08.2026</div>
     <div class="b-meta">58 Minuten, Dr. Anna Vogelsang und Herr Petersen. Aus der Mitschrift, die Herr Petersen um 10:02 erlaubt hat.</div>
 
     <h4>Worum es ging</h4>
     <div class="b-text">
-      <p>Der Margenverlust von 3,1 Punkten ist ein Preisproblem, kein Ausschussproblem — darüber waren sich beide Seiten nach zwanzig Minuten einig. Der Rest des Termins ging um die Frage, wie steil der Preisschritt ausfällt und wen er trifft.</p>
+      <p>Die Marge über das ganze Geschäft ist von 36,2 auf 30,4 Prozent gefallen, also um 5,8 Punkte. Davon gehen 3,1 Punkte auf den Preisdruck, 1,8 auf den Stahlpreis und 0,9 auf den Ausschuss. Der größte Brocken ist der Preis — darüber waren sich beide Seiten nach zwanzig Minuten einig, ohne den Ausschuss deshalb kleinzureden. Der Rest des Termins ging um die Frage, wie steil der Preisschritt ausfällt und wen er trifft.</p>
     </div>
 
     <h4>Was entschieden wurde</h4>
     <div class="b-text">
       <ul>
-        <li>Der Preisschritt kommt, <b>4,5 Prozent auf die Serienteile</b>, wirksam zum 1. Oktober.</li>
+        <li>Der Preisschritt kommt, <b>4,5 Prozent auf die Serienteile</b>, wirksam zum 1. Oktober 2026.</li>
         <li>Die zwölf A-Kunden bleiben in diesem Jahr unberührt. Herr Petersen will sie selbst anrufen, bevor irgendein Brief hinausgeht.</li>
         <li>Über die C-Kunden wird erst geredet, wenn die Nordstahl-Konditionen auf dem Tisch liegen.</li>
       </ul>
@@ -572,11 +589,11 @@ main > .bogen{animation:none;opacity:1;translate:none}
     <!-- Karte 1: die echte Aufgabe. Sie trägt den Satz, aus dem sie kommt,
          und die Zuständigkeit ist wählbar — der KI-Berater rät, er bestimmt
          nicht. -->
-    <section class="karte-a" data-karte="staffeln" aria-label="Aufgabenentwurf: Staffeln bis Freitag schneiden"
+    <section class="karte-a" data-karte="staffeln" aria-label="Aufgabenentwurf: Staffeln bis Freitag, 21.08.2026 schneiden"
              data-hilfe-name="Vom Satz zur Aufgabe"
              data-hilfe="Jede Karte trägt den Satz, aus dem sie entstanden ist. So siehst du in zwei Sekunden, ob dein KI-Berater richtig zugehört hat — und niemand muss ein Protokoll nach Aufgaben durchkämmen.">
       <div class="k-was">Staffeln neu schneiden und die Grenze festlegen</div>
-      <div class="k-wann">bis Freitag, sonst verschiebt sich die Umstellung um einen Monat</div>
+      <div class="k-wann">bis Freitag, 21.08.2026, sonst verschiebt sich die Umstellung um einen Monat</div>
       <div class="k-weil" style="--kunden-farbe:#2b5fe3">
         „Wenn Sie mir bis Freitag sagen, wo die Grenze liegt, ziehe ich es im September durch."
         <span class="kw-wer">Herr Petersen im Termin</span>
@@ -598,7 +615,7 @@ main > .bogen{animation:none;opacity:1;translate:none}
     <section class="karte-a" data-karte="preisliste" aria-label="Aufgabenentwurf: Preisliste durchrechnen">
       <div class="k-was">Preisliste mit den neuen Staffeln durchrechnen</div>
       <div class="k-wann">danach, wenn die Grenze steht</div>
-      <div class="k-schon"><b>Die gibt es schon.</b> Sie steht seit dem 6. August als offene Aufgabe am Mandat, zuständig ist dein KI-Berater. Ich lege sie nicht zweimal an.</div>
+      <div class="k-schon"><b>Die gibt es schon.</b> Sie steht seit dem 6. August 2026 als offene Aufgabe am Mandat, zuständig ist dein KI-Berater. Ich lege sie nicht zweimal an.</div>
       <div class="griffe">
         <button class="knopf sekundaer" type="button" data-tu="ansehen">Am Mandat ansehen</button>
         <button class="knopf leise" type="button" data-tu="weg">Karte wegnehmen</button>
@@ -629,13 +646,13 @@ main > .bogen{animation:none;opacity:1;translate:none}
   <h3 id="frueher">Frühere Protokolle</h3>
   <div class="frueher">
     <a href="#" data-frueher>
-      <div class="tag-blatt" aria-hidden="true"><div class="tb-tag">MI</div><div class="tb-zeit">6.8.</div></div>
-      <div><div class="f-wann">Analyse besprochen, 6. August</div><div class="f-was">44 Minuten, mit Herrn Petersen. Daraus kam die Aufgabe „Preisliste durchrechnen".</div></div>
+      <div class="tag-blatt" aria-hidden="true"><div class="tb-tag">DO</div><div class="tb-zeit">6.8.</div></div>
+      <div><div class="f-wann">Analyse besprochen, Donnerstag, 6. August 2026</div><div class="f-was">44 Minuten, mit Herrn Petersen. Daraus kam die Aufgabe „Preisliste durchrechnen".</div></div>
       <span class="f-daraus">2 Aufgaben</span>
     </a>
     <a href="#" data-frueher>
-      <div class="tag-blatt" aria-hidden="true"><div class="tb-tag">DI</div><div class="tb-zeit">22.7.</div></div>
-      <div><div class="f-wann">Erstes Gespräch zur Marge, 22. Juli</div><div class="f-was">1 Stunde 10, mit Herrn Petersen und seinem Buchhalter.</div></div>
+      <div class="tag-blatt" aria-hidden="true"><div class="tb-tag">MI</div><div class="tb-zeit">22.7.</div></div>
+      <div><div class="f-wann">Erstes Gespräch zur Marge, Mittwoch, 22. Juli 2026</div><div class="f-was">1 Stunde 10, mit Herrn Petersen und seinem Buchhalter.</div></div>
       <span class="f-daraus">3 Aufgaben</span>
     </a>
   </div>
@@ -658,6 +675,28 @@ main > .bogen{animation:none;opacity:1;translate:none}
   document.querySelectorAll('main > *').forEach(function(el, i){
     el.style.setProperty('--verz', (i * 0.06) + 's');
   });
+
+  /* ---------- Welcher Termin das ist ----------
+     Aus der Lage (lage.js), nicht abgeschrieben: derselbe Termin steht in
+     der Woche und auf dem Zettel der Beratung, und „Donnerstag" allein ließ
+     offen, welcher. Ohne den Baustein bleibt der Satz aus dem Markup stehen. */
+  (function(){
+    var L = window.Lage;
+    if (!L || !L.termine) return;
+    var t = L.termine().filter(function(x){ return x.ziel === 'beratung-protokoll.html'; })[0];
+    if (!t) return;
+    document.getElementById('t-wann').textContent = L.terminWann(t) + ', ' + t.kunde;
+    /* Der Blattkopf trägt das Jahr aus: das Protokoll wird ausgedruckt und
+       abgeheftet, und in der Ablage hilft „20.08." allein niemandem mehr. */
+    var tg = L.tage()[t.tag];
+    document.getElementById('b-titel').textContent =
+      t.was + ', Termin vom ' + tg.kurz + ', ' + tg.kurzdatum + '2026';
+    var blatt = document.querySelector('#termin .tag-blatt');
+    if (blatt) {
+      blatt.querySelector('.tb-tag').textContent = L.tagKuerzel(t.tag);
+      blatt.querySelector('.tb-zeit').textContent = L.zeitWort(t.von);
+    }
+  })();
 
   var hinweisTimer = null, leerTimer = null;
   function demoHinweis(text){
@@ -818,10 +857,10 @@ main > .bogen{animation:none;opacity:1;translate:none}
   var ENTWURF_AN_KUNDEN =
     'Guten Tag Herr Petersen,\n\n' +
     'anbei, was wir heute besprochen haben:\n\n' +
-    '— Der Preisschritt kommt: 4,5 Prozent auf die Serienteile, wirksam zum 1. Oktober.\n' +
+    '— Der Preisschritt kommt: 4,5 Prozent auf die Serienteile, wirksam zum 1. Oktober 2026.\n' +
     '— Ihre zwölf A-Kunden bleiben in diesem Jahr unberührt. Sie rufen sie selbst an, bevor etwas hinausgeht.\n' +
     '— Über die C-Kunden sprechen wir, sobald die Nordstahl-Konditionen vorliegen.\n\n' +
-    'Wo die Grenze der Staffeln liegt, sage ich Ihnen bis Freitag.\n\n' +
+    'Wo die Grenze der Staffeln liegt, sage ich Ihnen bis Freitag, den 21. August.\n\n' +
     'Viele Grüße\nAnna Vogelsang';
 
   function inTinteDruecken(bogen){
@@ -962,7 +1001,7 @@ main > .bogen{animation:none;opacity:1;translate:none}
       var wer = gewaehlt && gewaehlt.dataset.wer === 'ki' ? 'deinem KI-Berater' : 'dir';
       var wahl = karte.querySelector('.wer-wahl');
       if (wahl) wahl.hidden = true;
-      ablegen(karte, '<span>Steht als offene Aufgabe am <b>Mandat Petersen</b>, zuständig bei ' + wer + ', fällig Freitag. Der Satz von Herrn Petersen hängt als Grund daran. <a href="beratung-mandat.html">Im Mandat ansehen</a></span>');
+      ablegen(karte, '<span>Steht als offene Aufgabe am <b>Mandat Petersen</b>, zuständig bei ' + wer + ', fällig Freitag, 21.08.2026. Der Satz von Herrn Petersen hängt als Grund daran. <a href="beratung-mandat.html">Im Mandat ansehen</a></span>');
       kartenStand();
     },
     'ansehen': function(karte){
@@ -1018,7 +1057,7 @@ main > .bogen{animation:none;opacity:1;translate:none}
   document.querySelectorAll('[data-frueher]').forEach(function(a){
     a.addEventListener('click', function(e){
       e.preventDefault();
-      demoHinweis('In der Vorführung ist nur der Donnerstag gezeichnet.');
+      demoHinweis('In der Vorführung ist nur der Termin vom Donnerstag, 20.08.2026, gezeichnet.');
     });
   });
 

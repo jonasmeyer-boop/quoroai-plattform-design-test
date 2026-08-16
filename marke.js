@@ -1,6 +1,13 @@
 /* quoroai-plattform-design · Der Marken-Kern: eine Quelle für alle Flächen.
    Vier Farbregler + Anrede je Beratung; im Produkt kommt beides aus dem
-   Mandanten-Profil (agency_branding). Marker: MARKE-KERN-V7
+   Mandanten-Profil (agency_branding). Marker: MARKE-KERN-V8
+
+   V8: Die vierte Beispielmarke war „currily" samt echtem Logo aus dem Repo
+   `currily-investmentplattform`. CLAUDE.md trennt dieses Projekt strikt von
+   jenem — nichts von dort gehört hierher. An ihrer Stelle steht jetzt eine
+   frei erfundene Beratung (Kestner Beratung, Leipzig) mit eigenem Namen,
+   eigenen Farben und einem Logo als Data-URI, damit sie keine fremde
+   Bilddatei braucht.
 
    V4: Jede Marke trägt ihre Anbieterkennzeichnung (`recht`). Sie ist kein
    Design-Regler, sondern eine Pflichtangabe: Impressum und Datenschutz der
@@ -23,10 +30,32 @@
    die Vorführung weiter, ruht sie, und mit ihrer Marke gilt sie wieder. */
 window.Marke = (function () {
   'use strict';
+
+  /* Ein Logo als Datei-freie Sehprobe. Es zeigt den logo_url-Platz: trägt
+     eine Beratung ein Logo ein, tritt der geschriebene Name zurück
+     (data-logo-versteckt) und das Bild steht an seiner Stelle. Als Data-URI,
+     damit die erfundene Beispielmarke keine Bilddatei ins Repo zieht. Die
+     Schrift darin ist bewusst die Systemschrift: ein Logo bringt seine
+     eigene mit, und die Kundenflächen sollen an dieser Stelle NICHT die
+     Schrift der Plattform durchdrücken. */
+  function logoDatei(name, farbe) {
+    return 'data:image/svg+xml,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 372 72">' +
+      '<rect x="2" y="8" width="56" height="56" rx="17" fill="' + farbe + '"/>' +
+      '<path d="M20 47 L30 33 L38 40 L46 25" fill="none" stroke="#ffffff" stroke-width="5" ' +
+      'stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<text x="74" y="49" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" ' +
+      'font-size="34" font-weight="700" letter-spacing="-1" fill="#1a1512">' + name +
+      '<tspan fill="' + farbe + '" font-weight="500"> Beratung</tspan></text></svg>');
+  }
+
   var MARKEN = [
     {name: 'Nordholm & Partner',  anrede: 'du',  blau: '#2b5fe3', stift: '#1d46c9', tinte: '#10131a', papier: '#fafaf7',
      recht: {anschrift: 'Nordholm & Partner Unternehmensberatung GmbH\nGroße Elbstraße 145\n22767 Hamburg',
-             vertretungRolle: 'Geschäftsführung', vertretung: 'Dr. Anna Vogelsang, Jens Brandt', telefon: '+49 40 5544120',
+             /* Jens Nordholm, nicht „Jens Brandt": die Beratung trägt seinen
+                Namen, und lage.js führt ihn als Partner. Zwei Namen für
+                dieselbe Person standen bis 2026-08-16 nebeneinander. */
+             vertretungRolle: 'Geschäftsführung', vertretung: 'Dr. Anna Vogelsang, Jens Nordholm', telefon: '+49 40 5544120',
              mail: 'kontakt@nordholm-partner.de', register: 'Amtsgericht Hamburg, HRB 148920',
              ust: 'DE812345678', aufsicht: 'Der Hamburgische Beauftragte für Datenschutz und Informationsfreiheit'}},
     {name: 'Waldmann Consulting', anrede: 'sie', blau: '#0e7a5a', stift: '#0a5f46', tinte: '#101613', papier: '#f8faf7',
@@ -39,12 +68,18 @@ window.Marke = (function () {
              vertretungRolle: 'Persönlich haftender Gesellschafter', vertretung: 'Friedrich Steinbach', telefon: '+49 89 2420380',
              mail: 'kanzlei@steinbach-cie.de', register: 'Amtsgericht München, HRA 96140',
              ust: 'DE165920873', aufsicht: 'Bayerisches Landesamt für Datenschutzaufsicht'}},
-    /* echtes Logo als Sehprobe (Jonas, 2026-08-12) — zeigt den logo_url-Platz */
-    {name: 'currily',             anrede: 'du',  blau: '#7047EA', stift: '#5636b8', tinte: '#081B4A', papier: '#fbfafd', logo: 'bilder/currily-logo.svg',
-     recht: {anschrift: 'currily GmbH\nFriedrichstraße 68\n10117 Berlin',
-             vertretungRolle: 'Geschäftsführung', vertretung: 'Lena Kortmann', telefon: '+49 30 20889140',
-             mail: 'hallo@currily.de', register: 'Amtsgericht Berlin-Charlottenburg, HRB 231470',
-             ust: 'DE347118206', aufsicht: 'Berliner Beauftragte für Datenschutz und Informationsfreiheit'}}
+    /* Die Marke mit Logo — zeigt den logo_url-Platz. Sie ist frei erfunden
+       wie die drei darüber: Name, Farben und Logo gehören keinem echten
+       Unternehmen. Hier stand bis 2026-08-16 „currily" mit dem echten Logo
+       aus `currily-investmentplattform`. Das war ein Verstoß gegen die
+       Projektregel in CLAUDE.md — dieses Projekt ist von jenem strikt
+       getrennt, und nichts von dort gehört hierher. */
+    {name: 'Kestner Beratung',    anrede: 'du',  blau: '#a35c15', stift: '#7d4410', tinte: '#1a1512', papier: '#fbfaf7',
+     logo: logoDatei('Kestner', '#a35c15'),
+     recht: {anschrift: 'Kestner Beratung GmbH\nKäthe-Kollwitz-Straße 84\n04109 Leipzig',
+             vertretungRolle: 'Geschäftsführung', vertretung: 'Ines Kestner', telefon: '+49 341 3390260',
+             mail: 'kontakt@kestner-beratung.de', register: 'Amtsgericht Leipzig, HRB 32180',
+             ust: 'DE289140577', aufsicht: 'Sächsische Datenschutz- und Transparenzbeauftragte'}}
   ];
   var idx = 0;
   try { idx = parseInt(sessionStorage.getItem('marke') || '0', 10); } catch (e) {}

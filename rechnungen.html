@@ -6,9 +6,28 @@
 <title>Dein Berater – Rechnungen</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Rechnungen: Liste, Beleg, PDF · Marker: RECHNUNGEN-V7
+/* quoroai-plattform-design · Rechnungen: Liste, Beleg, Druck · Marker: RECHNUNGEN-V10
    (V6: kein Mittelpunkt als Trenner.)
-   V7 (Issue #58): das Kopfband ist bis zur Unterkante deckend. */
+   V7 (Issue #58): das Kopfband ist bis zur Unterkante deckend.
+   V8 (Issue #53/#54): Die Rechnung folgt dem Beratungsvertrag statt ihm zu
+   widersprechen. Der Vertrag in blaetter.js sagt: eine monatliche Pauschale von
+   2.400,00 € netto, alle Stunden abgegolten; die interne Honorar-Kalkulation
+   rechnet damit (2.400 − 1.715 = 685 Deckungsbeitrag, 28,5 %). Also steht auf
+   der Rechnung eine Zeile: die Pauschale, 2.400,00 € + 456,00 € USt =
+   2.856,00 € brutto. Die frühere Fassung wies 8,0 Std. zu 1.520,00 € einzeln
+   aus und stellte 480,00 € Pauschale daneben (netto 2.000,00 €, brutto
+   2.380,00 €) — das war die Abrechnung nach Aufwand und passte zu keinem der
+   beiden Blätter. 2.380,00 € kam sonst nirgends im Entwurf vor.
+   Dazu die Pflichtangaben (§ 14 UStG): Aussteller aus marke.js, Empfänger,
+   USt-IdNr. beider Seiten, Leistungszeitraum, Fälligkeit, Bankverbindung mit
+   Verwendungszweck. Der Zustand wird gegen das Heute gerechnet, nicht behauptet.
+   Der Knopf druckt wirklich (window.print) — der Browser bietet dort „Als PDF
+   sichern"; die frühere Textdatei war ein gebrochenes Versprechen.
+   V9: Das „Heute" kommt aus der Lage (lage.js) und nicht mehr aus einem
+   eigenen `HEUTE = '2026-08-14'`. Dieselbe Fläche stempelte im Gespräch jede
+   Zeile mit „heute, 18.08." und sagte im Beleg „Heute ist der 14. August
+   2026" — zwei Tage in einer Vorführung. Wie lange eine Frist durch ist,
+   rechnet jetzt Lage.frist(), statt dass eine Zahl dasteht. */
 @font-face{font-family:'Manrope';src:url('schriften/manrope.woff2') format('woff2');font-weight:200 800;font-display:swap}
 @font-face{font-family:'Caveat';src:url('schriften/caveat.woff2') format('woff2');font-weight:400 700;font-display:swap}
 :root{
@@ -60,14 +79,19 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
 .rechnung:hover{border-color:var(--blau);translate:0 -1px}
 .rechnung .nr{font-size:15px;font-weight:800;letter-spacing:-.01em}
 .rechnung .datum{font-size:12.5px;color:var(--grau);margin-top:2px}
-.rechnung .betrag{margin-left:auto;font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+/* Betrag und Zeichen bleiben zusammen: der Wert trägt ein geschütztes
+   Leerzeichen vor dem €, dazu nowrap. Vorher stand das € allein in der
+   nächsten Zeile, sobald es eng wurde (Ärger 19). */
+.rechnung .betrag{margin-left:auto;font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.rechnung .betrag small{display:block;font-size:11px;font-weight:600;color:var(--grau);white-space:nowrap}
 .rechnung .status{
   flex-shrink:0;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap;
   color:var(--grau);background:rgba(16,19,26,.05);
 }
 .rechnung .status.offen{color:#a06008;background:rgba(178,109,10,.12)}
+.rechnung .status.ueberfaellig{color:#fff;background:#a8341f}
 .rechnung .status.bezahlt{color:var(--blau);background:color-mix(in srgb, var(--blau) 10%, transparent)}
-.fuss{font-size:12.5px;color:var(--grau);margin-top:28px}
+.fuss{font-size:12.5px;color:var(--grau);margin-top:28px;max-width:62ch}
 
 /* Beleg-Blick */
 #beleg-blick{
@@ -88,19 +112,44 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
 #beleg-blick.offen .bogen{translate:none;scale:none}
 #beleg-blick .b-titel{font-size:clamp(22px,3.4vw,30px);font-weight:800;letter-spacing:-.03em}
 #beleg-blick .b-meta{font-size:13px;color:var(--grau);margin-top:4px;padding-bottom:18px;border-bottom:1px solid var(--linie)}
+/* Wer stellt, wer zahlt — ohne das ist es keine Rechnung */
+#beleg-blick .parteien{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:18px}
+#beleg-blick .parteien h3{font-size:11px;font-weight:800;color:var(--grau);letter-spacing:.02em}
+#beleg-blick .parteien p{font-size:13px;line-height:1.5;margin-top:4px;white-space:pre-line}
+#beleg-blick .b-zeitraum{
+  margin-top:18px;padding:12px 14px;border-radius:12px;
+  background:color-mix(in srgb, var(--blau) 5%, transparent);font-size:13.5px;
+}
+#beleg-blick .b-zeitraum a{color:var(--blau);font-weight:700}
 #beleg-blick table{width:100%;border-collapse:collapse;margin-top:16px;font-size:14.5px}
 #beleg-blick th{text-align:left;font-size:12px;color:var(--grau);font-weight:700;padding:6px 0;border-bottom:1px solid var(--linie)}
 #beleg-blick th:last-child,#beleg-blick td:last-child{text-align:right}
 #beleg-blick td{padding:10px 0;border-bottom:0.5px solid var(--linie);font-variant-numeric:tabular-nums;vertical-align:top}
 #beleg-blick td .p-wer{font-size:12px;color:var(--grau)}
-#beleg-blick .summen{margin-top:14px;display:flex;flex-direction:column;gap:5px;align-items:flex-end;font-size:14px}
+#beleg-blick .summen{margin-top:14px;display:flex;flex-direction:column;gap:5px;align-items:flex-end;font-size:14px;font-variant-numeric:tabular-nums}
+/* Kein nowrap auf der ganzen Zeile: bei 390 px schöbe „Rechnungsbetrag brutto
+   2.856,00 €" den Bogen auf. Der Betrag hält sich selbst zusammen — im Text
+   steht ein geschütztes Leerzeichen vor dem €. */
+#beleg-blick .summen span{text-align:right}
 #beleg-blick .summen .gesamt{font-size:18px;font-weight:800;color:var(--blau);border-top:1.5px solid var(--tinte);padding-top:8px;margin-top:4px}
+#beleg-blick .b-zahlung{margin-top:18px;font-size:13.5px;font-weight:700}
+#beleg-blick .b-zahlung.spaet{color:#a8341f}
+#beleg-blick .bank{
+  margin-top:12px;padding:14px 16px;border-radius:12px;border:0.5px solid var(--linie);
+  background:color-mix(in srgb, var(--tinte) 3%, transparent);
+}
+#beleg-blick .bank h3{font-size:11px;font-weight:800;color:var(--grau);letter-spacing:.02em}
+#beleg-blick .bank dl{margin-top:6px;display:grid;grid-template-columns:auto 1fr;gap:3px 14px;font-size:13px}
+#beleg-blick .bank dt{color:var(--grau)}
+#beleg-blick .bank dd{font-weight:700;font-variant-numeric:tabular-nums}
 #beleg-blick .b-aktion{margin-top:24px}
 #beleg-blick .b-aktion button{
-  padding:9px 18px;border-radius:999px;border:0.5px solid var(--linie);
-  background:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:border-color .2s,color .2s;
+  padding:11px 20px;border-radius:999px;border:0.5px solid var(--linie);
+  background:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:border-color .2s,color .2s;
 }
 #beleg-blick .b-aktion button:hover{border-color:var(--blau);color:var(--blau)}
+#beleg-blick .b-aktion .wie{font-size:12px;color:var(--grau);margin-top:8px}
+#beleg-blick .b-fuss{font-size:12px;color:var(--grau);margin-top:16px}
 #beleg-zu{
   position:fixed;top:16px;right:max(24px,calc((100vw - 640px)/2));z-index:25;
   padding:10px 18px;border-radius:999px;border:0.5px solid var(--linie);
@@ -111,10 +160,33 @@ body.beleg-offen{overflow:hidden}
 @media (max-width:700px){
   nav .wortmarke small{display:none}
   .rechnung{flex-wrap:wrap}
-  .rechnung .betrag{margin-left:0}
+  .rechnung .betrag{margin-left:0;text-align:left}
   #beleg-blick .bogen{margin:64px 12px 80px;padding:28px 22px 26px}
+  #beleg-blick .parteien{grid-template-columns:1fr;gap:14px}
+}
+/* Drucken heißt hier wirklich drucken: der aufgeschlagene Beleg allein, ohne
+   Kopfband, Liste und Knöpfe. Im Druckfenster wählt man „Als PDF sichern" —
+   das ist das PDF, das der Knopf verspricht. Ist kein Beleg offen, druckt die
+   Seite ganz normal ihre Liste. */
+@media print{
+  body.beleg-offen{overflow:visible;background:#fff}
+  body.beleg-offen nav,
+  body.beleg-offen main,
+  body.beleg-offen #beleg-zu,
+  body.beleg-offen #beleg-blick .b-aktion{display:none!important}
+  body.beleg-offen #beleg-blick{
+    position:static;opacity:1;overflow:visible;background:none;
+    backdrop-filter:none;-webkit-backdrop-filter:none;
+  }
+  body.beleg-offen #beleg-blick .bogen{
+    margin:0;max-width:none;box-shadow:none;border-radius:0;padding:0;
+    translate:none;scale:none;
+  }
 }
 </style>
+<!-- lage.js bringt window.Lage: das eine „Heute" des Entwurfs und das Rechnen
+     mit Tagesabständen. Muss vor allem anderen stehen, was daraus liest. -->
+<script src="lage.js"></script>
 <script src="marke.js"></script>
 </head>
 <body>
@@ -126,15 +198,20 @@ body.beleg-offen{overflow:hidden}
 <main>
   <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
   <h1>Rechnungen</h1>
-  <p class="unter">Jede gestellte Rechnung, mit Beleg und PDF.</p>
+  <p class="unter">Jede gestellte Rechnung, zum Ansehen, Prüfen und Ausdrucken.</p>
   <div class="zeilen" id="liste"></div>
-  <p class="fuss" data-du="Fragen zu einer Rechnung? Sag es deinem Berater — er kennt jede Position." data-sie="Fragen zu einer Rechnung? Sagen Sie es Ihrem Berater — er kennt jede Position.">Fragen zu einer Rechnung? Sag es deinem Berater — er kennt jede Position.</p>
+  <p class="fuss" data-du="Alle Beträge in Euro. Abgerechnet wird die monatliche Pauschale aus dem Beratungsvertrag, 2.400,00 € netto — sie deckt jede Stunde ab. Fragen zu einer Rechnung? Sag es deinem Berater, er kennt jede Position." data-sie="Alle Beträge in Euro. Abgerechnet wird die monatliche Pauschale aus dem Beratungsvertrag, 2.400,00 € netto — sie deckt jede Stunde ab. Fragen zu einer Rechnung? Sagen Sie es Ihrem Berater, er kennt jede Position.">Alle Beträge in Euro. Abgerechnet wird die monatliche Pauschale aus dem Beratungsvertrag, 2.400,00 € netto — sie deckt jede Stunde ab. Fragen zu einer Rechnung? Sag es deinem Berater, er kennt jede Position.</p>
 </main>
 
 <div id="beleg-blick" aria-hidden="true">
   <article class="bogen" role="dialog" aria-modal="true" aria-label="Rechnungsbeleg">
     <div class="b-titel"></div>
     <div class="b-meta"></div>
+    <div class="parteien">
+      <div><h3>Rechnung von</h3><p class="b-von"></p></div>
+      <div><h3>Rechnung an</h3><p class="b-an"></p></div>
+    </div>
+    <p class="b-zeitraum"></p>
     <table>
       <thead><tr><th>Position</th><th>Betrag</th></tr></thead>
       <tbody></tbody>
@@ -144,7 +221,22 @@ body.beleg-offen{overflow:hidden}
       <span class="steuer"></span>
       <span class="gesamt"></span>
     </div>
-    <div class="b-aktion"><button type="button" id="pdf">↓ Als PDF</button></div>
+    <p class="b-zahlung"></p>
+    <div class="bank">
+      <h3>Bankverbindung</h3>
+      <dl>
+        <dt>Empfänger</dt><dd class="k-inhaber"></dd>
+        <dt>IBAN</dt><dd class="k-iban"></dd>
+        <dt>BIC</dt><dd class="k-bic"></dd>
+        <dt>Bank</dt><dd class="k-bank"></dd>
+        <dt>Verwendungszweck</dt><dd class="k-zweck"></dd>
+      </dl>
+    </div>
+    <div class="b-aktion">
+      <button type="button" id="pdf">Rechnung drucken oder als PDF sichern</button>
+      <p class="wie" data-du="Im Druckfenster deines Browsers wählst du als Drucker „Als PDF sichern“." data-sie="Im Druckfenster Ihres Browsers wählen Sie als Drucker „Als PDF sichern“.">Im Druckfenster deines Browsers wählst du als Drucker „Als PDF sichern“.</p>
+    </div>
+    <p class="b-fuss">Vorführung mit Demo-Daten.</p>
   </article>
 </div>
 <button id="beleg-zu" type="button" hidden>Schließen</button>
@@ -172,30 +264,119 @@ body.beleg-offen{overflow:hidden}
     p.style.strokeDashoffset = 0;
   }
 
+  /* Das „Heute" dieses Entwurfs kommt aus der Lage (lage.js) — Dienstag, der
+     18. August 2026. Es hier abzuschreiben war der Weg, auf dem dieselbe
+     Vorführung zwei verschiedene Tage bekommen hat. */
+  var Lage = window.Lage;
+  var HEUTE = Lage.heuteISO();
+
+  /* Zahl und Zeichen bleiben zusammen (geschütztes Leerzeichen, Ärger 19). */
+  function euro(zahl){ return zahl + ' €'; }
+
+  /* Die Rechnung des Kunden. Der Empfänger ist derselbe wie in der Akte der
+     Beratung (blaetter.js, beratung-rechnungen.html): Petersen Stahlbau. */
+  var EMPFAENGER = {
+    name: 'Petersen Stahlbau GmbH',
+    anschrift: 'Brookweg 14\n26123 Oldenburg',
+    ust: 'USt-IdNr. DE812457733'
+  };
+
+  /* Die Bankverbindung gehört der Beratung, nicht quoroAI — sie steht darum
+     je Beispielmarke da, wie die Anbieterkennzeichnung in marke.js. Im Produkt
+     ist das eine Spalte am Mandanten, gleich neben `recht`. */
+  var BANKEN = {
+    'Nordholm & Partner':  {iban: 'DE05 2005 0550 0123 4567 89', bic: 'HANSDEHH0XX', bank: 'Hanseatische Bank, Hamburg'},
+    'Waldmann Consulting': {iban: 'DE73 3005 0110 0044 2871 60', bic: 'DUSSDEDDXXX', bank: 'Stadtsparkasse Düsseldorf'},
+    'Steinbach & Cie.':    {iban: 'DE78 7015 0000 0038 2914 55', bic: 'SSKMDEMMXXX', bank: 'Stadtsparkasse München'},
+    'Kestner Beratung':    {iban: 'DE49 8605 5592 0038 4471 20', bic: 'WELADE8LXXX', bank: 'Sparkasse Leipzig'}
+  };
+
+  /* Eine Zeile je Rechnung: die Pauschale aus dem Beratungsvertrag
+     (blaetter.js, Ziffer 2) — 2.400,00 € netto, 456,00 € USt, 2.856,00 €
+     brutto. Auslagen sind das Einzige, was danebentreten darf; der Vertrag
+     rechnet sie ausdrücklich gesondert ab.
+     `monat` zeigt auf den Leistungsnachweis, damit sich Rechnung und Stunden
+     gegeneinander halten lassen. */
   var RECHNUNGEN = [
-    {nr: 'RE-2026-084', datum: '1. August 2026', ziel: 'zahlbar bis 15. August', status: 'offen',
+    {nr: 'RE-2026-084', datum: '1. August 2026',
+     zeitraum: '1. bis 31. Juli 2026', monat: 'Juli 2026', monatId: '2026-07',
+     faellig: '11. August 2026', faelligISO: '2026-08-11', bezahlt: null,
      posten: [
-       {was: 'Beratung Preis und Marge, Juli', wer: 'Dr. Anna Vogelsang, 8,0 Std.', betrag: '1.520,00 €'},
-       {was: 'Benchmark-Auswertung Metallzulieferer', wer: 'Pauschale', betrag: '480,00 €'}
-     ], netto: '2.000,00 €', steuer: '380,00 €', gesamt: '2.380,00 €'},
-    {nr: 'RE-2026-071', datum: '1. Juli 2026', ziel: 'bezahlt am 9. Juli', status: 'bezahlt',
+       {was: 'Betriebswirtschaftliche Begleitung, Juli 2026',
+        wer: 'Monatliche Pauschale nach Beratungsvertrag Ziffer 2, alle Stunden abgegolten',
+        betrag: '2.400,00'}
+     ], netto: '2.400,00', steuer: '456,00', gesamt: '2.856,00'},
+    {nr: 'RE-2026-071', datum: '1. Juli 2026',
+     zeitraum: '1. bis 30. Juni 2026', monat: 'Juni 2026', monatId: '2026-06',
+     faellig: '11. Juli 2026', faelligISO: '2026-07-11', bezahlt: '9. Juli 2026',
      posten: [
-       {was: 'Beratung Jahresabschluss, Juni', wer: 'J. Brandt, 6,5 Std.', betrag: '1.105,00 €'}
-     ], netto: '1.105,00 €', steuer: '209,95 €', gesamt: '1.314,95 €'},
-    {nr: 'RE-2026-058', datum: '1. Juni 2026', ziel: 'bezahlt am 12. Juni', status: 'bezahlt',
+       {was: 'Betriebswirtschaftliche Begleitung, Juni 2026',
+        wer: 'Monatliche Pauschale nach Beratungsvertrag Ziffer 2, alle Stunden abgegolten',
+        betrag: '2.400,00'}
+     ], netto: '2.400,00', steuer: '456,00', gesamt: '2.856,00'},
+    {nr: 'RE-2026-058', datum: '1. Juni 2026',
+     zeitraum: '1. bis 31. Mai 2026', monat: 'Mai 2026', monatId: '2026-05',
+     faellig: '11. Juni 2026', faelligISO: '2026-06-11', bezahlt: '10. Juni 2026',
      posten: [
-       {was: 'Laufende Beratung, Mai', wer: 'Dr. Anna Vogelsang, 5,0 Std.', betrag: '950,00 €'},
-       {was: 'Unterlagen-Aufbereitung Akte', wer: 'Pauschale', betrag: '150,00 €'}
-     ], netto: '1.100,00 €', steuer: '209,00 €', gesamt: '1.309,00 €'}
+       {was: 'Betriebswirtschaftliche Begleitung, Mai 2026',
+        wer: 'Monatliche Pauschale nach Beratungsvertrag Ziffer 2, alle Stunden abgegolten',
+        betrag: '2.400,00'},
+       {was: 'Auslage: Branchenspiegel Metallzulieferer 2025',
+        wer: 'Bezogen am 19. Mai 2026, Beleg liegt vor',
+        betrag: '150,00'}
+     ], netto: '2.550,00', steuer: '484,50', gesamt: '3.034,50'}
   ];
+
+  /* Der Zustand wird gerechnet, nicht behauptet: eine Rechnung, deren Frist
+     vorbei ist, steht nicht weiter auf „offen" (Ärger 18). */
+  function zustand(r){
+    if (r.bezahlt) return 'bezahlt';
+    return r.faelligISO < HEUTE ? 'ueberfaellig' : 'offen';
+  }
+  function zustandWort(z){
+    return z === 'bezahlt' ? 'bezahlt' : (z === 'ueberfaellig' ? 'überfällig' : 'offen');
+  }
+  function zeile2(r){
+    var z = zustand(r);
+    if (z === 'bezahlt') return 'Rechnung vom ' + r.datum + ', bezahlt am ' + r.bezahlt;
+    if (z === 'ueberfaellig') return 'Rechnung vom ' + r.datum + ', fällig war der ' + r.faellig;
+    return 'Rechnung vom ' + r.datum + ', zahlbar bis ' + r.faellig;
+  }
 
   var blick = document.getElementById('beleg-blick');
   var zu = document.getElementById('beleg-zu');
   var offen = null;
+  var daten = (Marke.daten || {});
+  var recht = daten.recht || {};
+  var markenName = daten.name || 'Nordholm & Partner';
+  var konto = BANKEN[markenName] || BANKEN['Nordholm & Partner'];
+
   function oeffne(r){
     offen = r;
+    var z = zustand(r);
     blick.querySelector('.b-titel').textContent = 'Rechnung ' + r.nr;
-    blick.querySelector('.b-meta').textContent = r.datum + ', ' + r.ziel;
+    blick.querySelector('.b-meta').textContent = 'Rechnungsdatum ' + r.datum;
+
+    /* Aussteller: die Beratung, wie sie in marke.js steht. quoroAI steht auf
+       dieser Rechnung nirgends — es ist die Rechnung der Beratung. Die
+       Anschrift beginnt dort schon mit dem vollen Firmennamen; den Markennamen
+       davor zu setzen, schriebe ihn zweimal untereinander. */
+    var von = [];
+    if (recht.anschrift) von.push(recht.anschrift); else von.push(markenName);
+    if (recht.ust) von.push('USt-IdNr. ' + recht.ust);
+    if (recht.register) von.push(recht.register);
+    blick.querySelector('.b-von').textContent = von.join('\n');
+    blick.querySelector('.b-an').textContent =
+      EMPFAENGER.name + '\n' + EMPFAENGER.anschrift + '\n' + EMPFAENGER.ust;
+
+    var zr = blick.querySelector('.b-zeitraum');
+    zr.innerHTML = '';
+    zr.appendChild(document.createTextNode('Leistungszeitraum ' + r.zeitraum + '. '));
+    var a = document.createElement('a');
+    a.href = 'leistungen.html#' + r.monatId;
+    a.textContent = 'Die Stunden aus ' + r.monat + ' ansehen';
+    zr.appendChild(a);
+
     var tb = blick.querySelector('tbody');
     tb.innerHTML = '';
     r.posten.forEach(function(po){
@@ -203,23 +384,50 @@ body.beleg-offen{overflow:hidden}
       tr.innerHTML = '<td><div class="p-was"></div><div class="p-wer"></div></td><td></td>';
       tr.querySelector('.p-was').textContent = po.was;
       tr.querySelector('.p-wer').textContent = po.wer;
-      tr.lastElementChild.textContent = po.betrag;
+      tr.lastElementChild.textContent = euro(po.betrag);
       tb.appendChild(tr);
     });
-    blick.querySelector('.netto').textContent = 'Netto ' + r.netto;
-    blick.querySelector('.steuer').textContent = '19 % USt. ' + r.steuer;
-    blick.querySelector('.gesamt').textContent = r.gesamt;
+    blick.querySelector('.netto').textContent = 'Summe netto ' + euro(r.netto);
+    blick.querySelector('.steuer').textContent = 'zuzüglich 19 % Umsatzsteuer ' + euro(r.steuer);
+    blick.querySelector('.gesamt').textContent = 'Rechnungsbetrag brutto ' + euro(r.gesamt);
+
+    var zahl = blick.querySelector('.b-zahlung');
+    zahl.classList.toggle('spaet', z === 'ueberfaellig');
+    if (z === 'bezahlt') {
+      zahl.textContent = 'Bezahlt am ' + r.bezahlt + '. Es ist nichts mehr offen.';
+    } else if (z === 'ueberfaellig') {
+      /* Wie lange die Frist durch ist, wird gerechnet — vorher stand hier ein
+         zweites „Heute" im Klartext. */
+      zahl.textContent = 'Fällig war der ' + r.faellig + ', ' + Lage.frist(r.faelligISO).text +
+                         '. Der Betrag ist noch offen.';
+    } else {
+      zahl.textContent = 'Zahlbar ohne Abzug bis ' + r.faellig + '.';
+    }
+
+    var bank = blick.querySelector('.bank');
+    bank.hidden = (z === 'bezahlt');
+    bank.querySelector('.k-inhaber').textContent = markenName;
+    bank.querySelector('.k-iban').textContent = konto.iban;
+    bank.querySelector('.k-bic').textContent = konto.bic;
+    bank.querySelector('.k-bank').textContent = konto.bank;
+    bank.querySelector('.k-zweck').textContent = r.nr;
+
     blick.classList.add('offen');
     blick.setAttribute('aria-hidden', 'false');
     blick.scrollTop = 0;
     zu.hidden = false;
     document.body.classList.add('beleg-offen');
+    /* Die Nummer in die Adresse, damit ein Verweis auf genau diesen Beleg
+       zeigen kann. Über file:// verbietet mancher Browser das — dann eben nicht. */
+    try { if (location.hash.slice(1) !== r.nr) history.replaceState(null, '', '#' + r.nr); } catch (e) {}
   }
   function schliesse(){
     blick.classList.remove('offen');
     blick.setAttribute('aria-hidden', 'true');
     zu.hidden = true;
+    offen = null;
     document.body.classList.remove('beleg-offen');
+    try { if (location.hash) history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
   }
   zu.addEventListener('click', schliesse);
   blick.addEventListener('click', function(e){
@@ -228,16 +436,12 @@ body.beleg-offen{overflow:hidden}
   window.addEventListener('keydown', function(e){
     if (e.key === 'Escape' && blick.classList.contains('offen')) schliesse();
   });
+  /* Der Knopf hielt sein Versprechen nicht: er hieß „Als PDF" und lud eine
+     Textdatei (Ärger 20). Jetzt druckt er wirklich — im Druckfenster steht
+     „Als PDF sichern", und was herauskommt, ist der Beleg. */
   document.getElementById('pdf').addEventListener('click', function(){
     if (!offen) return;
-    var zeilen = ['Rechnung ' + offen.nr, offen.datum + ', ' + offen.ziel, ''];
-    offen.posten.forEach(function(po){ zeilen.push(po.was + ' (' + po.wer + '): ' + po.betrag); });
-    zeilen.push('', 'Netto ' + offen.netto, '19 % USt. ' + offen.steuer, 'Gesamt ' + offen.gesamt, '', '— Vorführung, Demo-Daten; im Produkt ein echtes PDF');
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([zeilen.join('\n')], {type: 'text/plain'}));
-    a.download = offen.nr + '.txt';
-    a.click();
-    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+    window.print();
   });
 
   var liste = document.getElementById('liste');
@@ -245,16 +449,35 @@ body.beleg-offen{overflow:hidden}
     var z = document.createElement('button');
     z.type = 'button';
     z.className = 'rechnung';
-    z.innerHTML = '<span><span class="nr"></span><br><span class="datum"></span></span><span class="status"></span><span class="betrag"></span>';
+    z.innerHTML = '<span><span class="nr"></span><br><span class="datum"></span></span>' +
+                  '<span class="status"></span>' +
+                  '<span class="betrag"></span>';
     z.querySelector('.nr').textContent = r.nr;
-    z.querySelector('.datum').textContent = r.datum + ', ' + r.ziel;
+    z.querySelector('.datum').textContent = zeile2(r);
     var st = z.querySelector('.status');
-    st.textContent = r.status;
-    st.classList.add(r.status);
-    z.querySelector('.betrag').textContent = r.gesamt;
+    var stand = zustand(r);
+    st.textContent = zustandWort(stand);
+    st.classList.add(stand);
+    var be = z.querySelector('.betrag');
+    be.textContent = euro(r.gesamt);
+    var klein = document.createElement('small');
+    klein.textContent = 'brutto, für ' + r.monat;
+    be.appendChild(klein);
     z.addEventListener('click', function(){ oeffne(r); });
     liste.appendChild(z);
   });
+
+  /* Ein Verweis wie rechnungen.html#RE-2026-084 schlägt den Beleg gleich auf —
+     so kommt der Leistungsnachweis zu seiner Rechnung zurück. */
+  function ausHash(){
+    var nr = decodeURIComponent(location.hash.slice(1));
+    if (!nr) return;
+    for (var i = 0; i < RECHNUNGEN.length; i++) {
+      if (RECHNUNGEN[i].nr === nr) { oeffne(RECHNUNGEN[i]); return; }
+    }
+  }
+  ausHash();
+  window.addEventListener('hashchange', ausHash);
 })();
 </script>
 <script src="rechtsfuss.js"></script>

@@ -9,7 +9,22 @@
 /* quoroai-plattform-design · Übersicht: die Akte als Cockpit, der Chat als Eingangstür
    V27 (Issue #58): Kopfband deckend, Sprungziele halten Abstand zum Band, und
    der Vorführungs-Schalter steht am Telefon im Fluss statt über dem Text.
-   Marker: UEBERSICHT-V27 (das wöchentliche Briefing hat eine Zeile und einen
+   V28 (Issue #57): die Glocke schreibt keine eigene Liste mehr — Meldungen und
+   Zeiten kommen aus der Lage (lage.js), aus der auch das Gespräch liest.
+   Termine und Meldungen stehen datiert.
+   V29 (Issue #51 und #59): jedes Tippziel misst am Telefon mindestens 44
+   Pixel, und an jeder Zahl steht der Kreis, über den sie zählt.
+   V30 (Reste der Nutzerprüfung): Die 20.550 € tragen den Kreis — es sind die
+   Forderungen seiner eigenen Kunden an IHN, nicht die Rechnung seiner Beratung
+   an ihn — und ein Datum statt „seit 9 Tagen". Die 30,4 % heißen beim vollen
+   Namen „Rohertragsmarge" (die des Kunden; die 28,5 % Marge der Beratung am
+   Mandat sind etwas anderes und stehen nie auf einer Kundenfläche).
+   V31 (Welle 3, Denkfehler 4): „ab Woche 6 wirksam" und „Woche 6, im Oktober"
+   standen ohne Anfang da. Der Fahrplan zählt ab der Freigabe des Preismodells
+   (erbeten bis Freitag, den 04.09.2026), Woche 1 beginnt am 07.09.2026 und
+   Woche 6 am 12.10.2026 — hier stehen jetzt die Daten, dieselben wie in
+   beratung-mandat.html.
+   Marker: UEBERSICHT-V31 (das wöchentliche Briefing hat eine Zeile und einen
    Glocken-Eintrag, Häppchen E3; V26 aus dem Review: Überschrift und Titel der
    Zeile folgen der Anrede der Marke, wie alle Nachbarn)
    (V22: die Vorschläge des ersten Tages sind wortgleich mit denen im Gespräch —
@@ -104,7 +119,12 @@ nav::after{
 nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
 nav .wortmarke .marke-logo{height:26px;width:auto;display:block}
 nav .wortmarke [data-marke-name]{display:block}
-nav .wortmarke .marke-wechsel{cursor:pointer;pointer-events:auto;display:inline-block}
+/* Kein eigenes `display` hier: die Zeile ist `small` und wird schmal
+   ausgeblendet (unten, 700px). Mit `display:inline-block` an dieser Stelle
+   gewann sie mit zwei Klassen gegen `nav .wortmarke small{display:none}` und
+   stand am Telefon doch da — als 18px hohes Tippziel quer unter dem Namen
+   (Issue #51, gemessen bei 390: 17,6 × 190). */
+nav .wortmarke .marke-wechsel{cursor:pointer;pointer-events:auto}
 nav .wortmarke .marke-wechsel:hover{color:var(--blau)}
 nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
 nav .griffe{display:flex;align-items:center;gap:8px;pointer-events:auto}
@@ -264,8 +284,10 @@ section{margin-top:52px}
 .kopfzeile a{font-size:13px;font-weight:700;color:var(--blau);text-decoration:none}
 .kopfzeile a:hover{text-decoration:underline}
 /* Am Finger ist ein Wort von 21 Pixeln Höhe kein Ziel — die Zeile daneben
-   bekommt Fingerhöhe, ohne im Bild größer zu werden. */
-@media (pointer:coarse){
+   bekommt Fingerhöhe, ohne im Bild größer zu werden. Die übrigen Fingermaße
+   stehen am Dateiende; dieser Block bleibt HIER, weil der 620er weiter unten
+   die Kopfzeile umbricht und dabei wieder linksbündig ausrichten muss. */
+@media (pointer:coarse),(max-width:700px){
   /* Eine 44px hohe Inline-Flex-Zeile hat ihre Grundlinie in der Mitte — auf
      baseline ausgerichtet schöbe sie jede Überschrift der Seite nach unten.
      Deshalb richtet sich die Kopfzeile am Finger mittig aus. */
@@ -421,6 +443,32 @@ section{margin-top:52px}
   .doppel{grid-template-columns:1fr}
   nav .wortmarke small{display:none}
 }
+
+/* ---------- Fingermaße (Issue #51) ----------
+   Gemessen bei 390 Pixeln Breite, vor dieser Änderung: Glocke 35 × 35,
+   „Abmelden" 35 × 93, „Verschieben" 35 × 108, „Neues Gespräch" 21 hoch,
+   „Beispielmarke wechseln" 18 × 190. Ein Daumen trifft darunter nicht
+   zuverlässig.
+
+   Dasselbe Muster wie im Produkt (dort UEBERSICHT-V8): auf Telefonbreite
+   44 Pixel, darüber die gewohnten Maße. Zusätzlich hängt der Block an
+   `pointer:coarse` — wer mit dem Finger bedient, tut das auch auf einem
+   breiteren Schirm, und die Fläche wächst dabei nur in der Höhe.
+
+   Der Block steht am Ende der Datei, nicht bei den Grundregeln: bei gleicher
+   Spezifität gewinnt die spätere Regel, und ein Override weiter oben sähe
+   richtig aus und wirkte nie. */
+@media (pointer:coarse),(max-width:700px){
+  /* Die Glocke kommt aus glocke.js und ist dort 35 × 35. Hier bekommt sie
+     Fingermaß; ihr Bild bleibt gleich groß, denn das Symbol darin misst
+     18px und sitzt zentriert. */
+  nav .griffe .glocke-knopf{width:44px;height:44px}
+  nav .griffe .ab,
+  .verschieben{
+    min-height:44px;padding-top:0;padding-bottom:0;
+    display:inline-flex;align-items:center;justify-content:center;
+  }
+}
 </style>
 <script src="marke.js"></script>
 </head>
@@ -498,7 +546,7 @@ section{margin-top:52px}
       <h2 data-du="Von deinem KI-Berater" data-sie="Von Ihrem KI-Berater">Von deinem KI-Berater</h2>
     </div>
     <div class="zeilen">
-      <a class="zeile" href="briefing.html"><span><span class="z-titel" data-du="Was diese Woche dich betrifft" data-sie="Was diese Woche Sie betrifft">Was diese Woche dich betrifft</span><br><span class="z-meta z-neu" data-du="Donnerstag früh. Zwei Meldungen rühren an deine Zahlen, zwölf hat er weggelassen." data-sie="Donnerstag früh. Zwei Meldungen rühren an Ihre Zahlen, zwölf hat er weggelassen.">Donnerstag früh. Zwei Meldungen rühren an deine Zahlen, zwölf hat er weggelassen.</span></span><span class="z-status">ungelesen</span></a>
+      <a class="zeile" href="briefing.html"><span><span class="z-titel" data-du="Was diese Woche dich betrifft" data-sie="Was diese Woche Sie betrifft">Was diese Woche dich betrifft</span><br><span class="z-meta z-neu" data-du="Heute früh, Dienstag, 18.08. Von vierzehn Meldungen dieser Woche rühren zwei an deine Zahlen, zwölf hat er weggelassen." data-sie="Heute früh, Dienstag, 18.08. Von vierzehn Meldungen dieser Woche rühren zwei an Ihre Zahlen, zwölf hat er weggelassen.">Heute früh, Dienstag, 18.08. Von vierzehn Meldungen dieser Woche rühren zwei an deine Zahlen, zwölf hat er weggelassen.</span></span><span class="z-status">ungelesen</span></a>
     </div>
   </section>
 
@@ -507,9 +555,18 @@ section{margin-top:52px}
       <h2 data-du="Aus deinen Gesprächen" data-sie="Aus Ihren Gesprächen">Aus deinen Gesprächen</h2>
     </div>
     <div class="reihe">
-      <div class="karte" data-frage="Was bringt mir das Preismodell?"><div class="wert blau">+38.000 €</div><div class="label">Preismodell, rechnerisch im Jahr</div><div class="delta">ab Woche 6 wirksam</div><div class="quelle">aus „Was bringt mir das Preismodell?"</div></div>
-      <div class="karte" data-frage="Warum schrumpft meine Marge?"><div class="wert">30,4 %</div><div class="label">Marge heute</div><div class="delta amber">fällt seit April</div><div class="quelle">aus „Warum schrumpft meine Marge?"</div></div>
-      <div class="karte" data-frage="Wie läuft mein Geschäft?"><div class="wert">20.550 €</div><div class="label">offene Forderungen</div><div class="delta amber">eine Rechnung seit 9 Tagen</div><div class="quelle">aus „Wie läuft mein Geschäft?"</div></div>
+      <!-- An jeder Zahl steht der Kreis, über den sie zählt (Issue #59). Ohne
+           ihn stand hier „offene Forderungen, eine Rechnung seit 9 Tagen"
+           neben „Rechnungen, eine offen" — zwei Sätze, die dasselbe zu sagen
+           schienen und zwei völlig verschiedene Rechnungen meinten: die, die
+           seine Kunden IHM schulden, und die, die er seiner Beratung
+           schuldet. -->
+      <div class="karte" data-frage="Was bringt mir das Preismodell?"><div class="wert blau">+38.000 €</div><div class="label">Preismodell, rechnerisch im Jahr, über alle C-Kunden</div><div class="delta">wirksam ab dem 12.10.2026</div><div class="quelle">aus „Was bringt mir das Preismodell?"</div></div>
+      <!-- „Marge" allein war zweideutig: 30,4 % ist die Rohertragsmarge des
+           Kunden, nicht die 28,5 %, die seine Beratung an dem Mandat verdient
+           (die sieht er ohnehin nie). Deshalb steht hier der volle Name. -->
+      <div class="karte" data-frage="Warum schrumpft meine Marge?"><div class="wert">30,4 %</div><div class="label" data-du="deine Rohertragsmarge heute, über dein ganzes Geschäft" data-sie="Ihre Rohertragsmarge heute, über Ihr ganzes Geschäft">deine Rohertragsmarge heute, über dein ganzes Geschäft</div><div class="delta amber">fällt seit April, 5,8 Punkte unter dem Jahr 2025</div><div class="quelle">aus „Warum schrumpft meine Marge?"</div></div>
+      <div class="karte" data-frage="Wie läuft mein Geschäft?"><div class="wert">20.550 €</div><div class="label" data-du="offene Forderungen deiner Kunden an dich" data-sie="offene Forderungen Ihrer Kunden an Sie">offene Forderungen deiner Kunden an dich</div><div class="delta amber">eine davon überfällig seit dem 09.08.2026</div><div class="quelle">aus „Wie läuft mein Geschäft?"</div></div>
     </div>
   </section>
 
@@ -528,13 +585,17 @@ section{margin-top:52px}
   </section>
 
   <section class="doppel">
-    <div>
+    <div id="termine">
       <div class="kopfzeile"><h2>Termine</h2></div>
       <div class="zeilen">
+        <!-- In Zeitfolge, wie überall: der nächste zuerst. Der Donnerstag stand
+             hier über dem heutigen Dienstag, weil er der Termin MIT der Beratung
+             ist — das ist eine Rangfolge, keine Zeitfolge (Issue #57). -->
+        <div class="zeile" data-lage="laufend"><div class="termin-lage"><div class="termin-blatt"><div class="tb-tag">DI</div><div class="tb-zeit">14:30</div></div><div><div class="termin-wann">heute, Dienstag, 18.08., 14:30–15:00</div><div class="termin-mit">Jahresgespräch mit dem Steuerbüro</div></div></div><span class="z-status">vor Ort</span></div>
         <!-- Nur der Termin MIT der Beratung lässt sich hier verschieben — beim
              Steuerbüro hätte der Knopf nichts, an das er sich wenden könnte. -->
         <div class="zeile termin" id="termin-beratung">
-          <div class="termin-lage"><div class="termin-blatt"><div class="tb-tag" data-t-tag>DO</div><div class="tb-zeit" data-t-zeit>10:00</div></div><div><div class="termin-wann" data-t-wann>Donnerstag, 10:00–11:00</div><div class="termin-mit">Preis und Marge mit Dr. Anna Vogelsang</div></div></div>
+          <div class="termin-lage"><div class="termin-blatt"><div class="tb-tag" data-t-tag>DO</div><div class="tb-zeit" data-t-zeit>10:00</div></div><div><div class="termin-wann" data-t-wann>Donnerstag, 20.08., 10:00–11:00</div><div class="termin-mit">Preis und Marge mit Dr. Anna Vogelsang</div></div></div>
           <div class="termin-griffe">
             <span class="z-status geteilt">Videocall</span>
             <button class="verschieben" type="button" id="verschieben-auf">Verschieben</button>
@@ -543,9 +604,9 @@ section{margin-top:52px}
         <div class="verschiebe-blatt" id="verschiebe-blatt" hidden>
           <div class="vb-frage" data-du="Wann passt es dir besser?" data-sie="Wann passt es Ihnen besser?">Wann passt es dir besser?</div>
           <div class="vb-fenster" role="group" aria-label="Freie Zeiten der Beratung">
-            <button type="button" data-tag="MI" data-zeit="14:00" data-wann="Mittwoch, 14:00–15:00">Mittwoch, 14:00</button>
-            <button type="button" data-tag="DO" data-zeit="15:00" data-wann="Donnerstag, 15:00–16:00">Donnerstag, 15:00</button>
-            <button type="button" data-tag="FR" data-zeit="10:00" data-wann="Freitag, 10:00–11:00">Freitag, 10:00</button>
+            <button type="button" data-tag="MI" data-zeit="14:00" data-wann="Mittwoch, 19.08., 14:00–15:00">Mittwoch, 14:00</button>
+            <button type="button" data-tag="DO" data-zeit="15:00" data-wann="Donnerstag, 20.08., 15:00–16:00">Donnerstag, 15:00</button>
+            <button type="button" data-tag="FR" data-zeit="10:00" data-wann="Freitag, 21.08., 10:00–11:00">Freitag, 10:00</button>
           </div>
           <div class="vb-hilfe" data-du="Diese Zeiten sind bei Dr. Anna Vogelsang frei. Passt keine, schreib es dazu." data-sie="Diese Zeiten sind bei Dr. Anna Vogelsang frei. Passt keine, schreiben Sie es dazu.">Diese Zeiten sind bei Dr. Anna Vogelsang frei. Passt keine, schreib es dazu.</div>
           <label class="vb-label" for="vb-grund" data-du="Grund, wenn du magst" data-sie="Grund, wenn Sie mögen">Grund, wenn du magst</label>
@@ -555,13 +616,12 @@ section{margin-top:52px}
             <button class="vb-ab" type="button" id="vb-ab">Abbrechen</button>
           </div>
         </div>
-        <div class="zeile" data-lage="laufend"><div class="termin-lage"><div class="termin-blatt"><div class="tb-tag">DI</div><div class="tb-zeit">14:30</div></div><div><div class="termin-wann">Dienstag, 14:30–15:00</div><div class="termin-mit">Jahresgespräch mit dem Steuerbüro</div></div></div><span class="z-status">vor Ort</span></div>
       </div>
     </div>
     <div data-lage="laufend">
       <div class="kopfzeile"><h2>Anfragen</h2></div>
       <div class="zeilen">
-        <div class="zeile" data-lage="laufend"><span><span class="z-titel">Gespräch mit einem Menschen</span><br><span class="z-meta">An Dr. Anna Vogelsang, Wunschfenster Freitag, 9:00</span></span><span class="z-status offen">liegt vor</span></div>
+        <div class="zeile" data-lage="laufend"><span><span class="z-titel">Gespräch mit einem Menschen</span><br><span class="z-meta">An Dr. Anna Vogelsang, Wunschfenster Freitag, 21.08., 9:00</span></span><span class="z-status offen">liegt vor</span></div>
       </div>
     </div>
   </section>
@@ -569,7 +629,10 @@ section{margin-top:52px}
   <section data-lage="laufend">
     <div class="kopfzeile">
       <h2>Unterlagen</h2>
-      <a href="unterlagen.html">Alle durchsuchen</a>
+      <!-- Zwei von fünf stehen hier. Wie viele es insgesamt sind, sagt der
+           Griff, sonst hält der Kunde zwei für alles (Issue #59). Fünf ist
+           der Bestand in unterlagen.html im laufenden Mandat. -->
+      <a href="unterlagen.html">Alle fünf durchsuchen</a>
     </div>
     <div class="zeilen">
       <a class="zeile" href="unterlagen.html"><div class="mit-blatt"><div class="blatt"></div><span><span class="z-titel">Preismodell Benchmark</span><br><span class="z-meta">12 Seiten, gestern, Fassung 1</span></span></div><span class="z-status geteilt">neu</span></a>
@@ -579,9 +642,16 @@ section{margin-top:52px}
 
   <section data-lage="laufend">
     <div class="kopfzeile"><h2>Zusammenarbeit</h2></div>
+    <!-- Beide Zahlen sind nachgerechnet, nicht behauptet: die 14,2 Std. sind
+         die Summe der Posten des Augusts in leistungen.html (9,2 Preis und
+         Marge, 5,0 Jahresabschluss). Die Rechnung ist RE-2026-084 über
+         2.856,00 €, fällig war der 11.08.2026 — heute ist der 18.08., also
+         überfällig, wie rechnungen.html es selbst rechnet. „eine offen" stand
+         hier neben „offene Forderungen 20.550 €" und meinte etwas anderes
+         (Issue #59, Ärger 13). -->
     <div class="fuss-links">
-      <a href="leistungen.html">Leistungsnachweis<small>14,2 Std. im August</small></a>
-      <a href="rechnungen.html">Rechnungen<small>eine offen</small></a>
+      <a href="leistungen.html">Leistungsnachweis<small>14,2 Std. im August, aus zwei Mandaten</small></a>
+      <a href="rechnungen.html">Rechnungen<small>eine von drei überfällig, 2.856,00 €</small></a>
     </div>
   </section>
 </main>
@@ -597,6 +667,7 @@ section{margin-top:52px}
   </div>
 </div>
 
+<script src="lage.js"></script>
 <script src="glocke.js"></script>
 <script src="bitten.js"></script>
 <script>
@@ -618,7 +689,7 @@ section{margin-top:52px}
     document.querySelectorAll('[data-lage="laufend"]').forEach(function(el){ el.hidden = true; });
     document.querySelector('.doppel').classList.add('einzeln');
   }
-  var terminTag = ersterTag ? 'der Dienstag' : 'der Donnerstag';
+  var terminTag = 'der Donnerstag, 20.08.';
   function zufall(a, b){ return a + Math.random() * (b - a); }
   /* Der Stift zieht seinen Anstrich, die Karten belichten gestaffelt */
   var svg = document.querySelector('.anstrich');
@@ -794,21 +865,26 @@ section{margin-top:52px}
       var frei = st === 'erledigt', fragt = st === 'rueckfrage';
       return {
         satz: frei
-          ? Marke.rede('Freigegeben. Dr. Anna Vogelsang schneidet jetzt die Staffeln — ab September stellst du um, ab Woche 6 rechnet es sich.',
-                       'Freigegeben. Dr. Anna Vogelsang schneidet jetzt die Staffeln — ab September stellen Sie um, ab Woche 6 rechnet es sich.')
+          ? Marke.rede('Freigegeben. Dr. Anna Vogelsang schneidet jetzt die Staffeln — ab dem 07.09.2026 stellst du um, ab dem 12.10.2026 rechnet es sich.',
+                       'Freigegeben. Dr. Anna Vogelsang schneidet jetzt die Staffeln — ab dem 07.09.2026 stellen Sie um, ab dem 12.10.2026 rechnet es sich.')
           : fragt
           ? Marke.rede('Wir sind beim Preismodell. Deine Rückfrage liegt bei Dr. Anna Vogelsang; sobald sie geantwortet hat, entscheidest du.',
                        'Wir sind beim Preismodell. Ihre Rückfrage liegt bei Dr. Anna Vogelsang; sobald sie geantwortet hat, entscheiden Sie.')
-          : Marke.rede('Wir sind beim Preismodell. Es liegt bei dir — sobald du freigibst, schneidet Dr. Anna Vogelsang die Staffeln und lässt deine Preisliste neu rechnen.',
-                       'Wir sind beim Preismodell. Es liegt bei Ihnen — sobald Sie freigeben, schneidet Dr. Anna Vogelsang die Staffeln und lässt Ihre Preisliste neu rechnen.'),
+          : Marke.rede('Wir sind beim Preismodell. Es liegt bei dir — sobald du freigibst, schneidet Dr. Anna Vogelsang die Staffeln und lässt deine Preisliste neu rechnen. Gibst du bis Freitag, dem 04.09.2026 frei, gilt der neue Preis ab dem 12.10.2026.',
+                       'Wir sind beim Preismodell. Es liegt bei Ihnen — sobald Sie freigeben, schneidet Dr. Anna Vogelsang die Staffeln und lässt Ihre Preisliste neu rechnen. Geben Sie bis Freitag, dem 04.09.2026 frei, gilt der neue Preis ab dem 12.10.2026.'),
         stationen: [
           {name: 'Analyse', stand: 'geschafft', wann: 'im Juli geschafft'},
           {name: 'Preismodell', stand: 'jetzt',
            wann: frei ? Marke.rede('liegt bei deiner Beratung', 'liegt bei Ihrer Beratung')
                : fragt ? Marke.rede('deine Rückfrage läuft', 'Ihre Rückfrage läuft')
                : Marke.rede('liegt bei dir', 'liegt bei Ihnen')},
-          {name: 'Staffeln umsetzen', wann: 'ab September'},
-          {name: 'Wirksam', wann: 'Woche 6, im Oktober'}
+          /* Denkfehler 4 der Nutzerprüfung: „Woche 6, im Oktober" stand ohne
+             Anfang da — nirgends stand, wann Woche 1 beginnt. Der Fahrplan
+             zählt ab der Freigabe des Preismodells (erbeten bis Freitag, den
+             04.09.2026); Woche 1 beginnt dann am 07.09.2026 und Woche 6 am
+             12.10.2026. Dieselben Daten trägt beratung-mandat.html. */
+          {name: 'Staffeln umsetzen', wann: 'ab dem 07.09.2026'},
+          {name: 'Wirksam', wann: 'ab dem 12.10.2026'}
         ]
       };
     }
@@ -849,8 +925,8 @@ section{margin-top:52px}
     var brief = document.getElementById('brief');
     brief.hidden = false;
     document.getElementById('brief-text').textContent = Marke.rede(
-      'Ich habe deine Akte angelegt und drei Dinge notiert, die ich von dir brauche. Sobald deine Zahlen da sind, rechnet mein KI-Berater über Nacht — meine erste Einschätzung findest du am nächsten Morgen hier. Alles Weitere klären wir am Dienstag.',
-      'Ich habe Ihre Akte angelegt und drei Dinge notiert, die ich von Ihnen brauche. Sobald Ihre Zahlen da sind, rechnet mein KI-Berater über Nacht — meine erste Einschätzung finden Sie am nächsten Morgen hier. Alles Weitere klären wir am Dienstag.');
+      'Ich habe deine Akte angelegt und drei Dinge notiert, die ich von dir brauche. Sobald deine Zahlen da sind, rechnet mein KI-Berater über Nacht — meine erste Einschätzung findest du am nächsten Morgen hier. Alles Weitere klären wir am Donnerstag, 20.08.',
+      'Ich habe Ihre Akte angelegt und drei Dinge notiert, die ich von Ihnen brauche. Sobald Ihre Zahlen da sind, rechnet mein KI-Berater über Nacht — meine erste Einschätzung finden Sie am nächsten Morgen hier. Alles Weitere klären wir am Donnerstag, 20.08.');
     var beiWem = (Marke.daten && Marke.daten.name) || 'deiner Beratung';
     document.getElementById('brief-wer').textContent = Marke.rede(
       'Dr. Anna Vogelsang, deine Beraterin bei ' + beiWem,
@@ -871,48 +947,34 @@ section{margin-top:52px}
     });
     /* Der einzige Termin, den es am ersten Tag gibt: das Kennenlernen. */
     var t = document.getElementById('termin-beratung');
-    t.querySelector('[data-t-tag]').textContent = 'DI';
+    t.querySelector('[data-t-tag]').textContent = 'DO';
     t.querySelector('[data-t-zeit]').textContent = '11:00';
-    t.querySelector('[data-t-wann]').textContent = 'Dienstag, 11:00–12:00';
+    t.querySelector('[data-t-wann]').textContent = 'Donnerstag, 20.08., 11:00–12:00';
     t.querySelector('.termin-mit').textContent = 'Kennenlernen mit Dr. Anna Vogelsang';
   }
 
-  /* Die Glocke ist ein Baustein (glocke.js): Neuigkeiten führen zu ihrem Abschnitt */
-  Glocke.baue({eintraege: ersterTag ? [
-    {titel: Marke.rede('Dein Zugang ist da', 'Ihr Zugang ist da'),
-     text: Marke.rede('Dr. Anna Vogelsang hat deine Akte angelegt.', 'Dr. Anna Vogelsang hat Ihre Akte angelegt.'),
-     zeit: 'gerade eben', neu: true,
-     tue: function(){ document.getElementById('brief').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'center'}); }},
-    /* Ohne Zahl, und das mit Absicht: die Glocke berichtet, was passiert ist,
-       nicht was gerade gilt. Eine Zahl darin wäre entweder eingefroren oder
-       müsste die Glocke bei jeder erledigten Bitte neu bauen — und würde sie
-       dem Kunden unter der Hand zuklappen. Wie viele es sind, sagt der
-       Abschnitt, zu dem dieser Eintrag führt. */
-    {titel: Marke.rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'),
-     text: 'Damit die Analyse anlaufen kann.',
-     zeit: 'gerade eben', neu: true,
-     tue: function(){ document.getElementById('zuliefern').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'start'}); }},
-    {titel: Marke.rede('Dein Kennenlern-Termin steht', 'Ihr Kennenlern-Termin steht'),
-     text: 'Dienstag, 11:00 mit Dr. Anna Vogelsang.', zeit: 'vor 10 Minuten', neu: true,
-     tue: function(){ springe('Termine'); }}
-  ] : [
-    /* Häppchen E3: das Briefing meldet sich hier, nicht per Mail. Es führt zu
-       seiner Fläche, nicht zu einem Postfach. */
-    {titel: Marke.rede('Dein Briefing liegt da', 'Ihr Briefing liegt da'),
-     text: Marke.rede('Zwei Meldungen rühren diese Woche an deine Zahlen.', 'Zwei Meldungen rühren diese Woche an Ihre Zahlen.'),
-     zeit: 'heute, 7:00', neu: true,
-     tue: function(){ location.href = 'briefing.html'; }},
-    {titel: 'Dr. Anna Vogelsang hat geschrieben',
-     text: 'In „Warum schrumpft meine Marge?" — sie liest seit gestern mit.',
-     zeit: 'vor 5 Minuten', neu: true,
-     tue: function(){ geheZuGespraech('Warum schrumpft meine Marge?', document.getElementById('zeile-marge')); }},
-    {titel: Marke.rede('Deine Beratung braucht etwas von dir', 'Ihre Beratung braucht etwas von Ihnen'),
-     text: 'Der unterschriebene Rahmenvertrag Stahl fehlt Dr. Anna Vogelsang.', zeit: 'vor 20 Minuten', neu: true,
-     tue: function(){ document.getElementById('zuliefern').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'start'}); }},
-    {titel: 'Dein Termin steht', text: 'Donnerstag, 10:00 mit Dr. Anna Vogelsang.', zeit: 'gerade eben', neu: true, tue: function(){ springe('Termine'); }},
-    {titel: 'Neues Dokument für dich', text: 'Preismodell Benchmark liegt in deinen Unterlagen.', zeit: 'vor 2 Stunden', neu: true, tue: function(){ springe('Unterlagen'); }},
-    {titel: 'Antwort auf deine Anfrage', text: 'Das Jahresgespräch ist bestätigt.', zeit: 'gestern', neu: false, tue: function(){ springe('Anfragen'); }}
-  ]});
+  /* Die Glocke ist ein Baustein (glocke.js), und ihre Einträge stehen in der
+     Lage — derselben Quelle, aus der auch das Gespräch liest (Issue #57).
+     Hier steht nur noch, wohin ein Ziel auf DIESER Fläche führt. Vorher
+     schrieben Übersicht und Gespräch zwei Listen ab: „Dr. Anna Vogelsang hat
+     geschrieben" gab es nur hier, und die Zahl an der Glocke war dort eine
+     andere.
+     Ohne Zahlen in den Texten, und das mit Absicht: die Glocke berichtet, was
+     passiert ist, nicht was gerade gilt. Wie viele Bitten offen sind, sagt
+     der Abschnitt, zu dem der Eintrag führt. */
+  Glocke.baue({
+    lage: ersterTag ? 'erster-tag' : 'laufend',
+    rede: Marke.rede,
+    ziele: {
+      brief: function(){ document.getElementById('brief').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'center'}); },
+      zuliefern: function(){ document.getElementById('zuliefern').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block: 'start'}); },
+      briefing: function(){ location.href = 'briefing.html'; },
+      'gespraech-marge': function(){ geheZuGespraech('Warum schrumpft meine Marge?', document.getElementById('zeile-marge')); },
+      termine: function(){ springe('Termine'); },
+      anfragen: function(){ springe(ersterTag ? 'Termine' : 'Anfragen'); },
+      unterlagen: function(){ springe('Unterlagen'); }
+    }
+  });
 
   /* ---------- Verschieben (Häppchen C2) ----------
      Der Kunde fragt, die Beratung entscheidet. Deshalb ändert sich hier

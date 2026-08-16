@@ -52,7 +52,10 @@
    Im Markup stand weiter „Diese Fläche entsteht gerade." — der Satz, den
    die Entscheidung vom 2026-08-16 abgeschafft hat. Sichtbar war er nie, im
    Vorlesebaum schon.
-   Marker: BERATUNG-AKTE-V16 (die Krume kommt aus einer Quelle) */
+   V17 (Welle 3): Petersens Mandat läuft seit Mai 2026, nicht seit März 2025.
+   Der Beratungsvertrag beginnt am 1. Mai 2026 (blaetter.js, Ziffer 3), und
+   beratung-marge.html rechnet das Mandat über genau vier Monatspauschalen.
+   Marker: BERATUNG-AKTE-V17 (das Mandat beginnt mit seinem Vertrag) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -358,7 +361,11 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
     petersen: {
       name: 'Petersen Stahlbau',
-      stand: 'Petersen Stahlbau, Mandat seit März 2025, betreut von Dr. Anna Vogelsang',
+      /* „seit März 2025" war ein Rest aus der Aufwands-Zeit: der
+         Beratungsvertrag (blaetter.js, Ziffer 3) läuft vom 1. Mai 2026 bis
+         zum 30. April 2027, und beratung-marge.html rechnet dieses Mandat
+         seit Mai 2026 über vier Monatspauschalen. */
+      stand: 'Petersen Stahlbau, Mandat seit Mai 2026, betreut von Dr. Anna Vogelsang',
       zustand: {art: 'aktiv', wort: 'Mandat aktiv'},
       stamm: [
         ['Firma', 'Petersen Stahlbau GmbH, Stahlbau, 46 Mitarbeitende'],

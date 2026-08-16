@@ -39,7 +39,11 @@
    Rückweg um eine Stufe da.
    V3 (Issue #58): nach dem Einsetzen beginnen die Spaltenkarten über dem
    klebenden Abschluss-Balken, statt darunter zu liegen.
-   Marker: BERATUNG-IMPORT-V3 (die Krume kommt aus einer Quelle) */
+   V4 (Paket A4, Issue #56): Der letzte Schritt fragt nach. „Übernehmen" legt
+   Mandate an, und das nimmt niemand zurück — also nennt die Rückfrage vorher
+   noch einmal die Zahl der neuen Mandate, die ergänzten und die Zeilen, die
+   draußen bleiben (sicher.js). Alles davor bleibt ohne Rückfrage.
+   Marker: BERATUNG-IMPORT-V4 (der letzte Schritt fragt nach) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select,textarea{font-family:inherit}
@@ -282,6 +286,7 @@ h2.abschnitt + .was{font-size:14px;color:var(--nebel-600);margin-top:6px;max-wid
 }
 </style>
 <script src="krume.js"></script>
+<script src="sicher.js"></script>
 </head>
 <body class="quoro"
       data-krume-raum="zentrale" data-krume-hier="Kundenliste einlesen"
@@ -1104,9 +1109,34 @@ h2.abschnitt + .was{font-size:14px;color:var(--nebel-600);margin-top:6px;max-wid
     einfuegenEl.value = '';
     zeigeLage(1);
   });
+  /* Der letzte Schritt ist der einzige, der etwas anlegt — und er lässt sich
+     nicht zurücknehmen. Also sagt die Rückfrage vorher noch einmal, wie viele
+     Mandate es sind und was mit dem Rest geschieht (sicher.js, Issue #56).
+     Alles davor bleibt ohne Rückfrage: Spalten umdeuten, Zeilen draußen
+     lassen, andere Datei — davon geht nichts verloren. */
   document.getElementById('uebernehmen').addEventListener('click', function(){
-    zeigeLage(3);
-    ankunft();
+    var knopf = this;
+    if (!window.Sicher) {
+      if (window.confirm('Die Mandate jetzt in deine Beratung übernehmen? Rückgängig machen kann ich das nicht.')) { zeigeLage(3); ankunft(); }
+      return;
+    }
+    var b = bilanz();
+    var teile = [b.neu.length + (b.neu.length === 1 ? ' neues Mandat' : ' neue Mandate')];
+    if (b.ergaenzt.length) teile.push(b.ergaenzt.length + (b.ergaenzt.length === 1 ? ' bestehendes ergänzt' : ' bestehende ergänzt'));
+    Sicher.frage({
+      frage: 'Jetzt in deine Beratung übernehmen?',
+      was: teile.join(', '),
+      punkte: [
+        b.draussen ? (b.draussen === 1 ? 'Eine Zeile bleibt draußen, so wie du es oben entschieden hast.'
+                                       : b.draussen + ' Zeilen bleiben draußen, so wie du es oben entschieden hast.')
+                   : 'Alle Zeilen deiner Datei kommen mit.',
+        'Danach stehen die Mandate im Modell und zählen in jeder Auswertung mit.',
+        'Rückgängig machen kann ich das nicht.'
+      ],
+      ja: 'Übernehmen',
+      aus: knopf,
+      dann: function(){ zeigeLage(3); ankunft(); }
+    });
   });
 })();
 </script>

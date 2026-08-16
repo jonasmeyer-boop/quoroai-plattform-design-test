@@ -43,7 +43,7 @@
    V4 (Issue #58): am Telefon ist das Dock eine deckende Leiste an der Kante
    statt einer schwebenden Glaskapsel. Die Kapsel lag bei jedem Scrollstand
    über dem Text und schnitt einmal den Hauptknopf mitten im Wort ab.
-   Marker: UHR-V4 */
+   Marker: UHR-V5 */
 window.Uhr = (function () {
   'use strict';
 
@@ -79,8 +79,8 @@ window.Uhr = (function () {
     /* Was der Vormittag schon gebracht hat — damit die Fläche nicht leer
        startet und man den Wochenstand glauben kann. */
     buchungen = [
-      { id: 'v1', name: 'Cordes Logistik',   was: 'Fuhrpark und Finanzierung',      von: '8:15', bis: '9:05',  dauer: 3000, quelle: 'uhr' },
-      { id: 'v2', name: 'Petersen Stahlbau', was: 'Marge, Vorbereitung des Termins', von: '9:20', bis: '10:12', dauer: 3120, quelle: 'uhr' }
+      { id: 'v1', name: 'Cordes Logistik',   was: 'Wechselbrücken, Steuerfrage nachgelesen', von: '8:15', bis: '9:05',  dauer: 3000, quelle: 'uhr' },
+      { id: 'v2', name: 'Petersen Stahlbau', was: 'Marge, Vorbereitung des Termins', von: '8:15', bis: '9:07', dauer: 3120, quelle: 'uhr' }
     ];
     schreib(SCHLUESSEL_BUCH, buchungen);
   }

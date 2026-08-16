@@ -26,7 +26,14 @@
    Sortierungen sind bei gleichem Monat eindeutig, und angeboten wird der
    ÄLTESTE offene Monat — sonst wäre eine verworfene ältere Abrechnung nie
    wieder abzuschließen.
-   Marker: PLATTFORM-V4 */
+   V5: Der Tag kommt aus der Lage (lage.js) — Dienstag, der 18. August 2026.
+   Hier stand ein eigenes `HEUTE = '2026-08-14'` mit dem Kommentar „derselbe
+   Tag wie in den anderen Entwürfen"; seit die Lage den Tag führt, stimmte das
+   nicht mehr, und der laufende Monat war um vier Tage zu kurz. Der Tag, bis zu
+   dem gezählt wird, steht jetzt überall ausgeschrieben statt „bis heute" —
+   eine Abrechnung, die einen Zeitraum nennt, darf ihn nicht verschweigen.
+   Außerdem trifft „Abmelden" am Telefon jetzt 44 Pixel hoch (Issue #51).
+   Marker: PLATTFORM-V5 */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -51,6 +58,13 @@ nav a.vorschlaege,nav button.abmelden{
   text-decoration:none;cursor:pointer;transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover,nav button.abmelden:hover{border-color:var(--lila-600);color:var(--tinte)}
+/* Am Telefon war „Abmelden" 97 × 35 — dieselbe zu kleine Tippfläche, die
+   Issue #51 beim Namen nennt. 44 ist die Untergrenze, die ein Daumen trifft. */
+@media (pointer:coarse),(max-width:700px){
+  nav a.vorschlaege,nav button.abmelden{
+    min-height:44px;padding:0 14px;display:inline-flex;align-items:center;
+  }
+}
 #krume{
   position:fixed;top:72px;left:24px;z-index:70;
   display:inline-flex;align-items:center;gap:8px;
@@ -232,6 +246,9 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   .zeile .z-recht{gap:10px}
 }
 </style>
+<!-- lage.js bringt window.Lage: das eine „Heute" des Entwurfs und das Rechnen
+     mit Tagesabständen. Muss vor allem stehen, was daraus liest. -->
+<script src="lage.js"></script>
 </head>
 <body class="quoro">
 
@@ -250,7 +267,10 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   <div id="ansicht-liste">
     <div class="kopf">
       <h1>Abrechnung</h1>
-      <div class="stand">Was alle Beratungen uns schulden. Der laufende Monat wird bis heute gezählt, nicht bis zum Monatsende — hier steht kein Geld, das noch nicht verdient ist.</div>
+      <!-- Der Tag, bis zu dem gezählt wird, steht ausgeschrieben da: „bis
+           heute" ließ offen, welcher Tag gemeint ist, und war vier Tage
+           daneben. Er kommt aus der Lage (lage.js). -->
+      <div class="stand">Was alle Beratungen uns schulden. Der laufende Monat wird tagegenau gezählt, bis zum <span id="kopf-stichtag">18.08.2026</span> — nicht bis zum Monatsende, hier steht kein Geld, das noch nicht verdient ist.</div>
     </div>
 
     <section class="lage" aria-label="Der laufende Monat">
@@ -264,7 +284,7 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
     <h3>Beratungen</h3>
     <section class="tafel" aria-label="Alle Beratungen">
       <div class="zeilen" id="liste-beratungen"></div>
-      <div class="klein">Listenpreis je Kunde und vollem Monat: Basis 19,00 €, Standard 59,00 €, Plus 149,00 €. Davon geht der Wholesale-Rabatt ab — 25 %, ab 25 Zugängen 35 %, ab 100 Zugängen 45 %. Dazu kommt die Plattformgebühr von 149,00 € je Beratung und Monat; angebrochene Monate werden tagegenau geteilt.</div>
+      <div class="klein">Listenpreis je Kunde und vollem Monat: Basis 19,00 €, Standard 59,00 €, Plus 149,00 €. Davon geht der Mengenrabatt ab: 25 % ab dem ersten Zugang, 35 % ab 25 Zugängen, 45 % ab 100 Zugängen. Dazu kommt die Plattformgebühr von 149,00 € je Beratung und Monat; angebrochene Monate werden tagegenau geteilt.</div>
     </section>
 
     <h3>Offen</h3>
@@ -302,7 +322,11 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   };
   var STAFFEL = [{ab:0,proz:25},{ab:25,proz:35},{ab:100,proz:45}];
   var GEBUEHR = 14900;
-  var HEUTE = '2026-08-14';
+  /* Der Tag, bis zu dem der laufende Monat zählt, kommt aus der Lage
+     (lage.js): Dienstag, der 18. August 2026. Er wird überall ausgeschrieben,
+     nie als „heute" behauptet. */
+  var Lage = window.Lage;
+  var HEUTE = Lage.heuteISO();
 
   function rabattFuer(zugaenge){
     var p = 0;
@@ -346,9 +370,8 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   }
 
   /* ================= Die Welt: vier Beratungen =================
-     „Heute" ist der 14. August 2026 — derselbe Tag wie in den anderen
-     Entwürfen. Nordholm & Partner ist die Beratung, die überall sonst in
-     diesen Entwürfen arbeitet; hier ist sie eine von vieren. */
+     Nordholm & Partner ist die Beratung, die überall sonst in diesen
+     Entwürfen arbeitet; hier ist sie eine von vieren. */
   function kunde(name, tarif, seit, bis){ return {name:name, tarif:tarif, seit:seit, bis:bis||null}; }
 
   var ACKERMANN_KUNDEN = [
@@ -454,7 +477,7 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
     };
   }
 
-  /* Der laufende Monat: gezählt bis heute. */
+  /* Der laufende Monat: gezählt bis zum Tag der Lage, tagegenau. */
   function laufend(beratung){ return rechne(beratung, monatsBeginn(HEUTE), HEUTE); }
 
   /* Beim Start wird jeder Abschluss einmal gerechnet und dann eingefroren —
@@ -523,7 +546,7 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
         /* Ohne Zugänge gibt es nichts zu rabattieren — die Zeile bliebe eine
            Prozentzahl ohne Gegenstand. */
         (daten.zwischensumme > 0
-          ? '<div><dt>Wholesale-Rabatt ' + daten.rabattProzent + ' %</dt><dd>' + euro(-daten.rabatt) + '</dd></div>'
+          ? '<div><dt>Mengenrabatt ' + daten.rabattProzent + ' %</dt><dd>' + euro(-daten.rabatt) + '</dd></div>'
           : '') +
         '<div><dt>Plattformgebühr</dt><dd>' + euro(daten.gebuehr) + '</dd></div>' +
         '<div class="gesamt"><dt class="was">Zu zahlen</dt><dd>' + euro(daten.gesamt) + '</dd></div>' +
@@ -577,8 +600,8 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
             '<span class="z-recht"><span class="z-betrag">' + euro(o.abschluss.daten.gesamt) + '</span></span></a>';
         }).join('');
 
-    lageUnter.textContent = monatsLabel(monatsBeginn(HEUTE)) + ' bis heute, ' +
-      BERATUNGEN.length + ' Beratungen, ' + zugaengeWort(zugaenge);
+    lageUnter.textContent = monatsLabel(monatsBeginn(HEUTE)) + ', gezählt bis zum ' +
+      datum(HEUTE) + ', ' + BERATUNGEN.length + ' Beratungen, ' + zugaengeWort(zugaenge);
     lageOffen.className = 'offen' + (offen.length === 0 ? ' nichts' : '');
     lageOffen.innerHTML = offen.length === 0
       ? '<b>nichts offen</b>'
@@ -613,7 +636,7 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
       '<div class="meta">' + b.adresse + ', Kunde seit ' + datum(b.seit) + '</div></div>';
 
     html += '<div class="abschnitt-kopf"><h3>' + monatsLabel(monatsBeginn(HEUTE)) + '</h3>' +
-            '<span class="laeuft">läuft noch, gezählt bis ' + datum(HEUTE) + '</span></div>';
+            '<span class="laeuft">läuft noch, gezählt bis zum ' + datum(HEUTE) + '</span></div>';
     html += m ? aufstellung(m) : '<section class="tafel"><p class="leer">Keine Zahlen.</p></section>';
 
     if (offen) {
@@ -803,6 +826,8 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   document.getElementById('abmelden').addEventListener('click', function(){
     location.href = 'wurzel.html';
   });
+
+  document.getElementById('kopf-stichtag').textContent = datum(HEUTE);
 
   route();
 })();

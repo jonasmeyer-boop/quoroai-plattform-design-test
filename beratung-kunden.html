@@ -52,7 +52,26 @@
    nicht mehr vorzuschlagen: er lief am Montag, Freitag steht das Angebot.
    V8 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
-   Marker: BERATUNG-KUNDEN-V8 (die Krume kommt aus einer Quelle) */
+   V9 (Issue #59): an die Summe gehört der Kreis. Die Bilanzzeile sagt jetzt
+   „12 von 187 mit offener Forderung, zusammen 58.636 €" statt nur „58.636 €
+   offen" — im Modell stehen 8.806,00 € offen, und beide Zahlen sind richtig,
+   weil sie über Verschiedenes zählen. Der Kopf sagt das in einem Satz.
+   MTS ist 27 Tage still, nicht 25: seine letzte Frage steht am 22. Juli, und
+   „heute" ist der 18.08.2026 (Lage in lage.js).
+   V10 (Welle 2): Petersen ist ein Pauschalmandat, wie sein Beratungsvertrag
+   es sagt (blaetter.js, Ziffer 2) und wie es der Leistungsnachweis des Kunden
+   führt (leistungen.html). Damit fallen hier vier Zahlen: das Mandat läuft
+   seit 2026 statt 2025, die Marge der Beratung daran ist 28,5 % statt 30,4 %,
+   und offen sind 2.856,00 € — die Monatspauschale brutto — statt 6.426 €.
+   Die Modellsumme der drei offenen Forderungen fällt damit von 12.376 € auf
+   8.806,00 €, die Registersumme von 62.206 € auf 58.636 €.
+   V11: Die Fläche liest die Lage jetzt wirklich, statt sie nur im Kopf zu
+   erwähnen. „Monatspauschale seit 11 Tagen offen" war gegen den 14. August
+   gerechnet, während oben der 18. stand; die Zahl wird jetzt aus dem
+   Fälligkeitsdatum gerechnet. Und die erzeugten Register-Zeilen trugen
+   pauschal „Frist ist durch", ohne dass es eine Frist gab — jede offene
+   Rechnung hat jetzt ihr Fälligkeitsdatum und nennt es.
+   Marker: BERATUNG-KUNDEN-V11 (Petersen ist ein Pauschalmandat) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -270,6 +289,9 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
   .kunde{transition:none}
 }
 </style>
+<!-- lage.js bringt window.Lage: das eine „Heute" des Entwurfs und das Rechnen
+     mit Tagesabständen. Muss vor allem stehen, was daraus liest. -->
+<script src="lage.js"></script>
 <script src="krume.js"></script>
 </head>
 <body class="quoro"
@@ -285,7 +307,7 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
 <main>
   <div class="kopf">
     <h1>Kunden</h1>
-    <div class="stand">Das Modell bleibt der Ort, an dem die Beratung arbeitet. Diese Liste ist das Register daneben — für die Tage, an denen man einen Namen sucht und nicht ein Gebäude.</div>
+    <div class="stand">Das Modell bleibt der Ort, an dem die Beratung arbeitet. Diese Liste ist das Register daneben — für die Tage, an denen man einen Namen sucht und nicht ein Gebäude. Gezählt wird hier über alle 187 Mandate; das Modell und die fünf Auswertungen rechnen über die vier, die als Beispiel gebaut sind. Deshalb stehen dort kleinere Summen, und beide sind richtig.</div>
     <div class="tueren">
       <a class="knopf sekundaer" href="beratung-f-modell.html">Ins Modell</a>
       <a class="knopf leise" href="beratung-import.html">Liste einlesen</a>
@@ -333,7 +355,7 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
        stillen Feld darunter. -->
   <p class="treffer"
      data-hilfe-name="Die Bilanz"
-     data-hilfe="Wie viele Kunden gerade in der Liste stehen, und was bei ihnen zusammen offen ist. Beides folgt Suche und Filtern."><b id="anzahl">0</b> <span id="anzahl-wort">Kunden</span><span class="summe" id="summe"></span></p>
+     data-hilfe="Wie viele Kunden gerade in der Liste stehen, und was bei ihnen zusammen offen ist. Die Summe sagt dazu, über wie viele der gezeigten Kunden sie zählt — sonst steht hier eine Zahl, die zu keiner anderen Fläche passt. Beides folgt Suche und Filtern."><b id="anzahl">0</b> <span id="anzahl-wort">Kunden</span><span class="summe" id="summe"></span></p>
   <p class="nur-gehoert" id="ansage" role="status" aria-live="polite"></p>
 
   <div id="liste" class="liste"
@@ -357,6 +379,16 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
 (function(){
   'use strict';
 
+  /* Das „Heute" und alles Rechnen mit Tagen kommt aus der Lage (lage.js):
+     Dienstag, der 18. August 2026. Diese Fläche sagte es oben im Kopf schon,
+     trug aber 300 Zeilen tiefer „seit 11 Tagen offen" — eine Zahl, die gegen
+     einen anderen Tag gerechnet war. Getippte Tageszahlen gibt es hier
+     deshalb nicht mehr. */
+  var Lage = window.Lage;
+  /* Fälligkeit der Cordes-Monatspauschale, gestellt am 03.08.2026 mit vierzehn
+     Tagen Ziel (beratung-rechnungen.html, Beleg 2026-0086). */
+  var CORDES_FAELLIG = '2026-08-17';
+
   /* ================= Die Kunden =================
      Vier stammen aus dem Modell und tragen dessen Zahlen; der Rest ist eine
      erfundene Beratung in der Größe, die das Häppchen verlangt. Erzeugt wird
@@ -364,16 +396,25 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
      dieselbe Liste zeigen — sonst ist kein Bild mit dem nächsten vergleichbar. */
   /* Orte und Beträge kommen aus beratung-rechnungen.html — dort stehen die
      Anschriften, die auf dem Papier landen, und die drei offenen Rechnungen,
-     die das Modell mit 12.376 € zusammenzählt (6.426 + 2.677,50 + 3.272,50).
-     Zwei davon sind Raten einer Abrede, kein Aufwand. Wer
-     hier eigene Zahlen erfindet, baut zwei Wahrheiten auf einen Klickweg. */
+     die das Modell mit 8.806,00 € zusammenzählt (2.856,00 + 2.677,50 +
+     3.272,50). Alle drei sind Raten einer Abrede, kein Aufwand. Wer
+     hier eigene Zahlen erfindet, baut zwei Wahrheiten auf einen Klickweg.
+     Petersen ist seit Welle 2 ein Pauschalmandat: 2.400,00 € netto im Monat
+     seit dem 1. Mai 2026, brutto 2.856,00 €, Marge 28,5 % (Rechenweg in
+     beratung-marge.html). Die frühere Aufwands-Vorgeschichte — seit 2025,
+     30,4 % Marge, 6.426 € offen — gab es nie. */
   var AUS_DEM_MODELL = [
-    {name:'Petersen Stahlbau', branche:'Stahlbau', ort:'Oldenburg', seit:2025,
-     marge:30.4, offen:6426, still:4, zugang:'ok', modell:'petersen',
+    {name:'Petersen Stahlbau', branche:'Stahlbau', ort:'Oldenburg', seit:2026,
+     marge:28.5, offen:2856, still:4, zugang:'ok', modell:'petersen',
      klemmt:'Marge fällt, das Preismodell liegt beim Kunden'},
     {name:'Cordes Logistik', branche:'Spedition', ort:'Bremen', seit:2021,
      marge:12.1, offen:3272.50, still:0, zugang:'ok', modell:'cordes',
-     klemmt:'Steuerfrage wartet auf dich, Monatspauschale seit 11 Tagen offen'},
+     /* Die Monatspauschale von Cordes ist in beratung-rechnungen.html am
+        03.08.2026 gestellt und war am 17.08.2026 fällig. Wie weit die Frist
+        durch ist, wird gerechnet — vorher stand hier „seit 11 Tagen offen",
+        gegen einen Tag gerechnet, an dem der Entwurf nicht steht. */
+     faelligISO: CORDES_FAELLIG,
+     klemmt:'Steuerfrage wartet auf dich, Monatspauschale ' + Lage.frist(CORDES_FAELLIG).text},
     {name:'Bäckerei Freitag', branche:'Bäckerei', ort:'Wilhelmshaven', seit:2018,
      marge:31.0, offen:0, still:2, zugang:'ok', modell:'freitag',
      /* „läuft ruhig" war derselbe Satz, den auch das Modell und die Termine
@@ -381,9 +422,14 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
         offen bleibt 0, das meint offene Forderungen; unberechnet ist etwas
         anderes und steht in beratung-rechnungen.html. */
      klemmt:'Marge im Ziel, seit dem Juni nichts berechnet'},
+    /* 27 Tage, nicht 25: die letzte Frage steht im Modell am 22. Juli, und
+       „heute" ist seit der Lage (lage.js) der 18. August 2026. Die 25
+       stammten aus einem früheren Heute; zwei Zahlen für denselben Abstand
+       sind derselbe Denkfehler wie zwei Summen ohne Kreis. Der Satz nennt
+       jetzt den Tag statt der Wochen — dann muss ihn niemand nachrechnen. */
     {name:'MTS Maschinenbau', branche:'Maschinenbau', ort:'Cloppenburg', seit:2022,
-     marge:26.8, offen:2677.50, still:25, zugang:'abgelaufen', modell:'mts',
-     klemmt:'Seit drei Wochen still, Freitag liegt das Angebot auf dem Tisch'}
+     marge:26.8, offen:2677.50, still:27, zugang:'abgelaufen', modell:'mts',
+     klemmt:'Seit dem 22. Juli keine Frage, Freitag liegt das Angebot auf dem Tisch'}
   ];
 
   var STAEMME = ['Ahrens','Bergmann','Clausen','Dohrmann','Eggers','Fricke','Gerdes','Harms',
@@ -435,6 +481,7 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
   }
   function waehle(feld){ return feld[Math.floor(zufall() * feld.length)]; }
 
+  var offenZaehler = 0;
   var kunden = AUS_DEM_MODELL.slice();
   var vergeben = {};
   kunden.forEach(function(k){ vergeben[k.name] = true; });
@@ -454,9 +501,23 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
     var still = zufall() < 0.10 ? 21 + Math.floor(zufall() * 40) : Math.floor(zufall() * 15);
     var hatOffen = zufall() < 0.065;
     var zugang = zufall() < 0.022 ? 'abgelaufen' : (zufall() < 0.014 ? 'nie' : 'ok');
+    /* Eine offene Rechnung bekommt ihr Fälligkeitsdatum, und wie weit die
+       Frist durch ist, wird daraus gerechnet. Vorher stand an jeder dieser
+       Zeilen pauschal „Frist ist durch", ohne dass es irgendwo eine Frist
+       gab — beim Aufklappen hätte der Kunde nach dem Datum gefragt und
+       niemand hätte es nennen können. Ein bis vier Wochen zurück: was noch
+       läuft, klemmt nicht und gehört hier nicht her.
+       Die Folge läuft eigenständig statt über zufall(): jeder zusätzliche
+       Griff in den Zufall verschiebt die ganze Liste, und dann stimmen die
+       Zahlen im Kopf dieser Datei und in beratung-auswertungen.html nicht
+       mehr. 11 und 27 sind teilerfremd, sonst wiederholten sich drei Daten. */
+    var faellig = hatOffen
+      ? Lage.plusTage(Lage.heuteDatum(), -(1 + (offenZaehler++ * 11 + 4) % 27))
+      : null;
     var klemmt;
     if (still >= 21) klemmt = waehle(GRUENDE_STILL).replace('{t}', still);
-    else if (hatOffen) klemmt = 'Rechnung offen, Frist ist durch';
+    else if (hatOffen) klemmt = 'Rechnung offen, fällig war der ' + Lage.kurzDatum(faellig) +
+                                ', ' + Lage.frist(faellig).text;
     else if (zugang === 'abgelaufen') klemmt = 'Zugang zum Portal ist abgelaufen';
     else if (zugang === 'nie') klemmt = 'Zugang nie eingerichtet, der Kunde kommt nicht rein';
     else klemmt = waehle(GRUENDE_RUHIG);
@@ -468,6 +529,7 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
       seit: 2015 + Math.floor(zufall() * 11),
       marge: Math.round((8 + zufall() * 32) * 10) / 10,
       offen: hatOffen ? Math.round((900 + zufall() * 9000) / 6) * 6 : 0,
+      faelligISO: faellig ? Lage.iso(faellig) : null,
       still: still,
       zugang: zugang,
       klemmt: klemmt
@@ -675,10 +737,21 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
 
     setzeZahl(treffer.length);
     var offenSumme = treffer.reduce(function(s,k){ return s + k.offen; }, 0);
-    summeEl.textContent = offenSumme ? euro.format(offenSumme) + ' offen' : '';
+    /* An die Summe gehört der Kreis, über den sie zählt (Prüfung 2026-08-16,
+       Denkfehler 1). Vorher stand hier nur „58.636 € offen" — zwei Klicks vom
+       Modell entfernt, wo 8.806,00 € offen stehen. Beide Zahlen waren richtig:
+       die eine zählt über 12 der 187 Mandate, die andere über die drei
+       gestellten Rechnungen der vier Modell-Mandate. Wer den Kreis nicht
+       mitliest, hält eine der beiden für falsch. */
+    var mitOffen = treffer.reduce(function(n,k){ return n + (k.offen > 0 ? 1 : 0); }, 0);
+    var kreis = mitOffen
+      ? zahlF.format(mitOffen) + ' von ' + zahlF.format(treffer.length)
+        + ' mit offener Forderung, zusammen ' + euro.format(offenSumme)
+      : '';
+    summeEl.textContent = kreis;
     ansageEl.textContent = zahlF.format(treffer.length)
       + (treffer.length === 1 ? ' Kunde' : ' Kunden')
-      + (offenSumme ? ', ' + euro.format(offenSumme) + ' offen' : '');
+      + (kreis ? ', ' + kreis : '');
     setzeGriffZahlen(worte);
 
     var neu = document.createDocumentFragment();

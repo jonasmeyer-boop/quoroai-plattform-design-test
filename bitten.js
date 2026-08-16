@@ -41,7 +41,35 @@
    ersten Tag über Staffeln geredet, die es dort nicht gibt.
    Trägt eine Bitte ein `woran`, verlinkt die Fläche es in die Unterlagen —
    etwas freigeben, das man nirgends lesen kann, ist keine Abnahme.
-   Marker: BITTEN-V7 */
+
+   V8 (Paket A4, Issue #56): Eine Unterlage zu verschicken ist unumkehrbar —
+   ein Mensch liest sie, und Gelesenes nimmt niemand zurück. Bisher genügte
+   dafür ein Antippen im Dateifenster. Jetzt fragt sicher.js vorher nach und
+   nennt dabei beides, den Dateinamen und den Empfänger. Danach steht da, dass
+   und an wen es hinausging, und auf den Flächen (nicht im Gespräch, wo die
+   Antwort der Beratung schon im Verlauf steht) liegt eine Minute lang ein
+   „Zurücknehmen" daneben. Sicher.frage lädt bitten.js selbst nach, wenn die
+   Fläche den Baustein nicht eingebunden hat — die Rückfrage darf nicht davon
+   abhängen, welche Fläche gerade offen ist.
+   V9 (Denkfehler 4 der Nutzerprüfung, dazu Issue #53): Jede Frist trägt jetzt ihr
+   Datum. „bis Freitag" ist keine Frist, sondern eine Vermutung — wer am
+   Dienstag liest, muss nicht nachrechnen, welcher Freitag gemeint ist, und
+   „vor Woche 3" konnte niemand ausrechnen. Die Tage kommen aus der Lage
+   (lage.js), damit hier nicht wieder eine eigene Woche entsteht; bringt
+   eine Fläche den Baustein nicht mit, greift derselbe Wortlaut als fester
+   Text — ohne Datum darf keine Bitte dastehen.
+   Ebenfalls V9: Der Beratungsvertrag nennt seine Zahlen, statt sie zu
+   umschreiben. „Pauschale, Laufzeit und was drin ist — alles steht darin"
+   war eine Freigabe im Blindflug.
+   V10 (Welle 3): der Vorlauf der C-Kunden steht als zwei Daten statt als
+   Wochenzahl. „Vier Wochen Vorlauf" widersprach dem Fahrplan, der zwischen
+   „Kunden informieren" (21.09.2026) und „wirksam" (12.10.2026) drei Wochen
+   lässt. Es gelten die drei Wochen und vor allem die beiden Daten.
+   V11 (Nutzerprüfung 2026-08-16): Die Rückfrage vor dem Verschicken versprach
+   „Eine Minute lang kannst du es hier noch zurücknehmen" — auch auf der Karte
+   im Gespräch, wo es diesen Knopf bewusst nicht gibt. Der Satz sagt jetzt je
+   Fläche, was auf ihr wirklich geht.
+   Marker: BITTEN-V11 (das Versprechen gilt nur, wo der Knopf steht) */
 window.Bitten = (function () {
   'use strict';
 
@@ -78,6 +106,30 @@ window.Bitten = (function () {
     rufe(null);
   }
 
+  /* ---------- Die Tage ----------
+     Eine Frist ohne Datum wird nicht eingehalten, weil niemand sie ausrechnet.
+     Welcher Tag welches Datum trägt, weiß die Lage (lage.js) — dieselbe
+     Quelle, aus der Glocke, Woche und Zettel ihre Termine holen. Bringt die
+     Fläche sie nicht mit, steht hier dieselbe Woche als fester Wortlaut:
+     lieber doppelt geschrieben als eine Bitte ohne Datum.
+     Das Jahr steht dabei ausgeschrieben — eine Frist wird ausgedruckt,
+     abgeheftet und im Oktober noch einmal gelesen. */
+  var WOCHE = ['Montag, 17.08.2026', 'Dienstag, 18.08.2026', 'Mittwoch, 19.08.2026',
+               'Donnerstag, 20.08.2026', 'Freitag, 21.08.2026'];
+  var JAHR = '2026';
+  function tag(i) {
+    var L = window.Lage;
+    if (L && L.tage) {
+      var t = L.tage()[i];
+      if (t) return t.kurz + ', ' + t.kurzdatum + JAHR;
+    }
+    return WOCHE[i] || WOCHE[WOCHE.length - 1];
+  }
+  function heute() {
+    var L = window.Lage;
+    return tag(L && L.heute ? L.heute() : 1);
+  }
+
   /* ---------- Der Bestand ----------
      Vorführungsdaten zum Fall Petersen (Metallzulieferer), passend zu dem,
      was der Berater im Gespräch rechnet. Im Produkt kommt das vom Server.
@@ -94,7 +146,7 @@ window.Bitten = (function () {
        return rede('Ohne deine Zahlen rechne ich mit dem Branchenschnitt, und der passt auf niemanden. Mit ihnen steht meine erste Einschätzung morgen früh hier.',
                    'Ohne Ihre Zahlen rechne ich mit dem Branchenschnitt, und der passt auf niemanden. Mit ihnen steht meine erste Einschätzung morgen früh hier.');
      },
-     frist: 'am besten heute, dann steht sie morgen früh',
+     frist: function () { return 'am besten heute, ' + heute() + ' — dann steht sie morgen früh'; },
      wer: 'Dr. Anna Vogelsang',
      antwort: function () {
        return rede('Angekommen. Ich lese sie heute Abend ein und rechne über Nacht — meine erste Einschätzung liegt morgen früh in deiner Akte.',
@@ -106,17 +158,25 @@ window.Bitten = (function () {
        return rede('Marge, Wachstum und Liquidität ziehen in verschiedene Richtungen — ich kann nicht an allen dreien zuerst arbeiten. Du weißt, was dich nachts wach hält, und danach richte ich die Analyse aus.',
                    'Marge, Wachstum und Liquidität ziehen in verschiedene Richtungen — ich kann nicht an allen dreien zuerst arbeiten. Sie wissen, was Sie nachts wach hält, und danach richte ich die Analyse aus.');
      },
-     frist: 'vor unserem Kennenlern-Termin am Dienstag',
+     /* Der Kennenlern-Termin steht in der Lage: Donnerstag, 20.08., 11:00.
+        Hier stand „am Dienstag" — dieselbe Sache, zwei Tage. */
+     frist: function () { return 'vor unserem Kennenlern-Termin am ' + tag(3); },
      wer: 'Dr. Anna Vogelsang',
      platzhalter: 'Ein Satz reicht',
-     antwort: 'Notiert. Danach richte ich die Analyse aus, und am Dienstag fangen wir genau dort an.'},
+     antwort: function () { return 'Notiert. Danach richte ich die Analyse aus. Genau dort fangen wir im Kennenlern-Termin an, am ' + tag(3) + '.'; }},
     {id: 'beratungsvertrag', art: 'abnahme',
      titel: 'Den Beratungsvertrag freigeben',
+     /* Was freigegeben wird, steht hier — nicht „alles steht darin".
+        Dieselben Zahlen wie in der Zusammenfassung des Vertrags in den
+        Unterlagen (Issue #53); wer sie hier liest, findet sie dort wieder. */
+     punkte: ['Pauschale 2.400,00 € netto im Monat, mit Umsatzsteuer 2.856,00 €.',
+              'Laufzeit zwölf Monate, bis zum 30. April 2027.',
+              'Kündigungsfrist drei Monate, also bis zum 31. Januar 2027.'],
      warum: function () {
-       return rede('Pauschale, Laufzeit und was drin ist — alles steht darin. Vor deiner Freigabe arbeite ich nicht auf deine Rechnung, und der KI-Berater sieht deine Zahlen nicht.',
-                   'Pauschale, Laufzeit und was drin ist — alles steht darin. Vor Ihrer Freigabe arbeite ich nicht auf Ihre Rechnung, und der KI-Berater sieht Ihre Zahlen nicht.');
+       return rede('Vor deiner Freigabe arbeite ich nicht auf deine Rechnung, und der KI-Berater sieht deine Zahlen nicht.',
+                   'Vor Ihrer Freigabe arbeite ich nicht auf Ihre Rechnung, und der KI-Berater sieht Ihre Zahlen nicht.');
      },
-     frist: 'vor dem ersten Termin',
+     frist: function () { return 'vor dem Kennenlern-Termin am ' + tag(3); },
      wer: 'Dr. Anna Vogelsang',
      woran: 'Beratungsvertrag',
      danach: function () {
@@ -136,8 +196,8 @@ window.Bitten = (function () {
   var LAUFEND = [
     {id: 'rahmenvertrag', art: 'datei',
      titel: 'Der unterschriebene Rahmenvertrag Stahl',
-     warum: 'Meine Rechnung zum Einkauf steht auf der Fassung vom Mai. Die Preisgleitklausel endet am 30. September — steht im unterschriebenen Vertrag etwas anderes, liegt der Hebel um 21.000 € daneben.',
-     frist: 'bis Freitag, sonst rechne ich ohne',
+     warum: 'Meine Rechnung zum Einkauf steht auf der Fassung vom 12. Mai 2026. Die Preisgleitklausel endet am 30. September 2026 — steht im unterschriebenen Vertrag etwas anderes, liegt der Hebel um 21.000 € daneben.',
+     frist: function () { return 'bis ' + tag(4) + ', sonst rechne ich ohne'; },
      wer: 'Dr. Anna Vogelsang',
      antwort: function () {
        return rede('Angekommen. Ich lese den Vertrag und rechne den Einkaufshebel damit neu — das Ergebnis lege ich dir heute Abend in die Akte.',
@@ -149,17 +209,32 @@ window.Bitten = (function () {
        return rede('Die Preiserhöhung trifft die C-Kunden zuerst. Welche drei du auf keinen Fall verlieren willst, nehme ich aus der Staffel heraus — das kostet rechnerisch 4.000 € und spart dir den Ärger.',
                    'Die Preiserhöhung trifft die C-Kunden zuerst. Welche drei Sie auf keinen Fall verlieren wollen, nehme ich aus der Staffel heraus — das kostet rechnerisch 4.000 € und spart Ihnen den Ärger.');
      },
-     frist: 'vor dem Termin am Donnerstag',
+     /* Gemeint ist der Termin „Preis und Marge" aus der Lage: Donnerstag,
+        20.08., 10:00 bis 11:00 — derselbe, dessen Protokoll gezeichnet ist. */
+     frist: function () { return 'vor dem Termin am ' + tag(3) + ', 10:00'; },
      wer: 'Dr. Anna Vogelsang',
      platzhalter: 'Drei Namen reichen',
      antwort: 'Notiert. Die drei nehme ich aus der Staffel heraus und rechne die Preisliste ohne sie.'},
     {id: 'preismodell', art: 'abnahme',
      titel: 'Das neue Preismodell freigeben',
      warum: function () {
-       return rede('Mit deiner Freigabe schneide ich die Staffeln und lasse deine Preisliste neu rechnen. Vorher passiert nichts — und nach der Freigabe bekommen deine C-Kunden vier Wochen Vorlauf.',
-                   'Mit Ihrer Freigabe schneide ich die Staffeln und lasse Ihre Preisliste neu rechnen. Vorher passiert nichts — und nach der Freigabe bekommen Ihre C-Kunden vier Wochen Vorlauf.');
+       return rede('Mit deiner Freigabe schneide ich die Staffeln und lasse deine Preisliste neu rechnen. Vorher passiert nichts. Deine C-Kunden erfahren es dann am 21.09.2026, und wirksam wird der neue Preis am 12.10.2026 — drei Wochen später.',
+                   'Mit Ihrer Freigabe schneide ich die Staffeln und lasse Ihre Preisliste neu rechnen. Vorher passiert nichts. Ihre C-Kunden erfahren es dann am 21.09.2026, und wirksam wird der neue Preis am 12.10.2026 — drei Wochen später.');
      },
-     frist: 'keine Eile, aber vor Woche 3',
+     /* „vor Woche 3" konnte niemand ausrechnen: Woche 3 des Fahrplans beginnt
+        erst mit der Freigabe. Zwei Wochen sind der ehrliche Spielraum.
+
+        Hier stand bis 2026-08-16 „vier Wochen Vorlauf" für die C-Kunden, der
+        Fahrplan in beratung-mandat.html ergibt aber drei: Kunden informieren
+        in Woche 3 (ab 21.09.2026), wirksam in Woche 6 (ab 12.10.2026). Zwei
+        Zahlen für denselben Abstand, und der Kunde liest beide. Es gelten die
+        drei Wochen, denn der Fahrplan ist die Stelle, die Daten trägt und an
+        der gearbeitet wird — die „vier Wochen" waren eine runde Zahl ohne
+        Datum dahinter. Die vier Wochen aus Ziffer 3.3 des Rahmenvertrags
+        Stahl (blaetter.js) binden den Lieferanten gegenüber Petersen, nicht
+        Petersen gegenüber seinen C-Kunden. Statt der Zahl stehen jetzt die
+        beiden Daten da; wer nachzählen will, kann es. */
+     frist: 'keine Eile — bis Freitag, 04.09.2026 hat es Zeit',
      wer: 'Dr. Anna Vogelsang',
      woran: 'Preismodell Benchmark',
      antwort: 'Danke. Ich schneide die Staffeln und melde mich, sobald die neue Preisliste steht.',
@@ -205,6 +280,50 @@ window.Bitten = (function () {
 
   function wert(x) { return typeof x === 'function' ? x() : x; }
   function stand(b) { return (STAND[b.id] && STAND[b.id].stand) || 'offen'; }
+
+  /* ---------- Der Rückhalt (sicher.js) ----------
+     Die Rückfrage vor dem Verschicken ist Pflicht, auf jeder Fläche. Bindet
+     eine Fläche den Baustein nicht selbst ein, holt ihn dieser hier — sonst
+     hinge es an der Fläche, ob gefragt wird. */
+  var sicherLaeuft = null;
+  function mitSicher(fn) {
+    if (window.Sicher) { fn(window.Sicher); return; }
+    if (!sicherLaeuft) {
+      sicherLaeuft = document.createElement('script');
+      sicherLaeuft.src = 'sicher.js';
+      document.head.appendChild(sicherLaeuft);
+    }
+    var fertig = function () { fn(window.Sicher || null); };
+    sicherLaeuft.addEventListener('load', fertig, {once: true});
+    sicherLaeuft.addEventListener('error', fertig, {once: true});
+  }
+
+  /* Wie lange ein geschicktes Blatt zurückgeholt werden kann. Eine Minute ist
+     die ehrliche Grenze: danach hat die Beratung die Benachrichtigung, und ein
+     Knopf, der ein gelesenes Blatt „zurücknimmt", wäre eine Lüge. */
+  var RUECKNAHME = 60000;
+  function ruecknehmbar(b) {
+    if (b.art !== 'datei' || stand(b) !== 'erledigt') return 0;
+    var seit = STAND[b.id] && STAND[b.id].zeit;
+    if (!seit) return 0;
+    return Math.max(0, RUECKNAHME - (Date.now() - seit));
+  }
+  /* Die längste Frist unter den gerade gezeigten Bitten — danach richtet sich
+     die Tafel, wenn sie Erledigtes wegräumt. */
+  function ruecknahmeFrist(arten) {
+    var l = 0;
+    liste(arten).forEach(function (b) { l = Math.max(l, ruecknehmbar(b)); });
+    return l;
+  }
+  function nimmZurueck(id) {
+    var b = finde(id);
+    if (!b || !ruecknehmbar(b)) return;
+    delete STAND[id];
+    merke();
+    neuZeichnen();
+    document.dispatchEvent(new CustomEvent('bitte-zurueckgenommen', {detail: {id: id, art: b.art}}));
+    rufe(id);
+  }
   /* Was der Kunde eingegeben hat — sein Wortlaut, unverändert */
   function eingabe(b) { return (STAND[b.id] && STAND[b.id].eingabe) || ''; }
   /* Der Satz, der die erledigte Bitte beschreibt, entsteht beim Zeichnen.
@@ -225,6 +344,10 @@ window.Bitten = (function () {
         : rede('Freigegeben. Deine Beratung macht weiter.',
                'Freigegeben. Ihre Beratung macht weiter.');
     }
+    /* Beim Blatt gehört der Empfänger in den Satz: der Kunde hat eben in der
+       Rückfrage gelesen, wer es bekommt, und findet dieselbe Person hier
+       wieder. „Geschickt" allein ließe offen, wohin. */
+    if (b.art === 'datei') return 'Geschickt an ' + wert(b.wer) + ': ' + eingabe(b);
     return 'Geschickt: ' + eingabe(b);
   }
 
@@ -278,6 +401,11 @@ window.Bitten = (function () {
       '.bitte-titel{font-size:16px;font-weight:800;letter-spacing:-.01em;color:' + tinte + ';margin-top:4px}' +
       '.bitte.fertig .bitte-titel{color:' + grau + '}' +
       '.bitte-warum{font-size:14px;color:' + grau + ';margin-top:6px;max-width:58ch;line-height:1.55}' +
+      /* Die harten Zahlen einer Abnahme: eine Zeile je Sache, in Tinte statt
+         Grau. Wer freigibt, muss sie gelesen haben — sie stehen deshalb über
+         dem Knopf und nicht in einem Absatz Fließtext. */
+      '.bitte-punkte{list-style:none;margin:8px 0 0;padding:0;max-width:58ch}' +
+      '.bitte-punkte li{font-size:14px;color:' + tinte + ';line-height:1.5;padding:2px 0}' +
       '.bitte-woran{font-size:12.5px;color:' + grau + ';margin-top:8px}' +
       '.bitte-woran a{color:' + akzent + ';font-weight:700;text-decoration:none}' +
       '.bitte-woran a:hover{text-decoration:underline}' +
@@ -306,6 +434,10 @@ window.Bitten = (function () {
       '.bitte.wartet{border-color:' + akzent + '}' +
       '.bitte-wartet-zeile{margin-top:12px;font-size:13.5px;font-weight:700;color:' + akzent + '}' +
       '.bitte-fertig-zeile{display:flex;align-items:center;gap:12px;margin-top:12px;font-size:13.5px;color:' + grau + '}' +
+      '.bitte-zurueck{min-height:38px;padding:0 14px;border-radius:999px;border:0.5px solid ' + linie + ';' +
+        'background:#fff;font-family:inherit;font-size:13px;font-weight:700;color:' + tinte + ';cursor:pointer;' +
+        'flex-shrink:0;transition:border-color .2s ease,color .2s ease}' +
+      '@media (hover:hover){.bitte-zurueck:hover{border-color:' + akzent + ';color:' + akzent + '}}' +
       '.bitte-haken{width:26px;height:26px;flex-shrink:0}' +
       '.bitte-haken path{fill:none;stroke:' + stift + ';stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;' +
         'stroke-dasharray:40;stroke-dashoffset:40}' +
@@ -370,8 +502,26 @@ window.Bitten = (function () {
 
     if (stand(b) === 'erledigt') {
       el.classList.add('fertig');
-      el.appendChild(fertigZeile(ergebnis(b), false));
+      /* Zurücknehmen gibt es nur auf einer Fläche. Im Gespräch (inhalt ohne
+         diesen Schalter) steht die Antwort der Beratung schon im Verlauf —
+         ein Knopf, der das Blatt zurückholt, den Satz darüber aber stehen
+         lässt, wäre zwei Wahrheiten in einer Spalte. */
+      el.appendChild(fertigZeile(ergebnis(b), false, mitWoran ? b : null));
       return el;
+    }
+
+    /* Zuerst, was in der Sache steht, dann warum es an ihm hängt. Umgekehrt
+       stünde die Begründung über den Zahlen, die sie begründet. */
+    var punkte = wert(b.punkte);
+    if (punkte && punkte.length) {
+      var ul = document.createElement('ul');
+      ul.className = 'bitte-punkte';
+      punkte.forEach(function (p) {
+        var li = document.createElement('li');
+        li.textContent = wert(p);
+        ul.appendChild(li);
+      });
+      el.appendChild(ul);
     }
 
     var warum = document.createElement('p');
@@ -410,7 +560,7 @@ window.Bitten = (function () {
     return el;
   }
 
-  function fertigZeile(text, zeichnen) {
+  function fertigZeile(text, zeichnen, zurueck) {
     var zeile = document.createElement('div');
     zeile.className = 'bitte-fertig-zeile';
     zeile.setAttribute('role', 'status');
@@ -419,11 +569,38 @@ window.Bitten = (function () {
     wort.textContent = text;
     zeile.appendChild(h);
     zeile.appendChild(wort);
+    var frist = zurueck ? ruecknehmbar(zurueck) : 0;
+    if (frist) {
+      var zk = document.createElement('button');
+      zk.type = 'button';
+      zk.className = 'bitte-zurueck';
+      zk.textContent = 'Zurücknehmen';
+      zk.addEventListener('click', function () { nimmZurueck(zurueck.id); });
+      zeile.appendChild(zk);
+      /* Ist die Minute um, geht der Knopf — ein Knopf, der noch dasteht und
+         nichts mehr tut, ist schlimmer als keiner. */
+      setTimeout(function () { zk.remove(); }, frist);
+    }
     /* Der Stift zieht den Haken erst, wenn die Zeile steht — sonst läuft die
        Linie ins Leere, bevor das Auge sie findet */
     if (zeichnen) requestAnimationFrame(function () { h.classList.add('zieht'); });
     else h.classList.add('zieht');
     return zeile;
+  }
+
+  /* Was die Rückfrage über das Zurücknehmen verspricht, hängt daran, ob DIESE
+     Ausfertigung der Bitte den Knopf dazu bekommt. Die Karte im Gespräch
+     bekommt ihn absichtlich nicht (siehe inhalt): dort steht die Antwort der
+     Beratung schon im Verlauf. Sie hat es trotzdem versprochen — ein Satz,
+     den der Kunde in der Minute danach vergeblich sucht. Jetzt sagt jede
+     Fläche, was auf ihr wirklich geht. */
+  function ruecknahmeSatz(el) {
+    if (el && el.dataset && el.dataset.woran === '1') {
+      return rede('Sie liest sie sofort — gelesen ist gelesen. Eine Minute lang kannst du es hier noch zurücknehmen.',
+                  'Sie liest sie sofort — gelesen ist gelesen. Eine Minute lang können Sie es hier noch zurücknehmen.');
+    }
+    return rede('Sie liest sie sofort — gelesen ist gelesen. Von hier aus zurücknehmen kannst du sie dann nicht mehr.',
+                'Sie liest sie sofort — gelesen ist gelesen. Von hier aus zurücknehmen können Sie sie dann nicht mehr.');
   }
 
   /* Genau ein Griff je Bitte — und wo eine Rückfrage möglich sein muss,
@@ -444,7 +621,30 @@ window.Bitten = (function () {
       wahl.addEventListener('change', function () {
         var datei = wahl.files && wahl.files[0];
         if (!datei) return;
-        loese(b.id, datei.name, 'erledigt', el);
+        var name = datei.name;
+        /* Das Dateifenster ist nicht die Entscheidung, sondern die Auswahl.
+           Entschieden wird hier — mit dem Namen der Datei und dem Namen des
+           Menschen, der sie gleich liest, in derselben Frage. */
+        wahl.value = '';
+        mitSicher(function (S) {
+          /* Kommt der Baustein nicht (Datei-Aufruf ohne Server, altes
+             Fenster), fragt notfalls der Browser. Ungefragt hinausgehen darf
+             die Unterlage nie. */
+          if (!S) {
+            if (window.confirm('Diese Unterlage verschicken?\n\n' + name + '\nGeht an ' + wert(b.wer) + '.')) {
+              loese(b.id, name, 'erledigt', el);
+            }
+            return;
+          }
+          S.frage({
+            frage: 'Diese Unterlage verschicken?',
+            was: name,
+            punkte: ['Geht an ' + wert(b.wer) + '.', ruecknahmeSatz(el)],
+            ja: 'Verschicken',
+            aus: knopf,
+            dann: function () { loese(b.id, name, 'erledigt', el); }
+          });
+        });
       });
       lage.appendChild(knopf);
       lage.appendChild(wahl);
@@ -521,7 +721,7 @@ window.Bitten = (function () {
   function loese(id, eingegeben, art, herkunft) {
     var b = finde(id);
     if (!b) return;
-    STAND[id] = {stand: art || 'erledigt', eingabe: eingegeben || ''};
+    STAND[id] = {stand: art || 'erledigt', eingabe: eingegeben || '', zeit: Date.now()};
     merke();
     var text = ergebnis(b);
     /* Jede sichtbare Ausfertigung dieser Bitte legt sich hin — auf jeder
@@ -532,7 +732,7 @@ window.Bitten = (function () {
       el.classList.add(wartet ? 'wartet' : 'fertig');
       /* Bei einer Rückfrage bleibt der Grund stehen — er ist der Zusammenhang,
          in dem die Antwort der Beratung gleich ankommt. */
-      var weg = el.querySelectorAll(wartet ? '.bitte-frist, .bitte-tun' : '.bitte-warum, .bitte-frist, .bitte-tun');
+      var weg = el.querySelectorAll(wartet ? '.bitte-frist, .bitte-tun' : '.bitte-punkte, .bitte-warum, .bitte-frist, .bitte-tun');
       weg.forEach(function (x) { x.remove(); });
       if (wartet) {
         var w = document.createElement('div');
@@ -541,7 +741,7 @@ window.Bitten = (function () {
         w.textContent = text;
         el.appendChild(w);
       } else {
-        el.appendChild(fertigZeile(text, true));
+        el.appendChild(fertigZeile(text, true, el.dataset.woran === '1' ? b : null));
       }
     });
     /* Die Fläche darf antworten, und zwar dort, wo der Kunde gedrückt hat:
@@ -599,13 +799,18 @@ window.Bitten = (function () {
         return;
       }
       var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      /* Solange ein geschicktes Blatt noch zurückgeholt werden kann, bleibt
+         seine Karte stehen — sonst räumte die Tafel den einzigen Weg zurück
+         weg, anderthalb Sekunden nachdem er entstanden ist. */
+      var frist = ruecknahmeFrist(arten);
+      var warten = Math.max(reduziert ? 0 : 1500, frist ? frist + 60 : 0);
       setTimeout(function () {
         lage.querySelectorAll('.bitte.fertig').forEach(function (el) { el.style.opacity = '0'; });
         setTimeout(function () {
           male();
           if (typeof opts.aufAenderung === 'function') opts.aufAenderung(offen(arten), wartend(arten));
         }, reduziert ? 0 : 420);
-      }, reduziert ? 0 : 1500);
+      }, warten);
     });
     if (typeof opts.aufAenderung === 'function') opts.aufAenderung(offen(arten), wartend(arten));
     return {male: male};

@@ -40,7 +40,19 @@
    V4 (Issue #50): die Akten von Cordes, Freitag und MTS stehen hier neben
    der von Petersen. Ohne sie konnte ein Beleg die Akte eines anderen
    Mandanten nur benennen, nicht öffnen.
-   Marker: BLAETTER-V4 */
+   V5 (Issue #53/#54): der Beratungsvertrag nennt Zahlen statt Prosa —
+   Pauschale 2.400,00 € netto im Monat (2.856,00 € brutto), Laufzeit
+   1. Mai 2026 bis 30. April 2027, Kündigung bis 31. Januar 2027. Die
+   Zahlen sind dieselben wie in der Honorar-Kalkulation (2.400 − 1.715 =
+   685 Deckungsbeitrag, 28,5 %) und dieselben, die rechnungen.html stellt.
+   Wer hier eine Zahl ändert, ändert die Rechnung mit.
+   V6 (Welle 3): die Monatsauswertung Juli erklärt den Margenverlust wie das
+   Balkenbild des KI-Beraters — Preisdruck, Stahlpreis, Ausschuss — statt wie
+   vorher aus Stahleinkauf und Personalaufbau. Zwei Erklärungen desselben
+   Betriebs, nebeneinander aufgeschlagen, sind schlimmer als eine grobe. Und
+   die 31,4 Prozent sagen jetzt, dass sie der Monat sind und nicht das Jahr,
+   in dem 30,4 Prozent stehen.
+   Marker: BLAETTER-V6 (eine Erklärung für einen Betrieb) */
 window.Blaetter = (function () {
   'use strict';
 
@@ -52,14 +64,27 @@ window.Blaetter = (function () {
       seiten: [
         [{h: 'Monatsauswertung Juli 2026'},
          {klein: 'Petersen Stahlbau GmbH, Brookweg 14, 26123 Oldenburg. Erstellt am 4. August 2026 von {beratung}.'},
-         {p: 'Der Juli schließt mit 361.000 € Umsatz, gut vier Prozent über dem Vorjahresmonat. Der Rohertrag bleibt mit 31,4 Prozent hinter dem Vorjahr zurück; getragen hat den Monat die Menge, nicht der Preis.'},
+         {p: 'Der Juli schließt mit 361.000 € Umsatz, gut vier Prozent über dem Vorjahresmonat. Der Rohertrag bleibt mit 31,4 Prozent hinter dem Vorjahr zurück; getragen hat den Monat die Menge, nicht der Preis. Die 31,4 Prozent sind die Marge dieses einen Monats — über das laufende Jahr gerechnet liegt sie bei 30,4 Prozent, und daran wird sie sonst gemessen.'},
          {tab: [['Kennzahl', 'Juli 2026', 'Juli 2025'],
                 ['Umsatz', '361.000 €', '346.500 €'],
                 ['Rohertrag', '113.400 €', '116.200 €'],
                 ['Rohertragsmarge', '31,4 %', '33,5 %'],
                 ['Personalkosten', '141.800 €', '134.100 €'],
                 ['Betriebsergebnis', '18.900 €', '27.400 €']]},
-         {p: 'Zwei Drittel des Margenverlusts stammen aus dem Stahleinkauf, ein Drittel aus dem Personalaufbau in der Vorfertigung.'}],
+         /* Hier stand: „Zwei Drittel des Margenverlusts stammen aus dem
+            Stahleinkauf, ein Drittel aus dem Personalaufbau in der
+            Vorfertigung." Das Balkenbild des KI-Beraters, das auf allen
+            Flächen gleich lautet (gespraech.html, beratung-mitlesen.html,
+            beratung-protokoll.html), nennt drei ganz andere Treiber: 5,8
+            Punkte Verlust, davon 3,1 Preisdruck, 1,8 Stahlpreis, 0,9
+            Ausschuss — der Stahl ist knapp ein Drittel, Personal kommt gar
+            nicht vor. Wer das Blatt neben dem Gespräch aufschlug, las zwei
+            Erklärungen desselben Betriebs. Es gilt das Bild. Die 2,1 Punkte
+            dieses Monats sind in denselben Verhältnissen zerlegt, und dass
+            der Personalaufbau hier fehlt, sagt der Satz selbst — auf Seite 3
+            steht ohnehin, dass er erst ab Oktober auf die Stückkosten
+            wirkt. */
+         {p: 'Der Rückgang von 33,5 auf 31,4 Prozent, also 2,1 Punkte gegenüber dem Juli 2025, hat dieselben drei Adressen wie das Jahr: 1,1 Punkte Preisdruck, 0,7 Punkte Stahlpreis, 0,3 Punkte Ausschuss. Der Personalaufbau in der Vorfertigung steckt darin noch nicht — er wirkt erst ab Oktober auf die Stückkosten.'}],
         /* Abschnitt 2 ist die Stelle, die der KI-Berater im Gespräch zitiert —
            wortgleich. Ein Beleg, der auf eine Seite zeigt, auf der sein Satz
            nicht steht, wäre schlimmer als gar keiner. */
@@ -132,7 +157,7 @@ window.Blaetter = (function () {
       seiten: [
         [{h: 'Honorar-Kalkulation Mandat Petersen 2026'},
          {klein: 'Intern. Nicht freigegeben, nicht eingelesen.'},
-         {p: 'Grundlage der Pauschale von 2.400 € im Monat: 14 Stunden Beratung, davon 9 durch Dr. Vogelsang, sowie das KI-Kontingent von 40 Fragen.'},
+         {p: 'Grundlage der Pauschale von 2.400 € netto im Monat — auf der Rechnung 2.856 € brutto —: 14 Stunden Beratung, davon 9 durch Dr. Vogelsang, sowie das KI-Kontingent von 40 Fragen.'},
          {tab: [['Position', 'Menge', 'Kosten'],
                 ['Dr. Vogelsang, Partnerin', '9 h', '1.170 €'],
                 ['Beratung Senior', '5 h', '425 €'],
@@ -142,7 +167,7 @@ window.Blaetter = (function () {
                 ['Deckungsbeitrag', '', '685 €']]},
          {p: 'Die Marge liegt bei 28,5 Prozent und damit knapp über der Hausgrenze von 27 Prozent. Fällt der Aufwand wie im Juni auf 11 Stunden, sind es 34 Prozent.'}],
         [{h: 'Was der Kunde davon sieht'},
-         {p: 'Auf seiner Rechnung steht eine Zeile: die Pauschale. Die Zerlegung darunter ist unsere Sache und bleibt es. Auslagen werden gesondert erfasst und einzeln ausgewiesen.'},
+         {p: 'Auf seiner Rechnung steht eine Zeile: die Pauschale, 2.400,00 € netto. Die Zerlegung darunter ist unsere Sache und bleibt es. Auslagen werden gesondert erfasst und einzeln ausgewiesen.'},
          {klein: 'Freigabe an den Kunden ist ausdrücklich ausgeschlossen. Auch der KI-Berater liest dieses Blatt nicht, sonst könnte er daraus zitieren.'}]
       ]
     },
@@ -155,9 +180,16 @@ window.Blaetter = (function () {
          {h: '1. Gegenstand'},
          {p: 'Die Beratung übernimmt die laufende betriebswirtschaftliche Begleitung des Mandanten. Dazu gehören die monatliche Auswertung, der Zugang zum KI-Berater und die Beratungsgespräche.'},
          {h: '2. Vergütung'},
-         {p: 'Es gilt eine monatliche Pauschale. Sie deckt alle Leistungen nach Ziffer 1 ab; Auslagen werden gesondert und einzeln abgerechnet.'},
+         {p: 'Es gilt eine monatliche Pauschale von 2.400,00 € zuzüglich Umsatzsteuer. Sie deckt alle Leistungen nach Ziffer 1 ab, gleichgültig wie viele Stunden dafür anfallen; Auslagen werden gesondert und einzeln abgerechnet. Die Rechnung wird am ersten Tag des Folgemonats gestellt und ist innerhalb von zehn Tagen fällig.'},
          {h: '3. Laufzeit'},
-         {p: 'Der Vertrag läuft zwölf Monate und verlängert sich stillschweigend um jeweils zwölf Monate. Die Kündigungsfrist beträgt drei Monate zum Laufzeitende.'}],
+         {p: 'Der Vertrag läuft vom 1. Mai 2026 bis zum 30. April 2027, also zwölf Monate, und verlängert sich stillschweigend um jeweils zwölf Monate. Die Kündigungsfrist beträgt drei Monate zum Laufzeitende — für die erste Laufzeit ist das der 31. Januar 2027.'},
+         {h: 'Die drei Zahlen auf einen Blick'},
+         {tab: [['Punkt', 'Es gilt'],
+                ['Pauschale im Monat, netto', '2.400,00 €'],
+                ['Umsatzsteuer 19 %', '456,00 €'],
+                ['Zu zahlen im Monat', '2.856,00 €'],
+                ['Laufzeit', 'zwölf Monate, bis 30. April 2027'],
+                ['Kündigungsfrist', 'drei Monate, also bis 31. Januar 2027']]}],
         [{h: '4. Vertraulichkeit'},
          {p: 'Beide Seiten behandeln alle Unterlagen vertraulich. Die Beratung setzt Unterlagen des Mandanten ausschließlich für dessen eigenes Mandat ein.'},
          {h: '5. Der KI-Berater'},

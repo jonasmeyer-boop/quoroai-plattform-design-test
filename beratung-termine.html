@@ -39,7 +39,16 @@
    Vogelperspektive — beim ersten Mal mitten im neun Sekunden langen
    Aufbau-Film. Sie nennt jetzt ihren Raum, die Zentrale, und führt
    hinein. Gebaut wird sie vom Baustein krume.js.
-   Marker: BERATUNG-TERMINE-V11 (die Krume kommt aus einer Quelle) */
+   V12 (Issue #57): „Deine Termine" waren drei von Hand geschriebene Zeilen —
+   der Freitag bei MTS Maschinenbau fehlte, obwohl die Woche ihn unter „Nur
+   ich" kennt, und der Donnerstag stand vor dem Dienstag. Die Liste kommt
+   jetzt aus der Lage (lage.js), in Zeitfolge; bestätigen und verschieben
+   ändern die Lage, nicht das Markup. Zeiten stehen datiert.
+   V13 (Nutzerprüfung 2026-08-16): der Petersen-Zettel trug „Preis und Marge",
+   den Namen des ANDEREN Termins am Donnerstag — ebenfalls Petersen, ebenfalls
+   Dr. Vogelsang. Worum es auf einem Zettel geht, kommt jetzt aus der Lage,
+   wie die Liste darunter.
+   Marker: BERATUNG-TERMINE-V13 (auch der Zettel nennt die Sache aus der Lage) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -213,6 +222,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 }
 </style>
 <script src="krume.js"></script>
+<!-- Die Lage: eine Quelle für Termine und Meldungen (Issue #57) -->
+<script src="lage.js"></script>
 </head>
 <body class="quoro"
       data-krume-raum="zentrale" data-krume-hier="Termine und Übergaben">
@@ -235,29 +246,33 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     <div class="z-kopf">
       <div>
         <b>Herr Petersen möchte ein Gespräch mit einem Menschen</b>
-        <div class="z-meta">Petersen Stahlbau, gewünscht über den KI-Berater gestern um 16:38, aus dem Gespräch <a href="beratung-mitlesen.html">„Warum schrumpft meine Marge?"</a></div>
+        <div class="z-meta">Petersen Stahlbau, gewünscht über den KI-Berater gestern, Montag, 17.08., um 16:38, aus dem Gespräch <a href="beratung-mitlesen.html">„Warum schrumpft meine Marge?"</a></div>
       </div>
       <span class="z-fuell" data-zustand><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">liegt vor</span></span>
     </div>
     <div class="wunsch">
       <div class="tag-blatt" aria-hidden="true"><div class="tb-tag" data-tag>FR</div><div class="tb-zeit" data-zeit>9:00</div></div>
       <div>
-        <div class="w-wann" data-wann>Freitag, 9:00 bis 9:45, Videocall</div>
-        <div class="w-mit">Preis und Marge, mit Dr. Anna Vogelsang</div>
+        <div class="w-wann" data-wann>Freitag, 21.08., 9:00 bis 9:45, Videocall</div>
+        <!-- Worum es geht, kommt aus der Lage — hier stand „Preis und Marge",
+             und das ist der ANDERE Termin am Donnerstag, ebenfalls Petersen,
+             ebenfalls mit Dr. Vogelsang. Wer Zettel und Woche nebeneinander
+             legte, rief an (Nutzerprüfung 2026-08-16). -->
+        <div class="w-mit" data-mit>Gespräch mit einem Menschen, bei Dr. Anna Vogelsang</div>
       </div>
     </div>
-    <div class="frei-hinweis" data-frei>Freitag um 9:00 ist bei Dr. Vogelsang frei.</div>
+    <div class="frei-hinweis" data-frei>Freitag, 21.08., um 9:00 ist bei Dr. Vogelsang frei.</div>
     <div class="griffe" data-griffe>
-      <button class="knopf primaer" id="bestaetigen" type="button">Freitag, 9:00 bestätigen</button>
+      <button class="knopf primaer" id="bestaetigen" type="button">Freitag, 21.08., 9:00 bestätigen</button>
       <button class="knopf leise" id="anders" type="button">Anderes Fenster vorschlagen</button>
       <button class="knopf gefahr" id="ablehnen" type="button">Ablehnen</button>
     </div>
     <div class="fenster" id="fenster" hidden>
       <!-- Nur Fenster, die in der Woche noch kommen und bei Dr. Vogelsang
            wirklich frei sind (beratung-kalender.html) -->
-      <button type="button" data-tagk="MI" data-zeitk="9:00" data-text="Mittwoch, 9:00 bis 9:45, Videocall">Mittwoch, 9:00</button>
-      <button type="button" data-tagk="DO" data-zeitk="14:00" data-text="Donnerstag, 14:00 bis 14:45, Videocall">Donnerstag, 14:00</button>
-      <button type="button" data-tagk="FR" data-zeitk="11:00" data-text="Freitag, 11:00 bis 11:45, Videocall">Freitag, 11:00</button>
+      <button type="button" data-tagk="MI" data-zeitk="9:00" data-i="2" data-von="9" data-bis="9.75" data-text="Mittwoch, 19.08., 9:00 bis 9:45, Videocall">Mittwoch, 19.08., 9:00</button>
+      <button type="button" data-tagk="DO" data-zeitk="14:00" data-i="3" data-von="14" data-bis="14.75" data-text="Donnerstag, 20.08., 14:00 bis 14:45, Videocall">Donnerstag, 20.08., 14:00</button>
+      <button type="button" data-tagk="FR" data-zeitk="11:00" data-i="4" data-von="11" data-bis="11.75" data-text="Freitag, 21.08., 11:00 bis 11:45, Videocall">Freitag, 21.08., 11:00</button>
     </div>
     <div class="erledigt" id="petersen-fertig" hidden></div>
   </section>
@@ -269,31 +284,31 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     <div class="z-kopf">
       <div>
         <b>Herr Cordes möchte den Termin heute verschieben</b>
-        <div class="z-meta">Cordes Logistik, heute um 7:55 aus seinem Portal. Der Termin steht noch, bis du entscheidest.</div>
+        <div class="z-meta">Cordes Logistik, heute, Dienstag, 18.08., um 7:55 aus seinem Portal. Der Termin steht noch, bis du entscheidest.</div>
       </div>
       <span class="z-fuell" data-zustand><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">liegt vor</span></span>
     </div>
     <div class="wunsch">
       <div class="tag-blatt" aria-hidden="true"><div class="tb-tag" data-v-tag>MI</div><div class="tb-zeit" data-v-zeit>16:00</div></div>
       <div>
-        <div class="w-wann" data-v-wann>Mittwoch, 16:00 bis 16:30, statt heute 11:30</div>
-        <div class="w-mit">Fuhrpark und Finanzierung, mit Dr. Anna Vogelsang</div>
+        <div class="w-wann" data-v-wann>Mittwoch, 19.08., 16:00 bis 16:30, statt heute 11:30</div>
+        <div class="w-mit" data-v-mit>Fuhrpark und Finanzierung, bei Dr. Anna Vogelsang</div>
       </div>
     </div>
-    <div class="frei-hinweis" data-v-frei>Mittwoch um 16:00 ist bei Dr. Vogelsang frei. <a href="beratung-kalender.html#verschiebung">In der Woche ansehen</a></div>
+    <div class="frei-hinweis" data-v-frei>Mittwoch, 19.08., um 16:00 ist bei Dr. Vogelsang frei. <a href="beratung-kalender.html#verschiebung">In der Woche ansehen</a></div>
     <div class="kundenwort" style="--kunden-farbe:#2b5fe3">
       „Bei uns ist heute eine Lieferung dazwischengekommen. Geht es auch später in der Woche?"
-      <span class="kw-wer">Herr Cordes, heute um 7:55</span>
+      <span class="kw-wer">Herr Cordes, heute, 18.08., um 7:55</span>
     </div>
     <div class="griffe" data-griffe>
-      <button class="knopf primaer" id="v-bestaetigen" type="button">Mittwoch, 16:00 bestätigen</button>
+      <button class="knopf primaer" id="v-bestaetigen" type="button">Mittwoch, 19.08., 16:00 bestätigen</button>
       <button class="knopf leise" id="v-anders" type="button">Anderes Fenster vorschlagen</button>
       <button class="knopf gefahr" id="v-bleiben" type="button">Beim Dienstag bleiben</button>
     </div>
     <div class="fenster" id="v-fenster" hidden>
-      <button type="button" data-tagk="MI" data-zeitk="10:30" data-text="Mittwoch, 10:30 bis 11:00">Mittwoch, 10:30</button>
-      <button type="button" data-tagk="DO" data-zeitk="16:00" data-text="Donnerstag, 16:00 bis 16:30">Donnerstag, 16:00</button>
-      <button type="button" data-tagk="FR" data-zeitk="15:00" data-text="Freitag, 15:00 bis 15:30">Freitag, 15:00</button>
+      <button type="button" data-tagk="MI" data-zeitk="10:30" data-i="2" data-von="10.5" data-bis="11" data-text="Mittwoch, 19.08., 10:30 bis 11:00">Mittwoch, 19.08., 10:30</button>
+      <button type="button" data-tagk="DO" data-zeitk="16:00" data-i="3" data-von="16" data-bis="16.5" data-text="Donnerstag, 20.08., 16:00 bis 16:30">Donnerstag, 20.08., 16:00</button>
+      <button type="button" data-tagk="FR" data-zeitk="15:00" data-i="4" data-von="15" data-bis="15.5" data-text="Freitag, 21.08., 15:00 bis 15:30">Freitag, 21.08., 15:00</button>
     </div>
     <div class="erledigt" id="verschiebung-fertig" hidden></div>
   </section>
@@ -303,13 +318,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     <div class="z-kopf">
       <div>
         <b>Der KI-Berater hat dir eine Steuerfrage übergeben</b>
-        <div class="z-meta">Cordes Logistik, heute um 8:12, außerhalb seines Rahmens. Herr Cordes weiß, dass du übernimmst.</div>
+        <div class="z-meta">Cordes Logistik, heute, Dienstag, 18.08., um 8:12, außerhalb seines Rahmens. Herr Cordes weiß, dass du übernimmst.</div>
       </div>
       <span class="z-fuell" data-zustand><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">wartet auf Antwort</span></span>
     </div>
     <div class="kundenwort" style="--kunden-farbe:#2b5fe3">
       „Kann ich die zwei neuen Wechselbrücken noch dieses Jahr voll abschreiben, oder läuft das über die Nutzungsdauer?"
-      <span class="kw-wer">Herr Cordes, heute um 8:11</span>
+      <span class="kw-wer">Herr Cordes, heute, 18.08., um 8:11</span>
     </div>
     <span class="hand">die gehört dir.</span>
     <div class="feld" data-antwort>
@@ -325,30 +340,12 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   </section>
 
   <h3>Deine Termine</h3>
-  <p style="font-size:13px;color:var(--nebel-600);margin-top:6px">Was hier steht, sind die Termine deiner Mandate. Die ganze Woche und wer wann Luft hat, steht in <a href="beratung-kalender.html">der Woche</a>. Zu jedem Termin gehört sein Protokoll — gezeichnet ist in dieser Vorführung der Donnerstag.</p>
-  <div class="termine" id="termine">
-    <div class="termin-zeile">
-      <div class="tag-blatt" aria-hidden="true"><div class="tb-tag">DO</div><div class="tb-zeit">10:00</div></div>
-      <div><div class="t-wann">Donnerstag, 10:00 bis 11:00, Petersen Stahlbau</div><div class="t-mit">Dr. Anna Vogelsang, Preis und Marge</div></div>
-      <span class="t-art">Videocall</span>
-      <a class="t-tuer" href="beratung-protokoll.html">Protokoll</a>
-    </div>
-    <div class="termin-zeile" data-termin="cordes">
-      <div class="tag-blatt" aria-hidden="true"><div class="tb-tag">DI</div><div class="tb-zeit">11:30</div></div>
-      <div><div class="t-wann">Dienstag, 11:30 bis 12:00, Cordes Logistik</div><div class="t-mit">Fuhrpark und Finanzierung, mit Herrn Cordes</div></div>
-      <span class="t-art">Telefonat</span>
-    </div>
-    <!-- „kein Termin vereinbart, kein Eingriff nötig" war zweimal falsch: in
-         der Woche sitzt Miriam Krohn am Donnerstag mit ihr, und in
-         beratung-rechnungen.html ist seit dem Juni nichts gestellt worden.
-         Die leere Zeile bleibt eine leere Zeile — bei dir steht wirklich
-         nichts —, aber sie sagt jetzt, wo es stattdessen steht. -->
-    <div class="termin-zeile leer">
-      <div class="tag-blatt" aria-hidden="true" style="opacity:.45"><div class="tb-tag" style="background:var(--nebel-300)">–</div><div class="tb-zeit">–</div></div>
-      <div><div class="t-wann">Bäckerei Freitag, nichts bei dir im Kalender</div><div class="t-mit">Donnerstag, 10:00 sitzt Miriam Krohn mit ihr, Zwischenstand Personal</div></div>
-      <a class="t-tuer" href="beratung-kalender.html">In der Woche</a>
-    </div>
-  </div>
+  <p style="font-size:13px;color:var(--nebel-600);margin-top:6px"><span data-termine-satz>Was hier steht, sind deine eigenen Termine dieser Woche.</span> Die ganze Woche und wer wann Luft hat, steht in <a href="beratung-kalender.html">der Woche</a>. Zu jedem Termin gehört sein Protokoll — gezeichnet ist in dieser Vorführung der Donnerstag, 20.08.</p>
+  <!-- Die Zeilen entstehen aus der Lage (lage.js), nicht von Hand: hier
+       standen drei abgeschriebene Termine, und der Freitag bei MTS
+       Maschinenbau fehlte, obwohl die Woche ihn unter „Nur ich" kennt
+       (Issue #57). -->
+  <div class="termine" id="termine"></div>
 </main>
 
 
@@ -364,7 +361,117 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   /* Der Demo-Hinweis ist weg, samt seinem Element: sein einziger Aufrufer war
      „Lieber einen Termin vorschlagen", und der führt jetzt in die Woche. */
 
+  /* Zahlen bis sechs stehen als Wort, hier wie auf den Zetteln. */
   var ZAHLWORT = ['Kein', 'Ein', 'Zwei', 'Drei', 'Vier', 'Fünf', 'Sechs'];
+
+  /* ---------- Deine Termine kommen aus der Lage (Issue #57) ----------
+     Dieselbe Quelle, aus der die Woche (beratung-kalender.html) ihr Raster
+     baut. Vorher standen hier drei von Hand geschriebene Zeilen: der Freitag
+     bei MTS Maschinenbau fehlte, obwohl die Woche ihn unter „Nur ich" kennt,
+     und der Donnerstag stand vor dem Dienstag. Jetzt ist es dieselbe Liste,
+     in der Reihenfolge, in der sie kommt.
+     Das Aussehen bleibt hier — die Lage liefert nur, was wahr ist. */
+  var ICH = Lage.ich();
+  var HEUTE = Lage.heute();
+  var TAGE = Lage.tage();
+  var ALLE = Lage.termine();
+
+  /* Was noch kommt, gehört in die Liste; was vorbei ist, nicht. Angefragtes
+     ist kein Termin — es liegt oben als Zettel und wird dort entschieden. */
+  function meine(){
+    return ALLE.filter(function(t){
+      return t.wer === ICH && !t.intern && !t.angefragt && t.tag >= HEUTE;
+    }).sort(function(a, b){ return (a.tag - b.tag) || (a.von - b.von); });
+  }
+
+  function zeileFuer(t){
+    var reihe = document.createElement('div');
+    reihe.className = 'termin-zeile';
+    reihe.dataset.termin = t.id;
+
+    var blatt = document.createElement('div');
+    blatt.className = 'tag-blatt';
+    blatt.setAttribute('aria-hidden', 'true');
+    blatt.innerHTML = '<div class="tb-tag"></div><div class="tb-zeit"></div>';
+    blatt.querySelector('.tb-tag').textContent = Lage.tagKuerzel(t.tag);
+    blatt.querySelector('.tb-zeit').textContent = Lage.zeitWort(t.von);
+
+    var mitte = document.createElement('div');
+    var wann = document.createElement('div');
+    wann.className = 't-wann';
+    wann.textContent = Lage.terminWann(t) + ', ' + t.kunde;
+    /* Nicht der eigene Name: die Liste heißt „Deine Termine", da steht
+       dreimal „Dr. Anna Vogelsang" nur im Weg. Worum es geht, gehört hierhin. */
+    var mit = document.createElement('div');
+    mit.className = 't-mit';
+    mit.textContent = t.was;
+    mitte.appendChild(wann); mitte.appendChild(mit);
+
+    reihe.appendChild(blatt);
+    reihe.appendChild(mitte);
+
+    if (t.form) {
+      var art = document.createElement('span');
+      art.className = 't-art';
+      art.textContent = t.form;
+      reihe.appendChild(art);
+    }
+    /* Eine Tür steht nur da, wo im Entwurf wirklich etwas dahinterliegt. */
+    if (t.ziel && t.tuer) {
+      var tuer = document.createElement('a');
+      tuer.className = 't-tuer';
+      tuer.href = t.ziel;
+      tuer.textContent = t.tuer;
+      reihe.appendChild(tuer);
+    }
+    return reihe;
+  }
+
+  /* Mandate, bei denen diese Woche jemand anders sitzt und bei dir nichts
+     steht: die leere Zeile bleibt leer — bei dir steht wirklich nichts —,
+     aber sie sagt, wo es stattdessen steht. */
+  function fremdeMandate(){
+    var meineKunden = {};
+    meine().forEach(function(t){ meineKunden[t.kunde] = true; });
+    var gesehen = {}, raus = [];
+    ALLE.forEach(function(t){
+      if (t.intern || t.angefragt || t.tag < HEUTE) return;
+      if (t.wer === ICH || meineKunden[t.kunde] || gesehen[t.kunde]) return;
+      gesehen[t.kunde] = true;
+      raus.push(t);
+    });
+    return raus;
+  }
+
+  function leereZeileFuer(t){
+    var reihe = document.createElement('div');
+    reihe.className = 'termin-zeile leer';
+    reihe.innerHTML =
+      '<div class="tag-blatt" aria-hidden="true" style="opacity:.45">' +
+      '<div class="tb-tag" style="background:var(--nebel-300)">–</div><div class="tb-zeit">–</div></div>' +
+      '<div><div class="t-wann"></div><div class="t-mit"></div></div>' +
+      '<a class="t-tuer" href="beratung-kalender.html">In der Woche</a>';
+    reihe.querySelector('.t-wann').textContent = t.kunde + ', nichts bei dir im Kalender';
+    reihe.querySelector('.t-mit').textContent =
+      TAGE[t.tag].kurz + ', ' + TAGE[t.tag].kurzdatum + ', ' + Lage.zeitWort(t.von) +
+      ' sitzt ' + Lage.person(t.wer).name + ' dort, ' + t.was;
+    return reihe;
+  }
+
+  function listeBauen(){
+    var liste = document.getElementById('termine');
+    liste.textContent = '';
+    var meins = meine();
+    meins.forEach(function(t){ liste.appendChild(zeileFuer(t)); });
+    fremdeMandate().forEach(function(t){ liste.appendChild(leereZeileFuer(t)); });
+    /* An jede Summe gehört der Kreis, über den sie zählt. */
+    var satz = document.querySelector('[data-termine-satz]');
+    if (satz) satz.textContent = meins.length === 1
+      ? 'Ein eigener Termin steht dir diese Woche noch bevor.'
+      : (ZAHLWORT[meins.length] || meins.length) + ' eigene Termine stehen dir diese Woche noch bevor.';
+  }
+  listeBauen();
+
   function standAktualisieren(){
     var offen = document.querySelectorAll('.zettel .zustand.wartet').length;
     document.querySelector('[data-anfragen-stand]').textContent =
@@ -389,18 +496,35 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
   /* ---------- Die Termin-Anfrage ---------- */
   var anfrage = document.getElementById('anfrage-petersen');
-  var gewaehlt = {tag:'FR', zeit:'9:00', text:'Freitag, 9:00 bis 9:45, Videocall'};
+  /* w1 ist die offene Anfrage in der Lage — bestätigen macht daraus einen
+     Termin, statt eine zweite Zeile daneben zu erfinden. */
+  var ANFRAGE_ID = 'w1';
+  function ausLage(id){
+    for (var i = 0; i < ALLE.length; i++) if (ALLE[i].id === id) return ALLE[i];
+    return null;
+  }
+  /* Ohne Wächter risse ein Eintrag, den jemand aus der Lage nimmt, das ganze
+     Skript ab — samt Liste, Standzeile und Tiefeneinstieg. */
+  var gewaehlt = (function(){
+    var w = ausLage(ANFRAGE_ID);
+    if (!w) return null;
+    return {tag: Lage.tagKuerzel(w.tag), zeit: Lage.zeitWort(w.von),
+            i: w.tag, von: w.von, bis: w.bis,
+            text: Lage.terminWann(w) + ', ' + w.form};
+  })();
 
+  /* Der Termin geht in die Lage, die Liste baut sich daraus neu — so steht er
+     an seinem Platz in der Zeitfolge und nicht obenauf (Issue #57). */
   function terminEintragen(){
-    var liste = document.getElementById('termine');
-    var reihe = document.createElement('div');
-    reihe.className = 'termin-zeile neu';
-    reihe.innerHTML =
-      '<div class="tag-blatt" aria-hidden="true"><div class="tb-tag">' + gewaehlt.tag + '</div><div class="tb-zeit">' + gewaehlt.zeit + '</div></div>' +
-      '<div><div class="t-wann">' + gewaehlt.text + ', Petersen Stahlbau</div><div class="t-mit">Dr. Anna Vogelsang, Preis und Marge</div></div>' +
-      '<span class="t-art">Videocall</span>';
-    liste.prepend(reihe);
+    var w = ausLage(ANFRAGE_ID);
+    if (!w || !gewaehlt) return;
+    w.angefragt = false;
+    w.tag = gewaehlt.i; w.von = gewaehlt.von; w.bis = gewaehlt.bis;
+    listeBauen();
+    var reihe = document.querySelector('[data-termin="' + ANFRAGE_ID + '"]');
+    if (!reihe) return;
     /* der Lila-Ring gehört nur dem frisch eingereihten Termin */
+    reihe.classList.add('neu');
     setTimeout(function(){ reihe.classList.remove('neu'); }, 1400);
     if (!reduziert) reihe.scrollIntoView({behavior:'smooth', block:'nearest'});
   }
@@ -411,6 +535,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   var eigenerVorschlag = false;
 
   document.getElementById('bestaetigen').addEventListener('click', function(){
+    if (!gewaehlt) return;
     if (eigenerVorschlag) {
       erledige(anfrage, '<span>Vorgeschlagen: <b>' + gewaehlt.text + '</b>. Der KI-Berater fragt Herrn Petersen, ob das Fenster passt; der Termin entsteht, sobald er zusagt.</span>');
       return;
@@ -427,7 +552,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     b.addEventListener('click', function(){
       document.querySelectorAll('#fenster button').forEach(function(x){ x.classList.remove('gewaehlt'); });
       b.classList.add('gewaehlt');
-      gewaehlt = {tag: b.dataset.tagk, zeit: b.dataset.zeitk, text: b.dataset.text};
+      gewaehlt = {tag: b.dataset.tagk, zeit: b.dataset.zeitk, text: b.dataset.text,
+                  i: Number(b.dataset.i), von: Number(b.dataset.von), bis: Number(b.dataset.bis)};
       eigenerVorschlag = true;
       document.querySelector('#anfrage-petersen [data-tag]').textContent = gewaehlt.tag;
       document.querySelector('#anfrage-petersen [data-zeit]').textContent = gewaehlt.zeit;
@@ -447,22 +573,54 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
      Ein eigener Gegenvorschlag verschiebt dagegen NICHTS — er ist eine Frage
      zurück an den Kunden, und bis er zusagt, gilt der alte Termin. */
   var verschiebung = document.getElementById('verschiebung-cordes');
-  var vWunsch = {tag:'MI', zeit:'16:00', text:'Mittwoch, 16:00 bis 16:30'};
+  /* t4 ist der Anruf bei Cordes am Dienstag — die Kennung kommt aus der Lage. */
+  var CORDES_ID = 't4';
+  var vWunsch = (function(){
+    var t = ausLage(CORDES_ID);
+    if (!t || !t.wunsch) return null;
+    return {tag: Lage.tagKuerzel(t.wunsch.tag), zeit: Lage.zeitWort(t.wunsch.von),
+            i: t.wunsch.tag, von: t.wunsch.von, bis: t.wunsch.bis,
+            text: Lage.terminWann({tag: t.wunsch.tag, von: t.wunsch.von, bis: t.wunsch.bis})};
+  })();
   var vGegenvorschlag = false;
 
+  /* ---------- Worum es auf den Zetteln geht, sagt die Lage ----------
+     Die Zeile unter dem Wunschfenster stand hier von Hand — und trug beim
+     Petersen-Zettel den Namen eines anderen Termins („Preis und Marge", das
+     ist der Donnerstag 10:00, ebenfalls Petersen, ebenfalls Dr. Vogelsang).
+     Zwei Termine mit einer Überschrift: wer Zettel und Woche nebeneinander
+     legte, griff zum Hörer. Jetzt kommt beides aus derselben Quelle wie die
+     Liste darunter. */
+  function worumEsGeht(ziel, id){
+    var el = document.querySelector(ziel);
+    var t = ausLage(id);
+    if (!el || !t) return;
+    var wer = Lage.person(t.wer);
+    /* „bei" statt „mit": der Wunsch heißt schon „Gespräch mit einem
+       Menschen", und zweimal „mit" in einer Zeile stolpert. */
+    el.textContent = t.was + (wer ? ', bei ' + wer.name : '');
+  }
+  worumEsGeht('#anfrage-petersen [data-mit]', ANFRAGE_ID);
+  worumEsGeht('#verschiebung-cordes [data-v-mit]', CORDES_ID);
+
+  /* Ein verschobener Termin ist derselbe Termin: er wandert in der Lage,
+     und die Liste steht danach wieder in der richtigen Zeitfolge. */
   function cordesZeileSetzen(){
-    var zeile = document.querySelector('[data-termin="cordes"]');
+    var t = ausLage(CORDES_ID);
+    if (!t || !vWunsch) return;
+    t.tag = vWunsch.i; t.von = vWunsch.von; t.bis = vWunsch.bis;
+    delete t.wunsch;
+    listeBauen();
+    var zeile = document.querySelector('[data-termin="' + CORDES_ID + '"]');
     if (!zeile) return;
-    zeile.querySelector('.tb-tag').textContent = vWunsch.tag;
-    zeile.querySelector('.tb-zeit').textContent = vWunsch.zeit;
-    zeile.querySelector('.t-wann').textContent = vWunsch.text + ', Cordes Logistik';
     zeile.classList.add('neu');
     setTimeout(function(){ zeile.classList.remove('neu'); }, 1400);
   }
 
   document.getElementById('v-bestaetigen').addEventListener('click', function(){
+    if (!vWunsch) return;
     if (vGegenvorschlag) {
-      erledige(verschiebung, '<span>Vorgeschlagen: <b>' + vWunsch.text + '</b>. Der KI-Berater fragt Herrn Cordes, ob das Fenster passt; bis er zusagt, bleibt es bei heute 11:30.</span>');
+      erledige(verschiebung, '<span>Vorgeschlagen: <b>' + vWunsch.text + '</b>. Der KI-Berater fragt Herrn Cordes, ob das Fenster passt; bis er zusagt, bleibt es bei heute, 18.08., 11:30.</span>');
       return;
     }
     erledige(verschiebung, '<span>Verschoben auf <b>' + vWunsch.text + '</b>. Der KI-Berater bestätigt es Herrn Cordes, die alte Zeit ist frei.</span>');
@@ -476,7 +634,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     b.addEventListener('click', function(){
       document.querySelectorAll('#v-fenster button').forEach(function(x){ x.classList.remove('gewaehlt'); });
       b.classList.add('gewaehlt');
-      vWunsch = {tag:b.dataset.tagk, zeit:b.dataset.zeitk, text:b.dataset.text};
+      vWunsch = {tag:b.dataset.tagk, zeit:b.dataset.zeitk, text:b.dataset.text,
+                 i: Number(b.dataset.i), von: Number(b.dataset.von), bis: Number(b.dataset.bis)};
       vGegenvorschlag = true;
       verschiebung.querySelector('[data-v-tag]').textContent = vWunsch.tag;
       verschiebung.querySelector('[data-v-zeit]').textContent = vWunsch.zeit;
@@ -487,7 +646,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     });
   });
   document.getElementById('v-bleiben').addEventListener('click', function(){
-    erledige(verschiebung, '<span>Es bleibt bei <b>heute, 11:30</b>. Der KI-Berater sagt es Herrn Cordes und bietet ihm an, den Termin ganz abzusagen, wenn die Lieferung dazwischenkommt.</span>');
+    erledige(verschiebung, '<span>Es bleibt bei <b>heute, Dienstag, 18.08., 11:30</b>. Der KI-Berater sagt es Herrn Cordes und bietet ihm an, den Termin ganz abzusagen, wenn die Lieferung dazwischenkommt.</span>');
   });
 
   /* ---------- Die Übergabe ---------- */

@@ -28,7 +28,17 @@
    V10 (Issue #50): die Türen in die Kundenakte nennen jetzt das Mandat in der Adresse.
    V11 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
-   Marker: BERATUNG-KI-BERATER-V11 (die Krume kommt aus einer Quelle) */
+   V12 (Issue #55): der Live-Satz widerspricht seiner eigenen Zerlegung nicht
+   mehr. Er nannte 3,1 Punkte als GESAMTEN Margenverlust und zwei Zeilen
+   tiefer dieselben 3,1 als einen von drei Posten (3,1 + 1,8 + 0,9 = 5,8, und
+   36,2 − 30,4 = 5,8). Der Verlust sind 5,8 Punkte, die 3,1 gehören dem
+   Preisdruck. Dazu die Kreise: die 30,4 Prozent sind die Rohertragsmarge des
+   KUNDEN über sein ganzes Geschäft (nicht die Marge, die die Beratung an
+   diesem Mandat verdient — die liegt bei 28,5 %), und die 20.550 € sind
+   Forderungen des Kunden an SEINE Kunden, nicht die Rechnung der Beratung an
+   ihn. Der Dieselbetrag der zweiten Probe war zufällig dieselbe Zahl wie
+   Petersens Einfuhrabgabe im Radar (11.900 €) und ist jetzt eine eigene.
+   Marker: BERATUNG-KI-BERATER-V12 (die Zahlen widersprechen sich nicht mehr) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -293,16 +303,23 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   var laenge = document.getElementById('laenge');
   var TON_WORT = ['nüchtern', 'ausgewogen', 'nahbar'];
 
-  /* Der Live-Satz: dieselbe Auskunft in drei Tonlagen, knapp oder ausführlich */
+  /* Der Live-Satz: dieselbe Auskunft in drei Tonlagen, knapp oder ausführlich.
+     Der Verlust ist die GANZE Zahl (36,2 − 30,4 = 5,8 Punkte); die 3,1 sind
+     der größte der drei Posten und gehören dem Preisdruck. Wer hier die 3,1
+     als Gesamtverlust schreibt, widerspricht der Zerlegung darunter — und
+     dem Balkenbild, das der Kunde im Gespräch sieht (Issue #55).
+     30,4 Prozent ist hier die Rohertragsmarge des Kunden über sein ganzes
+     Geschäft. Die Marge der Beratung an diesem Mandat ist eine andere Zahl
+     und steht in beratung-marge.html. */
   var SATZ = [
-    'Die Marge liegt bei 30,4 Prozent, 3,1 Punkte unter Vorjahr. Größter Treiber ist das Preismodell.',
-    'Deine Marge liegt bei 30,4 Prozent, das sind 3,1 Punkte weniger als im Vorjahr. Der größte Hebel ist das Preismodell.',
-    'Kurz gesagt: Deine Marge ist auf 30,4 Prozent gerutscht. Keine Panik, der größte Hebel liegt schon auf dem Tisch, das Preismodell.'
+    'Die Marge über das ganze Geschäft liegt bei 30,4 Prozent, 5,8 Punkte unter Vorjahr. Größter Treiber ist der Preisdruck.',
+    'Deine Marge über dein ganzes Geschäft liegt bei 30,4 Prozent, das sind 5,8 Punkte weniger als im Vorjahr. Der größte Treiber ist der Preisdruck.',
+    'Kurz gesagt: Deine Marge über dein ganzes Geschäft ist von 36,2 auf 30,4 Prozent gerutscht, das sind 5,8 Punkte. Keine Panik, der größte Brocken ist der Preisdruck, und dagegen liegt schon etwas auf dem Tisch.'
   ];
   var SATZ_MEHR = [
-    ' Preisdruck kostet 3,1 Punkte, Stahlpreis 1,8, Ausschuss 0,9.',
-    ' Im Einzelnen: Preisdruck kostet 3,1 Punkte, der Stahlpreis 1,8 und der Ausschuss 0,9.',
-    ' Wenn du magst, zerlege ich dir das: Preisdruck 3,1 Punkte, Stahlpreis 1,8, Ausschuss 0,9.'
+    ' Die 5,8 Punkte haben drei Adressen: Preisdruck 3,1, Stahlpreis 1,8, Ausschuss 0,9.',
+    ' Im Einzelnen: Vom Verlust gehen 3,1 Punkte auf den Preisdruck, 1,8 auf den Stahlpreis und 0,9 auf den Ausschuss.',
+    ' Wenn du magst, zerlege ich dir die 5,8: Preisdruck 3,1 Punkte, Stahlpreis 1,8, Ausschuss 0,9.'
   ];
 
   var liveSatz = document.getElementById('live-satz');
@@ -349,20 +366,27 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     kosten: 'Was kostet mich der Dieselpreis?'
   };
   var ANTWORT = {
+    /* Der Kreis gehört an die Zahl: die 20.550 € schulden SEINE Kunden IHM.
+       Ohne ihn las es sich wie ein Widerspruch zu seiner eigenen Rechnung
+       über 2.856,00 €, die er der Beratung schuldet (Issue #55). Und „seit
+       9 Tagen" ist datiert: heute ist Dienstag, der 18.08.2026. */
     lage: [
-      'Umsatz Q3 hochgerechnet 412.000 €, 8 Prozent über Plan. Auslastung 82 Prozent. Offene Forderungen 20.550 €, eine Rechnung seit 9 Tagen.',
-      'Insgesamt gut: Der Umsatz liegt hochgerechnet bei 412.000 €, 8 Prozent über Plan, die Auslastung bei 82 Prozent. Offen sind 20.550 €, eine Rechnung wartet seit 9 Tagen.',
-      'Läuft ordentlich! Umsatz Richtung 412.000 €, das ist 8 Prozent über Plan. Ein Wermutstropfen: 20.550 € stehen noch offen, eine Rechnung schon seit 9 Tagen.'
+      'Umsatz Q3 hochgerechnet 412.000 €, 8 Prozent über Plan. Auslastung 82 Prozent. Offene Forderungen an deine Kunden 20.550 €, eine davon überfällig seit dem 09.08.2026.',
+      'Insgesamt gut: Der Umsatz liegt hochgerechnet bei 412.000 €, 8 Prozent über Plan, die Auslastung bei 82 Prozent. Deine Kunden schulden dir noch 20.550 €, eine Rechnung davon ist seit dem 09.08.2026 überfällig.',
+      'Läuft ordentlich! Umsatz Richtung 412.000 €, das ist 8 Prozent über Plan. Ein Wermutstropfen: 20.550 € stehen bei deinen Kunden noch offen, eine Rechnung davon schon seit dem 09.08.2026.'
     ],
     lageMehr: [
       ' Die Marge fällt seit April, dort würde ich ansetzen.',
       ' Auffällig ist nur die Marge, sie fällt seit April. Dort würde ich als Nächstes ansetzen.',
       ' Ein Punkt für dein Radar: Die Marge rutscht seit April. Da lohnt sich der nächste Blick.'
     ],
+    /* 9.400 € statt vorher 11.900 €: dieselbe Zahl trägt im Radar Petersens
+       Einfuhrabgabe. Zwei verschiedene Größen mit demselben Betrag sind genau
+       der Widerspruch, der eine Zahlenfläche unglaubwürdig macht. */
     kosten: [
-      'Diesel kostet dich aktuell 11.900 € im Monat, 14 Prozent der Frachtkosten. Sensitivität: plus 10 Cent je Liter kosten 640 € monatlich.',
-      'Der Diesel schlägt aktuell mit 11.900 € im Monat zu Buche, das sind 14 Prozent deiner Frachtkosten. Steigt der Liter um 10 Cent, kostet dich das 640 € mehr.',
-      'Gute Frage: Rund 11.900 € im Monat gehen für Diesel drauf, etwa jeder siebte Frachtkosten-Euro. Jeder 10-Cent-Sprung an der Säule kostet dich 640 € extra.'
+      'Diesel kostet dich aktuell 9.400 € im Monat, 14 Prozent der Frachtkosten. Sensitivität: plus 10 Cent je Liter kosten 505 € monatlich.',
+      'Der Diesel schlägt aktuell mit 9.400 € im Monat zu Buche, das sind 14 Prozent deiner Frachtkosten. Steigt der Liter um 10 Cent, kostet dich das 505 € mehr.',
+      'Gute Frage: Rund 9.400 € im Monat gehen für Diesel drauf, etwa jeder siebte Frachtkosten-Euro. Jeder 10-Cent-Sprung an der Säule kostet dich 505 € extra.'
     ],
     kostenMehr: [
       ' Eine Preisgleitklausel würde 70 Prozent des Risikos an die Kunden weitergeben.',
