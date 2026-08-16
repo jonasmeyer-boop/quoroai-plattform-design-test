@@ -57,7 +57,16 @@
    aus denselben Daten — über 700px ist die Leiter aus, ein Screenreader hörte
    sonst nur ein falsches, festes Label. Vier laufende Mandate heißen überall
    laufend, und Überschrift und Vorsatz altern beim Übernehmen mit.
-   Marker: BERATUNG-VORLAGEN-V2 */
+   V3 (zweites Review, acht Funde, alle an derselben Wurzel): was sich beim
+   Übernehmen und Aufnehmen ändert, muss überall mitaltern, nicht nur da, wo
+   man hinsieht — Region- und Listen-Labels, die Erklärstelle im Kopfband,
+   das Zahlwort in der Kopfzeile. Die Kante nennt keine Mandatszahl mehr, die
+   mit Rehbein falsch wird. Beide Antwort-Knöpfe verschwinden unter dem
+   Finger: der Fokus wandert jetzt mit, und der Satz an ihrer Stelle steht in
+   einer Live-Region, die schon im Markup steht (sonst wird die Änderung nicht
+   angesagt). Der Ring der neu aufgenommenen Station hält
+   prefers-reduced-motion ein.
+   Marker: BERATUNG-VORLAGEN-V3 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -348,7 +357,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
 @media (prefers-reduced-motion: reduce){
   main > *{animation:none;opacity:1;translate:none}
-  #bogen{transition:none}
+  #bogen,.stationen li.neu{transition:none}
 }
 @media (max-width:700px){
   nav{padding:0 18px;padding-bottom:58px}
@@ -407,7 +416,11 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     </div>
   </section>
 
-  <h3 data-hilfe-name="Der Vorschlag"
+  <!-- Die Erklärstelle wird beim Übernehmen umgeschrieben, nicht gegen eine
+       zweite getauscht: hilfe.js sammelt nur, was eine Kiste hat (sichtbar(),
+       Zeile 132) — ein verstecktes Zwillings-Element käme nie vor. -->
+  <h3 id="vorschlag-h3"
+      data-hilfe-name="Der Vorschlag"
       data-hilfe="Dein KI-Berater erfindet keine Vorlage. Er hat gelesen, wie deine vier Mandate tatsächlich laufen, und den Weg gefunden, den drei von ihnen gehen. Solange der Bogen durchscheinend liegt, gehört er dir noch nicht."><span id="vorschlag-titel">Was du machst, ohne es hinterlegt zu haben</span></h3>
   <p class="h3-satz" id="vorschlag-satz">Dein KI-Berater hat deine vier laufenden Mandate nebeneinandergelegt.</p>
 
@@ -488,9 +501,12 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       <button class="knopf leise" type="button" id="verwerfen">Nicht nötig</button>
       <span class="merk">Petersens Zahlen und Namen bleiben zurück, du siehst welche.</span>
     </div>
+    <!-- Steht leer im Markup, damit der Vorleser sie als Live-Bereich kennt,
+         bevor der Verwerfen-Zweig seinen Satz hineinschreibt. -->
+    <p class="merk" id="b-verworfen" role="status"></p>
     <div class="hand" id="b-hand" hidden>gehört jetzt dir.</div>
     <div class="kante" id="b-kante" hidden>
-      <b>Ab jetzt bekommt jedes neue Preis-und-Marge-Mandat diese vier Meilensteine.</b> Die vier laufenden behalten ihre eigenen Pläne — auch Petersen, aus dem sie stammt.
+      <b>Ab jetzt bekommt jedes neue Preis-und-Marge-Mandat diese vier Meilensteine.</b> Die laufenden behalten ihre eigenen Pläne — auch Petersen, aus dem sie stammt.
     </div>
   </section>
 
@@ -533,7 +549,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       <p class="woher-legende">Vier Stationen kommen aus der Vorlage. Eine hast du <b>selbst eingefügt</b>: die Zwischenprüfung der Kalkulation, weil Rehbein drei Werke getrennt rechnet.</p>
 
       <div class="rueckweg" id="rueckweg">
-        <div class="r-satz"><b>Diese Zwischenprüfung brauchst du zum dritten Mal.</b> Bei Cordes und MTS hast du sie damals selbst eingebaut, jetzt bei Rehbein von Hand eingefügt — jedes Mal an derselben Stelle. Aus zwei von drei sind drei von vier geworden. Soll sie in die Vorlage?</div>
+        <div class="r-satz" role="status" tabindex="-1"><b>Diese Zwischenprüfung brauchst du zum dritten Mal.</b> Bei Cordes und MTS hast du sie damals selbst eingebaut, jetzt bei Rehbein von Hand eingefügt — jedes Mal an derselben Stelle. Aus zwei von drei sind drei von vier geworden. Soll sie in die Vorlage?</div>
         <div class="r-fuss">Rehbein, Cordes und MTS behalten ihre Pläne — sie haben den Schritt ja schon.</div>
         <div class="griffe">
           <button class="knopf sekundaer" type="button" id="aufnehmen">In die Vorlage aufnehmen</button>
@@ -722,8 +738,12 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     var fertig = function(){
       bogen.classList.add('eigen', 'leer');
       document.getElementById('b-herkunft-wort').textContent = 'Eure Vorlage, seit heute';
+      /* Auch die Labels altern mit: wer sich per Region durch die Fläche
+         bewegt, hörte sonst dauerhaft „Vorschlag". */
+      bogen.setAttribute('aria-label', 'Eure Vorlage Preis und Marge');
+      document.getElementById('stationen').setAttribute('aria-label', 'Vier Meilensteine der Vorlage');
       document.getElementById('b-meta').textContent =
-        'Vier Meilensteine, herausgelöst aus drei gelaufenen Mandaten';
+        'Vier Meilensteine, herausgelöst aus drei laufenden Mandaten';
       document.getElementById('b-griffe').hidden = true;
       document.getElementById('b-hand').hidden = false;
       document.getElementById('b-kante').hidden = false;
@@ -734,6 +754,12 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       document.getElementById('vorschlag-titel').textContent = 'Was du gemacht hast, ohne es hinterlegt zu haben';
       document.getElementById('vorschlag-satz').textContent =
         'Dein KI-Berater hatte deine vier laufenden Mandate nebeneinandergelegt.';
+      var h3 = document.getElementById('vorschlag-h3');
+      h3.setAttribute('data-hilfe-name', 'Eure zweite Vorlage');
+      h3.setAttribute('data-hilfe',
+        'Aus dem Vorschlag ist eure Vorlage geworden: sie steht aufgerichtet da, in eurer Hand, und '
+        + 'jedes neue Mandat dieser Art bekommt sie beim Anlegen. Was an Petersen hing, ist beim '
+        + 'Herauslösen zurückgeblieben — die Liste darunter nennt jede Stelle.');
 
       document.getElementById('platzhalter').hidden = true;
       document.getElementById('anwenden-satz').textContent =
@@ -760,19 +786,25 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     zurueck.className = 'knopf leise';
     zurueck.textContent = 'Doch anlegen';
     zurueck.addEventListener('click', uebernehmen);
-    var s = document.createElement('span');
-    s.className = 'merk';
-    s.textContent = 'Verworfen. Von selbst schlägt er sie erst wieder vor, wenn ein fünftes Mandat denselben Weg geht.';
     g.appendChild(zurueck);
-    g.appendChild(s);
+    document.getElementById('b-verworfen').textContent =
+      'Verworfen. Von selbst schlägt er sie erst wieder vor, wenn ein fünftes Mandat denselben Weg geht.';
+    /* Der gedrückte Knopf ist eben verschwunden — ohne das hier fiele der
+       Fokus auf den body, und die Tastatur stünde wieder ganz oben. */
+    zurueck.focus();
   });
 
   /* ---------- Der Rückweg: dreimal von Hand ist ein Vorschlag ---------- */
   var rueckweg = document.getElementById('rueckweg');
+  /* Beide Antworten nehmen die Knöpfe weg, auf denen gerade der Finger lag.
+     Der Satz, der an ihre Stelle tritt, muss deshalb angesagt werden und den
+     Fokus halten — sonst ist für die Tastatur nur etwas verschwunden. */
   function rueckwegSchliessen(satz, fuss){
     rueckweg.querySelector('.griffe').remove();
-    rueckweg.querySelector('.r-satz').innerHTML = '<b>' + satz + '</b>';
+    var s = rueckweg.querySelector('.r-satz');
+    s.innerHTML = '<b>' + satz + '</b>';
     rueckweg.querySelector('.r-fuss').textContent = fuss;
+    s.focus();
   }
   /* Aufnehmen heißt aufnehmen: die Station steht danach wirklich in der
      Karte oben, und jede Zahl auf dieser Fläche wird gezählt statt getippt.
@@ -794,11 +826,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
     var anzahl = liste.children.length;
     var wort = ZAHLWORT[anzahl] || anzahl;
+    var grossWort = wort.charAt(0).toUpperCase() + wort.slice(1);
+    liste.setAttribute('aria-label', grossWort + ' Meilensteine der Vorlage');
     document.getElementById('b-meta').textContent =
-      anzahl + ' Meilensteine, herausgelöst aus drei Mandaten und einmal nachgeschärft';
+      grossWort + ' Meilensteine, herausgelöst aus drei laufenden Mandaten und einmal nachgeschärft';
     document.getElementById('b-kante').innerHTML =
       '<b>Ab jetzt bekommt jedes neue Preis-und-Marge-Mandat diese ' + wort
-      + ' Meilensteine.</b> Die vier laufenden behalten ihre eigenen Pläne — auch Petersen, aus dem sie stammt.';
+      + ' Meilensteine.</b> Die laufenden behalten ihre eigenen Pläne — auch Petersen, aus dem sie stammt, und Rehbein, das den Schritt schon hat.';
     document.querySelector('.woher-legende').innerHTML =
       'Vier Stationen kamen aus der Vorlage. Eine hast du <b>selbst eingefügt</b>: die Zwischenprüfung der '
       + 'Kalkulation, weil Rehbein drei Werke getrennt rechnet. Seit eben steht sie auch in der Vorlage — '
