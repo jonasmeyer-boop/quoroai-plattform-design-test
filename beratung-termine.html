@@ -31,7 +31,11 @@
    führt jetzt in die Woche, denn dort sucht man ein Fenster.
    V9 nach Code-Review: der Hinweis stand noch im Markup, obwohl ihn niemand
    mehr aufrief — Element und Funktion sind weg.
-   Marker: BERATUNG-TERMINE-V9 */
+   V10: die Bäckerei stand mit „kein Termin vereinbart, läuft ruhig, kein
+   Eingriff nötig" da. In der Woche sitzt Miriam Krohn am Donnerstag mit ihr,
+   und abgerechnet ist seit dem Juni nichts. Leer bleibt die Zeile trotzdem —
+   bei dir steht wirklich nichts —, aber sie nennt jetzt, wo es steht.
+   Marker: BERATUNG-TERMINE-V10 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -181,8 +185,11 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 /* Die Tür zum Protokoll gehört an den Termin selbst: dort wird gefragt, ob
    mitgeschrieben werden darf, und dort wird aus dem Gespräch Arbeit
    (Häppchen E2). Ein Termin ohne diese Tür wäre ein Eintrag im Kalender. */
+/* margin-left:auto steht auch hier: rechts geschoben wurde die Tür bisher
+   allein von der Art-Pille davor. In einer Zeile ohne Pille — die leere Zeile
+   der Bäckerei — klebte sie sonst mitten im Text. */
 .termin-zeile .t-tuer{
-  flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--lila-700);
+  margin-left:auto;flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--lila-700);
   text-decoration:none;padding:7px 13px;border-radius:999px;
   border:0.5px solid var(--nebel-200);background:var(--flaeche);
   transition:border-color .2s ease;
@@ -340,9 +347,15 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       <div><div class="t-wann">Dienstag, 11:30 bis 12:00, Cordes Logistik</div><div class="t-mit">Fuhrpark und Finanzierung, mit Herrn Cordes</div></div>
       <span class="t-art">Telefonat</span>
     </div>
+    <!-- „kein Termin vereinbart, kein Eingriff nötig" war zweimal falsch: in
+         der Woche sitzt Miriam Krohn am Donnerstag mit ihr, und in
+         beratung-rechnungen.html ist seit dem Juni nichts gestellt worden.
+         Die leere Zeile bleibt eine leere Zeile — bei dir steht wirklich
+         nichts —, aber sie sagt jetzt, wo es stattdessen steht. -->
     <div class="termin-zeile leer">
       <div class="tag-blatt" aria-hidden="true" style="opacity:.45"><div class="tb-tag" style="background:var(--nebel-300)">–</div><div class="tb-zeit">–</div></div>
-      <div><div class="t-wann">Bäckerei Freitag, kein Termin vereinbart</div><div class="t-mit">läuft ruhig, kein Eingriff nötig</div></div>
+      <div><div class="t-wann">Bäckerei Freitag, nichts bei dir im Kalender</div><div class="t-mit">Donnerstag, 10:00 sitzt Miriam Krohn mit ihr, Zwischenstand Personal</div></div>
+      <a class="t-tuer" href="beratung-kalender.html">In der Woche</a>
     </div>
   </div>
 </main>

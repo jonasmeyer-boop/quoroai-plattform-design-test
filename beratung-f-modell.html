@@ -89,7 +89,16 @@
    Dort stand auch, dass der Anruf längst lief: Montag der Rückruf, Freitag das
    Angebot. Der Zettel „vielleicht anrufen?" war damit falsch und heißt jetzt
    „Freitag liegt es auf dem Tisch", ebenso Griff und Flottenkarte.
-   Marker: BERATUNG-F-MODELL-V44 (keine Fläche entsteht mehr gerade) */
+   V45: die Bäckerei rechnet jetzt mit den Zahlen, die in
+   beratung-rechnungen.html stehen — der „Leistungsnachweis Juli über 2.900 €,
+   versendet und bezahlt" war frei erfunden, dort trägt sie einen einzigen
+   Beleg über 1.650 € für den Juni, und seither ist nichts gestellt worden.
+   Der Montag aus V44 war außerdem der falsche der beiden Termine: in der
+   Woche ist heute Dienstag, der nächste ist der Donnerstag — und der gehört
+   Miriam Krohn, während die Betrachterin zur selben Stunde bei Petersen
+   sitzt. Der Kopf des Raums sagt jetzt „wartet" wie Cordes und MTS bei
+   derselben Lage; ruhig läuft das Mandat, nicht die Abrechnung.
+   Marker: BERATUNG-F-MODELL-V45 (die Bäckerei rechnet mit dem Buch) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -748,7 +757,11 @@ body.gezoomt #zonen{display:block}
   <section class="inhalt" data-uhr-polster data-raum="freitag">
     <div class="kopf">
       <div><h2>Bäckerei Freitag</h2><div class="stand">6 Gespräche im Juli, keines freigegeben</div></div>
-      <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">läuft ruhig</span></span>
+      <!-- „läuft ruhig" im Kopf, während darunter eine amber-Zahl und eine
+           wartende Zeile stehen: Cordes und MTS tragen bei derselben Lage
+           „wartet". Das Mandat läuft ruhig — das sagt die Marge-Tafel —, der
+           Raum wartet. -->
+      <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">seit dem Juni nichts berechnet</span></span>
     </div>
     <div class="held">
       <div class="tafel-glas">
@@ -760,28 +773,42 @@ body.gezoomt #zonen{display:block}
           <path class="linie" d="M2 18 L18 20 L34 17 L50 19 L66 16 L82 18 L98 17"/>
         </svg>
       </div>
+      <!-- Vorher stand hier „Leistungsnachweis Juli über 2.900 €, versendet und
+           bezahlt". Beides erfunden: in beratung-rechnungen.html trägt dieses
+           Mandat genau einen Beleg, 2026-0083 über 1.650 € für den Juni,
+           bezahlt am 21. Juli. Seither ist nichts gestellt worden, während
+           Stunden und Auslagen weiterlaufen. Die Zahl kommt jetzt von dort. -->
       <div class="tafel-glas ruhig">
-        <span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="Aktiv" title="Aktiv"></span><span class="zustand-wort">läuft ruhig</span></span>
-        <span style="font-size:14.5px;line-height:1.5">Leistungsnachweis Juli über 2.900 € ist versendet und bezahlt. Kein Eingriff nötig.</span>
+        <span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">abzurechnen</span></span>
+        <span style="font-size:14.5px;line-height:1.5">Der letzte Leistungsnachweis, 1.650 € für den Juni, ist am 21. Juli bezahlt worden. Seitdem ist nichts berechnet: 5 Stunden und 304 € Auslagen liegen offen.</span>
       </div>
     </div>
     <div class="kpis">
       <div class="karte"><div class="wert" data-zaehl>6</div><div class="label">Gespräche im Juli</div><div class="delta">keines freigegeben</div></div>
-      <div class="karte"><div class="wert" data-zaehl>2.900 €</div><div class="label">Leistungsnachweis Juli</div><div class="delta">versendet und bezahlt</div></div>
+      <div class="karte"><div class="wert" data-zaehl>1.650 €</div><div class="label">Leistungsnachweis Juni</div><div class="delta">bezahlt am 21. Juli</div></div>
+      <div class="karte"><div class="wert" data-zaehl>1.054 €</div><div class="label">noch nicht berechnet</div><div class="delta amber">5 Stunden und zwei Auslagen</div></div>
+    </div>
+    <h3>Was wartet</h3>
+    <div class="zeilen">
+      <a class="zeile" href="beratung-rechnungen.html"><span><span class="z-titel">Seit dem Juni ist nichts gestellt</span><br><span class="z-meta">5 Stunden bis zum 8. August, dazu 304 € weiterberechenbare Auslagen</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">abrechnen</span></span></a>
     </div>
     <h3>Gespräche und Unterlagen</h3>
     <div class="zeilen">
       <div class="zeile zu"><span><span class="z-titel">Lohnt sich die zweite Filiale?</span><br><span class="z-meta">28. Juli. Frau Freitag hat es nicht freigegeben — keines ihrer sechs Gespräche ist frei.</span></span><span class="z-typ">Gespräch, privat</span></div>
       <!-- „noch keiner vereinbart" stimmte nicht: in der Woche stehen zwei
            Termine mit ihr. Eine Zeile, die das Gegenteil dessen behauptet, was
-           hinter ihrer eigenen Tür steht, ist schlimmer als gar keine. -->
-      <a class="zeile" href="beratung-kalender.html"><span><span class="z-titel">Nächster Termin</span><br><span class="z-meta">Montag, 14:00, Personalquote, bei ihr vor Ort</span></span><span class="z-typ">Termin</span></a>
+           hinter ihrer eigenen Tür steht, ist schlimmer als gar keine.
+           Der Montag war dann der falsche der beiden: in der Woche ist heute
+           Dienstag, die Personalquote liegt hinter uns. Der nächste ist der
+           Donnerstag. -->
+      <a class="zeile" href="beratung-kalender.html"><span><span class="z-titel">Nächster Termin</span><br><span class="z-meta">Donnerstag, 10:00, Zwischenstand Personal — bei Miriam Krohn, du sitzt zur selben Stunde bei Petersen</span></span><span class="z-typ">Termin</span></a>
     </div>
     <div class="tueren">
       <!-- Zwei Türen weniger, beide aus demselben Grund: hinter ihnen liegt für
            dieses Mandat nichts. Kein Gespräch ist freigegeben, und gezeichnet
            ist bisher nur Petersens Leistungsnachweis — dieselbe Kante wie beim
-           Briefing im Radar. Ihre 2.900 € stehen als Zahl über den Türen. -->
+           Briefing im Radar. Was offen ist, steht als Zahl über den Türen und
+           führt dorthin, wo es abgerechnet wird. -->
       <a class="knopf leise" href="beratung-akte.html?mandat=freitag">Kundenakte</a>
     </div>
   </section>

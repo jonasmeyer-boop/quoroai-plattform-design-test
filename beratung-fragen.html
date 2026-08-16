@@ -66,7 +66,15 @@
    die Zahl wirklich steht — der Fuhrpark-Übersicht von Cordes — und führt in
    dessen Akte, auf die Seite mit den Wechselbrücken. Die Umschiffung war
    nötig, solange nur Petersen eine gezeichnete Akte hatte.
-   Marker: BERATUNG-FRAGEN-V6 */
+   V7: der Bogen über die Lage las den Kalender nicht. Er wollte einen Anruf
+   bei MTS in die Woche legen, in der der Rückruf gestern früh schon lief und
+   am Freitag das Angebot steht — der Griff legt jetzt ein Blatt für diesen
+   Freitag in die Akte MTS. Und die Bäckerei brauchte keinen Eingriff, obwohl
+   seit dem Juni nichts berechnet ist. Dabei fielen drei Zahlen auf, die in
+   keinem der eigenen Belege standen (12,4 Stunden, 214 € je Stunde, 4 Stunden
+   für die Bäckerei) — jede Zahl im Bogen ist jetzt in beratung-marge.html
+   oder beratung-rechnungen.html nachzuschlagen.
+   Marker: BERATUNG-FRAGEN-V7 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -527,17 +535,33 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       frage: 'Welches Mandat trägt mich gerade, welches kostet mich?',
       meta: 'Über deine Beratung, gerade eben. Keine Kundenakte ist dafür aufgeschlagen worden.',
       text:
-        '<p><b>Petersen trägt dich.</b> 12,4 Stunden im August, 6.426 € offen, macht 214 € je Stunde. Freitag ist knapp kalkuliert, läuft aber ruhig: 4 Stunden, 31 Prozent Marge, kein Eingriff nötig.</p>' +
-        '<p><b>Cordes kostet dich gerade.</b> 9,1 Stunden, davon 3,4 auf Fragen, die ohne die Steuerantwort nicht weitergehen. Die liegt seit heute früh bei dir.</p>' +
-        '<p><b>MTS ist das eigentliche Problem.</b> Seit drei Wochen still, null Fragen, und die Jahrespauschale läuft weiter. Das sieht aus wie Gewinn und ist ein Kunde, der gerade geht.</p>',
+        /* Jede Zahl in diesen vier Absätzen steht in einem der Belege
+           darunter: Stunden, Honorar und Marge in beratung-marge.html, die
+           offenen Beträge in beratung-rechnungen.html, die beiden Auslagen in
+           beratung-zeiten.html. Wer wann mit wem sitzt, steht im Kalender —
+           der Rückruf bei MTS gehörte Tarek Aydin (wer:'t'), nicht der
+           Betrachterin (ICH = 'a'). Vorher standen hier
+           12,4 Stunden, 214 € je Stunde und 4 Stunden für die Bäckerei —
+           keine davon war irgendwo nachzuschlagen, und 6.426 € durch 12,4
+           Stunden sind auch nicht 214 €. */
+        '<p><b>Petersen trägt dich.</b> 250 Stunden, 38.350 € Honorar, macht 153 € je Stunde, und 30 Prozent bleiben. Die letzte Rechnung über 6.426 € ist seit neun Tagen offen — das ist kein Streit, das ist ihre Zahlungsfrist.</p>' +
+        '<p><b>Die Bäckerei ist knapp kalkuliert und läuft trotzdem ruhig:</b> 82 Stunden, 31 Prozent bleiben. Nur berechnet ist dort seit dem Juni nichts — 5 Stunden und zwei Auslagen, zusammen 1.054 €, liegen unabgerechnet herum.</p>' +
+        '<p><b>Cordes kostet dich gerade.</b> 211 Stunden auf eine Pauschale von 22.000 €, davon bleiben 12 Prozent — nicht einmal die Hälfte von Petersen. Und die Steuerfrage, die seit heute früh bei dir liegt, hält die nächsten Stunden auf.</p>' +
+        /* Vorher stand hier nur „seit drei Wochen still" und darunter der Griff
+           „Anruf bei MTS in die Woche legen". In der Woche lief der Rückruf
+           aber gestern früh, und am Freitag steht das Angebot. Ein Vorschlag,
+           der in die Woche legen will, was dort schon steht, ist ein Berater,
+           der den Kalender nicht gelesen hat. */
+        '<p><b>MTS ist das eigentliche Problem.</b> Drei Wochen keine Frage, und die Jahrespauschale läuft weiter — das sieht aus wie Gewinn und ist ein Kunde, der gerade geht. Angerufen wurde schon: Tarek hatte den Rückruf gestern um 9:00. Am Freitag um 13:00 sitzt du selbst im Angebotsgespräch, und bis dahin hängt das Mandat an diesem einen Termin.</p>',
       belege: [
-        {text:'Zeiten im August', href:'beratung-zeiten.html'},
+        {text:'Zeiten und Auslagen im August', href:'beratung-zeiten.html'},
         {text:'Marge und Sätze', href:'beratung-marge.html'},
-        {text:'Rechnungen der Beratung', href:'beratung-rechnungen.html'}
+        {text:'Rechnungen der Beratung', href:'beratung-rechnungen.html'},
+        {text:'Die Woche mit beiden Terminen', href:'beratung-kalender.html'}
       ],
       kante: null,
       griffe: [
-        {tu:'anruf-mts', art:'primaer', wort:'Anruf bei MTS in die Woche legen'},
+        {tu:'notiz-mts', art:'primaer', wort:'Als Blatt in die Akte MTS, für Freitag'},
         {tu:'verwerfen', art:'gefahr', wort:'Verwerfen'}
       ],
       hand: 'die Zahlen gehören dir allein.'
@@ -672,8 +696,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     'akte-petersen': function(bogen){
       ablegen(bogen, '<span>Liegt als Blatt in der <b>Akte Petersen</b>, mit dem heutigen Datum. Herr Petersen sieht es nicht, es ist dein Papier.</span>');
     },
-    'anruf-mts': function(bogen){
-      ablegen(bogen, '<span>Steht als Anruf bei MTS in <b>deiner Woche</b>, morgen früh. <a href="beratung-kalender.html">In der Woche ansehen</a></span>');
+    'notiz-mts': function(bogen){
+      ablegen(bogen, '<span>Liegt als Blatt in der <b>Akte MTS</b>, mit dem heutigen Datum. Am Freitag hast du es beim Angebot vor dir. <a href="beratung-akte.html?mandat=mts">In die Akte</a></span>');
     },
     'steuerberater': function(bogen){
       ablegen(bogen, '<span>Zurückgestellt. Herr Cordes bekommt vom KI-Berater die Nachricht, dass du die Frage prüfst — die <a href="beratung-termine.html#cordes">Übergabe</a> bleibt so lange offen.</span>');
