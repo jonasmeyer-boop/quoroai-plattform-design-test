@@ -34,7 +34,10 @@
 
    Kein Deko-Punkt, kein Mittelpunkt als Trenner (Jonas' Regeln). Zustand ist
    Füllstand im Glas, Chrom ist quoroAI (system.css).
-   Marker: BERATUNG-IMPORT-V1 */
+   V2 (Issue #49): die Krume kommt aus dem Baustein krume.js und trägt
+   alle drei Stufen — Zentrale, Ankommen, hier. Bisher stand nur der
+   Rückweg um eine Stufe da.
+   Marker: BERATUNG-IMPORT-V2 (die Krume kommt aus einer Quelle) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select,textarea{font-family:inherit}
@@ -62,21 +65,9 @@ nav a.vorschlaege{
   transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
-#krume{
-  position:fixed;top:72px;left:24px;z-index:70;
-  display:inline-flex;align-items:center;gap:8px;
-  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
-  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
-  font-size:13px;color:var(--tinte);
-  box-shadow:0 10px 30px rgba(16,19,26,.1);
-}
-#krume .zurueck{color:var(--nebel-600);font-weight:600}
-#krume:hover .zurueck{color:var(--lila-600)}
-#krume b{font-weight:600}
 @media (max-width:1420px){
   :root{--chrom:118px}
   nav{height:118px;padding-bottom:58px}
-  #krume{z-index:90}
 }
 
 /* ========== Seite ========== */
@@ -270,7 +261,6 @@ h2.abschnitt + .was{font-size:14px;color:var(--nebel-600);margin-top:6px;max-wid
 @media (max-width:760px){
   nav{padding:0 18px;padding-bottom:58px}
   nav .wortmarke small{display:none}
-  #krume{left:18px;top:70px}
   main{padding:132px 18px calc(84px + env(safe-area-inset-bottom))}
   .zone{padding:28px 18px}
   .zone .knopf{width:100%}
@@ -289,8 +279,11 @@ h2.abschnitt + .was{font-size:14px;color:var(--nebel-600);margin-top:6px;max-wid
   .zone{transition:none}
 }
 </style>
+<script src="krume.js"></script>
 </head>
 <body class="quoro"
+      data-krume-raum="zentrale" data-krume-hier="Kundenliste einlesen"
+      data-krume-ueber="beratung-ankommen.html|Ankommen"
       data-hilfe-titel="Kundenliste einlesen"
       data-hilfe-satz="Hier kommt deine bestehende Kundenliste in die Plattform. Du gibst eine Tabelle hinein, quoroAI liest sie und sagt dir, was es verstanden hat. Entscheiden musst du nur, wo es unsicher ist.">
 
@@ -301,8 +294,6 @@ h2.abschnitt + .was{font-size:14px;color:var(--nebel-600);margin-top:6px;max-wid
     <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
   </div>
 </nav>
-
-<a id="krume" href="beratung-ankommen.html"><span class="zurueck">← Ankommen</span><span>/</span><b>Kundenliste einlesen</b></a>
 
 <main>
   <div class="kopf">

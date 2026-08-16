@@ -32,7 +32,9 @@
 
    Kein Deko-Punkt, kein Mittelpunkt als Trenner (Jonas' Regeln). Zustand ist
    Füllstand im Glas, Chrom ist quoroAI (system.css).
-   Marker: BERATUNG-ANKOMMEN-V1 */
+   V2 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
+   fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
+   Marker: BERATUNG-ANKOMMEN-V2 (die Krume kommt aus einer Quelle) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -60,21 +62,9 @@ nav a.vorschlaege{
   transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
-#krume{
-  position:fixed;top:72px;left:24px;z-index:70;
-  display:inline-flex;align-items:center;gap:8px;
-  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
-  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
-  font-size:13px;color:var(--tinte);
-  box-shadow:0 10px 30px rgba(16,19,26,.1);
-}
-#krume .zurueck{color:var(--nebel-600);font-weight:600}
-#krume:hover .zurueck{color:var(--lila-600)}
-#krume b{font-weight:600}
 @media (max-width:1420px){
   :root{--chrom:118px}
   nav{height:118px;padding-bottom:58px}
-  #krume{z-index:90}
 }
 
 /* ========== Seite ========== */
@@ -189,7 +179,6 @@ h2.abschnitt + .was{font-size:14.5px;color:var(--nebel-600);margin-top:6px;max-w
 @media (max-width:760px){
   nav{padding:0 18px;padding-bottom:58px}
   nav .wortmarke small{display:none}
-  #krume{left:18px;top:70px}
   main{padding:132px 18px calc(84px + env(safe-area-inset-bottom))}
   .glied{padding-left:38px}
   .glied::before{left:13px}
@@ -202,8 +191,10 @@ h2.abschnitt + .was{font-size:14.5px;color:var(--nebel-600);margin-top:6px;max-w
   .kuer a{transition:none}
 }
 </style>
+<script src="krume.js"></script>
 </head>
 <body class="quoro"
+      data-krume-raum="zentrale" data-krume-hier="Ankommen"
       data-hilfe-titel="Ankommen"
       data-hilfe-satz="Der Weg von der Anmeldung bis zum ersten Kunden, der sich einloggen kann. Diese Fläche hängt nur so lange in der Zentrale, bis du sie nicht mehr brauchst.">
 
@@ -214,8 +205,6 @@ h2.abschnitt + .was{font-size:14.5px;color:var(--nebel-600);margin-top:6px;max-w
     <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
   </div>
 </nav>
-
-<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Ankommen</b></a>
 
 <main>
   <div class="stand-kopf">

@@ -55,7 +55,9 @@
    Lücke 2 sagt, was seit der gezeichneten Akte wirklich fehlt: nicht der
    Fuhrpark (den hat er, Fassung 1 des Kunden), sondern die Anlagenliste des
    Steuerbüros mit den Nutzungsdauern.
-   Marker: BERATUNG-RADAR-V4 */
+   V5 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
+   fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
+   Marker: BERATUNG-RADAR-V5 (die Krume kommt aus einer Quelle) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -85,22 +87,10 @@ nav a.vorschlaege{
   text-decoration:none;transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
-#krume{
-  position:fixed;top:72px;left:24px;z-index:70;
-  display:inline-flex;align-items:center;gap:8px;
-  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
-  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
-  font-size:13px;color:var(--tinte);text-decoration:none;
-  box-shadow:0 10px 30px rgba(16,19,26,.1);
-}
-#krume .zurueck{color:var(--nebel-600);font-weight:600}
-#krume:hover .zurueck{color:var(--lila-600)}
-#krume b{font-weight:600}
 /* Unter 1360px reicht die Krume in die Inhaltsspalte und wird die zweite
    Zeile des Kopfbands (Entscheidung 2026-08-14). */
 @media (max-width:1360px){
   nav{height:118px;padding-bottom:58px}
-  #krume{z-index:90}
 }
 
 /* ========== Seite ========== */
@@ -304,15 +294,16 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 @media (max-width:700px){
   nav{padding:0 18px;padding-bottom:58px}
   nav .wortmarke small{display:none}
-  #krume{left:18px;top:70px}
   main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
   .luecke,.kunde{padding:18px 18px}
   .griffe .knopf{flex:1 1 100%;min-height:48px}
   .k-kopf{gap:6px}
 }
 </style>
+<script src="krume.js"></script>
 </head>
 <body class="quoro"
+      data-krume-raum="zentrale" data-krume-hier="Was er von selbst meldet"
       data-hilfe-titel="Was er von selbst meldet"
       data-hilfe-satz="Zweimal meldet sich dein KI-Berater, ohne gefragt zu werden: bei dir, wenn er etwas nicht wusste — und bei deinen Kunden, wenn in ihrer Branche etwas passiert, das an ihren eigenen Zahlen hängt. Beides steht hier, bevor es hinausgeht.">
 
@@ -320,8 +311,6 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
   <div class="nav-rechts" style="display:flex;align-items:center;gap:10px"><span data-hilfe-knopf></span><a class="vorschlaege" href="index.html">Alle Vorschläge</a></div>
 </nav>
-
-<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Was er von selbst meldet</b></a>
 
 <main>
   <div class="kopf">

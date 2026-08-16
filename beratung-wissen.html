@@ -38,7 +38,9 @@
    „vom Fachverband", nicht „von dir". Zwei gleich aussehende Zeilen mit
    gegensätzlichen Rechten wären eine Falle.
    V10 (Issue #50): die Türen in die Kundenakte nennen jetzt das Mandat in der Adresse.
-   Marker: BERATUNG-WISSEN-V10 */
+   V11 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
+   fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
+   Marker: BERATUNG-WISSEN-V11 (die Krume kommt aus einer Quelle) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -71,17 +73,6 @@ nav a.vorschlaege{
   text-decoration:none;transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
-#krume{
-  position:fixed;top:72px;left:24px;z-index:70;
-  display:inline-flex;align-items:center;gap:8px;
-  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
-  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
-  font-size:13px;color:var(--tinte);text-decoration:none;
-  box-shadow:0 10px 30px rgba(16,19,26,.1);
-}
-#krume .zurueck{color:var(--nebel-600);font-weight:600}
-#krume:hover .zurueck{color:var(--lila-600)}
-#krume b{font-weight:600}
 
 /* Die Krume ist ein Zettel neben der Seite — solange daneben Platz ist.
    Wird das Fenster schmaler als 1420px, reicht sie in die Inhaltsspalte, und
@@ -90,7 +81,6 @@ nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
    wo sie war — das Polster unten hält den Inhaltskasten bei 60px. */
 @media (max-width:1420px){
   nav{height:118px;padding-bottom:58px}
-  #krume{z-index:90}
 }
 
 
@@ -237,7 +227,6 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 @media (max-width:760px){
   nav{padding:0 18px;padding-bottom:58px}
   nav .wortmarke small{display:none}
-  #krume{left:18px;top:70px}
   main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
   .tafel{padding:18px 18px}
   /* Zustand und Griff setzen sich unter den Namen, eingerückt auf dessen
@@ -256,15 +245,15 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   .zitat .hand{position:static;display:inline-block;margin-top:10px}
 }
 </style>
+<script src="krume.js"></script>
 </head>
-<body class="quoro">
+<body class="quoro"
+      data-krume-raum="zentrale" data-krume-hier="Wissen">
 
 <nav>
   <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
   <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
 </nav>
-
-<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Wissen</b></a>
 
 <main>
   <div class="kopf">

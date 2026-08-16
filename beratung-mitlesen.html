@@ -30,7 +30,9 @@
    V10 (Häppchen D4, Teil 1): ein Beleg zeigt jetzt die Stelle. Ein Druck auf
    den Chip oder auf die Quellenkarte schlägt das Dokument im Blatt-Blick auf,
    auf der Seite mit dem zitierten Satz.
-   Marker: BERATUNG-MITLESEN-V10 */
+   V11 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
+   fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
+   Marker: BERATUNG-MITLESEN-V11 (die Krume kommt aus einer Quelle) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -70,17 +72,6 @@ nav a.vorschlaege{
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
 
-#krume{
-  position:fixed;top:72px;left:24px;z-index:70;
-  display:inline-flex;align-items:center;gap:8px;
-  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
-  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
-  font-size:13px;color:var(--tinte);text-decoration:none;
-  box-shadow:0 10px 30px rgba(16,19,26,.1);
-}
-#krume .zurueck{color:var(--nebel-600);font-weight:600}
-#krume:hover .zurueck{color:var(--lila-600)}
-#krume b{font-weight:600}
 
 /* Die Krume ist ein Zettel neben der Seite — solange daneben Platz ist.
    Wird das Fenster schmaler als 1720px, reicht sie in die Inhaltsspalte, und
@@ -89,7 +80,6 @@ nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
    wo sie war — das Polster unten hält den Inhaltskasten bei 60px. */
 @media (max-width:1720px){
   nav{height:118px;padding-bottom:58px}
-  #krume{z-index:90}
 }
 
 
@@ -353,7 +343,6 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
 @media (max-width:700px){
   nav{padding:0 18px;padding-bottom:58px}
   nav .wortmarke small{display:none}
-  #krume{left:18px;top:70px}
   main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
   #blatt{padding:24px 20px 28px}
   /* Am Finger trägt der Griff die volle Breite, statt sich neben dem Feld auf
@@ -377,15 +366,15 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
   }
 }
 </style>
+<script src="krume.js"></script>
 </head>
-<body class="quoro">
+<body class="quoro"
+      data-krume-raum="petersen" data-krume-hier="Mitlesen">
 
 <nav>
   <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
   <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
 </nav>
-
-<a id="krume" href="beratung-f-modell.html#petersen"><span class="zurueck">← Petersen Stahlbau</span><span>/</span><b>Mitlesen</b></a>
 
 <main>
   <div class="kopf">

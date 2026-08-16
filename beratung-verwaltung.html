@@ -33,7 +33,9 @@
    führt zum Ankommen — dort wohnt die Fläche, sobald sie aus der Zentrale
    verschwunden ist.
    V7 (Häppchen C4): „Unterweisung lesen" hat am Finger seine 44px.
-   Marker: BERATUNG-VERWALTUNG-V7 */
+   V8 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
+   fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
+   Marker: BERATUNG-VERWALTUNG-V8 (die Krume kommt aus einer Quelle) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -60,17 +62,6 @@ nav a.vorschlaege{
   text-decoration:none;transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
-#krume{
-  position:fixed;top:72px;left:24px;z-index:70;
-  display:inline-flex;align-items:center;gap:8px;
-  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
-  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
-  font-size:13px;color:var(--tinte);text-decoration:none;
-  box-shadow:0 10px 30px rgba(16,19,26,.1);
-}
-#krume .zurueck{color:var(--nebel-600);font-weight:600}
-#krume:hover .zurueck{color:var(--lila-600)}
-#krume b{font-weight:600}
 
 /* Die Krume ist ein Zettel neben der Seite — solange daneben Platz ist.
    Wird das Fenster schmaler als 1480px, reicht sie in die Inhaltsspalte, und
@@ -79,7 +70,6 @@ nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
    wo sie war — das Polster unten hält den Inhaltskasten bei 60px. */
 @media (max-width:1480px){
   nav{height:118px;padding-bottom:58px}
-  #krume{z-index:90}
 }
 
 
@@ -236,7 +226,6 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
 @media (max-width:820px){
   nav{padding:0 18px;padding-bottom:58px}
   nav .wortmarke small{display:none}
-  #krume{left:18px;top:70px}
   main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
   .tafel{padding:18px 18px}
   .bereit a.b-hin{margin-left:0}
@@ -248,8 +237,10 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
   .qr-rahmen{justify-self:center}
 }
 </style>
+<script src="krume.js"></script>
 </head>
 <body class="quoro"
+      data-krume-raum="zentrale" data-krume-hier="Verwaltung"
       data-hilfe-titel="Verwaltung"
       data-hilfe-satz="Wer bei dir arbeitet, was er darf, und der Nachweis, dass er im Umgang mit dem KI-Berater unterwiesen ist. Kein Formular, sondern ein Nachweis.">
 
@@ -257,8 +248,6 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
   <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
   <div class="nav-rechts" style="display:flex;align-items:center;gap:10px"><span data-hilfe-knopf></span><a class="vorschlaege" href="index.html">Alle Vorschläge</a></div>
 </nav>
-
-<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Verwaltung</b></a>
 
 <main>
   <div class="kopf">

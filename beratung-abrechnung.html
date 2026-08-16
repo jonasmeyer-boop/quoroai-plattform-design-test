@@ -32,7 +32,9 @@
    Hochrechnung passt nicht auf die Schiene), Kerbe und Zeile werden vor
    jedem Zeichnen zurückgesetzt, und die Begründung „wird teurer, weil …"
    wird aus den Zahlen abgelesen statt behauptet.
-   Marker: BERATUNG-ABRECHNUNG-V3 */
+   V4 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
+   fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
+   Marker: BERATUNG-ABRECHNUNG-V4 (die Krume kommt aus einer Quelle) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -56,17 +58,6 @@ nav a.vorschlaege{
   text-decoration:none;transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
-#krume{
-  position:fixed;top:72px;left:24px;z-index:70;
-  display:inline-flex;align-items:center;gap:8px;
-  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
-  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
-  font-size:13px;color:var(--tinte);text-decoration:none;
-  box-shadow:0 10px 30px rgba(16,19,26,.1);
-}
-#krume .zurueck{color:var(--nebel-600);font-weight:600}
-#krume:hover .zurueck{color:var(--lila-600)}
-#krume b{font-weight:600}
 
 /* Die Krume ist ein Zettel neben der Seite — solange daneben Platz ist.
    Wird das Fenster schmaler als 1440px, reicht sie in die Inhaltsspalte und
@@ -74,7 +65,6 @@ nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
    Zeile des Kopfbands (Chronik 2026-08-14). */
 @media (max-width:1440px){
   nav{height:118px;padding-bottom:58px}
-  #krume{z-index:90}
 }
 
 /* ========== Seite ========== */
@@ -267,7 +257,6 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
 @media (max-width:760px){
   nav{padding:0 18px;padding-bottom:58px}
   nav .wortmarke small{display:none}
-  #krume{left:18px;top:70px}
   main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
   .tafel{padding:18px 18px}
   .lage{padding:20px 18px}
@@ -282,15 +271,15 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   .zeile .z-recht{gap:10px}
 }
 </style>
+<script src="krume.js"></script>
 </head>
-<body class="quoro">
+<body class="quoro"
+      data-krume-raum="zentrale" data-krume-hier="Was quoroAI berechnet">
 
 <nav>
   <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
   <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
 </nav>
-
-<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Was quoroAI berechnet</b></a>
 
 <main>
   <!-- ============ Ansicht: der laufende Monat und der Verlauf ============ -->

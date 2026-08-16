@@ -34,7 +34,11 @@
    also werden sie dort erfasst, wo der Tag ohnehin eingetragen wird. Ob eine
    Auslage weiterberechnet werden darf, entscheidet die Abrede des Mandats;
    berechnet wird sie im Rechnungsentwurf.
-   Marker: BERATUNG-ZEITEN-V6 (Auslagen) */
+   V7 (Issue #49): die Krume sagte „← Modell" und landete auf der
+   Vogelperspektive — beim ersten Mal mitten im neun Sekunden langen
+   Aufbau-Film. Sie nennt jetzt ihren Raum, die Zentrale, und führt
+   hinein. Gebaut wird sie vom Baustein krume.js.
+   Marker: BERATUNG-ZEITEN-V7 (die Krume kommt aus einer Quelle) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -58,22 +62,10 @@ nav a.vorschlaege{
   text-decoration:none;transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
-#krume{
-  position:fixed;top:72px;left:24px;z-index:70;
-  display:inline-flex;align-items:center;gap:8px;
-  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
-  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
-  font-size:13px;color:var(--tinte);text-decoration:none;
-  box-shadow:0 10px 30px rgba(16,19,26,.1);
-}
-#krume .zurueck{color:var(--nebel-600);font-weight:600}
-#krume:hover .zurueck{color:var(--lila-600)}
-#krume b{font-weight:600}
 /* Unter 1320px reicht die Krume in die Inhaltsspalte — dann wird sie die
    zweite Zeile des Kopfbands (Entscheidung 2026-08-14). */
 @media (max-width:1320px){
   nav{height:118px;padding-bottom:58px}
-  #krume{z-index:90}
 }
 
 /* ========== Seite ========== */
@@ -249,7 +241,6 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
 @media (max-width:700px){
   nav{padding:0 18px;padding-bottom:58px}
   nav .wortmarke small{display:none}
-  #krume{left:18px;top:70px}
   main{padding:132px 18px calc(140px + env(safe-area-inset-bottom))}
   .zettel{padding:16px 16px}
   .griffe .knopf{flex:1 1 140px}
@@ -261,15 +252,15 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
   .wochen-glas{height:64px}
 }
 </style>
+<script src="krume.js"></script>
 </head>
-<body class="quoro">
+<body class="quoro"
+      data-krume-raum="zentrale" data-krume-hier="Zeiten">
 
 <nav>
   <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
   <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
 </nav>
-
-<a id="krume" href="beratung-f-modell.html"><span class="zurueck">← Modell</span><span>/</span><b>Zeiten</b></a>
 
 <main>
   <div class="kopf">
