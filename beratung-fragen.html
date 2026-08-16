@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Selber fragen</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Selber fragen: die Beratung fragt ihren eigenen
+   KI-Berater (Häppchen E1, Issue #42).
+
+   Die Frage des Häppchens war: ist das dasselbe Gespräch wie beim Kunden, nur
+   in quoroAI-Marke — oder etwas anderes? Diese Fläche antwortet: etwas
+   anderes, und zwar in drei Punkten, die man sieht statt liest.
+
+   1. Beim Kunden BAUT das Gespräch den Raum, es ist der Empfang. Die Beratung
+      hat ihren Raum schon (das Modell). Hier ist kein Empfang nötig, sondern
+      eine WERKBANK: oben die Frage, darunter liegt, was dabei herauskam. Kein
+      Strang, keine fixierte Eingabe unten — Bogen auf einem Tisch.
+   2. Der Kunde fragt immer über seinen eigenen Betrieb. Die Beratung muss
+      zuerst sagen, WORÜBER — ein Mandat, alle, oder sie selbst. Und der
+      Umschalter ändert sichtbar, was der Berater dabei liest. „Deine
+      Beratung" liest ausdrücklich KEINE Kundenakte.
+   3. Der Kunde bekommt eine Antwort, die Beratung bekommt einen ENTWURF. Jeder
+      Bogen liegt als Pauspapier da (Entscheidung 2026-08-16) und trägt seine
+      Ausgänge: in die Akte, in die Woche, an den Kunden. Nichts davon geht von
+      allein.
+
+   Der Moment der Fläche ist die Steuerfrage von Herrn Cordes. Bei ihm bricht
+   der KI-Berater dort ab und übergibt (beratung-termine.html) — hier antwortet
+   er, sagt aber offen, wo der Beleg endet und die Einschätzung anfängt. Und
+   „In deinem Namen an Herrn Cordes" drückt das Pauspapier in Tinte: der Bogen
+   richtet sich gerade, verliert das quoroAI-Lila und trägt die Marke der
+   Beratung — ab da ist es ihr Satz, und der Text steht in einem Feld, in das
+   eine Hand fassen muss.
+
+   Chrome ist quoroAI (system.css, Entscheidung 2026-08-12), Hilfe-Ebene im
+   Kopfband, Uhr-Dock und Komet wie überall im Cockpit.
+   V2 (Code-Review vor der Freigabe): der Umschalter gilt auch beim Fragen (er
+   ließ sich vorher umgehen und führte damit genau die Aussage gebrochen vor,
+   auf der die Fläche steht); „Doch nicht schicken" macht den Bogen wieder zu
+   Pauspapier, statt ihn unterschrieben aussehend und ohne Ausgang liegen zu
+   lassen; bei reduzierter Bewegung wird trotzdem hingeführt; die beiden
+   Textfelder tragen 16px, damit iOS beim Fokussieren nicht hineinzoomt;
+   Hinweis und Ablage melden sich beim Vorlesen.
+   Marker: BERATUNG-FRAGEN-V2 */
+@font-face{
+  font-family:'Caveat';
+  src:url('schriften/caveat.woff2') format('woff2');
+  font-weight:400 700;
+  font-display:swap;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,textarea{font-family:inherit}
+
+/* ========== quoroAI-Chrom (wie in den anderen Cockpit-Räumen) ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;word-spacing:2px}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+#krume{
+  position:fixed;top:72px;left:24px;z-index:70;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  font-size:13px;color:var(--tinte);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,19,26,.1);
+}
+#krume .zurueck{color:var(--nebel-600);font-weight:600}
+#krume:hover .zurueck{color:var(--lila-600)}
+#krume b{font-weight:600}
+/* Unter 1360px reicht die Krume in die Inhaltsspalte und wird die zweite
+   Zeile des Kopfbands (Entscheidung 2026-08-14). */
+@media (max-width:1360px){
+  nav{height:118px;padding-bottom:58px}
+  #krume{z-index:90}
+}
+
+/* ========== Seite ========== */
+main{max-width:820px;margin:0 auto;padding:136px 24px 90px}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px;max-width:56ch}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:32px}
+
+.tafel{
+  margin-top:12px;border-radius:var(--radius-karte);padding:22px 24px;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+
+/* ---------- Die Werkbank: worüber, und dann die Frage ---------- */
+.worueber{display:flex;gap:8px;flex-wrap:wrap}
+.worueber button{
+  padding:10px 15px;border-radius:999px;border:0.5px solid var(--nebel-300);
+  background:var(--flaeche);font-size:13.5px;font-weight:600;color:var(--tinte);
+  cursor:pointer;transition:border-color .2s,background .2s,color .2s;
+}
+.worueber button:hover{border-color:var(--lila-500)}
+.worueber button[aria-pressed="true"]{background:var(--tinte);color:#fff;border-color:var(--tinte)}
+/* Die Zeile darunter ist der Kern des Umschalters: sie sagt, WAS er dabei
+   liest. Ein Umschalter, dessen Wirkung man nicht sieht, ist eine Behauptung. */
+.liest{
+  margin-top:14px;padding:11px 15px;border-radius:var(--radius-innen);
+  background:var(--lila-050);border:0.5px solid var(--lila-200);
+  font-size:13.5px;line-height:1.55;color:var(--nebel-700);
+  transition:opacity .18s ease;
+}
+.liest.wechselt{opacity:0}
+.liest b{color:var(--tinte);font-weight:600}
+
+.frage-feld{margin-top:16px}
+/* Kein font-size unter 16px: iOS zoomt beim Fokussieren in jedes kleinere
+   Feld hinein (system.css setzt .feld-Felder deshalb auf 16px). */
+.frage-feld textarea{min-height:88px;resize:vertical;line-height:1.55;padding:12px 14px}
+.vorlagen{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.vorlagen button{
+  padding:9px 14px;border-radius:12px;border:0.5px solid var(--nebel-200);
+  background:transparent;font-size:13px;color:var(--nebel-700);text-align:left;
+  cursor:pointer;transition:border-color .2s,color .2s;
+}
+.vorlagen button:hover{border-color:var(--lila-500);color:var(--tinte)}
+.vorlagen-leer{font-size:13px;color:var(--nebel-500);line-height:1.55;padding:6px 0}
+.werkbank-griffe{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center}
+.werkbank-griffe .knopf{min-height:44px;padding:0 20px;font-size:14px}
+.werkbank-griffe .merk{font-size:12.5px;color:var(--nebel-500)}
+
+/* ---------- Der Bogen: Pauspapier auf dem Tisch ----------
+   Dieselbe Sprache wie die Tafel in der Akte (Entscheidung 2026-08-16): was
+   die KI beiträgt, liegt durchscheinend und leicht schief obenauf, in der
+   Akzentfarbe, und gehört der Beratung noch nicht. */
+.tisch{margin-top:12px;display:flex;flex-direction:column;gap:18px}
+.bogen{
+  position:relative;border-radius:var(--radius-karte);padding:22px 24px;
+  scroll-margin-top:136px;
+  background:linear-gradient(180deg, rgba(245,244,254,.92), rgba(255,255,255,.9));
+  border:1px solid var(--lila-200);
+  box-shadow:0 16px 44px rgba(59,52,134,.13);
+  rotate:-.35deg;
+  transition:rotate .5s var(--kurve), background .5s ease, border-color .5s ease, box-shadow .5s ease;
+}
+.bogen:nth-child(even){rotate:.3deg}
+.bogen.neu{opacity:0;translate:0 -12px;animation:aufgelegt .5s var(--kurve) forwards}
+@keyframes aufgelegt{to{opacity:1;translate:0 0}}
+/* Der Herkunfts-Streifen: solange es Pauspapier ist, steht quoroAI dran. */
+.bogen .b-herkunft{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--lila-700);
+}
+.bogen .b-herkunft img{width:15px;height:15px;display:block}
+.bogen .b-frage{font-size:17px;font-weight:600;letter-spacing:-.01em;line-height:1.35;margin-top:8px}
+.bogen .b-meta{font-size:12.5px;color:var(--nebel-600);margin-top:4px}
+.bogen .b-meta a{color:var(--nebel-600);text-decoration:underline;text-decoration-color:var(--nebel-300);text-underline-offset:3px}
+.bogen .b-meta a:hover{color:var(--lila-700)}
+.bogen .b-text{font-size:15px;line-height:1.65;margin-top:16px}
+.bogen .b-text p + p{margin-top:10px}
+.bogen .b-text ol{margin:10px 0 0 20px}
+.bogen .b-text li + li{margin-top:7px}
+.bogen .b-text b{font-weight:600}
+
+/* Die Belege: wo die Antwort steht */
+.belege{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px}
+.belege a{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:var(--flaeche);font-size:12.5px;color:var(--nebel-700);text-decoration:none;
+  transition:border-color .2s,color .2s;
+}
+.belege a:hover{border-color:var(--lila-500);color:var(--tinte)}
+/* Ein Beleg ist ein Weg in die Unterlage, kein Etikett — am Finger muss er
+   sich treffen lassen (docs/wissen/handy-durchgang.md). */
+@media (pointer:coarse){.belege a{min-height:44px;padding:0 14px}}
+
+/* Die Kante: hier hört der Beleg auf. Bei einem Kunden bricht er hier ab und
+   übergibt — bei der Beratung tut er es nicht, sagt es aber. */
+.kante{
+  margin-top:18px;padding:14px 16px;border-radius:var(--radius-innen);
+  background:var(--bernstein-fond);
+  border-left:3px solid var(--bernstein);
+  font-size:14px;line-height:1.6;
+}
+.kante b{font-weight:600;color:var(--bernstein)}
+.kante .k-text{margin-top:6px}
+
+.bogen .griffe{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.bogen .griffe .knopf{min-height:42px;padding:0 18px;font-size:14px}
+.hand{font-family:'Caveat',cursive;font-size:20px;font-weight:700;color:var(--lila-700);rotate:-1.2deg;display:inline-block;margin-top:12px}
+
+/* ---------- In Tinte gedrückt: der Bogen wird das Papier der Beratung ----------
+   Der sichtbare Übergang IST die Aussage: hier verlässt der Satz quoroAI. */
+.bogen.uebernommen{
+  rotate:0deg;
+  background:var(--flaeche);
+  border-color:var(--marken-farbe);
+  box-shadow:0 18px 50px rgba(43,95,227,.16);
+}
+.bogen.uebernommen .b-herkunft{color:var(--marken-farbe)}
+.bogen.uebernommen .hand{color:var(--marken-farbe)}
+/* Auch der Knopf wechselt die Farbe: ein lila Absenden auf dem Papier der
+   Beratung würde behaupten, quoroAI schicke es. Das tut es nicht. */
+.bogen.uebernommen .knopf.primaer{
+  background:linear-gradient(180deg, color-mix(in srgb, var(--marken-farbe) 88%, #fff), var(--marken-farbe));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55), inset 0 -2px 5px rgba(0,0,0,.18), 0 10px 24px rgba(43,95,227,.34);
+}
+.marken-marke{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--marken-farbe);
+}
+/* Das Quadrat ist die Marke der Beratung an der Stelle, an der vorher das
+   quoroAI-Zeichen stand — ein Platzhalter für ihr Logo, kein Zustandspunkt. */
+.marken-marke .punkt{width:13px;height:13px;border-radius:4px;background:var(--marken-farbe);flex-shrink:0}
+.ausgang{margin-top:18px}
+.ausgang label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.ausgang textarea{
+  width:100%;min-height:150px;resize:vertical;line-height:1.6;font-size:16px;
+  padding:14px 16px;border-radius:var(--radius-innen);
+  border:1px solid var(--nebel-200);background:var(--flaeche);color:var(--tinte);
+}
+.ausgang textarea:focus{outline:none;border-color:var(--marken-farbe);box-shadow:0 0 0 4px rgba(43,95,227,.12)}
+.zurueckgelassen{
+  margin-top:10px;padding:11px 14px;border-radius:var(--radius-innen);
+  background:var(--nebel-100);font-size:13px;line-height:1.55;color:var(--nebel-600);
+}
+.zurueckgelassen b{color:var(--nebel-700);font-weight:600}
+
+/* die ruhige Endkarte, wenn ein Bogen seinen Weg gegangen ist */
+.abgelegt{
+  display:flex;align-items:center;gap:12px;margin-top:18px;
+  padding:13px 16px;border-radius:var(--radius-innen);
+  background:var(--gruen-fond);font-size:14px;line-height:1.5;
+}
+.abgelegt b{font-weight:600}
+.bogen.verworfen{opacity:.5;filter:saturate(.5)}
+
+.leer-tisch{
+  margin-top:12px;padding:26px 24px;border-radius:var(--radius-karte);
+  border:1px dashed var(--nebel-300);
+  font-size:14.5px;line-height:1.6;color:var(--nebel-600);
+}
+
+.fuss-satz{font-size:13px;color:var(--nebel-500);margin-top:26px;line-height:1.6;max-width:62ch}
+.fuss-satz a{color:var(--lila-700)}
+
+@media (prefers-reduced-motion: reduce){
+  main > *{animation:none;opacity:1;translate:none}
+  .bogen,.bogen.neu{animation:none;opacity:1;translate:none;transition:none}
+  .liest{transition:none}
+}
+@media (max-width:700px){
+  nav{padding:0 18px;padding-bottom:58px}
+  nav .wortmarke small{display:none}
+  #krume{left:18px;top:70px}
+  main{padding:132px 18px calc(64px + env(safe-area-inset-bottom))}
+  .tafel,.bogen{padding:18px 18px}
+  /* Am Finger ist ein halber Knopf kein Ziel: die Griffe nehmen die Zeile. */
+  .worueber button{flex:1 1 44%;min-height:46px;text-align:center}
+  .vorlagen button{flex:1 1 100%;min-height:46px}
+  .bogen .griffe .knopf,.werkbank-griffe .knopf{flex:1 1 100%;min-height:48px}
+  .werkbank-griffe .merk{flex:1 1 100%}
+}
+</style>
+</head>
+<body class="quoro"
+      data-hilfe-titel="Selber fragen"
+      data-hilfe-satz="Hier fragt die Beratung denselben KI-Berater, den ihre Kunden hören. Der Unterschied ist nicht die Marke, sondern die Haftung: was hier herauskommt, ist ein Entwurf, und wer ihn hinausgibt, unterschreibt ihn.">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <div class="nav-rechts" style="display:flex;align-items:center;gap:10px"><span data-hilfe-knopf></span><a class="vorschlaege" href="index.html">Alle Vorschläge</a></div>
+</nav>
+
+<a id="krume" href="beratung-f-modell.html#zentrale"><span class="zurueck">← Zentrale</span><span>/</span><b>Selber fragen</b></a>
+
+<main>
+  <div class="kopf">
+    <h1>Selber fragen</h1>
+    <div class="stand">Derselbe KI-Berater, den deine Kunden hören. Nur fragt hier jemand, der die Antwort verantwortet — deshalb bekommst du keine Auskunft, sondern einen Entwurf.</div>
+  </div>
+
+  <h3>Deine Frage</h3>
+  <section class="tafel" aria-label="Frage stellen"
+           data-hilfe-name="Worüber du fragst"
+           data-hilfe="Deine Kunden fragen immer über ihren eigenen Betrieb — du nicht. Deshalb steht die Wahl vor der Frage, und die Zeile darunter sagt dir, was er dabei aufschlägt. „Deine Beratung“ liest keine einzige Kundenakte.">
+    <div class="worueber" id="worueber" role="group" aria-label="Worüber gefragt wird">
+      <button type="button" data-bereich="petersen" aria-pressed="false">Petersen Stahlbau</button>
+      <button type="button" data-bereich="cordes" aria-pressed="true">Cordes Logistik</button>
+      <button type="button" data-bereich="alle" aria-pressed="false">Alle vier Mandate</button>
+      <button type="button" data-bereich="beratung" aria-pressed="false">Deine Beratung</button>
+    </div>
+    <div class="liest" id="liest" aria-live="polite"></div>
+
+    <div class="feld frage-feld">
+      <label for="frage">Was willst du wissen?</label>
+      <textarea id="frage" placeholder="Frag ihn wie einen Mitarbeiter, der alles gelesen hat."></textarea>
+    </div>
+    <div class="vorlagen" id="vorlagen" aria-label="Fragen, die diese Vorführung beantwortet"></div>
+
+    <div class="werkbank-griffe">
+      <button class="knopf primaer" id="fragen" type="button">Fragen</button>
+      <span class="merk">Er antwortet dir, nicht dem Kunden. Zum Kunden geht nichts, solange du es nicht schickst.</span>
+    </div>
+  </section>
+
+  <h3>Was auf dem Tisch liegt</h3>
+  <div class="tisch" id="tisch">
+
+    <!-- Der Bogen, der schon dalag: heute früh gefragt, noch nicht abgelegt.
+         Er zeigt die Regel ohne Erklärung — Entwurf, Belege, zwei Ausgänge. -->
+    <section class="bogen" data-bogen="petersen" aria-label="Entwurf zur Preisargumentation Petersen">
+      <span class="b-herkunft"><img src="bilder/quoro-icon.svg" alt="" width="15" height="15">Entwurf deines KI-Beraters</span>
+      <div class="b-frage">„Entwirf mir die Preisargumentation für Donnerstag."</div>
+      <div class="b-meta">Über Petersen Stahlbau, heute um 7:41 gefragt. Der Termin steht Donnerstag, 10:00.</div>
+      <div class="b-text">
+        <p>Drei Sätze, in dieser Reihenfolge:</p>
+        <ol>
+          <li>Der Stahlpreis ist seit April um 14 Prozent gestiegen, eure Preise stehen seit Januar. Das ist der ganze Margenverlust von 3,1 Punkten, nicht der Ausschuss.</li>
+          <li>Ein Preisschritt von 4,5 Prozent auf die Serienteile holt 2,4 Punkte zurück und liegt unter dem, was der Wettbewerb im Frühjahr genommen hat.</li>
+          <li>Der Einkauf bei Nordstahl läuft am 30. September aus. Wer erst danach über Preise redet, verhandelt ohne Zahlen.</li>
+        </ol>
+      </div>
+      <div class="belege">
+        <a href="beratung-akte.html">Akte Petersen, Skizze zum Preisgespräch</a>
+        <a href="beratung-wissen.html">Wissen, Branchenspiegel Abschnitt 5</a>
+        <a href="beratung-marge.html">Marge und Sätze</a>
+      </div>
+      <div class="griffe">
+        <button class="knopf primaer" type="button" data-tu="akte-petersen">Als Blatt in die Akte Petersen</button>
+        <button class="knopf gefahr" type="button" data-tu="verwerfen">Verwerfen</button>
+      </div>
+      <div class="abgelegt" role="status" aria-live="polite" hidden></div>
+    </section>
+
+  </div>
+
+  <p class="fuss-satz">Was hier steht, sieht kein Kunde — auch nicht der, über den es geht. Was du hinausgibst, geht als dein Wort in sein Gespräch, so wie die Antworten aus <a href="beratung-termine.html">Termine und Übergaben</a>.</p>
+</main>
+
+<div id="demo-hinweis" role="status" aria-live="polite" style="position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--lila-700);opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--kurve)">Diese Fläche entsteht gerade.</div>
+
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll('main > *').forEach(function(el, i){
+    el.style.setProperty('--verz', (i * 0.07) + 's');
+  });
+
+  var hinweisTimer = null;
+  function demoHinweis(text){
+    var h = document.getElementById('demo-hinweis');
+    h.textContent = text;
+    h.style.opacity = .95; h.style.translate = '-50% 0';
+    clearTimeout(hinweisTimer);
+    hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2600);
+  }
+
+  /* ---------- Worüber: der Umschalter zeigt seine Wirkung ----------
+     Nicht der Name des Bereichs ist die Auskunft, sondern was er aufschlägt.
+     Für „Deine Beratung" ist die Aussage eine Verneinung, und die ist der
+     eigentliche Unterschied zum Kundengespräch. */
+  var LIEST = {
+    petersen: 'Er liest dafür: die <b>Akte Petersen</b>, dein <b>Wissen</b> und was er Herrn Petersen selbst gesagt hat.',
+    cordes:   'Er liest dafür: die <b>Akte Cordes</b>, dein <b>Wissen</b> und die Frage, die er dir heute um 8:12 übergeben hat.',
+    alle:     'Er liest dafür: <b>alle vier Akten</b> und dein Wissen. Gesagtes bleibt bei dem, der es gesagt hat — er vergleicht Zahlen, keine Gespräche.',
+    beratung: 'Er liest dafür: deine <b>Zeiten</b>, deine <b>Sätze</b> und deine <b>Rechnungen</b>. <b>Keine Kundenakte</b> — hier geht es um dich.'
+  };
+  var bereich = 'cordes';
+  var liestEl = document.getElementById('liest');
+  var wechselTimer = null;
+
+  function liestSetzen(){
+    if (reduziert) { liestEl.innerHTML = LIEST[bereich]; return; }
+    liestEl.classList.add('wechselt');
+    clearTimeout(wechselTimer);
+    wechselTimer = setTimeout(function(){
+      liestEl.innerHTML = LIEST[bereich];
+      liestEl.classList.remove('wechselt');
+    }, 160);
+  }
+
+  /* ---------- Die drei Fragen, die diese Vorführung beantwortet ----------
+     Jede hängt an ihrem Bereich: wählt man einen anderen, verschwindet sie.
+     Eine Vorlage, die zum gewählten Bereich nicht passt, wäre eine Falle. */
+  var VORLAGEN = [
+    {id:'petersen', bereich:'petersen', text:'Entwirf mir die Preisargumentation für Donnerstag.'},
+    {id:'lage',     bereich:'beratung', text:'Welches Mandat trägt mich gerade, welches kostet mich?'},
+    {id:'afa',      bereich:'cordes',   text:'Wechselbrücken bei Cordes: dieses Jahr voll abschreiben oder über die Nutzungsdauer?'}
+  ];
+  var vorlagenEl = document.getElementById('vorlagen');
+  var frageFeld = document.getElementById('frage');
+
+  VORLAGEN.forEach(function(v){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = '„' + v.text + '"';
+    b.dataset.vorlage = v.id;
+    b.dataset.bereich = v.bereich;
+    b.addEventListener('click', function(){
+      bereichSetzen(v.bereich);
+      frageFeld.value = v.text;
+      frageFeld.focus();
+    });
+    vorlagenEl.appendChild(b);
+  });
+
+  /* Ist zu einem Bereich nichts mehr offen, sagt die Zeile das — ein Feld,
+     das plötzlich leer ist, sieht aus wie ein Fehler. */
+  var vorlagenLeer = document.createElement('span');
+  vorlagenLeer.className = 'vorlagen-leer';
+  vorlagenEl.appendChild(vorlagenLeer);
+
+  /* Dativ, weil der Satz „Weiter geht es bei …" ihn braucht. */
+  var BEREICH_BEI = {petersen:'Petersen Stahlbau', cordes:'Cordes Logistik', alle:'allen vier Mandaten', beratung:'deiner Beratung'};
+
+  function vorlagenZeigen(){
+    var offen = 0, anderswo = [];
+    vorlagenEl.querySelectorAll('button').forEach(function(b){
+      var frei = !gestellt[b.dataset.vorlage];
+      var passt = b.dataset.bereich === bereich && frei;
+      b.hidden = !passt;
+      if (passt) offen++;
+      else if (frei && anderswo.indexOf(b.dataset.bereich) < 0) anderswo.push(b.dataset.bereich);
+    });
+    vorlagenLeer.hidden = offen > 0;
+    if (offen > 0) return;
+    vorlagenLeer.textContent = anderswo.length
+      ? 'Dazu ist in dieser Vorführung nichts offen. Weiter geht es bei ' +
+        anderswo.map(function(k){ return BEREICH_BEI[k]; }).join(' und ') + '.'
+      : 'Alle drei Fragen dieser Vorführung liegen auf dem Tisch.';
+  }
+
+  function bereichSetzen(neu){
+    if (neu === bereich) { vorlagenZeigen(); return; }
+    bereich = neu;
+    document.querySelectorAll('#worueber button').forEach(function(b){
+      b.setAttribute('aria-pressed', b.dataset.bereich === bereich ? 'true' : 'false');
+    });
+    liestSetzen();
+    vorlagenZeigen();
+  }
+
+  document.querySelectorAll('#worueber button').forEach(function(b){
+    b.addEventListener('click', function(){ bereichSetzen(b.dataset.bereich); });
+  });
+
+  /* ---------- Die Bogen, die entstehen können ----------
+     Der Petersen-Bogen liegt schon im Markup; er gilt als gestellt. */
+  var gestellt = {petersen:true};
+
+  var BOGEN = {
+    lage: {
+      bereich: 'beratung',
+      frage: 'Welches Mandat trägt mich gerade, welches kostet mich?',
+      meta: 'Über deine Beratung, gerade eben. Keine Kundenakte ist dafür aufgeschlagen worden.',
+      text:
+        '<p><b>Petersen trägt dich.</b> 12,4 Stunden im August, 6.426 € offen, macht 214 € je Stunde. Freitag ist knapp kalkuliert, läuft aber ruhig: 4 Stunden, 31 Prozent Marge, kein Eingriff nötig.</p>' +
+        '<p><b>Cordes kostet dich gerade.</b> 9,1 Stunden, davon 3,4 auf Fragen, die ohne die Steuerantwort nicht weitergehen. Die liegt seit heute früh bei dir.</p>' +
+        '<p><b>MTS ist das eigentliche Problem.</b> Seit drei Wochen still, null Fragen, und die Jahrespauschale läuft weiter. Das sieht aus wie Gewinn und ist ein Kunde, der gerade geht.</p>',
+      belege: [
+        {text:'Zeiten im August', href:'beratung-zeiten.html'},
+        {text:'Marge und Sätze', href:'beratung-marge.html'},
+        {text:'Rechnungen der Beratung', href:'beratung-rechnungen.html'}
+      ],
+      kante: null,
+      griffe: [
+        {tu:'anruf-mts', art:'primaer', wort:'Anruf bei MTS in die Woche legen'},
+        {tu:'verwerfen', art:'gefahr', wort:'Verwerfen'}
+      ],
+      hand: 'die Zahlen gehören dir allein.'
+    },
+    afa: {
+      bereich: 'cordes',
+      frage: 'Wechselbrücken bei Cordes: dieses Jahr voll abschreiben oder über die Nutzungsdauer?',
+      meta: 'Über Cordes Logistik, gerade eben. Genau diese Frage hat er dir heute um 8:12 <a href="beratung-termine.html#cordes">als Übergabe hingelegt</a>.',
+      text:
+        '<p>Die zwei Wechselbrücken stehen mit <b>34.800 € netto</b> in der Anlagenliste, geliefert am 14. Mai. Die amtliche AfA-Tabelle führt Wechselbrücken mit <b>neun Jahren</b> Nutzungsdauer; zeitanteilig ab Mai wären das <b>2.253 € für 2026</b>.</p>',
+      kante: {
+        kopf: 'Ab hier steht nichts mehr in einer Unterlage.',
+        text: 'Ob daneben ein Sofortabzug in Frage kommt, hängt an Dingen, die ich nicht sehe: Betriebsgröße, Gewinn des Vorjahres, was in den letzten Jahren schon abgezogen wurde. <b>Bei Herrn Cordes hätte ich hier abgebrochen und an dich übergeben. Bei dir tue ich es nicht — aber es bleibt eine Steuerfrage, und die verantwortest du.</b>'
+      },
+      belege: [
+        {text:'Akte Cordes, Anlagenliste Seite 2', href:'beratung-akte.html'},
+        {text:'Wissen, AfA-Tabelle 2026', href:'beratung-wissen.html'},
+        {text:'Die Übergabe von heute früh', href:'beratung-termine.html#cordes'}
+      ],
+      griffe: [
+        {tu:'an-cordes', art:'primaer', wort:'In deinem Namen an Herrn Cordes'},
+        {tu:'steuerberater', art:'leise', wort:'Erst mit dem Steuerberater klären'},
+        {tu:'verwerfen', art:'gefahr', wort:'Verwerfen'}
+      ],
+      /* Was hinausgeht, ist der belegte Teil. Seine Einschätzung ist für dich
+         geschrieben, nicht für den Kunden — sie bleibt sichtbar liegen. */
+      ausgang: {
+        wer: 'Herrn Cordes',
+        marke: 'Nordholm & Partner',
+        entwurf: 'Guten Tag Herr Cordes,\n\ndie beiden Wechselbrücken stehen mit 34.800 € netto in Ihrer Anlagenliste, geliefert am 14. Mai. Die amtliche AfA-Tabelle sieht für Wechselbrücken neun Jahre Nutzungsdauer vor, zeitanteilig ab Mai also rund 2.253 € für 2026.\n\nOb daneben ein Sofortabzug in Frage kommt, sehe ich mir bis Freitag an und melde mich.',
+        zurueck: 'Nicht mitgeschickt: seine Einschätzung zum Sofortabzug. Die war für dich geschrieben.'
+      }
+    }
+  };
+
+  var tisch = document.getElementById('tisch');
+
+  function beleg(b){
+    return '<a href="' + b.href + '">' + b.text + '</a>';
+  }
+
+  function baueBogen(id){
+    var d = BOGEN[id];
+    var s = document.createElement('section');
+    s.className = 'bogen neu';
+    s.dataset.bogen = id;
+    s.setAttribute('aria-label', 'Entwurf: ' + d.frage);
+    s.innerHTML =
+      '<span class="b-herkunft"><img src="bilder/quoro-icon.svg" alt="" width="15" height="15">Entwurf deines KI-Beraters</span>' +
+      '<div class="b-frage">„' + d.frage + '"</div>' +
+      '<div class="b-meta">' + d.meta + '</div>' +
+      '<div class="b-text">' + d.text + '</div>' +
+      (d.kante ? '<div class="kante"><b>' + d.kante.kopf + '</b><div class="k-text">' + d.kante.text + '</div></div>' : '') +
+      '<div class="belege">' + d.belege.map(beleg).join('') + '</div>' +
+      '<div class="griffe">' + d.griffe.map(function(g){
+        return '<button class="knopf ' + g.art + '" type="button" data-tu="' + g.tu + '">' + g.wort + '</button>';
+      }).join('') + '</div>' +
+      (d.hand ? '<span class="hand">' + d.hand + '</span>' : '') +
+      '<div class="abgelegt" role="status" aria-live="polite" hidden></div>';
+    tisch.prepend(s);
+    griffeBinden(s);
+    if (!reduziert) setTimeout(function(){ s.classList.remove('neu'); }, 600);
+    else s.classList.remove('neu');
+    return s;
+  }
+
+  /* ---------- Die Ausgänge ---------- */
+  function ablegen(bogen, satz){
+    bogen.querySelector('.griffe').hidden = true;
+    var hand = bogen.querySelector('.hand');
+    if (hand) hand.hidden = true;
+    /* Erst sichtbar, dann füllen: ein aria-live-Bereich, der versteckt
+       beschrieben wird, sagt beim Auftauchen nichts. */
+    var karte = bogen.querySelector('.abgelegt');
+    karte.hidden = false;
+    karte.innerHTML = satz;
+  }
+
+  /* „In deinem Namen" drückt das Pauspapier in die Tinte der Beratung: der
+     Bogen richtet sich gerade, das quoroAI-Lila fällt weg, die Marke der
+     Beratung steht dran — und der Text landet in einem Feld. Was ohne Hand
+     hinausginge, wäre kein Satz der Beratung, sondern einer der Software. */
+  function inTinteDruecken(bogen, id){
+    var a = BOGEN[id].ausgang;
+    bogen.classList.add('uebernommen');
+    bogen.style.setProperty('--marken-farbe', '#2b5fe3');
+    /* Der quoroAI-Streifen wird versteckt, nicht zerstört: „Doch nicht
+       schicken" muss den Bogen wieder zu dem machen, was er war. */
+    var herkunft = bogen.querySelector('.b-herkunft');
+    herkunft.hidden = true;
+    var marke = document.createElement('span');
+    marke.className = 'marken-marke';
+    marke.innerHTML = '<span class="punkt"></span>' + a.marke;
+    herkunft.after(marke);
+    bogen.querySelector('.griffe').hidden = true;
+    var kante = bogen.querySelector('.kante');
+    if (kante) kante.hidden = true;
+
+    var feldId = 'ausgang-' + id;
+    var block = document.createElement('div');
+    block.className = 'ausgang';
+    block.innerHTML =
+      '<label for="' + feldId + '">Das geht an ' + a.wer + ', mit deinem Namen daran</label>' +
+      '<textarea id="' + feldId + '"></textarea>' +
+      '<div class="zurueckgelassen"><b>Liegen geblieben:</b> ' + a.zurueck + '</div>' +
+      '<div class="griffe">' +
+        '<button class="knopf primaer" type="button" data-tu="absenden">Absenden</button>' +
+        '<button class="knopf leise" type="button" data-tu="doch-nicht">Doch nicht schicken</button>' +
+      '</div>' +
+      '<span class="hand">ab hier ist es dein Satz.</span>';
+    bogen.querySelector('.abgelegt').before(block);
+    block.querySelector('textarea').value = a.entwurf;
+    griffeBinden(bogen);
+    /* Reduzierte Bewegung heißt „nicht animieren", nicht „nicht hinführen" —
+       ohne den Sprung entsteht das Feld außerhalb des Bildschirms. */
+    block.querySelector('textarea').scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block:'center'});
+  }
+
+  var TUN = {
+    'akte-petersen': function(bogen){
+      ablegen(bogen, '<span>Liegt als Blatt in der <b>Akte Petersen</b>, mit dem heutigen Datum. Herr Petersen sieht es nicht, es ist dein Papier.</span>');
+    },
+    'anruf-mts': function(bogen){
+      ablegen(bogen, '<span>Steht als Anruf bei MTS in <b>deiner Woche</b>, morgen früh. <a href="beratung-kalender.html">In der Woche ansehen</a></span>');
+    },
+    'steuerberater': function(bogen){
+      ablegen(bogen, '<span>Zurückgestellt. Herr Cordes bekommt vom KI-Berater die Nachricht, dass du die Frage prüfst — die <a href="beratung-termine.html#cordes">Übergabe</a> bleibt so lange offen.</span>');
+    },
+    'verwerfen': function(bogen){
+      bogen.classList.add('verworfen');
+      ablegen(bogen, '<span>Verworfen. Nichts davon ist irgendwo gelandet.</span>');
+    },
+    'an-cordes': function(bogen, id){ inTinteDruecken(bogen, id); },
+    'absenden': function(bogen){
+      var feld = bogen.querySelector('.ausgang textarea');
+      if (!feld.value.trim()) { feld.focus(); return; }
+      bogen.querySelector('.ausgang').hidden = true;
+      ablegen(bogen, '<span>Steht im Gespräch von Herrn Cordes, als dein Wort, mit deinem Namen daran. Die <a href="beratung-termine.html#cordes">Übergabe</a> ist damit erledigt.</span>');
+    },
+    /* Doch nicht schicken heißt: der Bogen ist wieder Pauspapier. Bliebe er in
+       der Marke der Beratung stehen, sähe er unterschrieben aus, wäre es nicht,
+       und alle anderen Wege wären verloren. */
+    'doch-nicht': function(bogen){
+      var ausgang = bogen.querySelector('.ausgang');
+      if (ausgang) ausgang.remove();
+      var marke = bogen.querySelector('.marken-marke');
+      if (marke) marke.remove();
+      bogen.querySelector('.b-herkunft').hidden = false;
+      bogen.classList.remove('uebernommen');
+      bogen.style.removeProperty('--marken-farbe');
+      var kante = bogen.querySelector('.kante');
+      if (kante) kante.hidden = false;
+      bogen.querySelector('.griffe').hidden = false;
+      demoHinweis('Nichts geschickt. Der Entwurf liegt wieder da.');
+    }
+  };
+
+  function griffeBinden(bogen){
+    bogen.querySelectorAll('[data-tu]').forEach(function(b){
+      if (b.dataset.gebunden) return;
+      b.dataset.gebunden = '1';
+      b.addEventListener('click', function(){
+        var tun = TUN[b.dataset.tu];
+        if (tun) tun(bogen, bogen.dataset.bogen);
+      });
+    });
+  }
+  document.querySelectorAll('.bogen').forEach(griffeBinden);
+
+  /* ---------- Fragen ----------
+     Ein eigener Satz bekommt hier keine erfundene Antwort. Eine Vorführung,
+     die auf alles antwortet, behauptet mehr, als das Produkt kann. */
+  document.getElementById('fragen').addEventListener('click', function(){
+    var text = frageFeld.value.trim();
+    if (!text) { frageFeld.focus(); return; }
+    /* Der Umschalter gilt auch beim Fragen. Wer die Vorlage nimmt und danach
+       den Bereich wechselt, bekommt NICHT den alten Bogen — sonst führte die
+       Fläche genau die Aussage vor, die sie widerlegt: dass „Deine Beratung"
+       keine Kundenakte liest. */
+    var treffer = null, danebenBereich = null;
+    VORLAGEN.forEach(function(v){
+      if (gestellt[v.id] || v.text.toLowerCase() !== text.toLowerCase()) return;
+      if (v.bereich === bereich) treffer = v;
+      else danebenBereich = v.bereich;
+    });
+    if (!treffer) {
+      demoHinweis(danebenBereich
+        ? 'Diese Frage gehört zu ' + BEREICH_BEI[danebenBereich] + '.'
+        : 'In der Vorführung antwortet er auf die drei Fragen.');
+      return;
+    }
+    gestellt[treffer.id] = true;
+    frageFeld.value = '';
+    var b = baueBogen(treffer.id);
+    vorlagenZeigen();
+    setTimeout(function(){ b.scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block:'start'}); }, reduziert ? 0 : 120);
+  });
+
+  liestEl.innerHTML = LIEST[bereich];
+  vorlagenZeigen();
+})();
+</script>
+<script src="hilfe.js"></script>
+<script src="uhr.js"></script>
+<script src="zeiger.js"></script>
+<script src="rechtsfuss.js"></script>
+</body>
+</html>
