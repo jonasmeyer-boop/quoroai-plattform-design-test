@@ -6,9 +6,13 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V54
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V55
    (V51: Häppchen D2, ein Mensch spricht in denselben Strang — aus drei Reviews:
    Ankunft, Abschied, Anlagen, Warteschlange und die Kante des Grenzfalls.
+   V55: Häppchen D4 — was gesetzte Seiten hat, öffnet der gemeinsame
+   Blatt-Blick (blatt.js, Inhalt aus blaetter.js): der Kunde sieht dasselbe
+   Dokument wie seine Beratung in der Akte, in seiner Marke. Der eigene Bogen
+   bleibt für Bilder, eigene Uploads und Blätter, die gerade entstehen.
    V52: Häppchen D3 — am ersten Tag stehen im Auftakt die Fragen eines neuen
    Kunden. Nach einer Marge zu fragen, zu der noch keine Zahl vorliegt, wäre
    der erste Satz, mit dem die Fläche lügt.
@@ -859,6 +863,8 @@ body.blatt-offen{overflow:hidden}
 <script src="marke.js"></script>
 <script src="glocke.js"></script>
 <script src="bitten.js"></script>
+<script src="blaetter.js"></script>
+<script src="blatt.js"></script>
 </head>
 <body>
 
@@ -1405,7 +1411,11 @@ body.blatt-offen{overflow:hidden}
 
   function baueFormel(d){
     var html = d.zeilen.map(function(z, i){
-      return '<div class="zeile-f' + (z.ergebnis ? ' ergebnis' : '') + '" style="transition-delay:' + (0.25 * i) + 's"' + (z.sk ? ' data-sk="' + z.sk + '"' : '') + '>' +
+      /* Die Staffel wird enger, je länger die Formel ist: der Stift kreist das
+         Ergebnis nach knapp 1,7 s ein, und er darf nichts umkreisen, das noch
+         einfliegt. */
+      var takt = Math.min(0.25, 0.6 / Math.max(1, d.zeilen.length - 1));
+      return '<div class="zeile-f' + (z.ergebnis ? ' ergebnis' : '') + '" style="transition-delay:' + (takt * i).toFixed(2) + 's"' + (z.sk ? ' data-sk="' + z.sk + '"' : '') + '>' +
         '<span class="op">' + (z.op || '') + '</span><span>' + z.label + '</span>' +
         '<span class="fuellung"></span><span class="wert-f"' + (z.wertSk ? ' data-sk="' + z.wertSk + '"' : '') + '>' + z.wert + '</span></div>';
     }).join('');
@@ -1486,6 +1496,35 @@ body.blatt-offen{overflow:hidden}
       a.click();
     });
 
+    /* ---------- Was es als echte Seiten gibt, kommt aus blaetter.js ----------
+       Häppchen D4: der Kunde sieht dasselbe Dokument wie seine Beratung in der
+       Akte — dieselben Seiten, dieselben Zahlen, nur seine Marke drumherum.
+       Der Bogen darunter bleibt für alles, was keine gesetzten Seiten hat:
+       eigene Uploads, Bilder, Blätter, die gerade erst entstehen. */
+    var GESETZT = {
+      'preismodell benchmark': {name: 'benchmark'},
+      'rahmenvertrag stahl': {name: 'rahmenvertrag', fund: {seite: 2, wort: 'Preisgleitklausel'}},
+      'branchenspiegel metallzulieferer 2025': {name: 'branchenspiegel', fund: {seite: 2, wort: '35,9 Prozent'}},
+      'beratungsvertrag': {name: 'beratungsvertrag'},
+      'jahresabschluss 2025, entwurf': {name: 'jahresabschluss'},
+      'monatsauswertung juli': {name: 'monatsauswertung', fund: {seite: 2, wort: '31,8 Prozent'}}
+    };
+    function gesetzt(titel, sicht, aus){
+      if (!window.Blatt || !window.Blaetter) return false;
+      var t = GESETZT[String(titel || '').toLowerCase().trim()];
+      if (!t) return false;
+      var s = sicht || {};
+      /* White-Label: der Name der Beratung steht nicht im Papier, er kommt
+         aus marke.js (blaetter.js). */
+      s.beratung = (window.Marke && Marke.daten && Marke.daten.name) || rede('deiner Beratung', 'Ihrer Beratung');
+      var dok = Blaetter.hol(t.name, s);
+      if (!dok) return false;
+      if (t.fund && !dok.fund) dok.fund = t.fund;
+      dok.aus = aus || null;
+      Blatt.zeige(dok);
+      return true;
+    }
+
     /* Demo-Inhalte: ein ausgearbeitetes Blatt, ein Zustand für Entstehendes */
     function fuelle(name, metaText){
       titel.textContent = name;
@@ -1533,11 +1572,19 @@ body.blatt-offen{overflow:hidden}
       zu.hidden = false;
       document.body.classList.add('blatt-offen');
     }
-    function oeffne(name, metaText){
+    function oeffne(name, metaText, aus){
+      if (gesetzt(name, {meta: metaText || '',
+                         fuss: rede('Liegt in deiner Akte.', 'Liegt in Ihrer Akte.')}, aus)) return;
       fuelle(name, metaText || '');
       zeige();
     }
-    function oeffneQuelle(q){
+    function oeffneQuelle(q, aus){
+      var woher = q.art === 'wissen'
+        ? rede('aus dem Wissen deiner Beratung', 'aus dem Wissen Ihrer Beratung')
+        : rede('aus deiner Akte', 'aus Ihrer Akte');
+      if (gesetzt(q.titel, {meta: (q.abschnitt ? 'Abschnitt ' + q.abschnitt + ', ' : '') + woher,
+                            fuss: rede('So belegt dein Berater seine Antwort.',
+                                       'So belegt Ihr Berater seine Antwort.')}, aus)) return;
       setzeLadbar(null);
       titel.textContent = q.titel;
       meta.textContent = (q.abschnitt ? 'Abschnitt ' + q.abschnitt + ' ' : '') +
@@ -1580,7 +1627,7 @@ body.blatt-offen{overflow:hidden}
       var karte = e.target.closest('.karte[data-doku], .karte[data-bild]');
       if (!karte) return;
       if (karte.dataset.bild) oeffneBild(karte.dataset.bild, karte.dataset.doku || 'Dein Bild', karte.dataset.dokuMeta);
-      else oeffne(karte.dataset.doku, karte.dataset.dokuMeta);
+      else oeffne(karte.dataset.doku, karte.dataset.dokuMeta, karte);
     }
     document.getElementById('akte').addEventListener('click', greife);
     document.getElementById('regal-inhalt').addEventListener('click', greife);
@@ -1616,7 +1663,7 @@ body.blatt-offen{overflow:hidden}
       /* Web-Quellen öffnen die Seite selbst, Akte und Wissen den Blatt-Blick */
       b.addEventListener('click', function(){
         if (q.art === 'web' && q.url) window.open(q.url, '_blank', 'noopener');
-        else blattBlick.oeffneQuelle(q);
+        else blattBlick.oeffneQuelle(q, b);
       });
       lage.appendChild(b);
       setTimeout(function(){ b.classList.add('da'); }, reduziert ? 0 : 110 * i + 60);
@@ -2807,9 +2854,10 @@ body.blatt-offen{overflow:hidden}
         ]},
         {t: 'Der erste Hebel, einmal ehrlich durchgerechnet:'},
         {formel: {zeilen: [
-          {label:'Umsatz mit C-Kunden', wert:'218.000 €'},
-          {op:'×', label:'Preiserhöhung', wert:'4 %'},
-          {op:'−', label:'erwartbarer Mengenverlust', wert:'5 %'},
+          {label:'Umsatz mit C-Kunden', wert:'876.000 €'},
+          {op:'×', label:'Preiserhöhung 4 %', wert:'35.040 €'},
+          {op:'+', label:'Wegfall Staffelrabatt', wert:'8.700 €'},
+          {op:'−', label:'Abgang, 5 % der Aufträge', wert:'5.740 €'},
           {ergebnis:true, label:'Ergebnisplus im Jahr', wert:'+38.000 €', wertSk:'formel-ergebnis'}
         ], sk:'formel'}},
         {skizze: [
@@ -3511,6 +3559,9 @@ body.blatt-offen{overflow:hidden}
     zu.addEventListener('click', schliesseRegal);
     window.addEventListener('keydown', function(e){
       if (e.key !== 'Escape') return;
+      /* Der Blatt-Blick als Baustein schließt sich selbst — hier darf dann
+         nicht zusätzlich das Regal zufallen. */
+      if (window.Blatt && Blatt.offen()) return;
       if (blattBlick.offen()) { blattBlick.schliesse(); return; }
       if (gespraechsliste.offen()) { gespraechsliste.schliesse(); return; }
       if (regal.classList.contains('offen')) schliesseRegal();

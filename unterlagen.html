@@ -7,10 +7,13 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
 /* quoroai-plattform-design · Unterlagen: alles, was die Beratung freigegeben hat
-   Marker: UNTERLAGEN-V10 (V9: Häppchen D1, die offene Bitte um eine Unterlage
+   Marker: UNTERLAGEN-V11 (V9: Häppchen D1, die offene Bitte um eine Unterlage
    steht über dem Bestand. V10: Häppchen D3 — am ersten Tag liegt hier genau ein
    Dokument, der Beratungsvertrag. Ein neuer Kunde mit fünf Beratungsdokumenten
-   in der Akte wäre eine Behauptung.) */
+   in der Akte wäre eine Behauptung. V11: Häppchen D4 — die Unterlage wird
+   hier gelesen, Seite für Seite; Laden ist der zweite Weg, nicht der einzige.
+   Die Seiten kommen aus blaetter.js, es sind dieselben, die die Beratung in
+   der Akte sieht.) */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -83,10 +86,22 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
 }
 .dok.versteckt{display:none}
 .dok .kopf{
-  display:flex;align-items:center;gap:16px;padding:15px 20px;cursor:pointer;
-  transition:background .15s ease;
+  display:flex;align-items:center;gap:16px;padding:15px 20px;
 }
-.dok .kopf:hover{background:rgba(16,19,26,.02)}
+/* Das Blatt und sein Name sind der Griff: ein Druck schlägt die Unterlage auf
+   (Häppchen D4, blatt.js). Vorher war die ganze Kopfzeile klickbar — mit den
+   Knöpfen darin war das ein Ziel, das andere Ziele enthielt. */
+.dok .d-oeffnen{
+  display:flex;align-items:center;gap:16px;flex:1;min-width:0;
+  border:0;background:none;padding:0;cursor:pointer;
+  font:inherit;color:inherit;text-align:left;border-radius:10px;
+}
+.dok .d-oeffnen:focus-visible{outline:3px solid var(--blau);outline-offset:4px}
+.dok .blatt{transition:border-color .2s ease,box-shadow .2s ease}
+@media (hover:hover){
+  .dok .d-oeffnen:hover .titel{color:var(--blau)}
+  .dok .d-oeffnen:hover .blatt{border-color:color-mix(in srgb, var(--blau) 35%, transparent);box-shadow:0 5px 14px rgba(16,19,26,.1)}
+}
 .blatt{
   width:34px;height:44px;flex-shrink:0;position:relative;
   background:#fff;border:1px solid var(--linie);border-radius:4px;
@@ -101,9 +116,9 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
   content:'';position:absolute;left:6px;right:6px;top:13px;height:19px;
   background:linear-gradient(var(--linie) 1.5px, transparent 1.5px);background-size:100% 6px;
 }
-.dok .titel{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.dok .titel{display:block;font-size:15px;font-weight:800;letter-spacing:-.01em;transition:color .2s ease}
 .dok .titel mark{background:color-mix(in srgb, var(--blau) 18%, transparent);color:inherit;border-radius:3px;padding:0 2px}
-.dok .meta{font-size:12.5px;color:var(--grau);margin-top:2px}
+.dok .meta{display:block;font-size:12.5px;color:var(--grau);margin-top:2px}
 .dok .status{
   flex-shrink:0;margin-left:auto;font-size:11px;font-weight:800;
   padding:4px 10px;border-radius:999px;color:var(--grau);background:rgba(16,19,26,.05);white-space:nowrap;
@@ -157,6 +172,8 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
 </style>
 <script src="marke.js"></script>
 <script src="bitten.js"></script>
+<script src="blaetter.js"></script>
+<script src="blatt.js"></script>
 </head>
 <body>
 
@@ -228,27 +245,50 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
      hier: der Beratungsvertrag, den die offene Abnahme oben meint. Alles andere
      wäre eine Akte, die ein neuer Kunde nicht haben kann. */
   var ersterTag = !!(window.Bitten && Bitten.lage() === 'erster-tag');
+  /* Die Seiten der Dokumente stehen in blaetter.js, einmal für alle Flächen —
+     derselbe Rahmenvertrag, den die Beratung in der Akte sieht (Häppchen D4).
+     Was hier steht, ist die Sicht des Kunden darauf: wie das Blatt hier heißt,
+     was in der Zeile darunter steht, und was durchsucht wird. */
+  function blatt(name, sicht){
+    /* Der Name der Beratung kommt aus marke.js — die Kundenfläche ist
+       White-Label, und im Papier steht er deshalb nicht fest (blaetter.js). */
+    sicht.beratung = (window.Marke && Marke.daten && Marke.daten.name) || 'deiner Beratung';
+    return (window.Blaetter && Blaetter.hol(name, sicht)) || sicht;
+  }
   var DOKUMENTE = ersterTag ? [
-    {titel: 'Beratungsvertrag', meta: Marke.rede('4 Seiten, heute, von deiner Beratung', '4 Seiten, heute, von Ihrer Beratung'), status: 'neu',
+    blatt('beratungsvertrag', {
+     titel: 'Beratungsvertrag',
+     meta: Marke.rede('4 Seiten, heute, von deiner Beratung', '4 Seiten, heute, von Ihrer Beratung'), status: 'neu',
      text: 'Monatliche Pauschale, Laufzeit zwölf Monate, Kündigungsfrist drei Monate. Enthalten sind der KI-Berater, die Beratungsleistung und die laufende Auswertung. Auslagen werden einzeln abgerechnet.',
-     fassungen: []}
+     fassungen: []})
   ] : [
-    {titel: 'Preismodell Benchmark', meta: '12 Seiten, gestern, Fassung 1', status: 'neu',
+    blatt('benchmark', {
+     titel: 'Preismodell Benchmark', meta: '12 Seiten, gestern, Fassung 1', status: 'neu',
      text: 'Preisanpassung von vier Prozent auf die C-Kunden bringt 38.000 Euro im Jahr. Staffeln neu geschnitten, A- und B-Kunden unberührt. Branchenschnitt sechs Prozent darüber.',
-     fassungen: []},
-    {titel: 'Rahmenvertrag Stahl', meta: Marke.rede('Fassung 2 vom 4. August, von deiner Beratung', 'Fassung 2 vom 4. August, von Ihrer Beratung'), status: 'Fassung 2',
+     randnotiz: 'die 4 % halten!',
+     fassungen: []}),
+    blatt('rahmenvertrag', {
+     titel: 'Rahmenvertrag Stahl',
+     meta: Marke.rede('Fassung 2 vom 4. August, von deiner Beratung', 'Fassung 2 vom 4. August, von Ihrer Beratung'), status: 'Fassung 2',
      text: 'Preisgleitklausel nach Ziffer 3.2 endet zum 30. September. Danach gilt der Tagespreis des Lieferanten, sofern kein neuer Rahmen vereinbart ist. Kündigungsfrist drei Monate.',
-     fassungen: [{name: 'Fassung 1', meta: 'vom 12. Mai'}]},
-    {titel: 'Jahresabschluss 2025, Entwurf', meta: '48 Seiten, 28. Juli', status: 'geteilt',
+     fassungen: [{name: 'Fassung 1', meta: 'vom 12. Mai'}]}),
+    blatt('jahresabschluss', {
+     titel: 'Jahresabschluss 2025, Entwurf',
+     meta: '48 Seiten, 28. Juli', status: 'geteilt',
      text: 'Umsatzerlöse 4,1 Millionen Euro, Rohertrag 31,8 Prozent, Eigenkapitalquote 38 Prozent. Vorbehaltlich der Schlussbuchungen des Steuerbüros.',
-     fassungen: []},
-    {titel: 'Fotos Halle 2, Begehung', meta: '9 Bilder, 15. Juli', status: 'geteilt',
+     fassungen: []}),
+    blatt('fotos', {
+     titel: 'Fotos Halle 2, Begehung',
+     meta: '9 Bilder, 15. Juli', status: 'geteilt',
      warnung: Marke.rede('Aus diesen Bildern kann dein Berater nicht zitieren — sie enthalten keinen lesbaren Text.', 'Aus diesen Bildern kann Ihr Berater nicht zitieren — sie enthalten keinen lesbaren Text.'),
      text: 'Begehung Halle zwei Fotos Anbau Brandschutz',
-     fassungen: []},
-    {titel: 'Benchmark Metallzulieferer 2025', meta: '22 Seiten, 2. Juli', status: 'geteilt',
+     fassungen: []}),
+    /* Derselbe Branchenspiegel wie im Wissen der Beratung: derselbe Name,
+       dieselbe Seitenzahl. Zwei Namen für ein Dokument wären zwei Dokumente. */
+    blatt('branchenspiegel', {
+     titel: 'Branchenspiegel Metallzulieferer 2025', meta: '38 Seiten, 2. Juli', status: 'geteilt',
      text: 'Zulieferer mit 20 bis 80 Mitarbeitenden erzielen im Median 35,9 Prozent Rohertragsmarge. Unteres Quartil 31,2 Prozent. Energiekosten je Tonne gestiegen.',
-     fassungen: []}
+     fassungen: []})
   ];
 
   var liste = document.getElementById('liste');
@@ -259,8 +299,9 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
     var el = document.createElement('div');
     el.className = 'dok';
     el.innerHTML =
-      '<div class="kopf"><div class="blatt"></div>' +
-      '<div style="min-width:0"><div class="titel"></div><div class="meta"></div></div>' +
+      '<div class="kopf">' +
+      '<button class="d-oeffnen" type="button"><span class="blatt"></span>' +
+      '<span style="min-width:0"><span class="titel"></span><span class="meta"></span></span></button>' +
       '<span class="status"></span>' +
       '<span class="aktionen"><button type="button" class="laden">↓ Laden</button>' +
       (dok.fassungen.length ? '<button type="button" class="ff">Fassungen</button>' : '') +
@@ -290,16 +331,27 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
         lage.hidden = !lage.hidden;
       });
     }
-    el.querySelector('.laden').addEventListener('click', function(e){
-      e.stopPropagation();
+    function lade(){
       var a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob(['# ' + dok.titel + '\n\n' + dok.text + '\n\n— Vorführung, Demo-Daten\n'], {type: 'text/markdown'}));
       a.download = dok.titel.replace(/[^\wäöüÄÖÜß-]+/g, '-') + '.md';
       a.click();
       setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+    }
+    el.querySelector('.laden').addEventListener('click', function(e){
+      e.stopPropagation();
+      lade();
     });
-    el.querySelector('.kopf').addEventListener('click', function(){
-      demoHinweis('Vorführung — im Produkt öffnet sich hier das Original.');
+    /* Der Blatt-Blick (Häppchen D4): die Unterlage wird hier gelesen. Laden
+       bleibt — es ist jetzt aber der zweite Weg, nicht der einzige. */
+    var griff = el.querySelector('.d-oeffnen');
+    griff.setAttribute('aria-label', dok.titel + ' aufschlagen');
+    griff.addEventListener('click', function(){
+      if (!window.Blatt) { demoHinweis('Vorführung — im Produkt öffnet sich hier das Original.'); return; }
+      dok.aus = el;
+      dok.griffe = [{wort: '↓ Laden', tat: lade}];
+      dok.fuss = Marke.rede('Von deiner Beratung freigegeben.', 'Von Ihrer Beratung freigegeben.');
+      Blatt.zeige(dok);
     });
     dok.el = el;
     return el;
@@ -328,6 +380,13 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
                  status: Marke.rede('von dir', 'von Ihnen'),
                  text: Marke.rede('Diese Unterlage hast du gerade geschickt. Deine Beratung hat sie.',
                                   'Diese Unterlage haben Sie gerade geschickt. Ihre Beratung hat sie.'),
+                 seitenGesamt: 1,
+                 seiten: [[
+                   {h: name || Marke.rede('Deine Unterlage', 'Ihre Unterlage')},
+                   {klein: Marke.rede('Von dir geschickt, gerade eben.', 'Von Ihnen geschickt, gerade eben.')},
+                   {p: Marke.rede('Deine Beratung hat sie. In der Vorführung steht hier kein Inhalt — im Produkt öffnet sich an dieser Stelle deine Datei, Seite für Seite.',
+                                  'Ihre Beratung hat sie. In der Vorführung steht hier kein Inhalt — im Produkt öffnet sich an dieser Stelle Ihre Datei, Seite für Seite.')}
+                 ]],
                  fassungen: []};
       DOKUMENTE.unshift(dok);
       liste.prepend(baueEinen(dok));

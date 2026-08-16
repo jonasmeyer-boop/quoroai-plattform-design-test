@@ -6,6 +6,8 @@
 <title>Kundenakte Petersen Stahlbau</title>
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="system.css">
+<script src="blaetter.js"></script>
+<script src="blatt.js"></script>
 <style>
 /* quoroai-plattform-design, Kundenakte: vierter Raum hinter den Cockpit-Türen
    (Reihenfolge-Entscheidung 2026-08-13), exemplarisch für Petersen Stahlbau
@@ -20,7 +22,11 @@
    V6 (Häppchen C4): am Handy stehen die Freigabe-Kapseln unter dem
    Dokumentnamen statt neben ihm — daneben blieb dem Namen keine Spalte,
    und er rutschte unter das Blatt-Symbol.
-   Marker: BERATUNG-AKTE-V6 (Anschrift deckt sich mit dem Rechnungspapier) */
+   V7 (Häppchen D4, Teil 1): jede Dokumentzeile lässt sich aufschlagen. Das
+   Blatt und sein Name sind der Griff, die Seiten stehen in blaetter.js, der
+   Leseraum ist blatt.js — dieselben Seiten, die der Kunde in seinen
+   Unterlagen sieht und die der KI-Berater als Beleg zitiert.
+   Marker: BERATUNG-AKTE-V7 (Anschrift deckt sich mit dem Rechnungspapier) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -124,6 +130,24 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 }
 .dok .d-name{font-size:14px;font-weight:600;letter-spacing:-.01em;line-height:1.4}
 .dok .d-meta{font-size:12px;color:var(--nebel-600);margin-top:2px}
+/* Das Blatt und sein Name sind der Griff: ein Druck schlägt das Dokument auf
+   (Häppchen D4, blatt.js). Der Knopf sieht aus wie die Zeile, die er war —
+   ein zweiter Rahmen um jede Zeile wäre Lärm für etwas, das man beim
+   Überfahren ohnehin sieht. */
+.dok .d-oeffnen{
+  display:flex;align-items:center;gap:16px;flex:1;min-width:0;
+  border:0;background:none;padding:0;cursor:pointer;
+  font:inherit;color:inherit;text-align:left;border-radius:10px;
+}
+.dok .d-oeffnen:focus-visible{outline:3px solid var(--lila-400);outline-offset:4px}
+.dok .d-oeffnen[disabled]{cursor:default}
+.dok .blatt-icon{transition:border-color .2s ease,box-shadow .2s ease}
+@media (hover:hover){
+  /* :not([disabled]) muss sein — ein abgeschalteter Knopf nimmt trotzdem
+     :hover an und leuchtete sonst auf, als ließe er sich anfassen. */
+  .dok .d-oeffnen:not([disabled]):hover .d-name{color:var(--lila-700)}
+  .dok .d-oeffnen:not([disabled]):hover .blatt-icon{border-color:var(--lila-300);box-shadow:0 5px 14px rgba(24,21,47,.12)}
+}
 .dok .frei{display:flex;gap:14px;margin-left:auto;flex-shrink:0}
 /* die Freigabe-Kapsel: ein Füllstand zum Kippen */
 .frei button{
@@ -224,33 +248,41 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   <h3>Dokumente, und wer sie sieht</h3>
   <section class="tafel" aria-label="Dokumente mit Freigabe">
     <div class="doks">
-      <div class="dok">
-        <span class="blatt-icon" aria-hidden="true"></span>
-        <span class="d-text"><span class="d-name">Monatsauswertung Juli</span><br><span class="d-meta">8 Seiten, von dir hochgeladen am 4. August</span></span>
+      <div class="dok" data-dok="monatsauswertung">
+        <button class="d-oeffnen" type="button">
+          <span class="blatt-icon" aria-hidden="true"></span>
+          <span class="d-text"><span class="d-name">Monatsauswertung Juli</span><br><span class="d-meta">8 Seiten, von dir hochgeladen am 4. August</span></span>
+        </button>
         <span class="frei">
           <button type="button" aria-pressed="true"><span class="zustand aktiv" aria-hidden="true"></span><span class="zustand-wort">Kunde sieht es</span></button>
           <button type="button" aria-pressed="true"><span class="zustand vorschlag" aria-hidden="true"></span><span class="zustand-wort">KI liest es</span></button>
         </span>
       </div>
-      <div class="dok">
-        <span class="blatt-icon" aria-hidden="true"></span>
-        <span class="d-text"><span class="d-name">Rahmenvertrag Stahl</span><br><span class="d-meta">14 Seiten, vom Kunden hochgeladen am 12. Juni</span></span>
+      <div class="dok" data-dok="rahmenvertrag">
+        <button class="d-oeffnen" type="button">
+          <span class="blatt-icon" aria-hidden="true"></span>
+          <span class="d-text"><span class="d-name">Rahmenvertrag Stahl</span><br><span class="d-meta">14 Seiten, vom Kunden hochgeladen am 12. Juni</span></span>
+        </button>
         <span class="frei">
           <button type="button" aria-pressed="true"><span class="zustand aktiv" aria-hidden="true"></span><span class="zustand-wort">Kunde sieht es</span></button>
           <button type="button" aria-pressed="true"><span class="zustand vorschlag" aria-hidden="true"></span><span class="zustand-wort">KI liest es</span></button>
         </span>
       </div>
-      <div class="dok">
-        <span class="blatt-icon" aria-hidden="true"></span>
-        <span class="d-text"><span class="d-name">Preismodell Benchmark</span><br><span class="d-meta">12 Seiten, vom KI-Berater erstellt, gestern</span></span>
+      <div class="dok" data-dok="benchmark">
+        <button class="d-oeffnen" type="button">
+          <span class="blatt-icon" aria-hidden="true"></span>
+          <span class="d-text"><span class="d-name">Preismodell Benchmark</span><br><span class="d-meta">12 Seiten, vom KI-Berater erstellt, gestern</span></span>
+        </button>
         <span class="frei">
           <button type="button" aria-pressed="true"><span class="zustand aktiv" aria-hidden="true"></span><span class="zustand-wort">Kunde sieht es</span></button>
           <button type="button" aria-pressed="true"><span class="zustand vorschlag" aria-hidden="true"></span><span class="zustand-wort">KI liest es</span></button>
         </span>
       </div>
-      <div class="dok intern">
-        <span class="blatt-icon" aria-hidden="true"></span>
-        <span class="d-text"><span class="d-name">Honorar-Kalkulation 2026</span><br><span class="d-meta">2 Seiten, von dir, 28. Juli</span></span>
+      <div class="dok intern" data-dok="honorar">
+        <button class="d-oeffnen" type="button">
+          <span class="blatt-icon" aria-hidden="true"></span>
+          <span class="d-text"><span class="d-name">Honorar-Kalkulation 2026</span><br><span class="d-meta">2 Seiten, von dir, 28. Juli</span></span>
+        </button>
         <span class="hand">bleibt intern.</span>
         <span class="frei">
           <button type="button" aria-pressed="false"><span class="zustand entwurf" aria-hidden="true"></span><span class="zustand-wort">nur Beratung</span></button>
@@ -260,7 +292,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     </div>
     <div class="fuss-griffe">
       <button class="bald knopf leise" type="button">Dokument hochladen</button>
-      <div class="tarif-fuss" style="margin-top:8px;flex-basis:100%">Was die KI liest, kann sie dem Kunden im Gespräch zitieren, mit Fundstelle, wie im <a href="beratung-mitlesen.html" style="color:var(--lila-700)">freigegebenen Gespräch</a>.</div>
+      <div class="tarif-fuss" style="margin-top:8px;flex-basis:100%">Ein Druck auf den Namen schlägt das Dokument auf, hier, ohne Herunterladen. Was die KI liest, kann sie dem Kunden im Gespräch zitieren, mit Fundstelle, wie im <a href="beratung-mitlesen.html" style="color:var(--lila-700)">freigegebenen Gespräch</a>.</div>
     </div>
   </section>
 
@@ -312,6 +344,46 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   }
   document.querySelectorAll('.bald').forEach(function(el){
     el.addEventListener('click', demoHinweis);
+  });
+
+  /* ---------- Der Blatt-Blick: die Akte ist ein Arbeitsraum ----------
+     Was hier liegt, wird angesehen, nicht heruntergeladen (Häppchen D4).
+     Die Seiten stehen hier, weil sie zu diesem Mandat gehören — der Baustein
+     blatt.js ist nur der Leseraum und kennt keinen Inhalt. Der Rahmenvertrag
+     trägt die Fundstelle, die der KI-Berater im freigegebenen Gespräch
+     zitiert: derselbe Satz, dieselbe Ziffer. */
+  /* Die Beratung dieser Vorführung. Auf den Kundenflächen kommt der Name aus
+     marke.js — im Papier steht er nicht fest (blaetter.js). */
+  var BERATUNG = 'Nordholm & Partner';
+  var AKTE = {
+    monatsauswertung: {meta: '8 Seiten, von dir, 4. August',
+      fuss: 'Liegt beim Kunden in den Unterlagen.'},
+    rahmenvertrag: {meta: '14 Seiten, vom Kunden, 12. Juni',
+      fund: {seite: 2, wort: 'Preisgleitklausel'},
+      fuss: 'Der KI-Berater zitiert daraus Abschnitt 3.'},
+    benchmark: {meta: '12 Seiten, vom KI-Berater erstellt, gestern',
+      fuss: 'Im Gespräch entstanden, in die Akte gelegt.',
+      randnotiz: 'mit ihm durchgehen!'},
+    honorar: {meta: '2 Seiten, von dir, 28. Juli',
+      fuss: 'Weder der Kunde noch die KI sehen dieses Blatt.'}
+  };
+  document.querySelectorAll('.dok[data-dok]').forEach(function(zeile){
+    var griff = zeile.querySelector('.d-oeffnen');
+    var name = zeile.dataset.dok;
+    if (!griff) return;
+    /* Ohne die Bausteine gibt es nichts aufzuschlagen — dann darf die Zeile
+       auch nicht so aussehen, als ließe sie sich anfassen. */
+    if (!AKTE[name] || !window.Blatt || !window.Blaetter) { griff.disabled = true; return; }
+    AKTE[name].beratung = BERATUNG;
+    /* Auch wenn hier ein Eintrag steht: kennt blaetter.js den Namen nicht, gibt
+       es keine Seiten — und dann keinen Knopf, der so tut. */
+    if (!Blaetter.hol(name, AKTE[name])) { griff.disabled = true; return; }
+    griff.setAttribute('aria-label', zeile.querySelector('.d-name').textContent + ' aufschlagen');
+    griff.addEventListener('click', function(){
+      var dok = Blaetter.hol(name, AKTE[name]);
+      dok.aus = zeile;
+      Blatt.zeige(dok);
+    });
   });
 
   /* ---------- Freigabe-Kapseln: Zustand wird gekippt ---------- */

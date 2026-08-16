@@ -6,6 +6,8 @@
 <title>Mitlesen, Petersen Stahlbau</title>
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="system.css">
+<script src="blaetter.js"></script>
+<script src="blatt.js"></script>
 <style>
 /* quoroai-plattform-design, Mitlesen: der erste Raum hinter den Cockpit-Türen
    (Entscheidung 2026-08-13, Mitlesen zuerst). Die Beratung liest ein
@@ -25,7 +27,10 @@
    V7 (Häppchen D2): aus Mitlesen wird Mitreden — die Beratung schreibt in dasselbe Gespräch, es gibt kein Postfach.
    V8 (Review zu D2): der Fuß sagt, was unter ihm steht, und Strg-Enter hinterlässt keinen Absatz.
    V9 (zweites Review): der Fuß behauptet nicht, was unter ihm steht.
-   Marker: BERATUNG-MITLESEN-V9 */
+   V10 (Häppchen D4, Teil 1): ein Beleg zeigt jetzt die Stelle. Ein Druck auf
+   den Chip oder auf die Quellenkarte schlägt das Dokument im Blatt-Blick auf,
+   auf der Seite mit dem zitierten Satz.
+   Marker: BERATUNG-MITLESEN-V10 */
 @font-face{
   font-family:'Manrope';
   src:url('schriften/manrope.woff2') format('woff2');
@@ -435,9 +440,10 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
 
         <p>Der erste Hebel, einmal ehrlich durchgerechnet:</p>
         <div class="b-karte formel" id="rechenweg">
-          <div class="zeile-f"><span class="op"></span><span>Umsatz mit C-Kunden</span><span class="fuellung"></span><span class="wert-f">218.000&nbsp;€</span></div>
-          <div class="zeile-f"><span class="op">×</span><span>Preiserhöhung</span><span class="fuellung"></span><span class="wert-f">4&nbsp;%</span></div>
-          <div class="zeile-f"><span class="op">−</span><span>erwartbarer Mengenverlust</span><span class="fuellung"></span><span class="wert-f">5&nbsp;%</span></div>
+          <div class="zeile-f"><span class="op"></span><span>Umsatz mit C-Kunden</span><span class="fuellung"></span><span class="wert-f">876.000&nbsp;€</span></div>
+          <div class="zeile-f"><span class="op">×</span><span>Preiserhöhung 4&nbsp;%</span><span class="fuellung"></span><span class="wert-f">35.040&nbsp;€</span></div>
+          <div class="zeile-f"><span class="op">+</span><span>Wegfall Staffelrabatt</span><span class="fuellung"></span><span class="wert-f">8.700&nbsp;€</span></div>
+          <div class="zeile-f"><span class="op">−</span><span>Abgang, 5&nbsp;% der Aufträge</span><span class="fuellung"></span><span class="wert-f">5.740&nbsp;€</span></div>
           <div class="zeile-f ergebnis"><span class="op">=</span><span>Ergebnisplus im Jahr</span><span class="fuellung"></span><span class="ergebnis-fang"><svg aria-hidden="true" viewBox="0 0 120 44" preserveAspectRatio="none"><path d="M8 22 C6 8 38 3 62 4 C96 5 116 10 114 23 C112 37 84 41 56 40 C26 39 9 34 10 20"/></svg><span class="wert-f">+38.000&nbsp;€</span></span></div>
         </div>
 
@@ -516,7 +522,7 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
   </div>
 </main>
 
-<div id="demo-hinweis" style="position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--lila-700);opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--kurve)">Diese Fläche entsteht gerade.</div>
+
 
 <script>
 (function(){
@@ -563,15 +569,48 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
     document.querySelectorAll('[data-fund]').forEach(function(el){ spaeher.observe(el); });
   }
 
-  /* Ein Beleg im Text greift zur Quelle in der Leiste */
+  /* ---------- Ein Beleg zeigt die Stelle, nicht nur ihren Namen ----------
+     Häppchen D4: bis hierher konnte man einen Beleg nur lesen. Jetzt schlägt
+     er das Dokument auf, auf der Seite, auf der der zitierte Satz steht —
+     dieselben Seiten, die in der Akte und im Wissen liegen (blaetter.js).
+     Der Chip in der Abschrift lässt zusätzlich die Quelle in der Leiste
+     aufleuchten: er zeigt, WORAUF er sich stützt, bevor er es aufschlägt. */
+  var BELEGE = {
+    rahmenvertrag: {name: 'rahmenvertrag', sicht: {
+      meta: 'Akte des Mandats, Abschnitt 3',
+      fund: {seite: 2, wort: 'Preisgleitklausel'},
+      fuss: 'Liegt in der Kundenakte Petersen.'}},
+    branchenspiegel: {name: 'branchenspiegel', sicht: {
+      meta: 'Wissen der Beratung, Abschnitt 5',
+      fund: {seite: 2, wort: '35,9 Prozent'},
+      fuss: 'Liegt im Wissen, in allen Mandaten zugleich.'}},
+    benchmark: {name: 'benchmark', sicht: {
+      meta: 'In diesem Gespräch erstellt, 12 Seiten',
+      fuss: 'In die Akte des Mandats gelegt.'}}
+  };
+  function schlagAuf(schluessel, aus){
+    var b = BELEGE[schluessel];
+    if (!b || !window.Blatt || !window.Blaetter) return;
+    b.sicht.beratung = 'Nordholm & Partner';
+    var dok = Blaetter.hol(b.name, b.sicht);
+    dok.aus = aus;
+    Blatt.zeige(dok);
+  }
   document.querySelectorAll('[data-quelle]').forEach(function(chip){
     chip.addEventListener('click', function(){
       var ziel = leiste.querySelector('.quelle[data-q="' + chip.dataset.quelle + '"]');
-      if (!ziel) return;
-      ziel.scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block:'center'});
-      ziel.classList.add('liest','puls');
-      setTimeout(function(){ ziel.classList.remove('puls'); }, 600);
+      if (ziel) {
+        ziel.scrollIntoView({behavior: reduziert ? 'auto' : 'smooth', block:'center'});
+        ziel.classList.add('liest','puls');
+        setTimeout(function(){ ziel.classList.remove('puls'); }, 600);
+      }
+      schlagAuf(chip.dataset.quelle, chip);
     });
+  });
+  /* Und die Karte in der Leiste selbst — sie sieht seit jeher aus wie etwas,
+     das man anfassen kann, und tat bis hierher nichts. */
+  leiste.querySelectorAll('.quelle').forEach(function(karte){
+    karte.addEventListener('click', function(){ schlagAuf(karte.dataset.q, karte); });
   });
 
   /* ---------- Mitreden (Häppchen D2) ----------
@@ -629,16 +668,9 @@ main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--ve
     });
   })();
 
-  /* Ehrlichkeit: die Quelle selbst öffnet sich erst im Produkt */
-  var hinweisTimer = null;
-  document.querySelectorAll('.quelle').forEach(function(q){
-    q.addEventListener('click', function(){
-      var h = document.getElementById('demo-hinweis');
-      h.style.opacity = .95; h.style.translate = '-50% 0';
-      clearTimeout(hinweisTimer);
-      hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2200);
-    });
-  });
+  /* Der Hinweis „diese Fläche entsteht gerade" hing bis Häppchen D4 an den
+     Quellenkarten — sie taten nichts. Jetzt schlagen sie das Dokument auf,
+     und der Hinweis wäre eine Lüge über etwas, das funktioniert. */
 })();
 </script>
 <script src="uhr.js"></script>
