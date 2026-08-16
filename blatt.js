@@ -55,7 +55,11 @@
    der Beratung, mit allem, was daran hängt. Ein Vermerk, in dem unbemerkt Sätze
    auftauchen, die niemand geschrieben hat, ist die eine Sache, die diese
    Software sich nicht leisten kann.
-   Marker: BLATT-V2
+   V3 (Nach-Review zu Teil 2): Umbrüche überleben auch in Tabellenzellen und
+   Randnotizen, die Feder-Tönung schlägt den Überfahr-Ton, ein leerer Absatz
+   mit Feder sagt trotzdem „Schreib hier.", der Stand unten veraltet nicht mehr,
+   und die Fläche erfährt vom Zuklappen (beimSchliessen).
+   Marker: BLATT-V3
 
    Markenneutral: alle Farben kommen aus den Tokens der Fläche — Kundenflächen
    setzen --blau/--linie/--grau über marke.js, quoroAI-Flächen bringen
@@ -201,16 +205,20 @@ window.Blatt = (function () {
          und der muss beim nächsten Aufschlagen noch da sein. Gesichert wird
          mit Zeilenumbruch im Text, gezeigt wird er nur, wenn das Papier ihn
          auch stehen lässt. */
-      '.bb-seite p,.bb-seite h4,.bb-seite .bb-klein,.bb-seite li{white-space:pre-wrap}' +
+      '.bb-seite p,.bb-seite h4,.bb-seite .bb-klein,.bb-seite li,' +
+      '.bb-seite td,.bb-seite th,.bb-seite .bb-notiz{white-space:pre-wrap}' +
       '.bb-seite [contenteditable]{outline:none;border-radius:3px;' +
         'transition:background .18s ' + kurve + '}' +
-      '.bb-seite [contenteditable]:hover{background:rgba(16,19,26,.028)}' +
-      '.bb-seite [contenteditable]:focus{background:color-mix(in srgb, ' + akzent + ' 7%, transparent)}' +
+      /* Nur offene Stellen tönen beim Überfahren — der Feder-Knopf trägt
+         contenteditable="false" und wäre sonst ein grauer Kasten in der Marge. */
+      '.bb-seite [contenteditable="true"]:hover{background:rgba(16,19,26,.028)}' +
+      '.bb-seite [contenteditable="true"]:focus{background:color-mix(in srgb, ' + akzent + ' 7%, transparent)}' +
       /* Ein leerer Absatz fiele auf null zusammen und wäre nicht zu treffen.
          Nur der Absatz: eine Tabellenzelle ist oft mit Absicht leer — die
          Ecke über der Kopfspalte etwa —, und „Schreib hier." stünde dort als
          Aufforderung, wo nichts hingehört. */
-      '.bb-seite p[contenteditable]:empty::before{content:"Schreib hier.";color:#b8b8c0}' +
+      '.bb-seite p[contenteditable]:empty::before,' +
+        '.bb-seite p[contenteditable].bb-leer::before{content:"Schreib hier.";color:#b8b8c0}' +
       /* Wer schreibt, schreibt irgendwann über den Fuß der Seite hinaus. Ein
          Umbruch auf die nächste Seite ist Produktarbeit; hier darf das Blatt
          wenigstens nichts verschlucken — es rollt in sich, ohne Balken, und
@@ -223,8 +231,14 @@ window.Blatt = (function () {
         '100%{background:transparent}}' +
 
       /* ---- die Feder: der Vorschlag steht NEBEN dem Blatt, nie darin ---- */
-      '.bb-mit-feder{position:relative;background:color-mix(in srgb, ' + akzent + ' 6%, transparent)}' +
-      '.bb-mit-feder.hier{background:color-mix(in srgb, ' + akzent + ' 15%, transparent)}' +
+      /* Die Tönung sagt, WELCHER Satz gemeint ist. Sie muss den Überfahr-Ton
+         schlagen, sonst verliert man beim Zeigen genau die Auskunft, wegen
+         der man hinschaut — deshalb dieselbe Bauart im Selektor, nur später. */
+      '.bb-mit-feder,.bb-seite [contenteditable="true"].bb-mit-feder:hover' +
+        '{position:relative;background:color-mix(in srgb, ' + akzent + ' 6%, transparent)}' +
+      '.bb-mit-feder.hier,.bb-seite [contenteditable="true"].bb-mit-feder.hier:hover,' +
+        '.bb-seite [contenteditable="true"].bb-mit-feder.hier:focus' +
+        '{background:color-mix(in srgb, ' + akzent + ' 15%, transparent)}' +
       '.bb-feder{position:absolute;left:-5.6%;top:0;bottom:0;width:22px;min-height:26px;' +
         'border:0;background:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center}' +
       '.bb-feder .strich{display:block;width:3px;height:calc(100% - 4px);min-height:18px;border-radius:2px;' +
@@ -814,6 +828,7 @@ window.Blatt = (function () {
       standWort.style.display = '';
     }
     raeumeFedern();
+    zeigeLeere();
     /* Die Miniaturen sind Klone der Seite. Wer tippt und links das alte Wort
        stehen sieht, traut der Leiste nicht mehr — also wird die Miniatur der
        Seite neu gezogen, sobald die Finger stillstehen. */
@@ -825,6 +840,17 @@ window.Blatt = (function () {
      Zähler gerade nennt. Am großen Schirm stehen zwei Seiten nebeneinander im
      Blick; wer in die untere tippt, ohne zu scrollen, sähe sonst die obere
      Miniatur neu und die eigene alt. */
+  /* :empty greift nicht, wo eine Feder im Absatz steht — der Knopf ist ein
+     Kind des Absatzes. Ein leerer Absatz fiele dann auf den Strich zusammen,
+     ohne zu sagen, dass man hier schreiben kann. */
+  function zeigeLeere() {
+    seitenEl.forEach(function (seite) {
+      Array.prototype.forEach.call(seite.querySelectorAll('p[contenteditable]'), function (p) {
+        p.classList.toggle('bb-leer', !lies(p).trim());
+      });
+    });
+  }
+
   function frischeMini() {
     var i = jetzt;
     var wo = document.activeElement;
@@ -882,32 +908,40 @@ window.Blatt = (function () {
         else if (!b.tab && !b.bild) b.p = lies(el);
       });
       var n = seite.querySelector('.bb-notiz');
-      if (n && n.textContent.trim()) notizen[i + 1] = n.textContent.trim();
+      /* lies() auch hier: eine Handschrift über zwei Zeilen ist zwei Zeilen. */
+      if (n && lies(n).trim()) notizen[i + 1] = lies(n).trim();
     });
     jetzigesDok.notizen = notizen;
+    /* Was unten steht, muss beim nächsten Aufschlagen noch stimmen: „noch kein
+       Wort" auf einem vollgeschriebenen Blatt wäre die eine Zeile, die dem
+       Versprechen „geschrieben ist gespeichert" widerspricht. */
+    if (schonGetippt && standNeu) jetzigesDok.stand = standNeu;
     /* Die alte Kurzform für Seite 1 darf nicht zusätzlich wirken, sonst stünde
        eine gelöschte Notiz beim nächsten Mal wieder da. */
     delete jetzigesDok.randnotiz;
   }
 
+  /* ---------- Die Randnotiz: was man auf fremdes Papier schreiben darf -----
+     Eine Notiz entsteht immer hier, ob sie neu geschrieben oder aus dem
+     letzten Mal wiederhergestellt wird — sonst hätte die wiederhergestellte
+     keinen Horcher, und wer sie leert, ließe einen unsichtbaren Fleck auf der
+     Seite zurück, den die Miniatur brav mitkopiert. */
+  function baueNotiz(seite, text) {
+    var n = document.createElement('div');
+    n.className = 'bb-notiz';
+    n.textContent = text || '';
+    n.addEventListener('blur', function () {
+      if (!lies(n).trim()) n.remove();
+      else getippt();
+    });
+    seite.appendChild(n);
+    return n;
+  }
   /* ---------- Die Randnotiz: was man auf fremdes Papier schreiben darf ----- */
   function notizAnDenRand() {
     var seite = seitenEl[jetzt];
     if (!seite) return;
-    var n = seite.querySelector('.bb-notiz');
-    if (!n) {
-      n = document.createElement('div');
-      n.className = 'bb-notiz';
-      seite.appendChild(n);
-      /* Eine leere Handschrift ist keine Notiz — sie geht wieder weg, statt als
-         unsichtbarer Fleck auf der Seite zu bleiben. Der Horcher hängt nur an
-         der frisch gebauten Notiz: beim zweiten Druck auf denselben Rand käme
-         er sonst ein zweites Mal dazu. */
-      n.addEventListener('blur', function () {
-        if (!n.textContent.trim()) n.remove();
-        else getippt();
-      });
-    }
+    var n = seite.querySelector('.bb-notiz') || baueNotiz(seite, '');
     n.setAttribute('contenteditable', 'true');
     n.focus();
     var r = document.createRange();
@@ -1018,15 +1052,15 @@ window.Blatt = (function () {
     Object.keys(notizen).forEach(function (nr) {
       var seite = seitenEl[+nr - 1];
       if (!seite) return;
-      var notiz = document.createElement('div');
-      notiz.className = 'bb-notiz';
-      notiz.textContent = notizen[nr];
-      seite.appendChild(notiz);
+      var notiz = baueNotiz(seite, notizen[nr]);
+      if (dok.notizbar) notiz.setAttribute('contenteditable', 'true');
       /* Auch die Miniatur trägt sie — sie ist ein Klon, der vor der Notiz
          entstanden ist. */
       var mk = miniEl[+nr - 1] && miniEl[+nr - 1].querySelector('.bb-seite');
       if (mk) mk.appendChild(notiz.cloneNode(true));
     });
+
+    zeigeLeere();
 
     fussWort.textContent = dok.fuss || '';
     standWort.textContent = dok.stand || '';
@@ -1122,6 +1156,12 @@ window.Blatt = (function () {
     clearTimeout(miniTakt);
     schliesseFeder(false);
     sichere();
+    /* Die Fläche darf erfahren, dass zugeklappt wurde — sie hängt eine Zeile
+       an dem Dokument, und deren Name steht in der Überschrift, die eben noch
+       geändert werden konnte. */
+    if (jetzigesDok && typeof jetzigesDok.beimSchliessen === 'function') {
+      jetzigesDok.beimSchliessen(jetzigesDok);
+    }
     schicht.hidden = true;
     document.documentElement.style.overflow = '';
     /* Zurück auf den Knopf, der aufgeschlagen hat. Nicht auf die Zeile: die ist

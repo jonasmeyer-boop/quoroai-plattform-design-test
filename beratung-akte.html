@@ -32,7 +32,11 @@
    Text der Beratung werden. Ein Entwurf hat keine Freigabe: die Kapseln
    entstehen erst beim Fertigstellen. Fremdes Papier bleibt gesetzt, dort
    schreibt man nur an den Rand.
-   Marker: BERATUNG-AKTE-V8 (Anschrift deckt sich mit dem Rechnungspapier) */
+   V9 (Nach-Review zu D4 Teil 2): ein neues Blatt bekommt seine Zeile erst
+   durch „In die Akte legen", und der Name zieht der Überschrift nach. Der
+   Zettel oben ist ein role=status, sonst bliebe die einzige Rückmeldung nach
+   dem Fertigstellen ungesprochen.
+   Marker: BERATUNG-AKTE-V9 (Anschrift deckt sich mit dem Rechnungspapier) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -350,7 +354,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   </div>
 </main>
 
-<div id="demo-hinweis" style="position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--lila-700);opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--kurve)">Diese Fläche entsteht gerade.</div>
+<!-- role="status" muss sein: nach „Fertigstellen" und „In die Akte legen"
+     schliesst sich die Ebene, der Fokus landet auf der Zeile, und dieser
+     Zettel ist die einzige Rueckmeldung. Ungesprochen waere sie keine. -->
+<div id="demo-hinweis" role="status" aria-live="polite" style="position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--lila-700);opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--kurve)">Diese Fläche entsteht gerade.</div>
 
 <script>
 (function(){
@@ -526,6 +533,16 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       blatt.aus = zeile;
       Blatt.zeige(blatt);
     });
+    /* Der Titel steht in der Überschrift, und die darf sich ändern. Beim
+       Zuklappen zieht die Zeile nach — sonst hieße ein Blatt für immer „Ohne
+       Titel", nur weil es so angelegt wurde. */
+    blatt.beimSchliessen = function(){
+      var jetzt = ((blatt.seiten[0][0] || {}).h || '').trim() || 'Ohne Titel';
+      if (jetzt === blatt.titel) return;
+      blatt.titel = jetzt;
+      zeile.querySelector('.d-name').textContent = jetzt;
+      griff.setAttribute('aria-label', jetzt + ' aufschlagen und weiterschreiben');
+    };
     document.querySelector('.doks').appendChild(zeile);
     blatt.aus = zeile;
     blatt.fuss = 'Liegt in der Akte Petersen.';

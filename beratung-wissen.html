@@ -34,7 +34,10 @@
    Beratung, also steht der Cursor darin, und der KI-Berater hat einen
    Vorschlag am Rand, der aus der eigenen Fallsammlung kommt. Fremdes Papier
    (Branchenspiegel vom Fachverband) bleibt gesetzt, dort nur Randnotizen.
-   Marker: BERATUNG-WISSEN-V8 */
+   V9 (Nach-Review): der Branchenspiegel heißt in der Zeile, was er ist —
+   „vom Fachverband", nicht „von dir". Zwei gleich aussehende Zeilen mit
+   gegensätzlichen Rechten wären eine Falle.
+   Marker: BERATUNG-WISSEN-V9 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -287,7 +290,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       <div class="dok" data-abschnitte="41" data-cent="62" data-dok="branchenspiegel">
         <button class="d-oeffnen" type="button">
           <span class="blatt-icon" aria-hidden="true"></span>
-          <span class="d-text"><span class="d-name">Branchenspiegel Metallzulieferer 2025</span><br><span class="d-meta">41 Abschnitte, von dir, 14. Februar</span></span>
+          <span class="d-text"><span class="d-name">Branchenspiegel Metallzulieferer 2025</span><br><span class="d-meta">41 Abschnitte, vom Fachverband, eingelesen am 14. Februar</span></span>
         </button>
         <span class="d-recht"><span class="z-fuell"><span class="zustand aktiv" role="img" aria-label="bereit" title="bereit"></span><span class="zustand-wort">bereit</span></span><button class="entf" type="button">Entfernen</button></span>
         <span class="d-zitat">Gestern im Petersen-Gespräch <a href="beratung-mitlesen.html">zitiert, Abschnitt 5</a>.</span>
@@ -368,7 +371,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
      zitiert. Wer eine fremde Erhebung darin ändern könnte, hätte am Ende
      Zahlen, die nirgends herkommen. */
   var WISSEN = {
-    branchenspiegel: {meta: 'von dir, 14. Februar',
+    branchenspiegel: {meta: 'vom Fachverband, eingelesen am 14. Februar',
       fund: {seite: 2, wort: '35,9 Prozent'}, notizbar: true,
       fuss: 'Vom Fachverband. Abschnitt 5 steht auf Seite 2.'},
     fallsammlung: {meta: 'von Dr. Vogelsang, 28. Juli', notizbar: true,
