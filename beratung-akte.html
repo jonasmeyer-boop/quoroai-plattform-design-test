@@ -43,7 +43,10 @@
    Akte er meint.
    V13: die zwei ungezeichneten Griffe sagen nicht mehr „entsteht gerade" —
    es entsteht nichts, sie sind im Entwurf schlicht nicht gezeichnet.
-   Marker: BERATUNG-AKTE-V13 (die ungezeichneten Griffe sagen es so) */
+   V14 nach Code-Review: ?mandat=constructor traf die Prototyp-Kette und ließ
+   die Akte als „Object" leer stehen, statt auf Petersen zurückzufallen; und
+   die tote Sammlung DOKS ist weg.
+   Marker: BERATUNG-AKTE-V14 (die ungezeichneten Griffe sagen es so) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -559,7 +562,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
      Name führt nach Petersen statt in eine leere Fläche. */
   var welches = 'petersen';
   var gefragt = (location.search.match(/[?&]mandat=([a-z]+)/i) || [])[1];
-  if (gefragt && MANDATE[gefragt.toLowerCase()]) welches = gefragt.toLowerCase();
+  /* hasOwnProperty, nicht die Wahrheitsprüfung: ?mandat=constructor fand sonst
+     die Prototyp-Kette, und die Akte stand als „Object" leer da. */
+  if (gefragt && Object.prototype.hasOwnProperty.call(MANDATE, gefragt.toLowerCase()))
+    welches = gefragt.toLowerCase();
   var M = MANDATE[welches];
   /* Und welches Blatt, falls der Weg hierher von einem Beleg kam. */
   var gefragtesBlatt = (location.search.match(/[?&]dok=([a-z]+)/i) || [])[1] || '';
@@ -640,7 +646,6 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
      den man hier ändern könnte, wäre kein Beleg mehr — man wüsste bei keinem
      Zitat, ob der Satz je so dastand. Auf fremdem Papier gibt es nur den
      Rand. */
-  var DOKS = {};
   var doksFlaeche = document.querySelector('.doks');
   M.doks.forEach(function(d){
     var zeile = document.createElement('div');
@@ -675,7 +680,6 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
        Grenze einer Vorführung ohne Rückseite. */
     var dok = Blaetter.hol(d.dok, sicht);
     if (!dok) { griff.disabled = true; return; }
-    DOKS[d.dok] = dok;
     griff.setAttribute('aria-label', d.name +
       (sicht.wort || (sicht.schreibbar ? ' aufschlagen und weiterschreiben' : ' aufschlagen')));
     griff.addEventListener('click', function(){

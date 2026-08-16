@@ -82,7 +82,14 @@
    zweimal „Gespräche ansehen", wo keines freigegeben ist, Freitags
    Leistungsnachweis, den es nur für Petersen gibt, und die
    „Leistungsnachweise" der Zentrale, die es über alle Mandate nie gab.
-   Marker: BERATUNG-F-MODELL-V43 (keine Fläche entsteht mehr gerade) */
+   V44 nach Code-Review: zwei Türen zeigten auf das Falsche. Der Bäckerei
+   „nächster Termin, noch keiner vereinbart" widersprach der Woche, in der
+   zwei Termine mit ihr stehen — jetzt steht der Montag da. Und MTS' Vorschlag
+   geht nicht an die Werkbank (dort liegt zu MTS nichts), sondern in die Woche.
+   Dort stand auch, dass der Anruf längst lief: Montag der Rückruf, Freitag das
+   Angebot. Der Zettel „vielleicht anrufen?" war damit falsch und heißt jetzt
+   „Freitag liegt es auf dem Tisch", ebenso Griff und Flottenkarte.
+   Marker: BERATUNG-F-MODELL-V44 (keine Fläche entsteht mehr gerade) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -765,7 +772,10 @@ body.gezoomt #zonen{display:block}
     <h3>Gespräche und Unterlagen</h3>
     <div class="zeilen">
       <div class="zeile zu"><span><span class="z-titel">Lohnt sich die zweite Filiale?</span><br><span class="z-meta">28. Juli. Frau Freitag hat es nicht freigegeben — keines ihrer sechs Gespräche ist frei.</span></span><span class="z-typ">Gespräch, privat</span></div>
-      <a class="zeile" href="beratung-kalender.html"><span><span class="z-titel">Nächster Termin</span><br><span class="z-meta">noch keiner vereinbart</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">offen</span></span></a>
+      <!-- „noch keiner vereinbart" stimmte nicht: in der Woche stehen zwei
+           Termine mit ihr. Eine Zeile, die das Gegenteil dessen behauptet, was
+           hinter ihrer eigenen Tür steht, ist schlimmer als gar keine. -->
+      <a class="zeile" href="beratung-kalender.html"><span><span class="z-titel">Nächster Termin</span><br><span class="z-meta">Montag, 14:00, Personalquote, bei ihr vor Ort</span></span><span class="z-typ">Termin</span></a>
     </div>
     <div class="tueren">
       <!-- Zwei Türen weniger, beide aus demselben Grund: hinter ihnen liegt für
@@ -795,8 +805,14 @@ body.gezoomt #zonen{display:block}
       <div class="ki">
         <span class="v-name">KI-Vorschlag</span>
         <span class="v-satz">Halbjahresblick als eigenes Mandat anbieten, das kam zuletzt gut an.</span>
-        <span class="v-hand">vielleicht anrufen?</span>
-        <a class="knopf primaer" href="beratung-fragen.html" style="text-decoration:none">Anruf vorbereiten</a>
+        <!-- Nicht mehr „vielleicht anrufen?": in der Woche lief der Rückruf
+             Montag, und Freitag steht „Angebot besprechen". Eine Notiz, die
+             das Gegenteil ihrer eigenen Tür sagt, ist keine Notiz. -->
+        <span class="v-hand">Freitag liegt es auf dem Tisch.</span>
+        <!-- Nicht an die Werkbank: dort liegt zu MTS nichts. Und nicht „Anruf
+             legen": der Rückruf steht Montag in der Woche, das Angebot am
+             Freitag. Die Tür führt dorthin, wo beides steht. -->
+        <a class="knopf primaer" href="beratung-kalender.html" style="text-decoration:none">Angebot Freitag besprechen</a>
       </div>
     </div>
     <div class="kpis">
@@ -806,7 +822,7 @@ body.gezoomt #zonen{display:block}
     <h3>Was wartet</h3>
     <div class="zeilen">
       <a class="zeile" href="beratung-rechnungen.html#b-r82"><span><span class="z-titel">Offener Abschlag 2026-0084</span><br><span class="z-meta">2.677,50 €, seit 12 Tagen</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">erinnern</span></span></a>
-      <a class="zeile" href="beratung-fragen.html"><span><span class="z-titel">Vorschlag des KI-Beraters</span><br><span class="z-meta">Halbjahresblick als eigenes Mandat anbieten, das kam zuletzt gut an</span><br><span class="z-hand">vielleicht anrufen?</span></span><span class="z-fuell"><span class="zustand vorschlag" role="img" aria-label="Vorschlag" title="Vorschlag"></span><span class="zustand-wort">Vorschlag</span></span></a>
+      <a class="zeile" href="beratung-kalender.html"><span><span class="z-titel">Vorschlag des KI-Beraters</span><br><span class="z-meta">Halbjahresblick als eigenes Mandat anbieten, das kam zuletzt gut an</span><br><span class="z-hand">Freitag liegt es auf dem Tisch.</span></span><span class="z-fuell"><span class="zustand vorschlag" role="img" aria-label="Vorschlag" title="Vorschlag"></span><span class="zustand-wort">Vorschlag</span></span></a>
     </div>
     <div class="tueren">
       <!-- Keine Tür „Gespräche ansehen": seit drei Wochen kommt hier keine Frage,
@@ -861,7 +877,7 @@ body.gezoomt #zonen{display:block}
       <button class="flotte-karte" type="button" data-zu="mts">
         <span class="f-kopf"><b>MTS Maschinenbau</b><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span></span>
         <span class="f-zahl">0 Fragen</span>
-        <span class="f-deut">seit 3 Wochen still, Anruf vorgeschlagen</span>
+        <span class="f-deut">seit 3 Wochen still, Angebot liegt Freitag an</span>
       </button>
     </div>
     <h3 data-hilfe-wenn="body.gezoomt"
