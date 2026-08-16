@@ -67,12 +67,22 @@
    V39 (Häppchen E1): die Zentrale hat eine Tür „Selber fragen" — die Beratung
    fragt denselben KI-Berater, den ihre Kunden hören, bekommt aber Entwürfe
    statt Auskünfte (beratung-fragen.html).
-   V42 (Issue #50): jedes der vier Mandate hat jetzt die Tür „Kundenakte",
-   und Freitags 31 % heißen, was sie sind — die Rohertragsmarge, nicht die
-   Personalquote (die steht mit 38,4 % in seiner Akte).
-   mit seinem Namen in der Adresse. Vorher hatte nur Petersen eine — und ein
-   Beleg auf einer anderen Fläche konnte eine fremde Akte nicht öffnen.
-   Marker: BERATUNG-F-MODELL-V42 (jedes Mandat hat die Tür zu seiner Akte) */
+   V42 (Issue #50): jedes der vier Mandate hat jetzt die Tür „Kundenakte", mit
+   seinem Namen in der Adresse. Vorher hatte nur Petersen eine — und ein Beleg
+   auf einer anderen Fläche konnte eine fremde Akte nicht öffnen. Und Freitags
+   31 % heißen, was sie sind — die Rohertragsmarge, nicht die Personalquote
+   (die steht mit 38,4 % in seiner Akte).
+   V43: keine Fläche „entsteht gerade" mehr. Die fünfzehn Sackgassen des
+   Cockpits sind aufgelöst — die meisten führen jetzt dorthin, wo die Sache
+   wirklich steht (Vorschlag ins Mandat, Termin ins Protokoll, Anruf an die
+   Werkbank, Leistungsnachweis hinaus in die Marke des Kunden). Ein Gespräch,
+   das der Kunde nicht freigegeben hat, ist keine Sackgasse, sondern eine
+   geschlossene Tür: die Zeile nennt den Grund und lässt sich nicht drücken
+   (.zeile.zu). Und vier Türen sind weg, weil hinter ihnen nichts liegt —
+   zweimal „Gespräche ansehen", wo keines freigegeben ist, Freitags
+   Leistungsnachweis, den es nur für Petersen gibt, und die
+   „Leistungsnachweise" der Zentrale, die es über alle Mandate nie gab.
+   Marker: BERATUNG-F-MODELL-V43 (keine Fläche entsteht mehr gerade) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -419,6 +429,12 @@ body.gezoomt #zonen{display:block}
   transition:border-color .2s ease;
 }
 .zeile:hover{border-color:var(--blau)}
+/* Eine Zeile, die zu ist, weil der Kunde sie nicht freigegeben hat: kein Zeiger,
+   kein Rand beim Zeigen, kein Schatten — sie steht da und nennt ihren Grund.
+   Nicht dasselbe wie „entsteht gerade": hier fehlt nichts, hier gilt etwas. */
+.zeile.zu{cursor:default;background:rgba(255,255,255,.55);box-shadow:none}
+.zeile.zu:hover{border-color:var(--linie)}
+.zeile.zu .z-typ{color:var(--grau)}
 .zeile .z-titel{font-size:14px;font-weight:600;letter-spacing:-.01em;line-height:1.4}
 .zeile .z-meta{font-size:12px;color:var(--grau);margin-top:2px}
 .zeile .z-typ{flex-shrink:0;font-size:11px;font-weight:600;color:var(--nebel-500);white-space:nowrap}
@@ -451,14 +467,6 @@ body.gezoomt #zonen{display:block}
 }
 .tueren{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
 .tueren .knopf{min-height:40px;padding:0 18px;font-size:13.5px;text-decoration:none}
-
-/* ========== Demo-Hinweis ========== */
-#demo-hinweis{
-  position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;
-  font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--stift);
-  opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--feder);
-}
-#demo-hinweis.da{opacity:.95;translate:-50% 0}
 
 /* ========== Der Aufbau-Film ========== */
 #film{
@@ -575,7 +583,6 @@ body.gezoomt #zonen{display:block}
 </nav>
 
 <button id="krume" type="button" hidden><span class="zurueck">← Modell</span><span class="trenner">/</span><b id="krume-ziel">Zone</b></button>
-<div id="demo-hinweis">Diese Fläche entsteht gerade.</div>
 
 <div id="buehne">
   <div id="kamera">
@@ -661,7 +668,7 @@ body.gezoomt #zonen{display:block}
       <div class="ki">
         <span class="v-name">KI-Vorschlag</span>
         <span class="v-satz">Preismodell umstellen: rechnerisch +38.000 € im Jahr, ab Woche 6 wirksam.</span>
-        <button class="bald knopf primaer" type="button">Vorschlag ansehen</button>
+        <a class="knopf primaer" href="beratung-mandat.html" style="text-decoration:none">Vorschlag ansehen</a>
       </div>
     </div>
     <div class="kpis">
@@ -675,15 +682,18 @@ body.gezoomt #zonen{display:block}
     </div>
     <h3>Gespräche und Unterlagen</h3>
     <div class="zeilen">
-      <button class="zeile bald" type="button"><span><span class="z-titel">Wie läuft mein Geschäft?</span><br><span class="z-meta">Montag, 9:12, nur für den Kunden</span></span><span class="z-typ">Gespräch</span></button>
+      <div class="zeile zu"><span><span class="z-titel">Wie läuft mein Geschäft?</span><br><span class="z-meta">Montag, 9:12. Herr Petersen hat es nicht freigegeben, also liest hier niemand mit.</span></span><span class="z-typ">Gespräch, privat</span></div>
       <a class="zeile" href="beratung-akte.html?mandat=petersen"><span><span class="z-titel">Preismodell Benchmark</span><br><span class="z-meta">gestern in die Akte gelegt, 12 Seiten</span></span><span class="z-typ">Unterlage</span></a>
-      <button class="zeile bald" type="button"><span><span class="z-titel">Termin Donnerstag, 10:00</span><br><span class="z-meta">Dr. Anna Vogelsang, Preis und Marge</span></span><span class="z-typ">Videocall</span></button>
+      <a class="zeile" href="beratung-protokoll.html"><span><span class="z-titel">Termin Donnerstag, 10:00</span><br><span class="z-meta">Dr. Anna Vogelsang, Preis und Marge</span></span><span class="z-typ">Videocall</span></a>
     </div>
     <div class="tueren">
       <a class="knopf leise" href="beratung-mitlesen.html">Gespräche mitlesen</a>
       <a class="knopf leise" href="beratung-akte.html?mandat=petersen">Kundenakte</a>
       <a class="knopf leise" href="beratung-mandat.html">Meilensteine und Aufgaben</a>
-      <button class="bald knopf leise" type="button">Leistungsnachweis</button>
+      <!-- Hinaus in die Marke des Kunden: derselbe Weg wie beim Briefing im
+           Radar, deshalb dieselbe Sprache — die Tür sagt, dass sie hinausführt.
+           Nur hier: gezeichnet ist allein Petersens Nachweis. -->
+      <a class="knopf leise" href="leistungen.html">Leistungsnachweis, wie er ihn sieht</a>
     </div>
   </section>
 
@@ -719,7 +729,7 @@ body.gezoomt #zonen{display:block}
     </div>
     <h3>Gespräche und Unterlagen</h3>
     <div class="zeilen">
-      <button class="zeile bald" type="button"><span><span class="z-titel">Was kostet mich der Dieselpreis wirklich?</span><br><span class="z-meta">Freitag, 11:05, nur für den Kunden</span></span><span class="z-typ">Gespräch</span></button>
+      <div class="zeile zu"><span><span class="z-titel">Was kostet mich der Dieselpreis wirklich?</span><br><span class="z-meta">Freitag, 11:05. Herr Cordes hat es nicht freigegeben, also liest hier niemand mit.</span></span><span class="z-typ">Gespräch, privat</span></div>
       <a class="zeile" href="beratung-akte.html?mandat=cordes"><span><span class="z-titel">Fuhrpark-Übersicht 2026</span><br><span class="z-meta">Fassung 1, vom Kunden hochgeladen</span></span><span class="z-typ">Unterlage</span></a>
     </div>
     <div class="tueren">
@@ -754,13 +764,15 @@ body.gezoomt #zonen{display:block}
     </div>
     <h3>Gespräche und Unterlagen</h3>
     <div class="zeilen">
-      <button class="zeile bald" type="button"><span><span class="z-titel">Lohnt sich die zweite Filiale?</span><br><span class="z-meta">28. Juli, nur für den Kunden</span></span><span class="z-typ">Gespräch</span></button>
-      <button class="zeile bald" type="button"><span><span class="z-titel">Nächster Termin</span><br><span class="z-meta">noch keiner vereinbart</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">offen</span></span></button>
+      <div class="zeile zu"><span><span class="z-titel">Lohnt sich die zweite Filiale?</span><br><span class="z-meta">28. Juli. Frau Freitag hat es nicht freigegeben — keines ihrer sechs Gespräche ist frei.</span></span><span class="z-typ">Gespräch, privat</span></div>
+      <a class="zeile" href="beratung-kalender.html"><span><span class="z-titel">Nächster Termin</span><br><span class="z-meta">noch keiner vereinbart</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">offen</span></span></a>
     </div>
     <div class="tueren">
-      <button class="bald knopf leise" type="button">Gespräche ansehen</button>
+      <!-- Zwei Türen weniger, beide aus demselben Grund: hinter ihnen liegt für
+           dieses Mandat nichts. Kein Gespräch ist freigegeben, und gezeichnet
+           ist bisher nur Petersens Leistungsnachweis — dieselbe Kante wie beim
+           Briefing im Radar. Ihre 2.900 € stehen als Zahl über den Türen. -->
       <a class="knopf leise" href="beratung-akte.html?mandat=freitag">Kundenakte</a>
-      <button class="bald knopf leise" type="button">Leistungsnachweis</button>
     </div>
   </section>
 
@@ -784,7 +796,7 @@ body.gezoomt #zonen{display:block}
         <span class="v-name">KI-Vorschlag</span>
         <span class="v-satz">Halbjahresblick als eigenes Mandat anbieten, das kam zuletzt gut an.</span>
         <span class="v-hand">vielleicht anrufen?</span>
-        <button class="bald knopf primaer" type="button">Gespräch beginnen</button>
+        <a class="knopf primaer" href="beratung-fragen.html" style="text-decoration:none">Anruf vorbereiten</a>
       </div>
     </div>
     <div class="kpis">
@@ -794,10 +806,11 @@ body.gezoomt #zonen{display:block}
     <h3>Was wartet</h3>
     <div class="zeilen">
       <a class="zeile" href="beratung-rechnungen.html#b-r82"><span><span class="z-titel">Offener Abschlag 2026-0084</span><br><span class="z-meta">2.677,50 €, seit 12 Tagen</span></span><span class="z-fuell"><span class="zustand wartet" role="img" aria-label="Wartet" title="Wartet"></span><span class="zustand-wort">erinnern</span></span></a>
-      <button class="zeile bald" type="button"><span><span class="z-titel">Vorschlag des KI-Beraters</span><br><span class="z-meta">Halbjahresblick als eigenes Mandat anbieten, das kam zuletzt gut an</span><br><span class="z-hand">vielleicht anrufen?</span></span><span class="z-fuell"><span class="zustand vorschlag" role="img" aria-label="Vorschlag" title="Vorschlag"></span><span class="zustand-wort">Vorschlag</span></span></button>
+      <a class="zeile" href="beratung-fragen.html"><span><span class="z-titel">Vorschlag des KI-Beraters</span><br><span class="z-meta">Halbjahresblick als eigenes Mandat anbieten, das kam zuletzt gut an</span><br><span class="z-hand">vielleicht anrufen?</span></span><span class="z-fuell"><span class="zustand vorschlag" role="img" aria-label="Vorschlag" title="Vorschlag"></span><span class="zustand-wort">Vorschlag</span></span></a>
     </div>
     <div class="tueren">
-      <button class="bald knopf leise" type="button">Gespräche ansehen</button>
+      <!-- Keine Tür „Gespräche ansehen": seit drei Wochen kommt hier keine Frage,
+           und freigegeben ist ohnehin keine. -->
       <a class="knopf leise" href="beratung-akte.html?mandat=mts">Kundenakte</a>
       <a class="knopf leise" href="beratung-rechnungen.html#b-r82">Rechnung ansehen</a>
     </div>
@@ -870,7 +883,9 @@ body.gezoomt #zonen{display:block}
       <a class="knopf leise" href="beratung-ki-berater.html">Persona einstellen</a>
       <a class="knopf leise" href="beratung-wissen.html">Wissen</a>
       <a class="knopf leise" href="beratung-marke.html">Marke</a>
-      <button class="bald knopf leise" type="button">Leistungsnachweise</button>
+      <!-- Kein „Leistungsnachweise" über alle Mandate: der Nachweis gehört dem
+           einzelnen Kunden und hängt in seinem Gebäude. Was die Beratung quer
+           über alle sehen will, sind ihre Stunden und ihre Rechnungen. -->
       <a class="knopf leise" href="beratung-rechnungen.html">Rechnungen</a>
       <a class="knopf leise" href="beratung-abrechnung.html">Was quoroAI berechnet</a>
       <a class="knopf leise" href="beratung-marge.html">Marge und Sätze</a>
@@ -896,18 +911,8 @@ body.gezoomt #zonen{display:block}
      quoroAI spricht die Beratungen per Du; die data-du-Standardtexte gelten. */
   var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- Ehrlichkeit ---------- */
-  var hinweisTimer = null;
-  function demoHinweis(text){
-    var h = document.getElementById('demo-hinweis');
-    h.textContent = text;
-    h.classList.add('da');
-    clearTimeout(hinweisTimer);
-    hinweisTimer = setTimeout(function(){ h.classList.remove('da'); }, 2200);
-  }
-  document.querySelectorAll('.bald').forEach(function(el){
-    el.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); demoHinweis('Diese Fläche entsteht gerade.'); });
-  });
+  /* Der Demo-Hinweis „Diese Fläche entsteht gerade" ist weg: es entsteht keine
+     Fläche mehr, auf die er zeigen könnte (Entscheidung 2026-08-16). */
 
   /* ---------- Der Stift kritzelt aufs Foto ---------- */
   var NS = 'http://www.w3.org/2000/svg';

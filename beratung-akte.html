@@ -41,7 +41,9 @@
    wird für alle vier dasselbe. Einen Umschalter gibt es bewusst nicht — man
    betritt eine Akte über ihr Mandat oder über einen Beleg, der sagt, wessen
    Akte er meint.
-   Marker: BERATUNG-AKTE-V12 (jedes Mandat hat seine Akte) */
+   V13: die zwei ungezeichneten Griffe sagen nicht mehr „entsteht gerade" —
+   es entsteht nichts, sie sind im Entwurf schlicht nicht gezeichnet.
+   Marker: BERATUNG-AKTE-V13 (die ungezeichneten Griffe sagen es so) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -322,7 +324,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     hinweisTimer = setTimeout(function(){ h.style.opacity = 0; h.style.translate = '-50% 6px'; }, 2600);
   }
   document.querySelectorAll('.bald').forEach(function(el){
-    el.addEventListener('click', function(){ demoHinweisText('Diese Fläche entsteht gerade.'); });
+    /* Nicht mehr „entsteht gerade": es entsteht nichts, dieser Griff ist im
+       Entwurf schlicht nicht gezeichnet (Entscheidung 2026-08-16). */
+    el.addEventListener('click', function(){ demoHinweisText('Dieser Griff ist im Entwurf nicht gezeichnet.'); });
   });
 
   /* Die Beratung dieser Vorführung. Auf den Kundenflächen kommt der Name aus

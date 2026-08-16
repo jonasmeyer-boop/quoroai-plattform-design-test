@@ -27,7 +27,9 @@
    Nur er: gezeichnet ist in der Vorführung dieses eine Protokoll, und eine Tür,
    die an jedem Termin steht und überall auf dasselbe Blatt führt, wäre eine
    Behauptung. Der Satz über der Liste sagt es.
-   Marker: BERATUNG-TERMINE-V7 */
+   V8: „Lieber einen Termin vorschlagen" endete in „entsteht gerade" — es
+   führt jetzt in die Woche, denn dort sucht man ein Fenster.
+   Marker: BERATUNG-TERMINE-V8 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -496,8 +498,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     if (!text) { document.getElementById('antwort').focus(); return; }
     erledige(uebergabe, '<span>Übergeben. Der KI-Berater bringt deine Antwort ins Gespräch von Herrn Cordes, mit deinem Namen daran.</span>');
   });
+  /* Statt „entsteht gerade": ein Termin statt einer Antwort heißt, ein Fenster
+     zu suchen — und das steht in der Woche (Entscheidung 2026-08-16). */
   document.getElementById('termin-statt').addEventListener('click', function(){
-    demoHinweis('Diese Fläche entsteht gerade.');
+    location.href = 'beratung-kalender.html';
   });
 
   /* Die Standzeile zählt die Zettel selbst — sonst behauptet sie beim Laden
