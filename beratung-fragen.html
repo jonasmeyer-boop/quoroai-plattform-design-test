@@ -44,7 +44,15 @@
    lassen; bei reduzierter Bewegung wird trotzdem hingeführt; die beiden
    Textfelder tragen 16px, damit iOS beim Fokussieren nicht hineinzoomt;
    Hinweis und Ablage melden sich beim Vorlesen.
-   Marker: BERATUNG-FRAGEN-V2 */
+   V3 (zweites Review): der Vorbehalt bleibt auch nach dem Absenden stehen —
+   Kante und „Liegen geblieben" verschwanden, und der Bogen las sich danach
+   als glatte, voll belegte Auskunft; der Anlagenlisten-Beleg nennt keinen
+   fremden Mandanten mehr (die Kundenakte ist bisher nur für Petersen
+   gezeichnet, Issue #50); die Vorlagen-Gruppe hat ein role, sonst verwirft
+   der Screenreader ihr Label; der Hinweis liegt am Handy unter der Krume
+   statt auf ihr; und die Hilfe-Ebene erklärt jetzt auch den Kern — Tisch,
+   Bogen, Ausgänge.
+   Marker: BERATUNG-FRAGEN-V3 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -259,6 +267,15 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   font-size:14.5px;line-height:1.6;color:var(--nebel-600);
 }
 
+/* Der Hinweis steht im Stil statt am Element: nur so kann ihn die
+   Handy-Regel weiter unten überhaupt verschieben. */
+#demo-hinweis{
+  position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;
+  pointer-events:none;font-family:'Caveat',cursive;font-size:21px;font-weight:700;
+  color:var(--lila-700);opacity:0;rotate:-1deg;
+  transition:opacity .3s ease,translate .3s var(--kurve);
+}
+
 .fuss-satz{font-size:13px;color:var(--nebel-500);margin-top:26px;line-height:1.6;max-width:62ch}
 .fuss-satz a{color:var(--lila-700)}
 
@@ -278,6 +295,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   .vorlagen button{flex:1 1 100%;min-height:46px}
   .bogen .griffe .knopf,.werkbank-griffe .knopf{flex:1 1 100%;min-height:48px}
   .werkbank-griffe .merk{flex:1 1 100%}
+  /* Am Handy ist das Kopfband 118px hoch und die Krume liegt auf 70px — der
+     Hinweis muss unter beide, sonst deckt er den Rückweg zu. Er ist hier die
+     einzige Rückmeldung auf eine Frage, die nicht vorgeführt wird. */
+  #demo-hinweis{top:124px}
 }
 </style>
 </head>
@@ -314,7 +335,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       <label for="frage">Was willst du wissen?</label>
       <textarea id="frage" placeholder="Frag ihn wie einen Mitarbeiter, der alles gelesen hat."></textarea>
     </div>
-    <div class="vorlagen" id="vorlagen" aria-label="Fragen, die diese Vorführung beantwortet"></div>
+    <!-- role, sonst verwirft der Screenreader das aria-label eines nackten div -->
+    <div class="vorlagen" id="vorlagen" role="group" aria-label="Fragen, die diese Vorführung beantwortet"></div>
 
     <div class="werkbank-griffe">
       <button class="knopf primaer" id="fragen" type="button">Fragen</button>
@@ -322,12 +344,15 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     </div>
   </section>
 
-  <h3>Was auf dem Tisch liegt</h3>
+  <h3 data-hilfe-name="Der Tisch"
+      data-hilfe="Was er dir gibt, bleibt liegen, bis es seinen Weg gegangen ist. Kein Verlauf, den man wegscrollt — Entwürfe auf einem Tisch, an denen man arbeitet.">Was auf dem Tisch liegt</h3>
   <div class="tisch" id="tisch">
 
     <!-- Der Bogen, der schon dalag: heute früh gefragt, noch nicht abgelegt.
          Er zeigt die Regel ohne Erklärung — Entwurf, Belege, zwei Ausgänge. -->
-    <section class="bogen" data-bogen="petersen" aria-label="Entwurf zur Preisargumentation Petersen">
+    <section class="bogen" data-bogen="petersen" aria-label="Entwurf zur Preisargumentation Petersen"
+             data-hilfe-name="Der Bogen ist ein Entwurf"
+             data-hilfe="Deine Kunden bekommen eine Antwort, du bekommst einen Entwurf — er liegt durchscheinend obenauf und gehört dir erst, wenn du danach greifst. Jeder Beleg darunter ist eine Tür zu der Unterlage, aus der die Zahl kommt.">
       <span class="b-herkunft"><img src="bilder/quoro-icon.svg" alt="" width="15" height="15">Entwurf deines KI-Beraters</span>
       <div class="b-frage">„Entwirf mir die Preisargumentation für Donnerstag."</div>
       <div class="b-meta">Über Petersen Stahlbau, heute um 7:41 gefragt. Der Termin steht Donnerstag, 10:00.</div>
@@ -344,7 +369,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         <a href="beratung-wissen.html">Wissen, Branchenspiegel Abschnitt 5</a>
         <a href="beratung-marge.html">Marge und Sätze</a>
       </div>
-      <div class="griffe">
+      <div class="griffe"
+           data-hilfe-name="Die Ausgänge"
+           data-hilfe="Hier entscheidest du, was aus dem Entwurf wird: ein Blatt in der Akte, ein Termin in deiner Woche, ein Satz an den Kunden. Geht er an den Kunden, wechselt der Bogen sichtbar in deine Marke — ab da hast du ihn unterschrieben.">
         <button class="knopf primaer" type="button" data-tu="akte-petersen">Als Blatt in die Akte Petersen</button>
         <button class="knopf gefahr" type="button" data-tu="verwerfen">Verwerfen</button>
       </div>
@@ -356,7 +383,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   <p class="fuss-satz">Was hier steht, sieht kein Kunde — auch nicht der, über den es geht. Was du hinausgibst, geht als dein Wort in sein Gespräch, so wie die Antworten aus <a href="beratung-termine.html">Termine und Übergaben</a>.</p>
 </main>
 
-<div id="demo-hinweis" role="status" aria-live="polite" style="position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--lila-700);opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--kurve)">Diese Fläche entsteht gerade.</div>
+<div id="demo-hinweis" role="status" aria-live="polite">Diese Fläche entsteht gerade.</div>
 
 <script>
 (function(){
@@ -501,7 +528,11 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         text: 'Ob daneben ein Sofortabzug in Frage kommt, hängt an Dingen, die ich nicht sehe: Betriebsgröße, Gewinn des Vorjahres, was in den letzten Jahren schon abgezogen wurde. <b>Bei Herrn Cordes hätte ich hier abgebrochen und an dich übergeben. Bei dir tue ich es nicht — aber es bleibt eine Steuerfrage, und die verantwortest du.</b>'
       },
       belege: [
-        {text:'Akte Cordes, Anlagenliste Seite 2', href:'beratung-akte.html'},
+        /* Bewusst ohne Mandantennamen: die Kundenakte ist in den Entwürfen
+           bisher nur für Petersen gezeichnet. Ein Beleg „Akte Cordes", der in
+           die Akte eines anderen Mandanten führt, wäre auf ausgerechnet dieser
+           Fläche die falsche Aussage. */
+        {text:'Anlagenliste in der Kundenakte, Seite 2', href:'beratung-akte.html'},
         {text:'Wissen, AfA-Tabelle 2026', href:'beratung-wissen.html'},
         {text:'Die Übergabe von heute früh', href:'beratung-termine.html#cordes'}
       ],
@@ -587,9 +618,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     var feldId = 'ausgang-' + id;
     var block = document.createElement('div');
     block.className = 'ausgang';
+    /* Das Feld ist der Teil, der nach dem Absenden geht; die Notiz „Liegen
+       geblieben" bleibt. Sie steht deshalb AUSSERHALB von .ausgang-feld. */
     block.innerHTML =
-      '<label for="' + feldId + '">Das geht an ' + a.wer + ', mit deinem Namen daran</label>' +
-      '<textarea id="' + feldId + '"></textarea>' +
+      '<div class="ausgang-feld">' +
+        '<label for="' + feldId + '">Das geht an ' + a.wer + ', mit deinem Namen daran</label>' +
+        '<textarea id="' + feldId + '"></textarea>' +
+      '</div>' +
       '<div class="zurueckgelassen"><b>Liegen geblieben:</b> ' + a.zurueck + '</div>' +
       '<div class="griffe">' +
         '<button class="knopf primaer" type="button" data-tu="absenden">Absenden</button>' +
@@ -619,10 +654,18 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       ablegen(bogen, '<span>Verworfen. Nichts davon ist irgendwo gelandet.</span>');
     },
     'an-cordes': function(bogen, id){ inTinteDruecken(bogen, id); },
+    /* Was hinausging, ist weg; der Vorbehalt bleibt stehen. Ein abgelegter
+       Bogen, auf dem die Kante fehlt und die zurückgehaltene Einschätzung
+       nicht mehr steht, läse sich als glatte, voll belegte Auskunft — genau
+       der Eindruck, den diese Fläche widerlegt. */
     'absenden': function(bogen){
       var feld = bogen.querySelector('.ausgang textarea');
       if (!feld.value.trim()) { feld.focus(); return; }
-      bogen.querySelector('.ausgang').hidden = true;
+      bogen.querySelector('.ausgang .ausgang-feld').hidden = true;
+      bogen.querySelector('.ausgang .griffe').hidden = true;
+      bogen.querySelector('.ausgang .hand').hidden = true;
+      var kante = bogen.querySelector('.kante');
+      if (kante) kante.hidden = false;
       ablegen(bogen, '<span>Steht im Gespräch von Herrn Cordes, als dein Wort, mit deinem Namen daran. Die <a href="beratung-termine.html#cordes">Übergabe</a> ist damit erledigt.</span>');
     },
     /* Doch nicht schicken heißt: der Bogen ist wieder Pauspapier. Bliebe er in
