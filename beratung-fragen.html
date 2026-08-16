@@ -59,7 +59,10 @@
    verschwinden beim Ablegen und versprachen drei Wege, wo zwei standen). Und
    der Anlagenlisten-Beleg ist ein Zitat ohne Tür statt eines Links in die
    Akte eines anderen Mandanten.
-   Marker: BERATUNG-FRAGEN-V4 */
+   V5 (Fund aus dem Review zu E2, gleicher Fehler hier): der Hinweis rutscht
+   schon unter das Kopfband, sobald dieses zweizeilig wird — er hing an der
+   Handy-Schwelle und lag dazwischen auf der Krume, also auf dem Rückweg.
+   Marker: BERATUNG-FRAGEN-V5 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -297,6 +300,14 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 .fuss-satz{font-size:13px;color:var(--nebel-500);margin-top:26px;line-height:1.6;max-width:62ch}
 .fuss-satz a{color:var(--lila-700)}
 
+/* Der Hinweis hängt an derselben Schwelle wie das Kopfband, nicht an der
+   Handy-Schwelle: ab hier ist es 118px hoch und die Krume liegt auf 70px.
+   Zwischen 701 und 1360px lag er sonst auf der Krume, also auf dem Rückweg.
+   Der Block steht unten, nach der Grundregel — oben verlöre er gegen sie. */
+@media (max-width:1360px){
+  #demo-hinweis{top:124px}
+}
+
 @media (prefers-reduced-motion: reduce){
   main > *{animation:none;opacity:1;translate:none}
   .bogen,.bogen.neu{animation:none;opacity:1;translate:none;transition:none}
@@ -313,10 +324,6 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   .vorlagen button{flex:1 1 100%;min-height:46px}
   .bogen .griffe .knopf,.werkbank-griffe .knopf{flex:1 1 100%;min-height:48px}
   .werkbank-griffe .merk{flex:1 1 100%}
-  /* Am Handy ist das Kopfband 118px hoch und die Krume liegt auf 70px — der
-     Hinweis muss unter beide, sonst deckt er den Rückweg zu. Er ist hier die
-     einzige Rückmeldung auf eine Frage, die nicht vorgeführt wird. */
-  #demo-hinweis{top:124px}
 }
 </style>
 </head>
