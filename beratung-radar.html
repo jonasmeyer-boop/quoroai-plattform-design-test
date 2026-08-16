@@ -37,7 +37,15 @@
 
    Chrome ist quoroAI (system.css, Entscheidung 2026-08-12), Hilfe-Ebene im
    Kopfband, Uhr-Dock und Komet wie überall im Cockpit.
-   Marker: BERATUNG-RADAR-V1 */
+   V2 (Code-Review vor der Freigabe): die Kopfzahl jeder Kundenkarte wird
+   gezählt statt geschrieben, und die untere Hälfte zieht mit, wenn oben eine
+   Lücke geschlossen wird — sonst stand dort weiter „MTS: nichts", während
+   oben behauptet wurde, MTS bekomme Donnerstag etwas. Cordes hat keine Tür
+   ins Briefing mehr (gezeichnet ist bisher nur Petersens Blatt). Die
+   Trennlinie über dem ersten Punkt hing an `:first-of-type` und griff nie.
+   Der Vermerk beim Anhalten wird erst eingehängt, dann gefüllt. Und der
+   Einleitungssatz zählt die drei Stellen so, wie sie darunter stehen.
+   Marker: BERATUNG-RADAR-V2 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -211,6 +219,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 .k-kopf{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .k-name{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.01em;word-spacing:1.5px}
 .k-zahl{font-size:12.5px;color:var(--nebel-600)}
+.k-ungezeichnet{font-size:12.5px;color:var(--nebel-400)}
 .k-tuer{font-size:13px;font-weight:600;color:var(--lila-700);text-decoration:none}
 .k-tuer:hover{text-decoration:underline}
 @media (pointer:coarse){.k-tuer{display:inline-flex;align-items:center;min-height:44px}}
@@ -219,7 +228,10 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   margin-top:14px;padding-top:14px;border-top:0.5px solid var(--nebel-200);
   transition:opacity .35s ease;
 }
-.punkt:first-of-type{border-top:0;padding-top:0}
+/* Der erste Punkt einer Karte braucht keine Trennlinie. Nicht
+   `:first-of-type` — erstes div in .kunde ist die Kopfzeile, nicht der Punkt,
+   und die Regel griff nie. */
+.k-kopf + .punkt{border-top:0;padding-top:0}
 /* Grau und klein: was passiert ist. Dunkel und größer: was es bei ihm
    ausmacht. Die Reihenfolge ist die Aussage — die Meldung ist der Anlass,
    nicht der Inhalt. */
@@ -305,7 +317,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
   <h3 data-hilfe-name="Wo er nicht weiterkam"
       data-hilfe="Jedes Mal, wenn er in einem Gespräch an dich übergeben musste, merkt er sich die Stelle. Was hier steht, sind nicht Themen, die gerade laufen, sondern Sätze, an denen er stehen geblieben ist — und die Leute, die seitdem auf dich warten.">Wo er nicht weiterkam</h3>
-  <p class="h3-satz">Drei Stellen in diesem Monat. Zwei davon hast du je dreimal einzeln beantwortet.</p>
+  <p class="h3-satz">Drei Stellen in diesem Monat: eine hast du dreimal einzeln beantwortet, einer fehlt eine Unterlage, und eine soll offen bleiben.</p>
 
   <!-- Lücke 1: der Moment der Fläche. Ein Satz ins Wissen, und drei Kunden
        hören auf zu warten. -->
@@ -370,9 +382,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
   <h3 data-hilfe-name="Was Donnerstag früh hinausgeht"
       data-hilfe="Jeder Kunde bekommt sein eigenes Briefing, und darin steht nur, was an einer Zahl aus seiner Akte hängt. Du gibst nichts frei — Schweigen darf dich keine Arbeit kosten. Du kannst einen Punkt anhalten, wenn du ihn lieber selbst sagst.">Was Donnerstag früh hinausgeht</h3>
-  <p class="h3-satz">Er hat diese Woche 41 Branchenmeldungen gelesen. Drei davon rühren an eine Zahl aus einer eurer Akten. Zwei von vier Kunden bekommen deshalb nichts.</p>
+  <p class="h3-satz">Er hat diese Woche 41 Branchenmeldungen gelesen. Drei davon rühren an eine Zahl aus einer eurer Akten. <span id="stille-satz">Zwei von vier Kunden bekommen deshalb nichts.</span></p>
 
-  <section class="kunde" aria-label="Briefing für Petersen Stahlbau">
+  <section class="kunde" data-kunde="petersen" aria-label="Briefing für Petersen Stahlbau">
     <div class="k-kopf">
       <div><span class="k-name">Petersen Stahlbau</span> <span class="k-zahl">zwei Punkte</span></div>
       <a class="k-tuer" href="briefing.html">Ansehen, wie er es bekommt</a>
@@ -380,8 +392,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
     <div class="punkt" data-punkt="zoll">
       <div class="p-welt">Das Kabinett hat am Dienstag den Entwurf zur Einfuhrabgabe auf Stahl beschlossen, 6 Prozent ab Januar.</div>
-      <div class="p-bei-ihm">Bei ihm sind das <b>340 Tonnen im Jahr</b>, gut 60 Prozent davon aus der Einfuhr — rund <b>11.900 € Mehrkosten</b>, gerechnet auf seine Mengen aus 2025.</div>
-      <div class="p-quelle">Seine Zahl kommt aus dem <a href="beratung-akte.html">Rohstoffbezug in seiner Akte</a>. Dieselbe Frage steht oben als offene Lücke.</div>
+      <div class="p-bei-ihm">Bei ihm sind das <b>340 Tonnen im Jahr</b>, gut 60 Prozent davon aus der Einfuhr — rund <b>11.900&nbsp;€ Mehrkosten</b>, gerechnet auf seine Mengen aus 2025.</div>
+      <div class="p-quelle" id="zoll-quelle">Seine Zahl kommt aus dem <a href="beratung-akte.html">Rohstoffbezug in seiner Akte</a>. Dieselbe Frage steht oben als offene Lücke.</div>
       <div class="p-griffe">
         <button class="anhalten" type="button">Anhalten, ich sage es selbst</button>
       </div>
@@ -389,7 +401,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
     <div class="punkt" data-punkt="tarif">
       <div class="p-welt">Der Tarifabschluss in der Metall- und Elektroindustrie steht: 4,2 Prozent ab Oktober.</div>
-      <div class="p-bei-ihm">Bei ihm sind das <b>19 gewerbliche Mitarbeiter</b> und rund <b>34.000 € im Jahr</b>, ab Oktober also gut 8.500 € im laufenden Geschäftsjahr.</div>
+      <div class="p-bei-ihm">Bei ihm sind das <b>19 gewerbliche Mitarbeiter</b> und rund <b>34.000&nbsp;€ im Jahr</b>, ab Oktober also gut 8.500&nbsp;€ im laufenden Geschäftsjahr.</div>
       <div class="p-quelle">Seine Zahl kommt aus der Personalliste in seiner Akte.</div>
       <div class="p-griffe">
         <button class="anhalten" type="button">Anhalten, ich sage es selbst</button>
@@ -397,14 +409,19 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     </div>
   </section>
 
-  <section class="kunde" aria-label="Briefing für Cordes Logistik">
+  <!-- Kein „Ansehen" bei Cordes: gezeichnet ist bisher nur Petersens Briefing
+       (briefing.html zeigt seine Woche, seine Tonnen, seine Leute). Eine Tür,
+       die auf das Blatt eines anderen Betriebs führt, wäre auf einer Fläche,
+       deren Aussage „jeder bekommt seine eigenen Zahlen" ist, genau der
+       falsche Beweis. -->
+  <section class="kunde" data-kunde="cordes" aria-label="Briefing für Cordes Logistik">
     <div class="k-kopf">
       <div><span class="k-name">Cordes Logistik</span> <span class="k-zahl">ein Punkt</span></div>
-      <a class="k-tuer" href="briefing.html">Ansehen, wie er es bekommt</a>
+      <span class="k-ungezeichnet">Sein Blatt ist noch nicht gezeichnet</span>
     </div>
     <div class="punkt" data-punkt="maut">
       <div class="p-welt">Die Maut für schwere Lkw steigt zum Januar um 4,3 Cent je Kilometer.</div>
-      <div class="p-bei-ihm">Bei ihm sind das <b>11 Zugmaschinen</b> und rund <b>18.400 € im Jahr</b>, gerechnet auf seine Fahrleistung aus 2025.</div>
+      <div class="p-bei-ihm">Bei ihm sind das <b>11 Zugmaschinen</b> und rund <b>18.400&nbsp;€ im Jahr</b>, gerechnet auf seine Fahrleistung aus 2025.</div>
       <div class="p-quelle">Seine Zahl kommt aus der Fahrleistung in seiner Akte — die Anlagenliste 2026 fehlt ihm dafür noch, das steht oben.</div>
       <div class="p-griffe">
         <button class="anhalten" type="button">Anhalten, ich sage es selbst</button>
@@ -412,7 +429,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     </div>
   </section>
 
-  <section class="kunde still" aria-label="Briefing für Bäckerei Freitag"
+  <section class="kunde still" data-kunde="freitag" aria-label="Briefing für Bäckerei Freitag"
            data-hilfe-name="Eine Woche ohne Meldung"
            data-hilfe="Wenn nichts an ihre Zahlen rührt, bekommt sie nichts. Ein Rundschreiben hat keine Ausgabe, in der nichts steht — er schon, und das ist der Unterschied.">
     <div class="k-kopf">
@@ -421,12 +438,26 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     <p class="still-satz">Neun Meldungen aus dem Backhandwerk gelesen, keine rührt an ihre Zahlen. <b>Sie bekommt Donnerstag nichts</b> — und merkt davon nichts.</p>
   </section>
 
-  <section class="kunde still" aria-label="Briefing für MTS Maschinenbau">
+  <section class="kunde still" data-kunde="mts" aria-label="Briefing für MTS Maschinenbau">
     <div class="k-kopf">
       <div><span class="k-name">MTS Maschinenbau</span> <span class="k-zahl">nichts</span></div>
     </div>
     <p class="still-satz">Der Tarifabschluss träfe sie auch — aber ihre Personalliste ist von 2024, damit rechnet er ihr keinen Betrag aus. <b>Lieber nichts als eine Zahl, die nicht stimmt.</b></p>
   </section>
+
+  <!-- Vorlage für den Nachtrag, den „Bescheid geben" oben in die Karten der
+       drei Wartenden legt. Er trägt keinen Betrag: eine Antwort aus dem Wissen
+       gilt für alle drei gleich, und für MTS ließe sich ohnehin keine rechnen. -->
+  <template id="vorlage-nachtrag">
+    <div class="punkt" data-punkt="nachtrag">
+      <div class="p-welt">Aus deinem Wissen, heute von dir geschrieben.</div>
+      <div class="p-bei-ihm"><b>Deine Antwort zur Einfuhrabgabe</b> geht wörtlich mit — ohne Betrag, sie gilt für alle drei gleich.</div>
+      <div class="p-quelle">Steht seit heute in deinem <a href="beratung-wissen.html">Wissen</a>.</div>
+      <div class="p-griffe">
+        <button class="anhalten" type="button">Anhalten, ich sage es selbst</button>
+      </div>
+    </div>
+  </template>
 
   <p class="fuss-satz"
      data-hilfe-name="Du gibst nichts frei"
@@ -537,7 +568,22 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       });
       karte.querySelector('.wartende .w-kopf').textContent = 'Wer darauf gewartet hat';
       var k = karte.querySelector('.abgelegt');
-      k.innerHTML = '<span>Steht in deinem <b><a href="beratung-wissen.html">Wissen</a></b>. Petersen, Cordes und MTS bekommen den Satz am Donnerstag in ihrem Briefing — jeder mit seinen eigenen Zahlen dahinter.</span>';
+      k.innerHTML = '<span>Steht in deinem <b><a href="beratung-wissen.html">Wissen</a></b>. Petersen, Cordes und MTS bekommen den Satz am Donnerstag in ihrem Briefing.</span>';
+
+      /* Die untere Hälfte der Fläche muss mitziehen. Steht dort weiter „MTS:
+         nichts", während oben behauptet wird, MTS bekomme Donnerstag etwas,
+         widerspricht sich die Fläche in ihrer eigenen Kernaussage. */
+      var vorlage = document.getElementById('vorlage-nachtrag');
+      ['petersen','cordes','mts'].forEach(function(name){
+        var kunde = document.querySelector('.kunde[data-kunde="' + name + '"]');
+        if (!kunde || kunde.querySelector('[data-punkt="nachtrag"]')) return;
+        var neu = vorlage.content.firstElementChild.cloneNode(true);
+        kunde.appendChild(neu);
+        anhaltenBinden(neu);
+      });
+      var quelle = document.getElementById('zoll-quelle');
+      if (quelle) quelle.innerHTML = 'Seine Zahl kommt aus dem <a href="beratung-akte.html">Rohstoffbezug in seiner Akte</a>. Deine Antwort von eben geht als eigener Punkt mit hinaus.';
+      zaehle();
       demoHinweis('Ein Satz. Drei Kunden hören auf zu warten.');
     },
 
@@ -595,28 +641,66 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   }
   document.querySelectorAll('.luecke').forEach(binden);
 
-  /* ---------- Anhalten ----------
-     Nicht freigeben, anhalten. Der Punkt bleibt sichtbar stehen und lässt sich
+  /* ---------- Was tatsächlich hinausgeht ----------
+     Eine Zahl im Kopf einer Karte, die nach dem Anhalten oder nach dem
+     Bescheidgeben stehen bleibt, macht die halbe Fläche zur Lüge. Deshalb
+     zählt die Fläche selbst, statt die Zahl ins Markup zu schreiben. */
+  var ZAHLWORT = ['nichts', 'ein Punkt', 'zwei Punkte', 'drei Punkte', 'vier Punkte'];
+  var ANGEHALTEN_WORT = ['', 'einer angehalten', 'zwei angehalten', 'drei angehalten'];
+
+  function zaehle(){
+    var ohne = 0, kunden = document.querySelectorAll('.kunde');
+    kunden.forEach(function(k){
+      var alle = k.querySelectorAll('.punkt');
+      var still = k.querySelectorAll('.punkt.angehalten').length;
+      var offen = alle.length - still;
+      if (offen === 0) ohne++;
+      k.classList.toggle('still', offen === 0);
+      var wort = ZAHLWORT[offen] || (offen + ' Punkte');
+      if (still) wort += ', ' + (ANGEHALTEN_WORT[still] || still + ' angehalten');
+      k.querySelector('.k-zahl').textContent = wort;
+    });
+    /* Der Satz beginnt hinter einem Punkt, also groß — deshalb eigene Worte
+       statt einer aus der Zahlwort-Liste zusammengeschnittenen Form. */
+    var OHNE_SATZ = {
+      0: 'Alle vier bekommen etwas.',
+      1: 'Einer von vier Kunden bekommt deshalb nichts.',
+      2: 'Zwei von vier Kunden bekommen deshalb nichts.',
+      3: 'Drei von vier Kunden bekommen deshalb nichts.',
+      4: 'Kein einziger Kunde bekommt deshalb etwas.'
+    };
+    document.getElementById('stille-satz').textContent = OHNE_SATZ[ohne] || '';
+  }
+
+  /* Nicht freigeben, anhalten. Der Punkt bleibt sichtbar stehen und lässt sich
      zurückholen — was weg ist und nicht mehr auffindbar, ist keine Kontrolle,
      sondern ein Verlust. */
-  document.querySelectorAll('.punkt .anhalten').forEach(function(b){
-    var punkt = b.closest('.punkt');
+  function anhaltenBinden(punkt){
+    var b = punkt.querySelector('.anhalten');
+    if (!b || b.dataset.gebunden) return;
+    b.dataset.gebunden = '1';
     b.addEventListener('click', function(){
       b.hidden = true;
       punkt.classList.add('angehalten');
       var v = document.createElement('div');
       v.className = 'p-vermerk';
       v.setAttribute('role', 'status');
-      v.innerHTML = '<b>Angehalten.</b> Dieser Punkt geht Donnerstag nicht hinaus. Er steht als Notiz in deiner Woche, damit du ihn nicht vergisst.<button type="button">Doch hinausgehen lassen</button>';
+      /* Erst einhängen, dann füllen — eine Live-Region, die fertig
+         beschrieben ins Dokument kommt, sagt beim Auftauchen nichts. */
       punkt.appendChild(v);
+      v.innerHTML = '<b>Angehalten.</b> Dieser Punkt geht Donnerstag nicht hinaus. Er steht als Notiz in deiner Woche, damit du ihn nicht vergisst.<button type="button">Doch hinausgehen lassen</button>';
       v.querySelector('button').addEventListener('click', function(){
         v.remove();
         punkt.classList.remove('angehalten');
         b.hidden = false;
+        zaehle();
       });
+      zaehle();
       demoHinweis('Angehalten. Der Rest geht Donnerstag hinaus.');
     });
-  });
+  }
+  document.querySelectorAll('.punkt').forEach(anhaltenBinden);
+  zaehle();
 })();
 </script>
 <script src="hilfe.js"></script>
