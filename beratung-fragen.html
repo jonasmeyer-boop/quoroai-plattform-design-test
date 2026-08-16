@@ -52,7 +52,14 @@
    der Screenreader ihr Label; der Hinweis liegt am Handy unter der Krume
    statt auf ihr; und die Hilfe-Ebene erklärt jetzt auch den Kern — Tisch,
    Bogen, Ausgänge.
-   Marker: BERATUNG-FRAGEN-V3 */
+   V4 (drittes Review): der zurückgeholte Vorbehalt bekommt eine Sprecherzeile
+   — sein „ich" gehörte auf dem markenwechselnden Bogen sonst der Beratung,
+   also genau die Zuschreibung, die der Wechsel verhindern soll. Die
+   Ausgangs-Erklärung hängt am Fußsatz statt an den Knöpfen eines Bogens (die
+   verschwinden beim Ablegen und versprachen drei Wege, wo zwei standen). Und
+   der Anlagenlisten-Beleg ist ein Zitat ohne Tür statt eines Links in die
+   Akte eines anderen Mandanten.
+   Marker: BERATUNG-FRAGEN-V4 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -198,6 +205,14 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 /* Ein Beleg ist ein Weg in die Unterlage, kein Etikett — am Finger muss er
    sich treffen lassen (docs/wissen/handy-durchgang.md). */
 @media (pointer:coarse){.belege a{min-height:44px;padding:0 14px}}
+/* Der Beleg ohne Tür: gestrichelt, damit man ihm nicht vergeblich einen
+   Druck gibt. Er nennt die Quelle, führt aber (noch) nicht hin. */
+.belege .beleg-ohne-tuer{
+  display:inline-flex;align-items:center;
+  padding:6px 12px;border-radius:999px;
+  border:0.5px dashed var(--nebel-300);
+  font-size:12.5px;color:var(--nebel-500);
+}
 
 /* Die Kante: hier hört der Beleg auf. Bei einem Kunden bricht er hier ab und
    übergibt — bei der Beratung tut er es nicht, sagt es aber. */
@@ -209,6 +224,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 }
 .kante b{font-weight:600;color:var(--bernstein)}
 .kante .k-text{margin-top:6px}
+/* Steht erst da, wenn der Bogen die Marke gewechselt hat: dann braucht der
+   Vorbehalt einen Sprecher, sonst gehört sein „ich" der Beratung. */
+.kante .k-wer{font-size:12.5px;color:var(--nebel-600);margin-bottom:8px}
 
 .bogen .griffe{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
 .bogen .griffe .knopf{min-height:42px;padding:0 18px;font-size:14px}
@@ -370,8 +388,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         <a href="beratung-marge.html">Marge und Sätze</a>
       </div>
       <div class="griffe"
-           data-hilfe-name="Die Ausgänge"
-           data-hilfe="Hier entscheidest du, was aus dem Entwurf wird: ein Blatt in der Akte, ein Termin in deiner Woche, ein Satz an den Kunden. Geht er an den Kunden, wechselt der Bogen sichtbar in deine Marke — ab da hast du ihn unterschrieben.">
+           data-hilfe-name="Die Ausgänge dieses Bogens"
+           data-hilfe="Jeder Bogen trägt die Ausgänge, die zu ihm passen — dieser hier zwei: ein Blatt in der Akte, oder verwerfen. Ein Bogen über deine eigene Zahlen bietet stattdessen einen Termin an, einer für einen Kunden den Weg zu ihm.">
         <button class="knopf primaer" type="button" data-tu="akte-petersen">Als Blatt in die Akte Petersen</button>
         <button class="knopf gefahr" type="button" data-tu="verwerfen">Verwerfen</button>
       </div>
@@ -380,7 +398,12 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
   </div>
 
-  <p class="fuss-satz">Was hier steht, sieht kein Kunde — auch nicht der, über den es geht. Was du hinausgibst, geht als dein Wort in sein Gespräch, so wie die Antworten aus <a href="beratung-termine.html">Termine und Übergaben</a>.</p>
+  <!-- Die Erklärung zum Hinausgehen hängt hier und nicht an den Knöpfen eines
+       Bogens: die verschwinden, sobald er abgelegt ist, und mit ihnen wäre die
+       halbe Aussage der Fläche aus der Führung verschwunden. -->
+  <p class="fuss-satz"
+     data-hilfe-name="Was hinausgeht"
+     data-hilfe="Nichts auf diesem Tisch erreicht einen Kunden, solange du es nicht schickst. Gibst du einen Bogen an ihn weiter, wechselt er sichtbar in deine Marke, und sein Text landet in einem Feld — ab da hast du ihn unterschrieben.">Was hier steht, sieht kein Kunde — auch nicht der, über den es geht. Was du hinausgibst, geht als dein Wort in sein Gespräch, so wie die Antworten aus <a href="beratung-termine.html">Termine und Übergaben</a>.</p>
 </main>
 
 <div id="demo-hinweis" role="status" aria-live="polite">Diese Fläche entsteht gerade.</div>
@@ -528,11 +551,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
         text: 'Ob daneben ein Sofortabzug in Frage kommt, hängt an Dingen, die ich nicht sehe: Betriebsgröße, Gewinn des Vorjahres, was in den letzten Jahren schon abgezogen wurde. <b>Bei Herrn Cordes hätte ich hier abgebrochen und an dich übergeben. Bei dir tue ich es nicht — aber es bleibt eine Steuerfrage, und die verantwortest du.</b>'
       },
       belege: [
-        /* Bewusst ohne Mandantennamen: die Kundenakte ist in den Entwürfen
-           bisher nur für Petersen gezeichnet. Ein Beleg „Akte Cordes", der in
-           die Akte eines anderen Mandanten führt, wäre auf ausgerechnet dieser
-           Fläche die falsche Aussage. */
-        {text:'Anlagenliste in der Kundenakte, Seite 2', href:'beratung-akte.html'},
+        /* Ohne Tür, und das ist Absicht: die Kundenakte ist in den Entwürfen
+           bisher nur für Petersen gezeichnet (Issue #50). Ein Beleg, der von
+           Cordes' Bogen in die Akte eines anderen Mandanten führt, wäre auf
+           ausgerechnet dieser Fläche die falsche Aussage — der Umweg über
+           einen neutralen Namen verdeckte das nur. Solange es die Akte nicht
+           gibt, nennt der Beleg seine Quelle, ohne eine Tür zu behaupten. */
+        {text:'Anlagenliste Cordes, Seite 2', ohneTuer:true},
         {text:'Wissen, AfA-Tabelle 2026', href:'beratung-wissen.html'},
         {text:'Die Übergabe von heute früh', href:'beratung-termine.html#cordes'}
       ],
@@ -554,8 +579,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
   var tisch = document.getElementById('tisch');
 
+  /* Ein Beleg ist normalerweise eine Tür. Wo die Unterlage noch nicht
+     gezeichnet ist, steht er als Zitat da — ein Knopf, der woanders hinführt
+     als er sagt, ist schlimmer als kein Knopf. */
   function beleg(b){
-    return '<a href="' + b.href + '">' + b.text + '</a>';
+    return b.ohneTuer
+      ? '<span class="beleg-ohne-tuer">' + b.text + '</span>'
+      : '<a href="' + b.href + '">' + b.text + '</a>';
   }
 
   function baueBogen(id){
@@ -664,8 +694,20 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       bogen.querySelector('.ausgang .ausgang-feld').hidden = true;
       bogen.querySelector('.ausgang .griffe').hidden = true;
       bogen.querySelector('.ausgang .hand').hidden = true;
+      /* Der Vorbehalt kommt zurück — aber er spricht in Ich-Form, und der
+         Bogen trägt jetzt nur noch die Marke der Beratung. Ohne Sprecherzeile
+         läse sich „Bei dir tue ich es nicht" als Satz von Nordholm & Partner.
+         Genau diese Zuschreibung soll der Markenwechsel verhindern. */
       var kante = bogen.querySelector('.kante');
-      if (kante) kante.hidden = false;
+      if (kante) {
+        kante.hidden = false;
+        if (!kante.querySelector('.k-wer')) {
+          var wer = document.createElement('div');
+          wer.className = 'k-wer';
+          wer.textContent = 'Was dein KI-Berater dazu angemerkt hat, und was nicht mitgegangen ist:';
+          kante.prepend(wer);
+        }
+      }
       ablegen(bogen, '<span>Steht im Gespräch von Herrn Cordes, als dein Wort, mit deinem Namen daran. Die <a href="beratung-termine.html#cordes">Übergabe</a> ist damit erledigt.</span>');
     },
     /* Doch nicht schicken heißt: der Bogen ist wieder Pauspapier. Bliebe er in
