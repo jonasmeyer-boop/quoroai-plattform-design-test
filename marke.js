@@ -1,6 +1,6 @@
 /* quoroai-plattform-design · Der Marken-Kern: eine Quelle für alle Flächen.
    Vier Farbregler + Anrede je Beratung; im Produkt kommt beides aus dem
-   Mandanten-Profil (agency_branding). Marker: MARKE-KERN-V8
+   Mandanten-Profil (agency_branding). Marker: MARKE-KERN-V9
 
    V8: Die vierte Beispielmarke war „currily" samt echtem Logo aus dem Repo
    `currily-investmentplattform`. CLAUDE.md trennt dieses Projekt strikt von
@@ -56,18 +56,18 @@ window.Marke = (function () {
                 Namen, und lage.js führt ihn als Partner. Zwei Namen für
                 dieselbe Person standen bis 2026-08-16 nebeneinander. */
              vertretungRolle: 'Geschäftsführung', vertretung: 'Dr. Anna Vogelsang, Jens Nordholm', telefon: '+49 40 5544120',
-             mail: 'kontakt@nordholm-partner.de', register: 'Amtsgericht Hamburg, HRB 148920',
-             ust: 'DE812345678', aufsicht: 'Der Hamburgische Beauftragte für Datenschutz und Informationsfreiheit'}},
+             mail: 'kontakt@nordholm-partner.de', register: 'Amtsgericht Hamburg, HRB 000000 (Beispiel)',
+             ust: 'DE000000000 (Beispiel)', aufsicht: 'Der Hamburgische Beauftragte für Datenschutz und Informationsfreiheit'}},
     {name: 'Waldmann Consulting', anrede: 'sie', blau: '#0e7a5a', stift: '#0a5f46', tinte: '#101613', papier: '#f8faf7',
      recht: {anschrift: 'Waldmann Consulting GmbH\nKönigsallee 62\n40212 Düsseldorf',
              vertretungRolle: 'Geschäftsführung', vertretung: 'Martin Waldmann', telefon: '+49 211 8820140',
-             mail: 'info@waldmann-consulting.de', register: 'Amtsgericht Düsseldorf, HRB 74210',
-             ust: 'DE298374611', aufsicht: 'Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen'}},
+             mail: 'info@waldmann-consulting.de', register: 'Amtsgericht Düsseldorf, HRB 000000 (Beispiel)',
+             ust: 'DE000000000 (Beispiel)', aufsicht: 'Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen'}},
     {name: 'Steinbach & Cie.',    anrede: 'sie', blau: '#9c3948', stift: '#7c2d3a', tinte: '#171114', papier: '#fbf9f7',
      recht: {anschrift: 'Steinbach & Cie. Unternehmensberatung KG\nMaximilianstraße 13\n80539 München',
              vertretungRolle: 'Persönlich haftender Gesellschafter', vertretung: 'Friedrich Steinbach', telefon: '+49 89 2420380',
-             mail: 'kanzlei@steinbach-cie.de', register: 'Amtsgericht München, HRA 96140',
-             ust: 'DE165920873', aufsicht: 'Bayerisches Landesamt für Datenschutzaufsicht'}},
+             mail: 'kanzlei@steinbach-cie.de', register: 'Amtsgericht München, HRA 000000 (Beispiel)',
+             ust: 'DE000000000 (Beispiel)', aufsicht: 'Bayerisches Landesamt für Datenschutzaufsicht'}},
     /* Die Marke mit Logo — zeigt den logo_url-Platz. Sie ist frei erfunden
        wie die drei darüber: Name, Farben und Logo gehören keinem echten
        Unternehmen. Hier stand bis 2026-08-16 „currily" mit dem echten Logo
@@ -78,8 +78,8 @@ window.Marke = (function () {
      logo: logoDatei('Kestner', '#a35c15'),
      recht: {anschrift: 'Kestner Beratung GmbH\nKäthe-Kollwitz-Straße 84\n04109 Leipzig',
              vertretungRolle: 'Geschäftsführung', vertretung: 'Ines Kestner', telefon: '+49 341 3390260',
-             mail: 'kontakt@kestner-beratung.de', register: 'Amtsgericht Leipzig, HRB 32180',
-             ust: 'DE289140577', aufsicht: 'Sächsische Datenschutz- und Transparenzbeauftragte'}}
+             mail: 'kontakt@kestner-beratung.de', register: 'Amtsgericht Leipzig, HRB 000000 (Beispiel)',
+             ust: 'DE000000000 (Beispiel)', aufsicht: 'Sächsische Datenschutz- und Transparenzbeauftragte'}}
   ];
   var idx = 0;
   try { idx = parseInt(sessionStorage.getItem('marke') || '0', 10); } catch (e) {}
