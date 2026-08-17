@@ -6,7 +6,22 @@
 <title>Dein Berater</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
 <style>
-/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V61
+/* quoroai-plattform-design · Das Gespräch baut den Raum · Marker: GESPRAECH-V63
+   V63 (Nachlese der Runde): Der Notnagel des Erster-Tag-Drehbuchs sagte „Am
+   Dienstag geht sie mit dir durch" — gemeint ist der Kennenlern-Termin, und
+   der steht in der Lage auf Donnerstag, 20.08. Dazu ein Warnschild an
+   termineSchritte(): der Block läuft, bevor die Marke angewandt ist, dort
+   steht `anredeSie` noch auf false (am 2026-08-17 nachgemessen).
+   V62 (Issue #64): Die Fläche filterte die Termine ihres Kunden selbst — nach
+   Kunde, angefragt, intern und vergangener Stunde —, und derselbe Rechenweg
+   stand in beratung-termine.html noch einmal. Er kommt jetzt aus der Lage
+   (Lage.termineVon), samt dem Wortlaut „worum es geht, und bei wem"
+   (Lage.terminWer) und dem Anfang eines Termins (Lage.terminBeginn). Termine
+   gibt es in der Lage jetzt je Lage: am ersten Tag steht mit einem neuen
+   Mandanten nur das Kennenlernen, nicht die Woche eines langjährigen Kunden.
+   Und das Jahresgespräch beim Steuerbüro ist eine eigene Gattung der Lage
+   (fremd: true) statt eines Meldungstextes, aus dem diese Fläche es wieder
+   herausziehen musste.
    V61 (Nutzerprüfung 2026-08-16): „Welche Termine stehen an?" wurde aus einer
    Handliste beantwortet und verschwieg Herrn Petersen zwei seiner drei Termine
    dieser Woche — dieselbe Fläche, deren Glocke längst aus der Lage liest.
@@ -118,7 +133,23 @@ nav::after{
 nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px;min-width:0}
 nav .wortmarke>div{min-width:0}
 #marke-name{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-nav .wortmarke img{height:28px;width:auto;display:block}
+/* Ein Logo bringt den Namen der Beratung mit und ist deshalb breit: die
+   Beispielmarke mit Logo misst 145 Pixel. Ohne Grenze lief es am Telefon unter
+   die Griffe. Gemessen (Kestner Beratung, Logo bis 213):
+
+     320px, Akte leer      Griffe ab 166  →  47px Überlappung
+     390px, Akte mit Zahl  Griffe ab 149  →  64px Überlappung
+     390px, Akte leer      Griffe ab 236  →  keine
+
+   Die Bedingung gehört dazu, und ich hatte sie erst weggelassen: der Knopf
+   „Akte" wächst mit seiner Zahl und verschwindet bei null. Wer nur die frisch
+   geladene Fläche bei 390 misst, sieht nichts und hält die Regel für
+   wirkungslos — sie greift, sobald der Kunde ein paar Fragen gestellt hat.
+   Mit der Regel endet das Logo in allen drei Fällen an der Kante der Griffe.
+   (Rest aus Issue #25; dass der Name nicht zweimal dasteht, ist seit V39
+   erledigt.) object-fit hält dabei die Form. */
+nav .wortmarke img{height:28px;width:auto;max-width:100%;
+  object-fit:contain;object-position:left center;display:block}
 nav .marke-heim{
   pointer-events:auto;display:flex;align-items:center;gap:10px;min-width:0;
   color:inherit;text-decoration:none;
@@ -1061,14 +1092,19 @@ body.blatt-offen{overflow:hidden}
      Abend." über einer Akte, deren Meldungen von morgens um 9:20 sind, und
      ein Kapitel trug „heute, 20:13" neben „heute, 18.08., 9:20 Uhr".
      Jede neue Frage rückt die Uhr um zwei Minuten vor, damit die Kapitel
-     einer Akte nicht alle auf derselben Minute stehen. */
+     einer Akte nicht alle auf derselben Minute stehen.
+     Die Notnägel „9.67", „9:40" und „heute, 18.08., 9:40 Uhr" standen hier
+     bis Issue #63 für den Fall, dass lage.js fehlt. Sie waren dieselbe Stunde
+     zum zweiten, dritten und vierten Mal — und sie hätten nie getragen: ohne
+     die Lage fällt diese Fläche schon an der Glocke um. Es gibt genau ein
+     Heute, und es steht in lage.js. */
   var VORFUEHR = (function(){
-    var uhr = (window.Lage && Lage.jetzt) ? Lage.jetzt() : 9.67;
+    var uhr = Lage.jetzt();
     return {
       stunde: function(){ return Math.floor(uhr); },
       weiter: function(){ uhr += 2 / 60; },
-      zeit: function(){ return window.Lage ? Lage.zeitWort(uhr) : '9:40'; },
-      wann: function(){ return window.Lage ? Lage.wannWort(Lage.heute(), uhr) : 'heute, 18.08., 9:40 Uhr'; }
+      zeit: function(){ return Lage.zeitWort(uhr); },
+      wann: function(){ return Lage.wannWort(Lage.heute(), uhr); }
     };
   })();
   /* Die eine Frage, die den Kunden anspricht statt nur zu benennen — und
@@ -2962,34 +2998,39 @@ body.blatt-offen{overflow:hidden}
   var MEIN_MANDANT = 'Petersen Stahlbau';
   var ZAHLWORT_T = ['Kein', 'Ein', 'Zwei', 'Drei', 'Vier', 'Fünf', 'Sechs'];
 
+  /* Welche Lage gilt, weiß der Baustein Bitten — Termine gibt es seit
+     Issue #64 je Lage, wie Meldungen. Am ersten Tag ist Herr Petersen ein
+     neuer Mandant: dort stand ihm die volle Woche eines langjährigen Kunden
+     im Bild, drei Termine, die es nicht geben durfte. */
+  function lageId(){ return ersterTag ? 'erster-tag' : 'laufend'; }
+
+  /* Wann das Kennenlernen ist, sagt die Lage — nicht ein Satz im Notnagel des
+     Erster-Tag-Drehbuchs. */
+  function kennenlernWann(){
+    var t = window.Lage && Lage.kennenlernTermin();
+    return t ? Lage.tagWort(t.tag) : '';
+  }
+
+  /* Ausgewählt wird im Baustein: derselbe Rechenweg stand hier und in
+     beratung-termine.html getippt (Issue #64). „ab: jetzt" heißt, was heute
+     schon vorbei ist, „steht" nicht mehr an. */
   function meineTermine(){
     if (!window.Lage) return [];
-    var h = Lage.heute(), jetzt = Lage.jetzt();
-    return Lage.termine().filter(function(t){
-      if (t.kunde !== MEIN_MANDANT || t.angefragt || t.intern) return false;
-      /* Was heute schon vorbei ist, „steht" nicht mehr an. */
-      return t.tag > h || (t.tag === h && t.bis > jetzt);
-    }).sort(function(a, b){ return (a.tag - b.tag) || (a.von - b.von); });
+    return Lage.termineVon(MEIN_MANDANT, {lage: lageId(), ab: 'jetzt'});
   }
 
   function meineAnfrage(){
     if (!window.Lage) return null;
-    var offen = Lage.termine().filter(function(t){
-      return t.kunde === MEIN_MANDANT && t.angefragt;
-    });
-    return offen.length ? offen[0] : null;
+    return Lage.termineVon(MEIN_MANDANT, {lage: lageId(), angefragt: true})[0] || null;
   }
 
-  /* Ein Termin, der nicht bei der Beratung liegt: er steht in der Lage als
-     Meldung, nicht als Termin — der KI-Berater hat ihn nur ausgerichtet. */
+  /* Ein Termin, der nicht bei der Beratung liegt — das Jahresgespräch beim
+     Steuerbüro. Er war ein Meldungstext, aus dem diese Fläche ihn wieder
+     herausziehen musste; jetzt ist er eine eigene Gattung in der Lage
+     (fremd: true), und der KI-Berater sagt dazu, was er dazu zu sagen hat. */
   function fremderTermin(){
     if (!window.Lage) return null;
-    var m = Lage.meldungen(ersterTag ? 'erster-tag' : 'laufend').filter(function(x){
-      return x.id === 'jahresgespraech';
-    });
-    /* Roh, nicht aufgelöst: ob du oder Sie gilt, entscheidet erst der Moment
-       des Sprechens — die Vorführung wechselt die Marke im Stehen. */
-    return m.length ? m[0].text : null;
+    return Lage.termineVon(MEIN_MANDANT, {lage: lageId(), fremd: 'nur', ab: 'jetzt'})[0] || null;
   }
 
   function termineSchritte(){
@@ -3002,21 +3043,38 @@ body.blatt-offen{overflow:hidden}
              rede(', alle mit deiner Beratung:', ', alle mit Ihrer Beratung:');
     }}];
 
+    /* ACHTUNG, Falle für den Nächsten: dieser Block läuft beim BAU des
+       SKRIPTE-Arrays, und da steht `anredeSie` noch auf false — die Marke wird
+       erst danach angewandt (`trage()` weiter unten). Nachgemessen am
+       2026-08-17 unter Waldmann Consulting: Marke.sie war true, `anredeSie`
+       beim Bau false, während die Kopfzeile daneben schon „Sie sprechen mit
+       dem KI-Berater von" sagte.
+       Heute richtet das keinen Schaden an: `terminWer` liefert hier
+       Personennamen, und die stehen in beiden Anreden gleich. Wer aber an
+       dieser Stelle einen `rede()`-Aufruf durch einen festen String ersetzt
+       oder einen anredeabhängigen Satz einfriert, bekommt still die Du-Form
+       unter einer Sie-Marke. Alles Anredeabhängige gehört deshalb in eine
+       Funktion (`{t: function(){...}}`) — die wird erst beim Sprechen
+       ausgewertet, und dann stimmt die Anrede. */
     liste.forEach(function(t){
-      var wer = Lage.person(t.wer);
       schritte.push({termin: {
         tag: Lage.tagKuerzel(t.tag),
         zeit: Lage.zeitWort(t.von),
         wann: Lage.terminWann(t),
-        mit: t.was + (wer ? ', bei ' + wer.name : ''),
+        /* Ein Wortlaut, zwei Flächen: „bei" statt „mit", weil die Sache
+           schon „Gespräch mit einem Menschen" heißen kann. */
+        mit: Lage.terminWer(t, anredeSie),
         form: t.form
       }});
     });
 
     var fremd = fremderTermin();
     if (fremd) schritte.push({t: function(){
-      return Lage.wortlaut(fremd, anredeSie) + rede(' Das läuft nicht über deine Beratung, ich habe es nur ausgerichtet.',
-                          ' Das läuft nicht über Ihre Beratung, ich habe es nur ausgerichtet.');
+      /* Der Satz zum fremden Termin kommt aus der Lage — dieselbe Quelle, aus
+         der die Glocke ihre Meldung dazu nimmt. */
+      return Lage.fremdSatz(fremd, anredeSie) +
+             rede(' Das läuft nicht über deine Beratung, ich habe es nur ausgerichtet.',
+                  ' Das läuft nicht über Ihre Beratung, ich habe es nur ausgerichtet.');
     }});
 
     /* Was noch nicht entschieden ist, ist kein Termin — und genau das muss
@@ -3025,10 +3083,9 @@ body.blatt-offen{overflow:hidden}
     var w = meineAnfrage();
     if (w) schritte.push({t: function(){
       var wer = Lage.person(w.wer);
-      var wann = Lage.tage()[w.tag];
       var satz = ' bei ' + (wer ? wer.name : 'deiner Beratung') + ': „' + w.was +
-                 '", Wunschfenster ' + wann.kurz + ', ' + wann.kurzdatum + ', ' +
-                 Lage.zeitWort(w.von) + '. Entschieden ist sie noch nicht.';
+                 '", Wunschfenster ' + Lage.terminBeginn(w) +
+                 '. Entschieden ist sie noch nicht.';
       return rede('Dazu liegt deine Anfrage', 'Dazu liegt Ihre Anfrage') + satz;
     }});
 
@@ -3322,8 +3379,15 @@ body.blatt-offen{overflow:hidden}
                       'Ehrliche Antwort: dazu kenne ich Ihre Zahlen noch nicht. Sobald Ihre Jahresabschlüsse da sind, rechne ich es Ihnen aus.');
         }},
         {t: function(){
-          return rede('Deine Frage habe ich Dr. Anna Vogelsang notiert. Am Dienstag geht sie mit dir durch, was sich daraus ergibt.',
-                      'Ihre Frage habe ich Dr. Anna Vogelsang notiert. Am Dienstag geht sie mit Ihnen durch, was sich daraus ergibt.');
+          /* Gemeint ist der Kennenlern-Termin, und der steht in der Lage. Hier
+             stand „Am Dienstag" — derselbe Termin, zwei Tage daneben, und
+             Dienstag ist zugleich das Heute der Lage. */
+          var k = kennenlernWann();
+          /* Das Komma hinter dem Datum gehört dazu: „Am Donnerstag, 20.08.,
+             geht sie …" — der Wortlaut der Lage endet mit dem Punkt der
+             Abkürzung, nicht mit dem des Satzes. */
+          return rede('Deine Frage habe ich Dr. Anna Vogelsang notiert. Am ' + k + ', geht sie mit dir durch, was sich daraus ergibt.',
+                      'Ihre Frage habe ich Dr. Anna Vogelsang notiert. Am ' + k + ', geht sie mit Ihnen durch, was sich daraus ergibt.');
         }},
         {chips: [brauchtFrage, 'Wie arbeiten wir zusammen?']}
       ]};

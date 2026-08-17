@@ -43,7 +43,14 @@
    steht ausgeschrieben da. „Gezählt wird bis heute" über einem Zeitraum
    „1. bis 14. August 2026" war zweimal falsch: der Entwurf steht am 18.,
    und ein Zeitraum, der sich „heute" nennt, sagt nicht, welcher Tag das ist.
-   Marker: BERATUNG-ABRECHNUNG-V6 (die Plattformgebühr zeigt Preis und Tage) */
+   V8 (Issue #66): „Alle Vorschläge" ist am groben Zeiger 44 Pixel hoch statt
+   38 — dieselbe Regel und derselbe Wortlaut wie in plattform.html. Am Telefon
+   greift sie nicht, und das ist Absicht: unter 520px blendet diese Fläche die
+   Pille aus, weil der Weg zu den Vorschlägen Gerüst ist. Gemessen 0 × 0 bei
+   390px, 134 × 44 bei 1200px mit grobem Zeiger.
+   Und Tagesabstände rechnet Lage.tageSeit(); das eigene tageSeit() dieser
+   Fläche war ein zweiter Rechenweg für dieselbe Sache.
+   Marker: BERATUNG-ABRECHNUNG-V8 (die Fingermaße stimmen) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -67,6 +74,14 @@ nav a.vorschlaege{
   text-decoration:none;transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+/* Am Finger ist die Pille 38 Pixel hoch — ein Daumen trifft das nicht
+   zuverlässig (Issue #66). Auf Telefonbreite und an jedem groben Zeiger 44;
+   das Bild wächst nur in der Höhe. Gleiches Muster wie in plattform.html. */
+@media (pointer:coarse),(max-width:700px){
+  nav a.vorschlaege{
+    min-height:44px;padding:0 14px;display:inline-flex;align-items:center;
+  }
+}
 
 /* Die Krume ist ein Zettel neben der Seite — solange daneben Platz ist.
    Wird das Fenster schmaler als 1440px, reicht sie in die Inhaltsspalte und
@@ -410,7 +425,11 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
     var ganz = String(Math.floor(v/100)).replace(/\B(?=(\d{3})+$)/g, '.');
     return (minus ? '−' : '') + ganz + ',' + ('0' + (v % 100)).slice(-2) + ' €';
   }
-  function tageSeit(iso){ return tagesZahl(HEUTE) - tagesZahl(iso); }
+  /* Tagesabstände zum Heute rechnet die Lage, nicht diese Fläche. Hier stand
+     ein eigenes tageSeit() über tagesZahl(); es kam heute auf dieselbe Zahl,
+     war aber ein zweiter Rechenweg für dieselbe Sache — und der zweite
+     Rechenweg ist der, der beim nächsten Sonderfall abweicht. */
+  function tageSeit(iso){ return Lage.tageSeit(iso); }
 
   /* ================= Die eigene Beratung =================
      Nordholm & Partner, dieselben Daten wie in plattform.html — dort ist sie

@@ -24,7 +24,9 @@
    über dem Symbol. Der Name bekommt jetzt die ganze erste Zeile. Dazu
    Fingermaß für „↓ Laden" und „Fassungen" (35 bzw. 31 Bildpunkte hoch) und
    der Vorführ-Griff im Kopfband verschwindet schmal wirklich.
-   Marker: UNTERLAGEN-V16 (V9: Häppchen D1, die offene Bitte um eine Unterlage
+   V17 (Nachlese der Runde): Das Jahr der Datumszeilen stand als getippte
+   „2026" neben dem kurzdatum der Lage; es kommt jetzt über Lage.kurzDatum mit.
+   Marker: UNTERLAGEN-V17 (V9: Häppchen D1, die offene Bitte um eine Unterlage
    steht über dem Bestand. V10: Häppchen D3 — am ersten Tag liegt hier genau ein
    Dokument, der Beratungsvertrag. Ein neuer Kunde mit fünf Beratungsdokumenten
    in der Akte wäre eine Behauptung. V11: Häppchen D4 — die Unterlage wird
@@ -329,13 +331,18 @@ h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-h
      entsteht; ohne den Baustein bleibt dieselbe Woche als fester Wortlaut. */
   var Lage = window.Lage || null;
   var TAGE_ERSATZ = ['17.08.2026', '18.08.2026', '19.08.2026', '20.08.2026', '21.08.2026'];
-  function tagDatum(i){
-    var t = Lage && Lage.tage && Lage.tage()[i];
-    return t ? t.kurzdatum + '2026' : (TAGE_ERSATZ[i] || TAGE_ERSATZ[1]);
+  /* Das ganze Datum kommt aus der Lage, auch das Jahr. Hier stand
+     `t.kurzdatum + '2026'` — der Tag aus dem Baustein, das Jahr getippt
+     daneben; beim Jahreswechsel hätte die Lage weitergezählt und diese Zeile
+     nicht. Heißt `datumVon`, nicht `tagDatum`: `Lage.tagDatum` nennt den
+     Wochentag mit, hier soll nur die Zahl stehen. */
+  function datumVon(i){
+    return (Lage && Lage.kurzDatum ? Lage.kurzDatum(i) : '') ||
+           (TAGE_ERSATZ[i] || TAGE_ERSATZ[1]);
   }
   function heuteZahl(){ return Lage && Lage.heute ? Lage.heute() : 1; }
-  function heuteDatum(){ return tagDatum(heuteZahl()); }
-  function gesternDatum(){ return tagDatum(heuteZahl() - 1); }
+  function heuteDatum(){ return datumVon(heuteZahl()); }
+  function gesternDatum(){ return datumVon(heuteZahl() - 1); }
 
   var ersterTag = !!(window.Bitten && Bitten.lage() === 'erster-tag');
   /* Die Seiten der Dokumente stehen in blaetter.js, einmal für alle Flächen —

@@ -48,7 +48,15 @@
    den Namen des ANDEREN Termins am Donnerstag — ebenfalls Petersen, ebenfalls
    Dr. Vogelsang. Worum es auf einem Zettel geht, kommt jetzt aus der Lage,
    wie die Liste darunter.
-   Marker: BERATUNG-TERMINE-V13 (auch der Zettel nennt die Sache aus der Lage) */
+   V14 (Issue #64): das Filtern nach Mensch, angefragt, intern und Tag stand
+   hier getippt und im Gespräch des Kunden noch einmal — zwei Rechenwege für
+   dieselbe Frage. Es zieht jetzt über Lage.termineBei aus dem Baustein, mit
+   der Fassung dieser Fläche als Vorrat (sie verschiebt Termine). Ebenso der
+   Wortlaut „worum es geht, und bei wem" (Lage.terminWer) und der Anfang eines
+   Termins (Lage.terminBeginn).
+   V15: Die Fingermaß-Regel für „Alle Vorschläge" stand als einzige einzeilig;
+   sie ist jetzt in Form und Wortlaut wie auf den 22 Nachbarflächen.
+   Marker: BERATUNG-TERMINE-V15 (Auswahl, Wortlaut und Fingermaß wie nebenan) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -81,6 +89,20 @@ nav a.vorschlaege{
   text-decoration:none;transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+/* Am Finger: die Pille maß hier 125 × 38 und war damit die letzte im Ordner
+   ohne Fingermaß. Wortlaut und Form wie auf den 22 Nachbarflächen — eine
+   Regel, eine Schreibweise; zwei Fassungen derselben Regel driften
+   auseinander, und die Mehrheit gewinnt.
+
+   Zum `padding:0 14px`: es trägt die Höhe hier NICHT. Diese Fläche setzt
+   `*{box-sizing:border-box}`, und dann steckt das Polster schon in der
+   `min-height`. Die Null bleibt trotzdem stehen, damit die Regel überall
+   gleich gelesen wird. */
+@media (pointer:coarse),(max-width:700px){
+  nav a.vorschlaege{
+    min-height:44px;padding:0 14px;display:inline-flex;align-items:center;
+  }
+}
 
 /* Die Krume ist ein Zettel neben der Seite — solange daneben Platz ist.
    Wird das Fenster schmaler als 1320px, reicht sie in die Inhaltsspalte, und
@@ -373,15 +395,17 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
      Das Aussehen bleibt hier — die Lage liefert nur, was wahr ist. */
   var ICH = Lage.ich();
   var HEUTE = Lage.heute();
-  var TAGE = Lage.tage();
   var ALLE = Lage.termine();
 
   /* Was noch kommt, gehört in die Liste; was vorbei ist, nicht. Angefragtes
-     ist kein Termin — es liegt oben als Zettel und wird dort entschieden. */
+     ist kein Termin — es liegt oben als Zettel und wird dort entschieden.
+     Gefiltert wird im Baustein (Issue #64): derselbe Rechenweg stand hier und
+     im Gespräch getippt, und der Kunde bekam am Ende eine andere Auswahl zu
+     sehen als seine Beratung. `aus` gibt der Auswahl die Fassung DIESER
+     Fläche mit — sie verschiebt Termine, und ein frischer Griff in die Quelle
+     hätte jede Bestätigung wieder zurückgedreht. */
   function meine(){
-    return ALLE.filter(function(t){
-      return t.wer === ICH && !t.intern && !t.angefragt && t.tag >= HEUTE;
-    }).sort(function(a, b){ return (a.tag - b.tag) || (a.von - b.von); });
+    return Lage.termineBei(ICH, {ab: 'heute', aus: ALLE});
   }
 
   function zeileFuer(t){
@@ -453,8 +477,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       '<a class="t-tuer" href="beratung-kalender.html">In der Woche</a>';
     reihe.querySelector('.t-wann').textContent = t.kunde + ', nichts bei dir im Kalender';
     reihe.querySelector('.t-mit').textContent =
-      TAGE[t.tag].kurz + ', ' + TAGE[t.tag].kurzdatum + ', ' + Lage.zeitWort(t.von) +
-      ' sitzt ' + Lage.person(t.wer).name + ' dort, ' + t.was;
+      Lage.terminBeginn(t) + ' sitzt ' + Lage.person(t.wer).name + ' dort, ' + t.was;
     return reihe;
   }
 
@@ -590,15 +613,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
      ist der Donnerstag 10:00, ebenfalls Petersen, ebenfalls Dr. Vogelsang).
      Zwei Termine mit einer Überschrift: wer Zettel und Woche nebeneinander
      legte, griff zum Hörer. Jetzt kommt beides aus derselben Quelle wie die
-     Liste darunter. */
+     Liste darunter — auch der Wortlaut: `Lage.terminWer` stand als
+     `t.was + ', bei ' + name` hier und im Gespräch getippt (Issue #64). */
   function worumEsGeht(ziel, id){
     var el = document.querySelector(ziel);
     var t = ausLage(id);
     if (!el || !t) return;
-    var wer = Lage.person(t.wer);
-    /* „bei" statt „mit": der Wunsch heißt schon „Gespräch mit einem
-       Menschen", und zweimal „mit" in einer Zeile stolpert. */
-    el.textContent = t.was + (wer ? ', bei ' + wer.name : '');
+    el.textContent = Lage.terminWer(t);
   }
   worumEsGeht('#anfrage-petersen [data-mit]', ANFRAGE_ID);
   worumEsGeht('#verschiebung-cordes [data-v-mit]', CORDES_ID);

@@ -51,7 +51,16 @@
    „Deine Termine" baut. Vorher kannte nur diese Fläche den Freitag bei MTS
    Maschinenbau. Und die Standzeile nennt den Kreis, über den sie zählt: das
    Raster zeigt zehn Kästen, gemeldet waren neun (Ärger 79).
-   Marker: BERATUNG-KALENDER-V5 (Termine kommen aus einer Quelle) */
+   V6 (Issue #66): am Finger trifft man, was man sieht — neun Bedienelemente
+   standen bei 38 statt 44 Pixeln (Blätterpfeile, Wer-Chips, „Abwesenheit
+   eintragen", „Alle Vorschläge"). Und die Filterreihe umbricht, statt zu
+   rollen: zwei von sechs Wählern lagen bei 390px hinter der Kante, ohne
+   dass irgendetwas das verriet.
+   V7 (Gegenlesen zu V6): die Pillen-Regel trägt den Wortlaut aus
+   plattform.html statt eines zweiten eigenen — eine Regel, ein Wortlaut.
+   Und die Kalenderblöcke tragen im Code, warum das Fingermaß für sie
+   bewusst nicht gilt, damit der nächste Prüfer sie nicht erneut meldet.
+   Marker: BERATUNG-KALENDER-V7 (die Ausnahme steht da, wo sie gilt) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -162,6 +171,19 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
    damit ein früher Termin Platz hat, bleiben aber ruhiger. */
 .tag-spalte .rand{position:absolute;left:0;right:0;background:rgba(16,19,26,.022);pointer-events:none}
 
+/* Fingermaß gilt hier BEWUSST nicht (Issue #66, gegengelesen 2026-08-17).
+   Ein Block liegt absolut im Zeitraster: seine Höhe IST seine Dauer. Eine
+   halbe Stunde misst 35 Pixel, und `min-height:44px` machte daraus optisch
+   eine Dreiviertelstunde — der Block behauptete dann eine Länge, die der
+   Termin nicht hat, und überlappte den nächsten. Die Trefferfläche ist mit
+   289 × 35 rund 10.000 Quadratpixel; hier ist die Höhe das falsche Maß.
+
+   Wer das hier misst und meldet: es ist kein Versehen.
+
+   Ein Block ist `<a>`, wenn der Termin ein Ziel hat, und sonst `<button>` —
+   und der Knopf ist nicht leer: er trägt entweder zur Verschiebung hinüber
+   (`wunsch`) oder sagt über `rufen()`, dass dieser Termin im Entwurf nicht
+   aufgeschlagen ist. Das ist die Entscheidung aus V3 oben, nicht ein Rest. */
 .block{
   position:absolute;left:5px;right:5px;overflow:hidden;
   border-radius:10px;padding:7px 9px;text-align:left;
@@ -347,7 +369,18 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   .tag-kopf[data-tag]:not(.gewaehlt),.tag-spalte:not(.gewaehlt){display:none}
   .leiste{gap:8px}
   .leiste .luecke{display:none}
-  .wer-chips{width:100%;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}
+  /* Die Filterreihe umbricht, sie rollt nicht (Issue #66). Vorher stand hier
+     `flex-wrap:nowrap;overflow-x:auto`: bei 390px maß die Reihe innen 328px
+     und außen 510px, „Tarek A." begann bei x=358 und „Sabine R." bei x=449 —
+     beide jenseits der Kante, und weil die Karte dort rund abschließt, endete
+     die Reihe fürs Auge bei „Miriam K.". Wer deren Woche sehen wollte, musste
+     raten, dass die Reihe wischt.
+     Ein Verlauf oder ein Anriss hätte nur besser gezeigt, dass etwas versteckt
+     ist. Umbrechen versteckt gar nichts: alle sechs Wähler stehen in zwei
+     Zeilen da, ohne Geste, ohne Ahnung, ohne zweiten Bedienweg. Die Reihe
+     kostet dafür rund 50 Pixel Höhe — der Preis, ein Teammitglied nicht zu
+     verlieren. */
+  .wer-chips{width:100%;flex-wrap:wrap;row-gap:8px}
   .wer-chips button{flex:0 0 auto}
   .leiste .knopf{width:100%}
   /* Die Luft-Tafel wird eine Zeile je Person mit fünf schmalen Feldern */
@@ -362,6 +395,41 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 @media (min-width:821px){
   .luft-zeile .l-tage{display:contents}
   .luft-zelle .l-tag-wort{display:none}
+}
+
+/* ---------- Fingermaße (Issue #66) ----------
+   Gemessen bei 390 Pixeln, vor dieser Änderung: die Blätterpfeile ‹ › je
+   38 × 38, die Wer-Chips „Alle" bis „Sabine R." je 38 hoch, „Abwesenheit
+   eintragen" 328 × 38, „Alle Vorschläge" 134 × 38. Immer dieselben zwei
+   Pixel zu wenig — ein Daumen trifft darunter nicht zuverlässig.
+
+   Dasselbe Muster wie in uebersicht.html und glocke.js: 44 Pixel unter
+   `pointer:coarse` ODER auf Telefonbreite. `pointer:coarse` steht mit dabei,
+   weil ein Finger auch auf einem breiten Schirm ein Finger bleibt.
+
+   Der Block steht am Dateiende, nicht bei den Grundregeln: bei gleicher
+   Spezifität gewinnt die spätere Regel, und ein Override weiter oben sähe
+   richtig aus und wirkte nie. */
+@media (pointer:coarse),(max-width:700px){
+  .blaettern button{width:44px;height:44px}
+  .wer-chips button{min-height:44px}
+  .leiste .knopf{min-height:44px}
+  /* Wortlaut aus plattform.html, wo dieselbe Pille seit Issue #51 steht:
+     eine Regel, ein Wortlaut. Zwei Fassungen derselben Regel driften
+     auseinander, und die aeltere hat mehr Flaechen hinter sich.
+
+     Zum `padding:0 14px`: es traegt die Hoehe hier NICHT. Diese Flaechen
+     setzen `*{box-sizing:border-box}`, und dann steckt das Polster schon
+     in der `min-height` — am 2026-08-17 nachgemessen, 44px mit und ohne
+     die Null, gleiche Breite, gleiche Lage. Erst unter `content-box`
+     waechst die Pille (gemessen 62px), und plattform.html setzt ebenfalls
+     border-box. Die Null bleibt trotzdem stehen, damit die Regel ueberall
+     gleich gelesen wird — aber wer anderswo ein Polster kuerzt oder
+     ergaenzt, sollte wissen, dass nicht sie die 44 haelt, sondern
+     `min-height` plus border-box. */
+  nav a.vorschlaege{
+    min-height:44px;padding:0 14px;display:inline-flex;align-items:center;
+  }
 }
 </style>
 <script src="krume.js"></script>

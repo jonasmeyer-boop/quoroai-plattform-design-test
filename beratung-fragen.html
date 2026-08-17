@@ -104,7 +104,9 @@
    den 1. August 2026 mit Fälligkeit 11. August datiert, beratung-rechnungen.html
    auf den 5. mit Fälligkeit 15. Solange die beiden sich widersprechen,
    behauptet dieser Bogen keine Anzahl von Tagen darüber.
-   Marker: BERATUNG-FRAGEN-V11 (Petersen trägt nicht, MTS trägt) */
+   V12 (Issue #66): „Alle Vorschläge" ist am Finger 44 Pixel hoch statt 38 —
+   dieselbe Regel und derselbe Wortlaut wie in plattform.html.
+   Marker: BERATUNG-FRAGEN-V12 (die Fingermaße stimmen) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -134,6 +136,14 @@ nav a.vorschlaege{
   text-decoration:none;transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+/* Am Finger ist die Pille 38 Pixel hoch — ein Daumen trifft das nicht
+   zuverlässig (Issue #66). Auf Telefonbreite und an jedem groben Zeiger 44;
+   das Bild wächst nur in der Höhe. Gleiches Muster wie in plattform.html. */
+@media (pointer:coarse),(max-width:700px){
+  nav a.vorschlaege{
+    min-height:44px;padding:0 14px;display:inline-flex;align-items:center;
+  }
+}
 /* Unter 1360px reicht die Krume in die Inhaltsspalte und wird die zweite
    Zeile des Kopfbands (Entscheidung 2026-08-14). */
 @media (max-width:1360px){

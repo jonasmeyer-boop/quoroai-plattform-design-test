@@ -24,7 +24,25 @@
    (erbeten bis Freitag, den 04.09.2026), Woche 1 beginnt am 07.09.2026 und
    Woche 6 am 12.10.2026 — hier stehen jetzt die Daten, dieselben wie in
    beratung-mandat.html.
-   Marker: UEBERSICHT-V31 (das wöchentliche Briefing hat eine Zeile und einen
+   V32 (Issue #64): Die Termin-Karte kommt aus der Lage (lage.js), samt der
+   offenen Anfrage daneben. Getippt standen hier: der fremde Termin beim
+   Steuerbüro mit eigener Anrede („mit dem" gegen die Glocke, die aus der Lage
+   „mit deinem/Ihrem" sagt), der Termin bei der Beraterin in zwei Fassungen
+   (Markup für den laufenden Betrieb, vier überschriebene Werte im Skript für
+   den ersten Tag), das Wunschfenster der Anfrage und der Satz „der Donnerstag,
+   20.08." im Verschiebe-Vermerk. Verschob jemand einen dieser Termine in der
+   Lage, sagte die Glocke das Neue und die Zeile darunter das Alte.
+   Und die Karte zeigt jetzt ALLE Termine, die dem Kunden bevorstehen, nicht
+   nur den einen mit seiner Beraterin — sein KI-Berater nennt im selben Besuch
+   drei.
+   V33 (Nachlese der Runde): „am Dienstag" stand an zwei Stellen für den
+   Kennenlern-Termin — im Weg-Satz und in der Station „Analyse" —, während die
+   Terminkarte derselben Fläche „Donnerstag, 20.08., 11:00" zeigte und der
+   Bitten-Block „am Donnerstag, 20.08.". Dienstag ist zugleich das Heute der
+   Lage; der Satz las sich also auch noch als „heute". Beide fragen jetzt
+   Lage.kennenlernTermin().
+   Marker: UEBERSICHT-V33 (auch der Weg nennt den Kennenlern-Termin aus der Lage)
+   (V31: das wöchentliche Briefing hat eine Zeile und einen
    Glocken-Eintrag, Häppchen E3; V26 aus dem Review: Überschrift und Titel der
    Zeile folgen der Anrede der Marke, wie alle Nachbarn)
    (V22: die Vorschläge des ersten Tages sind wortgleich mit denen im Gespräch —
@@ -588,19 +606,16 @@ section{margin-top:52px}
     <div id="termine">
       <div class="kopfzeile"><h2>Termine</h2></div>
       <div class="zeilen">
-        <!-- In Zeitfolge, wie überall: der nächste zuerst. Der Donnerstag stand
-             hier über dem heutigen Dienstag, weil er der Termin MIT der Beratung
-             ist — das ist eine Rangfolge, keine Zeitfolge (Issue #57). -->
-        <div class="zeile" data-lage="laufend"><div class="termin-lage"><div class="termin-blatt"><div class="tb-tag">DI</div><div class="tb-zeit">14:30</div></div><div><div class="termin-wann">heute, Dienstag, 18.08., 14:30–15:00</div><div class="termin-mit">Jahresgespräch mit dem Steuerbüro</div></div></div><span class="z-status">vor Ort</span></div>
-        <!-- Nur der Termin MIT der Beratung lässt sich hier verschieben — beim
-             Steuerbüro hätte der Knopf nichts, an das er sich wenden könnte. -->
-        <div class="zeile termin" id="termin-beratung">
-          <div class="termin-lage"><div class="termin-blatt"><div class="tb-tag" data-t-tag>DO</div><div class="tb-zeit" data-t-zeit>10:00</div></div><div><div class="termin-wann" data-t-wann>Donnerstag, 20.08., 10:00–11:00</div><div class="termin-mit">Preis und Marge mit Dr. Anna Vogelsang</div></div></div>
-          <div class="termin-griffe">
-            <span class="z-status geteilt">Videocall</span>
-            <button class="verschieben" type="button" id="verschieben-auf">Verschieben</button>
-          </div>
-        </div>
+        <!-- Die Zeilen entstehen aus der Lage (lage.js) — hier standen sie
+             getippt, in zwei Fassungen: eine für den laufenden Betrieb im
+             Markup, eine für den ersten Tag, die das Skript darüberschrieb
+             („DO", „11:00", „Donnerstag, 20.08., 11:00–12:00"). Vier Werte für
+             einen Termin, die an nichts hingen: verschob man das Kennenlernen
+             in der Lage, sagte die Glocke „Freitag, 21.08., 9:00" und die
+             Zeile zwei Zentimeter darunter weiter „DO 11:00".
+             In Zeitfolge, wie überall: der nächste zuerst. Der Donnerstag
+             stand hier über dem heutigen Dienstag, weil er der Termin MIT der
+             Beratung ist — das ist eine Rangfolge, keine Zeitfolge (#57). -->
         <div class="verschiebe-blatt" id="verschiebe-blatt" hidden>
           <div class="vb-frage" data-du="Wann passt es dir besser?" data-sie="Wann passt es Ihnen besser?">Wann passt es dir besser?</div>
           <div class="vb-fenster" role="group" aria-label="Freie Zeiten der Beratung">
@@ -620,9 +635,10 @@ section{margin-top:52px}
     </div>
     <div data-lage="laufend">
       <div class="kopfzeile"><h2>Anfragen</h2></div>
-      <div class="zeilen">
-        <div class="zeile" data-lage="laufend"><span><span class="z-titel">Gespräch mit einem Menschen</span><br><span class="z-meta">An Dr. Anna Vogelsang, Wunschfenster Freitag, 21.08., 9:00</span></span><span class="z-status offen">liegt vor</span></div>
-      </div>
+      <!-- Auch die offene Anfrage kommt aus der Lage: sie steht dort als
+           Termin w1 (angefragt), und hier stand ihr Wunschfenster ein zweites
+           Mal getippt. -->
+      <div class="zeilen" id="anfragen-zeilen"></div>
     </div>
   </section>
 
@@ -689,7 +705,138 @@ section{margin-top:52px}
     document.querySelectorAll('[data-lage="laufend"]').forEach(function(el){ el.hidden = true; });
     document.querySelector('.doppel').classList.add('einzeln');
   }
-  var terminTag = 'der Donnerstag, 20.08.';
+  /* ---------- Die Termin-Karte kommt aus der Lage (Issue #64) ----------
+     Hier standen vier Werte je Termin getippt, in zwei Fassungen: eine im
+     Markup für den laufenden Betrieb, eine im Skript für den ersten Tag. Sie
+     hingen an nichts. Der Gegenleser hat das Kennenlernen in der Lage auf
+     Freitag 9:00 geschoben — die Glocke sagte „Freitag, 21.08., 9:00", die
+     Zeile darunter weiter „DO 11:00". Dazu die Anrede: die Glocke sagte „mit
+     deinem Steuerbüro" (aus der Lage), die Zeile „mit dem Steuerbüro"
+     (getippt), unter einer Sie-Marke „mit Ihrem" gegen „mit dem".
+
+     Gezeigt werden ALLE Termine, die dem Kunden noch bevorstehen — seine
+     eigenen bei der Beratung und die fremden. Vorher stand hier einer von
+     dreien, während sein KI-Berater im selben Besuch „Drei Termine stehen
+     fest" sagte; das ist derselbe Fehler, für den die Nutzerprüfung schon
+     einmal zum Hörer gegriffen hat (V61 in gespraech.html).
+     Was hier aus dem Baustein kommt, sind Daten — Aussehen und Satzzeichen
+     bleiben Sache dieser Fläche. */
+  var MEIN_MANDANT = 'Petersen Stahlbau';
+  var anredeSie = !!(window.Marke && Marke.sie);
+
+  /* Wann das Kennenlernen ist, sagt die Lage. Hier stand „am Dienstag" — an
+     zwei Stellen, im Weg-Satz und in der Station „Analyse", während die
+     Terminkarte derselben Fläche „Donnerstag, 20.08., 11:00" zeigte und der
+     Bitten-Block „am Donnerstag, 20.08.". Verschärfend: Dienstag IST das Heute
+     der Lage, der Satz las sich also auch noch als „heute". */
+  function kennenlernTag(){
+    var t = window.Lage && Lage.kennenlernTermin();
+    return t ? Lage.tagWort(t.tag) : '';
+  }
+  var meineTermine = window.Lage
+    ? Lage.termineVon(MEIN_MANDANT, {lage: LAGE, ab: 'jetzt', fremd: true})
+    : [];
+
+  function terminZeile(t){
+    var zeile = document.createElement('div');
+    /* Verschieben geht nur bei dem Termin, der bei der eigenen Beraterin
+       liegt — beim Steuerbüro hätte der Knopf niemanden, an den er sich
+       wenden könnte, und bei einem fremden Termin erst recht nicht. */
+    var meiner = !t.fremd && t.wer === Lage.ich();
+    zeile.className = 'zeile' + (meiner ? ' termin' : '');
+    if (meiner) zeile.id = 'termin-beratung';
+
+    var lageEl = document.createElement('div');
+    lageEl.className = 'termin-lage';
+    var blatt = document.createElement('div');
+    blatt.className = 'termin-blatt';
+    blatt.innerHTML = '<div class="tb-tag"></div><div class="tb-zeit"></div>';
+    blatt.querySelector('.tb-tag').textContent = Lage.tagKuerzel(t.tag);
+    blatt.querySelector('.tb-zeit').textContent = Lage.zeitWort(t.von);
+
+    var text = document.createElement('div');
+    var wann = document.createElement('div');
+    wann.className = 'termin-wann';
+    wann.textContent = (t.tag === Lage.heute() ? 'heute, ' : '') +
+                       Lage.terminBeginn(t) + '–' + Lage.zeitWort(t.bis);
+    var mit = document.createElement('div');
+    mit.className = 'termin-mit';
+    mit.textContent = Lage.terminWer(t, anredeSie);
+    text.appendChild(wann);
+    text.appendChild(mit);
+    lageEl.appendChild(blatt);
+    lageEl.appendChild(text);
+    zeile.appendChild(lageEl);
+
+    var form = document.createElement('span');
+    form.className = 'z-status' + (meiner ? ' geteilt' : '');
+    form.textContent = t.form || '';
+    if (meiner) {
+      var griffe = document.createElement('div');
+      griffe.className = 'termin-griffe';
+      var knopf = document.createElement('button');
+      knopf.className = 'verschieben';
+      knopf.type = 'button';
+      knopf.id = 'verschieben-auf';
+      knopf.textContent = 'Verschieben';
+      griffe.appendChild(form);
+      griffe.appendChild(knopf);
+      zeile.appendChild(griffe);
+    } else {
+      zeile.appendChild(form);
+    }
+    return zeile;
+  }
+
+  (function(){
+    var blatt = document.getElementById('verschiebe-blatt');
+    meineTermine.forEach(function(t){
+      blatt.parentNode.insertBefore(terminZeile(t), blatt);
+    });
+  })();
+
+  /* Bis die Beratung antwortet, gilt der alte Termin — welcher das ist, sagt
+     die Lage. „der Donnerstag, 20.08." stand hier getippt, als fünfte Fassung
+     desselben Termins. */
+  var meinTermin = meineTermine.filter(function(t){ return !t.fremd && t.wer === Lage.ich(); })[0];
+  var terminTag = meinTermin ? 'der ' + Lage.terminBeginn(meinTermin) : '';
+
+  /* Die offene Anfrage steht in der Lage als angefragter Termin. Ihr
+     Wunschfenster stand hier ein zweites Mal getippt. */
+  (function(){
+    var liste = document.getElementById('anfragen-zeilen');
+    if (!liste || !window.Lage) return;
+    Lage.termineVon(MEIN_MANDANT, {lage: LAGE, angefragt: true}).forEach(function(w){
+      var wer = Lage.person(w.wer);
+      var zeile = document.createElement('div');
+      zeile.className = 'zeile';
+      var text = document.createElement('span');
+      var titel = document.createElement('span');
+      titel.className = 'z-titel';
+      titel.textContent = w.was;
+      var meta = document.createElement('span');
+      meta.className = 'z-meta';
+      meta.textContent = 'An ' + (wer ? wer.name : 'die Beratung') +
+                         ', Wunschfenster ' + Lage.terminBeginn(w);
+      text.appendChild(titel);
+      text.appendChild(document.createElement('br'));
+      text.appendChild(meta);
+      var stand = document.createElement('span');
+      stand.className = 'z-status offen';
+      stand.textContent = 'liegt vor';
+      zeile.appendChild(text);
+      zeile.appendChild(stand);
+      liste.appendChild(zeile);
+    });
+    /* Keine Anfrage, keine Spalte: eine leere „Anfragen"-Überschrift wäre
+       eine Behauptung. Der Verschiebe-Griff weiter unten holt sie zurück,
+       sobald wirklich eine vorliegt. */
+    if (!liste.children.length) {
+      liste.closest('.doppel > div').hidden = true;
+      document.querySelector('.doppel').classList.add('einzeln');
+    }
+  })();
+
   function zufall(a, b){ return a + Math.random() * (b - a); }
   /* Der Stift zieht seinen Anstrich, die Karten belichten gestaffelt */
   var svg = document.querySelector('.anstrich');
@@ -834,17 +981,20 @@ section{margin-top:52px}
       var fragt = offen === 0 && wartet > 0;
       return {
         satz: los
-          ? Marke.rede('Du hast alles geschickt. Dein KI-Berater rechnet über Nacht, und am Dienstag gehen wir gemeinsam durch, was herauskommt — damit ist das Kennenlernen durch.',
-                       'Sie haben alles geschickt. Ihr KI-Berater rechnet über Nacht, und am Dienstag gehen wir gemeinsam durch, was herauskommt — damit ist das Kennenlernen durch.')
+          /* Komma hinter dem Datum: der Wortlaut der Lage endet mit dem Punkt
+             der Abkürzung („20.08."), nicht mit dem des Satzes. */
+          ? Marke.rede('Du hast alles geschickt. Dein KI-Berater rechnet über Nacht, und am ' + kennenlernTag() + ', gehen wir gemeinsam durch, was herauskommt — damit ist das Kennenlernen durch.',
+                       'Sie haben alles geschickt. Ihr KI-Berater rechnet über Nacht, und am ' + kennenlernTag() + ', gehen wir gemeinsam durch, was herauskommt — damit ist das Kennenlernen durch.')
           : fragt
           ? Marke.rede('Von dir liegt alles vor. Deine Rückfrage liegt bei Dr. Anna Vogelsang — sobald sie beantwortet ist, fängt dein KI-Berater an zu rechnen.',
                        'Von Ihnen liegt alles vor. Ihre Rückfrage liegt bei Dr. Anna Vogelsang — sobald sie beantwortet ist, fängt Ihr KI-Berater an zu rechnen.')
           : Marke.rede('Wir stehen ganz am Anfang. Sobald deine Zahlen da sind, rechnet dein KI-Berater über Nacht — die erste Einschätzung findest du am nächsten Morgen hier.',
                        'Wir stehen ganz am Anfang. Sobald Ihre Zahlen da sind, rechnet Ihr KI-Berater über Nacht — die erste Einschätzung finden Sie am nächsten Morgen hier.'),
         /* Kennenlernen bleibt die Station, auch wenn alles geschickt ist: der
-           Termin steht erst am Dienstag. Nur der Ball wechselt die Seite —
-           dieselbe Regel wie im laufenden Fall, ein Meilenstein gilt nicht als
-           erreicht, weil die Vorarbeit da ist (Fund aus dem Review zu D3). */
+           Termin steht erst später in der Woche. Nur der Ball wechselt die
+           Seite — dieselbe Regel wie im laufenden Fall, ein Meilenstein gilt
+           nicht als erreicht, weil die Vorarbeit da ist (Fund aus dem Review
+           zu D3). */
         stationen: [
           {name: 'Kennenlernen', stand: 'jetzt',
            wann: los ? Marke.rede('liegt bei deiner Beratung', 'liegt bei Ihrer Beratung')
@@ -852,7 +1002,7 @@ section{margin-top:52px}
                  ? Marke.rede('deine Rückfrage läuft', 'Ihre Rückfrage läuft')
                  : Marke.rede(zahlwort(offen) + ' bei dir', zahlwort(offen) + ' bei Ihnen'))},
           {name: 'Analyse',
-           wann: los ? 'nach dem Dienstag'
+           wann: los ? 'nach dem ' + kennenlernTag()
                : fragt ? 'sobald die Rückfrage geklärt ist'
                : Marke.rede('sobald deine Zahlen da sind', 'sobald Ihre Zahlen da sind')},
           {name: 'Erste Empfehlung', wann: 'etwa vier Wochen später'},
@@ -925,8 +1075,12 @@ section{margin-top:52px}
     var brief = document.getElementById('brief');
     brief.hidden = false;
     document.getElementById('brief-text').textContent = Marke.rede(
-      'Ich habe deine Akte angelegt und drei Dinge notiert, die ich von dir brauche. Sobald deine Zahlen da sind, rechnet mein KI-Berater über Nacht — meine erste Einschätzung findest du am nächsten Morgen hier. Alles Weitere klären wir am Donnerstag, 20.08.',
-      'Ich habe Ihre Akte angelegt und drei Dinge notiert, die ich von Ihnen brauche. Sobald Ihre Zahlen da sind, rechnet mein KI-Berater über Nacht — meine erste Einschätzung finden Sie am nächsten Morgen hier. Alles Weitere klären wir am Donnerstag, 20.08.');
+      /* Auch der Brief nennt den Kennenlern-Termin — die fünfte Stelle, und
+         die einzige, die getippt „Donnerstag, 20.08." sagte statt „Dienstag".
+         Sie stimmte deshalb zufällig; auffällig wurde sie erst, als der Termin
+         im roten Lauf wegzog und der Brief als einziger stehen blieb. */
+      'Ich habe deine Akte angelegt und drei Dinge notiert, die ich von dir brauche. Sobald deine Zahlen da sind, rechnet mein KI-Berater über Nacht — meine erste Einschätzung findest du am nächsten Morgen hier. Alles Weitere klären wir am ' + kennenlernTag(),
+      'Ich habe Ihre Akte angelegt und drei Dinge notiert, die ich von Ihnen brauche. Sobald Ihre Zahlen da sind, rechnet mein KI-Berater über Nacht — meine erste Einschätzung finden Sie am nächsten Morgen hier. Alles Weitere klären wir am ' + kennenlernTag());
     var beiWem = (Marke.daten && Marke.daten.name) || 'deiner Beratung';
     document.getElementById('brief-wer').textContent = Marke.rede(
       'Dr. Anna Vogelsang, deine Beraterin bei ' + beiWem,
@@ -945,12 +1099,11 @@ section{margin-top:52px}
     document.querySelectorAll('.chips a').forEach(function(a, i){
       a.textContent = ersteFragen[i];
     });
-    /* Der einzige Termin, den es am ersten Tag gibt: das Kennenlernen. */
-    var t = document.getElementById('termin-beratung');
-    t.querySelector('[data-t-tag]').textContent = 'DO';
-    t.querySelector('[data-t-zeit]').textContent = '11:00';
-    t.querySelector('[data-t-wann]').textContent = 'Donnerstag, 20.08., 11:00–12:00';
-    t.querySelector('.termin-mit').textContent = 'Kennenlernen mit Dr. Anna Vogelsang';
+    /* Der einzige Termin, den es am ersten Tag gibt, ist das Kennenlernen —
+       und das steht in der Lage, nicht mehr hier. Diese vier Zeilen haben ihn
+       von Hand überschrieben („DO", „11:00", „Donnerstag, 20.08.,
+       11:00–12:00", „Kennenlernen mit Dr. Anna Vogelsang") und wussten nichts
+       davon, wenn er sich verschob. */
   }
 
   /* Die Glocke ist ein Baustein (glocke.js), und ihre Einträge stehen in der
@@ -985,6 +1138,19 @@ section{margin-top:52px}
   var senden = document.getElementById('vb-senden');
   var wunsch = null;
 
+  /* Seit die Zeilen aus der Lage entstehen (V32), kann es die verschiebbare
+     Zeile schlicht nicht geben — dann steht dem Kunden gerade kein Termin bei
+     seiner Beraterin bevor. Vorher stand sie fest im Markup und war immer da.
+     Ohne diesen Wächter wirft der erste Zugriff `Cannot read properties of
+     null (reading 'addEventListener')`, und weil alles in einer IIFE liegt,
+     stirbt danach der ganze Rest der Fläche — Vorführungs-Schalter
+     eingeschlossen. Gefunden im roten Lauf dieser Runde, als der
+     Kennenlern-Termin testweise in die Vergangenheit rutschte; im heutigen
+     Datenstand tritt es nicht auf, aber es ist einen Termin davon entfernt.
+     Dieselbe Lehre wie bei FREMDE.laufend: eine Liste kann leer sein. */
+  if (zeile) verschiebenVerdrahten();
+
+  function verschiebenVerdrahten(){
   document.getElementById('verschieben-auf').addEventListener('click', function(){
     blatt.hidden = !blatt.hidden;
     if (!blatt.hidden) blatt.querySelector('.vb-fenster button').focus();
@@ -1048,6 +1214,7 @@ section{margin-top:52px}
     liste.prepend(neu);
     if (!reduziert) neu.scrollIntoView({behavior:'smooth', block:'nearest'});
   });
+  }
 
   /* ---------- Der Vorführungs-Schalter ----------
      Ein anderer Tag ist ein anderer Besuch: die Fläche lädt neu, statt sich im

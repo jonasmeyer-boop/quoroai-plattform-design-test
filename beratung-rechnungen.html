@@ -74,7 +74,14 @@
    überfällig" an einer, die sieben Tage offen ist, und jede neu gestellte
    Rechnung entstand rückdatiert. Was jetzt geschieht, trägt außerdem eine
    Uhrzeit statt des Wortes „jetzt".
-   Marker: BERATUNG-RECHNUNGEN-V16 (ein Blatt, eine Fälligkeit) */
+   V18 (Issue #66): „Alle Vorschläge" ist am Finger 44 Pixel hoch statt 38 —
+   dieselbe Regel und derselbe Wortlaut wie in plattform.html.
+   Und die Zeile „Kleinunternehmer nach § 19 UStG" ist das Ziel ihres
+   Ankreuzfelds: breit gemessen war sie 22 Pixel hoch, jetzt 44.
+   Ebenso im Gutschrift-Modus: eine Position wird zum <label> um Kästchen und
+   Text, Ziel 44 statt 15 × 15. Ein Polster am Kästchen selbst hätte nichts
+   getan — der Browser verwirft padding an einem Ankreuzfeld.
+   Marker: BERATUNG-RECHNUNGEN-V18 (die Fingermaße stimmen) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -107,6 +114,14 @@ nav a.vorschlaege{
   text-decoration:none;transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+/* Am Finger ist die Pille 38 Pixel hoch — ein Daumen trifft das nicht
+   zuverlässig (Issue #66). Auf Telefonbreite und an jedem groben Zeiger 44;
+   das Bild wächst nur in der Höhe. Gleiches Muster wie in plattform.html. */
+@media (pointer:coarse),(max-width:700px){
+  nav a.vorschlaege{
+    min-height:44px;padding:0 14px;display:inline-flex;align-items:center;
+  }
+}
 
 /* Die Krume ist ein Zettel neben der Seite — solange daneben Platz ist.
    Wird das Fenster schmaler als 1440px, reicht sie in die Inhaltsspalte, und
@@ -317,6 +332,13 @@ a.beleg-zeile{
 
 /* Gutschrift-Wahl auf dem Papier */
 .papier td .wahl{margin-right:10px;accent-color:var(--lila-600);width:15px;height:15px;vertical-align:-2px}
+/* Das Kästchen misst 15 × 15 und lässt sich nicht vergrößern, ohne groß zu
+   werden: ein Polster am Kästchen selbst rechnet der Browser nicht — bei
+   `appearance:auto` fällt `padding` auf 0, gemessen im Browser, nicht
+   vermutet. Das Ziel ist deshalb die Position selbst. Sie wird im
+   Gutschrift-Modus zum <label> um Kästchen und Text und bekommt Fingerhöhe
+   (Issue #66), wie die Haken-Zeilen weiter oben. */
+.papier td .wahl-zeile{display:block;min-height:44px;padding:2px 0;cursor:pointer}
 
 /* Historie */
 .historie{display:flex;flex-direction:column}
@@ -334,8 +356,14 @@ a.beleg-zeile{
 #ansicht-daten .feld.breit{grid-column:1 / -1}
 #ansicht-daten .feld input{width:100%;min-height:44px}
 #ansicht-daten .feld input[disabled]{background:var(--nebel-050);color:var(--nebel-500)}
-.haken{display:flex;align-items:center;gap:10px;font-size:14px;margin-top:14px;cursor:pointer}
-.haken input{width:17px;height:17px;accent-color:var(--lila-600)}
+.haken{
+  display:flex;align-items:center;gap:10px;font-size:14px;margin-top:14px;cursor:pointer;
+  /* Das Kästchen misst 17px, breit gemessen war die ganze Zeile 22px hoch —
+     ein Daumen trifft das nicht. Das Ziel ist die Zeile, und die bekommt
+     Fingerhöhe (Issue #66), wie schon in beratung-zeiten.html. */
+  min-height:44px;padding:2px 0;
+}
+.haken input{width:17px;height:17px;flex-shrink:0;accent-color:var(--lila-600)}
 
 @media (prefers-reduced-motion: reduce){
   main > *{animation:none;opacity:1;translate:none}
@@ -1555,6 +1583,7 @@ a.beleg-zeile{
     b.positionen.forEach(function(p, idx){
       var tr = document.createElement('tr');
       var td1 = document.createElement('td');
+      var ziel = null;
       if (gutschriftModus){
         var box = document.createElement('input');
         box.type = 'checkbox'; box.className = 'wahl'; box.dataset.idx = idx;
@@ -1563,10 +1592,18 @@ a.beleg-zeile{
         box.addEventListener('change', function(){
           if (box.checked) angekreuzt.add(idx); else angekreuzt.delete(idx);
         });
-        td1.appendChild(box);
+        /* Kästchen und Text stehen zusammen in einem <label>: nur so ist das
+           Ziel am Finger 44 hoch — das Kästchen selbst lässt sich nicht
+           polstern. Das aria-label bleibt am Kästchen, es sagt schon alles;
+           der Text im Label wiederholte es sonst. */
+        ziel = document.createElement('label');
+        ziel.className = 'wahl-zeile';
+        ziel.appendChild(box);
       }
-      td1.appendChild(document.createTextNode(p.was));
-      td1.appendChild(el('span', 'her', p.her));
+      var wohin = ziel || td1;
+      wohin.appendChild(document.createTextNode(p.was));
+      wohin.appendChild(el('span', 'her', p.her));
+      if (ziel) td1.appendChild(ziel);
       tr.appendChild(td1);
       tr.appendChild(el('td', null, euro(p.cent)));
       tabelle.appendChild(tr);

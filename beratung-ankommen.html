@@ -34,7 +34,9 @@
    Füllstand im Glas, Chrom ist quoroAI (system.css).
    V2 (Issue #49): die Krume kommt aus dem Baustein krume.js statt aus
    fünfzehn Zeilen CSS und einem handgeschriebenen Verweis je Fläche.
-   Marker: BERATUNG-ANKOMMEN-V2 (die Krume kommt aus einer Quelle) */
+   V3 (Issue #66): „Alle Vorschläge" ist am Finger 44 Pixel hoch statt 38 —
+   dieselbe Regel und derselbe Wortlaut wie in plattform.html.
+   Marker: BERATUNG-ANKOMMEN-V3 (die Fingermaße stimmen) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -62,6 +64,14 @@ nav a.vorschlaege{
   transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+/* Am Finger ist die Pille 38 Pixel hoch — ein Daumen trifft das nicht
+   zuverlässig (Issue #66). Auf Telefonbreite und an jedem groben Zeiger 44;
+   das Bild wächst nur in der Höhe. Gleiches Muster wie in plattform.html. */
+@media (pointer:coarse),(max-width:700px){
+  nav a.vorschlaege{
+    min-height:44px;padding:0 14px;display:inline-flex;align-items:center;
+  }
+}
 @media (max-width:1420px){
   :root{--chrom:118px}
   nav{height:118px;padding-bottom:58px}

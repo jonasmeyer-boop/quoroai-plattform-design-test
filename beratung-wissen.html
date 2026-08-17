@@ -50,7 +50,9 @@
    Fuß der Liste — 25 Bildpunkte unter der Fensterkante. Die Zeile war weg, der
    Nachweis dafür außerhalb des Bildes. Jetzt rollt die Meldung ins Bild, wenn
    sie nicht ganz dasteht, und ist eine Live-Region.
-   Marker: BERATUNG-WISSEN-V14 (die Bestätigung steht im Bild) */
+   V15 (Issue #66): „Alle Vorschläge" ist am Finger 44 Pixel hoch statt 38 —
+   dieselbe Regel und derselbe Wortlaut wie in plattform.html.
+   Marker: BERATUNG-WISSEN-V15 (die Fingermaße stimmen) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -83,6 +85,14 @@ nav a.vorschlaege{
   text-decoration:none;transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+/* Am Finger ist die Pille 38 Pixel hoch — ein Daumen trifft das nicht
+   zuverlässig (Issue #66). Auf Telefonbreite und an jedem groben Zeiger 44;
+   das Bild wächst nur in der Höhe. Gleiches Muster wie in plattform.html. */
+@media (pointer:coarse),(max-width:700px){
+  nav a.vorschlaege{
+    min-height:44px;padding:0 14px;display:inline-flex;align-items:center;
+  }
+}
 
 /* Die Krume ist ein Zettel neben der Seite — solange daneben Platz ist.
    Wird das Fenster schmaler als 1420px, reicht sie in die Inhaltsspalte, und

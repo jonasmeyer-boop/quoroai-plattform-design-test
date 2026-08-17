@@ -46,7 +46,15 @@
    Außerdem: „seit März 2025" im Kopf war ein Rest aus der Zeit, als Petersen
    als Aufwandsmandat gerechnet wurde. Der Beratungsvertrag läuft seit dem
    1. Mai 2026 (blaetter.js Ziffer 2, leistungen.html).
-   Marker: BERATUNG-MANDAT-V9 (jede Woche nennt ihren Anfang) */
+   V10 (Issue #66): die drei Stufenknöpfe der Zeiterfassung standen bei 37
+   Pixeln Höhe, „Alle Vorschläge" bei 38. Am Finger bucht ein Fehltipper
+   hier die falsche Dauer.
+   V11 (Gegenlesen zu V10): die Erfassen-Zeile war halb nachgezogen — Feld
+   und Absendeknopf standen weiter bei 42, während ihre Nachbarn 44 maßen.
+   Eine Reihe mit zwei Höhen ist schlechter als eine mit einer falschen.
+   Dazu die vier Kipp-Schalter der Aufgaben bei 40.
+   Dazu trägt die Pillen-Regel den Wortlaut aus plattform.html.
+   Marker: BERATUNG-MANDAT-V11 (die ganze Zeile hat Fingermaß, nicht die halbe) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -250,6 +258,47 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   .zeit-zeile{flex-wrap:wrap}
   .zeit-zeile .z-wann{margin-left:78px}
   .erfassen .knopf{flex:1 1 auto}
+}
+
+/* ---------- Fingermaße (Issue #66) ----------
+   Gemessen bei 390 Pixeln, vor dieser Änderung: die Stufenknöpfe „0,25"
+   (55 × 37), „0,5" (47 × 37) und „1,0" (45 × 37), dazu „Alle Vorschläge"
+   (134 × 38). Breit genug waren sie alle, nur eben sieben Pixel zu flach —
+   und sie stehen zu dritt in einer Reihe, wo Danebentippen die falsche Zeit
+   bucht.
+
+   Die Zeile wird ganz nachgezogen oder gar nicht: Feld (42) und Absendeknopf
+   (108 × 42) gehören dazu. Eine Reihe, in der drei Griffe 44 messen und der
+   vierte 42, ist schlechter als eine, die durchgehend zu klein ist — der
+   Daumen lernt eine Höhe und trifft dann daneben.
+
+   Dazu die vier Kipp-Schalter der Aufgaben (48 × 40 und 52 × 40): sie tragen
+   den Schalter und sein Wort übereinander, das Wachstum geht nach unten und
+   verschiebt nichts.
+
+   Muster wie in uebersicht.html und glocke.js; der Block steht am Dateiende,
+   weil bei gleicher Spezifität die spätere Regel gewinnt. */
+@media (pointer:coarse),(max-width:700px){
+  .erfassen .dauer button{min-height:44px}
+  .erfassen input{min-height:44px}
+  .erfassen .knopf{min-height:44px}
+  .aufgabe button.kippe{min-height:44px;justify-content:center}
+  /* Wortlaut aus plattform.html, wo dieselbe Pille seit Issue #51 steht:
+     eine Regel, ein Wortlaut. Zwei Fassungen derselben Regel driften
+     auseinander, und die aeltere hat mehr Flaechen hinter sich.
+
+     Zum `padding:0 14px`: es traegt die Hoehe hier NICHT. Diese Flaechen
+     setzen `*{box-sizing:border-box}`, und dann steckt das Polster schon
+     in der `min-height` — am 2026-08-17 nachgemessen, 44px mit und ohne
+     die Null, gleiche Breite, gleiche Lage. Erst unter `content-box`
+     waechst die Pille (gemessen 62px), und plattform.html setzt ebenfalls
+     border-box. Die Null bleibt trotzdem stehen, damit die Regel ueberall
+     gleich gelesen wird — aber wer anderswo ein Polster kuerzt oder
+     ergaenzt, sollte wissen, dass nicht sie die 44 haelt, sondern
+     `min-height` plus border-box. */
+  nav a.vorschlaege{
+    min-height:44px;padding:0 14px;display:inline-flex;align-items:center;
+  }
 }
 </style>
 <script src="krume.js"></script>

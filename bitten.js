@@ -69,7 +69,11 @@
    „Eine Minute lang kannst du es hier noch zurücknehmen" — auch auf der Karte
    im Gespräch, wo es diesen Knopf bewusst nicht gibt. Der Satz sagt jetzt je
    Fläche, was auf ihr wirklich geht.
-   Marker: BITTEN-V11 (das Versprechen gilt nur, wo der Knopf steht) */
+   V12 (Nachlese der Runde): Welcher Tag der Kennenlern-Termin ist, kam aus
+   einer getippten 3 (`tag(3)`), und das Jahr der Fristen stand als „2026"
+   neben dem kurzdatum der Lage. Beides fragt jetzt die Lage:
+   `Lage.kennenlernTermin()` und `Lage.tagDatum()`.
+   Marker: BITTEN-V12 (Kennenlern-Termin und Jahr kommen aus der Lage) */
 window.Bitten = (function () {
   'use strict';
 
@@ -116,14 +120,26 @@ window.Bitten = (function () {
      abgeheftet und im Oktober noch einmal gelesen. */
   var WOCHE = ['Montag, 17.08.2026', 'Dienstag, 18.08.2026', 'Mittwoch, 19.08.2026',
                'Donnerstag, 20.08.2026', 'Freitag, 21.08.2026'];
-  var JAHR = '2026';
   function tag(i) {
     var L = window.Lage;
-    if (L && L.tage) {
-      var t = L.tage()[i];
-      if (t) return t.kurz + ', ' + t.kurzdatum + JAHR;
+    /* Das Jahr kommt aus der Lage mit, statt hier als „2026" danebenzustehen —
+       es hing an zwei Stellen getippt am kurzdatum (hier und in
+       unterlagen.html) und wüsste vom Jahreswechsel nichts. */
+    if (L && L.tagDatum) {
+      var w = L.tagDatum(i);
+      if (w) return w;
     }
     return WOCHE[i] || WOCHE[WOCHE.length - 1];
+  }
+
+  /* Welcher Tag der Kennenlern-Termin ist, weiß die Lage — nicht eine hier
+     getippte 3. Fehlt sie, bleibt der Donnerstag der Ersatzwoche. */
+  function tagVon(termin, ersatz) {
+    var t = window.Lage && termin ? termin() : null;
+    return tag(t ? t.tag : ersatz);
+  }
+  function kennenlernTag() {
+    return tagVon(window.Lage && Lage.kennenlernTermin, 3);
   }
   function heute() {
     var L = window.Lage;
@@ -160,10 +176,10 @@ window.Bitten = (function () {
      },
      /* Der Kennenlern-Termin steht in der Lage: Donnerstag, 20.08., 11:00.
         Hier stand „am Dienstag" — dieselbe Sache, zwei Tage. */
-     frist: function () { return 'vor unserem Kennenlern-Termin am ' + tag(3); },
+     frist: function () { return 'vor unserem Kennenlern-Termin am ' + kennenlernTag(); },
      wer: 'Dr. Anna Vogelsang',
      platzhalter: 'Ein Satz reicht',
-     antwort: function () { return 'Notiert. Danach richte ich die Analyse aus. Genau dort fangen wir im Kennenlern-Termin an, am ' + tag(3) + '.'; }},
+     antwort: function () { return 'Notiert. Danach richte ich die Analyse aus. Genau dort fangen wir im Kennenlern-Termin an, am ' + kennenlernTag() + '.'; }},
     {id: 'beratungsvertrag', art: 'abnahme',
      titel: 'Den Beratungsvertrag freigeben',
      /* Was freigegeben wird, steht hier — nicht „alles steht darin".
@@ -176,7 +192,7 @@ window.Bitten = (function () {
        return rede('Vor deiner Freigabe arbeite ich nicht auf deine Rechnung, und der KI-Berater sieht deine Zahlen nicht.',
                    'Vor Ihrer Freigabe arbeite ich nicht auf Ihre Rechnung, und der KI-Berater sieht Ihre Zahlen nicht.');
      },
-     frist: function () { return 'vor dem Kennenlern-Termin am ' + tag(3); },
+     frist: function () { return 'vor dem Kennenlern-Termin am ' + kennenlernTag(); },
      wer: 'Dr. Anna Vogelsang',
      woran: 'Beratungsvertrag',
      danach: function () {

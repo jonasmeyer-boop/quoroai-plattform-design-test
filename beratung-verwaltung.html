@@ -48,7 +48,15 @@
    Rollenwahl (`flex:1`) jeden freien Platz wegnahm — bei 760 blieben 10
    Bildpunkte, bei 430 und 390 lag „Entfernen" genau unter „Übernehmen". Jetzt
    trägt der Abstand in jeder Breite: fester Rand zur Seite, row-gap nach unten.
-   Marker: BERATUNG-VERWALTUNG-V11 (der Abstand trägt in jeder Breite) */
+   V12 (Issue #66): die drei Sprungmarken und „Alle Vorschläge" standen bei
+   38 statt 44 Pixeln Höhe. Am Finger ist das der Unterschied zwischen
+   treffen und danebentippen.
+   V13 (Gegenlesen zu V12): die Pillen-Regel trägt den Wortlaut aus
+   plattform.html statt eines zweiten eigenen. Die 16 Ziele bei 40px
+   (`.knopf.klein`, `select.rolle`) bleiben absichtlich stehen — das
+   Designsystem sagt 46, zehn Flächen drücken lokal auf 40; das gehört
+   nicht in eine Fläche (Issue #67).
+   Marker: BERATUNG-VERWALTUNG-V13 (eine Regel, ein Wortlaut) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -264,6 +272,35 @@ select.rolle:disabled{color:var(--nebel-400);background:var(--nebel-050)}
   .zwei-felder{grid-template-columns:1fr}
   .qr-block{grid-template-columns:1fr}
   .qr-rahmen{justify-self:center}
+}
+
+/* ---------- Fingermaße (Issue #66) ----------
+   Gemessen bei 390 Pixeln, vor dieser Änderung: die Sprungmarken „Team"
+   (69 × 38,8), „Sicherheit" (101 × 38,8) und „KI-Kompetenz" (126 × 38,8),
+   dazu „Alle Vorschläge" (134 × 38). Immer dieselben rund zwei Pixel zu
+   wenig. Die freistehenden Wortknöpfe dieser Fläche hatten ihr Fingermaß
+   schon (`.textknopf`, `.bereit a.b-hin`) — diese vier waren übersehen.
+
+   Muster wie in uebersicht.html und glocke.js; der Block steht am Dateiende,
+   weil bei gleicher Spezifität die spätere Regel gewinnt. */
+@media (pointer:coarse),(max-width:700px){
+  .spruenge a{display:inline-flex;align-items:center;min-height:44px}
+  /* Wortlaut aus plattform.html, wo dieselbe Pille seit Issue #51 steht:
+     eine Regel, ein Wortlaut. Zwei Fassungen derselben Regel driften
+     auseinander, und die aeltere hat mehr Flaechen hinter sich.
+
+     Zum `padding:0 14px`: es traegt die Hoehe hier NICHT. Diese Flaechen
+     setzen `*{box-sizing:border-box}`, und dann steckt das Polster schon
+     in der `min-height` — am 2026-08-17 nachgemessen, 44px mit und ohne
+     die Null, gleiche Breite, gleiche Lage. Erst unter `content-box`
+     waechst die Pille (gemessen 62px), und plattform.html setzt ebenfalls
+     border-box. Die Null bleibt trotzdem stehen, damit die Regel ueberall
+     gleich gelesen wird — aber wer anderswo ein Polster kuerzt oder
+     ergaenzt, sollte wissen, dass nicht sie die 44 haelt, sondern
+     `min-height` plus border-box. */
+  nav a.vorschlaege{
+    min-height:44px;padding:0 14px;display:inline-flex;align-items:center;
+  }
 }
 </style>
 <script src="krume.js"></script>

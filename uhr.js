@@ -43,21 +43,43 @@
    V4 (Issue #58): am Telefon ist das Dock eine deckende Leiste an der Kante
    statt einer schwebenden Glaskapsel. Die Kapsel lag bei jedem Scrollstand
    über dem Text und schnitt einmal den Hauptknopf mitten im Wort ab.
-   Marker: UHR-V5 */
+
+   V6 (Issue #63): die Uhr datiert nicht mehr selbst. Sie führte eine eigene
+   Mandatsliste (vier Namen — MTS Maschinenbau fehlte, obwohl es laut Marge
+   das Mandat ist, das die Beratung trägt: auf MTS ließ sich keine Zeit
+   buchen), einen Vorrat mit fest getippten Uhrzeiten, und sie schrieb jede
+   Buchung mit der Uhr des Rechners. Damit stand das „Heute" des Entwurfs an
+   vier Orten. Jetzt kommen Mandate, Menschen und Zeitpunkte aus lage.js:
+   - `Lage.mandate()` statt einer zweiten Liste,
+   - der Vorrat wird aus den nächsten eigenen Terminen gerechnet und endet
+     vor dem Jetzt der Lage,
+   - jede Uhrzeit wird auf das Jetzt der Lage gelegt, statt auf die
+     Systemuhr — sonst bucht eine Sehprobe um 22 Uhr in einen Vormittag.
+   Und: keine Buchung weist mehr einen Termin als geleistet aus. Gebucht ist
+   Vorbereitung, und Termine mit offenem Verschiebe-Wunsch bleiben außen vor
+   — zuletzt stand eine Buchung auf einem Termin, über dessen Verschiebung
+   zwei Flächen weiter noch entschieden wurde.
+
+   **lage.js muss VOR uhr.js geladen werden.** Neun Flächen binden die Uhr
+   heute ohne die Lage ein; damit dort nicht die Uhr ausfällt, holt der
+   Baustein sie notfalls selbst nach und baut erst danach. Die Zeile in der
+   Fläche bleibt der richtige Weg — sie sagt, wovon die Fläche abhängt.
+   Marker: UHR-V6 */
 window.Uhr = (function () {
   'use strict';
 
   var SCHLUESSEL_LAUF = 'quoro-uhr-lauf';
-  var SCHLUESSEL_BUCH = 'quoro-uhr-buchungen';
+  /* Der Schlüssel trägt die Fassung: die Ablage einer laufenden Sehprobe
+     enthielt sonst weiter den alten Vorrat mit den getippten Uhrzeiten, und
+     die Fläche zeigte nach dem Umbau denselben Widerspruch wie davor. */
+  var SCHLUESSEL_BUCH = 'quoro-uhr-buchungen-v2';
+  var SCHLUESSEL_ANKER = 'quoro-uhr-anker';
 
-  /* Die Mandate der Beispielberatung. Im Produkt kommt die Liste vom Server;
-     hier steht sie fest, damit jede Fläche dieselben Namen zeigt. */
-  var MANDATE = [
-    { id: 'petersen', name: 'Petersen Stahlbau' },
-    { id: 'cordes',   name: 'Cordes Logistik' },
-    { id: 'freitag',  name: 'Bäckerei Freitag' },
-    { id: 'intern',   name: 'Eigene Beratung, nicht abrechenbar' }
-  ];
+  /* Die Mandate kommen aus der Lage (lage.js), nicht von hier: eine zweite
+     Liste ist eine zweite Wahrheit, und ihre war unvollständig. */
+  function mandate() {
+    return window.Lage ? Lage.mandate() : [];
+  }
 
   /* ---------- Ablage ---------- */
   function lies(schluessel, ersatz) {
@@ -74,24 +96,69 @@ window.Uhr = (function () {
   }
 
   var lauf = lies(SCHLUESSEL_LAUF, null);
-  var buchungen = lies(SCHLUESSEL_BUCH, null);
-  if (!buchungen) {
-    /* Was der Vormittag schon gebracht hat — damit die Fläche nicht leer
-       startet und man den Wochenstand glauben kann. */
-    buchungen = [
-      { id: 'v1', name: 'Cordes Logistik',   was: 'Wechselbrücken, Steuerfrage nachgelesen', von: '8:15', bis: '9:05',  dauer: 3000, quelle: 'uhr' },
-      { id: 'v2', name: 'Petersen Stahlbau', was: 'Marge, Vorbereitung des Termins', von: '8:15', bis: '9:07', dauer: 3120, quelle: 'uhr' }
-    ];
-    schreib(SCHLUESSEL_BUCH, buchungen);
+  var gespeichert = lies(SCHLUESSEL_BUCH, null);
+  var buchungen = gespeichert || [];
+
+  /* ---------- Was der Vormittag schon gebracht hat ----------
+     Damit die Fläche nicht leer startet und man den Wochenstand glauben kann.
+     Drei Dinge waren daran falsch, bis Issue #63:
+
+     · Die Uhrzeiten standen getippt da (8:15 bis 9:05) und wussten nichts
+       vom Jetzt der Lage. Jetzt wird rückwärts gerechnet: der letzte Block
+       endet RUHE Minuten vor dem Jetzt, davor liegen die anderen.
+     · Beide Blöcke fingen um 8:15 an — auf demselben Menschen. Es gibt
+       höchstens EINE Uhr je Mensch; sie laufen jetzt nacheinander.
+     · Einer wies einen Termin als geleistet aus, über dessen Verschiebung
+       zwei Flächen weiter noch entschieden wurde. Gebucht ist deshalb
+       Vorbereitung auf die nächsten eigenen Termine, und ein Termin mit
+       offenem Verschiebe-Wunsch bleibt außen vor — dieselbe Regel, nach der
+       beratung-zeiten.html ihren Vorschlag wählt. */
+  var BLOECKE = [50, 25];   /* Minuten, in der Reihenfolge des Vormittags */
+  var RUHE = 10;            /* Minuten zwischen dem letzten Anhalten und dem Jetzt */
+
+  function vorrat() {
+    var L = window.Lage;
+    if (!L) return [];
+    var naechste = L.termineBei(L.ich(), { ab: 'jetzt', intern: true })
+      .filter(function (t) { return !t.wunsch; });
+    var gesamt = BLOECKE.reduce(function (a, b) { return a + b; }, 0);
+    var punkt = L.jetzt() - (RUHE + gesamt) / 60;
+    var raus = [];
+    BLOECKE.forEach(function (minuten, i) {
+      var von = punkt, bis = punkt + minuten / 60;
+      punkt = bis;
+      var t = naechste[i];
+      if (!t) return;
+      var mandat = t.intern ? L.mandat('intern') : L.mandatVon(t.kunde);
+      raus.push({
+        id: 'v' + (i + 1),
+        name: mandat ? mandat.name : t.kunde,
+        was: 'Vorbereitung, ' + t.was,
+        von: L.zeitWort(von),
+        bis: L.zeitWort(bis),
+        dauer: minuten * 60,
+        quelle: 'uhr',
+        /* Der Vormittag sortiert sich in sich selbst: ohne Sortierschlüssel
+           stünde der frühere Block über dem späteren. Die Zahlen bleiben weit
+           unter einem Zeitstempel, damit alles Neue oben einreiht. */
+        sortier: Math.round(bis * 3600)
+      });
+    });
+    return raus;
   }
-  /* Einträge aus einer älteren Fassung tragen kein id. Ohne Nachrüstung
-     löschte ein Klick auf „Eintrag löschen" sie alle auf einmal, weil sie
-     sich alle gleich (nämlich gar nicht) benennen. */
-  (function () {
+
+  function ablageSetzen() {
+    if (!gespeichert) {
+      buchungen = vorrat();
+      schreib(SCHLUESSEL_BUCH, buchungen);
+    }
+    /* Einträge aus einer älteren Fassung tragen kein id. Ohne Nachrüstung
+       löschte ein Klick auf „Eintrag löschen" sie alle auf einmal, weil sie
+       sich alle gleich (nämlich gar nicht) benennen. */
     var fehlte = false;
     buchungen.forEach(function (e, i) { if (!e.id) { e.id = 'alt' + i; fehlte = true; } });
     if (fehlte) schreib(SCHLUESSEL_BUCH, buchungen);
-  })();
+  }
 
   /* ---------- Zeit in Worten und Ziffern ---------- */
   function zweistellig(n) { return (n < 10 ? '0' : '') + n; }
@@ -119,9 +186,29 @@ window.Uhr = (function () {
     if (!h) return m + ' Minuten';
     return h + (h === 1 ? ' Stunde ' : ' Stunden ') + m + ' Minuten';
   }
+  /* Wie spät es ist, sagt die Lage — nicht der Rechner. Eine Sehprobe um
+     22 Uhr buchte sonst „22:03 bis 22:07" in einen Vormittag, der laut Lage
+     um 9:40 steht (Issue #63). Gemessen wird der Abstand zum Anker: dem
+     Moment, in dem die Uhr in dieser Sehprobe zum ersten Mal geladen wurde.
+     Er liegt in derselben Ablage wie der Lauf, damit er den Seitenwechsel
+     übersteht — sonst spränge die Zeit auf jeder neuen Fläche zurück. */
+  var ankerZeit = null;
+  function anker() {
+    if (ankerZeit === null) {
+      ankerZeit = lies(SCHLUESSEL_ANKER, null);
+      if (!ankerZeit) { ankerZeit = Date.now(); schreib(SCHLUESSEL_ANKER, ankerZeit); }
+    }
+    return ankerZeit;
+  }
   function uhrzeit(ms) {
-    var d = new Date(ms);
-    return d.getHours() + ':' + zweistellig(d.getMinutes());
+    /* Ohne Lage die Systemuhr — und nicht eine hier hingeschriebene Stunde:
+       eine zweite Zahl für dasselbe „Jetzt" wäre genau der Fehler, gegen den
+       dieser Umbau antritt. */
+    if (!window.Lage) {
+      var d = new Date(ms);
+      return d.getHours() + ':' + zweistellig(d.getMinutes());
+    }
+    return Lage.zeitWort(Lage.jetzt() + (ms - anker()) / 3600000);
   }
 
   /* ---------- Stil ---------- */
@@ -458,7 +545,7 @@ window.Uhr = (function () {
     h.textContent = lauf ? 'Wechseln — die laufende Zeit wird in derselben Sekunde gebucht' : 'Woran arbeitest du?';
     liste.appendChild(h);
 
-    MANDATE.forEach(function (m) {
+    mandate().forEach(function (m) {
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'uhr-wahl';
@@ -577,18 +664,38 @@ window.Uhr = (function () {
     return eintrag;
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', baue);
-  } else {
-    baue();
+  /* Ohne die Lage weiß die Uhr weder, welche Mandate es gibt, noch wie spät
+     es im Entwurf ist. Neun Flächen binden uhr.js heute ohne lage.js ein —
+     dort holt der Baustein sie nach, statt auszufallen. Ist sie schon da
+     (jede Fläche, die sie ordentlich einbindet), läuft alles wie bisher
+     synchron weiter, und nichts wartet. */
+  function mitLage(fertig) {
+    if (window.Lage) return fertig();
+    var s = document.createElement('script');
+    s.src = 'lage.js';
+    s.addEventListener('load', fertig);
+    /* Auch bei einem Fehlschlag weiterbauen: eine Uhr ohne Mandatsliste ist
+       wenig, eine Fläche, die auf ein Ereignis wartet, das nie kommt, ist
+       weniger. */
+    s.addEventListener('error', fertig);
+    document.head.appendChild(s);
   }
 
+  mitLage(function () {
+    ablageSetzen();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', baue);
+    } else {
+      baue();
+    }
+  });
+
   return {
-    mandate: function () { return MANDATE.slice(); },
+    mandate: mandate,
     buchungen: function () { return buchungen.slice(); },
     laeuft: function () { return lauf ? { id: lauf.id, name: lauf.name, start: lauf.start, dauer: sekunden() } : null; },
     starte: function (id) {
-      var m = MANDATE.filter(function (x) { return x.id === id; })[0];
+      var m = mandate().filter(function (x) { return x.id === id; })[0];
       if (m) starte(m);
     },
     halte: halte,

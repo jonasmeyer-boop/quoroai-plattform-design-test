@@ -97,7 +97,19 @@
    fehlt" stimmt dann nicht mehr, sie steht ja im Wissen. Ein Vermerk mit einem
    Grund, der nicht mehr zutrifft, ist derselbe Fehler wie eine Fläche, die
    etwas anderes behauptet als sie tut.
-   Marker: BERATUNG-RADAR-V10 (der Vermerk nennt den Grund, der gerade gilt) */
+   V11 (Issue #66): Die Griffe des Vermerks waren unterstrichene Wörter am
+   Satzende — „Trotzdem hinausgehen lassen" 200 × 17, „Zur Lücke oben"
+   90 × 16, das kleinste Ziel der Fläche. Ausgerechnet der Griff, der eine
+   Sperre aufhebt. Sie stehen jetzt als zwei Pillen auf einer eigenen Zeile,
+   am Finger 44 Pixel hoch, und der Weg zur Lücke trägt die Farbe, nicht der
+   Übergriff. Zurücknehmbar bleibt er, also fragt er weiter nicht nach — aber
+   nach dem Druck bekommt die Tastatur den Griff, der an seine Stelle tritt.
+   V12 (Gegenlesen zu V11): Der Hinweg verlor, was beide Rückwege bekommen
+   hatten — `b.hidden = true` warf den Fokus auf BODY. Und „Zur Lücke oben"
+   sprang ins Nichts: das Ziel landete bei 0, das Kopfband endet bei 118.
+   Ein Griff, der verspricht, muss liefern; `scroll-margin-top` gilt jetzt
+   für jedes Sprungziel der Fläche, nicht nur für dieses eine.
+   Marker: BERATUNG-RADAR-V12 (der Sprung landet vor der Lücke, nicht dahinter) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -293,7 +305,16 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 }
 .anhalten:hover{border-color:var(--bernstein);color:var(--bernstein)}
 @media (pointer:coarse){.anhalten{min-height:44px}}
-.punkt.angehalten{opacity:.62}
+/* Zurückgenommen wird der Punkt, nicht der Vermerk. Hier stand
+   `.punkt.angehalten{opacity:.62}` über der ganzen Karte — und weil Opazität
+   einen eigenen Stapelraum aufmacht, kam kein Kind je wieder auf volle
+   Deckung. Solange die Griffe unterstrichene Wörter waren, fiel das nicht auf;
+   als Pillen mit Fingermaß (Issue #66) stünde ausgerechnet der Griff, der
+   eine Sperre aufhebt, bei 62 Prozent Kontrast da. Also verblasst jetzt, was
+   verblassen soll: die Meldung. Der Vermerk daneben ist das, was gerade gilt. */
+.punkt.angehalten .p-welt,
+.punkt.angehalten .p-bei-ihm,
+.punkt.angehalten .p-quelle{opacity:.62}
 .punkt.angehalten .p-bei-ihm{text-decoration:line-through;text-decoration-color:var(--nebel-300)}
 .p-vermerk{
   margin-top:10px;padding:10px 14px;border-radius:var(--radius-innen);
@@ -301,10 +322,30 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 }
 .p-vermerk b{color:var(--bernstein);font-weight:600}
 .p-vermerk a{color:var(--bernstein)}
-.p-vermerk button{
-  border:0;background:none;padding:0;margin-left:6px;
-  font-size:13px;font-weight:600;color:var(--bernstein);cursor:pointer;text-decoration:underline;
+/* Die Griffe des Vermerks stehen auf einer eigenen Zeile (Issue #66).
+   Vorher hingen sie als unterstrichene Wörter am Satzende: „Trotzdem
+   hinausgehen lassen" maß 200 × 17, „Zur Lücke oben" 90 × 16 — das kleinste
+   Ziel der ganzen Fläche, und ausgerechnet der Griff, der eine Sperre aufhebt
+   und eine Zahl gegen eine offene Wissenslücke zum Kunden schickt.
+
+   Zurücknehmen kann man ihn, deshalb fragt er nicht nach. Aber er muss
+   absichtlich getroffen werden können — und er darf nicht der lauteste sein:
+   „Zur Lücke oben" ist der Weg, der die Lücke schließt, und trägt die Farbe;
+   der Übergriff steht daneben, gleich groß, aber still. */
+.p-vermerk .pv-griffe{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+.p-vermerk .pv-griffe > *{
+  display:inline-flex;align-items:center;min-height:38px;padding:0 14px;
+  border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;
+  text-decoration:none;transition:border-color .2s,color .2s,background .2s;
 }
+.p-vermerk .pv-hin{
+  background:var(--flaeche);border:0.5px solid var(--bernstein);color:var(--bernstein);
+}
+.p-vermerk .pv-hin:hover{background:var(--bernstein);color:#fff}
+.p-vermerk .pv-trotzdem{
+  background:none;border:0.5px solid var(--nebel-300);color:var(--nebel-600);
+}
+.p-vermerk .pv-trotzdem:hover{border-color:var(--bernstein);color:var(--bernstein)}
 
 /* Der stille Kunde. Diese Karte ist der eigentliche Beweis der Fläche:
    ein Newsletter hat keine Ausgabe, in der nichts steht. */
@@ -339,6 +380,61 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   .luecke,.kunde{padding:18px 18px}
   .griffe .knopf{flex:1 1 100%;min-height:48px}
   .k-kopf{gap:6px}
+}
+
+/* ---------- Fingermaße (Issue #66) ----------
+   Gemessen bei 390 Pixeln: „Alle Vorschläge" stand bei 134 × 38, zwei Pixel
+   zu flach — dieselben zwei Pixel wie in den Nachbarflächen. Die Griffe des
+   Vermerks (`.pv-griffe`) bekommen hier ihr Fingermaß; ihre Grundform steht
+   weiter oben bei `.p-vermerk`.
+
+   Muster wie in uebersicht.html und glocke.js; der Block steht am Dateiende,
+   weil bei gleicher Spezifität die spätere Regel gewinnt. */
+@media (pointer:coarse),(max-width:700px){
+  /* Wortlaut aus plattform.html, wo dieselbe Pille seit Issue #51 steht:
+     eine Regel, ein Wortlaut. Zwei Fassungen derselben Regel driften
+     auseinander, und die aeltere hat mehr Flaechen hinter sich.
+
+     Zum `padding:0 14px`: es traegt die Hoehe hier NICHT. Diese Flaechen
+     setzen `*{box-sizing:border-box}`, und dann steckt das Polster schon
+     in der `min-height` — am 2026-08-17 nachgemessen, 44px mit und ohne
+     die Null, gleiche Breite, gleiche Lage. Erst unter `content-box`
+     waechst die Pille (gemessen 62px), und plattform.html setzt ebenfalls
+     border-box. Die Null bleibt trotzdem stehen, damit die Regel ueberall
+     gleich gelesen wird — aber wer anderswo ein Polster kuerzt oder
+     ergaenzt, sollte wissen, dass nicht sie die 44 haelt, sondern
+     `min-height` plus border-box. */
+  nav a.vorschlaege{
+    min-height:44px;padding:0 14px;display:inline-flex;align-items:center;
+  }
+  .p-vermerk .pv-griffe > *{min-height:44px}
+}
+
+/* ---------- Sprungziele enden nicht unter dem Kopfband ----------
+   „Zur Lücke oben" setzte `#l-zoll`, das Ziel landete bei top = 0, und das
+   feste Kopfband endet bei 118 — die Lücke stand vollständig dahinter. Der
+   Griff versprach etwas und lieferte eine leere Stelle. Das galt schon vorher
+   und auf `main` genauso; es fällt nur jetzt auf, weil der Verweis zum
+   farbigen Hauptgriff des Vermerks geworden ist.
+
+   Die Regel hängt an 1360px, NICHT an 700px: dort wird das Kopfband
+   zweizeilig, weil die Krume hineinrutscht (60 → 118). Wer sie an 700
+   hängt, lässt jedes Ziel zwischen 701 und 1360 auf der Krume landen.
+
+   `main [id]` statt einer Aufzählung, damit auch das nächste Sprungziel
+   getragen wird; `scroll-margin-top` tut nichts an einem Element, zu dem
+   niemand springt. Der Block steht am Dateiende — ein Media-Block vor
+   seiner Grundregel sähe richtig aus und wirkte nie.
+
+   Ein gemeinsames Muster gibt es dafür im Ordner NICHT: sieben Flächen
+   tragen sechs verschiedene Werte (96, 124, 136, 150) an drei verschiedenen
+   Wählern, und keiner davon folgt der Höhe des Kopfbands. Deshalb steht
+   hier ein gemessener Wert statt eines abgeschriebenen — 60 und 118 sind
+   die beiden Höhen DIESER Fläche. Gehört zusammengeführt, aber nicht von
+   einer Fläche aus. */
+main [id]{scroll-margin-top:74px}
+@media (max-width:1360px){
+  main [id]{scroll-margin-top:132px}
 }
 </style>
 <script src="krume.js"></script>
@@ -835,14 +931,21 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       /* Erst einhängen, dann füllen — eine Live-Region, die fertig
          beschrieben ins Dokument kommt, sagt beim Auftauchen nichts. */
       punkt.appendChild(v);
-      v.innerHTML = '<b>Angehalten.</b> Dieser Punkt geht am ' + VERSAND.kurz + ' nicht hinaus. Er steht als Notiz in deiner Woche, damit du ihn nicht vergisst.<button type="button">Doch hinausgehen lassen</button>';
+      v.innerHTML = '<b>Angehalten.</b> Dieser Punkt geht am ' + VERSAND.kurz + ' nicht hinaus. Er steht als Notiz in deiner Woche, damit du ihn nicht vergisst.' +
+        '<span class="pv-griffe"><button type="button" class="pv-trotzdem">Doch hinausgehen lassen</button></span>';
       /* Und er steht auch nicht auf dem Blatt des Kunden: dieselbe Wahrheit,
          die briefing.html liest. */
       merke(punkt, 'gesperrt');
+      /* Der Hinweg braucht dasselbe wie die Rückwege: `b.hidden = true` nimmt
+         der Tastatur den Knopf unter den Fingern weg, und `activeElement`
+         fällt auf BODY — der nächste Tabulator fängt wieder ganz oben an.
+         Das Ziel ist der Griff, der gerade an seine Stelle getreten ist. */
+      v.querySelector('.pv-trotzdem').focus();
       v.querySelector('button').addEventListener('click', function(){
         v.remove();
         punkt.classList.remove('angehalten');
         b.hidden = false;
+        b.focus();   /* der gedrückte Knopf ist weg — die Tastatur braucht ein Ziel */
         merke(punkt, 'frei');
         zaehle();
       });
@@ -876,11 +979,18 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     var v = document.createElement('div');
     v.className = 'p-vermerk';
     punkt.appendChild(v);
-    v.innerHTML = '<b>Angehalten, solange ' + grund + ' fehlt.</b> Genau diese Frage hat er beim Kunden offengelassen — er darf sie nicht am ' + VERSAND.kurz + ' früh von selbst beantworten. Auf seinem Blatt steht an dieser Stelle, dass du die Antwort noch schuldig bist. <a href="#' + luecke.id + '">Zur Lücke oben</a>' +
-      '<button type="button">Trotzdem hinausgehen lassen</button>';
+    v.innerHTML = '<b>Angehalten, solange ' + grund + ' fehlt.</b> Genau diese Frage hat er beim Kunden offengelassen — er darf sie nicht am ' + VERSAND.kurz + ' früh von selbst beantworten. Auf seinem Blatt steht an dieser Stelle, dass du die Antwort noch schuldig bist.' +
+      '<span class="pv-griffe"><a class="pv-hin" href="#' + luecke.id + '">Zur Lücke oben</a>' +
+      '<button type="button" class="pv-trotzdem">Trotzdem hinausgehen lassen</button></span>';
     merke(punkt, 'gesperrt');
     v.querySelector('button').addEventListener('click', function(){
       loesen(punkt);
+      /* Der gedrückte Knopf verschwindet mit dem Vermerk. Ohne Ziel stünde die
+         Tastatur danach wieder ganz oben — sie bekommt den Griff, der an
+         seiner Stelle auftaucht. `loesen` selbst fasst den Fokus nicht an, das
+         läuft auch, wenn die Beratung antwortet und niemand hier tippt. */
+      var zurueck = punkt.querySelector('.anhalten');
+      if (zurueck) zurueck.focus();
       demoHinweis('Der Punkt geht am ' + VERSAND.kurz + ' hinaus, obwohl die Lücke offen ist.');
     });
   }

@@ -34,7 +34,15 @@
    deshalb, weil eine Regel dieser Runde neue Dateien verbot. **lage.js muss
    VOR glocke.js geladen werden.** Am Finger ist die Glocke 44px statt 35px
    (Issue #51); die Pillenhöhe von 35px trifft ein Daumen nicht zuverlässig.
-   Marker: GLOCKE-V4 */
+
+   V5 (Issue #64): die Zählpille hing als Kind des Knopfes an negativen
+   Rändern und lief aus ihm heraus — .glocke-halter und .glocke-knopf meldeten
+   scrollWidth > clientWidth. Gezogen hat die Seite deshalb nie, aber jede
+   Überlauf-Prüfung fand hier zwei Befunde, die keine waren. Sie hängt jetzt
+   am Halter, der ihren Überstand als Polster trägt und ihn als negativen Rand
+   wieder aus dem Layout nimmt: dasselbe Bild, dieselbe Reihe im Chrom, kein
+   Überstand. Ein transform genügte nicht — den rechnet der Browser mit.
+   Marker: GLOCKE-V5 */
 
 
 window.Glocke = (function () {
@@ -59,7 +67,13 @@ window.Glocke = (function () {
     var tinte  = 'var(--tinte, #18152f)';
     var s = document.createElement('style');
     s.textContent =
-      '.glocke-halter{position:relative;display:inline-flex;pointer-events:auto}' +
+      /* Der Halter trägt den Überstand der Zählpille als Polster — und nimmt
+         ihn als negativen Rand gleich wieder aus dem Layout heraus. Dadurch
+         steht die Pille aufs Pixel dort, wo sie immer stand, liegt aber
+         INNERHALB des Halters: er meldet keinen Überlauf mehr, und die Reihe
+         im Chrom bleibt so breit wie vorher. */
+      '.glocke-halter{position:relative;display:inline-flex;pointer-events:auto;' +
+        'padding:4px 4px 0 0;margin:-4px -4px 0 0}' +
       /* exakt Pillenhöhe, damit die Reihe im Chrom eine Linie bildet */
       '.glocke-knopf{position:relative;width:35px;height:35px;border-radius:999px;' +
         'border:0.5px solid ' + linie + ';background:#fff;cursor:pointer;padding:0;' +
@@ -67,19 +81,29 @@ window.Glocke = (function () {
       '@media (hover:hover){.glocke-knopf:hover{border-color:' + akzent + '}}' +
       '.glocke-knopf svg{width:18px;height:18px}' +
       '.glocke-knopf svg path{fill:none;stroke:' + tinte + ';stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}' +
-      '.glocke-knopf .zahl{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px;' +
+      /* Die Zählpille hängt am HALTER, nicht am Knopf (Issue #64). Als Kind
+         des Knopfes mit top/right:-4px lief sie aus ihm heraus, und beide
+         meldeten scrollWidth > clientWidth. Gezogen hat die Seite deshalb nie
+         — es sah nur bei jeder Überlauf-Prüfung wie ein Befund aus. Am Halter
+         sitzt sie an dessen Polsterkante: dasselbe Bild, kein Überstand. Ein
+         transform hätte nicht genügt, der Browser rechnet ihn mit. */
+      '.glocke-halter > .zahl{position:absolute;top:0;right:0;' +
+        'min-width:16px;height:16px;padding:0 4px;' +
         'border-radius:999px;background:' + akzent + ';color:#fff;font-size:11px;font-weight:800;' +
         'display:inline-flex;align-items:center;justify-content:center}' +
       /* eigene Regel, weil display:inline-flex sonst [hidden] übertrumpft —
          nicht jede Fläche bringt ein globales [hidden]{display:none} mit */
-      '.glocke-knopf .zahl[hidden],.glocke-fenster[hidden]{display:none}' +
+      '.glocke-halter > .zahl[hidden],.glocke-fenster[hidden]{display:none}' +
       /* Am Finger 44px: die Pillenhöhe von 35px trifft ein Daumen nicht
          zuverlässig (Issue #51). Breite Geräte mit Touch bekommen sie
          ebenfalls — dort steht die Glocke in keiner engen Pillenreihe. */
       '@media (pointer:coarse),(max-width:700px){' +
         '.glocke-knopf{width:44px;height:44px}' +
         '.glocke-knopf svg{width:20px;height:20px}}' +
-      '.glocke-fenster{position:absolute;top:calc(100% + 10px);right:0;z-index:60;' +
+      /* 100 % ist jetzt die Polsterhöhe des Halters, also 4px mehr als der
+         Knopf — Abstand und rechte Kante rechnen die 4px wieder heraus, damit
+         das Fenster steht, wo es stand. */
+      '.glocke-fenster{position:absolute;top:calc(100% + 6px);right:4px;z-index:60;' +
         /* eigene Zeilenführung: die Kopfzeilen, in denen die Glocke hängt,
            setzen oft white-space:nowrap — geerbt liefe der Text aus der Karte */
         'width:min(340px,calc(100vw - 32px));text-align:left;white-space:normal;' +
@@ -151,9 +175,14 @@ window.Glocke = (function () {
     knopf.className = 'glocke-knopf';
     knopf.setAttribute('aria-haspopup', 'dialog');
     knopf.setAttribute('aria-expanded', 'false');
-    knopf.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + BELL + '"/></svg>' +
-                      '<span class="zahl" aria-hidden="true"></span>';
-    var zahl = knopf.querySelector('.zahl');
+    knopf.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + BELL + '"/></svg>';
+
+    /* Die Zahl ist ein Geschwister des Knopfes, kein Kind: als Kind lief sie
+       über seine Kante hinaus und ließ ihn Überlauf melden. Was sie bedeutet,
+       steht im aria-label des Knopfes — deshalb bleibt sie versteckt. */
+    var zahl = document.createElement('span');
+    zahl.className = 'zahl';
+    zahl.setAttribute('aria-hidden', 'true');
 
     var fenster = document.createElement('div');
     fenster.className = 'glocke-fenster';
@@ -168,6 +197,7 @@ window.Glocke = (function () {
     fenster.appendChild(liste);
 
     halter.appendChild(knopf);
+    halter.appendChild(zahl);
     halter.appendChild(fenster);
 
     var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

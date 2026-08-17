@@ -55,7 +55,9 @@
    V17 (Welle 3): Petersens Mandat läuft seit Mai 2026, nicht seit März 2025.
    Der Beratungsvertrag beginnt am 1. Mai 2026 (blaetter.js, Ziffer 3), und
    beratung-marge.html rechnet das Mandat über genau vier Monatspauschalen.
-   Marker: BERATUNG-AKTE-V17 (das Mandat beginnt mit seinem Vertrag) */
+   V18 (Issue #66): „Alle Vorschläge" ist am Finger 44 Pixel hoch statt 38 —
+   dieselbe Regel und derselbe Wortlaut wie in plattform.html.
+   Marker: BERATUNG-AKTE-V18 (die Fingermaße stimmen) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -88,6 +90,14 @@ nav a.vorschlaege{
   text-decoration:none;transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+/* Am Finger ist die Pille 38 Pixel hoch — ein Daumen trifft das nicht
+   zuverlässig (Issue #66). Auf Telefonbreite und an jedem groben Zeiger 44;
+   das Bild wächst nur in der Höhe. Gleiches Muster wie in plattform.html. */
+@media (pointer:coarse),(max-width:700px){
+  nav a.vorschlaege{
+    min-height:44px;padding:0 14px;display:inline-flex;align-items:center;
+  }
+}
 
 /* Die Krume ist ein Zettel neben der Seite — solange daneben Platz ist.
    Wird das Fenster schmaler als 1420px, reicht sie in die Inhaltsspalte, und

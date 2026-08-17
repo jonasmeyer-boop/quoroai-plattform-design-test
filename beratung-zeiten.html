@@ -45,7 +45,9 @@
    Dienstagvormittag ist. Jetzt hängt sie an der Lage (lage.js): der Tag, die
    Woche, die Uhrzeit und der Termin-Vorschlag kommen von dort, und keine
    Uhrzeit liegt mehr hinter dem Jetzt der Lage.
-   Marker: BERATUNG-ZEITEN-V9 (die Fläche steht auf dem Dienstag der Lage) */
+   V10 (Issue #66): „Alle Vorschläge" ist am Finger 44 Pixel hoch statt 38 —
+   dieselbe Regel und derselbe Wortlaut wie in plattform.html.
+   Marker: BERATUNG-ZEITEN-V10 (die Fingermaße stimmen) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -69,6 +71,14 @@ nav a.vorschlaege{
   text-decoration:none;transition:border-color .2s ease,color .2s ease;
 }
 nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+/* Am Finger ist die Pille 38 Pixel hoch — ein Daumen trifft das nicht
+   zuverlässig (Issue #66). Auf Telefonbreite und an jedem groben Zeiger 44;
+   das Bild wächst nur in der Höhe. Gleiches Muster wie in plattform.html. */
+@media (pointer:coarse),(max-width:700px){
+  nav a.vorschlaege{
+    min-height:44px;padding:0 14px;display:inline-flex;align-items:center;
+  }
+}
 /* Unter 1320px reicht die Krume in die Inhaltsspalte — dann wird sie die
    zweite Zeile des Kopfbands (Entscheidung 2026-08-14). */
 @media (max-width:1320px){
