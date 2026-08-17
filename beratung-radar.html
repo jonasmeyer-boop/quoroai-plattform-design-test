@@ -92,7 +92,12 @@
    Zahl trotzdem, während die Fläche „Niemand wurde angeschrieben" meldete:
    genau die Bewegung, gegen die V7 und V8 gebaut sind, nur einen Griff daneben.
    Entsperrt wird jetzt ausschließlich in „Bescheid geben".
-   Marker: BERATUNG-RADAR-V9 (die Freigabe hängt am Bescheid, nicht am Schreiben) */
+   V10 (Code-Review zu V9): Bleibt der Punkt angehalten, weil die Beratung selbst
+   sprechen will, wechselt der Vermerk seinen Grund — „solange deine Antwort
+   fehlt" stimmt dann nicht mehr, sie steht ja im Wissen. Ein Vermerk mit einem
+   Grund, der nicht mehr zutrifft, ist derselbe Fehler wie eine Fläche, die
+   etwas anderes behauptet als sie tut.
+   Marker: BERATUNG-RADAR-V10 (der Vermerk nennt den Grund, der gerade gilt) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -706,7 +711,18 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
          Zahl am Versandtag doch von allein beim Kunden an, bevor die Beratung
          mit ihm gesprochen hat — und die Fläche behauptete dabei, niemand sei
          angeschrieben worden. Wer ihn doch laufen lassen will, hat den Griff
-         an der Karte selbst. */
+         an der Karte selbst.
+
+         Der Vermerk am Punkt muss dabei seinen Grund wechseln: „solange deine
+         Antwort fehlt" stimmt jetzt nicht mehr — sie steht im Wissen. Er wird
+         gehalten, weil die Beratung selbst sprechen will. Ein Vermerk, dessen
+         Grund nicht mehr zutrifft, ist derselbe Fehler wie eine Fläche, die
+         etwas anderes behauptet als sie tut. */
+      var thema = karte.dataset.sperrt;
+      if (thema) {
+        document.querySelectorAll('.punkt.gesperrt[data-punkt="' + thema + '"] .p-vermerk b')
+          .forEach(function(b){ b.textContent = 'Angehalten, weil du selbst mit ihm sprichst.'; });
+      }
       demoHinweis('Niemand wurde angeschrieben, und sein Punkt bleibt angehalten.');
     },
 
@@ -879,14 +895,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     zaehle();
   }
 
-  /* Gibt zurück, ob wirklich etwas losgelassen wurde — nur dann meldet die
-     Fläche es auch. */
+  /* Lässt alle angehaltenen Punkte zum Thema dieser Lücke wieder laufen.
+     Aufgerufen wird das an genau zwei Stellen: wenn die Beratung Bescheid
+     gibt, und wenn sie sagt, es sei gar keine Lücke. */
   function entsperren(luecke){
     var thema = luecke.dataset.sperrt;
-    if (!thema) return false;
-    var los = document.querySelectorAll('.punkt.gesperrt[data-punkt="' + thema + '"]');
-    los.forEach(loesen);
-    return los.length > 0;
+    if (!thema) return;
+    document.querySelectorAll('.punkt.gesperrt[data-punkt="' + thema + '"]').forEach(loesen);
   }
 
   /* Der Radar ist die Quelle des Zustands: beim Laden schreibt er den
