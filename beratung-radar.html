@@ -85,7 +85,14 @@
    Woche — die Termine kommen aus `Radar.versand()`.
    Und Denkfehler 4: „gestern", „seit gestern", „am Dienstag", „ab Januar"
    tragen jetzt ihr Datum.
-   Marker: BERATUNG-RADAR-V8 (das Blatt des Kunden hängt an derselben Wahrheit) */
+   V9 (Prüfung nach Welle 5): Die Freigabe lief einen Klick zu früh. Sie hing am
+   Schreiben ins Wissen — obwohl der Kommentar zwei Zeilen darüber schon sagte,
+   dass die Antwort erst mit „Bescheid geben" auf das Blatt des Kunden kommt.
+   Wer danach „Nur ins Wissen, ich rede selbst" wählte, schickte dem Kunden die
+   Zahl trotzdem, während die Fläche „Niemand wurde angeschrieben" meldete:
+   genau die Bewegung, gegen die V7 und V8 gebaut sind, nur einen Griff daneben.
+   Entsperrt wird jetzt ausschließlich in „Bescheid geben".
+   Marker: BERATUNG-RADAR-V9 (die Freigabe hängt am Bescheid, nicht am Schreiben) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -627,12 +634,14 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
          des Kunden kommt er erst mit „Bescheid geben". */
       GESCHRIEBEN[karte.dataset.sperrt || karte.id] = feld.value.trim();
 
-      /* Jetzt erst darf der Punkt zum selben Thema laufen: die Frage, mit der
-         er beim Kunden stehen geblieben ist, ist beantwortet. */
-      var gab = entsperren(karte);
-      var quelle0 = karte.id === 'l-zoll' ? document.getElementById('zoll-quelle') : null;
-      if (gab && quelle0) quelle0.innerHTML = 'Seine Zahl kommt aus dem <a href="beratung-akte.html?mandat=petersen">Rohstoffbezug in seiner Akte</a>. Die Frage dazu hast du eben beantwortet, der Punkt läuft wieder.';
-      if (gab) demoHinweis('Die Lücke ist zu. Sein Punkt läuft wieder.');
+      /* Hier wird NICHT entsperrt — der Satz zwei Absätze höher gilt auch für
+         den Code: auf das Blatt des Kunden kommt die Antwort erst mit
+         „Bescheid geben". Ein Prüfer hat genau das gefunden: die Freigabe lief
+         früher schon hier, und wer danach „ich rede selbst" wählte, schickte
+         dem Kunden die Zahl trotzdem — während die Fläche „Niemand wurde
+         angeschrieben" meldete. Das ist die Bewegung, gegen die diese ganze
+         Sperre gebaut ist. */
+      demoHinweis('Steht im Wissen. Zum Kunden geht damit noch nichts.');
 
       /* Der zweite Schritt, und er ist wirklich ein zweiter: ins Wissen
          schreiben heißt nicht, heute jemanden anzuschreiben. */
@@ -661,9 +670,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       k.innerHTML = '<span>Steht in deinem <b><a href="beratung-wissen.html">Wissen</a></b>. Petersen, Cordes und MTS bekommen den Satz am ' + VERSAND.kurz + ' in ihrem Briefing.</span>';
 
       /* Erst jetzt geht der Wortlaut wirklich hinaus — und damit auf das
-         Blatt des Kunden, das briefing.html zeigt. */
+         Blatt des Kunden, das briefing.html zeigt. Und erst jetzt darf auch
+         der angehaltene Punkt zum selben Thema wieder laufen: die Frage, mit
+         der er beim Kunden stehen geblieben ist, ist beantwortet UND der
+         Kunde erfährt die Antwort. */
       var thema = karte.dataset.sperrt || karte.id;
       if (window.Radar && GESCHRIEBEN[thema]) window.Radar.setzeAntwort(thema, GESCHRIEBEN[thema]);
+      entsperren(karte);
 
       /* Die untere Hälfte der Fläche muss mitziehen. Steht dort weiter „MTS:
          nichts", während oben behauptet wird, MTS bekomme etwas,
@@ -689,7 +702,12 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
     'nur-wissen': function(karte){
       karte.querySelector('.zweiter-schritt').remove();
-      demoHinweis('Niemand wurde angeschrieben.');
+      /* „Ich rede selbst" heißt: der Punkt bleibt angehalten. Sonst käme die
+         Zahl am Versandtag doch von allein beim Kunden an, bevor die Beratung
+         mit ihm gesprochen hat — und die Fläche behauptete dabei, niemand sei
+         angeschrieben worden. Wer ihn doch laufen lassen will, hat den Griff
+         an der Karte selbst. */
+      demoHinweis('Niemand wurde angeschrieben, und sein Punkt bleibt angehalten.');
     },
 
     /* Die Bitte nennt ihren Grund — sonst steht beim Kunden eine Forderung
