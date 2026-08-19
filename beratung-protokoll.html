@@ -23,6 +23,16 @@
    2. WÄHREND DER AUFNAHME trägt der Raum eine Kante, nicht die Ecke einen
       Punkt. Wer hereinkommt, sieht am ganzen Fenster, dass mitgeschrieben
       wird, und die Zeile darunter sagt seit wann und dass er es weiß.
+      **Beim Kunden gibt es diese Kante nicht** (Design-Issue #80, entschieden
+      2026-08-19): das Gespräch läuft am Telefon, im Videocall oder im Raum,
+      nicht durch die Plattform — der Kunde sitzt während des Termins nicht in
+      seinem Portal, und eine Kante, die niemand sieht, ist Theater. Er
+      erfährt es DANACH und dauerhaft: die Zustimmung steht in seinem Portal,
+      mit dem Weg zum Widerruf (Art. 7 Abs. 3 DSGVO). Aus demselben Grund
+      fragt hier die Beratung, nicht der KI-Berater, und seine Antwort ist
+      ausdrücklich IHRE Feststellung — ein Zitat mit seinem Namen wäre ein
+      erfundener Beleg. Aufgenommen wird, was das Mikrofon des Beraters hört,
+      und die Fläche sagt das.
    3. WAS BLEIBT, IST DAS BLATT. Mit dem Beenden wird die Tonspur gelöscht, und
       man sieht es. Deshalb trägt das Protokoll auch keine Zeitmarken: es gäbe
       nichts mehr, wohin sie führen.
@@ -81,7 +91,7 @@
    Ausschuss 0,9. Der Ausschuss ist der kleinste Posten, aber kein Nichts.
    V8 (Issue #66): „Alle Vorschläge" ist am Finger 44 Pixel hoch statt 38 —
    dieselbe Regel und derselbe Wortlaut wie in plattform.html.
-   Marker: BERATUNG-PROTOKOLL-V9 (V9: der Werkstatt-Knopf heißt Stand des Designs) (die Fingermaße stimmen) */
+   Marker: BERATUNG-PROTOKOLL-V10 (V10, Design-Issue #80: die Beratung fragt selbst und hält die Antwort als IHRE Feststellung fest, kein erfundenes Kundenzitat; keine Kante beim Kunden, sondern die dauerhafte Spur in seinem Portal mit Widerrufsweg; die Fläche sagt, dass nur das Mikrofon des Beraters aufnimmt) (V9: der Werkstatt-Knopf heißt Stand des Designs) (die Fingermaße stimmen) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -173,8 +183,36 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 }
 .nebensatz button:hover{text-decoration-color:var(--lila-600)}
 
+/* Der Satz, den DU vorliest. Er steht als Zitat da, weil er wörtlich gesagt
+   werden soll — die Beratung muss ihn nicht selbst erfinden, und was er
+   verspricht (Löschung des Tons), hält die Fläche danach ein. */
+.vorlesen{
+  margin-top:16px;padding:14px 18px;border-radius:var(--radius-innen);
+  background:var(--nebel-050);border:1px dashed var(--nebel-300);
+  font-size:15.5px;line-height:1.6;font-style:italic;color:var(--tinte);
+}
+.vorlesen .v-marke{
+  display:block;font-style:normal;font-size:11.5px;font-weight:600;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--nebel-500);margin-bottom:6px;
+}
+
+/* Deine Feststellung. Sie trägt bewusst NICHT die Kante des Kunden und kein
+   Zitat mit seinem Namen: die Plattform hört das Gespräch nicht, also kann
+   sie sein Wort nicht wiedergeben. Was hier steht, hast du festgehalten —
+   und so steht es auch in seinem Portal (Design-Issue #80, 2026-08-19). */
+.festhalt{
+  margin-top:16px;padding:14px 18px;border-radius:var(--radius-innen);
+  background:var(--flaeche);border:1px solid var(--nebel-200);
+  border-left:3px solid var(--nebel-400);
+  font-size:14px;line-height:1.6;
+}
+.festhalt b{font-weight:600;display:block}
+.festhalt .f-text{margin-top:6px;color:var(--nebel-600);font-size:13.5px}
+.festhalt.kommt{opacity:0;translate:0 8px;animation:ankunft .4s var(--kurve) forwards}
+
 /* Das Wort des Kunden: Zitat mit Kante in seiner Farbe, wie im Mitlesen-Blatt
-   und auf den Zetteln in „Termine und Übergaben". */
+   und auf den Zetteln in „Termine und Übergaben". Steht auf dieser Fläche nur
+   noch dort, wo der Kunde wirklich geschrieben hat. */
 .kundenwort{
   margin-top:16px;padding:12px 16px;border-left:3px solid var(--kunden-farbe,#2b5fe3);
   border-radius:0 12px 12px 0;
@@ -477,19 +515,25 @@ main > .bogen{animation:none;opacity:1;translate:none}
         <b>Mitschreiben darf nur, wer gefragt hat.</b>
         <div class="z-text">Herr Petersen muss zustimmen, und er muss es im Termin tun, nicht irgendwann in einem Haken. Ohne sein Ja gibt es kein Protokoll, sondern deine eigenen Notizen — das ist etwas anderes, und es sieht hinterher auch anders aus.</div>
       </div>
+      <div class="vorlesen">
+        <span class="v-marke">Zum Vorlesen</span>
+        „Ich würde gern mitschreiben lassen, damit ich Ihnen hinterher ein Protokoll schicken kann. Die Tonaufnahme wird nach dem Termin gelöscht, es bleibt nur das Blatt. Ist Ihnen das recht?"
+      </div>
       <div class="griffe">
-        <button class="knopf primaer" id="fragen" type="button">Herrn Petersen fragen</button>
-        <span class="nebensatz">Der KI-Berater fragt ihn hörbar im Gespräch, du musst den Satz nicht selbst sagen.</span>
+        <button class="knopf primaer" id="fragen" type="button">Gefragt, er hat zugestimmt</button>
+        <span class="nebensatz">Du fragst ihn, im Gespräch. Der KI-Berater sitzt nicht mit am Tisch — dieses Gespräch läuft am Telefon, im Videocall oder im Raum, nicht durch die Plattform.</span>
       </div>
     </div>
 
-    <!-- Zustand 2: seine Antwort. Sie ist keine Wahl der Beratung — deshalb
-         kommt sie von selbst, und der andere Ausgang steht als Nebensatz da,
-         sichtbar als das, was er ist: der zweite Weg der Vorführung. -->
+    <!-- Zustand 2: die Feststellung. Sie ist ausdrücklich DEIN Wort, nicht
+         seins — die Plattform hört das Gespräch nicht, also kann sie sein Ja
+         nicht selbst empfangen (Design-Issue #80, entschieden 2026-08-19).
+         Ein Zitat mit seinem Namen darüberzuschreiben wäre ein erfundener
+         Beleg; genau das stand hier bis heute. -->
     <div id="schritt-antwort" hidden>
-      <div class="kundenwort kommt" style="--kunden-farbe:#2b5fe3">
-        „Ja, machen Sie ruhig. Dann muss ich nicht selbst mitkritzeln."
-        <span class="kw-wer">Herr Petersen, 10:02</span>
+      <div class="festhalt kommt">
+        <b>Du hältst fest: Herr Petersen hat um 10:02 zugestimmt.</b>
+        <div class="f-text">Das ist deine Feststellung, nicht seine Unterschrift — sie steht so in der Akte und so in seinem Portal. Er sieht sie dort nach dem Termin und kann widersprechen; dann wird gelöscht (Art. 7 Abs. 3 DSGVO).</div>
       </div>
       <div class="griffe">
         <button class="knopf primaer" id="starten" type="button">Mitschreiben, seit 10:02</button>
@@ -505,7 +549,7 @@ main > .bogen{animation:none;opacity:1;translate:none}
         <div class="b-zeile">
           <span class="b-uhr" id="uhr-lauf">00:00</span>
           <span class="pegel" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-          <span class="b-satz" role="status"><b>Es wird mitgeschrieben.</b> Herr Petersen hat um 10:02 zugestimmt, und er sieht dieselbe Kante auf seiner Seite.</span>
+          <span class="b-satz" role="status"><b>Es wird mitgeschrieben.</b> Aufgenommen wird, was dein Mikrofon hört. Herr Petersen hat um 10:02 zugestimmt; er erfährt es nach dem Termin in seinem Portal, nicht währenddessen.</span>
         </div>
         <div class="b-griffe">
           <button class="knopf sekundaer" id="merken" type="button">Diese Stelle merken</button>
@@ -517,9 +561,9 @@ main > .bogen{animation:none;opacity:1;translate:none}
 
     <!-- Zustand 4: er hat nein gesagt -->
     <div id="schritt-nein" hidden>
-      <div class="kundenwort" style="--kunden-farbe:#2b5fe3">
-        „Lieber nicht, wenn es recht ist."
-        <span class="kw-wer">Herr Petersen, 10:02</span>
+      <div class="festhalt">
+        <b>Du hältst fest: Herr Petersen hat um 10:02 abgelehnt.</b>
+        <div class="f-text">Auch das gehört in die Akte — nicht als Makel, sondern damit niemand später fragt, warum es zu diesem Termin kein Protokoll gibt.</div>
       </div>
       <div class="zustimmung">
         <b>Dann wird nicht mitgeschrieben.</b>
@@ -733,7 +777,7 @@ main > .bogen{animation:none;opacity:1;translate:none}
   document.getElementById('fragen').addEventListener('click', function(){
     zeige('schritt-fragen', false);
     zeige('schritt-antwort', true);
-    var w = document.querySelector('#schritt-antwort .kundenwort');
+    var w = document.querySelector('#schritt-antwort .festhalt');
     if (!reduziert) { w.classList.remove('kommt'); void w.offsetWidth; w.classList.add('kommt'); }
   });
 
