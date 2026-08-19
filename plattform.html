@@ -33,7 +33,7 @@
    dem gezählt wird, steht jetzt überall ausgeschrieben statt „bis heute" —
    eine Abrechnung, die einen Zeitraum nennt, darf ihn nicht verschweigen.
    Außerdem trifft „Abmelden" am Telefon jetzt 44 Pixel hoch (Issue #51).
-   Marker: PLATTFORM-V5 */
+   Marker: PLATTFORM-V6 (V6: der Werkstatt-Knopf heißt Stand des Designs) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -256,11 +256,11 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Plattform</small></div></div>
   <div class="rechts">
     <button class="abmelden" type="button" id="abmelden">Abmelden</button>
-    <a class="vorschlaege" href="index.html">Alle Vorschläge</a>
+    <a class="vorschlaege" href="stand.html">Stand des Designs</a>
   </div>
 </nav>
 
-<a id="krume" href="wurzel.html"><span class="zurueck">← quoroAI</span><span>/</span><b>Abrechnung</b></a>
+<a id="krume" href="index.html"><span class="zurueck">← quoroAI</span><span>/</span><b>Abrechnung</b></a>
 
 <main>
   <!-- ============ Ansicht: alle Beratungen ============ -->
@@ -824,7 +824,7 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   });
 
   document.getElementById('abmelden').addEventListener('click', function(){
-    location.href = 'wurzel.html';
+    location.href = 'index.html';
   });
 
   document.getElementById('kopf-stichtag').textContent = datum(HEUTE);
