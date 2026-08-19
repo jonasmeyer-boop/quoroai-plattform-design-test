@@ -7,13 +7,16 @@
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="system.css">
 <style>
-/* quoroai-plattform-design · Die Sackgassen des Cockpits · Marker: SACKGASSE-V6 (V6: Abmelden führt zur Startadresse) (die Türen führen zum Cockpit, neuer Dateiname)
+/* quoroai-plattform-design · Die Sackgassen des Cockpits · Marker: SACKGASSE-V7 (V7: die Lage „Adresse gibt es nicht" wohnt jetzt hier. V6: Abmelden führt zur Startadresse) (die Türen führen zum Cockpit, neuer Dateiname)
    V4 (Häppchen C4): Impressum und Datenschutz sind am Finger fingerhoch.
 
-   Eine Fläche, drei Lagen — im Produkt sind es drei Zweige derselben Route
+   Eine Fläche, vier Lagen — drei sind im Produkt Zweige derselben Route
    (src/app/(beratung)/cockpit/page.tsx): das Konto gehört nicht hierher, es
    gehört zu mehreren Beratungen, oder zu gar keiner. Heute steht dort im
-   ersten Fall ein nackter Satz ohne einen einzigen Weg.
+   ersten Fall ein nackter Satz ohne einen einzigen Weg. Die vierte ist eine
+   andere Route: die Adresse selbst gehört keiner Beratung (vertippte
+   Kundenadresse) — sie stand bis zum 19.08.2026 als Umschalt-Lage auf der
+   Startadresse und wohnt seither hier, bei den anderen Sackgassen.
 
    Die Regel dieser Fläche: **eine Sackgasse ohne Weg ist ein Fehler, kein
    Zustand.** Jede Lage nennt, wer man gerade ist, warum es hier nicht
@@ -187,6 +190,18 @@ a.haus .rein{font-size:14px;font-weight:600;color:var(--lila-700);white-space:no
         <a class="knopf leise" href="index.html">Abmelden</a>
       </div>
     </div>
+
+    <!-- Lage 4: die Adresse gehört keiner Beratung — hierher zieht die Lage
+         von der Startadresse (Entscheidung Jonas 2026-08-19): sie ist eine
+         ANDERE Adresse (vertippte Kundenadresse), kein Zustand der Tür.
+         Deshalb ohne Konto-Zeile: dafür muss niemand angemeldet sein. -->
+    <div class="lage" id="l-adresse" hidden>
+      <h1>Diese Adresse gehört keiner Beratung.</h1>
+      <p class="satz">Prüf die Schreibweise. Oder frag deine Beratung nach dem Link, den sie dir geschickt hat — er führt auf ihre eigene Adresse.</p>
+      <div class="wege">
+        <a class="knopf sekundaer" href="index.html">Zu quoroAI</a>
+      </div>
+    </div>
   </main>
 
   <div class="modell" aria-hidden="true">
@@ -206,6 +221,7 @@ a.haus .rein{font-size:14px;font-weight:600;color:var(--lila-700);white-space:no
     <button type="button" id="u-fremd" class="hier" role="tab" aria-selected="true">Fremde Beratung</button>
     <button type="button" id="u-mehrere" role="tab" aria-selected="false">Mehrere Beratungen</button>
     <button type="button" id="u-keine" role="tab" aria-selected="false">Noch keine Beratung</button>
+    <button type="button" id="u-adresse" role="tab" aria-selected="false">Adresse gibt es nicht</button>
   </div>
 </div>
 
@@ -215,7 +231,8 @@ a.haus .rein{font-size:14px;font-weight:600;color:var(--lila-700);white-space:no
   var LAGEN = {
     fremd:   {flaeche: 'l-fremd',   knopf: 'u-fremd',   titel: 'Kein Zugang unter dieser Adresse'},
     mehrere: {flaeche: 'l-mehrere', knopf: 'u-mehrere', titel: 'Deine Beratungen'},
-    keine:   {flaeche: 'l-keine',   knopf: 'u-keine',   titel: 'Noch keine Beratung'}
+    keine:   {flaeche: 'l-keine',   knopf: 'u-keine',   titel: 'Noch keine Beratung'},
+    adresse: {flaeche: 'l-adresse', knopf: 'u-adresse', titel: 'Unbekannte Adresse'}
   };
   function zeige(name){
     Object.keys(LAGEN).forEach(function(k){
