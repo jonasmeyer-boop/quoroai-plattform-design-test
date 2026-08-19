@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Beratung beenden</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Beratung beenden: wie eine Beratung aufhört.
+   Der bestellte Entwurf für die Produktfläche src/app/(beratung)/beenden/
+   (bislang ohne Entwurf, Fahrplan-Issue #300 drüben, Schritt 5).
+
+   Warum es die Fläche gibt, obwohl kein Gesetz sie verlangt: der
+   Kündigungsknopf nach § 312k BGB gilt nur gegenüber Verbrauchern, und hier
+   schließen ausschließlich Unternehmen ab. Aber ohne ein Vertragsende hat
+   das Löschkonzept keinen Anfang. Und ein Ende, das nur „alles weg" sagt,
+   wäre unwahr: Rechnungen sind Buchungsbelege und bleiben acht Jahre —
+   wer das erst nach dem Klick erfährt, hat es zu spät erfahren. Deshalb
+   steht hier zuerst, was geschieht, und dann erst der Knopf.
+
+   Die Fläche ist absichtlich ruhig: kein Modell, kein Film, keine roten
+   Flächen auf Vorrat. Gefahr-Rot trägt nur der eine Knopf, der wirklich
+   beendet, und der Zustand eines gescheiterten Löschauftrags. Vier
+   Zustände, die das Produkt kennt, spielt die Vorführung durch: läuft,
+   endet bald, vorbei, und ein Löschauftrag, der hakt — der bleibt nicht
+   stumm (die Fläche nennt Versuch und Weg, nie den rohen Fehlertext).
+
+   Alle Daten sind gerechnet, nichts getippt: die Tage kommen aus der Lage
+   (lage.js), die Fristen aus ihren Regeln (Art. 12 Abs. 3 DSGVO: ein Monat;
+   § 147 AO / § 257 HGB: acht Jahre ab Jahresschluss). Nur Inhaberin und
+   Partner sehen diese Fläche (im Produkt: isLead).
+   Marker: BERATUNG-BEENDEN-V2 (V2 nach Review: die Monatsfrist rechnet nach
+   § 188 BGB, die Fälligkeit kennt das Vertragsende, der hakende Auftrag
+   nennt Bitte und Fälligkeit. V1: wie eine Beratung aufhört) */
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button{font-family:inherit}
+
+/* ========== quoroAI-Chrom (wie in den anderen Cockpit-Räumen) ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;word-spacing:2px}
+nav .nav-rechts{display:flex;align-items:center;gap:10px}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+@media (pointer:coarse),(max-width:700px){
+  nav a.vorschlaege{min-height:44px;padding:0 14px;display:inline-flex;align-items:center}
+}
+@media (max-width:1320px){
+  nav{height:118px;padding-bottom:58px}
+}
+
+/* ========== Seite ========== */
+main{max-width:720px;margin:0 auto;padding:136px 24px calc(150px + env(safe-area-inset-bottom))}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+@media (prefers-reduced-motion:reduce){ main > *{animation-duration:.01ms} }
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px;max-width:62ch}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:34px}
+
+/* ---------- Werkstatt: die Zustände durchspielen ---------- */
+.vorfuehrung{
+  margin-top:18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.vorfuehrung > span{font-size:12px;color:var(--nebel-600);white-space:nowrap}
+.umschalter{display:inline-flex;gap:4px;padding:4px;border-radius:var(--radius-kapsel);background:rgba(24,21,47,.05);flex-wrap:wrap}
+.umschalter button{
+  border:0;background:none;cursor:pointer;border-radius:var(--radius-kapsel);
+  min-height:36px;padding:6px 13px;font-size:12.5px;font-weight:600;color:var(--nebel-600);
+  transition:background .2s ease,color .2s ease;
+}
+.umschalter button.hier{background:var(--tinte);color:#fff}
+@media (pointer:coarse){ .umschalter button{min-height:44px} }
+
+/* ---------- Tafeln ---------- */
+.tafel{
+  margin-top:12px;border-radius:var(--radius-karte);padding:18px 20px;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+.tafel p{font-size:14px;line-height:1.6;margin-top:8px}
+.tafel p.leise{color:var(--nebel-600);font-size:13px}
+.tafel ul{margin:10px 0 0 18px;font-size:14px;line-height:1.65;display:grid;gap:6px}
+.tafel .hakt{color:var(--rot)}
+.feld{margin-top:14px}
+.feld label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.feld .deut{display:block;font-size:12.5px;font-weight:400;color:var(--nebel-600);margin-top:2px}
+.feld input[type="date"],.feld input[type="text"]{
+  width:100%;min-height:46px;padding:0 12px;font:inherit;font-size:14.5px;color:var(--tinte);
+  background:var(--flaeche, #fff);border:1px solid var(--nebel-300);border-radius:var(--radius-innen);
+}
+.feld input:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+.haken{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:14px;line-height:1.55}
+.haken input{width:19px;height:19px;margin-top:2px;flex-shrink:0;accent-color:var(--lila-600)}
+.fehler{font-size:13px;color:var(--rot);margin-top:10px}
+.tafel .knopf{margin-top:16px}
+.tafel .knopf.gefahr{min-height:48px}
+.fussnote{font-size:12.5px;color:var(--nebel-500);margin-top:10px;line-height:1.55}
+</style>
+<!-- lage.js bringt window.Lage: das eine „Heute" — jede Frist hier wird von
+     dort gerechnet, keine steht getippt. -->
+<script src="lage.js"></script>
+<script src="krume.js"></script>
+</head>
+<body class="quoro"
+      data-krume-raum="zentrale"
+      data-krume-ueber="beratung-verwaltung.html|Verwaltung der Beratung"
+      data-krume-hier="Beratung beenden"
+      data-hilfe-titel="Beratung beenden"
+      data-hilfe-satz="Keine Mindestlaufzeit, keine Frist. Du nennst den letzten Tag — und liest vorher, was er bedeutet.">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <div class="nav-rechts"><span data-hilfe-knopf></span><a class="vorschlaege" href="stand.html">Stand des Designs</a></div>
+</nav>
+
+<main>
+  <div class="kopf">
+    <h1>Beratung beenden</h1>
+    <div class="stand">Keine Mindestlaufzeit, keine Kündigungsfrist. Du nennst den letzten Tag; ab dem Tag danach berechnen wir nichts mehr. Diese Fläche sehen nur Inhaberin und Partner.</div>
+  </div>
+
+  <div class="vorfuehrung">
+    <span>Vorführung: Zustand der Beratung</span>
+    <div class="umschalter" role="tablist" aria-label="Zustand der Beratung">
+      <button type="button" id="u-laeuft" class="hier" role="tab" aria-selected="true">Läuft</button>
+      <button type="button" id="u-endet" role="tab" aria-selected="false">Endet bald</button>
+      <button type="button" id="u-vorbei" role="tab" aria-selected="false">Vorbei</button>
+      <button type="button" id="u-hakt" role="tab" aria-selected="false">Löschung hakt</button>
+    </div>
+  </div>
+
+  <h3>Stand</h3>
+  <section class="tafel" id="stand-tafel" aria-live="polite"
+       data-hilfe="Hier steht, ob deine Beratung läuft oder wann sie endet. Solange der letzte Tag nicht vorbei ist, lässt sich alles zurücknehmen."
+       data-hilfe-name="Der Stand">
+    <p id="stand-satz"></p>
+    <p class="leise" id="stand-vermerk" hidden></p>
+  </section>
+
+  <h3>Was mit dem letzten Tag geschieht</h3>
+  <section class="tafel">
+    <ul>
+      <li>Die Plattformgebühr endet <b>an diesem Tag</b> — er wird noch berechnet, der nächste nicht mehr. Dasselbe gilt für jeden Kundenzugang.</li>
+      <li>Deine Kunden können ab dem Tag danach kein Gespräch mehr beginnen und nichts mehr schreiben. <b>Lesen können sie weiter</b>, bis gelöscht wird — sonst bekämen sie ihre Auskunft nach Art. 15 DSGVO nicht mehr.</li>
+      <li>Neue Zugänge lassen sich nicht mehr vergeben.</li>
+    </ul>
+  </section>
+
+  <!-- Zustand: läuft — der letzte Tag wird benannt -->
+  <div id="l-laeuft">
+    <h3>Der letzte Tag</h3>
+    <section class="tafel"
+         data-hilfe="Leer heißt heute. Das Häkchen ist keine Formalie: es bestätigt, dass du die drei Folgen oben gelesen hast."
+         data-hilfe-name="Beenden">
+      <form id="beenden-form">
+        <div class="feld">
+          <label for="b-tag">Der letzte Tag, an dem wir dich bedienen<span class="deut">Leer heißt: heute.</span></label>
+          <input type="date" id="b-tag">
+        </div>
+        <div class="feld">
+          <label for="b-vermerk">Vermerk<span class="deut">Nur für dich und uns — deine Kunden sehen ihn nie.</span></label>
+          <input type="text" id="b-vermerk" maxlength="300" autocomplete="off">
+        </div>
+        <label class="haken">
+          <input type="checkbox" id="b-haken">
+          <span>Ja, diese Beratung soll enden. Mir ist klar, dass ab dem Tag danach kein Kunde mehr schreiben kann und keine Zugänge mehr vergeben werden.</span>
+        </label>
+        <div class="fehler" id="b-fehler" role="alert" hidden></div>
+        <button class="knopf gefahr" type="submit">Beratung beenden</button>
+      </form>
+    </section>
+  </div>
+
+  <!-- Zustand: endet — zurücknehmbar, solange der Tag nicht vorbei ist -->
+  <div id="l-endet" hidden>
+    <h3>Doch weitermachen</h3>
+    <section class="tafel">
+      <p id="weiter-satz"></p>
+      <button class="knopf leise" id="weiterfuehren" type="button">Weiterführen</button>
+    </section>
+  </div>
+
+  <!-- Löschen: sichtbar, sobald ein Ende benannt ist -->
+  <div id="l-loeschen" hidden>
+    <h3>Daten löschen lassen</h3>
+    <section class="tafel"
+         data-hilfe="Der Auftrag wird nicht sofort ausgeführt: er wird nach dem letzten Vertragstag fällig, spätestens einen Monat nach der Bitte. Was Buchungsbeleg ist, bleibt — das ist keine Wahl, sondern Aufbewahrungspflicht."
+         data-hilfe-name="Löschen">
+      <p>Art. 17 DSGVO. Der Auftrag wird nicht sofort ausgeführt: er wird nach dem letzten Vertragstag fällig, spätestens einen Monat nach der Bitte (Art. 12 Abs. 3 DSGVO).</p>
+      <p><b>Was dabei bleibt:</b> gestellte Rechnungen und ihre Zeilen. Sie sind Buchungsbelege und acht Jahre aufzubewahren, gerechnet ab dem Schluss des Kalenderjahres, in dem sie entstanden sind (§ 147 Abs. 1 Nr. 4, Abs. 3, Abs. 4 AO; § 257 Abs. 1 Nr. 4, Abs. 4, Abs. 5 HGB). <span id="beleg-beispiel"></span> Bis dahin bleibt deine Beratung als namenlose Zeile stehen — ohne Namen, ohne Adresse, ohne Menschen.</p>
+      <div id="auftrag-neu">
+        <label class="haken">
+          <input type="checkbox" id="a-haken">
+          <span>Ja, die Daten dieser Beratung sollen gelöscht werden. Mir ist klar, dass die Rechnungen bleiben und dass sich das nicht zurücknehmen lässt.</span>
+        </label>
+        <div class="fehler" id="a-fehler" role="alert" hidden></div>
+        <button class="knopf gefahr" id="loeschen" type="button">Löschung beauftragen</button>
+      </div>
+      <p class="leise" id="auftrag-steht" hidden></p>
+      <p class="hakt" id="auftrag-hakt" hidden></p>
+    </section>
+    <p class="fussnote">Ein Auftrag, der scheitert, bleibt nicht stumm: hier steht dann Versuch und Weg — nie der rohe Fehlertext des Servers, der gehört ins Betriebsprotokoll.</p>
+  </div>
+</main>
+
+<script src="uhr.js"></script>
+<script src="hilfe.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  var NAME = 'Nordholm & Partner';
+  var heute = Lage.heuteDatum();
+
+  /* Die Demo-Tage, alle aus der Lage gerechnet, keiner getippt:
+     endet-bald: in sechs Wochen. vorbei: das Ende liegt gut zwei Wochen
+     zurück. Löschauftrag (hakt): tags nach dem Ende gestellt, fällig einen
+     Monat nach der Bitte (Art. 12 Abs. 3 DSGVO). */
+  var ENDE_BALD = Lage.plusTage(heute, 42);
+  var ENDE_VORBEI = Lage.plusTage(heute, -18);
+  var BITTE = Lage.plusTage(ENDE_VORBEI, 1);
+  var GESCHEITERT = Lage.plusTage(heute, -1);
+
+  /* Ein Monat nach § 188 Abs. 2, 3 BGB: derselbe Tag des Folgemonats — und
+     fehlt der (31.01. + 1 Monat), der letzte Tag jenes Monats. Getippte
+     „31 Tage" stimmen nur zufällig im August (Review 2026-08-19). */
+  function monatsfrist(d){
+    var z = new Date(d.getTime());
+    var tag = z.getDate();
+    z.setMonth(z.getMonth() + 1);
+    if (z.getDate() !== tag) z.setDate(0);
+    return z;
+  }
+  /* Fällig ist ein Löschauftrag nach dem letzten Vertragstag, spätestens
+     einen Monat nach der Bitte — das Spätestens kann nie vor dem Frühestens
+     liegen (Art. 12 Abs. 3 DSGVO trifft das Vertragsende). */
+  function faelligAb(bitte, ende){
+    var frist = monatsfrist(bitte);
+    var danach = Lage.plusTage(ende, 1);
+    return frist.getTime() > danach.getTime() ? frist : danach;
+  }
+
+  /* Acht Jahre ab Jahresschluss: eine Rechnung aus diesem Jahr geht am
+     1. Januar in neun Jahren. */
+  document.getElementById('beleg-beispiel').textContent =
+    'Eine Rechnung aus ' + heute.getFullYear() + ' geht am 01.01.' + (heute.getFullYear() + 9) + '.';
+
+  var standSatz = document.getElementById('stand-satz');
+  var standVermerk = document.getElementById('stand-vermerk');
+  var weiterSatz = document.getElementById('weiter-satz');
+  var auftragNeu = document.getElementById('auftrag-neu');
+  var auftragSteht = document.getElementById('auftrag-steht');
+  var auftragHakt = document.getElementById('auftrag-hakt');
+
+  var LAGEN = {
+    laeuft:  { knopf:'u-laeuft' },
+    endet:   { knopf:'u-endet' },
+    vorbei:  { knopf:'u-vorbei' },
+    hakt:    { knopf:'u-hakt' }
+  };
+  var vermerk = '';
+  var aktuellesEnde = null;
+
+  function zeige(name, ende){
+    var endet = name === 'laeuft' ? null : (ende || (name === 'endet' ? ENDE_BALD : ENDE_VORBEI));
+    aktuellesEnde = endet;
+    var vorbei = name === 'vorbei' || name === 'hakt';
+
+    /* Stand */
+    if (endet === null) {
+      standSatz.innerHTML = '<b>' + NAME + '</b> läuft. Die Plattformgebühr wird tagegenau berechnet.';
+    } else {
+      standSatz.innerHTML = '<b>' + NAME + '</b> ' + (vorbei ? 'war bis zum' : 'läuft bis zum') +
+        ' <b>' + Lage.langDatum(endet) + '</b>. Für die Zeit danach berechnen wir nichts.';
+    }
+    standVermerk.hidden = !vermerk;
+    if (vermerk) standVermerk.textContent = 'Vermerk: ' + vermerk;
+
+    /* Blöcke */
+    document.getElementById('l-laeuft').hidden = endet !== null;
+    document.getElementById('l-endet').hidden = endet === null || vorbei;
+    document.getElementById('l-loeschen').hidden = endet === null;
+    if (endet !== null && !vorbei) {
+      weiterSatz.textContent = 'Solange der ' + Lage.kurzDatum(endet) +
+        ' nicht vorbei ist, lässt sich das zurücknehmen. Danach nicht mehr — dann ist ein neuer Anfang ein neuer Vertrag.';
+    }
+
+    /* Löschauftrag: neu, oder er hakt */
+    auftragNeu.hidden = name === 'hakt';
+    auftragSteht.hidden = true;
+    auftragHakt.hidden = name !== 'hakt';
+    if (name === 'hakt') {
+      auftragHakt.textContent = 'Die Bitte steht seit dem ' + Lage.kurzDatum(BITTE) +
+        ', fällig am ' + Lage.kurzDatum(faelligAb(BITTE, ENDE_VORBEI)) +
+        '. Der Lauf am ' + Lage.kurzDatum(GESCHEITERT) +
+        ' ist nicht durchgelaufen (3. Versuch); der nächste Tageslauf versucht es erneut. ' +
+        'Bleibt es dabei, melde dich bei uns — wir sehen den Grund im Betriebsprotokoll.';
+    }
+
+    /* Umschalter */
+    Object.keys(LAGEN).forEach(function(k){
+      var b = document.getElementById(LAGEN[k].knopf);
+      b.classList.toggle('hier', k === name);
+      b.setAttribute('aria-selected', k === name ? 'true' : 'false');
+    });
+  }
+
+  Object.keys(LAGEN).forEach(function(k){
+    document.getElementById(LAGEN[k].knopf).addEventListener('click', function(){
+      /* Der Umschalter spielt Zustände vor — jeder frisch, ohne den Vermerk
+         der vorigen Vorführung. */
+      vermerk = '';
+      zeige(k);
+    });
+  });
+
+  /* ---------- Beenden: wirkt ---------- */
+  var tag = document.getElementById('b-tag');
+  tag.min = Lage.heuteISO();
+  document.getElementById('beenden-form').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var fehler = document.getElementById('b-fehler');
+    if (!document.getElementById('b-haken').checked) {
+      fehler.textContent = 'Ohne das Häkchen geht es nicht — es bestätigt, dass du die drei Folgen oben gelesen hast.';
+      fehler.hidden = false;
+      return;
+    }
+    fehler.hidden = true;
+    vermerk = document.getElementById('b-vermerk').value.trim();
+    var gewaehlt = tag.value ? new Date(tag.value + 'T12:00:00') : heute;
+    if (Lage.iso(gewaehlt) < Lage.heuteISO()) gewaehlt = heute;
+    zeige('endet', gewaehlt);
+  });
+
+  /* ---------- Weiterführen: wirkt ---------- */
+  document.getElementById('weiterfuehren').addEventListener('click', function(){
+    vermerk = '';
+    zeige('laeuft');
+  });
+
+  /* ---------- Löschung beauftragen: wirkt ---------- */
+  document.getElementById('loeschen').addEventListener('click', function(){
+    var fehler = document.getElementById('a-fehler');
+    if (!document.getElementById('a-haken').checked) {
+      fehler.textContent = 'Ohne das Häkchen geht es nicht — es bestätigt, dass du weißt, was bleibt und was nicht wiederkommt.';
+      fehler.hidden = false;
+      return;
+    }
+    fehler.hidden = true;
+    auftragNeu.hidden = true;
+    auftragSteht.hidden = false;
+    auftragSteht.textContent = 'Steht seit ' + Lage.zeitstempel() + ', fällig am ' +
+      Lage.kurzDatum(faelligAb(heute, aktuellesEnde || heute)) +
+      ' — nach dem letzten Vertragstag, spätestens einen Monat nach der Bitte.';
+  });
+
+  /* Direkteinstieg über den Hash — im Produkt sind es Zustände derselben Route. */
+  var ausHash = location.hash.slice(1);
+  zeige(Object.prototype.hasOwnProperty.call(LAGEN, ausHash) ? ausHash : 'laeuft');
+})();
+</script>
+<script src="zeiger.js"></script>
+</body>
+</html>

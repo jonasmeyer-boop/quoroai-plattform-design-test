@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Einsatzplanung</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design, Einsatzplanung: wer hat wann Luft (Issue #74 —
+   die Fläche war die einzige des Produkts ohne Entwurf; das Produkt trägt
+   sie seit dem 17.08.2026 als ausdrückliche Notlösung, dieser Entwurf ist
+   der bestellte Ersatz).
+
+   Die Fläche rechnet in WOCHEN, nicht in Tagen — das ist die Entscheidung
+   des Produkts (der Plan wird je Woche geführt, planned_hours.week_start),
+   und sie bleibt: der Tagesschnitt „wohin lege ich diesen einen Termin"
+   wohnt im Kalender (beratung-kalender.html, Streifen „Wer hat wann Luft");
+   diese Fläche beantwortet „wer ist im nächsten Quartal ausgebucht".
+
+   Die Bildsprache ist der Füllstand: die Kapsel aus system.css (.zustand)
+   trägt je Person und Woche, wie voll die Woche ist — geplant gegen
+   verfügbar. Der Zustand steht IMMER auch als Klartext daneben („Luft,
+   9 h frei", „Überplant um 4 h") — Farbe und Füllung tragen ihn mit, nie
+   allein (und nie als Deko-Punkt). Rot gibt es nur, wo wirklich überplant
+   ist; „Nicht da" hängt an der Kapazität, nicht an der Ampel — die eine
+   Zeile, die zugleich abwesend und verplant ist, ist DER Konflikt, wegen
+   dem man diese Fläche öffnet, und sie sagt beides.
+
+   Die Ampel bewertet Plan gegen Kapazität, nicht Ist gegen Plan: die Frage
+   lautet „wer hat noch Luft", und die beantwortet nur der Plan. Das Ist
+   steht klein daneben, weil ein Plan, an den sich niemand hält, keiner ist.
+
+   Nur für die Leitung, wie die Auswertungen (im Produkt: isLead) — die
+   Auslastung ist die Steuerungsgröße der Beratung. Seine eigene Woche
+   sieht jeder Berater an anderer Stelle.
+
+   Team und Mandate kommen aus der Lage (lage.js); Abwesenheit, Plan und
+   Erfasstes aus dem Baustein einsatz.js — derselben Quelle, aus der der
+   Kalender seinen Luft-Streifen baut (Review 2026-08-19: vorher erzählten
+   beide Flächen über dieselbe Woche zwei Geschichten). Das Erfasste ist
+   dort echte Zahl, kein Prozentsatz des Plans — Einplanen erzeugt nie
+   rückwirkend erfasste Stunden. Der eine Moment der Fläche: die
+   Füllstände laufen beim ANKOMMEN voll — jedes weitere Neuzeichnen steht
+   sofort, sonst flackerte bei jedem Blättern das ganze Raster.
+   Marker: BERATUNG-EINSATZPLANUNG-V2 (V2 nach Review: eine Quelle mit dem
+   Kalender, echtes Ist, ruhiges Neuzeichnen. V1: der bestellte Ersatz) */
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button{font-family:inherit}
+
+/* ========== quoroAI-Chrom (wie in den anderen Cockpit-Räumen) ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;word-spacing:2px}
+nav .nav-rechts{display:flex;align-items:center;gap:10px}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+@media (pointer:coarse),(max-width:700px){
+  nav a.vorschlaege{min-height:44px;padding:0 14px;display:inline-flex;align-items:center}
+}
+@media (max-width:1320px){
+  nav{height:118px;padding-bottom:58px}
+}
+
+/* ========== Seite ========== */
+main{max-width:1120px;margin:0 auto;padding:136px 24px calc(150px + env(safe-area-inset-bottom))}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px;max-width:70ch}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:34px}
+h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;max-width:78ch}
+.fussnote{font-size:12.5px;color:var(--nebel-500);margin-top:10px;line-height:1.55;max-width:78ch}
+
+/* ---------- Zeitraum-Griffe ---------- */
+.griffe{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:18px}
+.griffe .knopf{min-height:44px;padding:0 16px;font-size:13.5px}
+.griffe .strecke{margin-left:auto;display:flex;align-items:center;gap:6px}
+.griffe .strecke span{font-size:12.5px;font-weight:600;color:var(--nebel-600);margin-right:2px}
+.griffe .strecke button{
+  min-height:44px;padding:0 14px;border-radius:var(--radius-kapsel);
+  border:0.5px solid var(--nebel-200);background:rgba(255,255,255,.8);cursor:pointer;
+  font-size:13px;font-weight:700;color:var(--nebel-600);
+  transition:border-color .2s ease,color .2s ease,background .2s ease;
+}
+.griffe .strecke button:hover{border-color:var(--lila-600);color:var(--tinte)}
+.griffe .strecke button.hier{background:var(--tinte);border-color:var(--tinte);color:#fff}
+
+/* ---------- Die Raster: Glas-Tafel, innen rollbar ---------- */
+.rollfeld{
+  margin-top:12px;border-radius:var(--radius-karte);
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+}
+table.raster{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px}
+.raster th,.raster td{padding:12px 14px;text-align:left;vertical-align:top;border-top:0.5px solid var(--nebel-200)}
+.raster thead th{border-top:0;font-size:12px;font-weight:600;color:var(--nebel-600);white-space:nowrap;background:rgba(250,250,252,.7)}
+.raster thead th small{display:block;font-weight:500;color:var(--nebel-500)}
+.raster .wer{position:sticky;left:0;background:rgba(253,253,254,.92);min-width:150px;font-weight:600;white-space:nowrap}
+.raster .wer small{display:block;font-size:11.5px;font-weight:500;color:var(--nebel-500)}
+.raster tbody .wer{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.raster td.zelle{min-width:132px}
+.zelle b{font-size:14.5px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums;font-feature-settings:"tnum";white-space:nowrap}
+.zelle b .von{color:var(--nebel-500);font-weight:500}
+.zelle .zustand{display:block;width:100%;max-width:110px;height:10px;margin-top:6px}
+.zelle small{display:block;font-size:11.5px;color:var(--nebel-600);margin-top:5px;line-height:1.45}
+.zelle.e-ueber b,.zelle.e-ueber small{color:var(--rot)}
+.zelle.e-weg b{color:var(--nebel-400)}
+/* Die Füllstands-Farben je Auslastung — über system.css-Kapseln, mit Klartext daneben */
+.zustand.e-frei{--fluid:var(--lila-300);--fluid-tief:var(--lila-500)}
+.zustand.e-knapp{--fluid:#eebb59;--fluid-tief:#c88f28}
+.zustand.e-voll{--fluid:var(--lila-500);--fluid-tief:var(--lila-700)}
+.zustand.e-ueber{--fluid:#e4657a;--fluid-tief:var(--rot)}
+.zustand.e-weg{--fluid:var(--nebel-200);--fluid-tief:var(--nebel-300)}
+/* Bei Stand 0 gibt es nichts zu füllen: ohne dieses Override zeigt die
+   Kapsel wegen min-width aus system.css einen ~10%-Streifen, und „Nicht da"
+   sähe aus wie eine leicht verplante Woche. */
+.zustand.e-weg::before{min-width:0}
+/* Beim Ankommen laufen die Kapseln von leer auf ihren Stand — der eine Moment.
+   Die Flüssigkeit in system.css ist eine Breite, also wird die Breite bewegt. */
+.zustand.laufend{--stand:0}
+.zustand.laufend::before{transition:width .7s var(--kurve)}
+@media (prefers-reduced-motion:reduce){
+  .zustand.laufend::before{transition:none}
+  main > *{animation-duration:.01ms}
+}
+
+/* ---------- Planen: der Glas-Zettel ---------- */
+.zettel{
+  margin-top:12px;border-radius:var(--radius-karte);padding:18px 20px;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+.zettel .reihe{display:grid;grid-template-columns:1.2fr 1.4fr 1fr .7fr auto;gap:12px;align-items:end}
+.zettel .feld label{font-size:12.5px;color:var(--nebel-600)}
+.zettel .feld select,.zettel .feld input{
+  width:100%;min-height:44px;padding:0 12px;font:inherit;font-size:14px;color:var(--tinte);
+  background:var(--flaeche, #fff);border:1px solid var(--nebel-300);border-radius:var(--radius-innen);
+}
+.zettel .feld select:focus,.zettel .feld input:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+.zettel .knopf{min-height:46px;white-space:nowrap}
+.melde{
+  margin-top:12px;font-size:13px;color:var(--gruen);background:var(--gruen-fond);
+  border-radius:var(--radius-innen);padding:10px 14px;
+}
+@media (max-width:860px){
+  .zettel .reihe{grid-template-columns:1fr 1fr}
+  .zettel .knopf{grid-column:1 / -1;width:100%}
+}
+@media (max-width:520px){
+  .zettel .reihe{grid-template-columns:1fr}
+}
+</style>
+<!-- lage.js bringt window.Lage: das eine „Heute", das Team und die Mandate.
+     Muss vor allem stehen, was daraus liest. -->
+<script src="lage.js"></script>
+<script src="einsatz.js"></script>
+<script src="krume.js"></script>
+</head>
+<body class="quoro"
+      data-krume-raum="zentrale" data-krume-hier="Einsatzplanung"
+      data-hilfe-titel="Einsatzplanung"
+      data-hilfe-satz="Wer hat wann Luft — geplante gegen verfügbare Stunden, Woche für Woche.">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <div class="nav-rechts"><span data-hilfe-knopf></span><a class="vorschlaege" href="stand.html">Stand des Designs</a></div>
+</nav>
+
+<main>
+  <div class="kopf">
+    <h1>Einsatzplanung</h1>
+    <div class="stand">Wer hat wann Luft — geplante gegen verfügbare Stunden, Woche für Woche. Diese Fläche sehen nur Inhaberin und Partner, wie die Auswertungen.</div>
+  </div>
+
+  <div class="griffe"
+       data-hilfe="Mit Früher und Später blätterst du in ganzen Zeiträumen, Diese Woche springt zurück zum Heute. Der Zeitraum rechts bestimmt, wie viele Wochen nebeneinanderstehen."
+       data-hilfe-name="Der Zeitraum">
+    <button class="knopf leise" id="frueher" type="button">← Früher</button>
+    <button class="knopf leise" id="heute" type="button">Diese Woche</button>
+    <button class="knopf leise" id="spaeter" type="button">Später →</button>
+    <div class="strecke" role="group" aria-label="Zeitraum">
+      <span>Zeitraum</span>
+      <button type="button" data-wochen="4">4 Wochen</button>
+      <button type="button" data-wochen="6" class="hier">6 Wochen</button>
+      <button type="button" data-wochen="12">12 Wochen</button>
+    </div>
+  </div>
+
+  <h3>Die Menschen</h3>
+  <p class="was">Je Zeile ein Mensch, je Spalte eine Woche. Gelesen wird <b>geplant / verfügbar</b> in Stunden; die Kapsel zeigt, wie voll die Woche ist. Verfügbar ist die Wochenarbeitszeit abzüglich Feiertagen und genehmigter Abwesenheit — beides wird im <a href="beratung-kalender.html">Kalender</a> geführt.</p>
+  <div class="rollfeld"
+       data-hilfe="Rot steht hier nur, wo wirklich überplant ist. „Nicht da" heißt: keine verfügbaren Stunden in dieser Woche — steht trotzdem ein Plan darin, ist genau das der Konflikt, und die Zelle sagt es."
+       data-hilfe-name="Wer hat Luft">
+    <table class="raster" id="menschen" aria-label="Auslastung je Mensch und Woche"></table>
+  </div>
+  <p class="fussnote">Die Kapsel bewertet den Plan gegen die verfügbaren Stunden, nicht das Erfasste gegen den Plan — die Frage ist, wer noch Luft hat. Was wirklich erfasst wurde, steht klein in der Zelle, weil ein Plan, an den sich niemand hält, keiner ist.</p>
+
+  <h3>Planen</h3>
+  <p class="was">Eine Zeile: wer, auf welchem Mandat, in welcher Woche, wie viele Stunden. Dieselbe Woche noch einmal eingeplant heißt dazugezählt.</p>
+  <section class="zettel"
+       data-hilfe="Einplanen wirkt sofort oben im Raster. Halbe Stunden sind erlaubt; wer eine Woche entlasten will, plant sie auf einem anderen Mandat kleiner."
+       data-hilfe-name="Planen">
+    <form class="reihe" id="planen">
+      <div class="feld"><label for="p-wer">Wer</label><select id="p-wer"></select></div>
+      <div class="feld"><label for="p-mandat">Mandat</label><select id="p-mandat"></select></div>
+      <div class="feld"><label for="p-woche">Woche</label><select id="p-woche"></select></div>
+      <div class="feld"><label for="p-stunden">Stunden</label><input id="p-stunden" type="number" inputmode="decimal" min="0.5" max="60" step="0.5" value="4"></div>
+      <button class="knopf primaer" type="submit">Einplanen</button>
+    </form>
+    <div class="melde" id="melde" role="status" aria-live="polite" hidden></div>
+  </section>
+
+  <h3>Auf welchen Mandaten</h3>
+  <p class="was">Dieselben Wochen eine Ebene tiefer: je Mensch und Mandat eine Zeile. Gelesen wird <b>geplant / erfasst</b> in Stunden. Zeilen ohne Plan stehen mit dabei — ungeplante Arbeit ist die zweite Hälfte der Wahrheit.</p>
+  <div class="rollfeld">
+    <table class="raster" id="mandate" aria-label="Geplante und erfasste Stunden je Mandat und Woche"></table>
+  </div>
+  <p class="fussnote">Die Tagessicht derselben Frage — wohin lege ich diesen einen Termin — steht im <a href="beratung-kalender.html">Kalender</a> unter „Wer hat wann Luft".</p>
+</main>
+
+<script src="uhr.js"></script>
+<script src="hilfe.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- Wochen: der Montag der Lage ist der Anker ---------- */
+  function montagVon(d){
+    var t = new Date(d.getTime());
+    var w = (t.getDay() + 6) % 7; /* Mo=0 */
+    t.setDate(t.getDate() - w);
+    return t;
+  }
+  var MONTAG = montagVon(Lage.heuteDatum());
+
+  function kw(d){
+    /* ISO-Kalenderwoche, fürs Etikett der Spalte */
+    var t = new Date(d.getTime());
+    t.setDate(t.getDate() + 3 - ((t.getDay() + 6) % 7));
+    var erster = new Date(t.getFullYear(), 0, 4);
+    return 1 + Math.round(((t - erster) / 864e5 - 3 + ((erster.getDay() + 6) % 7)) / 7);
+  }
+
+  /* ---------- Die Daten kommen aus dem Baustein (einsatz.js) ----------
+     Plan, Abwesenheit und Erfasstes teilen sich diese Fläche und der
+     Kalender — hier wird nichts davon getippt. Nur was über „Planen"
+     dazukommt, lebt in dieser Sitzung. */
+  var extra = []; /* {wer, mandat, wo, stunden} */
+
+  function planVon(personId, wo){
+    var summe = Einsatz.planWoche(personId, wo);
+    for (var i = 0; i < extra.length; i++) {
+      var e = extra[i];
+      if (e.wer === personId && e.wo === wo) summe[e.mandat] = (summe[e.mandat] || 0) + e.stunden;
+    }
+    return summe;
+  }
+  function stundenSumme(o){ var s = 0; for (var k in o) if (o.hasOwnProperty(k)) s += o[k]; return s; }
+
+  function zahl(n){ return (Math.round(n * 2) / 2).toLocaleString('de-DE'); }
+
+  function lageWort(geplant, kap, wegTage){
+    if (kap === 0) return geplant > 0
+      ? { klasse:'e-ueber', stand:1, wort: zahl(geplant) + ' h trotzdem verplant' }
+      : { klasse:'e-weg', stand:0, wort:'Nicht da' };
+    /* Teilweise abwesend: die kleinere Kapazität spricht, der Grund steht dabei. */
+    var dazu = wegTage > 0 ? ', ' + wegTage + (wegTage === 1 ? ' Tag' : ' Tage') + ' weg' : '';
+    var frei = kap - geplant;
+    if (geplant > kap) return { klasse:'e-ueber', stand:1, wort:'Überplant um ' + zahl(geplant - kap) + ' h' + dazu };
+    if (frei === 0)    return { klasse:'e-voll', stand:1, wort:'Ausgebucht' + dazu };
+    if (geplant / kap >= 0.85) return { klasse:'e-knapp', stand:geplant / kap, wort:'Fast voll, ' + zahl(frei) + ' h frei' + dazu };
+    return { klasse:'e-frei', stand:geplant / kap, wort:'Luft, ' + zahl(frei) + ' h frei' + dazu };
+  }
+
+  /* ---------- Zustand der Fläche ---------- */
+  var start = 0, breite = 6;
+
+  function wochen(){
+    var liste = [];
+    for (var i = 0; i < breite; i++) liste.push(start + i);
+    return liste;
+  }
+  function wochenTag(wo){ return Lage.plusTage(MONTAG, wo * 7); }
+
+  /* ---------- Raster bauen ---------- */
+  function kopfzeile(erste){
+    var s = '<thead><tr><th class="wer" scope="col">' + erste + '</th>';
+    wochen().forEach(function(wo){
+      var d = wochenTag(wo);
+      s += '<th scope="col">KW ' + kw(d) + '<small>ab ' + Lage.kurzDatum(d) + '</small></th>';
+    });
+    return s + '</tr></thead>';
+  }
+
+  function baueMenschen(){
+    var s = kopfzeile('Wer');
+    s += '<tbody>';
+    Lage.team().forEach(function(p){
+      s += '<tr><td class="wer">' + p.name + '<small>' + p.rolle + '</small></td>';
+      wochen().forEach(function(wo){
+        var geplant = stundenSumme(planVon(p.id, wo));
+        var kap = Einsatz.kapazitaet(p, wo);
+        /* Dieselbe Summe wie im Mandate-Raster darunter — beide lesen das
+           Ist aus dem Baustein, ungeplante Stunden eingeschlossen. */
+        var ist = stundenSumme(Einsatz.istWoche(p.id, wo));
+        var l = lageWort(geplant, kap, Einsatz.wegTage(p.id, wo));
+        /* Die Kapsel läuft nur beim ersten Bild voll; jedes weitere
+           Neuzeichnen steht sofort — sonst flackert bei jedem Blättern das
+           ganze Raster. */
+        var kapsel = erstesBild
+          ? '<span class="zustand laufend ' + l.klasse + '" data-stand="' + Math.min(l.stand, 1) + '" role="img" aria-label="' + l.wort + '"></span>'
+          : '<span class="zustand ' + l.klasse + '" style="--stand:' + Math.min(l.stand, 1) + '" role="img" aria-label="' + l.wort + '"></span>';
+        s += '<td class="zelle ' + (l.klasse === 'e-ueber' ? 'e-ueber' : l.klasse === 'e-weg' && geplant === 0 ? 'e-weg' : '') + '">' +
+             '<b>' + zahl(geplant) + '<span class="von"> / ' + zahl(kap) + ' h</span></b>' + kapsel +
+             '<small>' + l.wort + (ist > 0 ? ', ' + zahl(ist) + ' h erfasst' : '') + '</small></td>';
+      });
+      s += '</tr>';
+    });
+    document.getElementById('menschen').innerHTML = s + '</tbody>';
+  }
+
+  function baueMandate(){
+    var s = kopfzeile('Wer, worauf');
+    s += '<tbody>';
+    Lage.team().forEach(function(p){
+      /* Alle Mandate, die diese Person im sichtbaren Zeitraum berühren —
+         geplant oder nur erfasst */
+      var beruehrt = {};
+      wochen().forEach(function(wo){
+        var plan = planVon(p.id, wo), ist = Einsatz.istWoche(p.id, wo), k;
+        for (k in plan) if (plan.hasOwnProperty(k) && plan[k] > 0) beruehrt[k] = true;
+        for (k in ist) if (ist.hasOwnProperty(k) && ist[k] > 0) beruehrt[k] = true;
+      });
+      Object.keys(beruehrt).forEach(function(mId){
+        var m = Lage.mandat(mId);
+        s += '<tr><td class="wer">' + p.kurz + '<small>' + (m ? m.name : mId) + '</small></td>';
+        wochen().forEach(function(wo){
+          var geplant = planVon(p.id, wo)[mId] || 0;
+          var ist = Einsatz.istWoche(p.id, wo)[mId] || 0;
+          if (geplant === 0 && ist === 0) { s += '<td class="zelle"></td>'; return; }
+          s += '<td class="zelle"><b>' + zahl(geplant) + '<span class="von"> / ' + zahl(ist) + ' h</span></b>' +
+               (geplant === 0 && ist > 0 ? '<small>ungeplant</small>' : '') + '</td>';
+        });
+        s += '</tr>';
+      });
+    });
+    document.getElementById('mandate').innerHTML = s + '</tbody>';
+  }
+
+  var erstesBild = true;
+
+  function fuelle(){
+    /* Erst leer zeichnen, dann im nächsten Bild auf den Stand laufen lassen —
+       der eine Moment der Fläche, und nur der erste. */
+    var kapseln = document.querySelectorAll('.zustand.laufend');
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        kapseln.forEach(function(k){ k.style.setProperty('--stand', k.getAttribute('data-stand')); });
+      });
+    });
+  }
+
+  function baueWochenwahl(){
+    /* Die Auswahl überlebt das Neuzeichnen — sonst spränge sie nach jedem
+       Einplanen still auf die erste Woche zurück, und die zweite Buchung
+       landete in der falschen (Review 2026-08-19). */
+    var w = document.getElementById('p-woche');
+    var vorher = w.value;
+    w.innerHTML = wochen().map(function(wo){
+      var d = wochenTag(wo);
+      return '<option value="' + wo + '">KW ' + kw(d) + ', ab ' + Lage.kurzDatum(d) + '</option>';
+    }).join('');
+    if (vorher !== '' && wochen().indexOf(Number(vorher)) !== -1) w.value = vorher;
+  }
+
+  function baue(){
+    baueMenschen();
+    baueMandate();
+    baueWochenwahl();
+    if (erstesBild) { fuelle(); erstesBild = false; }
+  }
+
+  /* ---------- Griffe ---------- */
+  document.getElementById('frueher').addEventListener('click', function(){ start -= breite; baue(); });
+  document.getElementById('spaeter').addEventListener('click', function(){ start += breite; baue(); });
+  document.getElementById('heute').addEventListener('click', function(){ start = 0; baue(); });
+  Array.prototype.forEach.call(document.querySelectorAll('.strecke button'), function(b){
+    b.addEventListener('click', function(){
+      breite = Number(b.getAttribute('data-wochen'));
+      Array.prototype.forEach.call(document.querySelectorAll('.strecke button'), function(x){
+        x.classList.toggle('hier', x === b);
+      });
+      baue();
+    });
+  });
+
+  /* ---------- Planen ---------- */
+  var wer = document.getElementById('p-wer');
+  wer.innerHTML = Lage.team().map(function(p){ return '<option value="' + p.id + '">' + p.name + '</option>'; }).join('');
+  var mandat = document.getElementById('p-mandat');
+  mandat.innerHTML = Lage.mandate().map(function(m){ return '<option value="' + m.id + '">' + m.name + '</option>'; }).join('');
+
+  document.getElementById('planen').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var stunden = Number(document.getElementById('p-stunden').value);
+    if (!(stunden > 0)) return;
+    var wo = Number(document.getElementById('p-woche').value);
+    var pId = wer.value, mId = mandat.value;
+    extra.push({ wer: pId, mandat: mId, wo: wo, stunden: stunden });
+    baue();
+    var p = Lage.person(pId), m = Lage.mandat(mId), d = wochenTag(wo);
+    var melde = document.getElementById('melde');
+    melde.textContent = 'Eingeplant: ' + p.kurz + ' auf ' + m.name + ', KW ' + kw(d) +
+      ', ' + zahl(stunden) + ' h (' + Lage.zeitstempel() + ').';
+    melde.hidden = false;
+  });
+
+  baue();
+})();
+</script>
+<script src="zeiger.js"></script>
+</body>
+</html>

@@ -60,7 +60,7 @@
    plattform.html statt eines zweiten eigenen — eine Regel, ein Wortlaut.
    Und die Kalenderblöcke tragen im Code, warum das Fingermaß für sie
    bewusst nicht gilt, damit der nächste Prüfer sie nicht erneut meldet.
-   Marker: BERATUNG-KALENDER-V8 (V8: der Werkstatt-Knopf heißt Stand des Designs) (die Ausnahme steht da, wo sie gilt) */
+   Marker: BERATUNG-KALENDER-V10 (V10: Abwesenheit und Plan kommen aus einsatz.js, derselben Quelle wie die Einsatzplanung. V9: der Luft-Streifen nennt die Einsatzplanung als Wochensicht) (V8: der Werkstatt-Knopf heißt Stand des Designs) (die Ausnahme steht da, wo sie gilt) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -435,6 +435,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 <script src="krume.js"></script>
 <!-- Die Lage: eine Quelle für Termine und Meldungen (Issue #57) -->
 <script src="lage.js"></script>
+<script src="einsatz.js"></script>
 </head>
 <body class="quoro"
       data-krume-raum="zentrale" data-krume-hier="Die Woche">
@@ -470,7 +471,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
   <h3>Wer hat wann Luft</h3>
   <div class="luft" id="luft"></div>
-  <p class="fussnote">Luft ist der Tag abzüglich Terminen und dem, was auf den Mandaten eingeplant ist. Ein Tag mit weniger als einer Stunde Luft steht auf voll — dort passt kein Gespräch mehr hinein, ohne dass etwas anderes wartet. Tippe auf eine Zelle, dann steht dieser Tag oben im Raster.</p>
+  <p class="fussnote">Luft ist der Tag abzüglich Terminen und dem, was auf den Mandaten eingeplant ist. Ein Tag mit weniger als einer Stunde Luft steht auf voll — dort passt kein Gespräch mehr hinein, ohne dass etwas anderes wartet. Tippe auf eine Zelle, dann steht dieser Tag oben im Raster. Dieselbe Frage in Wochen, fürs nächste Quartal, beantwortet die <a href="beratung-einsatzplanung.html">Einsatzplanung</a>.</p>
 </main>
 
 <div class="schleier" id="schleier" hidden>
@@ -542,16 +543,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   var TAGE = Lage.tage();
   var termine = Lage.termine();
 
-  var abwesend = [
-    {wer:'j', von:3, bis:4, art:'Urlaub'},
-    {wer:'s', von:2, bis:2, art:'Fortbildung'}
-  ];
-
-  /* Was auf den Mandaten eingeplant ist, in Stunden je Person und Tag —
-     im Produkt kommt das aus der Mandatsplanung, hier steht es fest. */
-  var GEPLANT = {
-    a:[3,2.5,4,2,2], j:[4,4,3,0,0], m:[2,3,2,3.5,2], t:[3,4,4,2,1], s:[5,4,0,5,4]
-  };
+  /* Abwesenheiten und Plan kommen aus dem Baustein (einsatz.js) — derselben
+     Quelle, aus der die Einsatzplanung ihre Wochen baut. Vorher standen
+     beide Größen nur hier, und die Einsatzplanung erzählte über dieselbe
+     Woche eine andere Geschichte (Review 2026-08-19). Im Produkt kommt
+     beides aus absences und planned_hours. */
+  var abwesend = Einsatz.abwesend();
+  var GEPLANT = Einsatz.geplantTag();
 
   /* Heute ist Dienstag, der 18. August 2026, kurz vor zehn: der Montag liegt
      hinter uns, der Anruf bei Cordes um 11:30 ist der nächste Termin — und
