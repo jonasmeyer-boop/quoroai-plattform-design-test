@@ -10,16 +10,19 @@
    die White-Label-Lobby. Inhalt aus dem Produkt
    (../quoroai-plattform/src/app/page.tsx, AgencyHome): unter derselben
    Adresse arbeiten zwei verschiedene Leute, und wohin die Tür führt,
-   entscheidet der Zugang, nicht die Adresse. Drei Lagen: Kunde mit Zugang
-   (zum Berater), Beratung angemeldet (ins Cockpit), niemand angemeldet
-   (anmelden). Kein system.css — Kundenflächen bleiben White-Label über
+   entscheidet der Zugang, nicht die Adresse. Zwei Lagen: Kunde mit Zugang
+   (zum Berater), niemand angemeldet (anmelden). Ein angemeldetes
+   Beratungs-Konto sieht diese Lobby nie — die Kundenadresse kennt keine
+   Beratungs-Tür, das Produkt leitet ins Cockpit um (Entscheidung Jonas
+   2026-08-19, Chronik: die Kundenwelt und die quoroAI-Welt mischen sich
+   nicht; vorher stand hier eine dritte Lage „Beratung angemeldet"). Kein system.css — Kundenflächen bleiben White-Label über
    marke.js.
    Der eine Moment: der Gruß schreibt sich mit der Hand, sonst bleibt die
    Lobby still. Das Zeichen der Beratung ist ihr Logo, und wenn sie keins
    hinterlegt hat, ihr Anfangsbuchstabe in ihrer Farbe.
    Neu gegenüber dem Produkt: Impressum und Datenschutz stehen im Fuß — eine
    öffentliche Adresse in Deutschland braucht beide erreichbar.
-   Marker: STARTSEITE-V6 (das Cockpit hat seinen Namen; V4: Impressum und Datenschutz zeigen auf die
+   Marker: STARTSEITE-V7 (V7: die Lage „Beratung" ist weg — die Kundenadresse kennt keine Beratungs-Tür. V6: das Cockpit hat seinen Namen; V4: Impressum und Datenschutz zeigen auf die
    gezeichneten Rechtsflächen der Beratung, nicht mehr auf „#") */
 @font-face{font-family:'Manrope';src:url('schriften/manrope.woff2') format('woff2');font-weight:200 800;font-display:swap}
 @font-face{font-family:'Caveat';src:url('schriften/caveat.woff2') format('woff2');font-weight:400 700;font-display:swap}
@@ -154,7 +157,6 @@ body{
   <span>Vorführung</span>
   <div class="umschalter" role="tablist" aria-label="Wer steht vor der Tür">
     <button type="button" id="l-kunde" class="hier" role="tab" aria-selected="true">Kunde</button>
-    <button type="button" id="l-beratung" role="tab" aria-selected="false">Beratung</button>
     <button type="button" id="l-gast" role="tab" aria-selected="false">Niemand angemeldet</button>
   </div>
 </div>
@@ -200,14 +202,6 @@ body{
       zweit: Marke.rede('Du bist es nicht? Anders anmelden', 'Sie sind es nicht? Anders anmelden'),
       zweitZiel: 'anmelden.html'
     },
-    beratung: {
-      gruss: 'Willkommen zurück.',
-      satz: Marke.rede(
-        'Du bist mit deinem Beratungs-Konto angemeldet — dieselbe Adresse wie für deine Kunden, nur eine andere Tür.',
-        'Sie sind mit Ihrem Beratungs-Konto angemeldet — dieselbe Adresse wie für Ihre Kunden, nur eine andere Tür.'),
-      knopf: 'Zum Cockpit', ziel: 'beratung-cockpit.html',
-      zweit: 'Als Kunde ansehen', zweitZiel: 'uebersicht.html'
-    },
     gast: {
       gruss: Marke.rede('Dein Zugang zur Beratung.', 'Ihr Zugang zur Beratung.'),
       satz: Marke.rede(
@@ -224,7 +218,6 @@ body{
   var zweit = document.getElementById('zweitweg');
   var knoepfe = {
     kunde: document.getElementById('l-kunde'),
-    beratung: document.getElementById('l-beratung'),
     gast: document.getElementById('l-gast')
   };
   function zeige(name){
