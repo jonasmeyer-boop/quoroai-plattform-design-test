@@ -25,7 +25,7 @@
    Nur für die quoroAI-Flächen der Beratung. Die Kundenflächen sind White-Label
    und haben keine Räume; das Modell selbst bringt seine eigene Krume mit, weil
    sie dort keinen Weg geht, sondern den Zoom schließt.
-   Marker: KRUME-V1 */
+   Marker: KRUME-V2 (das Modell heißt beratung-cockpit.html) */
 window.Krume = (function () {
   'use strict';
 
@@ -40,7 +40,7 @@ window.Krume = (function () {
     mts:      'MTS Maschinenbau'
   };
 
-  var MODELL = 'beratung-f-modell.html';
+  var MODELL = 'beratung-cockpit.html';
 
   var el = null;
 

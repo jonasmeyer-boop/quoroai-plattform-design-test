@@ -73,7 +73,7 @@
    Rechnung hat jetzt ihr Fälligkeitsdatum und nennt es.
    V12 (Issue #66): „Alle Vorschläge" ist am Finger 44 Pixel hoch statt 38 —
    dieselbe Regel und derselbe Wortlaut wie in plattform.html.
-   Marker: BERATUNG-KUNDEN-V12 (die Fingermaße stimmen) */
+   Marker: BERATUNG-KUNDEN-V13 (die Türen führen zum Cockpit, neuer Dateiname) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -319,7 +319,7 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
     <h1>Kunden</h1>
     <div class="stand">Das Modell bleibt der Ort, an dem die Beratung arbeitet. Diese Liste ist das Register daneben — für die Tage, an denen man einen Namen sucht und nicht ein Gebäude. Gezählt wird hier über alle 187 Mandate; das Modell und die fünf Auswertungen rechnen über die vier, die als Beispiel gebaut sind. Deshalb stehen dort kleinere Summen, und beide sind richtig.</div>
     <div class="tueren">
-      <a class="knopf sekundaer" href="beratung-f-modell.html">Ins Modell</a>
+      <a class="knopf sekundaer" href="beratung-cockpit.html">Ins Modell</a>
       <a class="knopf leise" href="beratung-import.html">Liste einlesen</a>
       <a class="knopf leise" href="beratung-rechnungen.html">Rechnungen</a>
       <a class="knopf leise" href="beratung-zeiten.html">Zeiten</a>
@@ -633,7 +633,7 @@ main{max-width:980px;margin:0 auto;padding:136px 24px 90px}
     var rechts = zahlRechts(k, art);
     var a = document.createElement('a');
     a.className = 'kunde';
-    a.href = k.modell ? 'beratung-f-modell.html#' + k.modell : 'beratung-mandat.html';
+    a.href = k.modell ? 'beratung-cockpit.html#' + k.modell : 'beratung-mandat.html';
 
     var wer = document.createElement('span');
     wer.className = 'wer';

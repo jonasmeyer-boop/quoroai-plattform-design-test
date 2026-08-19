@@ -44,7 +44,7 @@
    dazu" ließ den Rabatt erst dort beginnen — plattform.html rechnet 25 % ab
    dem ersten Zugang, 35 % ab 25 und 45 % ab 100. Wer sich hier anmeldet,
    hatte sonst eine andere Zahl im Kopf als seine erste Abrechnung zeigt.
-   Marker: REGISTRIEREN-V10 */
+   Marker: REGISTRIEREN-V11 (nach dem Anlegen geht es ins Cockpit, neuer Dateiname) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input{font-family:inherit}
@@ -550,7 +550,7 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
   function eintritt(){
     lichtAn('Willkommen im Team.');
     try { sessionStorage.setItem('modell-film', '1'); } catch (e) {}
-    setTimeout(function(){ location.href = 'beratung-f-modell.html'; }, reduziert ? 150 : 1500);
+    setTimeout(function(){ location.href = 'beratung-cockpit.html'; }, reduziert ? 150 : 1500);
   }
 
   if (location.hash === '#anmelden') schalte(true);
@@ -577,7 +577,7 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
     lichtAn('Willkommen zurück.');
     /* die Ankunft IST das erleuchtete Modell — der Aufbau-Film läuft nicht doppelt */
     try { sessionStorage.setItem('modell-film', '1'); } catch (e) {}
-    setTimeout(function(){ location.href = 'beratung-f-modell.html'; }, reduziert ? 150 : 1500);
+    setTimeout(function(){ location.href = 'beratung-cockpit.html'; }, reduziert ? 150 : 1500);
   });
 
   var hinweisTimer = null, leerTimer = null;
