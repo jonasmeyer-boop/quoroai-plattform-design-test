@@ -41,7 +41,7 @@
    Bitten-Block „am Donnerstag, 20.08.". Dienstag ist zugleich das Heute der
    Lage; der Satz las sich also auch noch als „heute". Beide fragen jetzt
    Lage.kennenlernTermin().
-   Marker: UEBERSICHT-V33 (auch der Weg nennt den Kennenlern-Termin aus der Lage)
+   Marker: UEBERSICHT-V34 (V34: die Tür zu „Was du erlaubt hast" steht bei der Zusammenarbeit — Design-Issue #80) (auch der Weg nennt den Kennenlern-Termin aus der Lage)
    (V31: das wöchentliche Briefing hat eine Zeile und einen
    Glocken-Eintrag, Häppchen E3; V26 aus dem Review: Überschrift und Titel der
    Zeile folgen der Anrede der Marke, wie alle Nachbarn)
@@ -668,6 +668,13 @@ section{margin-top:52px}
     <div class="fuss-links">
       <a href="leistungen.html">Leistungsnachweis<small>14,2 Std. im August, aus zwei Mandaten</small></a>
       <a href="rechnungen.html">Rechnungen<small>eine von drei überfällig, 2.856,00 €</small></a>
+      <!-- Die Erlaubnisse wohnen hier und nicht im Rechtsfuß: es ist ein Griff,
+           kein Rechtstext (Design-Issue #80, 2026-08-19). Die Unterzeile nennt
+           die eine Erlaubnis, die es im laufenden Mandat gibt — die Mitschrift
+           des gestrigen Termins. -->
+      <!-- Kein data-du am <a>: marke.js setzt damit textContent, und das
+           <small> darin wäre weg. Die Ansprache hängt an den Textknoten. -->
+      <a href="meine-daten.html"><span data-du="Was du erlaubt hast" data-sie="Was Sie erlaubt haben">Was du erlaubt hast</span><small>Eine Erlaubnis, gestern gegeben, jederzeit zurücknehmbar</small></a>
     </div>
   </section>
 </main>

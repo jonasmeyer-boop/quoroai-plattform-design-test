@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dein Berater – Was du erlaubt hast</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%232b5fe3'/%3E%3C/svg%3E">
+<style>
+/* quoroai-plattform-design · Was du erlaubt hast: die Einwilligungen des
+   Kunden und ihr Widerruf. Kundenfläche, White-Label über marke.js — kein
+   system.css.
+
+   WARUM ES DIESE FLÄCHE GIBT (Design-Issue #80, entschieden 2026-08-19):
+   Der Entwurf des Protokolls versprach dem Kunden eine Kante auf seiner
+   Seite, während mitgeschrieben wird. Die gibt es nicht — das Gespräch läuft
+   am Telefon, im Videocall oder im Raum, und der Kunde sitzt dabei nicht in
+   seinem Portal. Der ERSATZ ist diese Fläche: was er erlaubt hat, steht
+   danach dauerhaft hier, mit dem Weg zurück (Art. 7 Abs. 3 DSGVO). Eine
+   Anzeige, die im Moment blinkt und dann weg ist, wäre weniger wert als ein
+   Eintrag, der bleibt und den man anfassen kann.
+
+   DIE HALTUNG DER FLÄCHE: sie wirbt nicht und sie warnt nicht. Ein Widerruf
+   ist kein Unfall und wird nicht erschwert — er steht als gewöhnlicher Griff
+   an jeder Zeile, nicht hinter einer Rückfrage mit erhobenem Zeigefinger.
+   Was er bewirkt und was er NICHT bewirkt, steht vorher da: der Ton ist
+   längst gelöscht, das Blatt geht, und was die Beratung dir daraus geschickt
+   hat, behältst du. Ein Widerruf, der so tut, als hätte es den Termin nie
+   gegeben, wäre gelogen.
+
+   ZWEI TEILE, IN DIESER REIHENFOLGE: erst die Erlaubnisse (die kann man
+   ändern), dann was die Beratung von dir hat (das ist Auskunft, kein Griff).
+   Wer hier landet, kommt wegen des Ersten.
+
+   Die Termine, Daten und Fristen kommen aus der Lage (lage.js). Die Marke
+   ist die der Beratung (marke.js), die Ansprache Du/Sie ebenso.
+   Marker: MEINE-DATEN-V1 (die Einwilligungen des Kunden und ihr Widerruf) */
+@font-face{font-family:'Manrope';src:url('schriften/manrope.woff2') format('woff2');font-weight:200 800;font-display:swap}
+@font-face{font-family:'Caveat';src:url('schriften/caveat.woff2') format('woff2');font-weight:400 700;font-display:swap}
+:root{
+  --papier:#fafaf7;--tinte:#10131a;--grau:#636c7d;--blau:#2b5fe3;--stift:#1d46c9;
+  --linie:rgba(16,19,26,.1);--feder:cubic-bezier(.22,.9,.24,1);
+  --rechtsfuss-luft:104px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button{font-family:inherit}
+body{
+  background:var(--papier);color:var(--tinte);
+  font-family:'Manrope',system-ui,sans-serif;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:10;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 max(24px,calc((100vw - 880px)/2));
+  background:var(--papier);
+}
+nav::after{
+  content:'';position:absolute;left:0;right:0;top:100%;height:22px;
+  background:linear-gradient(var(--papier), color-mix(in srgb, var(--papier) 1%, transparent));
+  pointer-events:none;
+}
+nav .wortmarke{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .marke-logo{height:26px;width:auto;display:block}
+nav .wortmarke [data-marke-name]{display:block}
+nav .wortmarke .marke-wechsel{cursor:pointer;pointer-events:auto;display:inline-block}
+nav .wortmarke .marke-wechsel:hover{color:var(--blau)}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--grau)}
+nav .zurueck{
+  font-size:14px;font-weight:600;color:var(--grau);text-decoration:none;
+  min-height:44px;display:inline-flex;align-items:center;padding:0 6px;
+}
+nav .zurueck:hover{color:var(--blau)}
+
+main{max-width:880px;margin:0 auto;padding:108px 24px calc(96px + var(--rechtsfuss-luft))}
+.anstrich{width:96px;height:12px;display:block;overflow:visible;margin-bottom:16px}
+.anstrich path{fill:none;stroke:var(--stift);stroke-width:2.5;stroke-linecap:round;opacity:.85}
+h1{font-size:clamp(28px,4.6vw,42px);font-weight:800;letter-spacing:-.03em;line-height:1.15}
+.unter{color:var(--grau);font-size:15px;margin-top:4px;max-width:60ch}
+h2{font-size:13px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--grau);margin-top:40px}
+h2 + .was{font-size:14px;color:var(--grau);margin-top:4px;line-height:1.55;max-width:66ch}
+
+/* ---------- Eine Erlaubnis ----------
+   Der Zettel trägt links die Kante der Beratung, weil die Erlaubnis IHR
+   gegenüber gilt. Kein Punkt, keine Ampel: der Zustand steht im Satz. */
+.erlaubnis{
+  margin-top:12px;padding:16px 18px;border-radius:14px;
+  background:#fff;border:1px solid var(--linie);
+  border-left:3px solid var(--blau);
+  box-shadow:0 1px 2px rgba(16,19,26,.04);
+}
+.erlaubnis.zurueckgenommen{
+  border-left-color:var(--grau);background:color-mix(in srgb, var(--papier) 60%, #fff);
+}
+.erlaubnis .e-kopf{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.erlaubnis b{font-size:16px;font-weight:700;letter-spacing:-.01em;line-height:1.35}
+.erlaubnis .e-wann{font-size:13px;color:var(--grau);margin-top:3px}
+.erlaubnis .e-was{font-size:14px;margin-top:10px;line-height:1.6}
+.erlaubnis .e-was a{color:var(--stift);text-underline-offset:3px}
+.erlaubnis .e-griffe{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.erlaubnis .stand{
+  font-size:12.5px;font-weight:700;color:var(--grau);
+  border:1px solid var(--linie);border-radius:999px;padding:5px 11px;white-space:nowrap;
+}
+.knopf{
+  min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--linie);
+  background:#fff;cursor:pointer;font-size:14px;font-weight:700;color:var(--tinte);
+  display:inline-flex;align-items:center;transition:border-color .2s var(--feder),color .2s var(--feder);
+}
+.knopf:hover{border-color:var(--blau);color:var(--blau)}
+.knopf.leise{background:none;border-color:transparent;color:var(--grau);padding:0 8px}
+.knopf.leise:hover{color:var(--blau)}
+
+/* Die Folgen des Widerrufs — sie stehen VOR dem Griff, nicht in einer
+   Rückfrage danach. Wer sie gelesen hat, braucht keine Warnung mehr. */
+.folgen{
+  margin-top:12px;padding:14px 16px;border-radius:12px;
+  background:#fff;border:1px dashed var(--linie);
+  font-size:13.5px;line-height:1.6;color:var(--tinte);
+}
+.folgen ul{margin:8px 0 0 18px;display:grid;gap:5px}
+.folgen .nicht{color:var(--grau)}
+
+.leer{
+  margin-top:12px;padding:18px;border-radius:14px;border:1px dashed var(--linie);
+  font-size:14px;color:var(--grau);line-height:1.6;
+}
+
+/* ---------- Was die Beratung von dir hat ---------- */
+.bestand{margin-top:12px;border-radius:14px;background:#fff;border:1px solid var(--linie);overflow:hidden}
+.bestand .b-zeile{display:flex;gap:14px;justify-content:space-between;padding:14px 18px;border-top:1px solid var(--linie);font-size:14px}
+.bestand .b-zeile:first-child{border-top:0}
+.bestand .b-zeile b{font-weight:700}
+.bestand .b-zeile span{color:var(--grau);text-align:right}
+.fussnote{font-size:13px;color:var(--grau);margin-top:12px;line-height:1.6;max-width:66ch}
+.fussnote a{color:var(--stift);text-underline-offset:3px}
+
+@media (max-width:560px){
+  .erlaubnis .e-kopf{flex-direction:column;gap:8px}
+  .bestand .b-zeile{flex-direction:column;gap:2px}
+  .bestand .b-zeile span{text-align:left}
+  .erlaubnis .e-griffe .knopf{width:100%;justify-content:center}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+<script src="marke.js"></script>
+<!-- lage.js bringt das eine „Heute" und die Termine: jedes Datum hier ist
+     gerechnet, keines getippt. -->
+<script src="lage.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="wortmarke"><img class="marke-logo" alt="" hidden><div><span data-marke-name data-logo-versteckt>Nordholm &amp; Partner</span><small class="marke-wechsel" role="button" tabindex="0" title="Andere Beispielmarke ansehen">Vorführung: Beispielmarke wechseln</small></div></div>
+  <a class="zurueck" href="uebersicht.html">← Übersicht</a>
+</nav>
+
+<main>
+  <svg class="anstrich" viewBox="0 0 96 12" aria-hidden="true"></svg>
+  <h1 id="titel">Was du erlaubt hast</h1>
+  <p class="unter" id="unter">Und was deine Beratung von dir hat. Jede Erlaubnis lässt sich hier zurücknehmen — ohne Begründung, jederzeit.</p>
+
+  <h2>Deine Erlaubnisse</h2>
+  <p class="was" id="was-erlaubnisse">Was du deiner Beratung erlaubt hast, steht hier mit Datum. Solange nichts hier steht, hast du nichts erlaubt.</p>
+  <div id="erlaubnisse"></div>
+  <div class="leer" id="erlaubnisse-leer" hidden></div>
+
+  <h2>Was deine Beratung von dir hat</h2>
+  <p class="was" id="was-bestand">Zur Auskunft, nicht zum Ändern. Was hier steht, gehört zum Mandat — es hängt nicht an einer Erlaubnis, sondern am Vertrag.</p>
+  <div class="bestand" id="bestand"></div>
+  <p class="fussnote" id="fussnote"></p>
+</main>
+
+<script src="rechtsfuss.js"></script>
+<script>
+(function(){
+  'use strict';
+  var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var NS = 'http://www.w3.org/2000/svg';
+
+  /* Der Anstrich über der Überschrift, wie auf den anderen Kundenflächen */
+  (function(){
+    function zufall(a, b){ return a + Math.random() * (b - a); }
+    var svg = document.querySelector('.anstrich');
+    var d = 'M2 6';
+    for (var i = 1; i <= 6; i++) d += ' L' + (2 + 92 * i / 6) + ' ' + (6 + zufall(-2, 2));
+    var p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', d);
+    svg.appendChild(p);
+  })();
+
+  /* Die Marke anwenden muss die Fläche selbst — marke.js tut es nicht von
+     allein (wie in uebersicht.html und unterlagen.html). Ohne diesen Ruf
+     bleiben Name, Farbe und Anrede auf dem Stand des Markups: die Fläche
+     stand grün da und hieß trotzdem Nordholm. */
+  var Marke = window.Marke || {anwenden: function(){}, rede: function(du){ return du; }, daten: {name: 'Nordholm & Partner'}};
+  Marke.anwenden();
+
+  function rede(du, sie){ return Marke.rede(du, sie); }
+  /* Der Name kommt aus den Markendaten, nicht aus dem Markup — sonst hinge er
+     an der Reihenfolge zweier Skripte. */
+  function beratung(){ return (Marke.daten && Marke.daten.name) || 'deine Beratung'; }
+
+  /* ---------- Die Erlaubnisse ----------
+     Im Produkt kommt jede aus einer Einwilligung an einem Termin; hier steht
+     eine, weil der Entwurf des Protokolls genau eine erzeugt: die Mitschrift
+     des Termins vom Vortag. Der Ton ist mit dem Termin gestorben, das Blatt
+     ist geblieben — und genau das steht in der Zeile. */
+  var ERLAUBT = [
+    {
+      id: 'mitschrift-preis-marge',
+      titel: 'Mitschrift deines Termins',
+      termin: 'Preis und Marge',
+      tag: -1,
+      uhr: '10:02',
+      blatt: 'Protokoll vom Termin',
+      zurueck: false
+    }
+  ];
+
+  function zeile(e){
+    var d = Lage.plusTage(Lage.heuteDatum(), e.tag);
+    var wann = Lage.langDatum(d);
+    var el = document.createElement('div');
+    el.className = 'erlaubnis' + (e.zurueck ? ' zurueckgenommen' : '');
+    el.setAttribute('data-id', e.id);
+
+    var kopf = document.createElement('div');
+    kopf.className = 'e-kopf';
+    var links = document.createElement('div');
+    var b = document.createElement('b');
+    b.textContent = e.titel + ', ' + e.termin;
+    var wannEl = document.createElement('div');
+    wannEl.className = 'e-wann';
+    wannEl.textContent = e.zurueck
+      ? rede('Erlaubt am ' + wann + ' um ' + e.uhr + ' Uhr, von dir zurückgenommen.',
+             'Erlaubt am ' + wann + ' um ' + e.uhr + ' Uhr, von Ihnen zurückgenommen.')
+      : rede('Du hast am ' + wann + ' um ' + e.uhr + ' Uhr zugestimmt.',
+             'Sie haben am ' + wann + ' um ' + e.uhr + ' Uhr zugestimmt.');
+    links.appendChild(b);
+    links.appendChild(wannEl);
+    var stand = document.createElement('span');
+    stand.className = 'stand';
+    stand.textContent = e.zurueck ? 'zurückgenommen' : 'gilt';
+    kopf.appendChild(links);
+    kopf.appendChild(stand);
+    el.appendChild(kopf);
+
+    var was = document.createElement('div');
+    was.className = 'e-was';
+    if (e.zurueck) {
+      was.textContent = rede(
+        'Das Blatt ist aus deiner Akte genommen. Was ' + beratung() + ' dir daraus geschickt hat, behältst du.',
+        'Das Blatt ist aus Ihrer Akte genommen. Was ' + beratung() + ' Ihnen daraus geschickt hat, behalten Sie.');
+    } else {
+      was.innerHTML = rede(
+        'Die Tonaufnahme wurde mit dem Ende des Termins gelöscht. Geblieben ist das Blatt: <a href="unterlagen.html">' + e.blatt + '</a>.',
+        'Die Tonaufnahme wurde mit dem Ende des Termins gelöscht. Geblieben ist das Blatt: <a href="unterlagen.html">' + e.blatt + '</a>.');
+    }
+    el.appendChild(was);
+
+    if (!e.zurueck) {
+      /* Die Folgen stehen vor dem Griff — danach braucht es keine Rückfrage,
+         die den Widerruf schwerer macht, als er sein darf. */
+      var folgen = document.createElement('div');
+      folgen.className = 'folgen';
+      folgen.innerHTML =
+        '<b>' + rede('Wenn du das zurücknimmst:', 'Wenn Sie das zurücknehmen:') + '</b>' +
+        '<ul>' +
+        '<li>' + rede('Das Blatt wird aus deiner Akte gelöscht, bei ' + beratung() + ' auch.',
+                      'Das Blatt wird aus Ihrer Akte gelöscht, bei ' + beratung() + ' auch.') + '</li>' +
+        '<li class="nicht">' + rede('Der Ton ist längst weg — der wurde schon am Terminende gelöscht.',
+                                    'Der Ton ist längst weg — der wurde schon am Terminende gelöscht.') + '</li>' +
+        '<li class="nicht">' + rede('Was deine Beratung dir daraus geschickt hat, bleibt bei dir. Und dass der Termin stattgefunden hat, bleibt auch stehen.',
+                                    'Was Ihre Beratung Ihnen daraus geschickt hat, bleibt bei Ihnen. Und dass der Termin stattgefunden hat, bleibt auch stehen.') + '</li>' +
+        '</ul>';
+      el.appendChild(folgen);
+    }
+
+    var griffe = document.createElement('div');
+    griffe.className = 'e-griffe';
+    if (!e.zurueck) {
+      var knopf = document.createElement('button');
+      knopf.className = 'knopf';
+      knopf.type = 'button';
+      knopf.textContent = 'Zustimmung zurücknehmen';
+      knopf.addEventListener('click', function(){
+        e.zurueck = true;
+        e.zurueckAm = Lage.zeitstempel();
+        bauen();
+        /* Der Satz sagt, was geschehen IST, nicht was geschehen wird. */
+        melde(rede('Zurückgenommen, ' + e.zurueckAm + '. Das Blatt ist gelöscht.',
+                   'Zurückgenommen, ' + e.zurueckAm + '. Das Blatt ist gelöscht.'));
+      });
+      griffe.appendChild(knopf);
+    } else {
+      var wieder = document.createElement('button');
+      wieder.className = 'knopf leise';
+      wieder.type = 'button';
+      wieder.textContent = rede('Doch wieder erlauben', 'Doch wieder erlauben');
+      wieder.addEventListener('click', function(){
+        e.zurueck = false;
+        bauen();
+        melde(rede('Wieder erlaubt. Ein neues Blatt entsteht daraus nicht — das alte ist gelöscht.',
+                   'Wieder erlaubt. Ein neues Blatt entsteht daraus nicht — das alte ist gelöscht.'));
+      });
+      griffe.appendChild(wieder);
+    }
+    el.appendChild(griffe);
+    return el;
+  }
+
+  var meldung = null;
+  function melde(text){
+    if (!meldung) {
+      meldung = document.createElement('p');
+      meldung.className = 'fussnote';
+      meldung.setAttribute('role', 'status');
+      meldung.setAttribute('aria-live', 'polite');
+      document.getElementById('erlaubnisse').after(meldung);
+    }
+    meldung.textContent = text;
+  }
+
+  function bauen(){
+    var wo = document.getElementById('erlaubnisse');
+    wo.textContent = '';
+    ERLAUBT.forEach(function(e){ wo.appendChild(zeile(e)); });
+    var leer = document.getElementById('erlaubnisse-leer');
+    leer.hidden = ERLAUBT.length > 0;
+    leer.textContent = rede('Du hast nichts erlaubt. Ohne deine Zustimmung wird nichts mitgeschrieben.',
+                            'Sie haben nichts erlaubt. Ohne Ihre Zustimmung wird nichts mitgeschrieben.');
+  }
+
+  /* ---------- Was die Beratung von dir hat ----------
+     Auskunft, keine Griffe. Die Zeilen nennen, was es ist und woher es kommt. */
+  var BESTAND = [
+    { was: 'Dein Zugang', woher: rede('Name, E-Mail, wann du zuletzt da warst', 'Name, E-Mail, wann Sie zuletzt da waren') },
+    { was: rede('Deine Gespräche', 'Ihre Gespräche'), woher: rede('Was du gefragt hast, und was freigegeben ist', 'Was Sie gefragt haben, und was freigegeben ist') },
+    { was: rede('Deine Unterlagen', 'Ihre Unterlagen'), woher: rede('Was du hochgeladen hast, und was sie dir gegeben hat', 'Was Sie hochgeladen haben, und was sie Ihnen gegeben hat') },
+    { was: 'Rechnungen', woher: 'Bleiben acht Jahre, das verlangt das Gesetz' }
+  ];
+
+  function bauenBestand(){
+    var wo = document.getElementById('bestand');
+    wo.textContent = '';
+    BESTAND.forEach(function(z){
+      var zeile = document.createElement('div');
+      zeile.className = 'b-zeile';
+      var b = document.createElement('b');
+      b.textContent = z.was;
+      var s = document.createElement('span');
+      s.textContent = z.woher;
+      zeile.appendChild(b);
+      zeile.appendChild(s);
+      wo.appendChild(zeile);
+    });
+  }
+
+  function texte(){
+    document.getElementById('unter').textContent = rede(
+      'Und was ' + beratung() + ' von dir hat. Jede Erlaubnis lässt sich hier zurücknehmen — ohne Begründung, jederzeit.',
+      'Und was ' + beratung() + ' von Ihnen hat. Jede Erlaubnis lässt sich hier zurücknehmen — ohne Begründung, jederzeit.');
+    document.getElementById('was-erlaubnisse').textContent = rede(
+      'Was du erlaubt hast, steht hier mit Datum. Solange nichts hier steht, hast du nichts erlaubt.',
+      'Was Sie erlaubt haben, steht hier mit Datum. Solange nichts hier steht, haben Sie nichts erlaubt.');
+    document.getElementById('was-bestand').textContent = rede(
+      'Zur Auskunft, nicht zum Ändern. Was hier steht, gehört zum Mandat — es hängt nicht an einer Erlaubnis, sondern am Vertrag.',
+      'Zur Auskunft, nicht zum Ändern. Was hier steht, gehört zum Mandat — es hängt nicht an einer Erlaubnis, sondern am Vertrag.');
+    document.getElementById('fussnote').innerHTML = rede(
+      'Willst du alles löschen lassen oder eine Kopie von allem, schreib es ' + beratung() + ' im <a href="gespraech.html">Gespräch</a> — sie muss dir binnen eines Monats antworten. Was wofür gespeichert wird, steht im <a href="datenschutz.html">Datenschutz</a>.',
+      'Wollen Sie alles löschen lassen oder eine Kopie von allem, schreiben Sie es ' + beratung() + ' im <a href="gespraech.html">Gespräch</a> — sie muss Ihnen binnen eines Monats antworten. Was wofür gespeichert wird, steht im <a href="datenschutz.html">Datenschutz</a>.');
+  }
+
+  /* Ein Ereignis für den Markenwechsel gibt es nicht: marke.js lädt die Seite
+     neu (weiter() → location.reload()), also stimmen Name und Ansprache beim
+     nächsten Aufbau von selbst. */
+  texte(); bauen(); bauenBestand();
+})();
+</script>
+</body>
+</html>
