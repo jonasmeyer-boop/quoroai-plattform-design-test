@@ -44,7 +44,10 @@
    dazu" ließ den Rabatt erst dort beginnen — plattform.html rechnet 25 % ab
    dem ersten Zugang, 35 % ab 25 und 45 % ab 100. Wer sich hier anmeldet,
    hatte sonst eine andere Zahl im Kopf als seine erste Abrechnung zeigt.
-   Marker: REGISTRIEREN-V12 (V12: die Beträge kommen aus preise.js statt aus dem Markup) (nach dem Anlegen geht es ins Cockpit, neuer Dateiname) */
+   Marker: REGISTRIEREN-V13 (V13: die gesendet-Lage hat einen Ausgang (#81),
+   und „Passwort vergessen" ist als vierte Lage gezeichnet (#83) — vorher
+   nahm das Produkt dafür die Kunden-Tür. V12: die Beträge kommen aus
+   preise.js statt aus dem Markup) (nach dem Anlegen geht es ins Cockpit, neuer Dateiname) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input{font-family:inherit}
@@ -96,6 +99,18 @@ h1{font-size:24px;margin-top:16px}
   background:var(--gruen-fond);color:var(--tinte);font-size:14px;line-height:1.55;
 }
 .gesendet b{font-weight:600}
+/* Der Ausgang unter der Bestätigung: leise, aber nicht versteckt. Ein
+   Wartender, dem nichts ankommt, findet sonst keinen Weg (Issue #81). */
+.gesendet .raus{
+  margin-top:10px;padding-top:10px;border-top:0.5px solid rgba(24,21,47,.12);
+  font-size:13.5px;color:var(--nebel-600);line-height:1.6;
+}
+.gesendet .raus button{
+  background:none;border:0;padding:0;cursor:pointer;font:inherit;
+  color:var(--lila-700);text-decoration:underline;text-decoration-color:var(--lila-300);
+  text-underline-offset:3px;
+}
+.gesendet .raus button:hover{text-decoration-color:var(--lila-600)}
 .neben{
   display:block;text-align:center;margin-top:14px;font-size:13px;font-weight:600;
   color:var(--nebel-600);background:none;border:none;width:100%;cursor:pointer;
@@ -229,7 +244,16 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
         <div class="feld"><label for="email">E-Mail</label><input id="email" type="email" autocomplete="email" placeholder="du@deine-beratung.de"></div>
         <div class="feld"><label for="pass">Dein Passwort</label><input id="pass" type="password" autocomplete="new-password" placeholder="mindestens 12 Zeichen"></div>
         <div class="fehler" id="fehler-neu" aria-live="polite"></div>
-        <div class="gesendet" id="gesendet" hidden><b>Post ist raus, und das Licht ist an.</b> Bestätige deine E-Mail, dann geht es weiter in deine Zentrale.</div>
+        <!-- Die Zeile darunter ist kein Beiwerk (Issue #81, entschieden
+             2026-08-20). Zu einer Adresse, die es schon gibt, geht keine
+             zweite Bestätigung hinaus, und diese Tür antwortet ABSICHTLICH
+             in beiden Fällen gleich — sonst verriete sie, wer hier ein Konto
+             hat. Genau deshalb kann sie nicht sagen, was los ist, und muss
+             stattdessen sagen, was man tun kann. Jonas hat am 19.08.2026
+             selbst auf eine Mail gewartet, die nie kam. -->
+        <div class="gesendet" id="gesendet" hidden><b>Post ist raus, und das Licht ist an.</b> Bestätige deine E-Mail, dann geht es weiter in deine Zentrale.
+          <div class="raus">Kommt nichts an? Sieh im Spam nach. Bleibt es dabei, gibt es zu dieser Adresse vielleicht schon ein Konto — diese Tür sagt es dir nicht, das wäre eine Auskunft über fremde Konten. <button type="button" id="raus-anmelden">Dann melde dich an</button> oder <button type="button" id="raus-vergessen">setz dein Passwort zurück</button>.</div>
+        </div>
         <div class="kosten">
           <b>Das Anlegen kostet nichts, und es wird keine Zahlungsangabe verlangt.</b>
           Läuft die Beratung, rechnet quoroAI monatlich ab:
@@ -258,6 +282,27 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
         <div class="fehler" id="fehler-an" aria-live="polite"></div>
         <button class="knopf primaer" id="eintreten" type="button">Eintreten</button>
         <button class="neben" id="vergessen" type="button">Passwort vergessen?</button>
+      </div>
+
+      <!-- Passwort vergessen, die vierte Lage dieser Tür (Issue #83,
+           entschieden 2026-08-20). Bis dahin war sie eine bewusste Lücke,
+           und das Produkt führte ersatzweise auf die KUNDEN-Tür unter
+           quoroAI-Farbe — genau der Mischpunkt, den die Entscheidung vom
+           19.08. ausschließt („die Kundenadresse kennt keine Beratungs-Tür",
+           und umgekehrt). Eine Grenze der Vorführung ersetzt keinen Weg, den
+           es geben muss; also wird er gezeichnet.
+           Dieselbe Regel wie oben: die Antwort ist in beiden Fällen gleich,
+           weil sie sonst verriete, wer hier ein Konto hat. -->
+      <div id="f-vergessen" hidden>
+        <h1>Passwort zurücksetzen.</h1>
+        <p class="erklaer">Sag uns die Adresse, mit der du dich anmeldest. Wir schicken dir einen Link, mit dem du ein neues Passwort setzt.</p>
+        <div class="feld"><label for="v-email">E-Mail</label><input id="v-email" type="email" autocomplete="email" placeholder="du@deine-beratung.de"></div>
+        <div class="fehler" id="fehler-v" aria-live="polite"></div>
+        <button class="knopf primaer" id="v-senden" type="button">Link schicken</button>
+        <div class="gesendet" id="v-gesendet" hidden><b>Wenn es zu dieser Adresse ein Konto gibt, ist der Link unterwegs.</b>
+          <div class="raus">Ob es eines gibt, sagen wir hier nicht — das wäre eine Auskunft über fremde Konten. Der Link gilt eine Stunde. Kommt nichts an, sieh im Spam nach, und prüf die Schreibweise der Adresse.</div>
+        </div>
+        <button class="neben" id="v-zurueck" type="button">Zurück zum Anmelden</button>
       </div>
 
       <!-- Die dritte Tür: eine Einladung ins Team einer Beratung.
@@ -473,6 +518,9 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
     anmeldeSeite = an;
     document.getElementById('f-neu').hidden = an;
     document.getElementById('f-an').hidden = !an;
+    /* Die vierte Lage (Passwort zurücksetzen) gehört keinem der beiden
+       Reiter — sie verschwindet, sobald einer gewählt wird. */
+    document.getElementById('f-vergessen').hidden = true;
     uNeu.classList.toggle('hier', !an); uNeu.setAttribute('aria-selected', String(!an));
     uAn.classList.toggle('hier', an); uAn.setAttribute('aria-selected', String(an));
     /* beim Tab-Wechsel steht der Bau einfach da — gebaut wird nur beim Tippen */
@@ -602,21 +650,48 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
   });
 
   var hinweisTimer = null, leerTimer = null;
-  document.getElementById('vergessen').addEventListener('click', function(){
-    var h = document.getElementById('demo-hinweis');
-    /* Nicht mehr „entsteht gerade": hier entsteht nichts, der Weg zurück ins
-       Passwort ist im Entwurf schlicht nicht gezeichnet (Entscheidung
-       2026-08-16). Der Satz steht erst beim Druck da, nicht schon im Markup —
-       sonst läse ihn das Vorlesen beim Betreten der Seite mit. */
-    h.textContent = 'Dieser Griff ist im Entwurf nicht gezeichnet.';
-    h.style.opacity = .95; h.style.translate = '-50% 0';
-    clearTimeout(hinweisTimer); clearTimeout(leerTimer);
-    hinweisTimer = setTimeout(function(){
-      h.style.opacity = 0; h.style.translate = '-50% 6px';
-      /* Leeren erst nach der Überblendung — sonst verschwindet der Satz
-         schlagartig, statt zu verklingen. */
-      leerTimer = setTimeout(function(){ h.textContent = ''; }, 320);
-    }, 2200);
+  /* ---------- Passwort zurücksetzen (Issue #83) ----------
+     Bis zum 20.08.2026 sagte dieser Griff „Dieser Griff ist im Entwurf nicht
+     gezeichnet." Das war eine ehrliche Grenze der Vorführung — aber das
+     Produkt braucht den Weg, und ohne Zeichnung nahm es die KUNDEN-Tür unter
+     quoroAI-Farbe. Eine Vorführungsgrenze ersetzt keinen Weg, den es geben
+     muss. */
+  function zeigeVergessen(){
+    document.getElementById('f-neu').hidden = true;
+    document.getElementById('f-an').hidden = true;
+    document.getElementById('f-ein').hidden = true;
+    document.getElementById('f-vergessen').hidden = false;
+    document.getElementById('v-gesendet').hidden = true;
+    document.getElementById('fehler-v').textContent = '';
+    /* Aus der Anmeldung mitgenommen, wenn sie schon getippt ist — niemand
+       tippt seine Adresse gern zweimal. */
+    var an = document.getElementById('an-email').value.trim();
+    if (an) document.getElementById('v-email').value = an;
+    standWort.textContent = 'Dein Modell steht. Es wartet auf dich.';
+  }
+  document.getElementById('vergessen').addEventListener('click', zeigeVergessen);
+  document.getElementById('raus-vergessen').addEventListener('click', function(){
+    var neu = document.getElementById('email');
+    var wert = neu ? neu.value.trim() : '';
+    zeigeVergessen();
+    if (wert) document.getElementById('v-email').value = wert;
+  });
+  document.getElementById('raus-anmelden').addEventListener('click', function(){
+    var neu = document.getElementById('email');
+    var wert = neu ? neu.value.trim() : '';
+    schalte(true);
+    if (wert) document.getElementById('an-email').value = wert;
+  });
+  document.getElementById('v-zurueck').addEventListener('click', function(){ schalte(true); });
+  document.getElementById('v-senden').addEventListener('click', function(){
+    var f = document.getElementById('fehler-v');
+    var wert = document.getElementById('v-email').value.trim();
+    if (wert.indexOf('@') === -1) { f.textContent = 'Die Adresse sieht noch nicht richtig aus.'; return; }
+    f.textContent = '';
+    /* Die Antwort ist in beiden Fällen dieselbe — ob es das Konto gibt,
+       steht hier nicht, sonst wäre die Tür eine Auskunft über fremde Konten. */
+    document.getElementById('v-gesendet').hidden = false;
+    document.getElementById('v-senden').hidden = true;
   });
 })();
 </script>

@@ -137,7 +137,12 @@
    dieselbe Regel und derselbe Wortlaut wie in plattform.html.
    V51: die Fläche legt den Vorschlagsnamen ab — Titel „Cockpit der Beratung",
    Datei beratung-cockpit.html, die alte Adresse leitet hierher weiter.
-   Marker: BERATUNG-COCKPIT-V52 (V52: der Werkstatt-Knopf heißt Stand des Designs) (der Vorschlagsname ist abgelegt) */
+   V52 (Issue #82): die Zentrale hat eine Tür „Abrechnung aller Beratungen",
+   die nur quoroAI selbst sieht — in der Vorführung über `?wir=1` in der
+   Adresszeile (nicht über den Hash: der gehört der Raumsteuerung). Seit WURZEL-V8 steht der Knopf nicht mehr auf der
+   Startadresse („auch wir melden uns nur an"), und ohne diese Tür wäre
+   plattform.html gezeichnet und von keiner Fläche aus erreichbar.
+   Marker: BERATUNG-COCKPIT-V52 */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -1062,6 +1067,18 @@ body.gezoomt #zonen{display:block}
       <a class="knopf leise" href="beratung-termine.html">Termine und Übergaben</a>
       <a class="knopf leise" href="beratung-verwaltung.html">Verwaltung</a>
       <a class="knopf leise" href="beratung-ankommen.html">Ankommen</a>
+      <!-- Die Tür, die nur WIR sehen (Issue #82, entschieden 2026-08-20).
+           Seit WURZEL-V8 steht der Abrechnungs-Knopf nicht mehr auf der
+           Startadresse — auch wir melden uns nur an. Hinter der Anmeldung
+           braucht er trotzdem einen Ort, sonst ist plattform.html gezeichnet
+           und unerreichbar. Er gehört in die Zentrale, weil dort alles hängt,
+           was nicht zu einem einzelnen Kunden gehört; unsere eigene Zentrale
+           hat eben eine Tür mehr.
+           Der Name muss die zwei Abrechnungen auseinanderhalten: „Was quoroAI
+           berechnet" (oben) ist die Rechnung AN diese Beratung, diese hier
+           ist die Abrechnung ALLER Beratungen. Im Produkt hängt sie am
+           eigenen Konto, nicht an einer Rolle der Beratung. -->
+      <a class="knopf leise nur-wir" id="tuer-plattform" href="plattform.html" hidden>Abrechnung aller Beratungen</a>
     </div>
   </section>
 </div>
@@ -1333,6 +1350,22 @@ body.gezoomt #zonen{display:block}
   });
   krume.addEventListener('click', schliesse);
   window.addEventListener('keydown', function(e){ if (e.key === 'Escape') schliesse(); });
+
+  /* ---------- Die Tür, die nur quoroAI selbst sieht (Issue #82) ----------
+     Im Produkt entscheidet das Konto, ob sie da ist. In der Vorführung
+     entscheidet die Adresszeile: `?wir=1` zeigt die Zentrale so, wie unsere
+     eigene aussieht. Ohne das ist die Tür weg — eine fremde Beratung darf
+     sie nie sehen, und eine, die sie immer sieht, wäre schlimmer als keine
+     Zeichnung.
+     NICHT über den Hash: der gehört der Raumsteuerung dieser Fläche, die
+     ihn bei jedem Öffnen neu schreibt (Z. 1330) und einen fremden Wert
+     wegwirft. Rot gesehen am 20.08.2026 — `#zentrale-wir` verschwand beim
+     Laden, und die Tür blieb unsichtbar. */
+  (function nurWir(){
+    var tuer = document.getElementById('tuer-plattform');
+    if (!tuer) return;
+    tuer.hidden = !/[?&]wir=1(&|$)/.test(location.search);
+  })();
   window.addEventListener('hashchange', function(){
     var z = location.hash.slice(1);
     if (ZONEN_NAMEN[z]) oeffne(z); else schliesse();
