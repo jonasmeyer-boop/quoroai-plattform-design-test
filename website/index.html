@@ -23,7 +23,7 @@
    kurz auf und die Leinwand setzt sich mit einem winzigen Impuls. Die
    Schriftzüge stehen auf einem weichen weißen Hof statt zu leuchten, unten
    läuft eine haarfeine Fortschrittslinie. Eine Kurve, eine Dauer, überall. */
-.kino{height:640vh;position:relative}
+.kino{height:760vh;position:relative}
 .kino .haftet{position:sticky;top:0;height:100svh;overflow:hidden;background:var(--grund)}
 .kino .lichthof{
   position:absolute;left:53%;top:50%;width:min(96vh,90vw);aspect-ratio:1;
@@ -36,10 +36,11 @@
   transform:translate(calc(-53% + var(--gleit,0px)),calc(-50% + var(--hub,0px))) scale(var(--nah,1));
   mix-blend-mode:multiply;pointer-events:none;will-change:transform;
 }
+.kino #blaetter{position:absolute;inset:0;perspective:1100px;pointer-events:none}
 .kino .blatt{
   position:absolute;left:50%;top:50%;width:min(22vw,320px);height:auto;
   mix-blend-mode:multiply;pointer-events:none;opacity:0;
-  will-change:transform,opacity,filter;
+  will-change:transform,opacity,filter;transform-style:preserve-3d;
 }
 /* die Schriftzüge: ruhig, auf einem weichen Hof, kaum Bewegung */
 .kino .wort{
@@ -91,7 +92,7 @@
 }
 .aufhaenger img{width:22px;height:22px;border-radius:6px}
 @media (max-width:900px){
-  .kino{height:560vh}
+  .kino{height:660vh}
   .kino canvas{left:50%;top:46%;height:min(140svh,225vw);transform:translate(calc(-52% + var(--gleit,0px)),calc(-50% + var(--hub,0px))) scale(var(--nah,1))}
   .kino .lichthof{left:50%;top:46%;width:min(70vh,120vw)}
   .kino .blatt{width:min(40vw,220px)}
@@ -327,15 +328,15 @@ section.bahn{padding-top:var(--luft)}
       <div class="lichthof" id="lichthof"></div>
       <canvas id="leinwand" aria-hidden="true"></canvas>
       <div id="blaetter" aria-hidden="true"></div>
-      <div class="wort" data-fenster="0.04,0.26">
+      <div class="wort" data-fenster="0.03,0.18">
         <div class="gross">Tausend <em>Belege</em>.</div>
         <span class="klein">Bilanzen, Verträge, Auswertungen, Protokolle. Das Wissen deiner Beratung liegt in Ordnern, Postfächern und Köpfen.</span>
       </div>
-      <div class="wort" data-fenster="0.30,0.50">
+      <div class="wort" data-fenster="0.21,0.38">
         <div class="gross">Ein <em>Gedanke</em>.</div>
         <span class="klein">quoroAI liest alles davon und denkt in deiner Methodik. Jede Zahl in der Antwort nennt ihre Quelle.</span>
       </div>
-      <div class="wort" data-fenster="0.54,0.70">
+      <div class="wort" data-fenster="0.50,0.78">
         <div class="gross">Dein <em>Berater</em>.</div>
         <span class="klein">Deine Mandanten fragen um 23 Uhr und bekommen deine Antwort, unter deinem Namen. Du liest jedes Wort mit.</span>
       </div>
@@ -570,14 +571,21 @@ section.bahn{padding-top:var(--luft)}
 
 <script src="zahlen.js"></script>
 <script>
-/* Das Kino, Fassung 3: ruhig und präzise. Bilder scrubben, acht Blätter
-   fliegen langsam herein, die Schriftzüge stehen fast still, das Licht
-   blüht beim Fertigwerden kurz auf, unten läuft die Fortschrittslinie. */
+/* Das Kino, Fassung 4: zwei Akte. Erst setzen sich die Belege zum Kopf
+   zusammen (61 Bilder), dann dreht sich der Kopf einmal um die eigene
+   Achse (60 Bilder) unter dem dritten Schriftzug. Die Blätter fliegen mit
+   echter 3D-Kippung herein. Beide Bildfolgen teilen sich eine Leinwand;
+   der Übergang ist nahtlos, weil die Drehung mit dem fertigen Kopf beginnt. */
 (function () {
   'use strict';
   var ruhig = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var BILDER = 61;                /* Schnitt: 5 s Kling, jedes zweite Bild */
-  var PFAD = function (i) { return 'bilder/kino/kopf-' + String(i + 1).padStart(3, '0') + '.jpg'; };
+  var AUFBAU = 61, DREHUNG = 61;
+  var GESAMT = AUFBAU + DREHUNG;
+  function PFAD(i) {
+    return i < AUFBAU
+      ? 'bilder/kino/kopf-' + String(i + 1).padStart(3, '0') + '.jpg'
+      : 'bilder/kino/dreh-' + String(i - AUFBAU + 1).padStart(3, '0') + '.jpg';
+  }
 
   var leinwand = document.getElementById('leinwand');
   var stift = leinwand.getContext('2d');
@@ -588,26 +596,25 @@ section.bahn{padding-top:var(--luft)}
   var fortschritt = document.getElementById('fortschritt');
   var worte = Array.prototype.slice.call(document.querySelectorAll('.kino .wort'));
 
-  /* ---------- Bilder ---------- */
-  var vorrat = new Array(BILDER);
+  /* ---------- Bilder: Aufbau zuerst, die Drehung gestaffelt danach ---------- */
+  var vorrat = new Array(GESAMT);
   function lade(i) {
     var b = new Image();
     b.onload = function () { vorrat[i] = b; if (i === 0 || i === letztesZiel || ruhig) male(letztesZiel); };
     b.src = PFAD(i);
   }
-  if (BILDER > 0) {
-    if (ruhig) {
-      lade(BILDER - 1);
-    } else {
-      lade(0); if (BILDER > 1) lade(BILDER - 1);
-      for (var i = 1; i < BILDER - 1; i++) lade(i);
-    }
+  if (ruhig) {
+    lade(AUFBAU - 1);
+  } else {
+    lade(0); lade(AUFBAU - 1); lade(GESAMT - 1);
+    for (var i = 1; i < AUFBAU - 1; i++) lade(i);
+    for (var j = AUFBAU; j < GESAMT - 1; j++) lade(j);
   }
 
   var letztesZiel = 0;
   function naechstesGeladene(z) {
     if (vorrat[z]) return vorrat[z];
-    for (var a = 1; a < BILDER; a++) {
+    for (var a = 1; a < GESAMT; a++) {
       if (vorrat[z - a]) return vorrat[z - a];
       if (vorrat[z + a]) return vorrat[z + a];
     }
@@ -616,7 +623,7 @@ section.bahn{padding-top:var(--luft)}
 
   var schleier = null;
   function bemesse() {
-    var kante = Math.min(1600, Math.round(leinwand.getBoundingClientRect().width * Math.min(window.devicePixelRatio || 1, 2))) || 1152;
+    var kante = Math.min(2048, Math.round(leinwand.getBoundingClientRect().width * Math.min(window.devicePixelRatio || 1, 2))) || 1440;
     if (kante === leinwand.width) return;
     leinwand.width = kante; leinwand.height = kante;
     schleier = stift.createRadialGradient(kante / 2, kante / 2, kante * .30, kante / 2, kante / 2, kante * .52);
@@ -637,9 +644,9 @@ section.bahn{padding-top:var(--luft)}
   function seg(p, a, b) { return Math.min(Math.max((p - a) / (b - a), 0), 1); }
   function zufall(i) { var x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); }
 
-  /* ---------- Die fliegenden Blätter: wenige, langsam, wenig Drehung ---------- */
+  /* ---------- Die fliegenden Blätter: mit Kippung im Raum ---------- */
   var blattLage = document.getElementById('blaetter');
-  var BLATTZAHL = window.matchMedia('(max-width: 900px)').matches ? 5 : 8;
+  var BLATTZAHL = window.matchMedia('(max-width: 900px)').matches ? 6 : 10;
   var blaetter = [];
   if (!ruhig) {
     for (var k = 0; k < BLATTZAHL; k++) {
@@ -649,17 +656,19 @@ section.bahn{padding-top:var(--luft)}
       el.alt = '';
       blattLage.appendChild(el);
       var winkel = zufall(k + 1) * Math.PI * 2;
-      var von = 0.03 + (k / BLATTZAHL) * 0.46;
+      var von = 0.02 + (k / BLATTZAHL) * 0.30;
       blaetter.push({
         el: el,
-        a: von, b: von + 0.22 + zufall(k + 7) * 0.06,
+        a: von, b: von + 0.15 + zufall(k + 7) * 0.05,
         x0: Math.cos(winkel), y0: Math.sin(winkel),
         zielX: (zufall(k + 13) - 0.35) * 0.16,
         zielY: (zufall(k + 29) - 0.5) * 0.28,
-        gross: 1.5 + zufall(k + 41) * 0.7,
+        gross: 1.6 + zufall(k + 41) * 0.8,
         klein: 0.09 + zufall(k + 53) * 0.08,
-        dreh0: (zufall(k + 61) - 0.5) * 70,
-        dreh1: (zufall(k + 71) - 0.5) * 180
+        dreh0: (zufall(k + 61) - 0.5) * 80,
+        dreh1: (zufall(k + 71) - 0.5) * 200,
+        kippX0: (zufall(k + 83) - 0.5) * 70,   /* Kippung im Raum: taumelt herein */
+        kippY0: (zufall(k + 97) - 0.5) * 90
       });
     }
   }
@@ -674,19 +683,29 @@ section.bahn{padding-top:var(--luft)}
       var y = s.y0 * weit * (1 - e) + s.zielY * vh * e;
       var gr = s.gross * Math.pow(s.klein / s.gross, e);
       var dreh = s.dreh0 + (s.dreh1 - s.dreh0) * e;
+      var kx = s.kippX0 * (1 - e), ky = s.kippY0 * (1 - e);
       var unschaerfe = (1 - e) * 4;
       s.el.style.opacity = Math.min(1, t * 6) * (t > .9 ? (1 - t) * 10 : 1);
       s.el.style.filter = unschaerfe > .4 ? 'blur(' + unschaerfe.toFixed(1) + 'px)' : 'none';
-      s.el.style.transform = 'translate(calc(-50% + ' + x.toFixed(1) + 'px), calc(-50% + ' + y.toFixed(1) + 'px)) rotate(' + dreh.toFixed(1) + 'deg) scale(' + gr.toFixed(3) + ')';
+      s.el.style.transform =
+        'translate(calc(-50% + ' + x.toFixed(1) + 'px), calc(-50% + ' + y.toFixed(1) + 'px)) ' +
+        'rotateX(' + kx.toFixed(1) + 'deg) rotateY(' + ky.toFixed(1) + 'deg) ' +
+        'rotate(' + dreh.toFixed(1) + 'deg) scale(' + gr.toFixed(3) + ')';
     });
   }
 
   if (ruhig) {
-    male(Math.max(0, BILDER - 1));
+    male(AUFBAU - 1);
     finale.classList.add('da');
     return;
   }
 
+  /* Die Karte des Films:
+     0,00–0,42  Aufbau (Bilder 0…60), Blätter, Worte 1 und 2
+     0,42–0,47  das Licht blüht, die Leinwand setzt sich
+     0,47–0,80  die Drehung (Bilder 61…120) unter Wort 3
+     0,80–0,86  zweites Aufblühen
+     0,86–1,00  die Bühne belichtet, der Kopf gleitet */
   var laeuft = false;
   function messen() {
     laeuft = false;
@@ -694,29 +713,31 @@ section.bahn{padding-top:var(--luft)}
     var weg = r.height - window.innerHeight;
     var p = weg > 0 ? Math.min(Math.max(-r.top / weg, 0), 1) : 1;
 
-    /* der Aufbau: Bild 0 bis N-1 über 0 … 0,70 */
-    if (BILDER > 0) {
-      var t = seg(p, 0, .70);
+    var bild;
+    if (p < .47) {
+      var t = seg(p, 0, .42);
       t = 1 - Math.pow(1 - t, 2.2);
-      male(Math.min(BILDER - 1, Math.round(t * (BILDER - 1))));
+      bild = Math.min(AUFBAU - 1, Math.round(t * (AUFBAU - 1)));
+    } else {
+      var d = seg(p, .47, .80);                 /* die Drehung läuft linear */
+      bild = AUFBAU + Math.min(DREHUNG - 1, Math.round(d * (DREHUNG - 1)));
     }
+    male(bild);
 
-    /* die Kamera: nah beginnen, weich zurück, ein winziger Impuls beim
-       Fertigwerden, am Ende zur Seite gleiten */
-    var setzt = Math.sin(seg(p, .70, .76) * Math.PI);
-    var nah = 1.18 - .18 * seg(p, 0, .70) + .012 * setzt;
-    var ausklang = seg(p, .76, .92);
+    var setzt1 = Math.sin(seg(p, .42, .47) * Math.PI);
+    var setzt2 = Math.sin(seg(p, .80, .86) * Math.PI);
+    var nah = 1.18 - .18 * seg(p, 0, .42) + .012 * (setzt1 + setzt2);
+    var ausklang = seg(p, .86, .97);
     nah -= .14 * ausklang;
     var schmal = window.matchMedia('(max-width: 900px)').matches;
     var gleit = schmal ? 0 : ausklang * window.innerWidth * .11;
-    var hub = -seg(p, 0, .70) * window.innerHeight * .02;   /* leiser Parallax-Hub */
+    var hub = -seg(p, 0, .42) * window.innerHeight * .02;
     leinwand.style.setProperty('--nah', nah.toFixed(4));
     leinwand.style.setProperty('--gleit', gleit.toFixed(1) + 'px');
     leinwand.style.setProperty('--hub', hub.toFixed(1) + 'px');
 
     malBlaetter(p);
 
-    /* die Schriftzüge: fast still, nur Atem */
     worte.forEach(function (w) {
       var f = w.dataset.fenster.split(',');
       var t = seg(p, parseFloat(f[0]), parseFloat(f[1]));
@@ -727,18 +748,15 @@ section.bahn{padding-top:var(--luft)}
       w.style.transform = 'translateY(-50%) translateY(' + ((1 - auf) * 14).toFixed(1) + 'px) scale(' + (.985 + .025 * t).toFixed(4) + ')';
     });
 
-    /* das Licht: trägt leise mit und blüht beim Fertigwerden kurz auf */
-    var schein = .10 + .18 * seg(p, 0, .70) + .20 * setzt;
+    var schein = .10 + .16 * seg(p, 0, .42) + .18 * setzt1 + .22 * setzt2;
     lichthof.style.setProperty('--schein', schein.toFixed(3));
-    lichthof.style.setProperty('--puls', (1 + .10 * setzt).toFixed(3));
+    lichthof.style.setProperty('--puls', (1 + .10 * (setzt1 + setzt2)).toFixed(3));
 
-    /* die Linie unten läuft mit und verabschiedet sich mit der Bühne */
-    fortschritt.style.setProperty('--stand', seg(p, 0, .70).toFixed(4));
-    fortschritt.style.setProperty('--linie-da', p >= .74 ? 0 : 1);
-    fortschritt.style.opacity = p >= .74 ? 0 : 1;
+    fortschritt.style.setProperty('--stand', seg(p, 0, .80).toFixed(4));
+    fortschritt.style.setProperty('--linie-da', p >= .84 ? 0 : 1);
+    fortschritt.style.opacity = p >= .84 ? 0 : 1;
 
-    /* die Bühne belichtet */
-    var da = p >= .78;
+    var da = p >= .87;
     finale.classList.toggle('da', da);
     schleierlinks.classList.toggle('da', da);
   }
