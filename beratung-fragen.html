@@ -35,6 +35,15 @@
    Beratung — ab da ist es ihr Satz, und der Text steht in einem Feld, in das
    eine Hand fassen muss.
 
+   WOHIN er dann geht, ist entschieden (Issue #86, 2026-08-20): **als eigenes
+   Blatt in seine Unterlagen, nicht als Nachricht in sein Gespräch.** Sein
+   Gespräch führt er mit dem KI-Berater; eine zweite Stimme darin könnte er
+   von dessen nicht unterscheiden — dieselbe Klasse Fehler wie das erfundene
+   Kundenzitat im Protokoll und der KI-Berater als Terminbote. Und das
+   Mitlesen-Prinzip („liest mit, redet nicht mit") bliebe sonst nur ein
+   Wort. Ein Blatt mit der Marke der Beratung darauf ist als ihres erkennbar,
+   und es bleibt liegen — eine Nachricht scrollt weg.
+
    Chrome ist quoroAI (system.css, Entscheidung 2026-08-12), Hilfe-Ebene im
    Kopfband, Uhr-Dock und Komet wie überall im Cockpit.
    V2 (Code-Review vor der Freigabe): der Umschalter gilt auch beim Fragen (er
@@ -106,7 +115,11 @@
    behauptet dieser Bogen keine Anzahl von Tagen darüber.
    V12 (Issue #66): „Alle Vorschläge" ist am Finger 44 Pixel hoch statt 38 —
    dieselbe Regel und derselbe Wortlaut wie in plattform.html.
-   Marker: BERATUNG-FRAGEN-V13 (V13: der Werkstatt-Knopf heißt Stand des Designs) (die Fingermaße stimmen) */
+   Marker: BERATUNG-FRAGEN-V14 (V14, Issue #86: was hinausgeht, geht als
+   eigenes Blatt in die Unterlagen des Kunden statt in sein Gespräch; die
+   Liest-Zeile nennt nur, was wirklich gelesen wird; die Chips sind zuletzt
+   gestellte Fragen statt eines erfundenen Katalogs; und ein Bogen ohne
+   Mandat fragt, in welche Akte er soll, statt eine zu erraten) (V13: der Werkstatt-Knopf heißt Stand des Designs) (die Fingermaße stimmen) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -168,15 +181,75 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
 
 /* ---------- Die Werkbank: worüber, und dann die Frage ---------- */
 .worueber{display:flex;gap:8px;flex-wrap:wrap}
-.worueber button{
+/* Die Suche ab acht Mandaten (Issue #86) */
+.worueber-viele{display:grid;gap:10px}
+.wv-fest{display:flex;gap:8px;flex-wrap:wrap}
+.wv-suche{display:grid;gap:5px}
+.wv-label{font-size:12.5px;font-weight:600;color:var(--nebel-600)}
+.wv-suche input{
+  width:100%;max-width:520px;min-height:46px;padding:0 14px;font:inherit;font-size:15px;
+  color:var(--tinte);background:var(--flaeche);
+  border:1px solid var(--nebel-300);border-radius:var(--radius-innen);
+}
+.wv-suche input:focus{outline:none;border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+.wv-zuletzt,.wv-treffer{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.wv-zuletzt .wv-wort,.wv-treffer .wv-wort{
+  font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--nebel-500);margin-right:2px;
+}
+.wv-treffer .wv-leer{font-size:13.5px;color:var(--nebel-500)}
+.vorfuehrung-reihe{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.vorfuehrung-reihe > span{font-size:12px;color:var(--nebel-600)}
+.vorfuehrung-reihe .umschalter{display:inline-flex;gap:4px;padding:4px;border-radius:var(--radius-kapsel);background:rgba(24,21,47,.05)}
+.vorfuehrung-reihe .umschalter button{
+  border:0;background:none;cursor:pointer;border-radius:var(--radius-kapsel);
+  min-height:36px;padding:6px 13px;font:inherit;font-size:12.5px;font-weight:600;color:var(--nebel-600);
+}
+.vorfuehrung-reihe .umschalter button[aria-pressed="true"]{background:var(--tinte);color:#fff}
+@media (pointer:coarse){ .vorfuehrung-reihe .umschalter button{min-height:44px} }
+.worueber button,
+.wv-fest button,.wv-zuletzt button,.wv-treffer button{
   padding:10px 15px;border-radius:999px;border:0.5px solid var(--nebel-300);
-  background:var(--flaeche);font-size:13.5px;font-weight:600;color:var(--tinte);
+  background:var(--flaeche);font:inherit;font-size:13.5px;font-weight:600;color:var(--tinte);
   cursor:pointer;transition:border-color .2s,background .2s,color .2s;
 }
-.worueber button:hover{border-color:var(--lila-500)}
-.worueber button[aria-pressed="true"]{background:var(--tinte);color:#fff;border-color:var(--tinte)}
+.worueber button:hover,
+.wv-fest button:hover,.wv-zuletzt button:hover,.wv-treffer button:hover{border-color:var(--lila-500)}
+.worueber button[aria-pressed="true"],
+.wv-fest button[aria-pressed="true"],.wv-zuletzt button[aria-pressed="true"],
+.wv-treffer button[aria-pressed="true"]{background:var(--tinte);color:#fff;border-color:var(--tinte)}
+/* Am Finger und an schmaler Breite 44 Pixel — dieselbe Regel wie überall
+   (Issue #66). Die neuen Pillen der Suche standen bei 21 Pixeln, weil sie
+   gar keine Gestalt geerbt hatten. */
+@media (pointer:coarse),(max-width:700px){
+  .worueber button,
+  .wv-fest button,.wv-zuletzt button,.wv-treffer button,
+  .vorfuehrung-reihe .umschalter button{
+    min-height:44px;display:inline-flex;align-items:center;
+  }
+}
 /* Die Zeile darunter ist der Kern des Umschalters: sie sagt, WAS er dabei
    liest. Ein Umschalter, dessen Wirkung man nicht sieht, ist eine Behauptung. */
+/* Die Aufschrift über den zuletzt gestellten Fragen. Ohne sie sähen die
+   Chips aus wie ein Angebot der Software statt wie die eigene Geschichte. */
+.zuletzt-wort{
+  font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--nebel-500);margin-top:14px;
+}
+/* Was nur die Leitung liest, steht leiser dabei — die Zeile gilt für alle,
+   aber sie gilt nicht für alle gleich. */
+.liest .nur-leitung{display:block;margin-top:4px;color:var(--nebel-500);font-size:12.5px}
+/* Die Akten-Wahl an einem Bogen ohne Mandat (Issue #86). Sie erscheint
+   unter den Griffen, statt ein Fenster zu öffnen — der Bogen bleibt lesbar. */
+.akte-wahl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.akte-wahl .aw-frage{font-size:13px;font-weight:600;color:var(--nebel-600)}
+.akte-wahl button{
+  min-height:44px;padding:0 14px;border-radius:var(--radius-kapsel);cursor:pointer;
+  border:0.5px solid var(--nebel-300);background:var(--flaeche);
+  font:inherit;font-size:13.5px;font-weight:600;color:var(--tinte);
+}
+.akte-wahl button:hover{border-color:var(--lila-500);color:var(--lila-800)}
+.akte-wahl .aw-zurueck{border-color:transparent;color:var(--nebel-500)}
 .liest{
   margin-top:14px;padding:11px 15px;border-radius:var(--radius-innen);
   background:var(--lila-050);border:0.5px solid var(--lila-200);
@@ -356,6 +429,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   .werkbank-griffe .merk{flex:1 1 100%}
 }
 </style>
+<!-- lage.js: die Mandate der Beratung. Die Akten-Wahl an einem Bogen ohne
+     Mandat (Issue #86) liest sie von dort, statt eine Liste zu tippen. -->
+<script src="lage.js"></script>
 <script src="krume.js"></script>
 </head>
 <body class="quoro"
@@ -384,6 +460,27 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       <button type="button" data-bereich="alle" aria-pressed="false">Alle vier Mandate</button>
       <button type="button" data-bereich="beratung" aria-pressed="false">Deine Beratung</button>
     </div>
+    <!-- Ab acht Mandaten wird aus der Pillen-Reihe eine Suche (Issue #86,
+         entschieden 2026-08-20). Eine Beratung mit 187 Mandaten bekäme sonst
+         187 Pillen vor die Frage — und die Reihe, die bei vier hilft, ist bei
+         187 eine Wand. Was bleibt: „Alle Mandate" und „Deine Beratung" stehen
+         weiter fest da, denn sie sind keine Mandate, sondern Blickwinkel. -->
+    <div class="worueber-viele" id="worueber-viele" hidden>
+      <div class="wv-fest" id="wv-fest"></div>
+      <div class="wv-suche">
+        <label class="wv-label" for="wv-feld">Worüber?</label>
+        <input id="wv-feld" type="search" autocomplete="off" placeholder="Kunde suchen — oder aus den zuletzt gefragten wählen">
+      </div>
+      <div class="wv-zuletzt" id="wv-zuletzt"></div>
+      <div class="wv-treffer" id="wv-treffer" role="listbox" aria-label="Gefundene Mandate" hidden></div>
+    </div>
+    <div class="vorfuehrung-reihe">
+      <span>Vorführung</span>
+      <div class="umschalter" role="group" aria-label="Wie viele Mandate">
+        <button type="button" id="viele-aus" aria-pressed="true">4 Mandate</button>
+        <button type="button" id="viele-an" aria-pressed="false">187 Mandate</button>
+      </div>
+    </div>
     <div class="liest" id="liest" aria-live="polite"></div>
 
     <div class="feld frage-feld">
@@ -391,7 +488,8 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       <textarea id="frage" placeholder="Frag ihn wie einen Mitarbeiter, der alles gelesen hat."></textarea>
     </div>
     <!-- role, sonst verwirft der Screenreader das aria-label eines nackten div -->
-    <div class="vorlagen" id="vorlagen" role="group" aria-label="Fragen, die diese Vorführung beantwortet"></div>
+    <div class="zuletzt-wort" id="zuletzt-wort" hidden>Zuletzt gefragt</div>
+    <div class="vorlagen" id="vorlagen" role="group" aria-label="Zuletzt gestellte Fragen"></div>
 
     <div class="werkbank-griffe">
       <button class="knopf primaer" id="fragen" type="button">Fragen</button>
@@ -446,7 +544,7 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
        halbe Aussage der Fläche aus der Führung verschwunden. -->
   <p class="fuss-satz"
      data-hilfe-name="Was hinausgeht"
-     data-hilfe="Nichts auf diesem Tisch erreicht einen Kunden, solange du es nicht schickst. Gibst du einen Bogen an ihn weiter, wechselt er sichtbar in deine Marke, und sein Text landet in einem Feld — ab da hast du ihn unterschrieben.">Was hier steht, sieht kein Kunde — auch nicht der, über den es geht. Was du hinausgibst, geht als dein Wort in sein Gespräch, so wie die Antworten aus <a href="beratung-termine.html">Termine und Übergaben</a>.</p>
+     data-hilfe="Nichts auf diesem Tisch erreicht einen Kunden, solange du es nicht schickst. Gibst du einen Bogen an ihn weiter, wechselt er sichtbar in deine Marke, und sein Text landet in einem Feld — ab da hast du ihn unterschrieben. Er kommt als eigenes Blatt in seiner Akte an, nicht als Nachricht in seinem Gespräch: sein Gespräch führt er mit dem KI-Berater, und eine zweite Stimme darin könnte er von dessen nicht unterscheiden.">Was hier steht, sieht kein Kunde — auch nicht der, über den es geht. Was du hinausgibst, geht als dein Wort <b>in seine Unterlagen</b>, mit deiner Marke darauf. <b>Nicht in sein Gespräch:</b> das führt er mit dem KI-Berater, und eine zweite Stimme darin wäre von dessen nicht zu unterscheiden.</p>
 </main>
 
 <div id="demo-hinweis" role="status" aria-live="polite"></div>
@@ -480,10 +578,21 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
      Für „Deine Beratung" ist die Aussage eine Verneinung, und die ist der
      eigentliche Unterschied zum Kundengespräch. */
   var LIEST = {
-    petersen: 'Er liest dafür: die <b>Akte Petersen</b>, dein <b>Wissen</b> und was er Herrn Petersen selbst gesagt hat.',
+    /* Diese Zeile ist eine Herkunftsangabe, kein Werbetext (Issue #86,
+       entschieden 2026-08-20). Sie darf nur nennen, was das Modell wirklich
+       bekommt. „Was er dem Kunden gesagt hat" stand hier für JEDES Mandat —
+       gelesen wird ein Kundengespräch aber nur nach Freigabe, und wo keine
+       vorliegt, ist die Zeile eine Behauptung über die Herkunft einer
+       Antwort. Das ist auf einer KI-Fläche der schlimmste Satz, den man
+       falsch haben kann. */
+    petersen: 'Er liest dafür: die <b>Akte Petersen</b> und dein <b>Wissen</b>. Aus seinen Gesprächen mit Herrn Petersen nur das, was freigegeben ist.',
     cordes:   'Er liest dafür: die <b>Akte Cordes</b>, dein <b>Wissen</b> und die Frage, die er dir heute um 8:12 übergeben hat.',
     alle:     'Er liest dafür: <b>alle vier Akten</b> und dein Wissen. Gesagtes bleibt bei dem, der es gesagt hat — er vergleicht Zahlen, keine Gespräche.',
-    beratung: 'Er liest dafür: deine <b>Zeiten</b>, deine <b>Sätze</b> und deine <b>Rechnungen</b>. <b>Keine Kundenakte</b> — hier geht es um dich.'
+    /* Zeiten, Sätze und Rechnungen sieht nur die Leitung (Chronik 14.08.).
+       Die Zeile sagt deshalb, was SIE liest, und daneben, was ein Berater an
+       derselben Stelle bekommt — sonst verspricht die Fläche jedem, was nur
+       die Leitung hat. */
+    beratung: 'Er liest dafür: deine <b>Zeiten</b>, deine <b>Sätze</b> und deine <b>Rechnungen</b>. <b>Keine Kundenakte</b> — hier geht es um dich. <span class="nur-leitung">Sätze und Rechnungen nur, wenn du Inhaberin oder Partner bist; sonst rechnet er ohne sie und sagt es dazu.</span>'
   };
   var bereich = 'cordes';
   var liestEl = document.getElementById('liest');
@@ -499,7 +608,13 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     }, 160);
   }
 
-  /* ---------- Die drei Fragen, die diese Vorführung beantwortet ----------
+  /* ---------- Was zuletzt gefragt wurde ----------
+     KEIN Katalog erfundener Vorlagen (Issue #86, entschieden 2026-08-20).
+     Ein Vorlagen-Katalog müsste jemand schreiben und pflegen, und er wäre
+     für jede Beratung derselbe — die Fragen einer Steuerkanzlei sind aber
+     nicht die einer Restrukturierung. Was hier steht, sind die zuletzt
+     gestellten Fragen DIESER Beratung: echte Daten, kein Erfundenes, und
+     beim ersten Mal steht die Reihe eben leer.
      Jede hängt an ihrem Bereich: wählt man einen anderen, verschwindet sie.
      Eine Vorlage, die zum gewählten Bereich nicht passt, wäre eine Falle. */
   var VORLAGEN = [
@@ -542,6 +657,9 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       if (passt) offen++;
       else if (frei && anderswo.indexOf(b.dataset.bereich) < 0) anderswo.push(b.dataset.bereich);
     });
+    /* Die Aufschrift „Zuletzt gefragt" nur, wenn wirklich etwas dasteht —
+       eine Überschrift über nichts ist eine Behauptung (Issue #86). */
+    document.getElementById('zuletzt-wort').hidden = offen === 0;
     vorlagenLeer.hidden = offen > 0;
     if (offen > 0) return;
     vorlagenLeer.textContent = anderswo.length
@@ -563,6 +681,115 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   document.querySelectorAll('#worueber button').forEach(function(b){
     b.addEventListener('click', function(){ bereichSetzen(b.dataset.bereich); });
   });
+
+  /* ---------- Ab acht Mandaten: eine Suche statt einer Wand (Issue #86) ----------
+     Die Regel steht hier und nicht im Kopf: über SCHWELLE Mandaten wird aus
+     der Pillen-Reihe ein Feld. „Alle Mandate" und „Deine Beratung" bleiben
+     als Pillen stehen — sie sind keine Mandate, sondern Blickwinkel, und wer
+     sie sucht, sucht sie nicht mit Namen.
+     Die Vorführung erzeugt 187 Mandate aus den vier echten; im Produkt kommen
+     sie aus dem Kundenregister. */
+  var SCHWELLE = 8;
+  var vieleAn = false;
+
+  /* Zuletzt gefragt: im Produkt die letzten Bereiche dieser Beratung. Hier
+     die beiden, über die die Vorführung schon gesprochen hat. */
+  var ZULETZT = ['cordes', 'petersen'];
+
+  function alleMandate(){
+    var echte = Lage.mandate().filter(function(m){ return !m.intern; });
+    if (!vieleAn) return echte;
+    /* 187 Mandate für die Vorführung: die vier echten, dazu erfundene Namen
+       mit laufender Nummer. Sie sind ausdrücklich Füllung — deshalb tragen
+       sie eine Nummer, damit niemand sie für Kunden hält. */
+    var viele = echte.slice();
+    var stamm = ['Brandt', 'Hoffmann', 'Kessler', 'Lauterbach', 'Menzel', 'Ostermann',
+                 'Pfeiffer', 'Reinhardt', 'Stadler', 'Thielemann', 'Uhlig', 'Wendler'];
+    for (var i = 1; viele.length < 187; i++) {
+      var n = stamm[i % stamm.length];
+      viele.push({ id: 'demo-' + i, name: n + ' ' + (100 + i) });
+    }
+    return viele;
+  }
+
+  var vieleEl = document.getElementById('worueber-viele');
+  var festEl = document.getElementById('wv-fest');
+  var feldEl = document.getElementById('wv-feld');
+  var zuletztEl = document.getElementById('wv-zuletzt');
+  var trefferEl = document.getElementById('wv-treffer');
+
+  function pille(text, bereichId){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = text;
+    b.setAttribute('aria-pressed', bereichId === bereich ? 'true' : 'false');
+    b.addEventListener('click', function(){
+      bereichSetzen(bereichId);
+      feldEl.value = '';
+      baueViele();
+    });
+    return b;
+  }
+
+  function baueViele(){
+    festEl.textContent = '';
+    festEl.appendChild(pille('Alle Mandate', 'alle'));
+    festEl.appendChild(pille('Deine Beratung', 'beratung'));
+
+    zuletztEl.textContent = '';
+    var w = document.createElement('span');
+    w.className = 'wv-wort';
+    w.textContent = 'Zuletzt gefragt';
+    zuletztEl.appendChild(w);
+    ZULETZT.forEach(function(id){
+      var m = Lage.mandat(id);
+      if (m) zuletztEl.appendChild(pille(m.name, id));
+    });
+
+    var suche = feldEl.value.trim().toLowerCase();
+    trefferEl.hidden = suche.length === 0;
+    if (!suche) return;
+    trefferEl.textContent = '';
+    var wort = document.createElement('span');
+    wort.className = 'wv-wort';
+    trefferEl.appendChild(wort);
+    var treffer = alleMandate().filter(function(m){
+      return m.name.toLowerCase().indexOf(suche) !== -1;
+    });
+    wort.textContent = treffer.length === 1 ? 'Ein Treffer' : treffer.length + ' Treffer';
+    if (!treffer.length) {
+      wort.textContent = 'Nichts gefunden';
+      var leer = document.createElement('span');
+      leer.className = 'wv-leer';
+      leer.textContent = 'Kein Mandat mit diesem Namen. Prüf die Schreibweise.';
+      trefferEl.appendChild(leer);
+      return;
+    }
+    /* Höchstens acht Treffer zeigen, und sagen, wenn mehr da sind — eine
+       Trefferliste, die still abschneidet, sieht aus wie eine vollständige. */
+    treffer.slice(0, 8).forEach(function(m){ trefferEl.appendChild(pille(m.name, m.id)); });
+    if (treffer.length > 8) {
+      var mehr = document.createElement('span');
+      mehr.className = 'wv-leer';
+      mehr.textContent = 'und ' + (treffer.length - 8) + ' weitere — tipp genauer.';
+      trefferEl.appendChild(mehr);
+    }
+  }
+
+  feldEl.addEventListener('input', baueViele);
+
+  function vieleSetzen(an){
+    vieleAn = an;
+    document.getElementById('viele-an').setAttribute('aria-pressed', an ? 'true' : 'false');
+    document.getElementById('viele-aus').setAttribute('aria-pressed', an ? 'false' : 'true');
+    var zuViele = alleMandate().length > SCHWELLE;
+    document.getElementById('worueber').hidden = zuViele;
+    vieleEl.hidden = !zuViele;
+    if (zuViele) baueViele();
+  }
+  document.getElementById('viele-an').addEventListener('click', function(){ vieleSetzen(true); });
+  document.getElementById('viele-aus').addEventListener('click', function(){ vieleSetzen(false); });
+  vieleSetzen(false);
 
   /* ---------- Die Bogen, die entstehen können ----------
      Der Petersen-Bogen liegt schon im Markup; er gilt als gestellt. */
@@ -629,7 +856,12 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
       ],
       kante: null,
       griffe: [
-        {tu:'notiz-mts', art:'primaer', wort:'Als Blatt in die Akte MTS, für Freitag'},
+        /* Ein Bogen über die ganze Beratung kennt kein Mandat — er kann
+           eines aber brauchen (Issue #86, entschieden 2026-08-20). Der Griff
+           fragt deshalb, statt zu raten: „In welche Akte?" mit den vier
+           Mandaten. Vorher stand hier MTS fest, und woher der Bogen das
+           wusste, konnte niemand sagen. */
+        {tu:'in-akte', art:'primaer', wort:'Als Blatt in eine Akte'},
         {tu:'verwerfen', art:'gefahr', wort:'Verwerfen'}
       ],
       hand: 'die Zahlen gehören dir allein.'
@@ -764,11 +996,43 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
     'akte-petersen': function(bogen){
       ablegen(bogen, '<span>Liegt als Blatt in der <b>Akte Petersen</b>, mit dem heutigen Datum. Herr Petersen sieht es nicht, es ist dein Papier.</span>');
     },
-    'notiz-mts': function(bogen){
-      ablegen(bogen, '<span>Liegt als Blatt in der <b>Akte MTS</b>, mit dem heutigen Datum. Am Freitag hast du es beim Angebot vor dir. <a href="beratung-akte.html?mandat=mts">In die Akte</a></span>');
+    /* Fragt, statt zu raten: welche Akte soll das Blatt bekommen? Erst nach
+       der Wahl wird abgelegt — und die Wahl steht danach im Satz. */
+    'in-akte': function(bogen, id){
+      var griffe = bogen.querySelector('.griffe');
+      if (bogen.querySelector('.akte-wahl')) return;
+      var wahl = document.createElement('div');
+      wahl.className = 'akte-wahl';
+      var frage = document.createElement('span');
+      frage.className = 'aw-frage';
+      frage.textContent = 'In welche Akte?';
+      wahl.appendChild(frage);
+      Lage.mandate().forEach(function(m){
+        if (m.intern) return;
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = m.name;
+        b.addEventListener('click', function(){
+          wahl.remove();
+          ablegen(bogen, '<span>Liegt als Blatt in der <b>Akte ' + m.name + '</b>, mit dem heutigen Datum. ' +
+            '<a href="beratung-akte.html?mandat=' + m.id + '">In die Akte</a></span>');
+        });
+        wahl.appendChild(b);
+      });
+      var zurueck = document.createElement('button');
+      zurueck.type = 'button';
+      zurueck.className = 'aw-zurueck';
+      zurueck.textContent = 'Doch nicht';
+      zurueck.addEventListener('click', function(){ wahl.remove(); });
+      wahl.appendChild(zurueck);
+      griffe.after(wahl);
     },
     'steuerberater': function(bogen){
-      ablegen(bogen, '<span>Zurückgestellt. Herr Cordes bekommt vom KI-Berater die Nachricht, dass du die Frage prüfst — die <a href="beratung-termine.html#cordes">Übergabe</a> bleibt so lange offen.</span>');
+      /* Nicht mehr „bekommt vom KI-Berater die Nachricht" (Issue #86 und #90,
+         2026-08-20): der KI-Berater ist kein Bote der Beratung. Was Herr
+         Cordes sieht, ist der Stand seiner Übergabe — dort, wo er sie
+         gestellt hat. */
+      ablegen(bogen, '<span>Zurückgestellt. Bei Herrn Cordes steht die <a href="beratung-termine.html#cordes">Übergabe</a> weiter als offen, mit dem Vermerk, dass du sie prüfst.</span>');
     },
     'verwerfen': function(bogen){
       bogen.classList.add('verworfen');
