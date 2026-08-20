@@ -17,39 +17,58 @@
    Marker: WEBSITE-INDEX-V1 (aus Entwurf A; der Kino-Kopf kommt als eigener Abschnitt) */
 
 /* ---------- Das Kino: der Kopf setzt sich zusammen ----------
-   Der eine große Moment der Seite. Ein bei fal.ai gerechneter Film
-   (Blätterwolke -> Kopf aus Belegen, Kling v2.1 mit Start- und Endbild)
-   liegt als Einzelbilder unter bilder/kino/ und wird beim Scrollen
-   gescrubbt. Multiply lässt das Weiß des Films auf dem weissen Grund
-   verschwinden; der Kopf schwebt frei. Drei Glastafeln begleiten den
-   Aufbau, ein Lila-Lichthof schwillt mit an und zündet, wenn der Kopf
-   steht; danach belichtet die Bühne mit Headline und Knöpfen. */
-.kino{height:520vh;position:relative}
+   Der eine grosse Moment der Seite, Fassung 2 (Jonas: "viel krasser").
+   Bildfüllend: die Leinwand ist größer als der Bildschirm, der Kopf steht
+   über das ganze Bild und die Kamera fährt beim Aufbau leicht zurück.
+   Dazu fliegen einzelne Blätter (eigene fal.ai-Freisteller, blatt-1..4)
+   mit Tiefe an der Kamera vorbei in die Wolke — groß und unscharf am Rand,
+   klein und scharf beim Eintauchen. Drei riesige Schriftzüge wachsen der
+   Kamera entgegen, beim Zünden blitzt die Fläche weiß, dann gleitet der
+   Kopf nach rechts und die Bühne belichtet. Multiply lässt alles Weiße
+   auf dem weißen Grund verschwinden. */
+.kino{height:640vh;position:relative}
 .kino .haftet{position:sticky;top:0;height:100svh;overflow:hidden;background:var(--grund)}
 .kino .lichthof{
-  position:absolute;left:62%;top:52%;width:min(64vh,60vw);aspect-ratio:1;
+  position:absolute;left:53%;top:50%;width:min(96vh,90vw);aspect-ratio:1;
   transform:translate(-50%,-50%) scale(var(--puls,1));
   background:radial-gradient(circle,rgba(111,99,232,var(--schein,0)) 0%,rgba(111,99,232,0) 62%);
-  filter:blur(6px);pointer-events:none;transition:opacity .2s linear;
+  filter:blur(8px);pointer-events:none;
 }
 .kino canvas{
-  position:absolute;left:62%;top:52%;height:min(86vh,86vw);aspect-ratio:1;
-  transform:translate(-50%,-50%);
-  mix-blend-mode:multiply;pointer-events:none;
+  position:absolute;left:50%;top:50%;height:min(170svh,155vw);aspect-ratio:1;
+  transform:translate(calc(-53% + var(--gleit,0px)),-50%) scale(var(--nah,1));
+  mix-blend-mode:multiply;pointer-events:none;will-change:transform;
 }
-.kino .tafel{
-  position:absolute;left:clamp(24px,7vw,110px);top:50%;transform:translateY(-50%) translateY(26px);
-  opacity:0;max-width:min(44vw,560px);padding:22px 28px;border-radius:var(--radius-karte);
-  background:rgba(255,255,255,.55);
-  backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);
+.kino .blatt{
+  position:absolute;left:50%;top:50%;width:min(24vw,340px);height:auto;
+  mix-blend-mode:multiply;pointer-events:none;opacity:0;
+  will-change:transform,opacity,filter;
+}
+/* die riesigen Schriftzüge: wachsen der Kamera entgegen */
+.kino .wort{
+  position:absolute;left:clamp(24px,7vw,110px);top:50%;max-width:min(60vw,760px);
+  transform-origin:left center;opacity:0;pointer-events:none;will-change:transform,opacity;
+}
+.kino .wort .gross{
+  font-family:var(--schrift-schau);font-weight:600;letter-spacing:-.03em;
+  font-size:clamp(44px,7.6vw,120px);line-height:1.02;
+  text-shadow:0 0 18px rgba(253,253,254,.95),0 0 46px rgba(253,253,254,.9),0 0 90px rgba(253,253,254,.8);
+}
+.kino .wort .gross em{font-style:normal;color:var(--lila-600)}
+.kino .wort .klein{
+  display:inline-block;margin-top:14px;padding:10px 16px;border-radius:14px;
+  font-size:15.5px;color:var(--nebel-700);max-width:46ch;
+  background:rgba(255,255,255,.62);
+  backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);
   border:1px solid rgba(255,255,255,.65);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 20px 50px rgba(59,52,134,.14);
-  transition:opacity .45s var(--kurve),transform .45s var(--kurve);
-  pointer-events:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 14px 36px rgba(59,52,134,.12);
 }
-.kino .tafel.da{opacity:1;transform:translateY(-50%)}
-.kino .tafel .gross{font-family:var(--schrift-schau);font-weight:600;letter-spacing:-.02em;font-size:clamp(26px,3.4vw,44px);line-height:1.1}
-.kino .tafel .klein{margin-top:8px;font-size:15.5px;color:var(--nebel-700)}
+.kino .blitz{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.kino .schleierlinks{
+  position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .6s var(--kurve);
+  background:linear-gradient(90deg,rgba(253,253,254,.94) 0%,rgba(253,253,254,.8) 36%,rgba(253,253,254,0) 62%);
+}
+.kino .schleierlinks.da{opacity:1}
 .kino .finale{
   position:absolute;left:clamp(24px,7vw,110px);top:50%;transform:translateY(-50%) translateY(30px);
   opacity:0;max-width:min(46vw,620px);pointer-events:none;visibility:hidden;
@@ -73,12 +92,14 @@
 }
 .aufhaenger img{width:22px;height:22px;border-radius:6px}
 @media (max-width:900px){
-  .kino{height:440vh}
-  .kino .lichthof,.kino canvas{left:50%;top:31%}
-  .kino canvas{height:min(50vh,88vw)}
-  .kino .lichthof{width:min(46vh,80vw)}
-  .kino .tafel{left:16px;right:16px;top:auto;bottom:70px;transform:translateY(20px);max-width:none}
-  .kino .tafel.da{transform:none}
+  .kino{height:560vh}
+  .kino canvas{left:50%;top:46%;height:min(140svh,225vw);transform:translate(calc(-52% + var(--gleit,0px)),-50%) scale(var(--nah,1))}
+  .kino .lichthof{left:50%;top:46%;width:min(70vh,120vw)}
+  .kino .blatt{width:min(44vw,240px)}
+  .kino .wort{left:16px;right:16px;max-width:none}
+  .kino .wort .gross{font-size:clamp(38px,11.5vw,64px)}
+  .kino .wort .klein{font-size:14px}
+  .kino .schleierlinks{background:linear-gradient(180deg,rgba(253,253,254,0) 30%,rgba(253,253,254,.85) 58%,rgba(253,253,254,.96) 100%)}
   .kino .finale{
     left:16px;right:16px;top:auto;bottom:20px;transform:translateY(24px);max-width:none;
     padding:20px 18px;border-radius:var(--radius-karte);
@@ -96,9 +117,10 @@
 @media (prefers-reduced-motion:reduce){
   .kino{height:auto}
   .kino .haftet{position:static;height:auto;padding:calc(72px + 40px) 0 60px}
-  .kino .lichthof{display:none}
+  .kino .lichthof,.kino .blatt,.kino .blitz,.kino .schleierlinks{display:none}
   .kino canvas{position:static;transform:none;display:block;margin:0 auto;height:auto;width:min(520px,86vw)}
-  .kino .tafel{position:static;transform:none;opacity:1;max-width:min(680px,100% - 48px);margin:18px auto 0}
+  .kino .wort{position:static;transform:none;opacity:1;max-width:min(680px,100% - 48px);margin:18px auto 0}
+  .kino .wort .gross{font-size:clamp(30px,5vw,44px);text-shadow:none}
   .kino .finale{position:static;transform:none;opacity:1;visibility:visible;max-width:min(680px,100% - 48px);margin:26px auto 0;pointer-events:auto}
   .kino .abspann{display:none}
 }
@@ -295,18 +317,21 @@ section.bahn{padding-top:var(--luft)}
     <div class="haftet">
       <div class="lichthof" id="lichthof"></div>
       <canvas id="leinwand" aria-hidden="true"></canvas>
-      <div class="tafel" data-fenster="0.04,0.26">
-        <div class="gross">Tausend Belege.</div>
-        <div class="klein">Bilanzen, Kostenstellen, Verträge, Protokolle. Das Wissen deiner Beratung, verstreut über Ordner und Postfächer.</div>
+      <div id="blaetter" aria-hidden="true"></div>
+      <div class="wort" data-fenster="0.05,0.24">
+        <div class="gross">Tausend <em>Belege</em>.</div>
+        <span class="klein">Bilanzen, Kostenstellen, Verträge, Protokolle. Das Wissen deiner Beratung, verstreut über Ordner und Postfächer.</span>
       </div>
-      <div class="tafel" data-fenster="0.30,0.52">
-        <div class="gross">Ein Gedanke.</div>
-        <div class="klein">quoroAI liest, was du ihm gibst, und denkt in deiner Methodik. Nicht im halben Internet.</div>
+      <div class="wort" data-fenster="0.28,0.46">
+        <div class="gross">Ein <em>Gedanke</em>.</div>
+        <span class="klein">quoroAI liest, was du ihm gibst, und denkt in deiner Methodik. Nicht im halben Internet.</span>
       </div>
-      <div class="tafel" data-fenster="0.56,0.74">
-        <div class="gross">Dein Berater.</div>
-        <div class="klein">Er antwortet deinen Mandanten unter deinem Namen. Du liest jedes Wort mit.</div>
+      <div class="wort" data-fenster="0.50,0.66">
+        <div class="gross">Dein <em>Berater</em>.</div>
+        <span class="klein">Er antwortet deinen Mandanten unter deinem Namen. Du liest jedes Wort mit.</span>
       </div>
+      <div class="blitz" id="blitz"></div>
+      <div class="schleierlinks" id="schleierlinks"></div>
       <div class="finale" id="finale">
         <span class="aufhaenger"><img src="bilder/quoro-icon.svg" alt="">Für Unternehmensberatungen</span>
         <h1 style="margin-top:20px"><em>Ein zweiter Kopf</em> für deine Beratung.</h1>
@@ -537,7 +562,8 @@ section.bahn{padding-top:var(--luft)}
 
 <script src="zahlen.js"></script>
 <script>
-/* Das Kino: Bilder scrubben, Tafeln einblenden, Licht zünden. */
+/* Das Kino, Fassung 2: Bilder scrubben, Blätter mit Tiefe einfliegen,
+   Schriftzüge wachsen, Blitz beim Zünden, Kopf gleitet zur Bühne. */
 (function () {
   'use strict';
   var ruhig = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -550,16 +576,17 @@ section.bahn{padding-top:var(--luft)}
   var lichthof = document.getElementById('lichthof');
   var finale = document.getElementById('finale');
   var abspann = document.getElementById('abspann');
-  var tafeln = Array.prototype.slice.call(document.querySelectorAll('.kino .tafel'));
+  var blitz = document.getElementById('blitz');
+  var schleierlinks = document.getElementById('schleierlinks');
+  var worte = Array.prototype.slice.call(document.querySelectorAll('.kino .wort'));
 
+  /* ---------- Bilder ---------- */
   var vorrat = new Array(BILDER);
   function lade(i) {
     var b = new Image();
     b.onload = function () { vorrat[i] = b; if (i === 0 || i === letztesZiel || ruhig) male(letztesZiel); };
     b.src = PFAD(i);
   }
-  /* Ruhige Fassung: nur das fertige Bild. Sonst erst das erste und letzte,
-     dann der Rest — so steht sofort etwas. */
   if (BILDER > 0) {
     if (ruhig) {
       lade(BILDER - 1);
@@ -578,13 +605,13 @@ section.bahn{padding-top:var(--luft)}
     }
     return null;
   }
-  /* Ein weisser Rand-Schleier auf der Leinwand: multipliziert unsichtbar,
-     deckt aber den Studioverlauf an den Bildkanten ab. */
+
   var schleier = null;
   function bemesse() {
-    /* Speicher nach Anzeigegröße und Pixeldichte (Deckel 2), sonst wird der
-       Kopf auf dichten Bildschirmen weich. */
-    var kante = Math.round(leinwand.getBoundingClientRect().width * Math.min(window.devicePixelRatio || 1, 2)) || 1152;
+    /* Speicher nach Anzeigegröße und Pixeldichte (Deckel 2). Die Leinwand
+       ist größer als der Bildschirm; mehr als 1600 Kanten braucht niemand,
+       die Quelle hat 1152. */
+    var kante = Math.min(1600, Math.round(leinwand.getBoundingClientRect().width * Math.min(window.devicePixelRatio || 1, 2))) || 1152;
     if (kante === leinwand.width) return;
     leinwand.width = kante; leinwand.height = kante;
     schleier = stift.createRadialGradient(kante / 2, kante / 2, kante * .30, kante / 2, kante / 2, kante * .52);
@@ -603,6 +630,54 @@ section.bahn{padding-top:var(--luft)}
   }
 
   function seg(p, a, b) { return Math.min(Math.max((p - a) / (b - a), 0), 1); }
+  function zufall(i) { var x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); }
+
+  /* ---------- Die fliegenden Blätter ----------
+     Jedes Blatt hat ein Fortschritts-Fenster und fliegt vom Rand (groß,
+     unscharf, nah an der Kamera) in die Wolke (klein, scharf). Die Bahnen
+     sind aus dem Index gerechnet, damit jeder Lauf gleich aussieht. */
+  var blattLage = document.getElementById('blaetter');
+  var BLATTZAHL = window.matchMedia('(max-width: 900px)').matches ? 7 : 13;
+  var blaetter = [];
+  if (!ruhig) {
+    for (var k = 0; k < BLATTZAHL; k++) {
+      var el = document.createElement('img');
+      el.className = 'blatt';
+      el.src = 'bilder/kino/blatt-' + (1 + (k % 4)) + '.jpg';
+      el.alt = '';
+      blattLage.appendChild(el);
+      var winkel = zufall(k + 1) * Math.PI * 2;
+      var von = 0.02 + (k / BLATTZAHL) * 0.52;      /* gestaffelt über den Aufbau */
+      blaetter.push({
+        el: el,
+        a: von, b: von + 0.16 + zufall(k + 7) * 0.08,
+        x0: Math.cos(winkel), y0: Math.sin(winkel),  /* Richtung vom Rand */
+        zielX: (zufall(k + 13) - 0.35) * 0.16,       /* Eintauchpunkt um den Kopf */
+        zielY: (zufall(k + 29) - 0.5) * 0.28,
+        gross: 2.4 + zufall(k + 41) * 1.4,           /* nah an der Kamera */
+        klein: 0.07 + zufall(k + 53) * 0.09,
+        dreh0: (zufall(k + 61) - 0.5) * 140,
+        dreh1: (zufall(k + 71) - 0.5) * 420
+      });
+    }
+  }
+  function malBlaetter(p) {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var weit = Math.max(vw, vh) * 0.72;
+    blaetter.forEach(function (s) {
+      var t = seg(p, s.a, s.b);
+      if (t <= 0 || t >= 1) { s.el.style.opacity = 0; return; }
+      var e = 1 - Math.pow(1 - t, 2.6);             /* schnell herein, weich hinein */
+      var x = s.x0 * weit * (1 - e) + s.zielX * vw * e;
+      var y = s.y0 * weit * (1 - e) + s.zielY * vh * e;
+      var gr = s.gross * Math.pow(s.klein / s.gross, e);  /* Kamera-Tiefe: geometrisch */
+      var dreh = s.dreh0 + (s.dreh1 - s.dreh0) * e;
+      var unschaerfe = (1 - e) * 7;
+      s.el.style.opacity = Math.min(1, t * 8) * (t > .9 ? (1 - t) * 10 : 1);
+      s.el.style.filter = unschaerfe > .4 ? 'blur(' + unschaerfe.toFixed(1) + 'px)' : 'none';
+      s.el.style.transform = 'translate(calc(-50% + ' + x.toFixed(1) + 'px), calc(-50% + ' + y.toFixed(1) + 'px)) rotate(' + dreh.toFixed(1) + 'deg) scale(' + gr.toFixed(3) + ')';
+    });
+  }
 
   if (ruhig) {
     male(Math.max(0, BILDER - 1));
@@ -617,28 +692,48 @@ section.bahn{padding-top:var(--luft)}
     var weg = r.height - window.innerHeight;
     var p = weg > 0 ? Math.min(Math.max(-r.top / weg, 0), 1) : 1;
 
-    /* der Aufbau: Bild 0 bis N-1 über 0 … 0,74, mit sanftem Auslauf */
+    /* der Aufbau: Bild 0 bis N-1 über 0 … 0,66 */
     if (BILDER > 0) {
-      var t = seg(p, 0, .74);
+      var t = seg(p, 0, .66);
       t = 1 - Math.pow(1 - t, 2.2);
       male(Math.min(BILDER - 1, Math.round(t * (BILDER - 1))));
     }
 
-    /* die Tafeln in ihren Fenstern */
-    tafeln.forEach(function (tf) {
-      var f = tf.dataset.fenster.split(',');
-      tf.classList.toggle('da', p >= parseFloat(f[0]) && p <= parseFloat(f[1]));
+    /* die Kamera: nah beginnen, zurückfahren, am Ende zur Seite gleiten */
+    var nah = 1.32 - .32 * seg(p, 0, .66);
+    var ausklang = seg(p, .74, .9);
+    nah -= .16 * ausklang;                          /* fürs Finale etwas kleiner */
+    /* am Telefon bleibt der Kopf mittig — die Bühne liegt dort unten in Glas */
+    var schmal = window.matchMedia('(max-width: 900px)').matches;
+    var gleit = schmal ? 0 : ausklang * window.innerWidth * .12; /* nach rechts */
+    leinwand.style.setProperty('--nah', nah.toFixed(4));
+    leinwand.style.setProperty('--gleit', gleit.toFixed(1) + 'px');
+
+    malBlaetter(p);
+
+    /* die Schriftzüge wachsen der Kamera entgegen */
+    worte.forEach(function (w) {
+      var f = w.dataset.fenster.split(',');
+      var t = seg(p, parseFloat(f[0]), parseFloat(f[1]));
+      if (t <= 0 || t >= 1) { w.style.opacity = 0; return; }
+      var auf = Math.min(1, t * 6);                 /* schnell da */
+      var ab = t > .82 ? (1 - t) / .18 : 1;         /* weich weg */
+      w.style.opacity = (auf * ab).toFixed(3);
+      w.style.transform = 'translateY(-50%) scale(' + (.78 + .5 * t).toFixed(4) + ')';
     });
 
-    /* das Licht: schwillt an und zündet bei 0,76 */
-    var schein = .10 + .22 * seg(p, 0, .74);
-    var zuendung = seg(p, .74, .80);
-    schein += .30 * Math.sin(zuendung * Math.PI);
+    /* das Licht schwillt, der Blitz zündet */
+    var schein = .12 + .26 * seg(p, 0, .66);
+    var zuendung = seg(p, .66, .74);
+    schein += .34 * Math.sin(zuendung * Math.PI);
     lichthof.style.setProperty('--schein', schein.toFixed(3));
-    lichthof.style.setProperty('--puls', (1 + .18 * Math.sin(zuendung * Math.PI)).toFixed(3));
+    lichthof.style.setProperty('--puls', (1 + .22 * Math.sin(zuendung * Math.PI)).toFixed(3));
+    blitz.style.opacity = (Math.sin(zuendung * Math.PI) * .85).toFixed(3);
 
     /* die Bühne belichtet */
-    finale.classList.toggle('da', p >= .78);
+    var da = p >= .78;
+    finale.classList.toggle('da', da);
+    schleierlinks.classList.toggle('da', da);
     abspann.style.opacity = p > .04 ? 0 : 1;
   }
   window.addEventListener('scroll', function () {
