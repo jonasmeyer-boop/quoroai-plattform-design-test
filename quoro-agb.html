@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AGB – quoroAI</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<link rel="stylesheet" href="recht.css">
+<style>
+/* quoroai-plattform-design · Die AGB zwischen der Quoro Advisory GmbH und der
+   Beratung (Design-Issue #84, bestellt aus der Schlussmessung des Produkts;
+   Bausprache entschieden in Issue #79).
+
+   DREI DINGE, DIE DIESE FLÄCHE VON IMPRESSUM UND DATENSCHUTZ UNTERSCHEIDEN:
+
+   1. **Sie steht IMMER in der Welt von quoroAI**, auch unter der Adresse
+      einer Beratung. Impressum und Datenschutz stehen zweimal, weil sie zwei
+      Verantwortliche haben (Chronik 2026-08-14, „Recht steht zweimal"). Diese
+      hier hat nur einen: Vertragspartner sind die Quoro Advisory GmbH und die
+      Beratung. In der Marke der Beratung gezeigt, läse ein Endkunde die
+      Bedingungen SEINER Beratung — was sie nicht sind.
+   2. **Sie ist speicherbar, und der Knopf steht oben.** § 312i Abs. 1 Nr. 4
+      BGB verlangt abrufbar UND speicherbar; zwischen Unternehmern ist das
+      nicht abdingbar. Eine Möglichkeit zu speichern, die erst nach 300 Zeilen
+      sichtbar wird, ist eine schlechte.
+   3. **Sie ist nummeriert**, weil man in einen Vertrag springt und ihn
+      zitiert. Die Ziffer hängt ab 900px in der Marge (recht.css, `.vertrag`).
+
+   KEINE ZAHL STEHT HIER GETIPPT. Gebühr, Tarifspanne und Mengenrabatt kommen
+   aus `preise.js` — bis zum 20.08.2026 standen dieselben Zahlen in drei
+   Flächen, und eine falsche Zahl in einem Vertrag ist kein Schönheitsfehler.
+   Ebenso die Kündigungsregel: sie sagt dasselbe wie `beratung-beenden.html`
+   („keine Mindestlaufzeit, du nennst den letzten Tag"), und die
+   Aufbewahrung sagt dasselbe wie die Datenschutzerklärungen (acht Jahre,
+   § 147 AO). Wo ein Vertrag und eine Fläche dasselbe versprechen müssen,
+   steht es in beiden gleich — sonst gilt am Ende, was im Vertrag steht, und
+   die Software tut etwas anderes.
+
+   Der Text ist im Haus entstanden (CLAUDE.md des Produkts: kein Anwalt) und
+   beschreibt, was die Software wirklich tut.
+   Marker: QUORO-AGB-V1 (die AGB zwischen quoroAI und der Beratung) */
+</style>
+</head>
+<body class="quoro">
+
+<header class="recht-kopf glas-dick">
+  <a class="wortmarke" href="index.html">
+    <img src="bilder/quoro-icon.svg" alt="" width="26" height="26">quoroAI
+  </a>
+  <nav>
+    <a href="quoro-agb.html" aria-current="page">AGB</a>
+    <a href="quoro-avv.html">AVV</a>
+    <a href="quoro-impressum.html">Impressum</a>
+    <a href="quoro-datenschutz.html">Datenschutz</a>
+  </nav>
+</header>
+
+<main class="recht vertrag">
+  <h1>Allgemeine Geschäftsbedingungen</h1>
+  <p class="stand" id="stand">Stand: 20. August 2026</p>
+  <p class="vorspann">Diese Bedingungen gelten zwischen der Quoro Advisory GmbH und der Unternehmensberatung, die quoroAI nutzt. Sie gelten nicht gegenüber den Kunden der Beratung — für die gelten die Bedingungen ihrer eigenen Beratung.</p>
+
+  <!-- Der Knopf steht hier oben, nicht am Ende (Issue #79). Im Produkt liegt
+       dahinter /agb/text als text/plain mit content-disposition: attachment;
+       im Entwurf baut ihn das Skript aus dem Text dieser Seite, damit die
+       Fläche nicht verspricht, was sie nicht kann. -->
+  <a class="speichern" id="speichern" href="#" download="quoroAI-AGB.txt">
+    Diesen Text als Datei speichern
+    <span class="dazu" id="speichern-dazu">Textdatei</span>
+  </a>
+
+  <div class="merk glas-lila">
+    <b>Diese Seite betrifft den Vertrag deiner Beratung mit quoroAI.</b> Bist du Kunde einer
+    Beratung, gilt für dich nicht dieser Text, sondern das, was du mit deiner Beratung
+    vereinbart hast — quoroAI ist dort nur die Software dahinter.
+  </div>
+
+  <h2><span class="ziffer">1</span>Wer hier miteinander abschließt</h2>
+  <p>Anbieterin ist die Quoro Advisory GmbH, Bahnhofstraße 38, 99084 Erfurt (im Folgenden „quoroAI"). Vertragspartnerin ist die Unternehmensberatung, die ein Konto anlegt (im Folgenden „die Beratung").</p>
+  <p>Der Vertrag kommt ausschließlich mit Unternehmern im Sinne des § 14 BGB zustande. Wer eine Beratung anlegt, erklärt dabei, unternehmerisch zu handeln. Verbraucherrechte, insbesondere das Widerrufsrecht nach § 355 BGB, gelten deshalb nicht.</p>
+
+  <h2><span class="ziffer">2</span>Was quoroAI leistet</h2>
+  <p>quoroAI stellt der Beratung eine Software bereit, mit der sie ihr Beratungsgeschäft führt und ihren eigenen Kunden einen KI-Berater unter ihrer eigenen Marke zugänglich macht. Dazu gehören:</p>
+  <ul>
+    <li>der Arbeitsbereich der Beratung mit Mandaten, Akten, Terminen, Zeiten und Rechnungen,</li>
+    <li>eine Adresse je Beratung, unter der ihre Kunden ihren Zugang bekommen,</li>
+    <li>der KI-Berater, der auf Grundlage der Unterlagen und Angaben antwortet, die in der jeweiligen Akte liegen.</li>
+  </ul>
+  <p><b>Was quoroAI nicht leistet:</b> quoroAI berät nicht. Die Antworten des KI-Beraters sind Vorschläge auf Grundlage der vorliegenden Unterlagen, keine Rechts-, Steuer- oder Unternehmensberatung. Verantwortlich für die Beratungsleistung gegenüber ihren Kunden bleibt die Beratung.</p>
+
+  <h2><span class="ziffer">3</span>Was es kostet</h2>
+  <p>Abgerechnet wird monatlich, jeweils zum Monatsende, und zwar aus zwei Teilen:</p>
+  <ul>
+    <li>eine Plattformgebühr je Beratung und Monat in Höhe von <b id="p-gebuehr">—</b>,</li>
+    <li>ein Betrag je Kunde, der in diesem Monat einen Zugang hatte. Der Listenpreis richtet sich nach dem Umfang des Zugangs und liegt zwischen <b id="p-spanne">—</b>.</li>
+  </ul>
+  <p id="p-staffel">Auf den Listenpreis je Zugang gewährt quoroAI einen Mengenrabatt.</p>
+  <p>Alle Beträge verstehen sich netto zuzüglich der gesetzlichen Umsatzsteuer (derzeit <span id="p-ust">—</span>). Angebrochene Monate werden tagegenau geteilt: berechnet wird der Zeitraum vom ersten bis zum letzten Tag, an dem die Beratung oder der jeweilige Zugang bestand.</p>
+  <p>Die Rechnung ist innerhalb von vierzehn Tagen ab Zugang ohne Abzug fällig.</p>
+
+  <h2><span class="ziffer">4</span>Wie der Vertrag endet</h2>
+  <p><b>Es gibt keine Mindestlaufzeit und keine Kündigungsfrist.</b> Die Beratung nennt in ihrem Arbeitsbereich den letzten Tag, an dem sie bedient werden möchte. Ab dem Tag danach berechnet quoroAI nichts mehr — weder die Plattformgebühr noch einen Kundenzugang.</p>
+  <p>Solange dieser letzte Tag nicht vorbei ist, kann die Beratung ihre Kündigung zurücknehmen. Danach ist ein neuer Anfang ein neuer Vertrag.</p>
+  <p>Mit dem Tag nach dem letzten Vertragstag können die Kunden der Beratung kein Gespräch mehr beginnen und nichts mehr schreiben. <b>Lesen können sie weiter</b>, bis gelöscht wird — sonst bekämen sie ihre Auskunft nach Art. 15 DSGVO nicht mehr. Neue Zugänge lassen sich nicht mehr vergeben.</p>
+  <p>quoroAI kann den Vertrag mit einer Frist von drei Monaten zum Monatsende kündigen. Das Recht beider Seiten zur Kündigung aus wichtigem Grund bleibt unberührt.</p>
+
+  <h2><span class="ziffer">5</span>Wem die Daten gehören</h2>
+  <p>Alle Daten, die die Beratung und ihre Kunden in quoroAI einstellen, bleiben ihre Daten. quoroAI erwirbt daran keine Rechte über das hinaus, was zur Erbringung der Leistung nötig ist.</p>
+  <p>quoroAI verarbeitet personenbezogene Daten der Kunden der Beratung ausschließlich in deren Auftrag. Grundlage dafür ist der <a href="quoro-avv.html">Auftragsverarbeitungsvertrag</a>; er ist Bestandteil dieses Vertrags.</p>
+  <p><b>Kein Training mit fremden Daten.</b> quoroAI verwendet die Inhalte der Beratung und ihrer Kunden nicht, um Modelle zu trainieren — weder eigene noch die eines Anbieters.</p>
+  <p>Nach dem Ende des Vertrags kann die Beratung die Löschung ihrer Daten verlangen. Davon ausgenommen sind gestellte Rechnungen und ihre Zeilen: sie sind Buchungsbelege und acht Jahre aufzubewahren, gerechnet ab dem Schluss des Kalenderjahres, in dem sie entstanden sind (§ 147 Abs. 1 Nr. 4, Abs. 3, Abs. 4 AO; § 257 Abs. 1 Nr. 4, Abs. 4, Abs. 5 HGB).</p>
+
+  <h2><span class="ziffer">6</span>Was die Beratung selbst schuldet</h2>
+  <ul>
+    <li>Sie schließt mit ihren eigenen Kunden die Verträge, die sie braucht, und stellt ihnen die Rechtstexte bereit, die unter ihrer Adresse gelten.</li>
+    <li>Sie sorgt dafür, dass ihre Beschäftigten über ausreichende KI-Kompetenz verfügen (Art. 4 EU AI Act). quoroAI stellt dafür eine Unterweisung bereit; die Pflicht bleibt bei der Beratung.</li>
+    <li>Sie gibt Zugänge nur an Menschen, die sie kennt, und nimmt sie zurück, wenn jemand ausscheidet.</li>
+    <li>Sie stellt in quoroAI nichts ein, was sie nicht einstellen darf.</li>
+  </ul>
+
+  <h2><span class="ziffer">7</span>Verfügbarkeit</h2>
+  <p>quoroAI wird mit einer Verfügbarkeit von 99 % im Monatsmittel betrieben, gemessen über den Kalendermonat. Nicht als Ausfall zählen angekündigte Wartungen sowie Störungen, die außerhalb des Einflussbereichs von quoroAI liegen.</p>
+  <p>Wird die Verfügbarkeit in einem Monat unterschritten, mindert sich die Plattformgebühr dieses Monats anteilig. Weitergehende Ansprüche richten sich nach Ziffer 8.</p>
+
+  <h2><span class="ziffer">8</span>Haftung</h2>
+  <p>quoroAI haftet unbeschränkt bei Vorsatz und grober Fahrlässigkeit, bei der Verletzung von Leben, Körper und Gesundheit sowie nach dem Produkthaftungsgesetz.</p>
+  <p>Bei leicht fahrlässiger Verletzung einer Pflicht, deren Erfüllung die ordnungsgemäße Durchführung des Vertrags überhaupt erst ermöglicht und auf deren Einhaltung die Beratung vertrauen darf, haftet quoroAI der Höhe nach begrenzt auf den vertragstypischen, vorhersehbaren Schaden. Im Übrigen ist die Haftung ausgeschlossen.</p>
+  <p><b>Für die Antworten des KI-Beraters gilt Ziffer 2:</b> sie sind Vorschläge. Wer sie ungeprüft an seine Kunden weitergibt, tut das in eigener Verantwortung.</p>
+
+  <h2><span class="ziffer">9</span>Änderungen dieser Bedingungen</h2>
+  <p>quoroAI kann diese Bedingungen ändern. Die Änderung wird der Beratung mindestens sechs Wochen vor ihrem Wirksamwerden in Textform mitgeteilt. Widerspricht die Beratung nicht bis zum Wirksamwerden, gilt die Änderung als angenommen; darauf wird in der Mitteilung hingewiesen. Widerspricht sie, kann jede Seite den Vertrag zum Zeitpunkt des Wirksamwerdens kündigen.</p>
+  <p>Preisänderungen gelten frühestens für den auf die Mitteilung folgenden übernächsten Kalendermonat.</p>
+
+  <h2><span class="ziffer">10</span>Schlussbestimmungen</h2>
+  <p>Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts. Ausschließlicher Gerichtsstand für alle Streitigkeiten aus diesem Vertrag ist Erfurt, soweit die Beratung Kaufmann, juristische Person des öffentlichen Rechts oder öffentlich-rechtliches Sondervermögen ist.</p>
+  <p>Sollte eine Bestimmung unwirksam sein, bleibt der übrige Vertrag wirksam.</p>
+  <p>Nebenabreden bedürfen der Textform. Das gilt auch für die Aufhebung dieses Formerfordernisses.</p>
+
+  <p class="hinweis">
+    Diese Bedingungen gelten zwischen quoroAI und der Beratung. Was zwischen der Beratung und
+    ihren eigenen Kunden gilt, steht unter der Adresse der Beratung. Fragen zu diesem Text gehen
+    an <a href="mailto:recht@quoroai.io">recht@quoroai.io</a>.
+  </p>
+</main>
+
+<!-- preise.js ist die eine Quelle für Gebühr, Tarifspanne und Staffel. Keine
+     dieser Zahlen steht im Text oben. -->
+<script src="preise.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- Die Zahlen aus dem Baustein ---------- */
+  var spanne = Preise.spanne();
+  document.getElementById('p-gebuehr').textContent = Preise.euro(Preise.gebuehr());
+  document.getElementById('p-spanne').textContent =
+    Preise.euro(spanne.von) + ' und ' + Preise.euro(spanne.bis) + ' je Kunde und vollem Monat';
+  document.getElementById('p-ust').textContent = Preise.ust() + ' %';
+
+  /* Die Staffel als Satz, nicht als Liste — im Vertrag liest sie sich als
+     eine Regel, und sie beginnt beim ERSTEN Zugang, nicht erst bei 25. */
+  var stufen = Preise.staffel();
+  var satz = 'Auf den Listenpreis je Zugang gewährt quoroAI einen Mengenrabatt: ' +
+             stufen[0].proz + ' % ab dem ersten Zugang';
+  for (var i = 1; i < stufen.length; i++) {
+    satz += ', ' + stufen[i].proz + ' % ab ' + stufen[i].ab + ' Zugängen';
+  }
+  document.getElementById('p-staffel').textContent = satz + '. Maßgeblich ist die Zahl der Zugänge im jeweiligen Abrechnungsmonat.';
+
+  /* ---------- Speichern ----------
+     Im Produkt liegt dahinter /agb/text (text/plain, als Anhang). Hier baut
+     der Entwurf die Datei aus dem Text der Seite selbst — dann verspricht
+     die Fläche nichts, was sie nicht kann, und der Knopf ist echt.
+     Erst NACH dem Füllen der Zahlen, sonst stünden Striche in der Datei. */
+  var knopf = document.getElementById('speichern');
+  var text = (function(){
+    var zeilen = ['ALLGEMEINE GESCHÄFTSBEDINGUNGEN — quoroAI',
+                  document.getElementById('stand').textContent, ''];
+    var haupt = document.querySelector('main.recht');
+    Array.prototype.forEach.call(haupt.querySelectorAll('h2, p, li'), function(el){
+      if (el.classList.contains('stand') || el.closest('.speichern')) return;
+      var t = el.textContent.replace(/\s+/g, ' ').trim();
+      if (!t) return;
+      if (el.tagName === 'H2') zeilen.push('', t.toUpperCase(), '');
+      else if (el.tagName === 'LI') zeilen.push('  - ' + t);
+      else zeilen.push(t);
+    });
+    return zeilen.join('\n');
+  })();
+  knopf.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+  var kb = Math.max(1, Math.round(new Blob([text]).size / 1024));
+  document.getElementById('speichern-dazu').textContent = 'Textdatei, ' + kb + ' KB';
+})();
+</script>
+</body>
+</html>

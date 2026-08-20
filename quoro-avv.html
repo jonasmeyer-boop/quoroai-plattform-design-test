@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Auftragsverarbeitung – quoroAI</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<link rel="stylesheet" href="recht.css">
+<style>
+/* quoroai-plattform-design · Der Auftragsverarbeitungsvertrag zwischen der
+   Beratung (Verantwortliche) und der Quoro Advisory GmbH (Auftragsverarbeiter),
+   Art. 28 DSGVO. Design-Issue #84, Bausprache aus Issue #79.
+
+   ZWEI DINGE, DIE ES SONST NIRGENDS GIBT:
+
+   1. **Der Text ist offen, die Annahme hängt am Konto.** Lesen kann ihn
+      jeder — auch wer noch keine Beratung hat und wissen will, worauf er
+      sich einlässt. Annehmen kann ihn nur die Inhaberin, und was angenommen
+      wurde, steht danach mit Fassung und Zeitpunkt da. Ein Vertrag, der
+      nach der Annahme aussieht wie vorher, ist kein Nachweis.
+   2. **Die Unterauftragnehmer stehen als Tabelle**, und es sind dieselben
+      wie in `quoro-datenschutz.html` — man sucht darin, und wenn zwei
+      Flächen verschiedene Listen führen, ist eine davon falsch. Sie stehen
+      hier im Vertrag, weil Art. 28 Abs. 2 DSGVO die Genehmigung verlangt:
+      wer annimmt, genehmigt diese Liste.
+
+   DIE ANNAHME IST EIN ZUSTAND, KEIN KNOPF. Die Vorführung zeigt beide:
+   „noch nicht angenommen" (dann fehlt der Beratung etwas, und die Fläche
+   sagt es ohne Drohung) und „angenommen" (dann steht Fassung und Datum da).
+   Ein dritter Zustand ist der wichtige: **eine neue Fassung, während eine
+   alte angenommen ist** — dann steht beides da, die alte gilt weiter, bis
+   die neue angenommen ist. Ohne diesen Zustand wäre jede Textänderung ein
+   stiller Bruch.
+
+   Der Text ist im Haus entstanden (kein Anwalt, Entscheidung Jonas 2026-08-18)
+   und beschreibt, was die Software wirklich tut.
+   Marker: QUORO-AVV-V1 (der Auftragsverarbeitungsvertrag mit seiner Annahme) */
+
+/* ---------- Die Annahme ---------- */
+.annahme{
+  margin-top:22px;padding:20px 22px;border-radius:var(--radius-karte);
+  border:0.5px solid var(--nebel-200);background:var(--flaeche);
+}
+.annahme .a-kopf{display:flex;align-items:flex-start;gap:14px;justify-content:space-between;flex-wrap:wrap}
+.annahme b{font-size:17px;font-weight:600;letter-spacing:-.01em;display:block}
+.annahme .a-satz{font-size:14.5px;color:var(--nebel-600);margin-top:6px;line-height:1.6;max-width:60ch}
+.annahme .a-griffe{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+.annahme .knopf{min-height:46px}
+.annahme .haken{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.55;margin-top:16px;max-width:62ch}
+.annahme .haken input{width:19px;height:19px;margin-top:2px;flex-shrink:0;accent-color:var(--lila-600)}
+.annahme .fehler{font-size:13.5px;color:var(--rot);margin-top:10px}
+.annahme .wer-darf{font-size:13px;color:var(--nebel-500);margin-top:10px;line-height:1.55}
+/* Angenommen: der Nachweis, nicht ein Erfolgs-Bild. Keine Farbe für sich,
+   der Zustand steht im Satz (Jonas: farbige Punkte sind ein KI-Tell). */
+.annahme.steht{border-left:3px solid var(--gruen)}
+.annahme .nachweis{
+  margin-top:14px;border-top:0.5px solid var(--nebel-200);padding-top:14px;
+  font-size:14px;line-height:1.7;
+}
+.annahme .nachweis .z{display:block;color:var(--nebel-600)}
+.annahme .nachweis .z b{display:inline;font-size:inherit;font-weight:600;color:var(--tinte)}
+/* Eine neue Fassung, während die alte gilt */
+.annahme.neu-da{border-left:3px solid #c88f28}
+
+/* Die Vorführung, wie auf den anderen Flächen mit Zuständen */
+.vorfuehrung{
+  margin-top:18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.vorfuehrung > span{font-size:12px;color:var(--nebel-600);white-space:nowrap}
+.umschalter{display:inline-flex;gap:4px;padding:4px;border-radius:var(--radius-kapsel);background:rgba(24,21,47,.05);flex-wrap:wrap}
+.umschalter button{
+  border:0;background:none;cursor:pointer;border-radius:var(--radius-kapsel);
+  min-height:36px;padding:6px 13px;font-size:12.5px;font-weight:600;color:var(--nebel-600);
+  transition:background .2s ease,color .2s ease;
+}
+.umschalter button.hier{background:var(--tinte);color:#fff}
+@media (pointer:coarse){ .umschalter button{min-height:44px} }
+</style>
+</head>
+<body class="quoro">
+
+<header class="recht-kopf glas-dick">
+  <a class="wortmarke" href="index.html">
+    <img src="bilder/quoro-icon.svg" alt="" width="26" height="26">quoroAI
+  </a>
+  <nav>
+    <a href="quoro-agb.html">AGB</a>
+    <a href="quoro-avv.html" aria-current="page">AVV</a>
+    <a href="quoro-impressum.html">Impressum</a>
+    <a href="quoro-datenschutz.html">Datenschutz</a>
+  </nav>
+</header>
+
+<main class="recht vertrag">
+  <h1>Auftragsverarbeitung</h1>
+  <p class="stand" id="stand">Fassung 2 · Stand: 20. August 2026</p>
+  <p class="vorspann">Vertrag nach Art. 28 DSGVO zwischen der Beratung als Verantwortlicher und der Quoro Advisory GmbH als Auftragsverarbeiterin. Er ist Bestandteil der <a href="quoro-agb.html">AGB</a> und gilt, solange die Beratung quoroAI nutzt.</p>
+
+  <a class="speichern" id="speichern" href="#" download="quoroAI-AVV.txt">
+    Diesen Text als Datei speichern
+    <span class="dazu" id="speichern-dazu">Textdatei</span>
+  </a>
+
+  <!-- Die Annahme: offen lesbar, angenommen nur vom Konto der Inhaberin -->
+  <section class="annahme" id="annahme" aria-live="polite">
+    <div class="a-kopf">
+      <div>
+        <b id="a-titel">Dieser Vertrag ist noch nicht angenommen.</b>
+        <div class="a-satz" id="a-satz">Ohne Annahme fehlt deiner Beratung die Grundlage, auf die sich ihre eigene Datenschutzerklärung beruft. Angenommen wird er einmal, von der Inhaberin.</div>
+      </div>
+    </div>
+    <div id="a-formular">
+      <label class="haken">
+        <input type="checkbox" id="a-haken">
+        <span>Ich nehme diesen Auftragsverarbeitungsvertrag für meine Beratung an und genehmige die unten genannten Unterauftragnehmer.</span>
+      </label>
+      <div class="fehler" id="a-fehler" role="alert" hidden></div>
+      <div class="a-griffe">
+        <button class="knopf primaer" id="a-annehmen" type="button">Vertrag annehmen</button>
+      </div>
+      <div class="wer-darf">Annehmen kann nur die Inhaberin. Wer im Team ist, kann den Text lesen und speichern — das reicht, um ihn zu prüfen.</div>
+    </div>
+    <div class="nachweis" id="a-nachweis" hidden></div>
+  </section>
+
+  <div class="vorfuehrung">
+    <span>Vorführung: Stand der Annahme</span>
+    <div class="umschalter" role="tablist" aria-label="Stand der Annahme">
+      <button type="button" id="u-offen" class="hier" role="tab" aria-selected="true">Noch nicht angenommen</button>
+      <button type="button" id="u-steht" role="tab" aria-selected="false">Angenommen</button>
+      <button type="button" id="u-neu" role="tab" aria-selected="false">Neue Fassung liegt vor</button>
+    </div>
+  </div>
+
+  <h2><span class="ziffer">1</span>Gegenstand und Dauer</h2>
+  <p>quoroAI verarbeitet personenbezogene Daten im Auftrag der Beratung, soweit das zur Erbringung der in den AGB beschriebenen Leistung nötig ist. Die Verarbeitung dauert so lange, wie der Vertrag über die Nutzung von quoroAI läuft.</p>
+
+  <h2><span class="ziffer">2</span>Art, Zweck und Kreis der Betroffenen</h2>
+  <p>Verarbeitet werden:</p>
+  <ul>
+    <li><b>von den Kunden der Beratung:</b> Name, E-Mail-Adresse, Zugangsdaten, ihre Gespräche mit dem KI-Berater, die Unterlagen, die sie hochladen oder erhalten, sowie Rechnungsdaten;</li>
+    <li><b>von den Beschäftigten der Beratung:</b> Name, E-Mail-Adresse, Rolle, Arbeitszeiten, Abwesenheiten und die Sätze, mit denen ihre Zeit berechnet wird;</li>
+    <li><b>von Ansprechpartnern in Kundenunternehmen:</b> Name, Funktion und Kontaktdaten, soweit die Beratung sie einstellt.</li>
+  </ul>
+  <p>Zweck ist ausschließlich die Führung des Beratungsgeschäfts und die Bereitstellung des KI-Beraters gegenüber den Kunden der Beratung.</p>
+
+  <h2><span class="ziffer">3</span>Weisungen</h2>
+  <p>quoroAI verarbeitet die Daten nur auf dokumentierte Weisung der Beratung. Als Weisung gilt zunächst dieser Vertrag samt AGB; weitere Weisungen erteilt die Beratung in Textform.</p>
+  <p>Hält quoroAI eine Weisung für rechtswidrig, wird sie die Beratung darauf hinweisen und darf die Ausführung aussetzen, bis die Beratung sie bestätigt oder ändert.</p>
+
+  <h2><span class="ziffer">4</span>Vertraulichkeit</h2>
+  <p>Alle Personen, die bei quoroAI Zugang zu diesen Daten haben, sind auf Vertraulichkeit verpflichtet und in den Datenschutz eingewiesen. Die Verpflichtung gilt über das Ende ihrer Tätigkeit hinaus.</p>
+
+  <h2><span class="ziffer">5</span>Sicherheit der Verarbeitung</h2>
+  <p>quoroAI trifft die Maßnahmen nach Art. 32 DSGVO. Dazu gehören insbesondere:</p>
+  <ul>
+    <li>Übertragung ausschließlich verschlüsselt (TLS), Speicherung verschlüsselt;</li>
+    <li>Trennung der Daten nach Beratung: jede Beratung sieht nur ihre eigenen, durchgesetzt in der Datenbank und nicht erst in der Oberfläche;</li>
+    <li>Zugang nur über persönliche Konten, für die Beratung mit zweitem Faktor;</li>
+    <li>Protokollierung der Zugriffe auf Kundenakten, einsehbar für die Beratung;</li>
+    <li>regelmäßige Sicherungen und geprüfte Wiederherstellung.</li>
+  </ul>
+
+  <h2><span class="ziffer">6</span>Unterauftragnehmer</h2>
+  <p>Die Beratung genehmigt mit der Annahme dieses Vertrags den Einsatz der folgenden Unterauftragnehmer:</p>
+  <div class="tabelle">
+    <div class="zeile titel"><span>Wer</span><span>Wofür</span><span>Wo</span></div>
+    <div class="zeile"><span class="wer">Supabase</span><span>Datenbank, Anmeldung, Dateispeicher</span><span class="wo">Frankfurt</span></div>
+    <div class="zeile"><span class="wer">Hetzner</span><span>Server, auf dem die Plattform läuft</span><span class="wo">Falkenstein</span></div>
+    <div class="zeile"><span class="wer">AWS Bedrock</span><span>Sprachmodell des KI-Beraters, Einbettungen des Wissens</span><span class="wo">EU</span></div>
+    <div class="zeile"><span class="wer">Scaleway</span><span>Versand unserer E-Mails</span><span class="wo">EU</span></div>
+    <div class="zeile"><span class="wer">AWS SES</span><span>Versand unserer E-Mails, der zweite Weg</span><span class="wo">EU</span></div>
+    <div class="zeile"><span class="wer">Cloudflare</span><span>Adressauflösung der Domain</span><span class="wo">EU</span></div>
+    <div class="zeile"><span class="wer">lexware office</span><span>Belege in die Buchhaltung, wenn die Beratung das einschaltet</span><span class="wo">Deutschland</span></div>
+  </div>
+  <p>Diese Liste ist dieselbe wie in der <a href="quoro-datenschutz.html">Datenschutzerklärung von quoroAI</a>. Kommt einer dazu oder fällt einer weg, teilt quoroAI das mindestens vier Wochen vorher in Textform mit. Widerspricht die Beratung, kann sie den Vertrag zu diesem Zeitpunkt kündigen.</p>
+  <p><b>Kein Training mit diesen Daten.</b> Beim Sprachmodell ist die Auswertung der Inhalte für Modellverbesserungen abgeschaltet; die Inhalte verlassen die EU nicht.</p>
+
+  <h2><span class="ziffer">7</span>Unterstützung der Beratung</h2>
+  <p>quoroAI unterstützt die Beratung bei ihren eigenen Pflichten:</p>
+  <ul>
+    <li>bei Auskunft, Berichtigung, Löschung und Datenübertragbarkeit — die Software zeigt der Beratung, was zu einer Person gespeichert ist, und kann es ausgeben und löschen;</li>
+    <li>bei der Meldung von Datenpannen: quoroAI meldet der Beratung eine Verletzung des Schutzes personenbezogener Daten unverzüglich, spätestens innerhalb von 24 Stunden nach Kenntnis, mit dem, was bis dahin bekannt ist;</li>
+    <li>bei Datenschutz-Folgenabschätzung und Vorabkonsultation, soweit sie quoroAI betreffen.</li>
+  </ul>
+
+  <h2><span class="ziffer">8</span>Löschung und Rückgabe</h2>
+  <p>Nach dem Ende des Vertrags löscht quoroAI die Daten der Beratung auf ihre Weisung. Bis dahin bleiben sie lesbar, damit die Kunden der Beratung ihre Auskunft nach Art. 15 DSGVO noch bekommen.</p>
+  <p>Ausgenommen sind Daten, die quoroAI gesetzlich aufbewahren muss: gestellte Rechnungen und ihre Zeilen bleiben acht Jahre, gerechnet ab dem Schluss des Kalenderjahres ihrer Entstehung (§ 147 AO, § 257 HGB). Sie werden für diese Zeit gesperrt und nicht weiterverarbeitet.</p>
+
+  <h2><span class="ziffer">9</span>Nachweise und Kontrolle</h2>
+  <p>quoroAI stellt der Beratung auf Anfrage die Nachweise über die Einhaltung dieses Vertrags zur Verfügung. Die Beratung kann Kontrollen durchführen; sie kündigt sie mit angemessener Frist an und führt sie so durch, dass der Betrieb nicht unangemessen gestört wird.</p>
+
+  <p class="hinweis">
+    Dieser Vertrag regelt das Verhältnis zwischen der Beratung und quoroAI. Das Verhältnis
+    zwischen der Beratung und ihren eigenen Kunden regelt die Beratung selbst — quoroAI stellt
+    dafür keine Vorlage bereit. Fragen an <a href="mailto:datenschutz@quoroai.io">datenschutz@quoroai.io</a>.
+  </p>
+</main>
+
+<!-- lage.js liefert das eine „Heute" und die Zeitstempel — kein Datum steht
+     hier getippt. -->
+<script src="lage.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  var FASSUNG = 2;
+  var el = {
+    kasten:   document.getElementById('annahme'),
+    titel:    document.getElementById('a-titel'),
+    satz:     document.getElementById('a-satz'),
+    formular: document.getElementById('a-formular'),
+    haken:    document.getElementById('a-haken'),
+    fehler:   document.getElementById('a-fehler'),
+    nachweis: document.getElementById('a-nachweis')
+  };
+
+  /* Die angenommene Fassung: null heißt nie angenommen. Angenommen wurde in
+     der Vorführung vor sechs Wochen — das Datum kommt aus der Lage. */
+  var ANGENOMMEN_AM = Lage.plusTage(Lage.heuteDatum(), -42);
+
+  var LAGEN = {
+    offen: { knopf: 'u-offen' },
+    steht: { knopf: 'u-steht' },
+    neu:   { knopf: 'u-neu' }
+  };
+
+  function nachweisZeile(fassung, datum, wer, zusatz){
+    return '<span class="z">Angenommen: <b>Fassung ' + fassung + '</b>, am <b>' +
+           Lage.langDatum(datum) + '</b> von <b>' + wer + '</b>.' +
+           (zusatz ? ' ' + zusatz : '') + '</span>';
+  }
+
+  function zeige(name, frisch){
+    el.kasten.classList.toggle('steht', name === 'steht');
+    el.kasten.classList.toggle('neu-da', name === 'neu');
+    el.fehler.hidden = true;
+
+    if (name === 'offen') {
+      el.titel.textContent = 'Dieser Vertrag ist noch nicht angenommen.';
+      el.satz.textContent = 'Ohne Annahme fehlt deiner Beratung die Grundlage, auf die sich ihre eigene Datenschutzerklärung beruft. Angenommen wird er einmal, von der Inhaberin.';
+      el.formular.hidden = false;
+      el.haken.checked = false;
+      el.nachweis.hidden = true;
+    } else if (name === 'steht') {
+      el.titel.textContent = 'Dieser Vertrag gilt.';
+      el.satz.textContent = 'Deine Beratung hat ihn angenommen. Der Nachweis steht unten und lässt sich mit dem Text zusammen speichern.';
+      el.formular.hidden = true;
+      el.nachweis.hidden = false;
+      el.nachweis.innerHTML = nachweisZeile(
+        FASSUNG,
+        frisch ? Lage.heuteDatum() : ANGENOMMEN_AM,
+        'Dr. Anna Vogelsang, Inhaberin',
+        frisch ? '(gerade eben, ' + Lage.zeitstempel() + ')' : '');
+    } else {
+      /* Der wichtige dritte Zustand: eine neue Fassung liegt vor, die alte
+         gilt weiter. Ohne ihn wäre jede Textänderung ein stiller Bruch. */
+      el.titel.textContent = 'Es gibt eine neue Fassung.';
+      el.satz.textContent = 'Bis sie angenommen ist, gilt die alte weiter — es entsteht keine Lücke. Was sich geändert hat, steht in der Mitteilung, die deine Beratung bekommen hat.';
+      el.formular.hidden = false;
+      el.haken.checked = false;
+      el.nachweis.hidden = false;
+      el.nachweis.innerHTML = nachweisZeile(FASSUNG - 1, ANGENOMMEN_AM,
+        'Dr. Anna Vogelsang, Inhaberin', 'Diese Fassung gilt, bis Fassung ' + FASSUNG + ' angenommen ist.');
+    }
+
+    Object.keys(LAGEN).forEach(function(k){
+      var b = document.getElementById(LAGEN[k].knopf);
+      b.classList.toggle('hier', k === name);
+      b.setAttribute('aria-selected', k === name ? 'true' : 'false');
+    });
+
+    /* Die Datei wird HIER neu gebaut, nicht beim Klick auf den Knopf: eine
+       href, die erst im Klick-Handler entsteht, ist ein Wettlauf mit dem
+       Browser — und die Datei trüge sonst den Nachweis von vorhin. */
+    frischerKnopf();
+  }
+
+  Object.keys(LAGEN).forEach(function(k){
+    document.getElementById(LAGEN[k].knopf).addEventListener('click', function(){ zeige(k); });
+  });
+
+  document.getElementById('a-annehmen').addEventListener('click', function(){
+    if (!el.haken.checked) {
+      el.fehler.textContent = 'Ohne das Häkchen geht es nicht — es ist die Annahme.';
+      el.fehler.hidden = false;
+      return;
+    }
+    zeige('steht', true);
+  });
+
+  /* ---------- Speichern ----------
+     Im Produkt liegt dahinter /avv/text (text/plain, als Anhang). Der
+     Nachweis der Annahme geht mit in die Datei: ein AVV ohne den Zeitpunkt
+     seiner Annahme ist als Nachweis die Hälfte wert. */
+  function baueText(){
+    var zeilen = ['AUFTRAGSVERARBEITUNGSVERTRAG — quoroAI',
+                  document.getElementById('stand').textContent];
+    if (!el.nachweis.hidden) zeilen.push(el.nachweis.textContent.replace(/\s+/g, ' ').trim());
+    zeilen.push('');
+    Array.prototype.forEach.call(document.querySelectorAll('main.recht h2, main.recht p, main.recht li, main.recht .tabelle .zeile'), function(x){
+      if (x.classList.contains('stand') || x.closest('.annahme') || x.closest('.speichern') || x.classList.contains('titel')) return;
+      var t = x.textContent.replace(/\s+/g, ' ').trim();
+      if (!t) return;
+      if (x.tagName === 'H2') zeilen.push('', t.toUpperCase(), '');
+      else if (x.tagName === 'LI' || x.classList.contains('zeile')) zeilen.push('  - ' + t);
+      else zeilen.push(t);
+    });
+    return zeilen.join('\n');
+  }
+  function frischerKnopf(){
+    var text = baueText();
+    var knopf = document.getElementById('speichern');
+    knopf.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+    var kb = Math.max(1, Math.round(new Blob([text]).size / 1024));
+    document.getElementById('speichern-dazu').textContent = 'Textdatei, ' + kb + ' KB';
+  }
+  var ausHash = location.hash.slice(1);
+  zeige(Object.prototype.hasOwnProperty.call(LAGEN, ausHash) ? ausHash : 'offen');
+})();
+</script>
+</body>
+</html>

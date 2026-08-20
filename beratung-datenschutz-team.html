@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Was über dich gespeichert wird</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<link rel="stylesheet" href="recht.css">
+<style>
+/* quoroai-plattform-design · Der Datenschutzhinweis für die BESCHÄFTIGTEN der
+   Beratung, Art. 13 DSGVO (Design-Issue #84).
+
+   WARUM DIESE FLÄCHE EIGEN IST — und warum sie nicht bei den anderen
+   Rechtsseiten im Kopfband steht:
+
+   Die anderen drei Rechtsflächen der quoroAI-Welt (AGB, AVV, Impressum,
+   Datenschutz) sprechen quoroAI oder die Beratung als Vertragspartner an.
+   Diese hier spricht **einen Menschen an, der bei der Beratung arbeitet** —
+   und Verantwortliche ist seine Beratung, nicht quoroAI. Deshalb trägt sie
+   das Chrom des Cockpits mit der Krume (er kommt aus der Verwaltung, nicht
+   aus dem Fuß einer Rechtsseite) und nicht das Kopfband der Rechtswelt.
+   Stünde sie dort, läse sie sich wie ein Text von quoroAI über ihn — und das
+   wäre falsch.
+
+   DREI VERANTWORTLICHKEITEN STATT ZWEI. Auf allen anderen Flächen gilt „Recht
+   steht zweimal" (Chronik 2026-08-14): die Beratung für ihre Kunden, quoroAI
+   für sich. Hier kommt eine dritte Lage dazu, und sie ist der Grund für die
+   Fläche: die Beratung ist Arbeitgeberin, quoroAI ist ihre Auftragsverarbeiterin,
+   und für manches ist die Beratung gesetzlich verpflichtet (Lohn, Arbeitszeit),
+   für anderes nicht. Wer das nicht trennt, verspricht Beschäftigten ein
+   Widerspruchsrecht, das es beim Lohnkonto nicht gibt.
+
+   DER TON: Diese Fläche wirbt nicht und beschwichtigt nicht. Sie sagt auch,
+   **was der Chef sehen kann** — wer das verschweigt, hat den Hinweis nicht
+   gegeben, sondern versteckt. Und sie sagt, was der KI-Berater über
+   Beschäftigte NICHT tut; das ist keine Beteuerung, sondern eine gebaute
+   Grenze (beratung-verwaltung.html, Unterweisung nach Art. 4 EU AI Act).
+
+   Die Marke der Beratung steht im Text, nicht im Chrom: das Chrom der
+   Beratungsseite ist immer quoroAI (Entscheidung 2026-08-12).
+   Marker: BERATUNG-DATENSCHUTZ-TEAM-V2 (V2: die Lesespalte beginnt unter
+   der Krume, nicht unter dem Kopfband — gemessen lagen 16,8 Pixel der
+   Überschrift dahinter. V1: der Hinweis für die Beschäftigten) */
+
+/* Das Chrom des Cockpits, wie in den anderen Räumen */
+nav.kopfband{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav.kopfband .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav.kopfband .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav.kopfband .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;word-spacing:2px}
+nav.kopfband .nav-rechts{display:flex;align-items:center;gap:10px}
+nav.kopfband a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav.kopfband a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+@media (pointer:coarse),(max-width:700px){
+  nav.kopfband a.vorschlaege{min-height:44px;padding:0 14px;display:inline-flex;align-items:center}
+}
+/* Die Lesespalte beginnt UNTER der Krume, nicht unter dem Kopfband: die
+   Krume hängt bei 72px und ist rund 40 hoch, das Kopfband nur 60 — gemessen
+   lagen 16,8 Pixel der Überschrift dahinter. recht.css rechnet die Spalte aus
+   `--recht-kopf-hoehe`, also wird der Wert hier gesetzt, statt ein Polster zu
+   raten. */
+body{--recht-kopf-hoehe:100px}
+/* Unter 1320px wird die Krume die zweite Zeile des Kopfbands, wie überall */
+@media (max-width:1320px){
+  nav.kopfband{height:118px;padding-bottom:58px}
+  body{--recht-kopf-hoehe:122px}
+}
+
+/* Wer wofür verantwortlich ist — die drei Lagen als Tafel, nicht als Absatz */
+.recht .drei{
+  margin-top:16px;display:grid;gap:10px;
+}
+.recht .drei > div{
+  padding:16px 18px;border-radius:var(--radius-innen);
+  border:0.5px solid var(--nebel-200);background:var(--flaeche);
+}
+.recht .drei b{display:block;font-weight:600;font-size:15.5px}
+.recht .drei span{display:block;font-size:14px;color:var(--nebel-600);margin-top:5px;line-height:1.6}
+
+/* Was der Chef sieht und was nicht — zwei Spalten, damit die Grenze eine
+   Kante hat statt eines Halbsatzes */
+.recht .grenze{
+  margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;
+}
+.recht .grenze > div{
+  padding:16px 18px;border-radius:var(--radius-innen);
+  border:0.5px solid var(--nebel-200);background:var(--flaeche);
+}
+.recht .grenze b{display:block;font-weight:600;font-size:14.5px;margin-bottom:8px}
+.recht .grenze ul{margin-top:0;padding-left:20px;list-style:disc}
+.recht .grenze li{font-size:14px;margin-top:6px}
+.recht .grenze .nicht{border-left:3px solid var(--gruen)}
+@media (max-width:640px){
+  .recht .grenze{grid-template-columns:1fr}
+}
+</style>
+<script src="lage.js"></script>
+<script src="krume.js"></script>
+</head>
+<body class="quoro"
+      data-krume-raum="zentrale"
+      data-krume-ueber="beratung-verwaltung.html|Verwaltung der Beratung"
+      data-krume-hier="Was über dich gespeichert wird">
+
+<nav class="kopfband">
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <div class="nav-rechts"><a class="vorschlaege" href="stand.html">Stand des Designs</a></div>
+</nav>
+
+<main class="recht">
+  <h1>Was über dich gespeichert wird</h1>
+  <p class="stand" id="stand">Stand: 20. August 2026</p>
+  <p class="vorspann">Dieser Hinweis gilt für alle, die bei <b class="beratung">Nordholm &amp; Partner</b> arbeiten — nicht für die Kunden der Beratung. Er sagt, was über dich gespeichert wird, warum, wie lange, und wer es sehen kann (Art. 13 DSGVO).</p>
+
+  <div class="merk glas-lila">
+    <b>Verantwortlich ist deine Beratung, nicht quoroAI.</b> quoroAI ist die Software, in der
+    gearbeitet wird, und verarbeitet deine Daten nur im Auftrag — geregelt im
+    <a href="quoro-avv.html">Auftragsverarbeitungsvertrag</a>. Wer dir Auskunft geben muss, ist
+    also deine Beratung.
+  </div>
+
+  <h2>Wer wofür verantwortlich ist</h2>
+  <p>Drei Rollen, und sie sind nicht dasselbe:</p>
+  <div class="drei">
+    <div>
+      <b>Deine Beratung als Arbeitgeberin</b>
+      <span>Sie entscheidet, was über dich gespeichert wird und wer es sieht. An sie richten sich deine Rechte aus diesem Hinweis.</span>
+    </div>
+    <div>
+      <b>quoroAI als Auftragsverarbeiterin</b>
+      <span>Sie stellt die Software und verarbeitet nur, was deine Beratung ihr aufträgt. Eigene Zwecke verfolgt sie mit deinen Daten nicht, und sie trainiert damit keine Modelle.</span>
+    </div>
+    <div>
+      <b>Du</b>
+      <span>Deine Zeiten trägst du selbst ein, und du siehst jederzeit, was drinsteht. Was du korrigierst, bleibt als Korrektur sichtbar — das ist kein Misstrauen, sondern die Grundlage der Abrechnung.</span>
+    </div>
+  </div>
+
+  <h2>Was gespeichert wird, und warum</h2>
+  <div class="tabelle">
+    <div class="zeile titel"><span>Was</span><span>Warum</span><span>Wie lange</span></div>
+    <div class="zeile"><span class="wer">Name, E-Mail, Rolle</span><span>Damit du dich anmelden kannst und die Software weiß, was du darfst</span><span class="wo">Bis du gehst, dann 30 Tage</span></div>
+    <div class="zeile"><span class="wer">Arbeitszeiten je Mandat</span><span>Grundlage für die Rechnung an den Kunden und für deine eigene Arbeitszeit</span><span class="wo">Acht Jahre</span></div>
+    <div class="zeile"><span class="wer">Abwesenheiten</span><span>Urlaubskonto, Planung, wer wann erreichbar ist</span><span class="wo">Bis zum Ende des Folgejahres</span></div>
+    <div class="zeile"><span class="wer">Dein Verrechnungssatz</span><span>Damit die Zeit auf der Rechnung einen Betrag ergibt</span><span class="wo">Bis er sich ändert, dann als Verlauf</span></div>
+    <div class="zeile"><span class="wer">Was du in Akten geschrieben hast</span><span>Die Arbeit am Mandat</span><span class="wo">Mit dem Mandat</span></div>
+    <div class="zeile"><span class="wer">Dein Nachweis der KI-Unterweisung</span><span>Pflicht der Beratung aus Art. 4 EU AI Act</span><span class="wo">Bis du gehst, dann drei Jahre</span></div>
+    <div class="zeile"><span class="wer">Wer wann eine Kundenakte geöffnet hat</span><span>Damit nachvollziehbar ist, wer Kundendaten gesehen hat</span><span class="wo">Ein Jahr</span></div>
+  </div>
+  <p>Rechtsgrundlage ist überwiegend § 26 BDSG und Art. 6 Abs. 1 lit. b DSGVO — es geht um dein Arbeitsverhältnis. Beim Zugriffsprotokoll ist es Art. 6 Abs. 1 lit. f: das berechtigte Interesse daran, dass der Umgang mit Kundendaten nachvollziehbar bleibt.</p>
+
+  <h2>Was deine Vorgesetzten sehen können</h2>
+  <p>Diese Grenze steht hier, weil sie sonst niemand nachliest:</p>
+  <div class="grenze">
+    <div>
+      <b>Was Inhaber und Partner sehen</b>
+      <ul>
+        <li>deine erfassten Zeiten je Mandat und Tag, samt Korrekturen</li>
+        <li>deine Abwesenheiten und dein Urlaubskonto</li>
+        <li>deine Auslastung: geplante gegen verfügbare Stunden je Woche</li>
+        <li>deinen Verrechnungssatz und was daraus je Mandat bleibt</li>
+        <li>dass du eine Kundenakte geöffnet hast</li>
+      </ul>
+    </div>
+    <div class="nicht">
+      <b>Was nicht erhoben wird</b>
+      <ul>
+        <li>wann du dich anmeldest oder wie lange ein Fenster offen war</li>
+        <li>was du tippst, während du tippst, oder wie schnell</li>
+        <li>wo du bist</li>
+        <li>welche Seiten du in welcher Reihenfolge ansiehst</li>
+        <li>eine Bewertung deiner Leistung durch die Software</li>
+      </ul>
+    </div>
+  </div>
+  <p><b>Der Unterschied ist wichtig:</b> was du <i>erfasst</i>, ist eine Angabe von dir und dient der Abrechnung. Eine <i>Überwachung</i> deines Verhaltens findet nicht statt — nicht, weil es verboten wäre, sie zu bauen, sondern weil sie nicht gebaut ist.</p>
+
+  <h2>Was der KI-Berater über dich nicht tut</h2>
+  <p>Der KI-Berater arbeitet an den Mandaten der Beratung, nicht an ihren Beschäftigten. Über einen benannten Menschen trifft er keine Aussage: keine Bewertung, keine Auswahl, keine Rangfolge, keine Empfehlung zu Einstellung, Beförderung, Kündigung, Aufgabenzuweisung oder Vergütung, keine Leistungs- oder Verhaltensüberwachung, keine Einschätzung von Gefühlslagen.</p>
+  <p>Das ist die Grenze, auf die deine Beratung ihre Beschäftigten unterweist (Art. 4 EU AI Act), und sie ist in der Software gezogen — nicht bloß versprochen.</p>
+
+  <h2>Wer deine Daten sonst noch sieht</h2>
+  <p>Außerhalb deiner Beratung sind das die Dienstleister, die quoroAI einsetzt: sie stehen mit Zweck und Ort im <a href="quoro-avv.html">Auftragsverarbeitungsvertrag</a> und in der <a href="quoro-datenschutz.html">Datenschutzerklärung von quoroAI</a>. Darüber hinaus geben wir nichts weiter — außer an Stellen, denen deine Beratung gesetzlich Auskunft schuldet (etwa Finanzamt oder Sozialversicherung).</p>
+
+  <h2>Deine Rechte</h2>
+  <p>Du kannst von deiner Beratung Auskunft verlangen (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung (Art. 18) und Datenübertragbarkeit (Art. 20). Du kannst der Verarbeitung widersprechen, wo sie auf einem berechtigten Interesse beruht (Art. 21) — beim Zugriffsprotokoll etwa.</p>
+  <p><b>Was nicht auf Verlangen gelöscht wird:</b> Arbeitszeiten, die in eine gestellte Rechnung eingegangen sind. Sie sind Teil eines Buchungsbelegs und acht Jahre aufzubewahren (§ 147 AO, § 257 HGB). Deine Beratung kann sie nicht früher löschen, auch wenn sie wollte.</p>
+  <p>Du kannst dich außerdem bei einer Aufsichtsbehörde beschweren, ohne deine Beratung vorher zu fragen. Zuständig ist die Behörde am Sitz deiner Beratung.</p>
+
+  <h2>Wen du fragst</h2>
+  <p class="anschrift" id="ansprech">
+    <b class="beratung">Nordholm &amp; Partner</b><br>
+    Die Anschrift und die Kontaktdaten stehen im Impressum deiner Beratung.
+  </p>
+  <p>Bei Fragen zur Software selbst — nicht zu deinem Arbeitsverhältnis — erreichst du quoroAI unter <a href="mailto:datenschutz@quoroai.io">datenschutz@quoroai.io</a>.</p>
+
+  <p class="hinweis">
+    Diesen Hinweis gibt dir deine Beratung. Ändert sie etwas daran, bekommst du die neue Fassung
+    zu sehen; die alte bleibt mit ihrem Datum stehen, damit nachvollziehbar ist, was wann galt.
+  </p>
+</main>
+
+<script src="zeiger.js"></script>
+</body>
+</html>

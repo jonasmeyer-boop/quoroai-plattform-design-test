@@ -44,7 +44,7 @@
    dazu" ließ den Rabatt erst dort beginnen — plattform.html rechnet 25 % ab
    dem ersten Zugang, 35 % ab 25 und 45 % ab 100. Wer sich hier anmeldet,
    hatte sonst eine andere Zahl im Kopf als seine erste Abrechnung zeigt.
-   Marker: REGISTRIEREN-V11 (nach dem Anlegen geht es ins Cockpit, neuer Dateiname) */
+   Marker: REGISTRIEREN-V12 (V12: die Beträge kommen aus preise.js statt aus dem Markup) (nach dem Anlegen geht es ins Cockpit, neuer Dateiname) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input{font-family:inherit}
@@ -233,16 +233,17 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
         <div class="kosten">
           <b>Das Anlegen kostet nichts, und es wird keine Zahlungsangabe verlangt.</b>
           Läuft die Beratung, rechnet quoroAI monatlich ab:
+          <!-- Die Beträge kommen aus dem Baustein, nicht aus diesem Markup: sie
+               standen bis zum 20.08.2026 in drei Flächen getippt. Die Staffel
+               stand hier einmal falsch („ab 25 Zugängen kommt ein Mengenrabatt
+               dazu") — sie beginnt beim ERSTEN Zugang, und wer sich hier
+               anmeldet, hätte sonst eine andere Zahl im Kopf als die
+               Abrechnung später zeigt. Genau dagegen hilft die eine Quelle. -->
           <dl>
-            <dt>Für deine Beratung</dt><dd>149,00 €</dd>
-            <dt>Listenpreis je Kunde mit Zugang</dt><dd>19,00 € bis 149,00 €</dd>
+            <dt>Für deine Beratung</dt><dd id="preis-gebuehr">—</dd>
+            <dt>Listenpreis je Kunde mit Zugang</dt><dd id="preis-spanne">—</dd>
           </dl>
-          <!-- Die Staffel stand hier falsch: „ab 25 Zugängen kommt ein
-               Mengenrabatt dazu" ließ den Rabatt aussehen, als beginne er
-               erst dort. plattform.html rechnet in Wahrheit ab dem ersten
-               Zugang mit 25 %. Wer sich hier anmeldet, hat sonst eine andere
-               Zahl im Kopf als die Abrechnung später zeigt. -->
-          Je Kunde entscheidet der Umfang. Vom Listenpreis gehen 25 % ab, ab 25 Zugängen 35 %, ab 100 Zugängen 45 %.
+          <span id="preis-staffel">Je Kunde entscheidet der Umfang.</span>
           Alle Preise zuzüglich Umsatzsteuer, angebrochene Monate werden tagegenau geteilt.
         </div>
         <button class="knopf primaer" id="anlegen" type="button">Beratung anlegen</button>
@@ -333,10 +334,30 @@ body.erwacht .buehne canvas{opacity:0;transition:opacity 1.3s ease}
 
 <div id="demo-hinweis" role="status" aria-live="polite" style="position:fixed;top:20px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-size:14px;font-weight:600;color:var(--lila-700);opacity:0;transition:opacity .3s ease,translate .3s var(--kurve)"></div>
 
+<script src="preise.js"></script>
 <script>
 (function(){
   'use strict';
   var reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Die Preise stehen nicht im Markup, sondern kommen aus preise.js — eine
+     Quelle für Tarife, Staffel und Gebühr (Baustein seit 20.08.2026). */
+  (function preise(){
+    var g = document.getElementById('preis-gebuehr');
+    var sp = document.getElementById('preis-spanne');
+    var st = document.getElementById('preis-staffel');
+    if (!g || !window.Preise) return;
+    var spanne = Preise.spanne();
+    g.textContent = Preise.euro(Preise.gebuehr());
+    sp.textContent = Preise.euro(spanne.von) + ' bis ' + Preise.euro(spanne.bis);
+    var stufen = Preise.staffel();
+    var satz = 'Je Kunde entscheidet der Umfang. Vom Listenpreis gehen ' +
+      stufen[0].proz + ' % ab';
+    for (var i = 1; i < stufen.length; i++) {
+      satz += ', ab ' + stufen[i].ab + ' Zugängen ' + stufen[i].proz + ' %';
+    }
+    st.textContent = satz + '.';
+  })();
 
   /* ---------- die Bau-Bühne: Baustufen sitzen auf echten Film-Phasen ---------- */
   var cv = document.getElementById('bau');

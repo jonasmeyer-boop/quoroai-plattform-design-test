@@ -1,7 +1,18 @@
 /* quoroai-plattform-design · Die Rechtsflächen von quoroAI: eine Lesefläche,
-   zwei Dokumente (Impressum, Datenschutz). Ergänzt system.css, ersetzt es nie —
-   hier stehen nur die Regeln, die eine reine Lesefläche braucht und die es
-   sonst nirgends gibt. Marker: RECHT-CSS-V2
+   vier Dokumente (AGB, AVV, Impressum, Datenschutz). Ergänzt system.css,
+   ersetzt es nie — hier stehen nur die Regeln, die eine reine Lesefläche
+   braucht und die es sonst nirgends gibt. Marker: RECHT-CSS-V5
+
+   V5: lange Überschriften trennen, statt die Seite quer zu schieben.
+   V4: die Fingermaße greifen auch an schmaler Breite, nicht nur am groben
+   Zeiger — gemessen 38px statt 44 bei 390 Pixeln.
+   V3 (Issue #79, entschieden 2026-08-20): Ein Vertrag ist keine eigene
+   Gattung, sondern dieselbe Lesefläche mit drei Regeln mehr — nummerierte
+   Abschnitte, ein Knopf zum Speichern und Aufzählungspunkte. Sie hängen an
+   `.vertrag` und ändern an Impressum und Datenschutz nichts. Eine zweite
+   CSS-Datei für dieselbe Sache wäre der Anfang zweier Wortlaute derselben
+   Lesefläche (CLAUDE.md: „Zwei Fassungen derselben Arbeitsweise driften
+   auseinander"); drüben verschwindet dafür `vertrag.css`.
 
    Haltung: Recht ist eine funktionale Fläche. Kein Fancy-Moment, keine
    Bewegung, kein Glas über dem Text. Was hier zählt, ist Lesbarkeit:
@@ -35,14 +46,34 @@
 }
 .recht-kopf nav a:hover{background:var(--lila-050);color:var(--lila-700)}
 .recht-kopf nav a[aria-current="page"]{background:var(--lila-100);color:var(--lila-800)}
-/* Am Finger braucht jedes Ziel 44px, auch wenn es nur zwei Wörter trägt */
-@media (pointer:coarse){
+/* Am Finger braucht jedes Ziel 44px, auch wenn es nur zwei Wörter trägt.
+   Die schmale Breite steht mit in der Bedingung, wie auf allen anderen
+   Flächen (plattform.html, die Cockpit-Räume): so misst man das Handy hier,
+   und bis zum 20.08.2026 fehlte sie ausgerechnet auf den Rechtsseiten —
+   gemessen 38px statt 44 bei 390 Pixeln Breite. */
+@media (pointer:coarse),(max-width:700px){
   .recht-kopf nav a{min-height:44px;display:inline-flex;align-items:center}
+}
+/* Vier Wege statt zwei (Issue #79). Ab 560px bricht das Band um, statt zu
+   schrumpfen: die 44px am Finger bleiben (WCAG 2.5.8), und die Lesespalte
+   bekommt entsprechend mehr Kopfpolster — sonst läge die Überschrift unter
+   dem zweizeiligen Band. */
+@media (max-width:560px){
+  .recht-kopf{height:auto;min-height:60px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px;gap:6px 16px}
+  .recht-kopf nav{flex-wrap:wrap;gap:2px}
+  body{--recht-kopf-hoehe:112px}
 }
 
 /* ---------- Die Lesespalte ---------- */
-.recht{max-width:760px;margin:0 auto;padding:96px 22px 110px}
-.recht h1{font-size:clamp(30px,5vw,44px)}
+.recht{max-width:760px;margin:0 auto;padding:calc(36px + var(--recht-kopf-hoehe,60px)) 22px 110px}
+/* Lange Wörter dürfen trennen. „Auftragsverarbeitung" braucht bei 44px
+   Schriftgröße 325 Pixel und schob bei 320 Pixeln Fensterbreite die ganze
+   Seite quer (gemessen 2026-08-20) — ohne dass ein einziges Element aus dem
+   Fenster ragte, weshalb die übliche Suche nach dem Übeltäter nichts fand.
+   `hyphens` trennt nach den Regeln von lang="de", `overflow-wrap` ist das
+   Netz für Wörter, die auch das nicht rettet. */
+.recht h1{font-size:clamp(30px,5vw,44px);hyphens:auto;overflow-wrap:break-word}
+.recht h2,.recht h3{hyphens:auto;overflow-wrap:break-word}
 .recht .stand{font-size:14px;color:var(--nebel-500);margin-top:12px}
 .recht .vorspann{font-size:18px;color:var(--nebel-700);margin-top:20px;line-height:1.6;max-width:60ch}
 
@@ -81,6 +112,47 @@
 .recht .tabelle .wer{font-weight:600}
 .recht .tabelle .wo{color:var(--nebel-600);white-space:nowrap}
 
+/* ---------- Was nur ein Vertrag braucht (.vertrag) ----------
+   AGB und AVV sind Verträge zwischen der Quoro Advisory GmbH und der
+   Beratung. Sie lesen sich anders als eine Datenschutzerklärung: man springt
+   zu einer Ziffer, man zitiert sie, und man muss den Text behalten dürfen. */
+
+/* Die Ziffer hängt ab 900px in der linken Marge, damit die Überschrift auf
+   derselben Kante steht wie die Absätze darunter. Darunter läuft sie im
+   Text mit — eingerückte Überschriften auf schmalem Schirm kosten Breite,
+   die der Satz braucht. */
+.recht.vertrag h2{position:relative}
+.recht.vertrag h2 .ziffer{
+  font-family:var(--schrift-text);font-size:15px;font-weight:600;
+  color:var(--nebel-400);margin-right:10px;
+}
+@media (min-width:900px){
+  .recht.vertrag h2 .ziffer{
+    position:absolute;right:100%;margin-right:14px;top:.15em;
+    text-align:right;white-space:nowrap;
+  }
+}
+
+/* Der Knopf steht unter dem Vorspann, nicht am Ende: eine Möglichkeit zu
+   speichern, die erst nach 300 Zeilen sichtbar wird, ist eine schlechte.
+   § 312i Abs. 1 Nr. 4 BGB verlangt abrufbar UND speicherbar, und zwischen
+   Unternehmern ist das nicht abdingbar. */
+.recht.vertrag .speichern{
+  display:inline-flex;align-items:center;gap:9px;margin-top:22px;
+  min-height:44px;padding:0 18px;border-radius:var(--radius-kapsel);
+  border:0.5px solid var(--nebel-200);background:var(--flaeche);
+  font-size:14px;font-weight:600;color:var(--tinte);text-decoration:none;
+  transition:border-color .15s var(--kurve),color .15s var(--kurve);
+}
+.recht.vertrag .speichern:hover{border-color:var(--lila-600);color:var(--lila-800)}
+.recht.vertrag .speichern .dazu{font-weight:500;color:var(--nebel-500)}
+
+/* Ein Pflichtenkatalog ohne Punkte liest sich wie ein Absatz mit
+   Zeilenumbrüchen. Gescopet, weil die Datenschutzerklärung bewusst ohne
+   Punkte entworfen ist. */
+.recht.vertrag ul{list-style:disc}
+.recht.vertrag ul ul{list-style:circle;margin-top:7px}
+
 .recht .hinweis{
   margin-top:44px;padding-top:22px;border-top:0.5px solid var(--nebel-200);
   font-size:13.5px;color:var(--nebel-500);line-height:1.6;max-width:66ch;
@@ -89,7 +161,7 @@
 @media (max-width:640px){
   /* 96px, nicht 84: das Kopfband ist 60px hoch, und die Schauschrift braucht
      Luft darunter, sonst klebt die Überschrift am Glasrand */
-  .recht{padding:96px 18px 90px}
+  .recht{padding:calc(36px + var(--recht-kopf-hoehe,60px)) 18px 90px}
   .recht-kopf{padding:0 18px}
   .recht-kopf nav a{padding:8px 11px}
   .recht h2{margin-top:40px}

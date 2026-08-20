@@ -33,7 +33,7 @@
    dem gezählt wird, steht jetzt überall ausgeschrieben statt „bis heute" —
    eine Abrechnung, die einen Zeitraum nennt, darf ihn nicht verschweigen.
    Außerdem trifft „Abmelden" am Telefon jetzt 44 Pixel hoch (Issue #51).
-   Marker: PLATTFORM-V6 (V6: der Werkstatt-Knopf heißt Stand des Designs) */
+   Marker: PLATTFORM-V7 (V7: Tarife, Staffel und Gebühr kommen aus preise.js) (V6: der Werkstatt-Knopf heißt Stand des Designs) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,select{font-family:inherit}
@@ -315,13 +315,12 @@ a.zeile:hover{border-color:var(--lila-400);translate:0 -1px}
   /* ================= Die Zahlen aus dem Produkt =================
      src/lib/plans.ts (Listenpreise) und src/lib/platform/preise.ts
      (Staffel, Plattformgebühr). Sie stehen hier genau einmal. */
-  var TARIFE = {
-    basis:    {label:'Basis',    cent:1900},
-    standard: {label:'Standard', cent:5900},
-    plus:     {label:'Plus',     cent:14900}
-  };
-  var STAFFEL = [{ab:0,proz:25},{ab:25,proz:35},{ab:100,proz:45}];
-  var GEBUEHR = 14900;
+  /* Aus dem Baustein preise.js — dieselben Zahlen standen bis zum 20.08.2026
+     in drei Flächen getippt, und mit den AGB wäre eine vierte dazugekommen. */
+  var TARIFE = {};
+  Preise.tarife().forEach(function(t){ TARIFE[t.id] = {label:t.label, cent:t.cent}; });
+  var STAFFEL = Preise.staffel();
+  var GEBUEHR = Preise.gebuehr();
   /* Der Tag, bis zu dem der laufende Monat zählt, kommt aus der Lage
      (lage.js): Dienstag, der 18. August 2026. Er wird überall ausgeschrieben,
      nie als „heute" behauptet. */
