@@ -39,7 +39,21 @@
 
    Die Marke der Beratung steht im Text, nicht im Chrom: das Chrom der
    Beratungsseite ist immer quoroAI (Entscheidung 2026-08-12).
-   Marker: BERATUNG-DATENSCHUTZ-TEAM-V2 (V2: die Lesespalte beginnt unter
+   V3 (2026-08-20, gemessen von der Produkt-Sitzung): die Gegenliste stand
+   zur Hälfte falsch. „Wann du dich anmeldest" WIRD erhoben — beim
+   Anmeldedienst, mit IP und Browserkennung —, nur sieht die Beratung es
+   nicht; und „welche Seiten in welcher Reihenfolge" steht faktisch im
+   Zugriffsprotokoll des Servers. Beide Punkte sind aus der Gegenliste
+   heraus und stehen jetzt dort, wo sie hingehören: der eine als Zeile in
+   der Tabelle, der andere als eigener Absatz über den Server. **Eine
+   Gegenliste darf nur tragen, was wirklich nicht erhoben wird — sonst ist
+   sie schlimmer als gar keine.** Dazu kam, was fehlte: der Freitext an der
+   Zeit (den der Kunde über den Leistungsnachweis liest), Krankheit als
+   Art.-9-Datum, die laufende Uhr als das Einzige, das nur dem Menschen
+   selbst gehört, die 66 Urheberstempel, die Fragebögen, und wer von den
+   Kollegen was sieht. Zwei Zeilen sind ausdrücklich als noch nicht
+   eingelöste Zusage gekennzeichnet.
+   Marker: BERATUNG-DATENSCHUTZ-TEAM-V3 (V2: die Lesespalte beginnt unter
    der Krume, nicht unter dem Kopfband — gemessen lagen 16,8 Pixel der
    Überschrift dahinter. V1: der Hinweis für die Beschäftigten) */
 
@@ -151,15 +165,25 @@ body{--recht-kopf-hoehe:100px}
   <h2>Was gespeichert wird, und warum</h2>
   <div class="tabelle">
     <div class="zeile titel"><span>Was</span><span>Warum</span><span>Wie lange</span></div>
-    <div class="zeile"><span class="wer">Name, E-Mail, Rolle</span><span>Damit du dich anmelden kannst und die Software weiß, was du darfst</span><span class="wo">Bis du gehst, dann 30 Tage</span></div>
-    <div class="zeile"><span class="wer">Arbeitszeiten je Mandat</span><span>Grundlage für die Rechnung an den Kunden und für deine eigene Arbeitszeit</span><span class="wo">Acht Jahre</span></div>
-    <div class="zeile"><span class="wer">Abwesenheiten</span><span>Urlaubskonto, Planung, wer wann erreichbar ist</span><span class="wo">Bis zum Ende des Folgejahres</span></div>
-    <div class="zeile"><span class="wer">Dein Verrechnungssatz</span><span>Damit die Zeit auf der Rechnung einen Betrag ergibt</span><span class="wo">Bis er sich ändert, dann als Verlauf</span></div>
+    <div class="zeile"><span class="wer">Name, E-Mail, Rolle</span><span>Damit du dich anmelden kannst und die Software weiß, was du darfst. <b>Deine Kollegen sehen das</b> — sie müssen wissen, wer im Team ist.</span><span class="wo">Bis du gehst, dann 30 Tage</span></div>
+    <div class="zeile"><span class="wer">Anmeldung: Zeitpunkt, IP-Adresse, Browser</span><span>Beim Anmeldedienst, damit eine Sitzung sicher ist. <b>Deine Beratung kommt nicht daran</b> und wertet es nicht aus.</span><span class="wo">Mit der Sitzung</span></div>
+    <div class="zeile"><span class="wer">Arbeitszeiten je Mandat, mit deinem Text dazu</span><span>Grundlage für die Rechnung. <b>Jeder am Mandat liest sie</b>, und über den Leistungsnachweis auch der Kunde — schreib dort nichts, was er nicht lesen soll.</span><span class="wo">Acht Jahre, mit der Rechnung</span></div>
+    <div class="zeile"><span class="wer">Deine laufende Uhr</span><span>Was du gerade misst. Das gehört dir allein — auch die Leitung sieht es nicht, solange du nichts erfasst hast.</span><span class="wo">Bis du sie stoppst</span></div>
+    <div class="zeile"><span class="wer">Abwesenheiten, auch Krankheit</span><span>Urlaubskonto, Planung, wer wann erreichbar ist. Krankheitstage sind Gesundheitsdaten (Art. 9 DSGVO) — sie stehen als Abwesenheit da, ohne Grund und ohne Befund.</span><span class="wo">Bis zum Ende des Folgejahres</span></div>
+    <div class="zeile"><span class="wer">Dein Verrechnungssatz und dein Kostensatz</span><span>Damit die Zeit auf der Rechnung einen Betrag ergibt. <b>Nur Inhaber und Partner</b> — und du selbst.</span><span class="wo">Bis er sich ändert, dann als Verlauf</span></div>
     <div class="zeile"><span class="wer">Was du in Akten geschrieben hast</span><span>Die Arbeit am Mandat</span><span class="wo">Mit dem Mandat</span></div>
-    <div class="zeile"><span class="wer">Dein Nachweis der KI-Unterweisung</span><span>Pflicht der Beratung aus Art. 4 EU AI Act</span><span class="wo">Bis du gehst, dann drei Jahre</span></div>
-    <div class="zeile"><span class="wer">Wer wann eine Kundenakte geöffnet hat</span><span>Damit nachvollziehbar ist, wer Kundendaten gesehen hat</span><span class="wo">Ein Jahr</span></div>
+    <div class="zeile"><span class="wer">Wer eine Handlung war</span><span>An angelegten, geänderten und geprüften Dingen steht dein Name — sonst wäre nicht nachvollziehbar, wer etwas getan hat.</span><span class="wo">Mit der Sache selbst</span></div>
+    <div class="zeile"><span class="wer">Was du den KI-Berater gefragt hast</span><span>Deine Fragebögen samt Antwort. <b>Nur du</b> — nicht die Leitung, nicht die Kollegen.</span><span class="wo">Zwei Jahre</span></div>
+    <div class="zeile"><span class="wer">Dein Nachweis der KI-Unterweisung</span><span>Pflicht der Beratung aus Art. 4 EU AI Act. <b>Deine Kollegen sehen ihn</b> — der Stand des Teams steht in der Verwaltung.</span><span class="wo">Bis du gehst, dann drei Jahre</span></div>
+    <div class="zeile"><span class="wer">Wer wann eine Kundenakte geöffnet hat</span><span>Damit nachvollziehbar ist, wer Kundendaten gesehen hat. <b>Das schützt den Kunden, nicht die Kontrolle über dich</b> — ausgewertet wird es nur bei einem Verdacht, der jemanden von außen betrifft.</span><span class="wo">Ein Jahr</span></div>
   </div>
-  <p>Rechtsgrundlage ist überwiegend § 26 BDSG und Art. 6 Abs. 1 lit. b DSGVO — es geht um dein Arbeitsverhältnis. Beim Zugriffsprotokoll ist es Art. 6 Abs. 1 lit. f: das berechtigte Interesse daran, dass der Umgang mit Kundendaten nachvollziehbar bleibt.</p>
+  <p>Rechtsgrundlage ist überwiegend § 26 BDSG und Art. 6 Abs. 1 lit. b DSGVO — es geht um dein Arbeitsverhältnis. Beim Zugriffsprotokoll ist es Art. 6 Abs. 1 lit. f: das berechtigte Interesse daran, dass der Umgang mit Kundendaten nachvollziehbar bleibt. Für Krankheitstage kommt Art. 9 Abs. 2 lit. b DSGVO dazu.</p>
+  <p class="hinweis" style="margin-top:16px;padding-top:0;border-top:0">
+    <b>Zwei Zeilen dieser Tabelle sind eine Zusage, die erst noch eingelöst wird.</b> Das
+    Zugriffsprotokoll auf Kundenakten und die Frist deiner Anmeldesitzung gibt es in der Software
+    heute noch nicht. Sie stehen hier, weil sie kommen sollen — und wer diesen Hinweis
+    veröffentlicht, bevor sie da sind, gibt eine Zusage, die er nicht hält.
+  </p>
 
   <h2>Was deine Vorgesetzten sehen können</h2>
   <p>Diese Grenze steht hier, weil sie sonst niemand nachliest:</p>
@@ -175,17 +199,21 @@ body{--recht-kopf-hoehe:100px}
       </ul>
     </div>
     <div class="nicht">
-      <b>Was nicht erhoben wird</b>
+      <b>Was deine Beratung nicht sieht</b>
       <ul>
-        <li>wann du dich anmeldest oder wie lange ein Fenster offen war</li>
+        <li><b>wann du dich anmeldest.</b> Das weiß der Anmeldedienst, und deine Beratung kommt nicht daran — die Software zeigt es auf keiner Fläche.</li>
         <li>was du tippst, während du tippst, oder wie schnell</li>
         <li>wo du bist</li>
-        <li>welche Seiten du in welcher Reihenfolge ansiehst</li>
         <li>eine Bewertung deiner Leistung durch die Software</li>
       </ul>
     </div>
   </div>
   <p><b>Der Unterschied ist wichtig:</b> was du <i>erfasst</i>, ist eine Angabe von dir und dient der Abrechnung. Eine <i>Überwachung</i> deines Verhaltens findet nicht statt — nicht, weil es verboten wäre, sie zu bauen, sondern weil sie nicht gebaut ist.</p>
+  <p><b>Was auf dem Server anfällt, ist etwas anderes als das, was die Software führt.</b> Jeder
+  Seitenaufruf hinterlässt dort für kurze Zeit eine Zeile mit Uhrzeit und Adresse — das tut jeder
+  Server im Internet, es dient dem Betrieb, und deine Beratung sieht es nicht. Wer daraus etwas
+  über dich ablesen wollte, müsste an den Server; das darf sie nicht, und quoroAI wertet es nicht
+  aus.</p>
 
   <h2>Was der KI-Berater über dich nicht tut</h2>
   <p>Der KI-Berater arbeitet an den Mandaten der Beratung, nicht an ihren Beschäftigten. Über einen benannten Menschen trifft er keine Aussage: keine Bewertung, keine Auswahl, keine Rangfolge, keine Empfehlung zu Einstellung, Beförderung, Kündigung, Aufgabenzuweisung oder Vergütung, keine Leistungs- oder Verhaltensüberwachung, keine Einschätzung von Gefühlslagen.</p>
