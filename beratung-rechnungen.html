@@ -81,7 +81,7 @@
    Ebenso im Gutschrift-Modus: eine Position wird zum <label> um Kästchen und
    Text, Ziel 44 statt 15 × 15. Ein Polster am Kästchen selbst hätte nichts
    getan — der Browser verwirft padding an einem Ankreuzfeld.
-   Marker: BERATUNG-RECHNUNGEN-V19 (V19: der Werkstatt-Knopf heißt Stand des Designs) (die Fingermaße stimmen) */
+   Marker: BERATUNG-RECHNUNGEN-V21 (V21: die Tür zu den wiederkehrenden Rechnungen. V20: die Abreden kommen aus abreden.js) (V19: der Werkstatt-Knopf heißt Stand des Designs) (die Fingermaße stimmen) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -396,6 +396,7 @@ a.beleg-zeile{
 <!-- lage.js bringt window.Lage: das eine „Heute" des Entwurfs und das Rechnen
      mit Tagesabständen. Muss vor allem stehen, was daraus liest. -->
 <script src="lage.js"></script>
+<script src="abreden.js"></script>
 <script src="krume.js"></script>
 </head>
 <body class="quoro"
@@ -497,6 +498,7 @@ a.beleg-zeile{
       <div class="klein">Solange hier etwas fehlt, lässt sich keine Rechnung stellen. Rechnungsdaten pflegen Inhaber und Partner.</div>
     </section>
   </div>
+  <p class="fussnote">Was jeden Monat gleich aussieht, muss niemand jeden Monat tippen: <a href="beratung-rechnungsvorlagen.html">wiederkehrende Rechnungen</a> legen zum Stichtag von selbst einen Entwurf an — gestellt wird er hier, von einem Menschen.</p>
 </main>
 
 <div id="demo-hinweis" role="status" aria-live="polite" style="position:fixed;top:70px;left:50%;translate:-50% 6px;z-index:90;pointer-events:none;font-family:'Caveat',cursive;font-size:21px;font-weight:700;color:var(--lila-700);opacity:0;rotate:-1deg;transition:opacity .3s ease,translate .3s var(--kurve)"></div>
@@ -596,19 +598,11 @@ a.beleg-zeile{
      Sichtbar im Stapel ist davon nur die letzte; ohne diese beiden Felder
      böte ein Entwurf mit Stichtag im Mai oder Juni die Rate ein zweites Mal
      an. Dieselbe Sperre wie bei MTS. */
-  var ABREDEN = {
-    petersen: {art: 'monatspauschale', wort: 'über eine Monatspauschale von 2.400 €', cent: 240000,
-               zielTage: 10, frueherJahr: '2026', frueherBis: '2026-06'},
-    cordes:   {art: 'monatspauschale', wort: 'über eine Monatspauschale von 2.750 €', cent: 275000},
-    freitag:  {art: 'aufwand', wort: 'nach Aufwand und Auslagen'},
-    mts:      {art: 'jahrespauschale', wort: 'über eine Jahrespauschale von 27.000 € in zwölf Abschlägen',
-               cent: 2700000, raten: 12, rate: 225000,
-               /* Abschläge vor dem sichtbaren Stapel: Januar bis Juni 2026.
-                  Juli und August stehen als 2026-0081 und 2026-0084 unten
-                  drin und werden gezählt, nicht geschätzt. Das Jahr steht
-                  dabei — der Stichtag darf in jedem Jahr liegen. */
-               frueherJahr: '2026', frueherBis: '2026-06', frueher: 6, frueherCent: 1350000}
-  };
+  /* Aus dem Baustein abreden.js — die Abreden standen bis zum 20.08.2026 nur
+     hier, und die Fläche für wiederkehrende Rechnungen braucht dieselben
+     Beträge. Zwei Kopien hätten geheißen: die eine Fläche erzeugt den
+     Entwurf, den die andere mit einem anderen Betrag anzeigt. */
+  var ABREDEN = Abreden.alle();
   /* Offene berechenbare Stunden je Kunde. satz = null heißt: das Mandat hat
      keinen Stundensatz, es bleibt liegen statt den Lauf abzubrechen.
      bis = letzter Tag, an dem gearbeitet wurde — der Stichtag der neuen

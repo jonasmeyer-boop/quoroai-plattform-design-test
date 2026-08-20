@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wiederkehrende Rechnungen</title>
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="system.css">
+<style>
+/* quoroai-plattform-design · Wiederkehrende Rechnungen: was von selbst als
+   Entwurf entsteht (Produkt-Route /rechnungen/vorlagen, Design-Issue #84).
+
+   DIE EINE REGEL: **es entsteht ein ENTWURF, nie eine Rechnung.** Zum
+   Stichtag legt die Software den Entwurf an, die Glocke meldet ihn, und
+   gestellt wird er von einem Menschen. Das ist keine Vorsicht, sondern die
+   Haltung des ganzen Hauses: eine Rechnung, die niemand angesehen hat, ist
+   eine Rechnung, für die niemand geradesteht. Die Fläche sagt das an drei
+   Stellen, weil man es an genau einer übersieht.
+
+   WAS HIER NICHT STEHT, UND WARUM: Kunden, die nach Aufwand abrechnen,
+   tauchen nicht als Vorlage auf. Bei ihnen weiß vorher niemand, was
+   draufsteht — ein Entwurf über null Euro wäre eine Meldung ohne Inhalt.
+   Sie stehen unten als eigene Zeile mit ihrem Grund, statt zu fehlen: eine
+   Liste, die jemanden weglässt, ohne es zu sagen, liest sich wie ein
+   Versehen (Regel aus beratung-radar.html: was weggelassen wurde, steht
+   dabei).
+
+   DER NÄCHSTE LAUF IST EIN DATUM, KEIN „BALD". Jede Zeile nennt den Tag,
+   an dem der nächste Entwurf entsteht, und wie viele Tage das noch sind —
+   gerechnet aus der Lage, nicht getippt. Beträge und Rhythmus kommen aus
+   abreden.js, derselben Quelle, aus der der Rechnungs-Raum seine Entwürfe
+   baut; sonst zeigte diese Fläche einen Betrag an und die andere erzeugte
+   einen anderen.
+
+   PAUSIEREN STATT LÖSCHEN. Eine Vorlage, die nicht mehr laufen soll, wird
+   angehalten und behält ihren Verlauf. Gelöscht würde die Frage „warum kam
+   im März keine Rechnung?" unbeantwortbar.
+
+   Chrome ist quoroAI, Krume in den Rechnungs-Raum, Uhr-Dock wie überall.
+   Nur Inhaber und Partner (im Produkt: isLead).
+   Marker: BERATUNG-RECHNUNGSVORLAGEN-V2 (V2: „Angehalten" stand doppelt,
+   und der Betrag rutschte bei der längsten Abrede-Zeile unter den Text.
+   V1: was von selbst als Entwurf entsteht) */
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+button{font-family:inherit}
+
+/* ========== quoroAI-Chrom ========== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(253,253,254,.72);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:0.5px solid var(--nebel-200);
+}
+nav .wortmarke{font-family:var(--schrift-schau);font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+nav .wortmarke .quoro-logo{display:block;width:28px;height:28px}
+nav .wortmarke small{display:block;font-size:11px;font-weight:500;color:var(--nebel-600);letter-spacing:0;word-spacing:2px}
+nav .nav-rechts{display:flex;align-items:center;gap:10px}
+nav a.vorschlaege{
+  padding:8px 14px;border-radius:999px;border:0.5px solid var(--nebel-200);
+  background:rgba(255,255,255,.8);
+  font-size:12.5px;font-weight:700;color:var(--nebel-600);
+  text-decoration:none;transition:border-color .2s ease,color .2s ease;
+}
+nav a.vorschlaege:hover{border-color:var(--lila-600);color:var(--tinte)}
+@media (pointer:coarse),(max-width:700px){
+  nav a.vorschlaege{min-height:44px;padding:0 14px;display:inline-flex;align-items:center}
+}
+@media (max-width:1320px){ nav{height:118px;padding-bottom:58px} }
+
+/* ========== Seite ========== */
+main{max-width:840px;margin:0 auto;padding:136px 24px calc(150px + env(safe-area-inset-bottom))}
+main > *{opacity:0;translate:0 12px;animation:ankunft .35s var(--kurve) var(--verz,0s) forwards}
+@keyframes ankunft{to{opacity:1;translate:0 0}}
+@media (prefers-reduced-motion:reduce){ main > *{animation-duration:.01ms} }
+.kopf h1{font-size:clamp(26px,3.6vw,36px);line-height:1.15;hyphens:auto;overflow-wrap:break-word}
+.kopf .stand{font-size:13.5px;color:var(--nebel-600);margin-top:4px;max-width:70ch}
+h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--nebel-600);margin-top:34px}
+h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.55;max-width:78ch}
+.fussnote{font-size:12.5px;color:var(--nebel-500);margin-top:12px;line-height:1.55;max-width:78ch}
+
+/* Der Merksatz oben: was hier entsteht, ist ein Entwurf */
+.merk{
+  margin-top:20px;padding:16px 20px;border-radius:var(--radius-karte);
+  font-size:15.5px;line-height:1.6;
+}
+.merk b{font-weight:600}
+
+/* Eine Vorlage: Glas-Zettel wie die Zettel der anderen Räume */
+.vorlage{
+  margin-top:12px;border-radius:var(--radius-karte);padding:18px 20px;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 14px 40px rgba(24,21,47,.10);
+}
+.vorlage.ruht{background:rgba(250,250,252,.6);box-shadow:none}
+/* Die linke Hälfte darf schrumpfen, der Betrag nicht: ohne die Basis rutschte
+   er bei MTS unter den Text, weil dessen Abrede-Zeile am längsten ist. */
+.v-kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.v-kopf > div:first-child{flex:1 1 260px;min-width:0}
+.v-kopf b{font-size:17px;font-weight:600;letter-spacing:-.01em;line-height:1.35;display:block}
+.v-meta{font-size:13.5px;color:var(--nebel-600);margin-top:4px;line-height:1.55}
+.v-betrag{
+  flex-shrink:0;text-align:right;
+  font-size:21px;font-weight:600;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum";white-space:nowrap;
+}
+.v-betrag small{display:block;font-size:11.5px;font-weight:500;color:var(--nebel-500);letter-spacing:0}
+.v-naechster{
+  margin-top:14px;padding-top:13px;border-top:0.5px solid var(--nebel-200);
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  font-size:14px;
+}
+.v-naechster .zustand{width:52px;height:14px;flex-shrink:0}
+.v-naechster .wort{color:var(--nebel-600)}
+.v-naechster .wort b{color:var(--tinte);font-weight:600}
+.v-griffe{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.v-griffe .knopf{min-height:44px;padding:0 16px;font-size:13.5px}
+.melde{
+  margin-top:12px;font-size:13.5px;color:var(--gruen);background:var(--gruen-fond);
+  border-radius:var(--radius-innen);padding:10px 14px;line-height:1.55;
+}
+
+/* Was hier bewusst nicht steht */
+.ohne{
+  margin-top:12px;border-radius:var(--radius-karte);
+  border:1px dashed var(--nebel-300);padding:16px 20px;
+  font-size:14px;line-height:1.6;color:var(--nebel-600);
+}
+.ohne b{color:var(--tinte);font-weight:600}
+.ohne ul{margin:8px 0 0 20px;list-style:disc}
+.ohne li{margin-top:5px}
+
+@media (max-width:560px){
+  .v-kopf{flex-direction:column;gap:8px}
+  .v-betrag{text-align:left}
+  .v-griffe .knopf{width:100%;justify-content:center}
+}
+</style>
+<!-- lage.js: das eine „Heute" und die Mandate. abreden.js: was mit welchem
+     Kunden vereinbart ist — dieselbe Quelle wie im Rechnungs-Raum. -->
+<script src="lage.js"></script>
+<script src="abreden.js"></script>
+<script src="krume.js"></script>
+</head>
+<body class="quoro"
+      data-krume-raum="zentrale"
+      data-krume-ueber="beratung-rechnungen.html|Rechnungen der Beratung"
+      data-krume-hier="Wiederkehrende Rechnungen"
+      data-hilfe-titel="Wiederkehrende Rechnungen"
+      data-hilfe-satz="Was zum Stichtag von selbst als Entwurf entsteht. Gestellt wird er von einem Menschen, nie von der Software.">
+
+<nav>
+  <div class="wortmarke"><img class="quoro-logo" src="bilder/quoro-icon.svg" alt="" width="28" height="28"><div>quoroAI<small>Cockpit der Beratung</small></div></div>
+  <div class="nav-rechts"><span data-hilfe-knopf></span><a class="vorschlaege" href="stand.html">Stand des Designs</a></div>
+</nav>
+
+<main>
+  <div class="kopf">
+    <h1>Wiederkehrende Rechnungen</h1>
+    <div class="stand">Was jeden Monat gleich aussieht, muss niemand jeden Monat tippen. Diese Fläche sehen nur Inhaberin und Partner.</div>
+  </div>
+
+  <div class="merk glas-lila"
+       data-hilfe="Der Entwurf wird angelegt, nicht gestellt. Er landet im Rechnungs-Raum bei den Entwürfen, die Glocke meldet ihn, und erst wer ihn gestellt hat, hat ihn gestellt."
+       data-hilfe-name="Entwurf, nicht Rechnung">
+    <b>Zum Stichtag entsteht ein Entwurf, keine Rechnung.</b> Er liegt danach im
+    <a href="beratung-rechnungen.html">Rechnungs-Raum</a>, die Glocke meldet ihn, und gestellt
+    wird er von einem Menschen. Eine Nummer bekommt er erst dabei.
+  </div>
+
+  <h3>Läuft</h3>
+  <p class="was">Je Zeile ein Kunde mit fester Abrede. Betrag und Rhythmus stehen in der Abrede des Mandats — geändert werden sie dort, nicht hier.</p>
+  <div id="laufend"></div>
+
+  <h3>Angehalten</h3>
+  <p class="was">Eine angehaltene Vorlage erzeugt nichts und behält ihren Verlauf. Gelöscht wäre die Frage „warum kam im März keine Rechnung?" nicht mehr zu beantworten.</p>
+  <div id="ruhend"></div>
+  <div class="ohne" id="ruhend-leer" hidden>Nichts angehalten.</div>
+
+  <h3>Was hier bewusst nicht steht</h3>
+  <div class="ohne" id="ohne"></div>
+
+  <p class="fussnote">Der Stichtag entscheidet, welche Auslagen mitkommen: weiterberechenbare Auslagen bis zum Stichtag stehen im Entwurf, spätere warten auf den nächsten. Wie ein Entwurf zusammengesetzt wird, steht im <a href="beratung-rechnungen.html">Rechnungs-Raum</a>.</p>
+</main>
+
+<script src="uhr.js"></script>
+<script src="hilfe.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- Der Stichtag je Vorlage ----------
+     Im Produkt ein Feld an der Vorlage. Hier: Petersen am 1., Cordes am 3.,
+     MTS am 5. — dieselben Tage, an denen ihre Rechnungen im Rechnungs-Raum
+     entstehen. Der Zustand („laeuft"/„ruht") gehört ebenfalls der Vorlage,
+     nicht der Abrede. */
+  var VORLAGEN = [
+    { mandat: 'petersen', tag: 1,  zustand: 'laeuft' },
+    { mandat: 'cordes',   tag: 3,  zustand: 'laeuft' },
+    { mandat: 'mts',      tag: 5,  zustand: 'ruht',
+      grund: 'Angehalten am 3. Juli 2026: MTS prüft die Jahrespauschale neu.' }
+  ];
+
+  var heute = Lage.heuteDatum();
+
+  /* Der nächste Stichtag ab heute. Fällt der Tag in diesem Monat schon
+     hinter uns, ist es der nächste Monat. Monate ohne diesen Tag (der 31.
+     im Februar) rutschen auf den letzten des Monats — sonst fiele ein Lauf
+     aus, und niemand sähe warum. */
+  function naechsterStichtag(tag){
+    var j = heute.getFullYear(), m = heute.getMonth();
+    function bauen(jahr, monat){
+      var letzter = new Date(jahr, monat + 1, 0).getDate();
+      return new Date(jahr, monat, Math.min(tag, letzter), 12, 0, 0);
+    }
+    var d = bauen(j, m);
+    if (Lage.iso(d) < Lage.heuteISO()) {
+      m += 1;
+      if (m > 11) { m = 0; j += 1; }
+      d = bauen(j, m);
+    }
+    return d;
+  }
+
+  function zahl(n){ return n.toLocaleString('de-DE'); }
+
+  function baueVorlage(v){
+    var a = Abreden.abrede(v.mandat);
+    var m = Lage.mandat(v.mandat);
+    var el = document.createElement('section');
+    el.className = 'vorlage' + (v.zustand === 'ruht' ? ' ruht' : '');
+
+    /* Kopf: wer, worüber, wie viel */
+    var kopf = document.createElement('div');
+    kopf.className = 'v-kopf';
+    var links = document.createElement('div');
+    var b = document.createElement('b');
+    b.textContent = m ? m.name : v.mandat;
+    var meta = document.createElement('div');
+    meta.className = 'v-meta';
+    meta.textContent = 'Abgerechnet ' + a.wort + ', ' + Abreden.rhythmus(v.mandat) +
+      ' am ' + v.tag + '. Zahlungsziel ' + Abreden.zielTage(v.mandat) + ' Tage.';
+    links.appendChild(b);
+    links.appendChild(meta);
+    var betrag = document.createElement('div');
+    betrag.className = 'v-betrag';
+    betrag.innerHTML = Abreden.euro(Abreden.rateCent(v.mandat)) +
+      '<small>je Lauf, netto</small>';
+    kopf.appendChild(links);
+    kopf.appendChild(betrag);
+    el.appendChild(kopf);
+
+    /* Der nächste Lauf — ein Datum, kein „bald" */
+    var naechst = document.createElement('div');
+    naechst.className = 'v-naechster';
+    if (v.zustand === 'ruht') {
+      /* Der Grund beginnt selbst mit „Angehalten am …" — ein festes
+         „Angehalten." davor stand doppelt da. */
+      naechst.innerHTML = '<span class="zustand entwurf" role="img" aria-label="angehalten"></span>' +
+        '<span class="wort">' + (v.grund || 'Angehalten.') + ' Es entsteht nichts, bis du sie wieder laufen lässt.</span>';
+    } else {
+      var d = naechsterStichtag(v.tag);
+      var tage = Lage.tageZwischen(heute, d);
+      /* Die Kapsel füllt sich, je näher der Stichtag rückt — über einen
+         Monat gerechnet. Der Zustand steht immer auch als Text daneben. */
+      var stand = Math.max(0, Math.min(1, (30 - tage) / 30));
+      var wann = tage === 0 ? 'heute'
+               : tage === 1 ? 'morgen'
+               : 'in ' + zahl(tage) + ' Tagen';
+      naechst.innerHTML = '<span class="zustand" style="--stand:' + stand.toFixed(2) +
+        ';--fluid:var(--lila-400);--fluid-tief:var(--lila-600)" role="img" aria-label="nächster Entwurf ' + wann + '"></span>' +
+        '<span class="wort">Nächster Entwurf <b>' + Lage.langDatum(d) + '</b>, ' + wann + '.</span>';
+    }
+    el.appendChild(naechst);
+
+    /* Griffe */
+    var griffe = document.createElement('div');
+    griffe.className = 'v-griffe';
+    var knopf = document.createElement('button');
+    knopf.type = 'button';
+    knopf.className = 'knopf ' + (v.zustand === 'ruht' ? 'primaer' : 'leise');
+    knopf.textContent = v.zustand === 'ruht' ? 'Wieder laufen lassen' : 'Anhalten';
+    knopf.addEventListener('click', function(){
+      v.zustand = v.zustand === 'ruht' ? 'laeuft' : 'ruht';
+      if (v.zustand === 'laeuft') v.grund = '';
+      else v.grund = 'Angehalten am ' + Lage.kurzDatum(heute) + '.';
+      bauen();
+      melde(v.zustand === 'ruht'
+        ? (m ? m.name : v.mandat) + ' ist angehalten. Zum ' + v.tag + '. entsteht nichts mehr, bis du sie wieder laufen lässt.'
+        : (m ? m.name : v.mandat) + ' läuft wieder. Nächster Entwurf am ' + Lage.langDatum(naechsterStichtag(v.tag)) + '.');
+    });
+    griffe.appendChild(knopf);
+
+    if (v.zustand !== 'ruht') {
+      var jetzt = document.createElement('button');
+      jetzt.type = 'button';
+      jetzt.className = 'knopf sekundaer';
+      jetzt.textContent = 'Entwurf jetzt anlegen';
+      jetzt.addEventListener('click', function(){
+        melde('Der Entwurf für ' + (m ? m.name : v.mandat) + ' über ' +
+              Abreden.euro(Abreden.rateCent(v.mandat)) + ' liegt im Rechnungs-Raum. ' +
+              'Gestellt ist er damit nicht — das machst du dort, und erst dabei bekommt er seine Nummer.');
+      });
+      griffe.appendChild(jetzt);
+    }
+    var hin = document.createElement('a');
+    hin.className = 'knopf leise';
+    hin.href = 'beratung-akte.html?mandat=' + v.mandat;
+    hin.textContent = 'Zur Akte';
+    griffe.appendChild(hin);
+    el.appendChild(griffe);
+
+    return el;
+  }
+
+  var meldung = null;
+  function melde(text){
+    if (!meldung) {
+      meldung = document.createElement('div');
+      meldung.className = 'melde';
+      meldung.setAttribute('role', 'status');
+      meldung.setAttribute('aria-live', 'polite');
+      document.getElementById('laufend').after(meldung);
+    }
+    meldung.textContent = text;
+  }
+
+  function bauen(){
+    var wo = document.getElementById('laufend');
+    var ruhe = document.getElementById('ruhend');
+    wo.textContent = '';
+    ruhe.textContent = '';
+    VORLAGEN.forEach(function(v){
+      (v.zustand === 'ruht' ? ruhe : wo).appendChild(baueVorlage(v));
+    });
+    document.getElementById('ruhend-leer').hidden = ruhe.children.length > 0;
+  }
+
+  /* ---------- Was hier bewusst nicht steht ----------
+     Jedes Mandat ohne feste Abrede, mit seinem Grund. Eine Liste, die
+     jemanden weglässt, ohne es zu sagen, liest sich wie ein Versehen. */
+  (function ohne(){
+    var fehlende = Lage.mandate().filter(function(m){
+      return !m.intern && !Abreden.istWiederkehrend(m.id);
+    });
+    var el = document.getElementById('ohne');
+    if (!fehlende.length) {
+      el.textContent = 'Alle Mandate mit fester Abrede stehen oben.';
+      return;
+    }
+    var satz = '<b>Nach Aufwand abgerechnete Mandate haben keine Vorlage.</b> ' +
+      'Vorher weiß niemand, was draufsteht — ein Entwurf über null Euro wäre eine Meldung ohne Inhalt. ' +
+      'Ihre Rechnungen entstehen im Rechnungs-Raum, wenn du sie machst.<ul>';
+    fehlende.forEach(function(m){
+      var a = Abreden.abrede(m.id);
+      satz += '<li>' + m.name + ' — abgerechnet ' + (a ? a.wort : 'ohne feste Abrede') + '</li>';
+    });
+    el.innerHTML = satz + '</ul>';
+  })();
+
+  bauen();
+})();
+</script>
+<script src="zeiger.js"></script>
+</body>
+</html>
