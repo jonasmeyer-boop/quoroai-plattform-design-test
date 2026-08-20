@@ -9,8 +9,9 @@ nichts aus `entwuerfe/`.
 
 | Datei | Was es ist |
 |---|---|
-| `variante-a.html` | Entwurf A „Der weiße Raum": ruhig, editorial. Kino-Moment ist der Markenwechsel, dasselbe Kundenportal wandert beim Scrollen durch drei Beratungsmarken. |
-| `variante-b.html` | Entwurf B „Die Werkbank": laut, plakative Schauschrift. Kino-Moment ist der Aufbau, aus einer Mandantenfrage entsteht gescrubbt ein fertiger Vermerk. |
+| `index.html` | **Die Startseite** (Jonas' Wahl: Entwurf A). Hero ist das Scroll-Kino: aus einer Wolke fliegender Belege setzt sich beim Scrollen ein Kopf aus Papier zusammen (61 Bilder unter `bilder/kino/`, fal.ai: FLUX-Motiv + Kling-Film, gescrubbt per Canvas mit Multiply). Danach Markenwechsel, Werkzeuge, Preisrechner, Daten. |
+| `variante-a.html` | Entwurf A „Der weiße Raum", der Stand vor dem Kino. Kino-Moment ist der Markenwechsel. |
+| `variante-b.html` | Entwurf B „Die Werkbank": laut, plakative Schauschrift. Kino-Moment ist der Aufbau eines Vermerks. Nicht gewählt, bleibt als Referenz. |
 | `stil.css` | Marke und Bausteine. Tokens sind eine Kopie aus `entwuerfe/system.css` (Lila #6f63e8, Clash Display, General Sans). |
 | `zahlen.js` | Die geteilten Zahlen des Auftritts. Werte aus `entwuerfe/preise.js` kopiert, keine Fläche tippt einen Betrag ins Markup. |
 | `schriften/`, `bilder/` | Kopien der beiden Schriften und des Logos. |
@@ -31,9 +32,10 @@ gekennzeichnet.
 ## Vorschau
 
     python3 -m http.server 8099 --bind 127.0.0.1
-    # http://127.0.0.1:8099/website/variante-a.html
+    # http://127.0.0.1:8099/website/index.html
 
 ## Offen
 
-Noch nicht entschieden: welche Variante es wird. Danach kommen die
-Unterseiten und das Bildmaterial. Rechtsseiten sind im Fuß noch tote Verweise.
+Entschieden ist: nur die Startseite, richtig fertig (Chronik 2026-08-20).
+Unterseiten gibt es nicht; die Rechtsverweise im Fuß sind bewusst tot, bis
+dieser Umfang neu entschieden wird.

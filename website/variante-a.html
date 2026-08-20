@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>quoroAI · Entwurf A: Der weiße Raum</title>
+<title>quoroAI, Entwurf A: Der weiße Raum</title>
 <meta name="description" content="quoroAI ist die Plattform, auf der Unternehmensberatungen ihren Kunden einen KI-Berater unter der eigenen Marke geben.">
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="stil.css">
@@ -77,7 +77,7 @@
 /* ---------- Abschnittsköpfe ---------- */
 .kopfzeile{max-width:min(760px,100%)}
 .kopfzeile p{margin-top:16px;font-size:18px;color:var(--nebel-700)}
-section{padding-top:var(--luft)}
+section.bahn{padding-top:var(--luft)}
 
 /* ---------- Zwei Seiten desselben Hauses ---------- */
 .zweiseiten{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:44px}
@@ -179,6 +179,7 @@ section{padding-top:var(--luft)}
 .rechner .aufstellung{margin-top:18px;display:grid;gap:8px;font-size:14px;color:var(--nebel-700)}
 .rechner .aufstellung div{display:flex;justify-content:space-between;gap:14px}
 .rechner .aufstellung span:last-child{font-variant-numeric:tabular-nums}
+.rechner .aufstellung .anmerkung{display:block;color:var(--nebel-500);font-size:13px}
 .preistext ul{list-style:none;display:grid;gap:16px;margin-top:22px}
 .preistext li{display:flex;gap:12px;font-size:16px;align-items:flex-start}
 .preistext li svg{width:20px;height:20px;flex-shrink:0;margin-top:3px;color:var(--lila-600)}
@@ -613,7 +614,7 @@ section{padding-top:var(--luft)}
     aufstellung.innerHTML =
       '<div><span>Plattformgebühr je Monat</span><span>' + Z.euro(m.gebuehr) + '</span></div>' +
       '<div><span>' + n + ' Zugänge zu ' + Z.euro(m.proZugang) + '</span><span>' + Z.euro(m.proZugang * n) + '</span></div>' +
-      '<div><span>Mengenrabatt auf den Listenpreis</span><span>' + m.rabatt + ' %</span></div>';
+      '<div class="anmerkung">Im Preis je Zugang stecken schon ' + m.rabatt + ' % Mengenrabatt auf den Listenpreis.</div>';
   }
   regler.addEventListener('input', rechne);
   rechne();

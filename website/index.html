@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>quoroAI · Der KI-Berater deiner Beratung</title>
+<title>quoroAI für Unternehmensberatungen</title>
 <meta name="description" content="quoroAI ist die Plattform, auf der Unternehmensberatungen ihren Kunden einen KI-Berater unter der eigenen Marke geben.">
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="stil.css">
@@ -52,17 +52,17 @@
 .kino .tafel .klein{margin-top:8px;font-size:15.5px;color:var(--nebel-700)}
 .kino .finale{
   position:absolute;left:clamp(24px,7vw,110px);top:50%;transform:translateY(-50%) translateY(30px);
-  opacity:0;max-width:min(46vw,620px);pointer-events:none;
-  transition:opacity .6s var(--kurve),transform .6s var(--kurve);
+  opacity:0;max-width:min(46vw,620px);pointer-events:none;visibility:hidden;
+  transition:opacity .6s var(--kurve),transform .6s var(--kurve),visibility 0s .6s;
 }
-.kino .finale.da{opacity:1;transform:translateY(-50%);pointer-events:auto}
+.kino .finale.da{opacity:1;transform:translateY(-50%);pointer-events:auto;visibility:visible;transition:opacity .6s var(--kurve),transform .6s var(--kurve)}
 .kino .finale h1{font-size:clamp(34px,4.6vw,60px);max-width:13ch}
 .kino .finale h1 em{font-style:normal;color:var(--lila-700)}
 .kino .finale .vorsatz{margin-top:18px;font-size:18px;color:var(--nebel-700);max-width:44ch}
 .kino .finale .unterzeile{margin-top:18px;font-size:14px;color:var(--nebel-500)}
 .kino .abspann{
   position:absolute;left:0;right:0;bottom:26px;text-align:center;
-  font-size:13.5px;color:var(--nebel-500);opacity:var(--abspann,1);transition:opacity .3s;
+  font-size:13.5px;color:var(--nebel-500);transition:opacity .3s;
 }
 .knopfreihe{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
 .aufhaenger{
@@ -98,8 +98,8 @@
   .kino .haftet{position:static;height:auto;padding:calc(72px + 40px) 0 60px}
   .kino .lichthof{display:none}
   .kino canvas{position:static;transform:none;display:block;margin:0 auto;height:auto;width:min(520px,86vw)}
-  .kino .tafel{display:none}
-  .kino .finale{position:static;transform:none;opacity:1;max-width:min(680px,100% - 48px);margin:18px auto 0;pointer-events:auto}
+  .kino .tafel{position:static;transform:none;opacity:1;max-width:min(680px,100% - 48px);margin:18px auto 0}
+  .kino .finale{position:static;transform:none;opacity:1;visibility:visible;max-width:min(680px,100% - 48px);margin:26px auto 0;pointer-events:auto}
   .kino .abspann{display:none}
 }
 
@@ -127,13 +127,6 @@
 .antwort .beraterzeichen{width:28px;height:28px;border-radius:8px;flex-shrink:0;background:var(--kundenfarbe,#2b5fe3);display:grid;place-items:center;color:#fff;font-size:11px;font-weight:700}
 .antwort .text{font-size:14.5px;line-height:1.55}
 .antwort .text b{font-weight:600}
-.beleg{
-  margin-top:16px;border:0.5px solid var(--nebel-200);border-radius:14px;padding:14px 16px;
-  display:grid;gap:10px;background:var(--nebel-050);
-}
-.beleg .zeile{display:flex;justify-content:space-between;gap:14px;font-size:13.5px}
-.beleg .zeile span:last-child{font-variant-numeric:tabular-nums;font-weight:600}
-.beleg .quelle{font-size:12.5px;color:var(--nebel-500)}
 
 @media (max-width:960px){
   .fenster{transform:none}
@@ -142,7 +135,7 @@
 /* ---------- Abschnittsköpfe ---------- */
 .kopfzeile{max-width:min(760px,100%)}
 .kopfzeile p{margin-top:16px;font-size:18px;color:var(--nebel-700)}
-section{padding-top:var(--luft)}
+section.bahn{padding-top:var(--luft)}
 
 /* ---------- Zwei Seiten desselben Hauses ---------- */
 .zweiseiten{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:44px}
@@ -244,6 +237,7 @@ section{padding-top:var(--luft)}
 .rechner .aufstellung{margin-top:18px;display:grid;gap:8px;font-size:14px;color:var(--nebel-700)}
 .rechner .aufstellung div{display:flex;justify-content:space-between;gap:14px}
 .rechner .aufstellung span:last-child{font-variant-numeric:tabular-nums}
+.rechner .aufstellung .anmerkung{display:block;color:var(--nebel-500);font-size:13px}
 .preistext ul{list-style:none;display:grid;gap:16px;margin-top:22px}
 .preistext li{display:flex;gap:12px;font-size:16px;align-items:flex-start}
 .preistext li svg{width:20px;height:20px;flex-shrink:0;margin-top:3px;color:var(--lila-600)}
@@ -300,7 +294,7 @@ section{padding-top:var(--luft)}
   <section class="kino" aria-label="Aus tausend Belegen setzt sich ein Kopf zusammen">
     <div class="haftet">
       <div class="lichthof" id="lichthof"></div>
-      <canvas id="leinwand" width="1024" height="1024" aria-hidden="true"></canvas>
+      <canvas id="leinwand" aria-hidden="true"></canvas>
       <div class="tafel" data-fenster="0.04,0.26">
         <div class="gross">Tausend Belege.</div>
         <div class="klein">Bilanzen, Kostenstellen, Verträge, Protokolle. Das Wissen deiner Beratung, verstreut über Ordner und Postfächer.</div>
@@ -559,16 +553,20 @@ section{padding-top:var(--luft)}
   var tafeln = Array.prototype.slice.call(document.querySelectorAll('.kino .tafel'));
 
   var vorrat = new Array(BILDER);
-  var geladen = 0;
   function lade(i) {
     var b = new Image();
-    b.onload = function () { geladen++; vorrat[i] = b; if (i === 0 || ruhig) male(letztesZiel); };
+    b.onload = function () { vorrat[i] = b; if (i === 0 || i === letztesZiel || ruhig) male(letztesZiel); };
     b.src = PFAD(i);
   }
-  /* Erst das erste und letzte Bild, dann der Rest — so steht sofort etwas. */
+  /* Ruhige Fassung: nur das fertige Bild. Sonst erst das erste und letzte,
+     dann der Rest — so steht sofort etwas. */
   if (BILDER > 0) {
-    lade(0); if (BILDER > 1) lade(BILDER - 1);
-    for (var i = 1; i < BILDER - 1; i++) lade(i);
+    if (ruhig) {
+      lade(BILDER - 1);
+    } else {
+      lade(0); if (BILDER > 1) lade(BILDER - 1);
+      for (var i = 1; i < BILDER - 1; i++) lade(i);
+    }
   }
 
   var letztesZiel = 0;
@@ -583,13 +581,17 @@ section{padding-top:var(--luft)}
   /* Ein weisser Rand-Schleier auf der Leinwand: multipliziert unsichtbar,
      deckt aber den Studioverlauf an den Bildkanten ab. */
   var schleier = null;
-  function baueSchleier() {
-    var w = leinwand.width, h = leinwand.height;
-    schleier = stift.createRadialGradient(w / 2, h / 2, w * .30, w / 2, h / 2, w * .52);
+  function bemesse() {
+    /* Speicher nach Anzeigegröße und Pixeldichte (Deckel 2), sonst wird der
+       Kopf auf dichten Bildschirmen weich. */
+    var kante = Math.round(leinwand.getBoundingClientRect().width * Math.min(window.devicePixelRatio || 1, 2)) || 1152;
+    if (kante === leinwand.width) return;
+    leinwand.width = kante; leinwand.height = kante;
+    schleier = stift.createRadialGradient(kante / 2, kante / 2, kante * .30, kante / 2, kante / 2, kante * .52);
     schleier.addColorStop(0, 'rgba(255,255,255,0)');
     schleier.addColorStop(1, 'rgba(255,255,255,1)');
   }
-  baueSchleier();
+  bemesse();
   function male(z) {
     letztesZiel = z;
     var b = naechstesGeladene(z);
@@ -637,13 +639,13 @@ section{padding-top:var(--luft)}
 
     /* die Bühne belichtet */
     finale.classList.toggle('da', p >= .78);
-    document.querySelector('.kino .haftet').style.setProperty('--abspann', p > .04 ? 0 : 1);
     abspann.style.opacity = p > .04 ? 0 : 1;
   }
   window.addEventListener('scroll', function () {
     if (!laeuft) { laeuft = true; requestAnimationFrame(messen); }
   }, { passive: true });
   window.addEventListener('resize', function () {
+    bemesse();
     if (!laeuft) { laeuft = true; requestAnimationFrame(messen); }
   }, { passive: true });
   messen();
@@ -779,7 +781,7 @@ section{padding-top:var(--luft)}
     aufstellung.innerHTML =
       '<div><span>Plattformgebühr je Monat</span><span>' + Z.euro(m.gebuehr) + '</span></div>' +
       '<div><span>' + n + ' Zugänge zu ' + Z.euro(m.proZugang) + '</span><span>' + Z.euro(m.proZugang * n) + '</span></div>' +
-      '<div><span>Mengenrabatt auf den Listenpreis</span><span>' + m.rabatt + ' %</span></div>';
+      '<div class="anmerkung">Im Preis je Zugang stecken schon ' + m.rabatt + ' % Mengenrabatt auf den Listenpreis.</div>';
   }
   regler.addEventListener('input', rechne);
   rechne();

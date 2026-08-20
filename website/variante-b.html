@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>quoroAI · Entwurf B: Die Werkbank</title>
+<title>quoroAI, Entwurf B: Die Werkbank</title>
 <meta name="description" content="quoroAI ist die Plattform, auf der Unternehmensberatungen ihren Kunden einen KI-Berater unter der eigenen Marke geben.">
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="stil.css">
@@ -16,6 +16,9 @@
    Marker: WEBSITE-B-V1 */
 
 body{background:#fbfbfe}
+section.bahn{padding-top:var(--luft)}
+.kopfzeile{max-width:min(760px,100%)}
+.kopfzeile p{margin-top:16px;font-size:18px;color:var(--nebel-700)}
 
 /* ---------- Bühne ---------- */
 .buehne{min-height:100svh;display:flex;align-items:flex-end;padding:calc(72px + 40px) 0 clamp(40px,7vh,80px);position:relative;overflow:hidden}
@@ -227,7 +230,7 @@ body{background:#fbfbfe}
   <section id="werkzeuge" class="bahn">
     <div class="kopfzeile taucht">
       <h2>Was sonst noch im Haus ist.</h2>
-      <p style="margin-top:16px;font-size:18px;color:var(--nebel-700)">Ein KI-Berater allein ersetzt keine Kanzleisoftware. Hier ist beides dasselbe Programm.</p>
+      <p>Ein KI-Berater allein ersetzt keine Kanzleisoftware. Hier ist beides dasselbe Programm.</p>
     </div>
     <div class="zeilenwerk">
       <div class="werkzeug taucht"><h3>Mandate</h3><p>Auftrag, Abrede, Pauschale und Frist an einer Stelle. Was vereinbart ist, rechnet später von selbst.</p><span class="wer">Beratung</span></div>
@@ -244,7 +247,7 @@ body{background:#fbfbfe}
   <section id="label" class="bahn">
     <div class="kopfzeile taucht">
       <h2>Drei Beratungen, drei Marken, eine Plattform.</h2>
-      <p style="margin-top:16px;font-size:18px;color:var(--nebel-700)">Farbe, Zeichen und Adresse gehören der Beratung. Der Mandant sieht das Haus nie, in dem er steht.</p>
+      <p>Farbe, Zeichen und Adresse gehören der Beratung. Der Mandant sieht das Haus nie, in dem er steht.</p>
     </div>
     <div class="trio">
       <div class="mini taucht">
@@ -273,9 +276,9 @@ body{background:#fbfbfe}
     </div>
     <div class="preisband taucht">
       <div class="haelfte">
-        <div class="gross" id="p-gebuehr">149 €</div>
+        <div class="gross" id="p-gebuehr">—</div>
         <p class="dazu">je Beratung und Monat, netto. Damit steht die Plattform, egal wie viele Mandate du führst.</p>
-        <p class="dazu" style="margin-top:22px">Dazu ein Zugang je Kunde, <b id="p-spanne">19 bis 149 €</b> nach Umfang, abzüglich Mengenrabatt.</p>
+        <p class="dazu" style="margin-top:22px">Dazu ein Zugang je Kunde, <b id="p-spanne">—</b> nach Umfang, abzüglich Mengenrabatt.</p>
       </div>
       <div class="haelfte">
         <h3 style="font-size:19px;margin-bottom:6px">Mengenrabatt auf den Listenpreis</h3>
@@ -430,16 +433,16 @@ body{background:#fbfbfe}
 
   /* ---------- Preise aus zahlen.js ---------- */
   var Z = window.Zahlen;
-  var tarife = Z.tarife();
-  document.getElementById('p-gebuehr').textContent = Z.euroKurz(Z.gebuehr);
+  var spanne = Z.spanne();
+  document.getElementById('p-gebuehr').textContent = Z.euroKurz(Z.gebuehr());
   document.getElementById('p-spanne').textContent =
-    Z.euroKurz(tarife[0].cent) + ' bis ' + Z.euroKurz(tarife[tarife.length - 1].cent);
+    Z.euroKurz(spanne.von) + ' bis ' + Z.euroKurz(spanne.bis);
   var liste = document.getElementById('p-staffel');
   Z.staffel().forEach(function (s, i, alle) {
     var li = document.createElement('li');
-    var bis = alle[i + 1] ? ' bis ' + (alle[i + 1].ab - 1) : ' und mehr';
     var von = s.ab === 0 ? 'Ab dem ersten Zugang' : 'Ab ' + s.ab + ' Zugängen';
-    li.innerHTML = '<span>' + von + (alle[i + 1] ? bis : '') + '</span><b>' + s.proz + ' %</b>';
+    var bis = alle[i + 1] ? ' bis ' + (alle[i + 1].ab - 1) : ', nach oben offen';
+    li.innerHTML = '<span>' + von + bis + '</span><b>' + s.proz + ' %</b>';
     liste.appendChild(li);
   });
 })();
