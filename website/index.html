@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>quoroAI für Unternehmensberatungen</title>
-<meta name="description" content="quoroAI ist die Plattform, auf der Unternehmensberatungen ihren Kunden einen KI-Berater unter der eigenen Marke geben.">
+<meta name="description" content="quoroAI gibt deinen Mandanten einen KI-Unternehmensberater unter deiner Marke, der dein Wissen kennt. Mandate, Termine, Zeiten und Abrechnung im selben Haus.">
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="stil.css">
 <style>
@@ -17,15 +17,12 @@
    Marker: WEBSITE-INDEX-V1 (aus Entwurf A; der Kino-Kopf kommt als eigener Abschnitt) */
 
 /* ---------- Das Kino: der Kopf setzt sich zusammen ----------
-   Der eine grosse Moment der Seite, Fassung 2 (Jonas: "viel krasser").
-   Bildfüllend: die Leinwand ist größer als der Bildschirm, der Kopf steht
-   über das ganze Bild und die Kamera fährt beim Aufbau leicht zurück.
-   Dazu fliegen einzelne Blätter (eigene fal.ai-Freisteller, blatt-1..4)
-   mit Tiefe an der Kamera vorbei in die Wolke — groß und unscharf am Rand,
-   klein und scharf beim Eintauchen. Drei riesige Schriftzüge wachsen der
-   Kamera entgegen, beim Zünden blitzt die Fläche weiß, dann gleitet der
-   Kopf nach rechts und die Bühne belichtet. Multiply lässt alles Weiße
-   auf dem weißen Grund verschwinden. */
+   Fassung 3 (Jonas: hochwertig statt laut). Bildfüllender Kopf, die Kamera
+   beginnt nah und fährt weich zurück; acht Blätter fliegen langsam und mit
+   wenig Drehung herein. Kein Blitz mehr — beim Fertigwerden blüht das Licht
+   kurz auf und die Leinwand setzt sich mit einem winzigen Impuls. Die
+   Schriftzüge stehen auf einem weichen weißen Hof statt zu leuchten, unten
+   läuft eine haarfeine Fortschrittslinie. Eine Kurve, eine Dauer, überall. */
 .kino{height:640vh;position:relative}
 .kino .haftet{position:sticky;top:0;height:100svh;overflow:hidden;background:var(--grund)}
 .kino .lichthof{
@@ -36,53 +33,55 @@
 }
 .kino canvas{
   position:absolute;left:50%;top:50%;height:min(170svh,155vw);aspect-ratio:1;
-  transform:translate(calc(-53% + var(--gleit,0px)),-50%) scale(var(--nah,1));
+  transform:translate(calc(-53% + var(--gleit,0px)),calc(-50% + var(--hub,0px))) scale(var(--nah,1));
   mix-blend-mode:multiply;pointer-events:none;will-change:transform;
 }
 .kino .blatt{
-  position:absolute;left:50%;top:50%;width:min(24vw,340px);height:auto;
+  position:absolute;left:50%;top:50%;width:min(22vw,320px);height:auto;
   mix-blend-mode:multiply;pointer-events:none;opacity:0;
   will-change:transform,opacity,filter;
 }
-/* die riesigen Schriftzüge: wachsen der Kamera entgegen */
+/* die Schriftzüge: ruhig, auf einem weichen Hof, kaum Bewegung */
 .kino .wort{
-  position:absolute;left:clamp(24px,7vw,110px);top:50%;max-width:min(60vw,760px);
+  position:absolute;left:clamp(24px,7vw,110px);top:50%;max-width:min(58vw,720px);
   transform-origin:left center;opacity:0;pointer-events:none;will-change:transform,opacity;
+}
+.kino .wort::before{ /* der Hof: hebt die Schrift vom Papier, ohne zu leuchten */
+  content:"";position:absolute;inset:-56px -80px;z-index:-1;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(253,253,254,.94),rgba(253,253,254,.7) 58%,rgba(253,253,254,0));
 }
 .kino .wort .gross{
   font-family:var(--schrift-schau);font-weight:600;letter-spacing:-.03em;
-  font-size:clamp(44px,7.6vw,120px);line-height:1.02;
-  text-shadow:0 0 18px rgba(253,253,254,.95),0 0 46px rgba(253,253,254,.9),0 0 90px rgba(253,253,254,.8);
+  font-size:clamp(42px,6.8vw,104px);line-height:1.04;
 }
 .kino .wort .gross em{font-style:normal;color:var(--lila-600)}
 .kino .wort .klein{
-  display:inline-block;margin-top:14px;padding:10px 16px;border-radius:14px;
-  font-size:15.5px;color:var(--nebel-700);max-width:46ch;
-  background:rgba(255,255,255,.62);
-  backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);
-  border:1px solid rgba(255,255,255,.65);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 14px 36px rgba(59,52,134,.12);
+  display:block;margin-top:16px;font-size:16.5px;line-height:1.55;
+  color:var(--nebel-700);max-width:44ch;
 }
-.kino .blitz{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.kino .fortschritt{ /* die haarfeine Linie unten */
+  position:absolute;left:0;bottom:0;height:2px;width:100%;
+  background:var(--nebel-200);opacity:var(--linie-da,1);transition:opacity .5s var(--kurve);
+}
+.kino .fortschritt i{
+  display:block;height:100%;width:calc(var(--stand,0) * 100%);
+  background:linear-gradient(90deg,var(--lila-400),var(--lila-600));
+}
 .kino .schleierlinks{
-  position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .6s var(--kurve);
+  position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .7s var(--kurve);
   background:linear-gradient(90deg,rgba(253,253,254,.94) 0%,rgba(253,253,254,.8) 36%,rgba(253,253,254,0) 62%);
 }
 .kino .schleierlinks.da{opacity:1}
 .kino .finale{
-  position:absolute;left:clamp(24px,7vw,110px);top:50%;transform:translateY(-50%) translateY(30px);
+  position:absolute;left:clamp(24px,7vw,110px);top:50%;transform:translateY(-50%) translateY(24px);
   opacity:0;max-width:min(46vw,620px);pointer-events:none;visibility:hidden;
-  transition:opacity .6s var(--kurve),transform .6s var(--kurve),visibility 0s .6s;
+  transition:opacity .7s var(--kurve),transform .7s var(--kurve),visibility 0s .7s;
 }
-.kino .finale.da{opacity:1;transform:translateY(-50%);pointer-events:auto;visibility:visible;transition:opacity .6s var(--kurve),transform .6s var(--kurve)}
+.kino .finale.da{opacity:1;transform:translateY(-50%);pointer-events:auto;visibility:visible;transition:opacity .7s var(--kurve),transform .7s var(--kurve)}
 .kino .finale h1{font-size:clamp(34px,4.6vw,60px);max-width:13ch}
 .kino .finale h1 em{font-style:normal;color:var(--lila-700)}
 .kino .finale .vorsatz{margin-top:18px;font-size:18px;color:var(--nebel-700);max-width:44ch}
 .kino .finale .unterzeile{margin-top:18px;font-size:14px;color:var(--nebel-500)}
-.kino .abspann{
-  position:absolute;left:0;right:0;bottom:26px;text-align:center;
-  font-size:13.5px;color:var(--nebel-500);transition:opacity .3s;
-}
 .knopfreihe{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
 .aufhaenger{
   display:inline-flex;align-items:center;gap:10px;padding:7px 16px 7px 8px;
@@ -93,12 +92,17 @@
 .aufhaenger img{width:22px;height:22px;border-radius:6px}
 @media (max-width:900px){
   .kino{height:560vh}
-  .kino canvas{left:50%;top:46%;height:min(140svh,225vw);transform:translate(calc(-52% + var(--gleit,0px)),-50%) scale(var(--nah,1))}
+  .kino canvas{left:50%;top:46%;height:min(140svh,225vw);transform:translate(calc(-52% + var(--gleit,0px)),calc(-50% + var(--hub,0px))) scale(var(--nah,1))}
   .kino .lichthof{left:50%;top:46%;width:min(70vh,120vw)}
-  .kino .blatt{width:min(44vw,240px)}
+  .kino .blatt{width:min(40vw,220px)}
   .kino .wort{left:16px;right:16px;max-width:none}
-  .kino .wort .gross{font-size:clamp(38px,11.5vw,64px)}
-  .kino .wort .klein{font-size:14px}
+  .kino .wort::before{inset:-52px -26px;background:radial-gradient(closest-side,rgba(253,253,254,.97),rgba(253,253,254,.86) 62%,rgba(253,253,254,0))}
+  .kino .wort .gross{font-size:clamp(36px,10.5vw,58px)}
+  .kino .wort .klein{
+    font-size:14.5px;padding:10px 14px;border-radius:12px;
+    background:rgba(253,253,254,.82);
+    backdrop-filter:blur(14px) saturate(170%);-webkit-backdrop-filter:blur(14px) saturate(170%);
+  }
   .kino .schleierlinks{background:linear-gradient(180deg,rgba(253,253,254,0) 30%,rgba(253,253,254,.85) 58%,rgba(253,253,254,.96) 100%)}
   .kino .finale{
     left:16px;right:16px;top:auto;bottom:20px;transform:translateY(24px);max-width:none;
@@ -117,12 +121,12 @@
 @media (prefers-reduced-motion:reduce){
   .kino{height:auto}
   .kino .haftet{position:static;height:auto;padding:calc(72px + 40px) 0 60px}
-  .kino .lichthof,.kino .blatt,.kino .blitz,.kino .schleierlinks{display:none}
+  .kino .lichthof,.kino .blatt,.kino .fortschritt,.kino .schleierlinks{display:none}
   .kino canvas{position:static;transform:none;display:block;margin:0 auto;height:auto;width:min(520px,86vw)}
   .kino .wort{position:static;transform:none;opacity:1;max-width:min(680px,100% - 48px);margin:18px auto 0}
-  .kino .wort .gross{font-size:clamp(30px,5vw,44px);text-shadow:none}
+  .kino .wort::before{display:none}
+  .kino .wort .gross{font-size:clamp(30px,5vw,44px)}
   .kino .finale{position:static;transform:none;opacity:1;visibility:visible;max-width:min(680px,100% - 48px);margin:26px auto 0;pointer-events:auto}
-  .kino .abspann{display:none}
 }
 
 /* ---------- Das Fenster: eine echte Oberfläche, gekippt in Glas ---------- */
@@ -229,7 +233,9 @@ section.bahn{padding-top:var(--luft)}
 .stueck .tafel{border-radius:14px;border:0.5px solid var(--nebel-200);background:var(--flaeche);padding:16px;display:grid;gap:10px}
 .tafel .balken{display:grid;grid-template-columns:112px 1fr auto;gap:12px;align-items:center;font-size:13.5px}
 .tafel .balken .spur{height:9px;border-radius:999px;background:var(--nebel-100);overflow:hidden}
-.tafel .balken .spur i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--lila-400),var(--lila-600));width:var(--anteil,50%)}
+.tafel .balken .spur i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--lila-400),var(--lila-600));width:0;transition:width 1.1s var(--kurve) .25s}
+.taucht.da .tafel .balken .spur i{width:var(--anteil,50%)}
+@media (prefers-reduced-motion:reduce){.tafel .balken .spur i{width:var(--anteil,50%);transition:none}}
 .tafel .balken em{font-style:normal;font-variant-numeric:tabular-nums;color:var(--nebel-600)}
 @media (max-width:900px){
   .werkbank{grid-template-columns:repeat(2,1fr)}
@@ -255,6 +261,9 @@ section.bahn{padding-top:var(--luft)}
 .rechner .stufen button[aria-pressed=true]{border-color:var(--lila-600);color:var(--lila-800);background:var(--lila-050)}
 .rechner .summe{margin-top:26px;padding-top:22px;border-top:0.5px solid var(--nebel-200)}
 .rechner .summe .zahl{font-family:var(--schrift-schau);font-size:44px;line-height:1;letter-spacing:-.02em}
+.rechner .summe .zahl.tickt{animation:zahl-tickt .28s var(--kurve)}
+@keyframes zahl-tickt{0%{opacity:.35;transform:translateY(5px)}100%{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.rechner .summe .zahl.tickt{animation:none}}
 .rechner .summe .je{font-size:14px;color:var(--nebel-500);margin-top:8px}
 .rechner .aufstellung{margin-top:18px;display:grid;gap:8px;font-size:14px;color:var(--nebel-700)}
 .rechner .aufstellung div{display:flex;justify-content:space-between;gap:14px}
@@ -318,31 +327,30 @@ section.bahn{padding-top:var(--luft)}
       <div class="lichthof" id="lichthof"></div>
       <canvas id="leinwand" aria-hidden="true"></canvas>
       <div id="blaetter" aria-hidden="true"></div>
-      <div class="wort" data-fenster="0.05,0.24">
+      <div class="wort" data-fenster="0.04,0.26">
         <div class="gross">Tausend <em>Belege</em>.</div>
-        <span class="klein">Bilanzen, Kostenstellen, Verträge, Protokolle. Das Wissen deiner Beratung, verstreut über Ordner und Postfächer.</span>
+        <span class="klein">Bilanzen, Verträge, Auswertungen, Protokolle. Das Wissen deiner Beratung liegt in Ordnern, Postfächern und Köpfen.</span>
       </div>
-      <div class="wort" data-fenster="0.28,0.46">
+      <div class="wort" data-fenster="0.30,0.50">
         <div class="gross">Ein <em>Gedanke</em>.</div>
-        <span class="klein">quoroAI liest, was du ihm gibst, und denkt in deiner Methodik. Nicht im halben Internet.</span>
+        <span class="klein">quoroAI liest alles davon und denkt in deiner Methodik. Jede Zahl in der Antwort nennt ihre Quelle.</span>
       </div>
-      <div class="wort" data-fenster="0.50,0.66">
+      <div class="wort" data-fenster="0.54,0.70">
         <div class="gross">Dein <em>Berater</em>.</div>
-        <span class="klein">Er antwortet deinen Mandanten unter deinem Namen. Du liest jedes Wort mit.</span>
+        <span class="klein">Deine Mandanten fragen um 23 Uhr und bekommen deine Antwort, unter deinem Namen. Du liest jedes Wort mit.</span>
       </div>
-      <div class="blitz" id="blitz"></div>
       <div class="schleierlinks" id="schleierlinks"></div>
       <div class="finale" id="finale">
         <span class="aufhaenger"><img src="bilder/quoro-icon.svg" alt="">Für Unternehmensberatungen</span>
         <h1 style="margin-top:20px"><em>Ein zweiter Kopf</em> für deine Beratung.</h1>
-        <p class="vorsatz">quoroAI gibt jedem deiner Mandanten einen KI-Unternehmensberater, der dein Wissen kennt und deinen Namen trägt. Mandate, Termine, Zeiten und Abrechnung laufen im selben Haus.</p>
+        <p class="vorsatz">quoroAI beantwortet die Fragen deiner Mandanten aus deinem Wissen, unter deiner Marke, auf deiner Adresse. Und rechnet die Arbeit gleich mit ab.</p>
         <div class="knopfreihe">
           <a class="knopf primaer" href="#schluss">Beratung anlegen</a>
           <a class="knopf leise" href="#haus">Ansehen, wie es arbeitet</a>
         </div>
         <p class="unterzeile">Software aus Erfurt, Daten in Frankfurt und Falkenstein.</p>
       </div>
-      <p class="abspann" id="abspann">Der Kopf setzt sich beim Weiterlesen zusammen.</p>
+      <div class="fortschritt" id="fortschritt" aria-hidden="true"><i></i></div>
     </div>
   </section>
 
@@ -350,16 +358,16 @@ section.bahn{padding-top:var(--luft)}
   <section id="haus" class="bahn">
     <div class="kopfzeile taucht">
       <h2>Ein Haus, zwei Türen.</h2>
-      <p>Dein Kunde arbeitet in seinem Portal. Du arbeitest in deinem Cockpit. Was hinter beiden Türen passiert, ist dieselbe Akte.</p>
+      <p>Dein Mandant arbeitet in seinem Portal, du in deinem Cockpit. Dazwischen liegt keine Schnittstelle, sondern dieselbe Akte.</p>
     </div>
     <div class="zweiseiten">
       <div class="seite taucht">
         <h3>Was dein Kunde sieht</h3>
         <p class="wer">Unter deiner Marke, auf deiner Adresse</p>
         <ul>
-          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Ein Berater, der die eigenen Zahlen und Unterlagen kennt</li>
-          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Termine buchen, ohne zu telefonieren</li>
-          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Unterlagen abgeben, Rechnungen einsehen, Fortschritt lesen</li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Antworten in Sekunden, aus den eigenen Zahlen und Unterlagen</li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Termine buchen, Unterlagen abgeben, ohne Anruf und ohne Mail</li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Jede Rechnung, jeder Fortschritt, jederzeit einsehbar</li>
           <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Kein Wort und kein Logo von quoroAI</li>
         </ul>
       </div>
@@ -367,10 +375,10 @@ section.bahn{padding-top:var(--luft)}
         <h3>Was du siehst</h3>
         <p class="wer">Dein Cockpit, über alle Mandate</p>
         <ul>
-          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Jedes Gespräch mitlesen, jederzeit übernehmen</li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Jedes Gespräch mitlesen und mit einem Klick selbst übernehmen</li>
           <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Zeiten, Auslagen und Pauschalen je Mandat</li>
-          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Rechnung aus der geleisteten Arbeit, nicht aus dem Gedächtnis</li>
-          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Marge je Mandat, bevor sie weg ist</li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Rechnungen aus der erfassten Arbeit, nicht aus dem Gedächtnis</li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Die Marge je Mandat, solange du sie noch retten kannst</li>
         </ul>
       </div>
     </div>
@@ -383,7 +391,7 @@ section.bahn{padding-top:var(--luft)}
       <div class="mitte">
         <div class="text">
           <h2>Der Kunde sieht nie uns.</h2>
-          <p>Dieselbe Plattform, dreimal. Was wechselt, ist die Marke: Name, Farbe, Adresse. Was bleibt, ist die Arbeit dahinter.</p>
+          <p>Dieselbe Plattform, dreimal. Was wechselt, ist die Marke: Name, Farbe, Adresse. Deine Mandanten erleben deine Beratung, nicht unsere Software.</p>
           <ul class="markenliste" id="markenliste"></ul>
         </div>
         <div class="fenster" id="wechselfenster">
@@ -410,14 +418,14 @@ section.bahn{padding-top:var(--luft)}
   <section id="werkzeug" class="bahn">
     <div class="kopfzeile taucht">
       <h2>Die ganze Beratung, nicht nur das Gespräch.</h2>
-      <p>Ein KI-Berater allein ersetzt keine Kanzleisoftware. Deshalb ist hier beides im selben Haus.</p>
+      <p>Ein Chatbot beantwortet Fragen. quoroAI führt daneben Mandate, Zeiten, Termine und Rechnungen, damit aus jeder Antwort abgerechnete Arbeit wird.</p>
     </div>
     <div class="werkbank">
       <div class="stueck breit taucht">
         <div>
           <span class="marke-klein">Marge je Mandat</span>
           <h3>Du siehst, was ein Mandat wirklich trägt.</h3>
-          <p>Stunden, Pauschale, Auslagen und Zugangskosten stehen nebeneinander, während das Mandat läuft. Nicht erst, wenn die Rechnung geschrieben ist.</p>
+          <p>Stunden, Pauschale, Auslagen und Zugangskosten stehen nebeneinander, während das Mandat läuft. Nicht erst im Jahresabschluss, wenn nichts mehr zu retten ist.</p>
         </div>
         <div class="tafel">
           <div class="balken"><span>MTS Maschinenbau</span><span class="spur"><i style="--anteil:74%"></i></span><em>74 %</em></div>
@@ -429,27 +437,27 @@ section.bahn{padding-top:var(--luft)}
       <div class="stueck gross taucht">
         <span class="marke-klein">Wissen</span>
         <h3>Er weiß, was du weißt.</h3>
-        <p>Deine Methoden, Vorlagen und Unterlagen sind seine Grundlage. Nicht das halbe Internet.</p>
+        <p>Deine Methoden, Vorlagen und Unterlagen sind seine Grundlage, und jede Zahl nennt ihre Quelle. Nicht das halbe Internet.</p>
       </div>
       <div class="stueck gross taucht">
         <span class="marke-klein">Mitlesen</span>
         <h3>Nichts geht ungesehen raus.</h3>
-        <p>Jedes Gespräch steht offen im Cockpit. Ein Klick, und der Berater übernimmt selbst.</p>
+        <p>Jedes Gespräch steht offen im Cockpit. Wird es heikel, übernimmst du mit einem Klick, mitten im Satz.</p>
       </div>
       <div class="stueck taucht">
         <span class="marke-klein">Termine</span>
         <h3>Kalender</h3>
-        <p>Der Kunde bucht, du bestätigst. Beides im Portal.</p>
+        <p>Der Mandant bucht, du bestätigst. Kein einziges Telefonat.</p>
       </div>
       <div class="stueck taucht">
         <span class="marke-klein">Zeiten</span>
         <h3>Zeiterfassung</h3>
-        <p>Gebucht auf Mandat und Mensch, mit Nachweis.</p>
+        <p>Jede Stunde auf Mandat und Mensch, mit Nachweis.</p>
       </div>
       <div class="stueck taucht">
         <span class="marke-klein">Rechnungen</span>
         <h3>Abrechnung</h3>
-        <p>Aus Zeiten und Abreden, tagegenau geteilt.</p>
+        <p>Aus Zeiten und Abreden, tagegenau gerechnet.</p>
       </div>
     </div>
   </section>
@@ -457,12 +465,12 @@ section.bahn{padding-top:var(--luft)}
   <!-- ---------- Preis ---------- -->
   <section id="preis" class="bahn">
     <div class="kopfzeile taucht">
-      <h2>Du zahlst je Kunde, der wirklich arbeitet.</h2>
-      <p>Eine Gebühr für die Beratung, dazu ein Zugang je Kunde. Der Mengenrabatt gilt ab dem ersten Zugang und wächst mit.</p>
+      <h2>Du zahlst je Mandant, der wirklich arbeitet.</h2>
+      <p>Eine Gebühr für die Beratung, dazu ein Zugang je Mandant mit Portal. Der Mengenrabatt gilt ab dem ersten Zugang und wächst mit. Was du deinen Mandanten berechnest, bleibt deine Sache.</p>
     </div>
     <div class="preisraum">
       <div class="rechner taucht">
-        <label for="zugaenge">Kunden mit Zugang: <b id="zugaenge-wert">20</b></label>
+        <label for="zugaenge">Mandanten mit Zugang: <b id="zugaenge-wert">20</b></label>
         <input type="range" id="zugaenge" min="1" max="150" value="20" step="1">
         <div class="stufen" id="stufen" role="group" aria-label="Umfang je Zugang"></div>
         <div class="summe">
@@ -473,9 +481,9 @@ section.bahn{padding-top:var(--luft)}
       </div>
       <div class="preistext taucht">
         <ul>
-          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg><span>Ein Zugang zählt erst, wenn der Kunde ihn hat. Angelegte Mandate ohne Portal kosten nichts.</span></li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg><span>Ein Zugang zählt erst, wenn der Mandant ihn hat. Angelegte Mandate ohne Portal kosten nichts.</span></li>
           <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg><span>Beginnt oder endet ein Zugang mitten im Monat, wird tagegenau geteilt.</span></li>
-          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg><span>Was du deinem Kunden berechnest, bestimmst du. Wir berechnen nur dir.</span></li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg><span>Ein Standard-Zugang kostet dich weniger als eine halbe Beratungsstunde im Monat.</span></li>
           <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg><span>Monatlich kündbar, keine Einrichtungsgebühr.</span></li>
         </ul>
       </div>
@@ -486,7 +494,7 @@ section.bahn{padding-top:var(--luft)}
   <section id="daten" class="bahn">
     <div class="kopfzeile taucht">
       <h2>Mandantendaten, die im Haus bleiben.</h2>
-      <p>Eine Beratung darf ihren Kunden nicht erklären müssen, wohin deren Zahlen gehen. Also steht es hier.</p>
+      <p>Deine Mandanten vertrauen dir ihre Zahlen an. Die erste Frage an jede KI heißt deshalb: Wo läuft das, und wer lernt daraus? Hier ist die Antwort.</p>
     </div>
     <div class="fakten taucht">
       <div class="fakt">
@@ -508,8 +516,8 @@ section.bahn{padding-top:var(--luft)}
   <!-- ---------- Schluss ---------- -->
   <section id="schluss" class="bahn">
     <div class="schluss taucht">
-      <h2>Leg deine Beratung an, sieh sie dir an.</h2>
-      <p>Konto anlegen, Marke setzen, ersten Kunden einladen. Das dauert einen Nachmittag, nicht ein Projekt.</p>
+      <h2>Die nächste Frage kommt heute Abend.</h2>
+      <p>Konto anlegen, Marke setzen, ersten Mandanten einladen: ein Nachmittag, kein Projekt. Monatlich kündbar, keine Einrichtungsgebühr.</p>
       <div class="knopfreihe">
         <a class="knopf hell" href="#">Beratung anlegen</a>
         <a class="knopf klar" href="#">Vorführung vereinbaren</a>
@@ -562,8 +570,9 @@ section.bahn{padding-top:var(--luft)}
 
 <script src="zahlen.js"></script>
 <script>
-/* Das Kino, Fassung 2: Bilder scrubben, Blätter mit Tiefe einfliegen,
-   Schriftzüge wachsen, Blitz beim Zünden, Kopf gleitet zur Bühne. */
+/* Das Kino, Fassung 3: ruhig und präzise. Bilder scrubben, acht Blätter
+   fliegen langsam herein, die Schriftzüge stehen fast still, das Licht
+   blüht beim Fertigwerden kurz auf, unten läuft die Fortschrittslinie. */
 (function () {
   'use strict';
   var ruhig = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -575,9 +584,8 @@ section.bahn{padding-top:var(--luft)}
   var kino = document.querySelector('.kino');
   var lichthof = document.getElementById('lichthof');
   var finale = document.getElementById('finale');
-  var abspann = document.getElementById('abspann');
-  var blitz = document.getElementById('blitz');
   var schleierlinks = document.getElementById('schleierlinks');
+  var fortschritt = document.getElementById('fortschritt');
   var worte = Array.prototype.slice.call(document.querySelectorAll('.kino .wort'));
 
   /* ---------- Bilder ---------- */
@@ -608,9 +616,6 @@ section.bahn{padding-top:var(--luft)}
 
   var schleier = null;
   function bemesse() {
-    /* Speicher nach Anzeigegröße und Pixeldichte (Deckel 2). Die Leinwand
-       ist größer als der Bildschirm; mehr als 1600 Kanten braucht niemand,
-       die Quelle hat 1152. */
     var kante = Math.min(1600, Math.round(leinwand.getBoundingClientRect().width * Math.min(window.devicePixelRatio || 1, 2))) || 1152;
     if (kante === leinwand.width) return;
     leinwand.width = kante; leinwand.height = kante;
@@ -632,12 +637,9 @@ section.bahn{padding-top:var(--luft)}
   function seg(p, a, b) { return Math.min(Math.max((p - a) / (b - a), 0), 1); }
   function zufall(i) { var x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); }
 
-  /* ---------- Die fliegenden Blätter ----------
-     Jedes Blatt hat ein Fortschritts-Fenster und fliegt vom Rand (groß,
-     unscharf, nah an der Kamera) in die Wolke (klein, scharf). Die Bahnen
-     sind aus dem Index gerechnet, damit jeder Lauf gleich aussieht. */
+  /* ---------- Die fliegenden Blätter: wenige, langsam, wenig Drehung ---------- */
   var blattLage = document.getElementById('blaetter');
-  var BLATTZAHL = window.matchMedia('(max-width: 900px)').matches ? 7 : 13;
+  var BLATTZAHL = window.matchMedia('(max-width: 900px)').matches ? 5 : 8;
   var blaetter = [];
   if (!ruhig) {
     for (var k = 0; k < BLATTZAHL; k++) {
@@ -647,33 +649,33 @@ section.bahn{padding-top:var(--luft)}
       el.alt = '';
       blattLage.appendChild(el);
       var winkel = zufall(k + 1) * Math.PI * 2;
-      var von = 0.02 + (k / BLATTZAHL) * 0.52;      /* gestaffelt über den Aufbau */
+      var von = 0.03 + (k / BLATTZAHL) * 0.46;
       blaetter.push({
         el: el,
-        a: von, b: von + 0.16 + zufall(k + 7) * 0.08,
-        x0: Math.cos(winkel), y0: Math.sin(winkel),  /* Richtung vom Rand */
-        zielX: (zufall(k + 13) - 0.35) * 0.16,       /* Eintauchpunkt um den Kopf */
+        a: von, b: von + 0.22 + zufall(k + 7) * 0.06,
+        x0: Math.cos(winkel), y0: Math.sin(winkel),
+        zielX: (zufall(k + 13) - 0.35) * 0.16,
         zielY: (zufall(k + 29) - 0.5) * 0.28,
-        gross: 2.4 + zufall(k + 41) * 1.4,           /* nah an der Kamera */
-        klein: 0.07 + zufall(k + 53) * 0.09,
-        dreh0: (zufall(k + 61) - 0.5) * 140,
-        dreh1: (zufall(k + 71) - 0.5) * 420
+        gross: 1.5 + zufall(k + 41) * 0.7,
+        klein: 0.09 + zufall(k + 53) * 0.08,
+        dreh0: (zufall(k + 61) - 0.5) * 70,
+        dreh1: (zufall(k + 71) - 0.5) * 180
       });
     }
   }
   function malBlaetter(p) {
     var vw = window.innerWidth, vh = window.innerHeight;
-    var weit = Math.max(vw, vh) * 0.72;
+    var weit = Math.max(vw, vh) * 0.66;
     blaetter.forEach(function (s) {
       var t = seg(p, s.a, s.b);
       if (t <= 0 || t >= 1) { s.el.style.opacity = 0; return; }
-      var e = 1 - Math.pow(1 - t, 2.6);             /* schnell herein, weich hinein */
+      var e = 1 - Math.pow(1 - t, 2.2);
       var x = s.x0 * weit * (1 - e) + s.zielX * vw * e;
       var y = s.y0 * weit * (1 - e) + s.zielY * vh * e;
-      var gr = s.gross * Math.pow(s.klein / s.gross, e);  /* Kamera-Tiefe: geometrisch */
+      var gr = s.gross * Math.pow(s.klein / s.gross, e);
       var dreh = s.dreh0 + (s.dreh1 - s.dreh0) * e;
-      var unschaerfe = (1 - e) * 7;
-      s.el.style.opacity = Math.min(1, t * 8) * (t > .9 ? (1 - t) * 10 : 1);
+      var unschaerfe = (1 - e) * 4;
+      s.el.style.opacity = Math.min(1, t * 6) * (t > .9 ? (1 - t) * 10 : 1);
       s.el.style.filter = unschaerfe > .4 ? 'blur(' + unschaerfe.toFixed(1) + 'px)' : 'none';
       s.el.style.transform = 'translate(calc(-50% + ' + x.toFixed(1) + 'px), calc(-50% + ' + y.toFixed(1) + 'px)) rotate(' + dreh.toFixed(1) + 'deg) scale(' + gr.toFixed(3) + ')';
     });
@@ -692,49 +694,53 @@ section.bahn{padding-top:var(--luft)}
     var weg = r.height - window.innerHeight;
     var p = weg > 0 ? Math.min(Math.max(-r.top / weg, 0), 1) : 1;
 
-    /* der Aufbau: Bild 0 bis N-1 über 0 … 0,66 */
+    /* der Aufbau: Bild 0 bis N-1 über 0 … 0,70 */
     if (BILDER > 0) {
-      var t = seg(p, 0, .66);
+      var t = seg(p, 0, .70);
       t = 1 - Math.pow(1 - t, 2.2);
       male(Math.min(BILDER - 1, Math.round(t * (BILDER - 1))));
     }
 
-    /* die Kamera: nah beginnen, zurückfahren, am Ende zur Seite gleiten */
-    var nah = 1.32 - .32 * seg(p, 0, .66);
-    var ausklang = seg(p, .74, .9);
-    nah -= .16 * ausklang;                          /* fürs Finale etwas kleiner */
-    /* am Telefon bleibt der Kopf mittig — die Bühne liegt dort unten in Glas */
+    /* die Kamera: nah beginnen, weich zurück, ein winziger Impuls beim
+       Fertigwerden, am Ende zur Seite gleiten */
+    var setzt = Math.sin(seg(p, .70, .76) * Math.PI);
+    var nah = 1.18 - .18 * seg(p, 0, .70) + .012 * setzt;
+    var ausklang = seg(p, .76, .92);
+    nah -= .14 * ausklang;
     var schmal = window.matchMedia('(max-width: 900px)').matches;
-    var gleit = schmal ? 0 : ausklang * window.innerWidth * .12; /* nach rechts */
+    var gleit = schmal ? 0 : ausklang * window.innerWidth * .11;
+    var hub = -seg(p, 0, .70) * window.innerHeight * .02;   /* leiser Parallax-Hub */
     leinwand.style.setProperty('--nah', nah.toFixed(4));
     leinwand.style.setProperty('--gleit', gleit.toFixed(1) + 'px');
+    leinwand.style.setProperty('--hub', hub.toFixed(1) + 'px');
 
     malBlaetter(p);
 
-    /* die Schriftzüge wachsen der Kamera entgegen */
+    /* die Schriftzüge: fast still, nur Atem */
     worte.forEach(function (w) {
       var f = w.dataset.fenster.split(',');
       var t = seg(p, parseFloat(f[0]), parseFloat(f[1]));
       if (t <= 0 || t >= 1) { w.style.opacity = 0; return; }
-      var auf = Math.min(1, t * 6);                 /* schnell da */
-      var ab = t > .82 ? (1 - t) / .18 : 1;         /* weich weg */
+      var auf = Math.min(1, t * 5);
+      var ab = t > .85 ? (1 - t) / .15 : 1;
       w.style.opacity = (auf * ab).toFixed(3);
-      w.style.transform = 'translateY(-50%) scale(' + (.78 + .5 * t).toFixed(4) + ')';
+      w.style.transform = 'translateY(-50%) translateY(' + ((1 - auf) * 14).toFixed(1) + 'px) scale(' + (.985 + .025 * t).toFixed(4) + ')';
     });
 
-    /* das Licht schwillt, der Blitz zündet */
-    var schein = .12 + .26 * seg(p, 0, .66);
-    var zuendung = seg(p, .66, .74);
-    schein += .34 * Math.sin(zuendung * Math.PI);
+    /* das Licht: trägt leise mit und blüht beim Fertigwerden kurz auf */
+    var schein = .10 + .18 * seg(p, 0, .70) + .20 * setzt;
     lichthof.style.setProperty('--schein', schein.toFixed(3));
-    lichthof.style.setProperty('--puls', (1 + .22 * Math.sin(zuendung * Math.PI)).toFixed(3));
-    blitz.style.opacity = (Math.sin(zuendung * Math.PI) * .85).toFixed(3);
+    lichthof.style.setProperty('--puls', (1 + .10 * setzt).toFixed(3));
+
+    /* die Linie unten läuft mit und verabschiedet sich mit der Bühne */
+    fortschritt.style.setProperty('--stand', seg(p, 0, .70).toFixed(4));
+    fortschritt.style.setProperty('--linie-da', p >= .74 ? 0 : 1);
+    fortschritt.style.opacity = p >= .74 ? 0 : 1;
 
     /* die Bühne belichtet */
     var da = p >= .78;
     finale.classList.toggle('da', da);
     schleierlinks.classList.toggle('da', da);
-    abspann.style.opacity = p > .04 ? 0 : 1;
   }
   window.addEventListener('scroll', function () {
     if (!laeuft) { laeuft = true; requestAnimationFrame(messen); }
@@ -873,6 +879,9 @@ section.bahn{padding-top:var(--luft)}
     var m = Z.monat(n, tarif);
     wert.textContent = n;
     summe.textContent = Z.euroKurz(m.summe);
+    summe.classList.remove('tickt');
+    void summe.offsetWidth;              /* Neustart der kurzen Regung */
+    summe.classList.add('tickt');
     aufstellung.innerHTML =
       '<div><span>Plattformgebühr je Monat</span><span>' + Z.euro(m.gebuehr) + '</span></div>' +
       '<div><span>' + n + ' Zugänge zu ' + Z.euro(m.proZugang) + '</span><span>' + Z.euro(m.proZugang * n) + '</span></div>' +
