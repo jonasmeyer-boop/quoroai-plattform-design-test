@@ -159,10 +159,94 @@
   .fenster{transform:none}
 }
 
+/* ---------- Beweis-Band: vier Wahrheiten in einer Zeile ---------- */
+.band{border-top:0.5px solid var(--nebel-200);border-bottom:0.5px solid var(--nebel-200);background:var(--flaeche)}
+.band .bahn{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.band .stein{padding:26px 26px 26px 0;border-right:0.5px solid var(--nebel-200)}
+.band .stein:last-child{border-right:0}
+.band .stein + .stein{padding-left:26px}
+.band b{display:block;font-family:var(--schrift-schau);font-weight:600;font-size:19px;letter-spacing:-.01em}
+.band span{font-size:14px;color:var(--nebel-600)}
+@media (max-width:820px){
+  .band .bahn{grid-template-columns:1fr 1fr}
+  .band .stein{padding:18px 16px 18px 0;border-right:0}
+  .band .stein:nth-child(odd){border-right:0.5px solid var(--nebel-200)}
+  .band .stein:nth-child(-n+2){border-bottom:0.5px solid var(--nebel-200)}
+  .band .stein + .stein{padding-left:16px}
+  .band .stein:nth-child(3){padding-left:0}
+}
+
+/* ---------- So startest du: drei Schritte an einer Linie ---------- */
+.schritte{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:44px;position:relative}
+.schritte::before{ /* die Linie, auf der die Schritte sitzen */
+  content:"";position:absolute;top:29px;left:calc(16.67% + 30px);right:calc(16.67% + 30px);
+  height:1px;background:var(--nebel-200);
+}
+.schritt-karte{position:relative}
+.schritt-karte .nummer{
+  width:58px;height:58px;border-radius:50%;display:grid;place-items:center;
+  font-family:var(--schrift-schau);font-weight:600;font-size:22px;
+  background:var(--flaeche);border:1px solid var(--nebel-200);color:var(--lila-700);
+  position:relative;z-index:1;
+}
+.schritt-karte h3{margin-top:18px;font-size:21px}
+.schritt-karte p{margin-top:8px;font-size:15.5px;color:var(--nebel-700)}
+.schritt-karte .dauer{display:inline-block;margin-top:12px;padding:5px 12px;border-radius:999px;font-size:13px;font-weight:600;background:var(--lila-050);color:var(--lila-800)}
+@media (max-width:820px){
+  .schritte{grid-template-columns:1fr;gap:30px}
+  .schritte::before{display:none}
+}
+
+/* ---------- Preise: drei Tarifkarten, die den Rechner stellen ---------- */
+.tarife{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:44px}
+.tarif{
+  position:relative;text-align:left;padding:24px;border-radius:var(--radius-karte);
+  border:0.5px solid var(--nebel-200);background:var(--flaeche);cursor:pointer;
+  font:inherit;transition:border-color .25s var(--kurve),box-shadow .25s var(--kurve),transform .25s var(--kurve);
+}
+.tarif:hover{border-color:var(--lila-300)}
+.tarif[aria-pressed=true]{
+  border-color:var(--lila-600);box-shadow:0 0 0 1px var(--lila-600),0 16px 40px rgba(111,99,232,.14);
+}
+.tarif .haeufig{
+  position:absolute;top:-11px;left:22px;padding:3px 12px;border-radius:999px;
+  font-size:12px;font-weight:700;color:#fff;
+  background:linear-gradient(180deg,var(--lila-500),var(--lila-700));
+}
+.tarif .name{font-weight:600;font-size:16px}
+.tarif .betrag{font-family:var(--schrift-schau);font-weight:600;font-size:34px;letter-spacing:-.02em;margin-top:8px}
+.tarif .je{font-size:13px;color:var(--nebel-500)}
+.tarif .wofuer{margin-top:12px;font-size:14px;color:var(--nebel-700);line-height:1.5}
+@media (max-width:820px){.tarife{grid-template-columns:1fr;gap:12px}.tarif .betrag{font-size:28px}}
+
+
+/* ---------- Die Fragen, die jeder stellt ---------- */
+.fragen{margin-top:36px;border-top:0.5px solid var(--nebel-200)}
+.fragen details{border-bottom:0.5px solid var(--nebel-200)}
+.fragen summary{
+  list-style:none;cursor:pointer;display:flex;align-items:baseline;justify-content:space-between;gap:20px;
+  padding:22px 0;font-family:var(--schrift-schau);font-weight:600;font-size:clamp(18px,2vw,23px);letter-spacing:-.01em;
+}
+.fragen summary::-webkit-details-marker{display:none}
+.fragen summary .zeichen{
+  flex-shrink:0;width:26px;height:26px;border-radius:50%;position:relative;align-self:center;
+  border:1px solid var(--nebel-300);transition:transform .3s var(--kurve),border-color .3s var(--kurve);
+}
+.fragen summary .zeichen::before,.fragen summary .zeichen::after{
+  content:"";position:absolute;left:50%;top:50%;background:var(--nebel-600);
+  transform:translate(-50%,-50%);transition:background .3s;
+}
+.fragen summary .zeichen::before{width:10px;height:1.5px}
+.fragen summary .zeichen::after{width:1.5px;height:10px}
+.fragen details[open] summary .zeichen{transform:rotate(45deg);border-color:var(--lila-500)}
+.fragen details[open] summary .zeichen::before,.fragen details[open] summary .zeichen::after{background:var(--lila-700)}
+.fragen .antworttext{padding:0 46px 24px 0;font-size:16px;color:var(--nebel-700);max-width:68ch}
+.fragen .antworttext p + p{margin-top:10px}
+
 /* ---------- Abschnittsköpfe ---------- */
 .kopfzeile{max-width:min(760px,100%)}
 .kopfzeile p{margin-top:16px;font-size:18px;color:var(--nebel-700)}
-section.bahn{padding-top:var(--luft)}
+section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
 
 /* ---------- Zwei Seiten desselben Hauses ---------- */
 .zweiseiten{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:44px}
@@ -249,7 +333,7 @@ section.bahn{padding-top:var(--luft)}
 }
 
 /* ---------- Preis ---------- */
-.preisraum{margin-top:44px;display:grid;grid-template-columns:1fr 1.25fr;gap:30px;align-items:start}
+.preisraum{margin-top:26px;display:grid;grid-template-columns:1fr 1.25fr;gap:30px;align-items:start}
 .rechner{padding:30px;border-radius:var(--radius-karte);border:0.5px solid var(--nebel-200);background:var(--flaeche);box-shadow:0 14px 40px rgba(24,21,47,.06)}
 .rechner label{display:block;font-size:14px;font-weight:600;margin-bottom:10px}
 .rechner input[type=range]{width:100%;accent-color:var(--lila-600)}
@@ -354,6 +438,16 @@ section.bahn{padding-top:var(--luft)}
       <div class="fortschritt" id="fortschritt" aria-hidden="true"><i></i></div>
     </div>
   </section>
+
+  <!-- ---------- Vier Wahrheiten ---------- -->
+  <div class="band">
+    <div class="bahn">
+      <div class="stein taucht"><b>Rund um die Uhr</b><span>antwortet, wann immer gefragt wird</span></div>
+      <div class="stein taucht"><b>100 % deine Marke</b><span>quoroAI bleibt unsichtbar</span></div>
+      <div class="stein taucht"><b>Daten in der EU</b><span>Frankfurt und Falkenstein, kein Training</span></div>
+      <div class="stein taucht"><b>Monatlich kündbar</b><span>keine Einrichtung, keine Laufzeit</span></div>
+    </div>
+  </div>
 
   <!-- ---------- Zwei Seiten desselben Hauses ---------- -->
   <section id="haus" class="bahn">
@@ -463,17 +557,67 @@ section.bahn{padding-top:var(--luft)}
     </div>
   </section>
 
+  <!-- ---------- So startest du ---------- -->
+  <section id="start" class="bahn">
+    <div class="kopfzeile taucht">
+      <h2>Heute angelegt, heute Abend im Einsatz.</h2>
+      <p>Keine Einführung, kein Beraterprojekt, keine Schulung. Drei Schritte, dann arbeitet dein zweiter Kopf.</p>
+    </div>
+    <div class="schritte">
+      <div class="schritt-karte taucht">
+        <div class="nummer">1</div>
+        <h3>Beratung anlegen</h3>
+        <p>Konto, Name, fertig. Ab jetzt gehört dir ein Cockpit über alle Mandate.</p>
+        <span class="dauer">10 Minuten</span>
+      </div>
+      <div class="schritt-karte taucht">
+        <div class="nummer">2</div>
+        <h3>Marke setzen, Wissen geben</h3>
+        <p>Farbe, Logo, deine Adresse. Dann bekommt der Berater deine Methoden und Vorlagen.</p>
+        <span class="dauer">Ein Nachmittag</span>
+      </div>
+      <div class="schritt-karte taucht">
+        <div class="nummer">3</div>
+        <h3>Ersten Mandanten einladen</h3>
+        <p>Er öffnet sein Portal unter deiner Marke und stellt die erste Frage. Du liest mit.</p>
+        <span class="dauer">5 Minuten</span>
+      </div>
+    </div>
+  </section>
+
   <!-- ---------- Preis ---------- -->
   <section id="preis" class="bahn">
     <div class="kopfzeile taucht">
       <h2>Du zahlst je Mandant, der wirklich arbeitet.</h2>
       <p>Eine Gebühr für die Beratung, dazu ein Zugang je Mandant mit Portal. Der Mengenrabatt gilt ab dem ersten Zugang und wächst mit. Was du deinen Mandanten berechnest, bleibt deine Sache.</p>
     </div>
+
+    <div class="tarife" id="tarife" role="group" aria-label="Umfang je Zugang">
+      <button type="button" class="tarif taucht" data-tarif="basis">
+        <span class="name">Basis</span>
+        <div class="betrag" data-preis></div>
+        <span class="je">je Mandant und Monat, vor Rabatt</span>
+        <p class="wofuer">Portal mit Unterlagen, Terminen und Rechnungen. Ohne KI-Berater.</p>
+      </button>
+      <button type="button" class="tarif taucht" data-tarif="standard">
+        <span class="haeufig">Am häufigsten</span>
+        <span class="name">Standard</span>
+        <div class="betrag" data-preis></div>
+        <span class="je">je Mandant und Monat, vor Rabatt</span>
+        <p class="wofuer">Dazu der KI-Berater auf deinem Wissen, mit Protokoll und Mitlesen.</p>
+      </button>
+      <button type="button" class="tarif taucht" data-tarif="plus">
+        <span class="name">Plus</span>
+        <div class="betrag" data-preis></div>
+        <span class="je">je Mandant und Monat, vor Rabatt</span>
+        <p class="wofuer">Dazu Auswertungen, Radar und eigene Vorlagen je Mandat.</p>
+      </button>
+    </div>
+
     <div class="preisraum">
       <div class="rechner taucht">
         <label for="zugaenge">Mandanten mit Zugang: <b id="zugaenge-wert">20</b></label>
         <input type="range" id="zugaenge" min="1" max="150" value="20" step="1">
-        <div class="stufen" id="stufen" role="group" aria-label="Umfang je Zugang"></div>
         <div class="summe">
           <div class="zahl" id="summe">0 €</div>
           <div class="je">je Monat, netto, zuzüglich Umsatzsteuer</div>
@@ -488,6 +632,39 @@ section.bahn{padding-top:var(--luft)}
           <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg><span>Monatlich kündbar, keine Einrichtungsgebühr.</span></li>
         </ul>
       </div>
+    </div>
+  </section>
+
+  <!-- ---------- Die Fragen, die jeder stellt ---------- -->
+  <section id="fragen" class="bahn">
+    <div class="kopfzeile taucht">
+      <h2>Die Fragen, die jeder stellt.</h2>
+    </div>
+    <div class="fragen taucht">
+      <details>
+        <summary>Was, wenn der Berater Unsinn erzählt?<span class="zeichen"></span></summary>
+        <div class="antworttext">
+          <p>Er antwortet nur aus dem, was du ihm gegeben hast, und jede Zahl nennt ihre Quelle. Jedes Gespräch steht offen in deinem Cockpit, und wird es heikel, übernimmst du mit einem Klick, mitten im Satz. Nichts erreicht deinen Mandanten, das du nicht sehen kannst.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Macht mich das nicht ersetzbar?<span class="zeichen"></span></summary>
+        <div class="antworttext">
+          <p>Deine Mandanten fragen längst eine KI, nur eben eine, die dich nicht kennt und der niemand widerspricht. Hier trägt die Antwort deinen Namen, denkt in deiner Methodik und macht aus der Frage einen Termin bei dir. Die Alternative ist nicht „keine KI". Die Alternative ist eine ohne dich.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Lernt die KI aus den Daten meiner Mandanten?<span class="zeichen"></span></summary>
+        <div class="antworttext">
+          <p>Nein. Weder wir noch der Modellanbieter verwenden Gespräche oder Unterlagen zum Training. Die Verarbeitung läuft in der EU, für die Daten deiner Mandanten sind wir dein Auftragsverarbeiter nach Art. 28 DSGVO.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Was sehen meine Mandanten von quoroAI?<span class="zeichen"></span></summary>
+        <div class="antworttext">
+          <p>Nichts. Name, Farbe, Adresse und Impressum gehören deiner Beratung. quoroAI ist die Software dahinter und bleibt dahinter.</p>
+        </div>
+      </details>
     </div>
   </section>
 
@@ -540,8 +717,9 @@ section.bahn{padding-top:var(--luft)}
         <ul>
           <li><a href="#haus">Zwei Türen</a></li>
           <li><a href="#werkzeug">Werkzeuge</a></li>
-          <li><a href="#marke">White Label</a></li>
+          <li><a href="#start">So startest du</a></li>
           <li><a href="#preis">Preise</a></li>
+          <li><a href="#fragen">Fragen</a></li>
         </ul>
       </div>
       <div>
@@ -870,26 +1048,25 @@ section.bahn{padding-top:var(--luft)}
   }
 
   /* ---------- Preisrechner: die Zahlen kommen aus zahlen.js ---------- */
+  /* Die Tarifkarten sind der Schalter des Rechners: eine wählen heißt rechnen. */
   var Z = window.Zahlen;
   var regler = document.getElementById('zugaenge');
   var wert = document.getElementById('zugaenge-wert');
-  var stufen = document.getElementById('stufen');
   var summe = document.getElementById('summe');
   var aufstellung = document.getElementById('aufstellung');
+  var karten = Array.prototype.slice.call(document.querySelectorAll('#tarife .tarif'));
   var tarif = 'standard';
 
-  Z.tarife().forEach(function (t) {
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.textContent = t.label;
-    b.setAttribute('aria-pressed', t.id === tarif ? 'true' : 'false');
-    b.addEventListener('click', function () {
-      tarif = t.id;
-      Array.prototype.forEach.call(stufen.children, function (k) { k.setAttribute('aria-pressed', 'false'); });
-      b.setAttribute('aria-pressed', 'true');
+  karten.forEach(function (k) {
+    var t = Z.tarif(k.dataset.tarif);
+    k.querySelector('[data-preis]').textContent = Z.euroKurz(t.cent);
+    k.setAttribute('aria-pressed', k.dataset.tarif === tarif ? 'true' : 'false');
+    k.addEventListener('click', function () {
+      tarif = k.dataset.tarif;
+      karten.forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+      k.setAttribute('aria-pressed', 'true');
       rechne();
     });
-    stufen.appendChild(b);
   });
 
   function rechne() {
