@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>quoroAI · Entwurf B: Die Werkbank</title>
+<meta name="description" content="quoroAI ist die Plattform, auf der Unternehmensberatungen ihren Kunden einen KI-Berater unter der eigenen Marke geben.">
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="stil.css">
+<style>
+/* quoroai-plattform-design · website/ · ENTWURF B „Die Werkbank".
+   Lauter als A: sehr große Schauschrift, asymmetrisches Raster, Lila als
+   Fläche statt als Tupfer. Der Kino-Moment ist der Aufbau: beim Scrollen
+   entsteht aus einer Kundenfrage ein fertiger Vermerk, gezeichnet wie im
+   Produkt (Blaupause, Umriss, belichtet). Vier Stufen, gescrubbt.
+   Marker: WEBSITE-B-V1 */
+
+body{background:#fbfbfe}
+
+/* ---------- Bühne ---------- */
+.buehne{min-height:100svh;display:flex;align-items:flex-end;padding:calc(72px + 40px) 0 clamp(40px,7vh,80px);position:relative;overflow:hidden}
+.buehne::before{
+  content:"";position:absolute;inset:auto -10% -40% -10%;height:70vh;
+  background:radial-gradient(ellipse at 30% 100%,rgba(111,99,232,.22),transparent 60%);
+  pointer-events:none;
+}
+.buehne .bahn{position:relative;display:grid;grid-template-columns:2fr .95fr;gap:46px;align-items:end}
+.buehne h1{font-size:clamp(40px,5.9vw,76px);line-height:1;letter-spacing:-.035em;max-width:20ch}
+.buehne h1 .zeile2{display:block;color:var(--lila-700)}
+.buehne .vorsatz{margin-top:30px;font-size:clamp(17px,1.7vw,21px);color:var(--nebel-700);max-width:44ch}
+.buehne .knopfreihe{display:flex;gap:12px;margin-top:34px;flex-wrap:wrap}
+.pfeiler{display:grid;gap:14px}
+.pfeiler .stein{padding:20px 22px;border-radius:18px;background:rgba(255,255,255,.66);border:1px solid rgba(255,255,255,.7);box-shadow:0 14px 40px rgba(59,52,134,.12);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%)}
+.pfeiler .stein b{display:block;font-family:var(--schrift-schau);font-size:30px;letter-spacing:-.02em;line-height:1.1}
+.pfeiler .stein span{font-size:14px;color:var(--nebel-600)}
+@media (max-width:940px){
+  .buehne{min-height:0;align-items:stretch}
+  .buehne .bahn{grid-template-columns:1fr;gap:36px}
+  .pfeiler{grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .pfeiler .stein{padding:14px}
+  .pfeiler .stein b{font-size:22px}
+}
+@media (max-width:560px){.pfeiler{grid-template-columns:1fr}}
+
+/* ---------- Der Kino-Moment: der Vermerk entsteht ---------- */
+.aufbau{height:420vh;position:relative}
+.aufbau .haftet{position:sticky;top:0;height:100svh;display:grid;place-items:center;overflow:hidden;background:linear-gradient(180deg,#fbfbfe,var(--lila-050) 45%,#fbfbfe)}
+.aufbau .mitte{width:min(var(--bahn),100% - 48px);display:grid;grid-template-columns:.85fr 1.15fr;gap:48px;align-items:center}
+.aufbau .worte h2{font-size:clamp(28px,3.6vw,46px)}
+.stufen{list-style:none;margin-top:28px;display:grid;gap:4px}
+.stufen li{
+  padding:14px 18px;border-radius:14px;font-size:16px;color:var(--nebel-500);
+  border-left:2px solid var(--nebel-200);transition:color .4s var(--kurve),border-color .4s var(--kurve),background .4s var(--kurve);
+}
+.stufen li b{font-weight:600;display:block;color:inherit}
+.stufen li small{font-size:14px;display:block;margin-top:2px}
+.stufen li.jetzt{color:var(--tinte);border-left-color:var(--lila-600);background:rgba(255,255,255,.8)}
+
+/* die Karte, die entsteht */
+.werkstueck{position:relative;border-radius:22px;padding:30px 32px;background:#fff;border:0.5px solid var(--nebel-200);box-shadow:0 30px 70px rgba(59,52,134,.16);min-height:420px}
+.werkstueck .gitter{
+  position:absolute;inset:0;border-radius:22px;pointer-events:none;opacity:var(--blau,0);
+  background:linear-gradient(rgba(111,99,232,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(111,99,232,.1) 1px,transparent 1px);
+  background-size:16px 16px;transition:opacity .4s ease;
+}
+.werkstueck svg.umriss{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.werkstueck svg.umriss rect{fill:none;width:calc(100% - 2px);height:calc(100% - 2px);stroke:var(--lila-600);stroke-width:1.5;stroke-dasharray:var(--umfang,2400);stroke-dashoffset:var(--rest,2400);opacity:var(--umriss-auf,0)}
+.werkstueck .inhalt{position:relative;display:grid;gap:16px}
+.werkstueck .titelzeile{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.werkstueck .titelzeile h3{font-size:22px}
+.werkstueck .stempel{font-size:12.5px;color:var(--nebel-500)}
+.werkstueck .block{opacity:0;transform:translateY(10px);transition:opacity .5s var(--kurve),transform .5s var(--kurve)}
+.werkstueck .block.da{opacity:1;transform:none}
+.werkstueck .frage{background:var(--nebel-100);border-radius:16px 16px 16px 4px;padding:14px 16px;font-size:15px}
+.werkstueck .fund{display:grid;gap:10px}
+.werkstueck .fund .zeile{display:flex;justify-content:space-between;gap:14px;font-size:14.5px;padding-bottom:10px;border-bottom:0.5px solid var(--nebel-200)}
+.werkstueck .fund .zeile b{font-variant-numeric:tabular-nums}
+.werkstueck .satz{font-size:15.5px;line-height:1.6}
+.werkstueck .rechnung{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--lila-050);border:1px solid var(--lila-200);border-radius:16px;padding:16px 18px}
+.werkstueck .rechnung .betrag{font-family:var(--schrift-schau);font-size:28px;letter-spacing:-.02em}
+.werkstueck .rechnung small{display:block;font-size:13px;color:var(--nebel-600)}
+@media (max-width:940px){
+  .aufbau{height:360vh}
+  .aufbau .mitte{grid-template-columns:1fr;gap:24px}
+  .stufen{display:none}
+  .werkstueck{min-height:360px;padding:22px}
+}
+@media (prefers-reduced-motion:reduce){
+  .aufbau{height:auto}
+  .aufbau .haftet{position:static;height:auto;padding:60px 0}
+  .werkstueck .block{opacity:1;transform:none}
+  .stufen li{color:var(--tinte)}
+}
+
+/* ---------- Werkzeuge als Zeilen ---------- */
+.zeilenwerk{margin-top:44px;border-top:0.5px solid var(--nebel-200)}
+.werkzeug{
+  display:grid;grid-template-columns:minmax(180px,.42fr) 1fr auto;gap:28px;align-items:baseline;
+  padding:26px 0;border-bottom:0.5px solid var(--nebel-200);transition:background .3s ease;
+}
+.werkzeug h3{font-size:clamp(21px,2.4vw,30px)}
+.werkzeug p{font-size:16px;color:var(--nebel-700)}
+.werkzeug .wer{font-size:13.5px;color:var(--nebel-500);white-space:nowrap}
+@media (hover:hover){.werkzeug:hover{background:linear-gradient(90deg,var(--lila-050),transparent 70%)}}
+@media (max-width:760px){
+  .werkzeug{grid-template-columns:1fr;gap:8px;padding:20px 0}
+  .werkzeug .wer{order:-1}
+}
+
+/* ---------- White Label als Trio ---------- */
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px}
+.mini{border-radius:20px;overflow:hidden;background:#fff;border:0.5px solid var(--nebel-200);box-shadow:0 16px 44px rgba(24,21,47,.08)}
+.mini .band{display:flex;align-items:center;gap:9px;padding:12px 14px;border-bottom:0.5px solid var(--nebel-200);background:var(--nebel-050)}
+.mini .band .zeichen{width:20px;height:20px;border-radius:6px;color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center}
+.mini .band b{font-size:13.5px;font-weight:600}
+.mini .leib{padding:16px;display:grid;gap:10px}
+.mini .leib .strich{height:9px;border-radius:999px;background:var(--nebel-100)}
+.mini .leib .strich.kurz{width:58%}
+.mini .leib .knopfform{margin-top:6px;height:34px;border-radius:999px;display:grid;place-items:center;color:#fff;font-size:12.5px;font-weight:600}
+.mini .adresse{padding:12px 16px 16px;font-size:12.5px;color:var(--nebel-500)}
+.trio-satz{margin-top:26px;font-size:15px;color:var(--nebel-600)}
+@media (max-width:820px){.trio{grid-template-columns:1fr;gap:14px}}
+
+/* ---------- Preis als Aussage ---------- */
+.preisband{margin-top:44px;display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:26px;overflow:hidden;border:0.5px solid var(--nebel-200);background:#fff}
+.preisband .haelfte{padding:clamp(28px,4vw,46px)}
+.preisband .haelfte:first-child{border-right:0.5px solid var(--nebel-200)}
+.preisband .gross{font-family:var(--schrift-schau);font-size:clamp(40px,5.6vw,64px);letter-spacing:-.03em;line-height:1}
+.preisband .dazu{margin-top:12px;font-size:16px;color:var(--nebel-700)}
+.staffel{list-style:none;display:grid;gap:0;margin-top:8px}
+.staffel li{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:0.5px solid var(--nebel-200);font-size:15.5px}
+.staffel li:last-child{border-bottom:0}
+.staffel li b{font-variant-numeric:tabular-nums;font-weight:600}
+@media (max-width:760px){
+  .preisband{grid-template-columns:1fr}
+  .preisband .haelfte:first-child{border-right:0;border-bottom:0.5px solid var(--nebel-200)}
+}
+
+/* ---------- Daten ---------- */
+.aussage{margin-top:var(--luft);padding:clamp(36px,5vw,64px);border-radius:28px;background:linear-gradient(135deg,var(--lila-050),#fff 65%);border:1px solid var(--lila-200)}
+.aussage p{font-family:var(--schrift-schau);font-size:clamp(24px,3.2vw,40px);line-height:1.15;letter-spacing:-.02em;max-width:22ch}
+.aussage .orte{margin-top:28px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px;font-size:14.5px;color:var(--nebel-700)}
+.aussage .orte div b{display:block;font-weight:600;color:var(--tinte)}
+@media (max-width:760px){.aussage .orte{grid-template-columns:1fr 1fr}}
+
+/* ---------- Schluss ---------- */
+.schlusszeile{margin-top:var(--luft);text-align:center;padding:clamp(40px,6vw,80px) 0}
+.schlusszeile h2{font-size:clamp(32px,5.4vw,64px);max-width:18ch;margin-inline:auto}
+.schlusszeile .knopfreihe{display:flex;gap:12px;justify-content:center;margin-top:30px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<header class="kopf" id="kopf">
+  <div class="bahn">
+    <a class="wortmarke" href="#oben"><img src="bilder/quoro-icon.svg" alt=""><span>quoroAI</span></a>
+    <nav>
+      <a href="#aufbau">Wie es arbeitet</a>
+      <a href="#werkzeuge">Werkzeuge</a>
+      <a href="#label">Deine Marke</a>
+      <a href="#preis">Preise</a>
+    </nav>
+    <a class="knopf primaer" href="#schluss">Beratung anlegen</a>
+  </div>
+</header>
+
+<main id="oben">
+
+  <div class="buehne">
+    <div class="bahn">
+      <div>
+        <h1>Beratung, die weiterarbeitet.<span class="zeile2">Unter deinem Namen.</span></h1>
+        <p class="vorsatz">Deine Mandanten fragen nachts um halb elf. quoroAI antwortet mit deinem Wissen, in deiner Handschrift, auf deiner Adresse. Du liest jedes Wort mit.</p>
+        <div class="knopfreihe">
+          <a class="knopf primaer" href="#schluss">Beratung anlegen</a>
+          <a class="knopf leise" href="#aufbau">Sehen, wie ein Vermerk entsteht</a>
+        </div>
+      </div>
+      <div class="pfeiler">
+        <div class="stein"><b>Rund um die Uhr</b><span>Der Mandant wartet nicht auf den nächsten Termin.</span></div>
+        <div class="stein"><b>Deine Marke</b><span>Name, Farbe, Adresse. quoroAI steht nirgends.</span></div>
+        <div class="stein"><b>Ein Haus</b><span>Mandate, Zeiten, Termine und Rechnungen inklusive.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- Kino: der Vermerk entsteht ---------- -->
+  <section id="aufbau" class="aufbau" aria-label="Aus einer Frage wird ein Vermerk">
+    <div class="haftet">
+      <div class="mitte">
+        <div class="worte">
+          <h2>Aus einer Frage wird Arbeit, die zählt.</h2>
+          <ol class="stufen" id="stufen">
+            <li class="jetzt"><b>Der Mandant fragt</b><small>Im Portal, ohne Termin, um 22:40 Uhr.</small></li>
+            <li><b>Der Berater sucht in deinen Akten</b><small>Bilanz, Kostenstellen, deine Methodik.</small></li>
+            <li><b>Er schreibt den Vermerk</b><small>Mit Quelle je Zahl, für dich zum Gegenlesen.</small></li>
+            <li><b>Die Zeit steht auf dem Mandat</b><small>Und geht in die nächste Rechnung.</small></li>
+          </ol>
+        </div>
+
+        <div class="werkstueck" id="werkstueck">
+          <div class="gitter" id="gitter"></div>
+          <svg class="umriss" id="umriss" aria-hidden="true"><rect x="1" y="1" rx="21" ry="21"></rect></svg>
+          <div class="inhalt">
+            <div class="titelzeile block" data-stufe="0">
+              <h3>Vermerk: zweite Schicht</h3>
+              <span class="stempel">MTS Maschinenbau</span>
+            </div>
+            <div class="frage block" data-stufe="0">Lohnt sich die zweite Schicht ab Oktober?</div>
+            <div class="fund block" data-stufe="1">
+              <div class="zeile"><span>Auslastung Kernschicht</span><b>78 %</b></div>
+              <div class="zeile"><span>Deckungsbeitrag je Monat</span><b>14.200 €</b></div>
+              <div class="zeile"><span>Zusatzkosten Schicht</span><b>24.500 €</b></div>
+            </div>
+            <p class="satz block" data-stufe="2">Die zweite Schicht trägt sich ab dem vierten Monat. Bis dahin fehlen 41.000 € Deckungsbeitrag, die aus dem Auftrag Kessler kommen müssten. Grundlage: Kostenstellenbericht Juli, Anlage 2.</p>
+            <div class="rechnung block" data-stufe="3">
+              <div><b>1,5 Stunden auf das Mandat gebucht</b><small>Prüfung und Freigabe durch Anke Berner</small></div>
+              <span class="betrag">277,50 €</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Werkzeuge ---------- -->
+  <section id="werkzeuge" class="bahn">
+    <div class="kopfzeile taucht">
+      <h2>Was sonst noch im Haus ist.</h2>
+      <p style="margin-top:16px;font-size:18px;color:var(--nebel-700)">Ein KI-Berater allein ersetzt keine Kanzleisoftware. Hier ist beides dasselbe Programm.</p>
+    </div>
+    <div class="zeilenwerk">
+      <div class="werkzeug taucht"><h3>Mandate</h3><p>Auftrag, Abrede, Pauschale und Frist an einer Stelle. Was vereinbart ist, rechnet später von selbst.</p><span class="wer">Beratung</span></div>
+      <div class="werkzeug taucht"><h3>Mitlesen</h3><p>Jedes Gespräch offen im Cockpit, jederzeit übernehmbar. Nichts geht ungesehen an deinen Mandanten.</p><span class="wer">Beratung</span></div>
+      <div class="werkzeug taucht"><h3>Zeiten</h3><p>Gebucht auf Mandat und Mensch, mit Nachweis. Auch die Zeit, die der Berater gearbeitet hat.</p><span class="wer">Beratung</span></div>
+      <div class="werkzeug taucht"><h3>Rechnungen</h3><p>Aus Zeiten, Pauschalen und Auslagen. Tagegenau geteilt, wenn ein Mandat mitten im Monat beginnt.</p><span class="wer">Beratung</span></div>
+      <div class="werkzeug taucht"><h3>Termine</h3><p>Der Mandant bucht im Portal, du bestätigst. Kein Anruf, keine Mail mit fünf Vorschlägen.</p><span class="wer">Beide Seiten</span></div>
+      <div class="werkzeug taucht"><h3>Unterlagen</h3><p>Der Mandant lädt hoch, der Berater liest daraus. Was fehlt, fordert er selbst an.</p><span class="wer">Beide Seiten</span></div>
+      <div class="werkzeug taucht"><h3>Marge</h3><p>Was ein Mandat trägt, steht da, während es läuft. Nicht erst beim Jahresabschluss.</p><span class="wer">Beratung</span></div>
+    </div>
+  </section>
+
+  <!-- ---------- White Label ---------- -->
+  <section id="label" class="bahn">
+    <div class="kopfzeile taucht">
+      <h2>Drei Beratungen, drei Marken, eine Plattform.</h2>
+      <p style="margin-top:16px;font-size:18px;color:var(--nebel-700)">Farbe, Zeichen und Adresse gehören der Beratung. Der Mandant sieht das Haus nie, in dem er steht.</p>
+    </div>
+    <div class="trio">
+      <div class="mini taucht">
+        <div class="band"><span class="zeichen" style="background:#2b5fe3">H</span><b>Hellwig &amp; Partner</b></div>
+        <div class="leib"><span class="strich"></span><span class="strich kurz"></span><span class="knopfform" style="background:#2b5fe3">Termin vorschlagen</span></div>
+        <p class="adresse">berater.hellwig-partner.de</p>
+      </div>
+      <div class="mini taucht">
+        <div class="band"><span class="zeichen" style="background:#0f766e">N</span><b>Nordlicht Consulting</b></div>
+        <div class="leib"><span class="strich"></span><span class="strich kurz"></span><span class="knopfform" style="background:#0f766e">Termin vorschlagen</span></div>
+        <p class="adresse">mandant.nordlicht.de</p>
+      </div>
+      <div class="mini taucht">
+        <div class="band"><span class="zeichen" style="background:#9a3412">B</span><b>Kanzlei Brehm</b></div>
+        <div class="leib"><span class="strich"></span><span class="strich kurz"></span><span class="knopfform" style="background:#9a3412">Termin vorschlagen</span></div>
+        <p class="adresse">portal.brehm-beratung.de</p>
+      </div>
+    </div>
+    <p class="trio-satz">Die drei Beratungen sind erfunden. Die Oberfläche ist es nicht.</p>
+  </section>
+
+  <!-- ---------- Preis ---------- -->
+  <section id="preis" class="bahn">
+    <div class="kopfzeile taucht">
+      <h2>Ein Preis, den du deinem Kunden vorrechnen kannst.</h2>
+    </div>
+    <div class="preisband taucht">
+      <div class="haelfte">
+        <div class="gross" id="p-gebuehr">149 €</div>
+        <p class="dazu">je Beratung und Monat, netto. Damit steht die Plattform, egal wie viele Mandate du führst.</p>
+        <p class="dazu" style="margin-top:22px">Dazu ein Zugang je Kunde, <b id="p-spanne">19 bis 149 €</b> nach Umfang, abzüglich Mengenrabatt.</p>
+      </div>
+      <div class="haelfte">
+        <h3 style="font-size:19px;margin-bottom:6px">Mengenrabatt auf den Listenpreis</h3>
+        <ul class="staffel" id="p-staffel"></ul>
+        <p class="dazu" style="margin-top:18px;font-size:14.5px;color:var(--nebel-600)">Beginnt oder endet ein Zugang mitten im Monat, wird tagegenau geteilt. Umsatzsteuer kommt obendrauf.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Daten ---------- -->
+  <section id="daten" class="bahn">
+    <div class="aussage taucht">
+      <p>Die Zahlen deiner Mandanten verlassen Europa nicht.</p>
+      <div class="orte">
+        <div><b>Frankfurt</b>Datenbank, Anmeldung, Dateien</div>
+        <div><b>Falkenstein</b>Server der Plattform</div>
+        <div><b>EU</b>Sprachmodell des Beraters</div>
+        <div><b>Kein Training</b>Weder bei uns noch beim Modellanbieter</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="schlusszeile" id="schluss">
+    <h2>Der nächste Mandant fragt heute Abend.</h2>
+    <div class="knopfreihe">
+      <a class="knopf primaer" href="#">Beratung anlegen</a>
+      <a class="knopf leise" href="#">Vorführung vereinbaren</a>
+    </div>
+  </div>
+
+</main>
+
+<footer class="fuss">
+  <div class="bahn">
+    <div class="spalten">
+      <div>
+        <a class="wortmarke" href="#oben"><img src="bilder/quoro-icon.svg" alt=""><span>quoroAI</span></a>
+        <p style="margin-top:14px;max-width:34ch">Die Plattform, auf der Unternehmensberatungen ihren Kunden einen KI-Berater unter der eigenen Marke geben.</p>
+      </div>
+      <div>
+        <h4>Plattform</h4>
+        <ul>
+          <li><a href="#aufbau">Wie es arbeitet</a></li>
+          <li><a href="#werkzeuge">Werkzeuge</a></li>
+          <li><a href="#label">White Label</a></li>
+          <li><a href="#preis">Preise</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Recht</h4>
+        <ul>
+          <li><a href="#">Impressum</a></li>
+          <li><a href="#">Datenschutz</a></li>
+          <li><a href="#">AGB</a></li>
+          <li><a href="#">Auftragsverarbeitung</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Kontakt</h4>
+        <ul>
+          <li><a href="mailto:hello@quorogroup.com">hello@quorogroup.com</a></li>
+          <li><a href="tel:+4936155898702">+49 361 55898702</a></li>
+          <li>Bahnhofstraße 38<br>99084 Erfurt</li>
+        </ul>
+      </div>
+    </div>
+    <div class="abbinder">
+      <span>Quoro Advisory GmbH</span>
+      <span>Entwurf B, nicht veröffentlicht</span>
+    </div>
+  </div>
+</footer>
+
+<script src="zahlen.js"></script>
+<script>
+(function () {
+  'use strict';
+  var ruhig = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var kopf = document.getElementById('kopf');
+  function kante() { kopf.classList.toggle('gescrollt', window.scrollY > 8); }
+  window.addEventListener('scroll', kante, { passive: true });
+  kante();
+
+  var beobachter = new IntersectionObserver(function (e) {
+    e.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add('da'); beobachter.unobserve(x.target); } });
+  }, { rootMargin: '0px 0px -12% 0px' });
+  Array.prototype.forEach.call(document.querySelectorAll('.taucht'), function (el) { beobachter.observe(el); });
+
+  /* ---------- Der Aufbau ----------
+     Vier Stufen über die Länge des gepinnten Abschnitts. Zuerst zeichnet sich
+     der Umriss auf dem Gitter, dann belichtet die Karte, dann füllt sie sich
+     Block für Block. Rückwärts spult das von selbst zurück. */
+  var abschnitt = document.querySelector('.aufbau');
+  var stueck = document.getElementById('werkstueck');
+  var gitter = document.getElementById('gitter');
+  var umriss = document.getElementById('umriss');
+  var rechteck = umriss.querySelector('rect');
+  var bloecke = Array.prototype.slice.call(stueck.querySelectorAll('.block'));
+  var stufen = Array.prototype.slice.call(document.getElementById('stufen').children);
+
+  function umfangSetzen() {
+    var r = stueck.getBoundingClientRect();
+    var u = 2 * (r.width + r.height);
+    rechteck.style.setProperty('--umfang', u);
+    return u;
+  }
+  var umfang = umfangSetzen();
+  window.addEventListener('resize', function () { umfang = umfangSetzen(); }, { passive: true });
+
+  function seg(p, a, b) { return Math.min(Math.max((p - a) / (b - a), 0), 1); }
+
+  function zeichne(p) {
+    /* 0 bis 0,14: die Blaupause zeichnet den Umriss */
+    var z = seg(p, 0, .14);
+    gitter.style.setProperty('--blau', p < .2 ? String(1 - seg(p, .14, .2)) : '0');
+    rechteck.style.setProperty('--rest', umfang * (1 - z));
+    rechteck.style.setProperty('--umriss-auf', String(1 - seg(p, .14, .2)));
+    stueck.style.background = 'rgba(255,255,255,' + (0.25 + 0.75 * seg(p, .08, .2)) + ')';
+    stueck.style.boxShadow = '0 30px 70px rgba(59,52,134,' + (0.16 * seg(p, .1, .24)) + ')';
+
+    /* danach vier Fenster, je Stufe eines */
+    var fenster = [[.20, .34], [.36, .52], [.54, .72], [.74, .88]];
+    var aktiv = 0;
+    fenster.forEach(function (f, i) {
+      var auf = p >= f[0];
+      bloecke.forEach(function (b) {
+        if (parseInt(b.dataset.stufe, 10) === i) b.classList.toggle('da', auf);
+      });
+      if (auf) aktiv = i;
+    });
+    stufen.forEach(function (li, i) { li.classList.toggle('jetzt', i === aktiv); });
+  }
+
+  if (ruhig) {
+    gitter.style.setProperty('--blau', '0');
+    rechteck.style.setProperty('--umriss-auf', '0');
+    bloecke.forEach(function (b) { b.classList.add('da'); });
+  } else {
+    var laeuft = false;
+    function messen() {
+      var r = abschnitt.getBoundingClientRect();
+      var weg = r.height - window.innerHeight;
+      zeichne(weg > 0 ? Math.min(Math.max(-r.top / weg, 0), 1) : 0);
+      laeuft = false;
+    }
+    window.addEventListener('scroll', function () {
+      if (!laeuft) { laeuft = true; requestAnimationFrame(messen); }
+    }, { passive: true });
+    messen();
+  }
+
+  /* ---------- Preise aus zahlen.js ---------- */
+  var Z = window.Zahlen;
+  var tarife = Z.tarife();
+  document.getElementById('p-gebuehr').textContent = Z.euroKurz(Z.gebuehr);
+  document.getElementById('p-spanne').textContent =
+    Z.euroKurz(tarife[0].cent) + ' bis ' + Z.euroKurz(tarife[tarife.length - 1].cent);
+  var liste = document.getElementById('p-staffel');
+  Z.staffel().forEach(function (s, i, alle) {
+    var li = document.createElement('li');
+    var bis = alle[i + 1] ? ' bis ' + (alle[i + 1].ab - 1) : ' und mehr';
+    var von = s.ab === 0 ? 'Ab dem ersten Zugang' : 'Ab ' + s.ab + ' Zugängen';
+    li.innerHTML = '<span>' + von + (alle[i + 1] ? bis : '') + '</span><b>' + s.proz + ' %</b>';
+    liste.appendChild(li);
+  });
+})();
+</script>
+</body>
+</html>
