@@ -11,7 +11,7 @@
    glocke.js setzt lage.js voraus und muss nach ihr geladen werden.
    Ebenso uhr.js (Issue #63): sie zieht Mandate, Menschen und Zeitpunkte von
    hier, statt sie zu führen.
-   Marker: LAGE-V4
+   Marker: LAGE-V5 (V5: ein Terminvorschlag ist der zweite Anfrage-Zustand — Issue #90)
 
    V4 (Nachlese der Runde): Ein Wortlaut für den Tag im Fließtext (`tagWort`)
    und einer mit Jahr für Fristen (`tagDatum`) — bitten.js und unterlagen.html
@@ -135,7 +135,17 @@ window.Lage = (function () {
        wird sie auf dem Zettel, beurteilt in der Woche. Sie ist NICHT
        angenommen — was die Glocke des Kunden lange behauptet hat. */
     { id: 'w1',  tag: 4, von: 9,    bis: 9.75, wer: 'a', kunde: 'Petersen Stahlbau', was: 'Gespräch mit einem Menschen',
-      form: 'Videocall', angefragt: true, ziel: 'beratung-termine.html#petersen' }
+      form: 'Videocall', angefragt: true, ziel: 'beratung-termine.html#petersen' },
+    /* Der zweite Anfrage-Zustand (Issue #90, entschieden 2026-08-20): die
+       Beratung konnte das Wunschfenster nicht und hat ein anderes
+       VORGESCHLAGEN. Ein Vorschlag ist kein Termin — er wartet auf das Ja des
+       Kunden, und dieses Ja findet in seinem Portal statt, an derselben
+       Zeile, in der seine Anfrage liegt. `vorschlag` trägt das angebotene
+       Fenster (Tag, von, bis); das Wunschfenster bleibt daneben stehen,
+       sonst wüsste niemand mehr, worum gebeten wurde. */
+    { id: 'w2',  tag: 2, von: 15,   bis: 16,   wer: 'a', kunde: 'Petersen Stahlbau', was: 'Frachtraten kurz durchgehen',
+      form: 'Telefonat', angefragt: true, ziel: 'beratung-termine.html#petersen',
+      vorschlag: { tag: 3, von: 10, bis: 11 } }
   ];
 
   /* Am ersten Tag ist Petersen Stahlbau ein neuer Mandant: außer dem
@@ -581,8 +591,22 @@ window.Lage = (function () {
   function anfrageSatz(t) {
     if (!t) return '';
     var wer = person(t.wer);
+    /* Liegt ein Vorschlag vor, ist die Anfrage nicht mehr offen — sie
+       wartet auf DICH. Das ist ein anderer Satz, und die Glocke darf ihn
+       nicht mit „hat noch nicht entschieden" verwechseln (Issue #90). */
+    if (t.vorschlag) {
+      return t.was + ': ' + (wer ? wer.name : 'deine Beratung') + ' schlägt ' +
+             vorschlagWann(t) + ' vor. Dein Wunsch war ' + terminBeginn(t) + '.';
+    }
     return t.was + ', Wunschfenster ' + terminBeginn(t) + '.' +
            (wer ? ' ' + wer.name + ' hat noch nicht entschieden.' : '');
+  }
+
+  /* Das vorgeschlagene Fenster in Worten — dieselbe Form wie terminBeginn,
+     damit Wunsch und Vorschlag nebeneinander lesbar sind. */
+  function vorschlagWann(t) {
+    if (!t || !t.vorschlag) return '';
+    return terminBeginn({ tag: t.vorschlag.tag, von: t.vorschlag.von, bis: t.vorschlag.bis });
   }
 
   function person(id) {
@@ -624,6 +648,7 @@ window.Lage = (function () {
     termineBei: termineBei,
     terminWann: terminWann,
     terminBeginn: terminBeginn,
+    vorschlagWann: vorschlagWann,
     kennenlernTermin: kennenlernTermin,
     terminWer: terminWer,
     fremdSatz: fremdSatz,

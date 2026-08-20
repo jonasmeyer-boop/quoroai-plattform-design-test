@@ -41,7 +41,7 @@
    Bitten-Block „am Donnerstag, 20.08.". Dienstag ist zugleich das Heute der
    Lage; der Satz las sich also auch noch als „heute". Beide fragen jetzt
    Lage.kennenlernTermin().
-   Marker: UEBERSICHT-V34 (V34: die Tür zu „Was du erlaubt hast" steht bei der Zusammenarbeit — Design-Issue #80) (auch der Weg nennt den Kennenlern-Termin aus der Lage)
+   Marker: UEBERSICHT-V35 (V35: ein Terminvorschlag der Beratung wird hier zugesagt — Issue #90) (V34: die Tür zu „Was du erlaubt hast" steht bei der Zusammenarbeit — Design-Issue #80) (auch der Weg nennt den Kennenlern-Termin aus der Lage)
    (V31: das wöchentliche Briefing hat eine Zeile und einen
    Glocken-Eintrag, Häppchen E3; V26 aus dem Review: Überschrift und Titel der
    Zeile folgen der Anrede der Marke, wie alle Nachbarn)
@@ -447,6 +447,22 @@ section{margin-top:52px}
 .fuss-links a:hover{border-color:var(--blau)}
 .fuss-links a small{color:var(--grau);font-weight:600;margin-left:6px}
 
+/* Die zwei Griffe an einem Terminvorschlag (Issue #90). Sie stehen in der
+   Zeile, wo sonst der Zustand steht — der Zustand IST hier die Frage. */
+.z-griffe{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.z-griffe button{
+  min-height:44px;padding:0 14px;border-radius:999px;cursor:pointer;
+  font:inherit;font-size:13.5px;font-weight:700;
+  border:1px solid var(--linie);background:#fff;color:var(--tinte);
+  transition:border-color .2s var(--feder),color .2s var(--feder);
+}
+.z-griffe .z-ja{border-color:var(--blau);color:var(--blau)}
+.z-griffe button:hover{border-color:var(--stift);color:var(--stift)}
+@media (max-width:560px){
+  .z-griffe{width:100%}
+  .z-griffe button{flex:1}
+}
+
 @media (prefers-reduced-motion: reduce){
   .karte{opacity:1;translate:none}
   .karte.da{transition:none}
@@ -828,6 +844,49 @@ section{margin-top:52px}
       text.appendChild(titel);
       text.appendChild(document.createElement('br'));
       text.appendChild(meta);
+      /* Zwei Zustände (Issue #90, entschieden 2026-08-20): die Anfrage liegt
+         bei der Beratung — oder sie hat ein anderes Fenster VORGESCHLAGEN,
+         und dann wartet sie auf DICH. Das Ja findet hier statt, nicht im
+         Gespräch mit dem KI-Berater: der Kunde könnte dessen Wort nicht von
+         dem seiner Beratung unterscheiden, und ein Vorschlag, den nur die
+         Beratung sieht, ist kein Vorschlag. */
+      if (w.vorschlag) {
+        meta.textContent = (wer ? wer.name : 'Deine Beratung') + ' schlägt ' +
+          Lage.vorschlagWann(w) + ' vor. Dein Wunsch war ' + Lage.terminBeginn(w) + '.';
+        var griffe = document.createElement('span');
+        griffe.className = 'z-griffe';
+        var ja = document.createElement('button');
+        ja.type = 'button';
+        ja.className = 'z-ja';
+        ja.textContent = 'Passt';
+        var nein = document.createElement('button');
+        nein.type = 'button';
+        nein.className = 'z-nein';
+        nein.textContent = 'Passt nicht';
+        function antworte(satz){
+          griffe.remove();
+          var st = document.createElement('span');
+          st.className = 'z-status';
+          st.textContent = satz;
+          zeile.appendChild(st);
+        }
+        ja.addEventListener('click', function(){
+          meta.textContent = 'Steht: ' + Lage.vorschlagWann(w) + '. ' +
+            (wer ? wer.name : 'Deine Beratung') + ' bekommt Bescheid.';
+          antworte('zugesagt');
+        });
+        nein.addEventListener('click', function(){
+          meta.textContent = 'Passt nicht. ' + (wer ? wer.name : 'Deine Beratung') +
+            ' sucht ein anderes Fenster — dein Wunsch war ' + Lage.terminBeginn(w) + '.';
+          antworte('abgelehnt');
+        });
+        griffe.appendChild(ja);
+        griffe.appendChild(nein);
+        zeile.appendChild(text);
+        zeile.appendChild(griffe);
+        liste.appendChild(zeile);
+        return;
+      }
       var stand = document.createElement('span');
       stand.className = 'z-status offen';
       stand.textContent = 'liegt vor';

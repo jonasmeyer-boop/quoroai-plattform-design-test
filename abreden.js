@@ -20,14 +20,21 @@
    Im Produkt kommen dieselben Größen aus der Abrede am Mandat
    (`engagements`). Dieser Baustein liefert Daten und Rechenwege, nie
    Aussehen. Beträge in Cent, netto.
-   Marker: ABREDEN-V1 (die eine Quelle für die Abrede je Mandat) */
+   Marker: ABREDEN-V2 (V2: die Abrede sagt, ob sie auch Auslagen deckt —
+   Issue #90. V1: die eine Quelle für die Abrede je Mandat) */
 window.Abreden = (function () {
   'use strict';
 
   var ABREDEN = {
     petersen: {art: 'monatspauschale', wort: 'über eine Monatspauschale von 2.400 €', cent: 240000,
                zielTage: 10, frueherJahr: '2026', frueherBis: '2026-06'},
-    cordes:   {art: 'monatspauschale', wort: 'über eine Monatspauschale von 2.750 €', cent: 275000},
+    /* Cordes' Pauschale deckt auch die Auslagen ab — das ist eine Eigenschaft
+       DIESER Abrede, keine Regel der Software (Issue #90, entschieden
+       2026-08-20). Petersens Pauschale deckt sie nicht; dort gehen Auslagen
+       neben der Pauschale auf die Rechnung. Ohne dieses Feld müsste jede
+       Fläche raten oder es sich merken. */
+    cordes:   {art: 'monatspauschale', wort: 'über eine Monatspauschale von 2.750 €', cent: 275000,
+               auslagenGedeckt: true},
     freitag:  {art: 'aufwand', wort: 'nach Aufwand und Auslagen'},
     mts:      {art: 'jahrespauschale', wort: 'über eine Jahrespauschale von 27.000 € in zwölf Abschlägen',
                cent: 2700000, raten: 12, rate: 225000,
@@ -81,6 +88,23 @@ window.Abreden = (function () {
     return 0;
   }
 
+  /* Deckt die Pauschale dieses Mandats auch die Auslagen? Kein Vorgabewert
+     „ja": wer nichts vereinbart hat, berechnet Auslagen weiter — alles andere
+     wäre ein Verzicht, den niemand erklärt hat. */
+  function auslagenGedeckt(mandatId) {
+    var a = ABREDEN[mandatId];
+    return !!(a && a.auslagenGedeckt);
+  }
+
+  /* Der Satz, der an einer gesperrten Auslage steht. Leer heißt: sie darf
+     weiterberechnet werden. */
+  function auslagenGrund(mandatId, name) {
+    if (!auslagenGedeckt(mandatId)) return '';
+    var a = ABREDEN[mandatId];
+    var wie = a.art === 'jahrespauschale' ? 'Die Jahrespauschale' : 'Die Monatspauschale';
+    return wie + ' von ' + (name || mandatId) + ' deckt Auslagen ab — diese bleibt bei der Beratung.';
+  }
+
   /* Der Rhythmus in Worten — beide Pauschalen laufen monatlich, die
      Jahrespauschale als Abschlag. Das ist keine Kleinigkeit: „jährlich"
      stünde falsch da, obwohl der Betrag ein Jahresbetrag ist. */
@@ -104,6 +128,8 @@ window.Abreden = (function () {
     zielTage: zielTage,
     zielTageVorgabe: function () { return ZIEL_TAGE; },
     istWiederkehrend: istWiederkehrend,
+    auslagenGedeckt: auslagenGedeckt,
+    auslagenGrund: auslagenGrund,
     rateCent: rateCent,
     rhythmus: rhythmus,
     euro: euro

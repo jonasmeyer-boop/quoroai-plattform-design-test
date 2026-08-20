@@ -56,7 +56,7 @@
    Termins (Lage.terminBeginn).
    V15: Die Fingermaß-Regel für „Alle Vorschläge" stand als einzige einzeilig;
    sie ist jetzt in Form und Wortlaut wie auf den 22 Nachbarflächen.
-   Marker: BERATUNG-TERMINE-V16 (V16: der Werkstatt-Knopf heißt Stand des Designs) (Auswahl, Wortlaut und Fingermaß wie nebenan) */
+   Marker: BERATUNG-TERMINE-V17 (V17: der Kunde sagt im Portal zu, nicht im Gespräch — Issue #90) (V16: der Werkstatt-Knopf heißt Stand des Designs) (Auswahl, Wortlaut und Fingermaß wie nebenan) */
 @font-face{
   font-family:'Caveat';
   src:url('schriften/caveat.woff2') format('woff2');
@@ -560,7 +560,12 @@ h3{font-family:var(--schrift-text);font-size:12.5px;font-weight:600;letter-spaci
   document.getElementById('bestaetigen').addEventListener('click', function(){
     if (!gewaehlt) return;
     if (eigenerVorschlag) {
-      erledige(anfrage, '<span>Vorgeschlagen: <b>' + gewaehlt.text + '</b>. Der KI-Berater fragt Herrn Petersen, ob das Fenster passt; der Termin entsteht, sobald er zusagt.</span>');
+      /* Nicht mehr „der KI-Berater fragt" (Issue #90, entschieden
+         2026-08-20): der Kunde könnte dessen Wort nicht von dem seiner
+         Beratung unterscheiden, und die Zusage braucht einen Ort, der bleibt.
+         Sie findet in seinem Portal statt, an derselben Zeile, in der seine
+         Anfrage liegt (uebersicht.html, UEBERSICHT-V35). */
+      erledige(anfrage, '<span>Vorgeschlagen: <b>' + gewaehlt.text + '</b>. Der Vorschlag liegt bei Herrn Petersen im Portal, an seiner Anfrage; der Termin entsteht, sobald er zusagt.</span>');
       return;
     }
     erledige(anfrage, '<span>Der Termin steht: <b>' + gewaehlt.text + '</b>. Der KI-Berater sagt Herrn Petersen Bescheid, die Einladung geht an Dr. Vogelsang.</span>');

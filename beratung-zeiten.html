@@ -47,7 +47,7 @@
    Uhrzeit liegt mehr hinter dem Jetzt der Lage.
    V10 (Issue #66): „Alle Vorschläge" ist am Finger 44 Pixel hoch statt 38 —
    dieselbe Regel und derselbe Wortlaut wie in plattform.html.
-   Marker: BERATUNG-ZEITEN-V11 (V11: der Werkstatt-Knopf heißt Stand des Designs) (die Fingermaße stimmen) */
+   Marker: BERATUNG-ZEITEN-V12 (V12: ob eine Pauschale Auslagen deckt, sagt die Abrede — Issue #90. V11: der Werkstatt-Knopf heißt Stand des Designs) (die Fingermaße stimmen) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -272,6 +272,7 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
 <!-- lage.js bringt window.Lage: das eine „Heute" des Entwurfs, die Woche und
      die Termine. Muss vor allem stehen, was daraus liest. -->
 <script src="lage.js"></script>
+<script src="abreden.js"></script>
 <script src="krume.js"></script>
 </head>
 <body class="quoro"
@@ -725,10 +726,18 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5}
      (beratung-rechnungen.html). Ob das überhaupt geht, entscheidet die Abrede
      des Mandats: eine Pauschale deckt Auslagen ab, dann bleiben sie bei der
      Beratung und stehen nur in ihrer eigenen Kostenrechnung. */
-  var DECKT = {
-    cordes: 'Die Monatspauschale von Cordes deckt Auslagen ab — diese bleibt bei der Beratung.',
-    intern: 'Eigene Beratung: es gibt niemanden, dem sich das berechnen ließe.'
-  };
+  /* Ob eine Pauschale auch die Auslagen deckt, steht in der Abrede des
+     Mandats (abreden.js), nicht hier — es ist eine Eigenschaft DIESER
+     Abrede, keine Regel der Software (Issue #90, entschieden 2026-08-20).
+     Vorher stand Cordes hier getippt, und keine andere Fläche wusste davon. */
+  var DECKT = (function(){
+    var d = { intern: 'Eigene Beratung: es gibt niemanden, dem sich das berechnen ließe.' };
+    Lage.mandate().forEach(function(m){
+      var grund = Abreden.auslagenGrund(m.id, m.name.split(' ')[0]);
+      if (grund) d[m.id] = grund;
+    });
+    return d;
+  })();
   var AUSLAGEN = [
     {mandat: 'Bäckerei Freitag', was: 'Warenanalyse, Laborkosten', cent: 21500, am: '04.08.2026', weiter: true,  beleg: true},
     /* Wortgleich mit beratung-rechnungen.html — dieselbe Auslage darf nicht
