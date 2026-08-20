@@ -66,7 +66,10 @@
    Entwurf sagte, warum das Honorar unter dem Satz lag — und ist weg.
    V10 (Issue #66): „Alle Vorschläge" ist am Finger 44 Pixel hoch statt 38 —
    dieselbe Regel und derselbe Wortlaut wie in plattform.html.
-   Marker: BERATUNG-MARGE-V11 (V11: der Werkstatt-Knopf heißt Stand des Designs) (die Fingermaße stimmen) */
+   Marker: BERATUNG-MARGE-V12 (V12, Issue #85: die Vorschau wählt einen
+   KOPF, keine Rolle — „so sieht es Miriam", mit Namen. Im Produkt sähe die
+   Leitung sonst ihre eigene Berater-Sicht, und die ist leer; eine Vorschau,
+   die nichts zeigt, führt die Regel nicht vor, sondern behauptet sie.) (V11: der Werkstatt-Knopf heißt Stand des Designs) (die Fingermaße stimmen) */
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font-family:inherit}
@@ -348,11 +351,8 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
   </div>
 
   <div class="sicht">
-    <div class="frage">Ein Kostensatz ist eine Gehaltsangabe. Sieh dir an, was diese Fläche einem anderen im Team zeigt.</div>
-    <div class="waehler" role="group" aria-label="Sicht wählen">
-      <button type="button" id="sicht-inhaberin" aria-pressed="true">Als Inhaberin</button>
-      <button type="button" id="sicht-beraterin" aria-pressed="false">Als Beraterin</button>
-    </div>
+    <div class="frage">Ein Kostensatz ist eine Gehaltsangabe. Sieh dir an, was diese Fläche einem <b>bestimmten</b> Menschen im Team zeigt — nicht „einer Rolle", sondern ihm.</div>
+    <div class="waehler" role="group" aria-label="Sicht wählen" id="sicht-waehler"></div>
   </div>
 
   <h3 class="weich" id="titel-gesamt">Die Beratung, seit Jahresbeginn</h3>
@@ -467,10 +467,19 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
      stunden:[['anna',26],['tarek',88],['sabine',18]]}
   ];
 
-  /* Wer diese Fläche als Beraterin ansieht: Miriam Krohn. Sie arbeitet an
-     Petersen und Freitag — die beiden anderen Mandate gehören nicht zu ihr
-     und tauchen in ihrer Sicht gar nicht erst auf. */
+  /* Wessen Sicht gerade gezeigt wird. Steht hier oben, weil die Zuordnung
+     der Mandate gleich darunter davon abhängt — vorher stand die Zeile 90
+     Zeilen tiefer, und `m.meins` wäre beim Laden für niemanden wahr gewesen. */
   var ICH = 'miriam';
+
+  /* Wem ein Mandat gehört, hängt am gewählten Kopf — deshalb wird es beim
+     Umschalten neu gerechnet, nicht einmal beim Laden (Issue #85). */
+  function neuRechnen(){
+    MANDATE.forEach(function(m){
+      m.meins = m.stunden.some(function(p){ return p[0] === ICH; });
+    });
+    MEINE = summiere(MANDATE.filter(function(m){ return m.meins; }));
+  }
 
   MANDATE.forEach(function(m){
     m.kosten = 0; m.std = 0;
@@ -511,6 +520,9 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
     return s;
   }
   var SUMME = summiere(MANDATE);
+  /* MEINE hängt am gewählten Kopf und wird deshalb bei jedem Wechsel neu
+     gerechnet. Stand sie fest, zeigte die Sicht eines anderen Menschen die
+     Summe des vorigen — gefunden beim Bau der Kopf-Wahl (Issue #85). */
   var MEINE = summiere(MANDATE.filter(function(m){ return m.meins; }));
 
   /* ================= Zahlen in Worte ================= */
@@ -544,17 +556,48 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
      geändert. Würden sie neu gebaut, spränge der Balken auf seinen neuen
      Stand, statt dorthin zu laufen — und genau dieser Lauf ist der einzige
      Bewegungsmoment dieser Fläche. */
+  /* Die Vorschau wählt einen KOPF, keine Rolle (Issue #85, entschieden
+     2026-08-20). Bis dahin standen hier „Als Inhaberin / Als Beraterin", und
+     das reichte, solange die Vorführung ohnehin Miriam meinte. Im Produkt
+     kennt die Fläche die Rolle des Angemeldeten — die Leitung sähe dort ihre
+     EIGENE Berater-Sicht, und die ist meist leer: keine Mandate, alles
+     verdeckt. Eine Vorschau, die nichts zeigt, führt die Regel nicht vor,
+     sondern behauptet sie. Also: „so sieht es Miriam", mit Namen. */
   var sicht = 'inhaberin';
   function darfKosten(){ return sicht === 'inhaberin'; }
 
-  var knopfInhaberin = document.getElementById('sicht-inhaberin');
-  var knopfBeraterin = document.getElementById('sicht-beraterin');
+  var waehler = document.getElementById('sicht-waehler');
+  var knoepfe = {};
+
+  (function baueWaehler(){
+    function knopf(id, text, titel){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = text;
+      if (titel) b.title = titel;
+      b.setAttribute('aria-pressed', id === 'inhaberin' ? 'true' : 'false');
+      b.addEventListener('click', function(){ setzeSicht(id); });
+      knoepfe[id] = b;
+      waehler.appendChild(b);
+      return b;
+    }
+    knopf('inhaberin', 'Als Inhaberin', 'Deine eigene Sicht: alles');
+    /* Je Mensch ohne Leitungsrolle ein Knopf. Die Leitung steht nicht dabei —
+       ihre Sicht ist die erste. */
+    TEAM.forEach(function(k){
+      if (k.rolle === 'Inhaberin' || k.rolle === 'Partner') return;
+      knopf(k.id, 'Als ' + k.name.split(' ')[0], 'So sieht diese Fläche ' + k.name);
+    });
+  })();
 
   function setzeSicht(neu){
     if (neu === sicht) return;
     sicht = neu;
-    knopfInhaberin.setAttribute('aria-pressed', sicht === 'inhaberin' ? 'true' : 'false');
-    knopfBeraterin.setAttribute('aria-pressed', sicht === 'beraterin' ? 'true' : 'false');
+    if (neu !== 'inhaberin') ICH = neu;
+    Object.keys(knoepfe).forEach(function(k){
+      knoepfe[k].setAttribute('aria-pressed', k === sicht ? 'true' : 'false');
+    });
+    neuRechnen();                     /* wem gehört welches Mandat: hängt am Kopf */
     roehrenStellen();                 /* die Röhren laufen sofort los */
     if (reduziert) { texteStellen(); return; }
     document.querySelectorAll('.weich').forEach(function(el){ el.classList.add('aus'); });
@@ -563,8 +606,6 @@ h3 + .was{font-size:13px;color:var(--nebel-500);margin-top:3px;line-height:1.5;m
       document.querySelectorAll('.weich').forEach(function(el){ el.classList.remove('aus'); });
     }, 300);
   }
-  knopfInhaberin.addEventListener('click', function(){ setzeSicht('inhaberin'); });
-  knopfBeraterin.addEventListener('click', function(){ setzeSicht('beraterin'); });
 
   /* Die Röhre trägt genau eine Aussage: was von 100 € Honorar bleibt. Diese
      Aussage gibt es nur in der Inhaber-Sicht.
