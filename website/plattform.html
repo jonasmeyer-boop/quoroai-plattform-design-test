@@ -23,38 +23,37 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
 .taucht.da{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){.taucht{opacity:1;transform:none;transition:none}}
 
-/* ---------- Titel ---------- */
-.titel{padding:calc(72px + clamp(48px,7vw,90px)) 0 0}
-.titel h1{font-size:clamp(38px,5.4vw,72px);max-width:14ch}
-.titel .vorsatz{margin-top:18px;font-size:19px;color:var(--nebel-700);max-width:52ch}
-
-/* ---------- Der Weg: sechs Schritte ---------- */
-.weg{margin-top:44px;position:relative;max-width:880px}
-.weg::before{content:"";position:absolute;left:19px;top:8px;bottom:8px;width:1px;background:var(--nebel-200)}
-.station{position:relative;padding:0 0 34px 58px}
-.station:last-child{padding-bottom:0}
-.station::before{
-  content:"";position:absolute;left:12px;top:4px;width:15px;height:15px;border-radius:50%;
-  background:var(--flaeche);border:1.5px solid var(--lila-500);
-}
-.station h3{font-size:21px}
-.station p{margin-top:6px;font-size:16px;color:var(--nebel-700);max-width:62ch}
-.station .merk{margin-top:8px;font-size:14px;color:var(--lila-800);font-weight:600}
-
-/* ---------- Einblicke: die echten Flächen ---------- */
-.einblick{display:grid;grid-template-columns:1.25fr .75fr;gap:44px;align-items:center;margin-top:56px}
-.einblick:nth-child(even){grid-template-columns:.75fr 1.25fr}
-.einblick:nth-child(even) .rahmen{order:2}
-.einblick .rahmen{
+/* ---------- Die Tour: fünf Flächen als Scroll-Kino ----------
+   Die Seite beginnt direkt im Produkt. Gepinnter Lauf, fünf Folien:
+   das Bild blendet und setzt sich, der Text wechselt links, unten läuft
+   die Fortschrittslinie. Ruhige Fassung: die Folien untereinander. */
+.tour{height:560vh;position:relative}
+.tour .haftet{position:sticky;top:0;height:100svh;overflow:hidden;background:var(--grund);padding-top:72px}
+.tour .folie{position:absolute;inset:72px 0 0 0;opacity:0;pointer-events:none;
+  display:grid;grid-template-columns:.72fr 1.28fr;gap:44px;align-items:center;
+  padding:0 clamp(24px,5vw,80px)}
+.tour .folie .rahmen{
   border-radius:18px;overflow:hidden;border:0.5px solid var(--nebel-200);
-  box-shadow:0 24px 70px rgba(59,52,134,.16);background:#fff;
+  box-shadow:0 30px 80px rgba(59,52,134,.20);background:#fff;will-change:transform;
 }
-.einblick .rahmen img{display:block;width:100%;height:auto}
-.einblick h3{font-size:clamp(21px,2.2vw,27px)}
-.einblick p{margin-top:8px;font-size:16px;color:var(--nebel-700)}
-@media (max-width:860px){
-  .einblick,.einblick:nth-child(even){grid-template-columns:1fr;gap:16px}
-  .einblick:nth-child(even) .rahmen{order:0}
+.tour .folie .rahmen img{display:block;width:100%;height:auto}
+.tour .folie .kicker{font-size:13px;font-weight:700;color:var(--lila-700);letter-spacing:.05em}
+.tour .folie h3{margin-top:8px;font-size:clamp(24px,2.6vw,36px);line-height:1.15}
+.tour .folie p{margin-top:10px;font-size:16.5px;color:var(--nebel-700);max-width:38ch}
+.tour .fortschritt{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--nebel-200)}
+.tour .fortschritt i{display:block;height:100%;width:calc(var(--stand,0) * 100%);background:linear-gradient(90deg,var(--lila-400),var(--lila-600))}
+@media (max-width:900px){
+  .tour{height:480vh}
+  .tour .folie{grid-template-columns:1fr;gap:16px;align-content:center;padding:0 16px}
+  .tour .folie .rahmen{order:-1}
+  .tour .folie h3{font-size:clamp(21px,5.6vw,26px)}
+  .tour .folie p{font-size:14.5px;max-width:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .tour{height:auto}
+  .tour .haftet{position:static;height:auto;overflow:visible;padding-top:calc(72px + 30px)}
+  .tour .folie{position:static;opacity:1;pointer-events:auto;margin:0 auto 56px;max-width:min(1180px,100% - 48px);padding:0}
+  .tour .fortschritt{display:none}
 }
 
 /* ---------- Preise ---------- */
@@ -128,8 +127,7 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
   <div class="bahn">
     <a class="wortmarke" href="index.html"><img src="bilder/quoro-icon.svg" alt=""><span>quoroAI</span></a>
     <nav>
-      <a href="#weg">Der Weg</a>
-      <a href="#einblicke">Einblicke</a>
+      <a href="#tour">Die Tour</a>
       <a href="#preise">Preise</a>
       <a href="#fragen">Fragen</a>
     </nav>
@@ -139,91 +137,50 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
 
 <main id="oben">
 
-  <!-- ---------- Titel ---------- -->
-  <div class="titel bahn">
-    <h1>So arbeitet quoroAI, im Detail.</h1>
-    <p class="vorsatz">Von der leeren Beratung bis zur ersten beantworteten Mandantenfrage, mit echten Bildern aus der Oberfläche und den Preisen zum Selberrechnen.</p>
-  </div>
-
-  <!-- ---------- Der Weg ---------- -->
-  <section id="weg" class="bahn">
-    <div class="kopfzeile taucht">
-      <h2>Der Weg, Schritt für Schritt.</h2>
-    </div>
-    <div class="weg taucht">
-      <div class="station">
-        <h3>Beratung anlegen</h3>
-        <p>Konto mit Name und E-Mail, Passwort, fertig. Ab jetzt gehört dir das Cockpit über alle Mandate.</p>
+  <!-- ---------- Die Tour ---------- -->
+  <section id="tour" class="tour" aria-label="So arbeitet quoroAI, in fünf Bildern">
+    <div class="haftet">
+      <div class="folie" data-fenster="-0.15,0.2">
+        <div class="text">
+          <span class="kicker">SO ARBEITET QUOROAI</span>
+          <h3>Dein Cockpit ist ein Modell deiner Beratung.</h3>
+          <p>Jedes Mandat ein Gebäude, die Zentrale in der Mitte. Was Aufmerksamkeit braucht, leuchtet; was ansteht, liegt auf deinem Tisch.</p>
+        </div>
+        <div class="rahmen"><img src="bilder/produkt/cockpit.jpg" alt="Das Cockpit: die Beratung als begehbares Modell mit Mandaten als Gebäuden"></div>
       </div>
-      <div class="station">
-        <h3>Marke setzen</h3>
-        <p>Farbe, Logo, eigene Adresse für das Portal deiner Mandanten. quoroAI taucht dort nicht auf, auch nicht im Impressum: das ist deins.</p>
+      <div class="folie" data-fenster="0.2,0.4">
+        <div class="text">
+          <span class="kicker">DAS PORTAL</span>
+          <h3>Dein Mandant sieht nur deine Marke.</h3>
+          <p>Sein Portal beginnt mit einer Frage, nicht mit einem Menü. Name, Farbe, Adresse, Impressum: alles deins.</p>
+        </div>
+        <div class="rahmen"><img src="bilder/produkt/gespraech.jpg" alt="Das Mandanten-Portal unter fremder Marke mit der Frage: Womit ringst du gerade?"></div>
       </div>
-      <div class="station">
-        <h3>Wissen geben</h3>
-        <p>Deine Methoden, Vorlagen und Unterlagen werden die Grundlage des Beraters. Was du nicht hineingibst, benutzt er nicht.</p>
-        <span class="merk">Kein Training mit deinen Inhalten, weder bei uns noch beim Modellanbieter.</span>
+      <div class="folie" data-fenster="0.4,0.6">
+        <div class="text">
+          <span class="kicker">MITLESEN</span>
+          <h3>Du liest mit, samt Quellen.</h3>
+          <p>Gibt der Mandant ein Gespräch frei, siehst du es live, und rechts steht, worauf sich jede Antwort stützt: Akte, Wissen, erstellte Unterlagen.</p>
+        </div>
+        <div class="rahmen"><img src="bilder/produkt/mitlesen.jpg" alt="Mitlesen: ein freigegebenes Gespräch mit Margen-Zerlegung und Quellen am Rand"></div>
       </div>
-      <div class="station">
-        <h3>Mandanten einladen</h3>
-        <p>Jeder Mandant bekommt einen Zugang mit Tarifstufe. Er öffnet sein Portal unter deiner Marke, lädt Unterlagen hoch, bucht Termine, liest Rechnungen.</p>
+      <div class="folie" data-fenster="0.6,0.8">
+        <div class="text">
+          <span class="kicker">DIE MARGE</span>
+          <h3>Die Marge, solange sie lebt.</h3>
+          <p>Was von jedem Honorar übrig bleibt, nachdem die Stunden bezahlt sind, je Mandat und je Mensch. Nicht erst im Jahresabschluss.</p>
+        </div>
+        <div class="rahmen"><img src="bilder/produkt/marge.jpg" alt="Marge und Sätze: was vom Honorar übrig bleibt, je Mandat"></div>
       </div>
-      <div class="station">
-        <h3>Er fragt, dein Berater antwortet, du liest mit</h3>
-        <p>Antworten kommen aus deinem Wissen, jede Zahl nennt ihre Quelle. Gibt der Mandant ein Gespräch frei, liest du live mit und kannst jederzeit selbst hineinschreiben.</p>
+      <div class="folie" data-fenster="0.8,1.001">
+        <div class="text">
+          <span class="kicker">DIE RECHNUNG</span>
+          <h3>Rechnungen aus dem, was wirklich war.</h3>
+          <p>Der Entwurf hält sich aktuell bis zum Stichtag, gestellt ist gestellt, storniert wird sauber. Die Nummernfolge bleibt lückenlos.</p>
+        </div>
+        <div class="rahmen"><img src="bilder/produkt/rechnungen.jpg" alt="Rechnungen: Entwürfe, gestellte Rechnungen und Stichtage"></div>
       </div>
-      <div class="station">
-        <h3>Zeiten, Rechnung, Marge</h3>
-        <p>Stunden stehen auf Mandat und Mensch, Rechnungen entstehen aus Zeiten, Pauschalen und Auslagen, tagegenau. Und die Marge je Mandat siehst du, während es läuft.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ---------- Einblicke ---------- -->
-  <section id="einblicke" class="bahn">
-    <div class="kopfzeile taucht">
-      <h2>Echte Einblicke.</h2>
-      <p>Keine Broschüren-Mockups: so sieht die Oberfläche aus.</p>
-    </div>
-
-    <div class="einblick taucht">
-      <div class="rahmen"><img src="bilder/produkt/cockpit.jpg" alt="Das Cockpit: die Beratung als begehbares Modell mit Mandaten als Gebäuden" loading="lazy"></div>
-      <div>
-        <h3>Dein Cockpit ist ein Modell deiner Beratung.</h3>
-        <p>Jedes Mandat ein Gebäude, die Zentrale in der Mitte. Was Aufmerksamkeit braucht, leuchtet; was ansteht, liegt auf deinem Tisch.</p>
-      </div>
-    </div>
-
-    <div class="einblick taucht">
-      <div class="rahmen"><img src="bilder/produkt/gespraech.jpg" alt="Das Mandanten-Portal unter fremder Marke mit der Frage: Womit ringst du gerade?" loading="lazy"></div>
-      <div>
-        <h3>Dein Mandant sieht nur deine Marke.</h3>
-        <p>Sein Portal beginnt mit einer Frage, nicht mit einem Menü. Name, Farbe, Adresse, Impressum: alles deins.</p>
-      </div>
-    </div>
-
-    <div class="einblick taucht">
-      <div class="rahmen"><img src="bilder/produkt/mitlesen.jpg" alt="Mitlesen: ein freigegebenes Gespräch mit Margen-Zerlegung und Quellen am Rand" loading="lazy"></div>
-      <div>
-        <h3>Du liest mit, samt Quellen.</h3>
-        <p>Gibt der Mandant ein Gespräch frei, siehst du es live, und rechts steht, worauf sich jede Antwort stützt: Akte, Wissen, erstellte Unterlagen.</p>
-      </div>
-    </div>
-
-    <div class="einblick taucht">
-      <div class="rahmen"><img src="bilder/produkt/marge.jpg" alt="Marge und Sätze: was vom Honorar übrig bleibt, je Mandat" loading="lazy"></div>
-      <div>
-        <h3>Die Marge, solange sie lebt.</h3>
-        <p>Was von jedem Honorar übrig bleibt, nachdem die Stunden bezahlt sind, je Mandat und je Mensch. Nicht erst im Jahresabschluss.</p>
-      </div>
-    </div>
-
-    <div class="einblick taucht">
-      <div class="rahmen"><img src="bilder/produkt/rechnungen.jpg" alt="Rechnungen: Entwürfe, gestellte Rechnungen und Stichtage" loading="lazy"></div>
-      <div>
-        <h3>Rechnungen aus dem, was wirklich war.</h3>
-        <p>Der Entwurf hält sich aktuell bis zum Stichtag, gestellt ist gestellt, storniert wird sauber. Die Nummernfolge bleibt lückenlos.</p>
-      </div>
+      <div class="fortschritt" aria-hidden="true"><i></i></div>
     </div>
   </section>
 
@@ -333,8 +290,7 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
       <div>
         <h4>Diese Seite</h4>
         <ul>
-          <li><a href="#weg">Der Weg</a></li>
-          <li><a href="#einblicke">Einblicke</a></li>
+          <li><a href="#tour">Die Tour</a></li>
           <li><a href="#preise">Preise</a></li>
           <li><a href="#fragen">Fragen</a></li>
         </ul>
@@ -379,6 +335,46 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
     });
   }, { rootMargin: '0px 0px -12% 0px' });
   Array.prototype.forEach.call(document.querySelectorAll('.taucht'), function (el) { beobachter.observe(el); });
+
+  /* Die Tour: Folien blenden am Fortschritt, das Bild setzt sich. */
+  var ruhig = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var tour = document.querySelector('.tour');
+  if (tour && !ruhig) {
+    var folien = Array.prototype.slice.call(tour.querySelectorAll('.folie')).map(function (f) {
+      var w = f.dataset.fenster.split(',');
+      return { el: f, a: parseFloat(w[0]), b: parseFloat(w[1]),
+               rahmen: f.querySelector('.rahmen'), text: f.querySelector('.text') };
+    });
+    var balken = tour.querySelector('.fortschritt i');
+    function seg(p, a, b) { return Math.min(Math.max((p - a) / (b - a), 0), 1); }
+    var laeuft = false;
+    function messen() {
+      laeuft = false;
+      var r = tour.getBoundingClientRect();
+      var weg = r.height - window.innerHeight;
+      var p = weg > 0 ? Math.min(Math.max(-r.top / weg, 0), 1) : 0;
+      balken.style.setProperty('--stand', p.toFixed(4));
+      folien.forEach(function (f, i) {
+        var t = seg(p, f.a, f.b);
+        var istLetzte = i === folien.length - 1;
+        if (t <= 0 || (t >= 1 && !istLetzte)) { f.el.style.opacity = 0; f.el.style.pointerEvents = 'none'; return; }
+        var auf = Math.min(1, t * 6);
+        var ab = (!istLetzte && t > .86) ? (1 - t) / .14 : 1;
+        f.el.style.opacity = (auf * ab).toFixed(3);
+        f.el.style.pointerEvents = 'auto';
+        var e = 1 - Math.pow(1 - Math.min(t * 2, 1), 3);
+        f.rahmen.style.transform = 'translateY(' + ((1 - e) * 40).toFixed(1) + 'px) scale(' + (.965 + .035 * e).toFixed(4) + ')';
+        f.text.style.transform = 'translateY(' + ((1 - auf) * 18).toFixed(1) + 'px)';
+      });
+    }
+    window.addEventListener('scroll', function () {
+      if (!laeuft) { laeuft = true; requestAnimationFrame(messen); }
+    }, { passive: true });
+    window.addEventListener('resize', function () {
+      if (!laeuft) { laeuft = true; requestAnimationFrame(messen); }
+    }, { passive: true });
+    messen();
+  }
 
   /* Die Tarifkarten stellen den Rechner; Preise und Fragen aus zahlen.js. */
   var Z = window.Zahlen;
