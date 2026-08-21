@@ -115,10 +115,30 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
 .fragen details[open] summary .zeichen::before,.fragen details[open] summary .zeichen::after{background:var(--lila-700)}
 .fragen .antworttext{padding:0 46px 24px 0;font-size:16px;color:var(--nebel-700);max-width:68ch}
 
-/* ---------- Schluss ---------- */
-.detail-schluss{margin-top:var(--luft);text-align:center;padding-bottom:20px}
-.detail-schluss h2{max-width:20ch;margin-inline:auto}
-.detail-schluss .knopfreihe{justify-content:center}
+/* ---------- der Abend-Kasten als Abschluss (wie auf der Startseite) ---------- */
+.detail-schluss{margin-top:var(--luft);padding-bottom:20px}
+.detail-schluss .kasten{
+  border-radius:32px;padding:clamp(40px,6vw,80px);color:#fff;position:relative;overflow:hidden;
+  min-height:clamp(320px,36vw,440px);display:flex;flex-direction:column;justify-content:center;
+  background:
+    linear-gradient(100deg, rgba(30,24,72,.94) 0%, rgba(59,52,134,.78) 46%, rgba(24,21,47,.24) 78%, rgba(24,21,47,.55) 100%),
+    url('bilder/abend-kopf.jpg') right center/cover no-repeat;
+}
+.detail-schluss .kasten::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 82% 40%,rgba(255,190,120,.14),transparent 55%);
+}
+.detail-schluss h2{color:#fff;font-size:clamp(28px,4vw,52px);max-width:17ch}
+.detail-schluss p{margin-top:14px;font-size:17px;color:rgba(255,255,255,.82);max-width:44ch}
+.detail-schluss .knopfreihe{margin-top:28px;position:relative;z-index:1}
+.detail-schluss .knopf.hell{background:#fff;color:var(--lila-800);box-shadow:0 12px 30px rgba(24,21,47,.28)}
+.detail-schluss .knopf.klar{background:rgba(255,255,255,.14);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.4)}
+@media (max-width:760px){
+  .detail-schluss .kasten{background:
+    linear-gradient(160deg, rgba(30,24,72,.94) 0%, rgba(59,52,134,.82) 60%, rgba(24,21,47,.5) 100%),
+    url('bilder/abend-kopf.jpg') center 20%/cover no-repeat}
+  .detail-schluss .knopf{width:100%}
+}
 </style>
 </head>
 <body>
@@ -270,10 +290,13 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
   <!-- ---------- Schluss ---------- -->
   <section class="bahn">
     <div class="detail-schluss taucht">
-      <h2>Genug gelesen?</h2>
-      <div class="knopfreihe">
-        <a class="knopf primaer" href="index.html#schluss">Beratung anlegen</a>
-        <a class="knopf leise" href="index.html">Zurück zur Startseite</a>
+      <div class="kasten">
+        <h2>Die nächste Frage kommt heute Abend.</h2>
+        <p>Konto anlegen, Marke setzen, ersten Mandanten einladen: ein Nachmittag, kein Projekt. Monatlich kündbar, keine Einrichtungsgebühr.</p>
+        <div class="knopfreihe">
+          <a class="knopf hell" href="index.html#schluss">Beratung anlegen</a>
+          <a class="knopf klar" href="index.html">Zurück zur Startseite</a>
+        </div>
       </div>
     </div>
   </section>
