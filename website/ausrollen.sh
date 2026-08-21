@@ -35,6 +35,13 @@ cp "$quelle"/robots.txt "$quelle"/sitemap.xml "$quelle"/manifest.webmanifest "$q
 # Nachweisdateien, die der Server schon trägt: ohne sie bricht die
 # Google-Search-Console-Bestätigung und IndexNow weist die Meldung ab.
 cp "$quelle"/googlefb0080e3f9d15d81.html "$quelle"/50ce7df4a14c418306e7037f455b3d04.txt "$bau"/
+# Wurzel-Dateien, die von außen unter genau dieser Adresse abgefragt werden:
+# Symbole, das Vorschaubild bereits geteilter Links, die Logos. Sie stehen in
+# keinem Verweis unserer Seiten und wären beim ersten `rsync --delete` weg —
+# der Trockenlauf am 21.08.2026 hatte alle zehn in der Löschliste.
+# Warum welche: website/wurzel/LIESMICH.md
+# alles aus wurzel/ außer der Erklärung, die nur hier gilt
+find "$quelle"/wurzel -maxdepth 1 -type f ! -name 'LIESMICH.md' -exec cp {} "$bau"/ \;
 cp "$quelle"/index.html "$quelle"/404.html "$bau"/
 
 for paar in "plattform.html:plattform" "referenzen.html:arbeiten" \
@@ -126,6 +133,13 @@ with open(os.path.join(quelle, 'umleitungen.caddy')) as f:
         von, nach = teile[1], teile[2]
         ordner = os.path.join(ziel, von.strip('/'))
         if not von.strip('/'):
+            continue
+        # Adressen mit Dateiendung bekommen KEINE Weiterleitungsseite: ein Ordner
+        # namens `llms-full.txt` mit index.html darin ersetzt die Textdatei durch
+        # HTML, und eine Maschine, die Text erwartet, bekommt Markup. Für solche
+        # Adressen liefern wir die echte Datei aus (siehe wurzel/) und lassen die
+        # 301-Regel des Servers die Arbeit machen.
+        if os.path.splitext(von.rstrip('/'))[1]:
             continue
         os.makedirs(ordner, exist_ok=True)
         datei = os.path.join(ordner, 'index.html')

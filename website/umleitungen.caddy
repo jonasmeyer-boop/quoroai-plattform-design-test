@@ -116,3 +116,7 @@ redir /_not-found/ / permanent
 redir /branchen/* / permanent
 redir /loesungen/* / permanent
 redir /blog/* / permanent
+
+# Die ausführliche KI-Datei des alten Auftritts beschreibt Inhalte, die es nicht
+# mehr gibt. Statt sie mitzuschleppen, führt die Adresse auf die neue llms.txt.
+redir /llms-full.txt /llms.txt 301

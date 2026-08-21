@@ -32,6 +32,9 @@ Stand 2026-08-21: **go-live-fertig**, bis auf die zwei Sperren am Ende.
 | `sitemap.xml`, `robots.txt`, `manifest.webmanifest`, `llms.txt` | Für Suchmaschinen und KI-Antwortmaschinen. |
 | `umleitungen.caddy` | Dauerhafte Umleitungen der alten Adressen, jede mit und ohne Schrägstrich. |
 | `ausrollen.sh` | Baut den Server-Ordner. Zieht alle Pfade absolut und prüft sich selbst nach. |
+| `live-quoroai.sh` | Liegt auf quoroai.io wirklich dieser Stand? Vergleicht Bytes, nicht Marker. |
+| `CADDY-HANDGRIFF.md` | Die zwei Schritte, die eine Root-Shell brauchen: Umleitungen und Formular-Freischaltung. |
+| `wurzel/` | Dateien, die live in der Wurzel liegen und die kein Verweis nennt (Symbole, Vorschaubild, Logos). |
 | `AUSROLLEN.md` | Wie die Seiten auf den Server kommen und was danach zu prüfen ist. |
 
 ## Woher die Angaben stammen
