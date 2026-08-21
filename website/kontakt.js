@@ -87,6 +87,16 @@
     .kd-senden:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 5px rgba(24,21,47,.22),0 16px 36px rgba(111,99,232,.5)}
   }
   @keyframes kd-glanz{0%{background-position:-120px 0}60%,100%{background-position:calc(100% + 120px) 0}}
+  .kd-fehler{margin-top:10px;font-size:13.5px;color:#a06008;font-weight:600;min-height:1.2em}
+  .kd-fehler:empty{margin-top:0;min-height:0}
+  .kd-danke{text-align:center;padding:14px 0 6px}
+  .kd-danke .kd-haken{
+    width:64px;height:64px;border-radius:50%;margin:0 auto 18px;display:grid;place-items:center;
+    background:var(--gruen-fond);color:var(--gruen);font-size:30px;
+  }
+  .kd-danke h2{max-width:none;margin:0 auto}
+  .kd-danke p{margin-top:10px;font-size:16px;color:var(--nebel-700)}
+  .kd-senden[disabled]{opacity:.7;cursor:progress}
   @media (max-width:600px){
     .kd-zeile{grid-template-columns:1fr}
     .kd-fuss{flex-direction:column;align-items:stretch;text-align:center}
@@ -129,9 +139,10 @@
         <input type="email" name="mail" placeholder="Deine E-Mail" aria-label="Deine E-Mail" autocomplete="email">
       </div>
       <div class="kd-fuss">
-        <span class="kd-wort">Landet als Mail bei uns. Antwort von einem Menschen, meist am selben Tag.</span>
+        <span class="kd-wort">Geht direkt an uns. Antwort von einem Menschen, meist am selben Tag. Wir nutzen deine Angaben nur für diese Anfrage.</span>
         <button type="submit" class="kd-senden">Abschicken</button>
       </div>
+      <p class="kd-fehler" role="alert"></p>
     </form>`;
   document.body.appendChild(wurzel);
 
@@ -162,14 +173,73 @@
   wurzel.addEventListener('click', function (ev) { if (ev.target === wurzel) schliessen(); });
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') schliessen(); });
 
+  var ZIEL = 'webmaster@quoroai.io';
+  var fehler = karte.querySelector('.kd-fehler');
+  var senden = karte.querySelector('.kd-senden');
+
+  function mailtoWeg(betreff, leib) {
+    location.href = 'mailto:' + ZIEL + '?subject=' + encodeURIComponent(betreff) +
+      '&body=' + encodeURIComponent(leib);
+  }
+
+  function danke() {
+    karte.innerHTML =
+      '<button type="button" class="kd-zu" aria-label="Schließen">&#10005;</button>' +
+      '<div class="kd-danke"><div class="kd-haken">&#10003;</div>' +
+      '<h2>Angekommen.</h2>' +
+      '<p>Wir melden uns bei dir, meist am selben Tag. Kein Newsletter, keine Broschüre.</p></div>';
+    karte.querySelector('.kd-zu').addEventListener('click', schliessen);
+  }
+
   karte.addEventListener('submit', function (ev) {
     ev.preventDefault();
     var frage = karte.querySelector('[name=frage]').value.trim();
     var name = karte.querySelector('[name=name]').value.trim();
-    var betreff = thema ? thema + ': was mich aufhält' : 'Was mich aufhält';
-    var leib = frage + (name ? '\n\n' + name : '');
-    location.href = 'mailto:hello@quorogroup.com?subject=' +
-      encodeURIComponent(betreff) + '&body=' + encodeURIComponent(leib);
+    var mail = karte.querySelector('[name=mail]').value.trim();
+    var betreff = (thema ? thema : 'Anfrage') + ' über die Website';
+    var leib = frage + '\n\n' + (name || 'ohne Namen') + (mail ? ', ' + mail : '');
+
+    if (!frage) {
+      fehler.textContent = 'Schreib kurz, was dich aufhält, dann können wir etwas damit anfangen.';
+      karte.querySelector('[name=frage]').focus();
+      return;
+    }
+    if (!mail || mail.indexOf('@') < 1) {
+      fehler.textContent = 'Ohne deine E-Mail können wir dir nicht antworten.';
+      karte.querySelector('[name=mail]').focus();
+      return;
+    }
+    fehler.textContent = '';
+    senden.disabled = true;
+    senden.textContent = 'Wird gesendet';
+
+    fetch('https://formsubmit.co/ajax/' + ZIEL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        _subject: betreff,
+        _template: 'table',
+        _captcha: 'false',
+        Thema: thema || 'nicht gewählt',
+        Anfrage: frage,
+        Name: name || 'ohne Namen',
+        'E-Mail': mail
+      })
+    }).then(function (a) {
+      /* Der Dienst antwortet auch bei Absagen mit 200: die Wahrheit steht im
+         Feld success. Solange die Adresse nicht freigeschaltet ist, steht dort
+         "false" — dann darf hier kein Danke stehen. */
+      return a.json().catch(function () { return {}; });
+    }).then(function (d) {
+      if (!d || String(d.success) !== 'true') throw new Error('Absage vom Versand');
+      danke();
+    }).catch(function () {
+      /* Kein Weg soll verloren gehen: dann eben über das Mailprogramm. */
+      senden.disabled = false;
+      senden.textContent = 'Abschicken';
+      fehler.textContent = 'Der Versand hakt gerade. Wir öffnen dein Mailprogramm.';
+      window.setTimeout(function () { mailtoWeg(betreff, leib); }, 900);
+    });
   });
 
   /* Jeder Mail-CTA öffnet den Dialog; das mailto bleibt der Weg ohne Skript. */

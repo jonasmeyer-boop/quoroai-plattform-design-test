@@ -128,7 +128,7 @@ p{max-width:62ch}
 .wortmarke img{width:28px;height:28px;border-radius:8px}
 .wortmarke span{font-family:var(--schrift-schau);font-weight:600;font-size:18px;letter-spacing:-.02em}
 .kopf nav{display:flex;align-items:center;gap:26px;margin-left:auto}
-.kopf nav .knopf{display:none}
+.kopf nav .knopf{margin-left:8px}
 .kopf nav a{color:var(--nebel-700);text-decoration:none;font-size:15px;font-weight:500;transition:color .2s}
 .kopf nav a:hover{color:var(--tinte)}
 .kopf nav a[aria-current=page]{color:var(--tinte);font-weight:600}
@@ -163,8 +163,7 @@ p{max-width:62ch}
   .kopf.offen nav{transform:none;opacity:1;pointer-events:auto}
   .kopf nav a{padding:14px 0;font-size:17px;border-bottom:0.5px solid var(--nebel-200)}
   .kopf nav a:last-child{border-bottom:0}
-  .kopf .bahn > .knopf{display:none}
-  .kopf nav .knopf{display:inline-flex;margin-top:14px;width:100%;min-height:48px;font-size:16px}
+  .kopf nav .knopf{margin:14px 0 0;width:100%;min-height:48px;font-size:16px}
 }
 @media (prefers-reduced-motion:reduce){.kopf nav{transition:none}}
 
