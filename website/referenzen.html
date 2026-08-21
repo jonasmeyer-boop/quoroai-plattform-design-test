@@ -22,7 +22,7 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
 /* ---------- Die Fahrt: der Saal als Scroll-Kino ----------
    Ein nächtlicher Museumssaal voller Papierköpfe (fal.ai: FLUX-Saal, Kling
    fährt hindurch). Beim Scrollen läuft die Kamerafahrt als Bildfolge im
-   Vollbild, die drei Werke hängen als Glastafeln im Gang. */
+   Vollbild; je Werk eine große Zeile ohne Kasten und ein laufendes Band. */
 .galerie{height:900vh;position:relative}
 .galerie .haftet{position:sticky;top:0;height:100svh;overflow:hidden;background:var(--grund);perspective:1100px}
 .galerie canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) translate(var(--kx,0px),var(--ky,0px)) rotateY(var(--kr,0deg)) scale(var(--kz,1));min-width:100%;min-height:100%;pointer-events:none;will-change:transform,filter;filter:blur(var(--kb,0px))}
@@ -37,36 +37,54 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
   content:"";position:absolute;inset:-70px -110px;z-index:-1;border-radius:50%;
   background:radial-gradient(closest-side,rgba(253,253,254,.95),rgba(253,253,254,.7) 58%,rgba(253,253,254,0));
 }
-.galerie .tafel{
-  position:absolute;left:clamp(24px,6vw,90px);top:50%;transform:translateY(-50%);
-  width:min(500px,44vw);opacity:0;pointer-events:none;
-  padding:26px 28px;border-radius:22px;
-  background:rgba(255,255,255,.62);
-  backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);
-  border:1px solid rgba(255,255,255,.7);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 26px 70px rgba(59,52,134,.20);
+.galerie .werk-moment{position:absolute;inset:0;opacity:0;pointer-events:none}
+.galerie .werkzeile{
+  position:absolute;top:11svh;left:clamp(24px,6vw,90px);max-width:min(560px,46vw);
 }
-.galerie .tafel.rechts{left:auto;right:clamp(24px,6vw,90px)}
-.galerie .tafel .nummer{font-size:12.5px;font-weight:700;letter-spacing:.08em;color:var(--lila-700)}
-.galerie .tafel h2{margin-top:8px;font-size:clamp(22px,2.4vw,32px)}
-.galerie .tafel p{margin-top:10px;font-size:15px;color:var(--nebel-700)}
-.galerie .tafel .bild{margin-top:14px;border-radius:12px;overflow:hidden;box-shadow:0 0 0 0.5px var(--nebel-200),0 18px 50px rgba(59,52,134,.18)}
-.galerie .tafel .bild img{display:block;width:100%;height:auto}
-.galerie .tafel .knopf{margin-top:16px;pointer-events:auto}
-.galerie .tafel .knopf.hell{background:linear-gradient(180deg,var(--lila-500),var(--lila-700));color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 10px 24px rgba(111,99,232,.38)}
+.galerie .werk-moment.rechts .werkzeile{left:auto;right:clamp(24px,6vw,90px)}
+.galerie .werkzeile::before{ /* weicher Hof statt Kasten */
+  content:"";position:absolute;inset:-48px -70px;z-index:-1;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(253,253,254,.94),rgba(253,253,254,.66) 58%,rgba(253,253,254,0));
+}
+.galerie .werkzeile .nummer{font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--lila-700)}
+.galerie .werkzeile h2{margin-top:6px;font-size:clamp(26px,3.2vw,46px);line-height:1.08}
+.galerie .werkzeile p{margin-top:10px;font-size:16px;color:var(--nebel-700);max-width:40ch}
+.galerie .werkzeile .knopf{margin-top:16px;pointer-events:auto}
+.galerie .werkzeile .knopf.hell{background:linear-gradient(180deg,var(--lila-500),var(--lila-700));color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 10px 24px rgba(111,99,232,.38)}
+.galerie .band{
+  position:absolute;left:0;bottom:6svh;display:flex;gap:22px;align-items:flex-end;
+  will-change:transform;
+}
+.galerie .band .stueck{
+  flex-shrink:0;border-radius:14px;overflow:hidden;background:#fff;
+  box-shadow:0 0 0 0.5px var(--nebel-200),0 26px 70px rgba(59,52,134,.24);
+}
+.galerie .band .stueck img{display:block;height:32svh;width:auto}
+.galerie .band .stueck.hoch img{height:36svh}
+@media (max-width:900px){
+  .galerie .werkzeile,.galerie .werk-moment.rechts .werkzeile{left:16px;right:16px;top:9svh;max-width:none}
+  .galerie .werkzeile h2{font-size:clamp(24px,7vw,32px)}
+  .galerie .werkzeile p{font-size:14px}
+  .galerie .band{bottom:4svh;gap:14px}
+  .galerie .band .stueck img{height:24svh}
+  .galerie .band .stueck.hoch img{height:27svh}
+}
 .galerie .fortschritt{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--nebel-200)}
 .galerie .fortschritt i{display:block;height:100%;width:calc(var(--stand,0) * 100%);background:linear-gradient(90deg,var(--lila-400),var(--lila-600))}
 @media (max-width:900px){
   .galerie{height:760vh}
   .galerie .auftakt-wort h1{white-space:normal;font-size:clamp(34px,10vw,52px)}
-  .galerie .tafel,.galerie .tafel.rechts{left:16px;right:16px;top:auto;bottom:8svh;transform:none;width:auto}
 }
 @media (prefers-reduced-motion:reduce){
   .galerie{height:auto}
   .galerie .haftet{position:static;height:auto;overflow:visible;padding:calc(72px + 40px) 0 40px}
   .galerie canvas,.galerie .schleier,.galerie .fortschritt{display:none}
   .galerie .auftakt-wort{position:static;transform:none;margin-bottom:40px}
-  .galerie .tafel,.galerie .tafel.rechts{position:static;transform:none;opacity:1;pointer-events:auto;width:auto;max-width:640px;margin:0 auto 30px}
+  .galerie .werk-moment{position:static;opacity:1;pointer-events:auto;margin:0 auto 46px;max-width:min(900px,100% - 32px)}
+  .galerie .werkzeile{position:static;max-width:none}
+  .galerie .werkzeile::before{display:none}
+  .galerie .band{position:static;margin-top:16px;overflow-x:auto;padding-bottom:8px}
+  .galerie .band .stueck img{height:150px}
 }
 
 /* ---------- Schluss ---------- */
@@ -101,27 +119,52 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
         <p>Komm mit durch die Galerie. Jedes Stück kannst du anfassen.</p>
       </div>
 
-      <div class="tafel rechts" data-fenster="0.10,0.32">
-        <span class="nummer">WERK 1</span>
-        <h2>Die Plattform für Beratungen.</h2>
-        <p>Jeder Mandant bekommt einen Berater unter der Marke seiner Beratung, samt Mandaten, Zeiten und tagegenauer Abrechnung. Vollständig White Label, Daten in der EU.</p>
-        <div class="bild"><img src="bilder/produkt/cockpit.jpg" alt="Das Cockpit der Plattform"></div>
-        <a class="knopf hell" href="plattform.html">Die Tour ansehen</a>
+      <div class="werk-moment rechts" data-fenster="0.10,0.32">
+        <div class="werkzeile">
+          <span class="nummer">WERK 1</span>
+          <h2>Die Plattform für Beratungen.</h2>
+          <p>Ein Berater unter fremder Marke, samt Mandaten, Zeiten und tagegenauer Abrechnung. Daten in der EU.</p>
+          <a class="knopf hell" href="plattform.html">Die Tour ansehen</a>
+        </div>
+        <div class="band">
+          <div class="stueck"><img src="bilder/produkt/cockpit.jpg" alt="Das Cockpit als Modell der Beratung"></div>
+          <div class="stueck hoch"><img src="bilder/produkt/mitlesen.jpg" alt="Mitlesen mit Quellen"></div>
+          <div class="stueck"><img src="bilder/produkt/gespraech.jpg" alt="Das Mandanten-Portal unter fremder Marke"></div>
+          <div class="stueck hoch"><img src="bilder/produkt/marge.jpg" alt="Marge und Sätze"></div>
+          <div class="stueck"><img src="bilder/produkt/rechnungen.jpg" alt="Rechnungen mit Stichtag"></div>
+        </div>
       </div>
 
-      <div class="tafel" data-fenster="0.40,0.62">
-        <span class="nummer">WERK 2</span>
-        <h2>Die Seite, von der du kommst.</h2>
-        <p>Der Kopf aus tausend Belegen, die Drehung, der Tag von 06:12 bis 23:04. Kein Baukasten, jede Bewegung und jedes Motiv aus der eigenen Werkstatt, gebaut in Tagen.</p>
-        <div class="bild"><img src="bilder/produkt/website.jpg" alt="Die Startseite mit dem Papierkopf"></div>
-        <a class="knopf hell" href="index.html">Noch einmal erleben</a>
+      <div class="werk-moment" data-fenster="0.40,0.62">
+        <div class="werkzeile">
+          <span class="nummer">WERK 2</span>
+          <h2>Die Seite, von der du kommst.</h2>
+          <p>Der Kopf aus tausend Belegen, die Drehung, der Tag bis 23:04. Jede Bewegung aus der eigenen Werkstatt.</p>
+          <a class="knopf hell" href="index.html">Noch einmal erleben</a>
+        </div>
+        <div class="band">
+          <div class="stueck"><img src="bilder/produkt/web-1.jpg" alt="Der weiße Nullpunkt mit dem Firmenspruch"></div>
+          <div class="stueck hoch"><img src="bilder/produkt/web-2.jpg" alt="Die Wolke aus Belegen"></div>
+          <div class="stueck"><img src="bilder/produkt/website.jpg" alt="Der fertige Kopf neben der Überschrift"></div>
+          <div class="stueck hoch"><img src="bilder/produkt/web-3.jpg" alt="Die Drehung des Kopfs"></div>
+          <div class="stueck"><img src="bilder/produkt/web-4.jpg" alt="Der Abendkopf mit dem Aufruf"></div>
+        </div>
       </div>
 
-      <div class="tafel rechts" data-fenster="0.70,0.88">
-        <span class="nummer">WERK 3</span>
-        <h2>Die Bildwerkstatt dahinter.</h2>
-        <p>Motive und Filme wie dieser Saal hier: entworfen, gerechnet, geprüft und verbaut in Stunden statt Wochen. Dieselbe Werkstatt baut die Bildwelt deiner Marke.</p>
-        <div class="bild"><img src="bilder/ausstellung.jpg" alt="Vier Papier-Skulpturen der Werkstatt im Museum"></div>
+      <div class="werk-moment rechts" data-fenster="0.70,0.88">
+        <div class="werkzeile">
+          <span class="nummer">WERK 3</span>
+          <h2>Die Bildwerkstatt dahinter.</h2>
+          <p>Motive und Filme wie dieser Saal, in Stunden statt Wochen. Dieselbe Werkstatt baut die Bildwelt deiner Marke.</p>
+        </div>
+        <div class="band">
+          <div class="stueck"><img src="bilder/regal.jpg" alt="Das Regal der Köpfe"></div>
+          <div class="stueck hoch"><img src="bilder/abend-kopf.jpg" alt="Der Kopf im Abendlicht"></div>
+          <div class="stueck"><img src="bilder/kino/dreh-020.jpg" alt="Der Kopf in der Drehung"></div>
+          <div class="stueck hoch"><img src="bilder/ausstellung.jpg" alt="Die Motive als Museumsstücke"></div>
+          <div class="stueck"><img src="bilder/tresor.jpg" alt="Der Tresor"></div>
+          <div class="stueck hoch"><img src="bilder/mond.jpg" alt="Der Mond"></div>
+        </div>
       </div>
 
       <div class="fortschritt" aria-hidden="true"><i></i></div>
@@ -200,9 +243,9 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
     var stift = leinwand.getContext('2d');
     var auftakt = document.getElementById('auftakt');
     var balken = galerie.querySelector('.fortschritt i');
-    var tafeln = Array.prototype.slice.call(galerie.querySelectorAll('.tafel')).map(function (t) {
+    var momente = Array.prototype.slice.call(galerie.querySelectorAll('.werk-moment')).map(function (t) {
       var f = t.dataset.fenster.split(',');
-      return { el: t, a: parseFloat(f[0]), b: parseFloat(f[1]) };
+      return { el: t, a: parseFloat(f[0]), b: parseFloat(f[1]), band: t.querySelector('.band') };
     });
 
     var vorrat = new Array(BILDER);
@@ -296,13 +339,18 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
       leinwand.style.setProperty('--kr', kr.toFixed(2) + 'deg');
       leinwand.style.setProperty('--kb', kb > .4 ? kb.toFixed(1) + 'px' : '0px');
       balken.style.setProperty('--stand', p.toFixed(4));
-      tafeln.forEach(function (t) {
-        var x = seg(p, t.a, t.b);
-        if (x <= 0 || x >= 1) { t.el.style.opacity = 0; t.el.style.pointerEvents = 'none'; return; }
+      momente.forEach(function (m) {
+        var x = seg(p, m.a, m.b);
+        if (x <= 0 || x >= 1) { m.el.style.opacity = 0; m.el.style.pointerEvents = 'none'; return; }
         var auf = Math.min(1, x * 6);
-        var ab = x > .86 ? (1 - x) / .14 : 1;
-        t.el.style.opacity = (auf * ab).toFixed(3);
-        t.el.style.pointerEvents = 'auto';
+        var ab = x > .88 ? (1 - x) / .12 : 1;
+        m.el.style.opacity = (auf * ab).toFixed(3);
+        m.el.style.pointerEvents = 'auto';
+        /* das Band zieht am Scroll durchs Bild: von rechts herein, nach links hinaus */
+        var bw = m.band.scrollWidth;
+        var von = window.innerWidth * .92;
+        var bis = Math.min(window.innerWidth * .06 - bw * .55, -bw * .2);
+        m.band.style.transform = 'translateX(' + (von + (bis - von) * x).toFixed(1) + 'px)';
       });
     }
     window.addEventListener('scroll', function () {
