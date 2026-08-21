@@ -17,29 +17,10 @@
 
 body{background:var(--grund);color:var(--tinte);overflow-x:hidden}
 
-/* ---------- die Bühne über den Bändern ---------- */
-.titelzeile{padding:calc(72px + clamp(30px,4.6vw,64px)) 0 clamp(24px,3.4vw,46px);position:relative;overflow:hidden}
-.titelzeile::before{ /* das Licht hinter dem Regal */
-  content:"";position:absolute;top:-220px;right:-140px;width:720px;height:720px;
-  background:radial-gradient(circle,rgba(111,99,232,.20),transparent 62%);pointer-events:none;
-}
-.titelzeile .bahn{display:grid;grid-template-columns:1.15fr .85fr;gap:44px;align-items:center;position:relative}
+/* ---------- ein Wort, dann die Bänder ---------- */
+.titelzeile{padding:calc(72px + clamp(30px,4.6vw,60px)) 0 clamp(22px,3.2vw,42px);text-align:center}
 .titelzeile h1{font-size:clamp(38px,5.8vw,84px);line-height:1.02}
 .titelzeile h1 em{font-style:normal;color:var(--lila-600)}
-.titelzeile p{margin-top:14px;font-size:18px;color:var(--nebel-700);max-width:44ch}
-.titelzeile .regal{
-  width:100%;height:auto;justify-self:end;
-  mix-blend-mode:multiply;pointer-events:none;
-  -webkit-mask-image:radial-gradient(closest-side,#000 62%,transparent 98%);
-  mask-image:radial-gradient(closest-side,#000 62%,transparent 98%);
-  animation:schwebt 6s ease-in-out infinite alternate;
-}
-@keyframes schwebt{from{transform:translateY(0)}to{transform:translateY(-10px)}}
-@media (max-width:860px){
-  .titelzeile .bahn{grid-template-columns:1fr;gap:10px}
-  .titelzeile .regal{max-width:340px;justify-self:center}
-}
-@media (prefers-reduced-motion:reduce){.titelzeile .regal{animation:none}}
 
 /* ---------- die Bänder ---------- */
 .baender{border-top:0.5px solid var(--nebel-200)}
@@ -153,11 +134,7 @@ body{background:var(--grund);color:var(--tinte);overflow-x:hidden}
 
   <div class="titelzeile">
     <div class="bahn">
-      <div>
-        <h1>Gebaut, <em>nicht versprochen</em>.</h1>
-        <p>Drei Werke der Werkstatt ziehen unten vorbei. Halt ein Band an, und es zeigt dir mehr.</p>
-      </div>
-      <img class="regal" src="bilder/regal.jpg" alt="Vier Köpfe aus Papier auf einem Regal">
+      <h1>Gebaut, <em>nicht versprochen</em>.</h1>
     </div>
   </div>
 
