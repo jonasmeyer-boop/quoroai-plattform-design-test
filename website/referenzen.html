@@ -33,50 +33,52 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
 h1,h2,h3{color:#fff}
 .gedimmt{color:rgba(255,255,255,.66)}
 
-/* ---------- Auftakt ---------- */
-.auftakt{padding:calc(72px + clamp(56px,8vw,110px)) 0 0;text-align:center}
-.auftakt h1{font-size:clamp(40px,6.4vw,88px);max-width:16ch;margin-inline:auto}
-.auftakt h1 em{font-style:normal;color:var(--lila-400)}
-.auftakt .vorsatz{margin-top:18px;font-size:19px;color:rgba(255,255,255,.72);max-width:46ch;margin-inline:auto}
-
-/* ---------- die Werke ---------- */
-.werk{
-  margin-top:clamp(60px,8vw,110px);border-radius:32px;overflow:hidden;position:relative;
-  background:rgba(255,255,255,.045);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 0 0 1px rgba(255,255,255,.08),0 40px 100px rgba(0,0,0,.4);
+/* ---------- Die Fahrt: der Saal als Scroll-Kino ----------
+   Ein nächtlicher Museumssaal voller Papierköpfe (fal.ai: FLUX-Saal, Kling
+   fährt hindurch). Beim Scrollen läuft die Kamerafahrt als Bildfolge im
+   Vollbild, die drei Werke hängen als Glastafeln im Gang. */
+.galerie{height:900vh;position:relative}
+.galerie .haftet{position:sticky;top:0;height:100svh;overflow:hidden;background:#14102c}
+.galerie canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);min-width:100%;min-height:100%;pointer-events:none}
+.galerie .schleier{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 62%,transparent 40%,rgba(10,8,24,.55) 100%)}
+.galerie .auftakt-wort{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;
 }
-.werk .leib{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(28px,4vw,60px);align-items:center;padding:clamp(28px,4.5vw,64px)}
-.werk.gedreht .leib{grid-template-columns:1.1fr .9fr}
-.werk.gedreht .bildseite{order:-1}
-.werk .nummer{font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--lila-400)}
-.werk h2{margin-top:10px;font-size:clamp(26px,3.4vw,44px);max-width:16ch}
-.werk .satz{margin-top:14px;font-size:17px;color:rgba(255,255,255,.75);max-width:46ch}
-.werk .fakten{list-style:none;margin-top:24px;display:grid;gap:10px}
-.werk .fakten li{display:flex;gap:11px;font-size:15px;color:rgba(255,255,255,.85);align-items:flex-start}
-.werk .fakten svg{width:18px;height:18px;flex-shrink:0;margin-top:3px;color:var(--lila-400)}
-.werk .knopfreihe{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
-.werk .knopf.hell{background:#fff;color:var(--lila-800)}
-.werk .knopf.klar{background:rgba(255,255,255,.10);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.32);backdrop-filter:none}
-.werk .rahmen{
-  border-radius:16px;overflow:hidden;
-  box-shadow:0 0 0 1px rgba(255,255,255,.14),0 30px 80px rgba(0,0,0,.5),0 0 90px rgba(111,99,232,.28);
+.galerie .auftakt-wort h1{font-size:clamp(40px,6.4vw,92px);color:#fff;white-space:nowrap}
+.galerie .auftakt-wort h1 em{font-style:normal;color:var(--lila-300)}
+.galerie .auftakt-wort p{margin-top:14px;font-size:18px;color:rgba(255,255,255,.72)}
+.galerie .tafel{
+  position:absolute;left:clamp(24px,6vw,90px);top:50%;transform:translateY(-50%);
+  width:min(500px,44vw);opacity:0;pointer-events:none;
+  padding:26px 28px;border-radius:22px;
+  background:rgba(20,16,44,.55);
+  backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 30px 80px rgba(0,0,0,.5);
+  color:#fff;
 }
-.werk .rahmen img{display:block;width:100%;height:auto}
+.galerie .tafel.rechts{left:auto;right:clamp(24px,6vw,90px)}
+.galerie .tafel .nummer{font-size:12.5px;font-weight:700;letter-spacing:.08em;color:var(--lila-300)}
+.galerie .tafel h2{margin-top:8px;font-size:clamp(22px,2.4vw,32px);color:#fff}
+.galerie .tafel p{margin-top:10px;font-size:15px;color:rgba(255,255,255,.78)}
+.galerie .tafel .bild{margin-top:14px;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.16),0 18px 50px rgba(0,0,0,.45)}
+.galerie .tafel .bild img{display:block;width:100%;height:auto}
+.galerie .tafel .knopf{margin-top:16px;pointer-events:auto}
+.galerie .tafel .knopf.hell{background:#fff;color:var(--lila-800)}
+.galerie .fortschritt{position:absolute;left:0;bottom:0;height:2px;width:100%;background:rgba(255,255,255,.14)}
+.galerie .fortschritt i{display:block;height:100%;width:calc(var(--stand,0) * 100%);background:linear-gradient(90deg,var(--lila-400),var(--lila-600))}
 @media (max-width:900px){
-  .werk .leib,.werk.gedreht .leib{grid-template-columns:1fr}
-  .werk .bildseite,.werk.gedreht .bildseite{order:-1}
-  .werk .knopf{width:100%}
+  .galerie{height:760vh}
+  .galerie .auftakt-wort h1{white-space:normal;font-size:clamp(34px,10vw,52px)}
+  .galerie .tafel,.galerie .tafel.rechts{left:16px;right:16px;top:auto;bottom:8svh;transform:none;width:auto}
 }
-
-/* die Bildwerkstatt: leuchtende Motive auf Dunkel */
-.motive{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:0 clamp(28px,4.5vw,64px) clamp(28px,4.5vw,64px)}
-.motive figure{
-  margin:0;border-radius:14px;overflow:hidden;background:#fdfdfe;
-  box-shadow:0 0 0 1px rgba(255,255,255,.12),0 18px 50px rgba(0,0,0,.45);
+@media (prefers-reduced-motion:reduce){
+  .galerie{height:auto}
+  .galerie .haftet{position:static;height:auto;overflow:visible;padding:calc(72px + 40px) 0 40px}
+  .galerie canvas,.galerie .schleier,.galerie .fortschritt{display:none}
+  .galerie .auftakt-wort{position:static;transform:none;margin-bottom:40px}
+  .galerie .tafel,.galerie .tafel.rechts{position:static;transform:none;opacity:1;pointer-events:auto;width:auto;max-width:640px;margin:0 auto 30px}
 }
-.motive img{display:block;width:100%;height:150px;object-fit:cover}
-.motive figcaption{padding:8px 12px;font-size:12.5px;color:var(--nebel-600);background:#fdfdfe}
-@media (max-width:820px){.motive{grid-template-columns:repeat(2,1fr)}}
 
 /* ---------- Schluss ---------- */
 .ref-schluss{margin-top:clamp(70px,9vw,130px);text-align:center;padding-bottom:clamp(60px,8vw,110px)}
@@ -101,9 +103,8 @@ footer.fuss .abbinder{border-top-color:rgba(255,255,255,.10);color:rgba(255,255,
   <div class="bahn">
     <a class="wortmarke" href="index.html"><img src="bilder/quoro-icon.svg" alt=""><span>quoroAI</span></a>
     <nav>
-      <a href="#plattform">Die Plattform</a>
-      <a href="#website">Diese Website</a>
-      <a href="#werkstatt">Die Bildwerkstatt</a>
+      <a href="plattform.html">Die Plattform</a>
+      <a href="index.html">Die Startseite</a>
     </nav>
     <a class="knopf primaer" href="mailto:hello@quorogroup.com?subject=Was mich aufhält">Erzähl uns, was dich aufhält</a>
   </div>
@@ -111,79 +112,40 @@ footer.fuss .abbinder{border-top-color:rgba(255,255,255,.10);color:rgba(255,255,
 
 <main id="oben">
 
-  <!-- ---------- Auftakt ---------- -->
-  <div class="auftakt bahn">
-    <h1>Gebaut, <em>nicht versprochen</em>.</h1>
-    <p class="vorsatz">Drei Arbeiten aus der Werkstatt. Keine Logos, keine Behauptungen: du kannst jede davon anfassen.</p>
-  </div>
+  <!-- ---------- Die Fahrt ---------- -->
+  <section class="galerie" aria-label="Ein Gang durch die Werkstatt-Galerie">
+    <div class="haftet">
+      <canvas id="leinwand" aria-hidden="true"></canvas>
+      <div class="schleier"></div>
+      <div class="auftakt-wort" id="auftakt">
+        <h1>Gebaut, <em>nicht versprochen</em>.</h1>
+        <p>Komm mit durch die Galerie. Jedes Stück kannst du anfassen.</p>
+      </div>
 
-  <!-- ---------- Werk 1: die Plattform ---------- -->
-  <section id="plattform" class="bahn">
-    <div class="werk taucht">
-      <div class="leib">
-        <div>
-          <span class="nummer">WERK 1</span>
-          <h2>Eine Plattform, auf der Beratungen ihre Mandanten betreuen.</h2>
-          <p class="satz">Jeder Mandant bekommt einen Berater unter der Marke seiner Beratung, der aus deren Wissen antwortet. Mandate, Termine, Zeiten und Abrechnung laufen im selben Haus.</p>
-          <ul class="fakten">
-            <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Vollständig White Label, bis ins Impressum</li>
-            <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Verarbeitung in der EU, kein Training mit Kundeninhalten</li>
-            <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Abrechnung tagegenau, bis zur lückenlosen Rechnungsnummer</li>
-          </ul>
-          <div class="knopfreihe">
-            <a class="knopf hell" href="plattform.html">Die Tour ansehen</a>
-          </div>
-        </div>
-        <div class="bildseite">
-          <div class="rahmen"><img src="bilder/produkt/cockpit.jpg" alt="Das Cockpit der Plattform: die Beratung als Modell" loading="lazy"></div>
-        </div>
+      <div class="tafel" data-fenster="0.10,0.34">
+        <span class="nummer">WERK 1</span>
+        <h2>Die Plattform für Beratungen.</h2>
+        <p>Jeder Mandant bekommt einen Berater unter der Marke seiner Beratung, samt Mandaten, Zeiten und tagegenauer Abrechnung. Vollständig White Label, Daten in der EU.</p>
+        <div class="bild"><img src="bilder/produkt/cockpit.jpg" alt="Das Cockpit der Plattform"></div>
+        <a class="knopf hell" href="plattform.html">Die Tour ansehen</a>
       </div>
-    </div>
-  </section>
 
-  <!-- ---------- Werk 2: diese Website ---------- -->
-  <section id="website" class="bahn">
-    <div class="werk gedreht taucht">
-      <div class="leib">
-        <div>
-          <span class="nummer">WERK 2</span>
-          <h2>Die Seite, von der du gerade kommst.</h2>
-          <p class="satz">Ein Kopf, der sich beim Scrollen aus tausend Belegen zusammensetzt und einmal um die eigene Achse dreht. Bildwelt, Filme und Bewegung aus der eigenen Werkstatt, gebaut in Tagen.</p>
-          <ul class="fakten">
-            <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Kein Baukasten, keine Vorlage, keine Fremdbibliothek</li>
-            <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Jedes Motiv aus der eigenen Bild-Pipeline</li>
-            <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg>Läuft auf jedem Telefon, auch ohne Bewegung</li>
-          </ul>
-          <div class="knopfreihe">
-            <a class="knopf klar" href="index.html">Noch einmal erleben</a>
-          </div>
-        </div>
-        <div class="bildseite">
-          <div class="rahmen"><img src="bilder/produkt/website.jpg" alt="Die Startseite: der fertige Papierkopf neben der Überschrift" loading="lazy"></div>
-        </div>
+      <div class="tafel rechts" data-fenster="0.38,0.62">
+        <span class="nummer">WERK 2</span>
+        <h2>Die Seite, von der du kommst.</h2>
+        <p>Der Kopf aus tausend Belegen, die Drehung, der Tag von 06:12 bis 23:04. Kein Baukasten, jede Bewegung und jedes Motiv aus der eigenen Werkstatt, gebaut in Tagen.</p>
+        <div class="bild"><img src="bilder/produkt/website.jpg" alt="Die Startseite mit dem Papierkopf"></div>
+        <a class="knopf hell" href="index.html">Noch einmal erleben</a>
       </div>
-    </div>
-  </section>
 
-  <!-- ---------- Werk 3: die Bildwerkstatt ---------- -->
-  <section id="werkstatt" class="bahn">
-    <div class="werk taucht">
-      <div class="leib">
-        <div>
-          <span class="nummer">WERK 3</span>
-          <h2>Die Bildwerkstatt dahinter.</h2>
-          <p class="satz">Fotorealistische Motive und Filme in einer eigenen Papier-Welt: entworfen, gerechnet, geprüft und verbaut in Stunden statt Wochen. Dieselbe Werkstatt baut Bildwelten für deine Marke.</p>
-        </div>
-        <div class="bildseite">
-          <div class="rahmen"><img src="bilder/kino/dreh-020.jpg" alt="Der Papierkopf, mitten in der Drehung" loading="lazy"></div>
-        </div>
+      <div class="tafel" data-fenster="0.66,0.90">
+        <span class="nummer">WERK 3</span>
+        <h2>Die Bildwerkstatt dahinter.</h2>
+        <p>Motive und Filme wie dieser Saal hier: entworfen, gerechnet, geprüft und verbaut in Stunden statt Wochen. Dieselbe Werkstatt baut die Bildwelt deiner Marke.</p>
+        <div class="bild"><img src="bilder/ausstellung.jpg" alt="Vier Papier-Skulpturen der Werkstatt im Museum"></div>
       </div>
-      <div class="motive taucht">
-        <figure><img src="bilder/regal.jpg" alt=""><figcaption>Das Regal der Köpfe</figcaption></figure>
-        <figure><img src="bilder/abend-kopf.jpg" alt=""><figcaption>Der Kopf im Abendlicht</figcaption></figure>
-        <figure><img src="bilder/tresor.jpg" alt=""><figcaption>Der Tresor</figcaption></figure>
-        <figure><img src="bilder/mond.jpg" alt=""><figcaption>Der Mond</figcaption></figure>
-      </div>
+
+      <div class="fortschritt" aria-hidden="true"><i></i></div>
     </div>
   </section>
 
@@ -209,9 +171,8 @@ footer.fuss .abbinder{border-top-color:rgba(255,255,255,.10);color:rgba(255,255,
       <div>
         <h4>Arbeiten</h4>
         <ul>
-          <li><a href="#plattform">Die Plattform</a></li>
-          <li><a href="#website">Diese Website</a></li>
-          <li><a href="#werkstatt">Die Bildwerkstatt</a></li>
+          <li><a href="plattform.html">Die Plattform</a></li>
+          <li><a href="index.html">Die Startseite</a></li>
         </ul>
       </div>
       <div>
@@ -240,6 +201,7 @@ footer.fuss .abbinder{border-top-color:rgba(255,255,255,.10);color:rgba(255,255,
 <script>
 (function () {
   'use strict';
+  var ruhig = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var kopf = document.getElementById('kopf');
   function kante() { kopf.classList.toggle('gescrollt', window.scrollY > 8); }
   window.addEventListener('scroll', kante, { passive: true });
@@ -250,6 +212,83 @@ footer.fuss .abbinder{border-top-color:rgba(255,255,255,.10);color:rgba(255,255,
     });
   }, { rootMargin: '0px 0px -12% 0px' });
   Array.prototype.forEach.call(document.querySelectorAll('.taucht'), function (el) { beobachter.observe(el); });
+
+  /* ---------- Die Fahrt ---------- */
+  var BILDER = 121;
+  var galerie = document.querySelector('.galerie');
+  var leinwand = document.getElementById('leinwand');
+  if (galerie && leinwand && !ruhig) {
+    var stift = leinwand.getContext('2d');
+    var auftakt = document.getElementById('auftakt');
+    var balken = galerie.querySelector('.fortschritt i');
+    var tafeln = Array.prototype.slice.call(galerie.querySelectorAll('.tafel')).map(function (t) {
+      var f = t.dataset.fenster.split(',');
+      return { el: t, a: parseFloat(f[0]), b: parseFloat(f[1]) };
+    });
+
+    var vorrat = new Array(BILDER);
+    var letztesZiel = 0;
+    function lade(i) {
+      var b = new Image();
+      b.onload = function () { vorrat[i] = b; if (i === 0 || i === letztesZiel) male(letztesZiel); };
+      b.src = 'bilder/galerie/fahrt-' + String(i + 1).padStart(3, '0') + '.jpg';
+    }
+    lade(0); lade(BILDER - 1);
+    for (var i = 1; i < BILDER - 1; i++) lade(i);
+
+    function naechstes(z) {
+      if (vorrat[z]) return vorrat[z];
+      for (var a = 1; a < BILDER; a++) { if (vorrat[z - a]) return vorrat[z - a]; if (vorrat[z + a]) return vorrat[z + a]; }
+      return null;
+    }
+    function bemesse() {
+      /* Vollbild mit Beschnitt: die Leinwand deckt den Bildschirm, das Bild
+         wird deckend eingepasst, nie verzerrt. */
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      leinwand.width = Math.round(window.innerWidth * dpr);
+      leinwand.height = Math.round(window.innerHeight * dpr);
+      leinwand.style.width = window.innerWidth + 'px';
+      leinwand.style.height = window.innerHeight + 'px';
+    }
+    bemesse();
+    function male(z) {
+      letztesZiel = z;
+      var b = naechstes(z);
+      if (!b) return;
+      var cw = leinwand.width, ch = leinwand.height;
+      var s = Math.max(cw / b.width, ch / b.height);
+      var bw = b.width * s, bh = b.height * s;
+      stift.drawImage(b, (cw - bw) / 2, (ch - bh) / 2, bw, bh);
+    }
+    function seg(p, a, b) { return Math.min(Math.max((p - a) / (b - a), 0), 1); }
+
+    var laeuft = false;
+    function messen() {
+      laeuft = false;
+      var r = galerie.getBoundingClientRect();
+      var weg = r.height - window.innerHeight;
+      var p = weg > 0 ? Math.min(Math.max(-r.top / weg, 0), 1) : 0;
+      male(Math.min(BILDER - 1, Math.round(p * (BILDER - 1))));
+      auftakt.style.opacity = (1 - seg(p, 0, .07)).toFixed(3);
+      balken.style.setProperty('--stand', p.toFixed(4));
+      tafeln.forEach(function (t) {
+        var x = seg(p, t.a, t.b);
+        if (x <= 0 || x >= 1) { t.el.style.opacity = 0; t.el.style.pointerEvents = 'none'; return; }
+        var auf = Math.min(1, x * 6);
+        var ab = x > .86 ? (1 - x) / .14 : 1;
+        t.el.style.opacity = (auf * ab).toFixed(3);
+        t.el.style.pointerEvents = 'auto';
+      });
+    }
+    window.addEventListener('scroll', function () {
+      if (!laeuft) { laeuft = true; requestAnimationFrame(messen); }
+    }, { passive: true });
+    window.addEventListener('resize', function () {
+      bemesse();
+      if (!laeuft) { laeuft = true; requestAnimationFrame(messen); }
+    }, { passive: true });
+    messen();
+  }
 })();
 </script>
 </body>
