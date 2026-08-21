@@ -4,94 +4,100 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Gebaut, nicht versprochen</title>
-<meta name="description" content="Was die quoroAI-Werkstatt gebaut hat: eine White-Label-Plattform für Unternehmensberatungen, diese Website und die Bildwerkstatt dahinter. Erzähl uns, was dich aufhält.">
+<meta name="description" content="Die Arbeiten der quoroAI-Werkstatt als laufende Bänder: die Plattform, diese Website, die Bildwerkstatt. Anhalten, ansehen, anfragen.">
 <link rel="icon" href="bilder/quoro-icon.svg">
 <link rel="stylesheet" href="stil.css">
 <style>
-/* quoroai-plattform-design · website/ · Die Referenz-Seite der Werkstatt:
-   dunkel, die Abendwelt der Marke als Galerie. Nur echte Arbeiten, keine
-   erfundenen Kunden und keine Fantasie-Logos: die Plattform, diese Website
-   selbst, und die Bildwerkstatt dahinter. Marker: REFERENZEN-V1 */
+/* quoroai-plattform-design · website/ · Die Referenz-Seite als Bänderwerk:
+   weißer Grund, vier laufende Bänder übereinander (drei Werke und die
+   Aufruf-Zeile), abwechselnd links- und rechtsherum. Wer mit der Maus
+   darüberfährt, hält genau dieses Band an und bekommt ein klickbares
+   Popup; am Telefon hält ein Tipp das Band an. Bewusst mehrere Laufbänder:
+   die Seite IST das Band (Jonas, 2026-08-21). Marker: REFERENZEN-BAND-V1 */
 
-body{background:var(--grund);color:var(--tinte)}
-section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
-.taucht{opacity:0;transform:translateY(18px);transition:opacity .8s var(--kurve),transform .8s var(--kurve)}
-.taucht.da{opacity:1;transform:none}
-@media (prefers-reduced-motion:reduce){.taucht{opacity:1;transform:none;transition:none}}
+body{background:var(--grund);color:var(--tinte);overflow-x:hidden}
 
-/* ---------- Die Fahrt: der Saal als Scroll-Kino ----------
-   Ein nächtlicher Museumssaal voller Papierköpfe (fal.ai: FLUX-Saal, Kling
-   fährt hindurch). Beim Scrollen läuft die Kamerafahrt als Bildfolge im
-   Vollbild; je Werk eine große Zeile ohne Kasten und ein laufendes Band. */
-.galerie{height:900vh;position:relative}
-.galerie .haftet{position:sticky;top:0;height:100svh;overflow:hidden;background:var(--grund);perspective:1100px}
-.galerie canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) translate(var(--kx,0px),var(--ky,0px)) rotateY(var(--kr,0deg)) scale(var(--kz,1));min-width:100%;min-height:100%;pointer-events:none;will-change:transform,filter;filter:blur(var(--kb,0px))}
-.galerie .schleier{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 62%,transparent 46%,rgba(253,253,254,.42) 100%)}
-.galerie .auftakt-wort{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;
+/* ---------- Titelzeile ---------- */
+.titelzeile{padding:calc(72px + clamp(20px,3vw,40px)) 0 clamp(16px,2.4vw,30px)}
+.titelzeile .bahn{display:flex;align-items:baseline;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.titelzeile h1{font-size:clamp(30px,4.4vw,58px)}
+.titelzeile h1 em{font-style:normal;color:var(--lila-600)}
+.titelzeile p{font-size:15px;color:var(--nebel-500)}
+
+/* ---------- die Bänder ---------- */
+.baender{border-top:0.5px solid var(--nebel-200)}
+.reihe{position:relative;height:clamp(150px,21svh,230px);overflow:hidden;border-bottom:0.5px solid var(--nebel-200)}
+.reihe .lauf{
+  position:absolute;left:0;top:0;bottom:0;display:flex;gap:18px;align-items:center;
+  width:max-content;padding:14px 0;
+  animation:band-lauf var(--tempo,42s) linear infinite;will-change:transform;
 }
-.galerie .auftakt-wort h1{font-size:clamp(40px,6.4vw,92px);white-space:nowrap}
-.galerie .auftakt-wort h1 em{font-style:normal;color:var(--lila-600)}
-.galerie .auftakt-wort p{margin-top:14px;font-size:18px;color:var(--nebel-700)}
-.galerie .auftakt-wort::before{ /* der Hof, wie bei den Kino-Worten */
-  content:"";position:absolute;inset:-70px -110px;z-index:-1;border-radius:50%;
-  background:radial-gradient(closest-side,rgba(253,253,254,.95),rgba(253,253,254,.7) 58%,rgba(253,253,254,0));
+.reihe.retour .lauf{animation-direction:reverse}
+@keyframes band-lauf{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.reihe:hover .lauf,.reihe.angehalten .lauf{animation-play-state:paused}
+.reihe .stueck{
+  height:100%;flex-shrink:0;border-radius:14px;overflow:hidden;background:#fff;
+  box-shadow:0 0 0 0.5px var(--nebel-200),0 14px 40px rgba(59,52,134,.14);
 }
-.galerie .werk-moment{position:absolute;inset:0;opacity:0;pointer-events:none}
-.galerie .werkzeile{
-  position:absolute;top:11svh;left:clamp(24px,6vw,90px);max-width:min(560px,46vw);
+.reihe .stueck img{display:block;height:100%;width:auto}
+/* die Aufruf-Zeile: Schrift statt Bilder */
+.reihe.textband{height:clamp(110px,15svh,170px)}
+.reihe.textband .lauf{gap:0}
+.reihe.textband .satz{
+  display:flex;align-items:center;padding-right:90px;white-space:nowrap;
+  font-family:var(--schrift-schau);font-weight:600;letter-spacing:-.02em;
+  font-size:clamp(30px,4.6vw,60px);
 }
-.galerie .werk-moment.rechts .werkzeile{left:auto;right:clamp(24px,6vw,90px)}
-.galerie .werkzeile::before{ /* weicher Hof statt Kasten */
-  content:"";position:absolute;inset:-48px -70px;z-index:-1;border-radius:50%;
-  background:radial-gradient(closest-side,rgba(253,253,254,.94),rgba(253,253,254,.66) 58%,rgba(253,253,254,0));
+.reihe.textband .satz em{font-style:normal;color:var(--lila-600)}
+
+/* das Etikett am Band */
+.reihe .etikett{
+  position:absolute;left:clamp(16px,3vw,40px);top:14px;z-index:2;pointer-events:none;
+  padding:6px 14px;border-radius:var(--radius-kapsel);
+  background:rgba(253,253,254,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:0.5px solid var(--nebel-200);
+  font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--lila-800);
 }
-.galerie .werkzeile .nummer{font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--lila-700)}
-.galerie .werkzeile h2{margin-top:6px;font-size:clamp(26px,3.2vw,46px);line-height:1.08}
-.galerie .werkzeile p{margin-top:10px;font-size:16px;color:var(--nebel-700);max-width:40ch}
-.galerie .werkzeile .knopf{margin-top:16px;pointer-events:auto}
-.galerie .werkzeile .knopf.hell{background:linear-gradient(180deg,var(--lila-500),var(--lila-700));color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 10px 24px rgba(111,99,232,.38)}
-.galerie .band{
-  position:absolute;left:0;bottom:6svh;display:flex;gap:22px;align-items:flex-end;
-  will-change:transform;
+
+/* das Popup beim Anhalten */
+.reihe .popup{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) translateY(10px);z-index:3;
+  opacity:0;pointer-events:none;transition:opacity .3s var(--kurve),transform .3s var(--kurve);
+  display:flex;align-items:center;gap:20px;max-width:min(760px,92%);
+  padding:18px 22px;border-radius:var(--radius-karte);
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(26px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);
+  border:1px solid rgba(255,255,255,.8);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85),0 30px 80px rgba(59,52,134,.30);
 }
-.galerie .band .stueck{
-  flex-shrink:0;border-radius:14px;overflow:hidden;background:#fff;
-  box-shadow:0 0 0 0.5px var(--nebel-200),0 26px 70px rgba(59,52,134,.24);
-}
-.galerie .band .stueck img{display:block;height:32svh;width:auto}
-.galerie .band .stueck.hoch img{height:36svh}
-@media (max-width:900px){
-  .galerie .werkzeile,.galerie .werk-moment.rechts .werkzeile{left:16px;right:16px;top:9svh;max-width:none}
-  .galerie .werkzeile h2{font-size:clamp(24px,7vw,32px)}
-  .galerie .werkzeile p{font-size:14px}
-  .galerie .band{bottom:4svh;gap:14px}
-  .galerie .band .stueck img{height:24svh}
-  .galerie .band .stueck.hoch img{height:27svh}
-}
-.galerie .fortschritt{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--nebel-200)}
-.galerie .fortschritt i{display:block;height:100%;width:calc(var(--stand,0) * 100%);background:linear-gradient(90deg,var(--lila-400),var(--lila-600))}
-@media (max-width:900px){
-  .galerie{height:760vh}
-  .galerie .auftakt-wort h1{white-space:normal;font-size:clamp(34px,10vw,52px)}
+.reihe:hover .popup,.reihe.angehalten .popup{opacity:1;transform:translate(-50%,-50%);pointer-events:auto}
+.reihe .popup h2{font-size:clamp(19px,2vw,26px);line-height:1.15}
+.reihe .popup p{margin-top:4px;font-size:14px;color:var(--nebel-700);max-width:44ch}
+.reihe .popup .knopf{flex-shrink:0;min-height:44px;padding:0 20px;font-size:14.5px}
+@media (max-width:760px){
+  /* Das Band ist beschnitten (overflow), also schwebt das Popup am Telefon
+     als eigene Karte über dem unteren Rand statt im Band. */
+  .reihe .popup{
+    position:fixed;left:16px;right:16px;top:auto;bottom:22px;transform:translateY(10px);
+    flex-direction:column;text-align:center;gap:10px;padding:16px;max-width:none;
+  }
+  .reihe:hover .popup,.reihe.angehalten .popup{transform:none}
+  .reihe .popup .knopf{width:100%}
+  .reihe .etikett{top:10px}
 }
 @media (prefers-reduced-motion:reduce){
-  .galerie{height:auto}
-  .galerie .haftet{position:static;height:auto;overflow:visible;padding:calc(72px + 40px) 0 40px}
-  .galerie canvas,.galerie .schleier,.galerie .fortschritt{display:none}
-  .galerie .auftakt-wort{position:static;transform:none;margin-bottom:40px}
-  .galerie .werk-moment{position:static;opacity:1;pointer-events:auto;margin:0 auto 46px;max-width:min(900px,100% - 32px)}
-  .galerie .werkzeile{position:static;max-width:none}
-  .galerie .werkzeile::before{display:none}
-  .galerie .band{position:static;margin-top:16px;overflow-x:auto;padding-bottom:8px}
-  .galerie .band .stueck img{height:150px}
+  .reihe{height:auto}
+  .reihe .lauf{position:static;animation:none;width:auto;overflow-x:auto;padding:14px 16px}
+  .reihe .stueck{height:150px}
+  .reihe .popup{position:static;transform:none;opacity:1;pointer-events:auto;margin:0 16px 16px}
+  .reihe .doppel{display:none}
 }
 
 /* ---------- Schluss ---------- */
-.ref-schluss{margin-top:clamp(70px,9vw,130px);text-align:center;padding-bottom:clamp(60px,8vw,110px)}
-.ref-schluss h2{font-size:clamp(30px,4.6vw,58px);max-width:18ch;margin-inline:auto}
-.ref-schluss p{margin-top:16px;font-size:18px;color:var(--nebel-700);max-width:44ch;margin-inline:auto}
-.ref-schluss .knopfreihe{display:flex;gap:12px;justify-content:center;margin-top:32px;flex-wrap:wrap}
+.ref-schluss{margin-top:clamp(50px,7vw,90px);text-align:center;padding-bottom:clamp(50px,7vw,90px)}
+.ref-schluss h2{font-size:clamp(28px,4vw,50px);max-width:20ch;margin-inline:auto}
+.ref-schluss p{margin-top:14px;font-size:17px;color:var(--nebel-700);max-width:44ch;margin-inline:auto}
+.ref-schluss .knopfreihe{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -109,72 +115,89 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
 
 <main id="oben">
 
-  <!-- ---------- Die Fahrt ---------- -->
-  <section class="galerie" aria-label="Ein Gang durch die Werkstatt-Galerie">
-    <div class="haftet">
-      <canvas id="leinwand" aria-hidden="true"></canvas>
-      <div class="schleier"></div>
-      <div class="auftakt-wort" id="auftakt">
-        <h1>Gebaut, <em>nicht versprochen</em>.</h1>
-        <p>Komm mit durch die Galerie. Jedes Stück kannst du anfassen.</p>
-      </div>
+  <div class="titelzeile">
+    <div class="bahn">
+      <h1>Gebaut, <em>nicht versprochen</em>.</h1>
+      <p>Drei Werke der Werkstatt, im Vorbeiziehen. Anhalten lohnt sich.</p>
+    </div>
+  </div>
 
-      <div class="werk-moment rechts" data-fenster="0.10,0.32">
-        <div class="werkzeile">
-          <span class="nummer">WERK 1</span>
+  <div class="baender">
+
+    <div class="reihe" style="--tempo:46s">
+      <span class="etikett">WERK 1: DIE PLATTFORM</span>
+      <div class="lauf">
+        <div class="stueck"><img src="bilder/produkt/cockpit.jpg" alt="Das Cockpit als Modell der Beratung"></div>
+        <div class="stueck"><img src="bilder/produkt/mitlesen.jpg" alt="Mitlesen mit Quellen"></div>
+        <div class="stueck"><img src="bilder/produkt/gespraech.jpg" alt="Das Mandanten-Portal unter fremder Marke"></div>
+        <div class="stueck"><img src="bilder/produkt/marge.jpg" alt="Marge und Sätze"></div>
+        <div class="stueck"><img src="bilder/produkt/rechnungen.jpg" alt="Rechnungen mit Stichtag"></div>
+      </div>
+      <div class="popup">
+        <div>
           <h2>Die Plattform für Beratungen.</h2>
           <p>Ein Berater unter fremder Marke, samt Mandaten, Zeiten und tagegenauer Abrechnung. Daten in der EU.</p>
-          <a class="knopf hell" href="plattform.html">Die Tour ansehen</a>
         </div>
-        <div class="band">
-          <div class="stueck"><img src="bilder/produkt/cockpit.jpg" alt="Das Cockpit als Modell der Beratung"></div>
-          <div class="stueck hoch"><img src="bilder/produkt/mitlesen.jpg" alt="Mitlesen mit Quellen"></div>
-          <div class="stueck"><img src="bilder/produkt/gespraech.jpg" alt="Das Mandanten-Portal unter fremder Marke"></div>
-          <div class="stueck hoch"><img src="bilder/produkt/marge.jpg" alt="Marge und Sätze"></div>
-          <div class="stueck"><img src="bilder/produkt/rechnungen.jpg" alt="Rechnungen mit Stichtag"></div>
-        </div>
+        <a class="knopf primaer" href="plattform.html">Die Tour ansehen</a>
       </div>
+    </div>
 
-      <div class="werk-moment" data-fenster="0.40,0.62">
-        <div class="werkzeile">
-          <span class="nummer">WERK 2</span>
+    <div class="reihe retour" style="--tempo:52s">
+      <span class="etikett">WERK 2: DIESE WEBSITE</span>
+      <div class="lauf">
+        <div class="stueck"><img src="bilder/produkt/web-1.jpg" alt="Der weiße Nullpunkt mit dem Firmenspruch"></div>
+        <div class="stueck"><img src="bilder/produkt/web-2.jpg" alt="Die Wolke aus Belegen"></div>
+        <div class="stueck"><img src="bilder/produkt/website.jpg" alt="Der fertige Kopf neben der Überschrift"></div>
+        <div class="stueck"><img src="bilder/produkt/web-3.jpg" alt="Die Drehung des Kopfs"></div>
+        <div class="stueck"><img src="bilder/produkt/web-4.jpg" alt="Der Abendkopf mit dem Aufruf"></div>
+      </div>
+      <div class="popup">
+        <div>
           <h2>Die Seite, von der du kommst.</h2>
           <p>Der Kopf aus tausend Belegen, die Drehung, der Tag bis 23:04. Jede Bewegung aus der eigenen Werkstatt.</p>
-          <a class="knopf hell" href="index.html">Noch einmal erleben</a>
         </div>
-        <div class="band">
-          <div class="stueck"><img src="bilder/produkt/web-1.jpg" alt="Der weiße Nullpunkt mit dem Firmenspruch"></div>
-          <div class="stueck hoch"><img src="bilder/produkt/web-2.jpg" alt="Die Wolke aus Belegen"></div>
-          <div class="stueck"><img src="bilder/produkt/website.jpg" alt="Der fertige Kopf neben der Überschrift"></div>
-          <div class="stueck hoch"><img src="bilder/produkt/web-3.jpg" alt="Die Drehung des Kopfs"></div>
-          <div class="stueck"><img src="bilder/produkt/web-4.jpg" alt="Der Abendkopf mit dem Aufruf"></div>
-        </div>
+        <a class="knopf primaer" href="index.html">Noch einmal erleben</a>
       </div>
-
-      <div class="werk-moment rechts" data-fenster="0.70,0.88">
-        <div class="werkzeile">
-          <span class="nummer">WERK 3</span>
-          <h2>Die Bildwerkstatt dahinter.</h2>
-          <p>Motive und Filme wie dieser Saal, in Stunden statt Wochen. Dieselbe Werkstatt baut die Bildwelt deiner Marke.</p>
-        </div>
-        <div class="band">
-          <div class="stueck"><img src="bilder/regal.jpg" alt="Das Regal der Köpfe"></div>
-          <div class="stueck hoch"><img src="bilder/abend-kopf.jpg" alt="Der Kopf im Abendlicht"></div>
-          <div class="stueck"><img src="bilder/kino/dreh-020.jpg" alt="Der Kopf in der Drehung"></div>
-          <div class="stueck hoch"><img src="bilder/ausstellung.jpg" alt="Die Motive als Museumsstücke"></div>
-          <div class="stueck"><img src="bilder/tresor.jpg" alt="Der Tresor"></div>
-          <div class="stueck hoch"><img src="bilder/mond.jpg" alt="Der Mond"></div>
-        </div>
-      </div>
-
-      <div class="fortschritt" aria-hidden="true"><i></i></div>
     </div>
-  </section>
 
-  <!-- ---------- Schluss ---------- -->
+    <div class="reihe" style="--tempo:44s">
+      <span class="etikett">WERK 3: DIE BILDWERKSTATT</span>
+      <div class="lauf">
+        <div class="stueck"><img src="bilder/regal.jpg" alt="Das Regal der Köpfe"></div>
+        <div class="stueck"><img src="bilder/abend-kopf.jpg" alt="Der Kopf im Abendlicht"></div>
+        <div class="stueck"><img src="bilder/kino/dreh-020.jpg" alt="Der Kopf in der Drehung"></div>
+        <div class="stueck"><img src="bilder/ausstellung.jpg" alt="Die Motive als Museumsstücke"></div>
+        <div class="stueck"><img src="bilder/tresor.jpg" alt="Der Tresor"></div>
+        <div class="stueck"><img src="bilder/mond.jpg" alt="Der Mond"></div>
+      </div>
+      <div class="popup">
+        <div>
+          <h2>Die Bildwerkstatt dahinter.</h2>
+          <p>Motive und Filme in Stunden statt Wochen. Dieselbe Werkstatt baut die Bildwelt deiner Marke.</p>
+        </div>
+        <a class="knopf primaer" href="mailto:hello@quorogroup.com?subject=Bildwelt für meine Marke">Bildwelt anfragen</a>
+      </div>
+    </div>
+
+    <div class="reihe retour textband" style="--tempo:30s">
+      <div class="lauf">
+        <span class="satz">Dein Projekt könnte das <em>nächste Werk</em> sein.</span>
+        <span class="satz">Erzähl uns, was dich aufhält.</span>
+      </div>
+      <div class="popup">
+        <div>
+          <h2>Eine Mail genügt.</h2>
+          <p>Du bekommst keine Broschüre zurück, sondern eine Einschätzung und einen Vorschlag für den ersten Wurf.</p>
+        </div>
+        <a class="knopf primaer" href="mailto:hello@quorogroup.com?subject=Was mich aufhält">hello@quorogroup.com</a>
+      </div>
+    </div>
+
+  </div>
+
   <div class="ref-schluss bahn">
-    <h2>Dein Projekt könnte das nächste Werk sein.</h2>
-    <p>Eine Mail genügt. Du bekommst keine Broschüre zurück, sondern eine Einschätzung und einen Vorschlag für den ersten Wurf.</p>
+    <h2>Lieber direkt reden?</h2>
+    <p>Ruf an oder schreib. Wir sagen dir ehrlich, ob sich dein Vorhaben lohnt.</p>
     <div class="knopfreihe">
       <a class="knopf primaer" href="mailto:hello@quorogroup.com?subject=Was mich aufhält">Erzähl uns, was dich aufhält</a>
       <a class="knopf leise" href="tel:+4936155898702">+49 361 55898702</a>
@@ -228,140 +251,41 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
   function kante() { kopf.classList.toggle('gescrollt', window.scrollY > 8); }
   window.addEventListener('scroll', kante, { passive: true });
   kante();
-  var beobachter = new IntersectionObserver(function (eintraege) {
-    eintraege.forEach(function (e) {
-      if (e.isIntersecting) { e.target.classList.add('da'); beobachter.unobserve(e.target); }
-    });
-  }, { rootMargin: '0px 0px -12% 0px' });
-  Array.prototype.forEach.call(document.querySelectorAll('.taucht'), function (el) { beobachter.observe(el); });
 
-  /* ---------- Die Fahrt ---------- */
-  var BILDER = 121;
-  var galerie = document.querySelector('.galerie');
-  var leinwand = document.getElementById('leinwand');
-  if (galerie && leinwand && !ruhig) {
-    var stift = leinwand.getContext('2d');
-    var auftakt = document.getElementById('auftakt');
-    var balken = galerie.querySelector('.fortschritt i');
-    var momente = Array.prototype.slice.call(galerie.querySelectorAll('.werk-moment')).map(function (t) {
-      var f = t.dataset.fenster.split(',');
-      return { el: t, a: parseFloat(f[0]), b: parseFloat(f[1]), band: t.querySelector('.band') };
-    });
+  var reihen = Array.prototype.slice.call(document.querySelectorAll('.reihe'));
 
-    var vorrat = new Array(BILDER);
-    var letztesZiel = 0;
-    function lade(i) {
-      var b = new Image();
-      b.onload = function () { vorrat[i] = b; if (i === 0 || i === letztesZiel) male(letztesZiel); };
-      b.src = 'bilder/galerie/fahrt-' + String(i + 1).padStart(3, '0') + '.jpg';
-    }
-    lade(0); lade(BILDER - 1);
-    for (var i = 1; i < BILDER - 1; i++) lade(i);
-
-    function naechstes(z) {
-      if (vorrat[z]) return vorrat[z];
-      for (var a = 1; a < BILDER; a++) { if (vorrat[z - a]) return vorrat[z - a]; if (vorrat[z + a]) return vorrat[z + a]; }
-      return null;
-    }
-    function bemesse() {
-      /* Vollbild mit Beschnitt: die Leinwand deckt den Bildschirm, das Bild
-         wird deckend eingepasst, nie verzerrt. */
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      leinwand.width = Math.round(window.innerWidth * dpr);
-      leinwand.height = Math.round(window.innerHeight * dpr);
-      leinwand.style.width = window.innerWidth + 'px';
-      leinwand.style.height = window.innerHeight + 'px';
-    }
-    bemesse();
-    function male(z) {
-      letztesZiel = z;
-      var b = naechstes(z);
-      if (!b) return;
-      var cw = leinwand.width, ch = leinwand.height;
-      var s = Math.max(cw / b.width, ch / b.height);
-      var bw = b.width * s, bh = b.height * s;
-      stift.drawImage(b, (cw - bw) / 2, (ch - bh) / 2, bw, bh);
-    }
-    function seg(p, a, b) { return Math.min(Math.max((p - a) / (b - a), 0), 1); }
-    function weich(t) { return t * t * (3 - 2 * t); }
-    /* Glocke: weich hinein, halten, weich hinaus */
-    function glocke(t) { return Math.min(weich(seg(t, 0, .22)), weich(seg(1 - t, 0, .22)), 1); }
-
-    /* Die Regie: an jedem Werk lenkt der Blick zum Kopf ein (Seite -1 links,
-       +1 rechts), der Film hält dabei an. Zwischen den Werken läuft die Fahrt. */
-    var beats = [
-      { a: .10, b: .32, seite: -1, bild: 26 },
-      { a: .40, b: .62, seite: 1,  bild: 58 },
-      { a: .70, b: .88, seite: -1, bild: 92 }
-    ];
-    /* Der Film läuft zwischen den Halten linear: Stützpunkte (p, Bild) */
-    var stuetzen = [[0, 0]];
-    beats.forEach(function (b) { stuetzen.push([b.a, b.bild], [b.b, b.bild]); });
-    stuetzen.push([1, BILDER - 1]);
-    function bildFuer(p) {
-      for (var i = 1; i < stuetzen.length; i++) {
-        if (p <= stuetzen[i][0]) {
-          var t = (p - stuetzen[i - 1][0]) / (stuetzen[i][0] - stuetzen[i - 1][0] || 1);
-          return Math.round(stuetzen[i - 1][1] + (stuetzen[i][1] - stuetzen[i - 1][1]) * t);
-        }
-      }
-      return BILDER - 1;
-    }
-
-    var laeuft = false;
-    function messen() {
-      laeuft = false;
-      var r = galerie.getBoundingClientRect();
-      var weg = r.height - window.innerHeight;
-      var p = weg > 0 ? Math.min(Math.max(-r.top / weg, 0), 1) : 0;
-      male(Math.min(BILDER - 1, bildFuer(p)));
-      auftakt.style.opacity = (1 - seg(p, 0, .07)).toFixed(3);
-
-      /* die Kamera: hinlaufen, HINGUCKEN, weitergehen. Der Dreh kippt die
-         Bühne in der Perspektive, der Zoom geht nah ran, und genau im
-         Umschwenken liegt ein Hauch Bewegungsunschärfe. */
-      var kz = 1, kx = 0, ky = 0, kr = 0, kb = 0;
-      beats.forEach(function (b) {
-        var t = seg(p, b.a, b.b);
-        if (t <= 0 || t >= 1) return;
-        var k = glocke(t);
-        kz = 1 + .85 * k;
-        kx = -b.seite * window.innerWidth * .24 * k;
-        ky = window.innerHeight * .06 * k;
-        kr = b.seite * 9 * k;
-        kb = 7 * k * (1 - k);              /* nur während des Schwenks */
+  /* Nahtlose Schleife: der Inhalt wird verdoppelt, die Animation läuft bis
+     -50 Prozent. In der ruhigen Fassung bleibt das Original allein. */
+  if (!ruhig) {
+    reihen.forEach(function (r) {
+      var lauf = r.querySelector('.lauf');
+      var kinder = Array.prototype.slice.call(lauf.children);
+      kinder.forEach(function (k) {
+        var kopie = k.cloneNode(true);
+        kopie.classList.add('doppel');
+        kopie.setAttribute('aria-hidden', 'true');
+        lauf.appendChild(kopie);
       });
-      var tuer = weich(seg(p, .92, 1));
-      kz += .28 * tuer;
-      leinwand.style.setProperty('--kz', kz.toFixed(4));
-      leinwand.style.setProperty('--kx', kx.toFixed(1) + 'px');
-      leinwand.style.setProperty('--ky', ky.toFixed(1) + 'px');
-      leinwand.style.setProperty('--kr', kr.toFixed(2) + 'deg');
-      leinwand.style.setProperty('--kb', kb > .4 ? kb.toFixed(1) + 'px' : '0px');
-      balken.style.setProperty('--stand', p.toFixed(4));
-      momente.forEach(function (m) {
-        var x = seg(p, m.a, m.b);
-        if (x <= 0 || x >= 1) { m.el.style.opacity = 0; m.el.style.pointerEvents = 'none'; return; }
-        var auf = Math.min(1, x * 6);
-        var ab = x > .88 ? (1 - x) / .12 : 1;
-        m.el.style.opacity = (auf * ab).toFixed(3);
-        m.el.style.pointerEvents = 'auto';
-        /* das Band zieht am Scroll durchs Bild: von rechts herein, nach links hinaus */
-        var bw = m.band.scrollWidth;
-        var von = window.innerWidth * .92;
-        var bis = Math.min(window.innerWidth * .06 - bw * .55, -bw * .2);
-        m.band.style.transform = 'translateX(' + (von + (bis - von) * x).toFixed(1) + 'px)';
-      });
-    }
-    window.addEventListener('scroll', function () {
-      if (!laeuft) { laeuft = true; requestAnimationFrame(messen); }
-    }, { passive: true });
-    window.addEventListener('resize', function () {
-      bemesse();
-      if (!laeuft) { laeuft = true; requestAnimationFrame(messen); }
-    }, { passive: true });
-    messen();
+    });
   }
+
+  /* Am Telefon gibt es kein Schweben: ein Tipp hält das Band an und zeigt
+     das Popup, der nächste Tipp außerhalb lässt es weiterlaufen. */
+  /* Ein Klick aufs Band hält es an und pinnt das Popup (am Telefon der
+     einzige Weg, am Schreibtisch die Ergänzung zum Schweben). Ein Klick
+     daneben oder erneut lässt es weiterlaufen. */
+  reihen.forEach(function (r) {
+    r.addEventListener('click', function (ev) {
+      if (ev.target.closest('a')) return;
+      var war = r.classList.contains('angehalten');
+      reihen.forEach(function (x) { x.classList.remove('angehalten'); });
+      if (!war) r.classList.add('angehalten');
+    });
+  });
+  document.addEventListener('click', function (ev) {
+    if (ev.target.closest('.reihe')) return;
+    reihen.forEach(function (x) { x.classList.remove('angehalten'); });
+  });
 })();
 </script>
 </body>
