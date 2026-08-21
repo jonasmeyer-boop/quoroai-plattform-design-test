@@ -9,15 +9,17 @@
    lässt sich die Kopie eines Tages durch die Quelle ersetzen, ohne dass eine
    Fläche bricht. Dazu kommen zwei Website-Zugaben: monat() für den Rechner
    und euroKurz() für glatte Beträge im Fließtext.
-   Alle Beträge in Cent, netto. Marker: WEBSITE-ZAHLEN-V2 (V2 nach Review:
-   Oberfläche an preise.js angeglichen, spanne() übernommen) */
+   Alle Beträge in Cent, netto. Marker: WEBSITE-ZAHLEN-V3 (V3: Fragen je Monat und Sparmodus aus
+   src/lib/plans.ts; V2: Oberfläche an preise.js angeglichen) */
 window.Zahlen = (function () {
   'use strict';
 
+  /* Fragen je Kalendermonat und Kunde; Basis antwortet im Sparmodus
+     (Quelle: src/lib/plans.ts im Produkt, questionsPerMonth/standardModel) */
   var TARIFE = {
-    basis:    { label: 'Basis',    cent: 1900 },
-    standard: { label: 'Standard', cent: 5900 },
-    plus:     { label: 'Plus',     cent: 14900 }
+    basis:    { label: 'Basis',    cent: 1900,  fragen: 100, sparmodus: true },
+    standard: { label: 'Standard', cent: 5900,  fragen: 250, sparmodus: false },
+    plus:     { label: 'Plus',     cent: 14900, fragen: 700, sparmodus: false }
   };
 
   /* Die erste Stufe gilt ab dem ERSTEN Zugang (Falle aus registrieren.html) */
@@ -35,7 +37,7 @@ window.Zahlen = (function () {
       return { id: id, label: TARIFE[id].label, cent: TARIFE[id].cent };
     });
   }
-  function tarif(id) { return TARIFE[id] ? { id: id, label: TARIFE[id].label, cent: TARIFE[id].cent } : null; }
+  function tarif(id) { return TARIFE[id] ? { id: id, label: TARIFE[id].label, cent: TARIFE[id].cent, fragen: TARIFE[id].fragen, sparmodus: TARIFE[id].sparmodus } : null; }
   function staffel() { return STAFFEL.map(function (s) { return { ab: s.ab, proz: s.proz }; }); }
   function gebuehr() { return GEBUEHR; }
   function ust() { return UST_PROZENT; }

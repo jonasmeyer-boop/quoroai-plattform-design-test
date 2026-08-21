@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>So arbeitet quoroAI</title>
+<meta name="description" content="Wie quoroAI konkret funktioniert: der Weg vom Konto zur ersten beantworteten Mandantenfrage, echte Einblicke in die Oberfläche, und die Preise mit Rechner.">
+<link rel="icon" href="bilder/quoro-icon.svg">
+<link rel="stylesheet" href="stil.css">
+<style>
+/* quoroai-plattform-design · website/ · Die eine Unterseite: für alle, die
+   mehr wissen wollen. Ruhig, keine Kino-Mechanik: der Weg durch das Produkt
+   in sechs Schritten, echte Bilder der Flächen (Screenshots der Entwürfe,
+   die das Produkt-Design SIND), die Preise mit Rechner und die Fragen.
+   Zahlen aus zahlen.js (Quelle: Produkt-Repo src/lib/plans.ts und
+   platform/preise.ts, am 2026-08-21 gegengelesen). Marker: DETAILSEITE-V1 */
+
+section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
+.kopfzeile{max-width:min(760px,100%)}
+.kopfzeile p{margin-top:16px;font-size:18px;color:var(--nebel-700)}
+.knopfreihe{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
+.taucht{opacity:0;transform:translateY(18px);transition:opacity .8s var(--kurve),transform .8s var(--kurve)}
+.taucht.da{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.taucht{opacity:1;transform:none;transition:none}}
+
+/* ---------- Titel ---------- */
+.titel{padding:calc(72px + clamp(48px,7vw,90px)) 0 0}
+.titel h1{font-size:clamp(38px,5.4vw,72px);max-width:14ch}
+.titel .vorsatz{margin-top:18px;font-size:19px;color:var(--nebel-700);max-width:52ch}
+
+/* ---------- Der Weg: sechs Schritte ---------- */
+.weg{margin-top:44px;position:relative;max-width:880px}
+.weg::before{content:"";position:absolute;left:19px;top:8px;bottom:8px;width:1px;background:var(--nebel-200)}
+.station{position:relative;padding:0 0 34px 58px}
+.station:last-child{padding-bottom:0}
+.station::before{
+  content:"";position:absolute;left:12px;top:4px;width:15px;height:15px;border-radius:50%;
+  background:var(--flaeche);border:1.5px solid var(--lila-500);
+}
+.station h3{font-size:21px}
+.station p{margin-top:6px;font-size:16px;color:var(--nebel-700);max-width:62ch}
+.station .merk{margin-top:8px;font-size:14px;color:var(--lila-800);font-weight:600}
+
+/* ---------- Einblicke: die echten Flächen ---------- */
+.einblick{display:grid;grid-template-columns:1.25fr .75fr;gap:44px;align-items:center;margin-top:56px}
+.einblick:nth-child(even){grid-template-columns:.75fr 1.25fr}
+.einblick:nth-child(even) .rahmen{order:2}
+.einblick .rahmen{
+  border-radius:18px;overflow:hidden;border:0.5px solid var(--nebel-200);
+  box-shadow:0 24px 70px rgba(59,52,134,.16);background:#fff;
+}
+.einblick .rahmen img{display:block;width:100%;height:auto}
+.einblick h3{font-size:clamp(21px,2.2vw,27px)}
+.einblick p{margin-top:8px;font-size:16px;color:var(--nebel-700)}
+@media (max-width:860px){
+  .einblick,.einblick:nth-child(even){grid-template-columns:1fr;gap:16px}
+  .einblick:nth-child(even) .rahmen{order:0}
+}
+
+/* ---------- Preise ---------- */
+.tarife{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:44px}
+.tarif{
+  position:relative;text-align:left;padding:24px;border-radius:var(--radius-karte);
+  border:0.5px solid var(--nebel-200);background:var(--flaeche);cursor:pointer;
+  font:inherit;transition:border-color .25s var(--kurve),box-shadow .25s var(--kurve),opacity .8s var(--kurve),transform .8s var(--kurve);
+}
+.tarif:hover{border-color:var(--lila-300)}
+.tarif[aria-pressed=true]{border-color:var(--lila-600);box-shadow:0 0 0 1px var(--lila-600),0 16px 40px rgba(111,99,232,.14)}
+.tarif .haeufig{
+  position:absolute;top:-11px;left:22px;padding:3px 12px;border-radius:var(--radius-kapsel);
+  font-size:12px;font-weight:700;color:#fff;background:linear-gradient(180deg,var(--lila-500),var(--lila-700));
+}
+.tarif .name{display:block;font-weight:600;font-size:16px}
+.tarif .betrag{display:block;font-family:var(--schrift-schau);font-weight:600;font-size:34px;letter-spacing:-.02em;margin-top:8px}
+.tarif .je{display:block;font-size:13px;color:var(--nebel-500)}
+.tarif .wofuer{display:block;margin-top:12px;font-size:14px;color:var(--nebel-700);line-height:1.5;text-align:left}
+@media (max-width:820px){.tarife{grid-template-columns:1fr}.tarif .betrag{font-size:28px}}
+.preisraum{margin-top:26px;display:grid;grid-template-columns:1fr 1.25fr;gap:30px;align-items:start}
+.rechner{padding:30px;border-radius:var(--radius-karte);border:0.5px solid var(--nebel-200);background:var(--flaeche);box-shadow:0 14px 40px rgba(24,21,47,.06)}
+.rechner label{display:block;font-size:14px;font-weight:600;margin-bottom:10px}
+.rechner input[type=range]{width:100%;accent-color:var(--lila-600)}
+.rechner .summe{margin-top:26px;padding-top:22px;border-top:0.5px solid var(--nebel-200)}
+.rechner .summe .zahl{font-family:var(--schrift-schau);font-size:44px;line-height:1;letter-spacing:-.02em}
+.rechner .summe .zahl.tickt{animation:zahl-tickt .28s var(--kurve)}
+@keyframes zahl-tickt{0%{opacity:.35;transform:translateY(5px)}100%{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.rechner .summe .zahl.tickt{animation:none}}
+.rechner .summe .je{font-size:14px;color:var(--nebel-500);margin-top:8px}
+.rechner .aufstellung{margin-top:18px;display:grid;gap:8px;font-size:14px;color:var(--nebel-700)}
+.rechner .aufstellung div{display:flex;justify-content:space-between;gap:14px}
+.rechner .aufstellung span:last-child{font-variant-numeric:tabular-nums}
+.rechner .aufstellung .anmerkung{display:block;color:var(--nebel-500);font-size:13px}
+.preistext ul{list-style:none;display:grid;gap:16px;margin-top:8px}
+.preistext li{display:flex;gap:12px;font-size:16px;align-items:flex-start}
+.preistext li svg{width:20px;height:20px;flex-shrink:0;margin-top:3px;color:var(--lila-600)}
+@media (max-width:860px){.preisraum{grid-template-columns:1fr}}
+
+/* ---------- Fragen ---------- */
+.fragen{margin-top:36px;border-top:0.5px solid var(--nebel-200)}
+.fragen details{border-bottom:0.5px solid var(--nebel-200)}
+.fragen summary{
+  list-style:none;cursor:pointer;display:flex;align-items:baseline;justify-content:space-between;gap:20px;
+  padding:22px 0;font-family:var(--schrift-schau);font-weight:600;font-size:clamp(18px,2vw,23px);letter-spacing:-.01em;
+}
+.fragen summary::-webkit-details-marker{display:none}
+.fragen summary .zeichen{
+  flex-shrink:0;width:26px;height:26px;border-radius:50%;position:relative;align-self:center;
+  border:1px solid var(--nebel-300);transition:transform .3s var(--kurve),border-color .3s var(--kurve);
+}
+.fragen summary .zeichen::before,.fragen summary .zeichen::after{
+  content:"";position:absolute;left:50%;top:50%;background:var(--nebel-600);
+  transform:translate(-50%,-50%);transition:background .3s;
+}
+.fragen summary .zeichen::before{width:10px;height:1.5px}
+.fragen summary .zeichen::after{width:1.5px;height:10px}
+.fragen details[open] summary .zeichen{transform:rotate(45deg);border-color:var(--lila-500)}
+.fragen details[open] summary .zeichen::before,.fragen details[open] summary .zeichen::after{background:var(--lila-700)}
+.fragen .antworttext{padding:0 46px 24px 0;font-size:16px;color:var(--nebel-700);max-width:68ch}
+
+/* ---------- Schluss ---------- */
+.detail-schluss{margin-top:var(--luft);text-align:center;padding-bottom:20px}
+.detail-schluss h2{max-width:20ch;margin-inline:auto}
+.detail-schluss .knopfreihe{justify-content:center}
+</style>
+</head>
+<body>
+
+<header class="kopf" id="kopf">
+  <div class="bahn">
+    <a class="wortmarke" href="index.html"><img src="bilder/quoro-icon.svg" alt=""><span>quoroAI</span></a>
+    <nav>
+      <a href="#weg">Der Weg</a>
+      <a href="#einblicke">Einblicke</a>
+      <a href="#preise">Preise</a>
+      <a href="#fragen">Fragen</a>
+    </nav>
+    <a class="knopf primaer" href="index.html#schluss">Beratung anlegen</a>
+  </div>
+</header>
+
+<main id="oben">
+
+  <!-- ---------- Titel ---------- -->
+  <div class="titel bahn">
+    <h1>So arbeitet quoroAI, im Detail.</h1>
+    <p class="vorsatz">Von der leeren Beratung bis zur ersten beantworteten Mandantenfrage, mit echten Bildern aus der Oberfläche und den Preisen zum Selberrechnen.</p>
+  </div>
+
+  <!-- ---------- Der Weg ---------- -->
+  <section id="weg" class="bahn">
+    <div class="kopfzeile taucht">
+      <h2>Der Weg, Schritt für Schritt.</h2>
+    </div>
+    <div class="weg taucht">
+      <div class="station">
+        <h3>Beratung anlegen</h3>
+        <p>Konto mit Name und E-Mail, Passwort, fertig. Ab jetzt gehört dir das Cockpit über alle Mandate.</p>
+      </div>
+      <div class="station">
+        <h3>Marke setzen</h3>
+        <p>Farbe, Logo, eigene Adresse für das Portal deiner Mandanten. quoroAI taucht dort nicht auf, auch nicht im Impressum: das ist deins.</p>
+      </div>
+      <div class="station">
+        <h3>Wissen geben</h3>
+        <p>Deine Methoden, Vorlagen und Unterlagen werden die Grundlage des Beraters. Was du nicht hineingibst, benutzt er nicht.</p>
+        <span class="merk">Kein Training mit deinen Inhalten, weder bei uns noch beim Modellanbieter.</span>
+      </div>
+      <div class="station">
+        <h3>Mandanten einladen</h3>
+        <p>Jeder Mandant bekommt einen Zugang mit Tarifstufe. Er öffnet sein Portal unter deiner Marke, lädt Unterlagen hoch, bucht Termine, liest Rechnungen.</p>
+      </div>
+      <div class="station">
+        <h3>Er fragt, dein Berater antwortet, du liest mit</h3>
+        <p>Antworten kommen aus deinem Wissen, jede Zahl nennt ihre Quelle. Gibt der Mandant ein Gespräch frei, liest du live mit und kannst jederzeit selbst hineinschreiben.</p>
+      </div>
+      <div class="station">
+        <h3>Zeiten, Rechnung, Marge</h3>
+        <p>Stunden stehen auf Mandat und Mensch, Rechnungen entstehen aus Zeiten, Pauschalen und Auslagen, tagegenau. Und die Marge je Mandat siehst du, während es läuft.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Einblicke ---------- -->
+  <section id="einblicke" class="bahn">
+    <div class="kopfzeile taucht">
+      <h2>Echte Einblicke.</h2>
+      <p>Keine Broschüren-Mockups: so sieht die Oberfläche aus.</p>
+    </div>
+
+    <div class="einblick taucht">
+      <div class="rahmen"><img src="bilder/produkt/cockpit.jpg" alt="Das Cockpit: die Beratung als begehbares Modell mit Mandaten als Gebäuden" loading="lazy"></div>
+      <div>
+        <h3>Dein Cockpit ist ein Modell deiner Beratung.</h3>
+        <p>Jedes Mandat ein Gebäude, die Zentrale in der Mitte. Was Aufmerksamkeit braucht, leuchtet; was ansteht, liegt auf deinem Tisch.</p>
+      </div>
+    </div>
+
+    <div class="einblick taucht">
+      <div class="rahmen"><img src="bilder/produkt/gespraech.jpg" alt="Das Mandanten-Portal unter fremder Marke mit der Frage: Womit ringst du gerade?" loading="lazy"></div>
+      <div>
+        <h3>Dein Mandant sieht nur deine Marke.</h3>
+        <p>Sein Portal beginnt mit einer Frage, nicht mit einem Menü. Name, Farbe, Adresse, Impressum: alles deins.</p>
+      </div>
+    </div>
+
+    <div class="einblick taucht">
+      <div class="rahmen"><img src="bilder/produkt/mitlesen.jpg" alt="Mitlesen: ein freigegebenes Gespräch mit Margen-Zerlegung und Quellen am Rand" loading="lazy"></div>
+      <div>
+        <h3>Du liest mit, samt Quellen.</h3>
+        <p>Gibt der Mandant ein Gespräch frei, siehst du es live, und rechts steht, worauf sich jede Antwort stützt: Akte, Wissen, erstellte Unterlagen.</p>
+      </div>
+    </div>
+
+    <div class="einblick taucht">
+      <div class="rahmen"><img src="bilder/produkt/marge.jpg" alt="Marge und Sätze: was vom Honorar übrig bleibt, je Mandat" loading="lazy"></div>
+      <div>
+        <h3>Die Marge, solange sie lebt.</h3>
+        <p>Was von jedem Honorar übrig bleibt, nachdem die Stunden bezahlt sind, je Mandat und je Mensch. Nicht erst im Jahresabschluss.</p>
+      </div>
+    </div>
+
+    <div class="einblick taucht">
+      <div class="rahmen"><img src="bilder/produkt/rechnungen.jpg" alt="Rechnungen: Entwürfe, gestellte Rechnungen und Stichtage" loading="lazy"></div>
+      <div>
+        <h3>Rechnungen aus dem, was wirklich war.</h3>
+        <p>Der Entwurf hält sich aktuell bis zum Stichtag, gestellt ist gestellt, storniert wird sauber. Die Nummernfolge bleibt lückenlos.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Preise ---------- -->
+  <section id="preise" class="bahn">
+    <div class="kopfzeile taucht">
+      <h2>Die Preise, zum Selberrechnen.</h2>
+      <p>149 € je Beratung und Monat, dazu ein Zugang je Mandant mit Portal. Die Stufe bestimmt, wie viele Fragen im Monat gehen. Der Mengenrabatt gilt ab dem ersten Zugang.</p>
+    </div>
+
+    <div class="tarife" id="tarife" role="group" aria-label="Umfang je Zugang">
+      <button type="button" class="tarif taucht" data-tarif="basis" aria-pressed="false" aria-label="Basis wählen">
+        <span class="name">Basis</span>
+        <span class="betrag" data-preis>ab 14,25 €</span>
+        <span class="je">je Mandant und Monat, Mengenrabatt schon drin</span>
+        <span class="wofuer" data-wofuer>100 Fragen im Monat, beantwortet im Sparmodus. Portal, Termine und Rechnungen wie überall.</span>
+      </button>
+      <button type="button" class="tarif taucht" data-tarif="standard" aria-pressed="true" aria-label="Standard wählen">
+        <span class="haeufig">Am häufigsten</span>
+        <span class="name">Standard</span>
+        <span class="betrag" data-preis>ab 44,25 €</span>
+        <span class="je">je Mandant und Monat, Mengenrabatt schon drin</span>
+        <span class="wofuer" data-wofuer>250 Fragen im Monat, beantwortet vom starken Modell.</span>
+      </button>
+      <button type="button" class="tarif taucht" data-tarif="plus" aria-pressed="false" aria-label="Plus wählen">
+        <span class="name">Plus</span>
+        <span class="betrag" data-preis>ab 111,75 €</span>
+        <span class="je">je Mandant und Monat, Mengenrabatt schon drin</span>
+        <span class="wofuer" data-wofuer>700 Fragen im Monat, beantwortet vom starken Modell. Für Mandate, die täglich fragen.</span>
+      </button>
+    </div>
+
+    <div class="preisraum">
+      <div class="rechner taucht">
+        <label for="zugaenge">Mandanten mit Zugang: <b id="zugaenge-wert">20</b></label>
+        <input type="range" id="zugaenge" min="1" max="150" value="20" step="1">
+        <div class="summe">
+          <div class="zahl" id="summe">0 €</div>
+          <div class="je">je Monat, netto, zuzüglich Umsatzsteuer</div>
+          <div class="aufstellung" id="aufstellung"></div>
+        </div>
+      </div>
+      <div class="preistext taucht">
+        <ul>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg><span>Ein Zugang zählt erst, wenn der Mandant ihn hat. Angelegte Mandate ohne Portal kosten nichts.</span></li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg><span>Beginnt oder endet ein Zugang mitten im Monat, wird tagegenau geteilt. Auch beim Stufenwechsel.</span></li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg><span>Die Fragen gelten je Kunde und Kalendermonat, egal wie viele Menschen bei ihm mitarbeiten.</span></li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 10.5 8 15l9-10"/></svg><span>Was du deinem Mandanten berechnest, bestimmst du. Unsere Rechnung an dich hat 14 Tage Ziel.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- Fragen ---------- -->
+  <section id="fragen" class="bahn">
+    <div class="kopfzeile taucht">
+      <h2>Die Fragen, die jeder stellt.</h2>
+    </div>
+    <div class="fragen taucht">
+      <details>
+        <summary>Was, wenn der Berater Unsinn erzählt?<span class="zeichen"></span></summary>
+        <div class="antworttext">
+          <p>Er antwortet nur aus dem, was du ihm gegeben hast, und jede Zahl nennt ihre Quelle. Freigegebene Gespräche stehen offen in deinem Cockpit, und wird es heikel, übernimmst du mit einem Klick, mitten im Satz.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Macht mich das nicht ersetzbar?<span class="zeichen"></span></summary>
+        <div class="antworttext">
+          <p>Deine Mandanten fragen längst eine KI, nur eben eine, die dich nicht kennt und der niemand widerspricht. Hier trägt die Antwort deinen Namen, denkt in deiner Methodik und macht aus der Frage einen Termin bei dir. Die Alternative ist nicht „keine KI“. Die Alternative ist eine ohne dich.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Lernt die KI aus den Daten meiner Mandanten?<span class="zeichen"></span></summary>
+        <div class="antworttext">
+          <p>Nein. Weder wir noch der Modellanbieter verwenden Gespräche oder Unterlagen zum Training. Die Verarbeitung läuft in der EU, für die Daten deiner Mandanten sind wir dein Auftragsverarbeiter nach Art. 28 DSGVO.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Was sehen meine Mandanten von quoroAI?<span class="zeichen"></span></summary>
+        <div class="antworttext">
+          <p>Nichts. Name, Farbe, Adresse und Impressum gehören deiner Beratung. quoroAI ist die Software dahinter und bleibt dahinter.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ---------- Schluss ---------- -->
+  <section class="bahn">
+    <div class="detail-schluss taucht">
+      <h2>Genug gelesen?</h2>
+      <div class="knopfreihe">
+        <a class="knopf primaer" href="index.html#schluss">Beratung anlegen</a>
+        <a class="knopf leise" href="index.html">Zurück zur Startseite</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="fuss">
+  <div class="bahn">
+    <div class="spalten">
+      <div>
+        <a class="wortmarke" href="index.html"><img src="bilder/quoro-icon.svg" alt=""><span>quoroAI</span></a>
+        <p style="margin-top:14px;max-width:34ch">Die Plattform, auf der Unternehmensberatungen ihren Mandanten einen KI-Berater unter der eigenen Marke geben.</p>
+      </div>
+      <div>
+        <h4>Diese Seite</h4>
+        <ul>
+          <li><a href="#weg">Der Weg</a></li>
+          <li><a href="#einblicke">Einblicke</a></li>
+          <li><a href="#preise">Preise</a></li>
+          <li><a href="#fragen">Fragen</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Recht</h4>
+        <ul>
+          <li><a href="#">Impressum</a></li>
+          <li><a href="#">Datenschutz</a></li>
+          <li><a href="#">AGB</a></li>
+          <li><a href="#">Auftragsverarbeitung</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Kontakt</h4>
+        <ul>
+          <li><a href="mailto:hello@quorogroup.com">hello@quorogroup.com</a></li>
+          <li><a href="tel:+4936155898702">+49 361 55898702</a></li>
+          <li>Bahnhofstraße 38<br>99084 Erfurt</li>
+        </ul>
+      </div>
+    </div>
+    <div class="abbinder">
+      <span>Quoro Advisory GmbH</span>
+      <span>Entwurf, nicht veröffentlicht</span>
+    </div>
+  </div>
+</footer>
+
+<script src="zahlen.js"></script>
+<script>
+(function () {
+  'use strict';
+  var kopf = document.getElementById('kopf');
+  function kante() { kopf.classList.toggle('gescrollt', window.scrollY > 8); }
+  window.addEventListener('scroll', kante, { passive: true });
+  kante();
+
+  var beobachter = new IntersectionObserver(function (eintraege) {
+    eintraege.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('da'); beobachter.unobserve(e.target); }
+    });
+  }, { rootMargin: '0px 0px -12% 0px' });
+  Array.prototype.forEach.call(document.querySelectorAll('.taucht'), function (el) { beobachter.observe(el); });
+
+  /* Die Tarifkarten stellen den Rechner; Preise und Fragen aus zahlen.js. */
+  var Z = window.Zahlen;
+  var regler = document.getElementById('zugaenge');
+  var wert = document.getElementById('zugaenge-wert');
+  var summe = document.getElementById('summe');
+  var aufstellung = document.getElementById('aufstellung');
+  var karten = Array.prototype.slice.call(document.querySelectorAll('#tarife .tarif'));
+  var tarif = 'standard';
+
+  karten.forEach(function (k) {
+    var t = Z.tarif(k.dataset.tarif);
+    if (!t) return;
+    k.querySelector('.name').textContent = t.label;
+    k.querySelector('[data-preis]').textContent = 'ab ' + Z.euro(Z.preisJeZugang(t.id, 1));
+    k.setAttribute('aria-pressed', k.dataset.tarif === tarif ? 'true' : 'false');
+    k.addEventListener('click', function () {
+      if (k.dataset.tarif === tarif) return;
+      tarif = k.dataset.tarif;
+      karten.forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+      k.setAttribute('aria-pressed', 'true');
+      rechne();
+    });
+  });
+
+  function rechne() {
+    var n = parseInt(regler.value, 10);
+    var m = Z.monat(n, tarif);
+    wert.textContent = n;
+    summe.textContent = Z.euroKurz(m.summe);
+    summe.classList.remove('tickt');
+    void summe.offsetWidth;
+    summe.classList.add('tickt');
+    aufstellung.innerHTML =
+      '<div><span>Plattformgebühr je Monat</span><span>' + Z.euro(m.gebuehr) + '</span></div>' +
+      '<div><span>' + n + ' ' + Z.tarif(tarif).label + '-Zugänge zu ' + Z.euro(m.proZugang) + '</span><span>' + Z.euro(m.proZugang * n) + '</span></div>' +
+      '<div class="anmerkung">Im Preis je Zugang stecken schon ' + m.rabatt + ' % Mengenrabatt auf den Listenpreis.</div>';
+  }
+  regler.addEventListener('input', rechne);
+  rechne();
+})();
+</script>
+</body>
+</html>
