@@ -139,7 +139,7 @@
         <input type="email" name="mail" placeholder="Deine E-Mail" aria-label="Deine E-Mail" autocomplete="email">
       </div>
       <div class="kd-fuss">
-        <span class="kd-wort">Geht direkt an uns. Antwort von einem Menschen, meist am selben Tag. Wir nutzen deine Angaben nur für diese Anfrage.</span>
+        <span class="kd-wort">Wir schreiben dir zurück, meist am selben Tag. Deine Angaben nutzen wir nur für diese Anfrage.</span>
         <button type="submit" class="kd-senden">Abschicken</button>
       </div>
       <p class="kd-fehler" role="alert"></p>
@@ -174,6 +174,13 @@
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') schliessen(); });
 
   var ZIEL = 'webmaster@quoroai.io';
+  /* Der Weg des Versands. Solange ENDPUNKT leer ist, öffnet der Dialog das
+     Mailprogramm mit fertigem Text — ehrlich und ohne Fremddienst. Sobald der
+     eigene Endpunkt im Produkt steht (Auftrag vom 2026-08-21), hier eintragen:
+     dann geht die Anfrage direkt raus, ohne dass jemand sein Postfach öffnet.
+     FormSubmit ist bewusst RAUS: zwei ausgelöste Aktivierungen kamen nie an,
+     und als US-Dienst wäre er ein AVV-Fall. */
+  var ENDPUNKT = '';
   var fehler = karte.querySelector('.kd-fehler');
   var senden = karte.querySelector('.kd-senden');
 
@@ -186,8 +193,11 @@
     karte.innerHTML =
       '<button type="button" class="kd-zu" aria-label="Schließen">&#10005;</button>' +
       '<div class="kd-danke"><div class="kd-haken">&#10003;</div>' +
-      '<h2>Angekommen.</h2>' +
-      '<p>Wir melden uns bei dir, meist am selben Tag. Kein Newsletter, keine Broschüre.</p></div>';
+      '<h2>' + (ENDPUNKT ? 'Angekommen.' : 'Fast geschafft.') + '</h2>' +
+      '<p>' + (ENDPUNKT
+        ? 'Wir melden uns bei dir, meist am selben Tag. Kein Newsletter, keine Broschüre.'
+        : 'Dein Mailprogramm ist offen und die Nachricht steht schon fertig darin. Einmal senden, dann liegt sie bei uns.') +
+      '</p></div>';
     karte.querySelector('.kd-zu').addEventListener('click', schliessen);
   }
 
@@ -213,25 +223,24 @@
     senden.disabled = true;
     senden.textContent = 'Wird gesendet';
 
-    fetch('https://formsubmit.co/ajax/' + ZIEL, {
+    if (!ENDPUNKT) {
+      /* Kein eigener Endpunkt: der ehrliche Weg über das Mailprogramm. */
+      senden.disabled = false;
+      senden.textContent = 'Abschicken';
+      mailtoWeg(betreff, leib);
+      danke();
+      return;
+    }
+
+    fetch(ENDPUNKT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({
-        _subject: betreff,
-        _template: 'table',
-        _captcha: 'false',
-        Thema: thema || 'nicht gewählt',
-        Anfrage: frage,
-        Name: name || 'ohne Namen',
-        'E-Mail': mail
-      })
+      body: JSON.stringify({ thema: thema || '', anfrage: frage, name: name, mail: mail })
     }).then(function (a) {
-      /* Der Dienst antwortet auch bei Absagen mit 200: die Wahrheit steht im
-         Feld success. Solange die Adresse nicht freigeschaltet ist, steht dort
-         "false" — dann darf hier kein Danke stehen. */
-      return a.json().catch(function () { return {}; });
+      if (!a.ok) throw new Error('Absage vom Versand');
+      return a.json().catch(function () { return { ok: true }; });
     }).then(function (d) {
-      if (!d || String(d.success) !== 'true') throw new Error('Absage vom Versand');
+      if (d && d.ok === false) throw new Error('Absage vom Versand');
       danke();
     }).catch(function () {
       /* Kein Weg soll verloren gehen: dann eben über das Mailprogramm. */
