@@ -24,8 +24,8 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
    fährt hindurch). Beim Scrollen läuft die Kamerafahrt als Bildfolge im
    Vollbild, die drei Werke hängen als Glastafeln im Gang. */
 .galerie{height:900vh;position:relative}
-.galerie .haftet{position:sticky;top:0;height:100svh;overflow:hidden;background:var(--grund)}
-.galerie canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) translate(var(--kx,0px),var(--ky,0px)) scale(var(--kz,1));min-width:100%;min-height:100%;pointer-events:none;will-change:transform}
+.galerie .haftet{position:sticky;top:0;height:100svh;overflow:hidden;background:var(--grund);perspective:1100px}
+.galerie canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) translate(var(--kx,0px),var(--ky,0px)) rotateY(var(--kr,0deg)) scale(var(--kz,1));min-width:100%;min-height:100%;pointer-events:none;will-change:transform,filter;filter:blur(var(--kb,0px))}
 .galerie .schleier{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 62%,transparent 46%,rgba(253,253,254,.42) 100%)}
 .galerie .auftakt-wort{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;
@@ -242,7 +242,7 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
     function seg(p, a, b) { return Math.min(Math.max((p - a) / (b - a), 0), 1); }
     function weich(t) { return t * t * (3 - 2 * t); }
     /* Glocke: weich hinein, halten, weich hinaus */
-    function glocke(t) { return Math.min(weich(seg(t, 0, .3)), weich(seg(1 - t, 0, .3)), 1); }
+    function glocke(t) { return Math.min(weich(seg(t, 0, .22)), weich(seg(1 - t, 0, .22)), 1); }
 
     /* Die Regie: an jedem Werk lenkt der Blick zum Kopf ein (Seite -1 links,
        +1 rechts), der Film hält dabei an. Zwischen den Werken läuft die Fahrt. */
@@ -274,21 +274,27 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
       male(Math.min(BILDER - 1, bildFuer(p)));
       auftakt.style.opacity = (1 - seg(p, 0, .07)).toFixed(3);
 
-      /* die Kamera: einlenken, zoomen, halten, lösen — und am Ende in die Tür */
-      var kz = 1, kx = 0, ky = 0;
+      /* die Kamera: hinlaufen, HINGUCKEN, weitergehen. Der Dreh kippt die
+         Bühne in der Perspektive, der Zoom geht nah ran, und genau im
+         Umschwenken liegt ein Hauch Bewegungsunschärfe. */
+      var kz = 1, kx = 0, ky = 0, kr = 0, kb = 0;
       beats.forEach(function (b) {
         var t = seg(p, b.a, b.b);
         if (t <= 0 || t >= 1) return;
         var k = glocke(t);
-        kz = 1 + .58 * k;
-        kx = -b.seite * window.innerWidth * .17 * k;
-        ky = window.innerHeight * .05 * k;
+        kz = 1 + .85 * k;
+        kx = -b.seite * window.innerWidth * .24 * k;
+        ky = window.innerHeight * .06 * k;
+        kr = b.seite * 9 * k;
+        kb = 7 * k * (1 - k);              /* nur während des Schwenks */
       });
       var tuer = weich(seg(p, .92, 1));
       kz += .28 * tuer;
       leinwand.style.setProperty('--kz', kz.toFixed(4));
       leinwand.style.setProperty('--kx', kx.toFixed(1) + 'px');
       leinwand.style.setProperty('--ky', ky.toFixed(1) + 'px');
+      leinwand.style.setProperty('--kr', kr.toFixed(2) + 'deg');
+      leinwand.style.setProperty('--kb', kb > .4 ? kb.toFixed(1) + 'px' : '0px');
       balken.style.setProperty('--stand', p.toFixed(4));
       tafeln.forEach(function (t) {
         var x = seg(p, t.a, t.b);
