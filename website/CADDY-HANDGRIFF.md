@@ -127,6 +127,24 @@ Dann das Formular auf https://quoroai.io/arbeiten/ wirklich ausfüllen und
 abschicken. Kommt keine Mail an `webmaster@quoroai.io`, ist die
 `connect-src`-Zeile nicht im richtigen Block gelandet.
 
+## Achtung bei `web-rollback` ohne Stempel
+
+**Das Verb handelt sofort, es berichtet nicht.** Am 21.08.2026 wurde es hier
+aufgerufen, um zu sehen, welche Sicherungen es gibt — und es hat auf der Stelle
+die neueste zurückgeholt und die Live-Seite auf einen fünf Minuten alten Stand
+gesetzt. Kein Schaden, aber ein unnötiger Umweg.
+
+Was es gibt, sagt `caddy-config` für Caddy; für den Docroot gibt es kein
+lesendes Verb. Also **immer mit Stempel** aufrufen, nie ohne:
+
+```bash
+ssh -i ~/.ssh/quoro_deploy_restricted root@167.233.120.5 'web-rollback 20260821-162633'
+```
+
+Und wissen, welcher Stempel welcher ist: `web-backup` hält nur die **drei
+neuesten** Sicherungen. `20260821-162633` ist der Stand vor dem Relaunch — nach
+drei weiteren Sicherungen ist er weg.
+
 ## Schritt 6 — zurückdrehen, falls etwas klemmt
 
 ```bash
