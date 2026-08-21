@@ -6,7 +6,7 @@
 
 Betreiber: Quoro Advisory GmbH, Bahnhofstraße 38, 99084 Erfurt, Deutschland.
 Kontakt: hello@quorogroup.com, +49 361 55898702.
-Anwendung: https://app.quoroai.io
+Anwendung: https://whitelabel.quoroai.io
 
 ## Seiten
 

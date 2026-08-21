@@ -79,6 +79,14 @@ Im selben Site-Block, in der bestehenden `Content-Security-Policy`:
 Mehr nicht. Gemessen: `img-src` steht schon auf `https:`, `form-action` wird
 nicht gebraucht (das Formular sendet per `fetch`), `frame-src` auch nicht.
 
+**Nebenbei, wenn du schon drin bist:** `connect-src` und `form-action` nennen
+beide `https://app.quoroai.io`. Seit dem 21.08.2026 zeigt kein Verweis der
+Website mehr dorthin — alle Knöpfe führen auf `https://whitelabel.quoroai.io`.
+Der alte Host schadet in der Regel nicht, aber er beschreibt einen Zustand,
+den es nicht mehr gibt. Ersetzen oder ergänzen, wie es zu den anderen Seiten
+auf der Box passt; für unsere Website ist beides ohne Wirkung, weil ein
+normaler Link weder unter `connect-src` noch unter `form-action` fällt.
+
 **Eine Nebenwirkung, die du kennen solltest:** neben dem bereits vorhandenen
 `'unsafe-eval'` bedeutet der Google-Host, dass jeder mit Zugang zum
 GA4-Konto beliebiges JavaScript auf der Seite ausführen kann, die das
