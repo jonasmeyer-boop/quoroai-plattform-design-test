@@ -17,12 +17,29 @@
 
 body{background:var(--grund);color:var(--tinte);overflow-x:hidden}
 
-/* ---------- Titelzeile ---------- */
-.titelzeile{padding:calc(72px + clamp(20px,3vw,40px)) 0 clamp(16px,2.4vw,30px)}
-.titelzeile .bahn{display:flex;align-items:baseline;justify-content:space-between;gap:24px;flex-wrap:wrap}
-.titelzeile h1{font-size:clamp(30px,4.4vw,58px)}
+/* ---------- die Bühne über den Bändern ---------- */
+.titelzeile{padding:calc(72px + clamp(30px,4.6vw,64px)) 0 clamp(24px,3.4vw,46px);position:relative;overflow:hidden}
+.titelzeile::before{ /* das Licht hinter dem Regal */
+  content:"";position:absolute;top:-220px;right:-140px;width:720px;height:720px;
+  background:radial-gradient(circle,rgba(111,99,232,.20),transparent 62%);pointer-events:none;
+}
+.titelzeile .bahn{display:grid;grid-template-columns:1.15fr .85fr;gap:44px;align-items:center;position:relative}
+.titelzeile h1{font-size:clamp(38px,5.8vw,84px);line-height:1.02}
 .titelzeile h1 em{font-style:normal;color:var(--lila-600)}
-.titelzeile p{font-size:15px;color:var(--nebel-500)}
+.titelzeile p{margin-top:14px;font-size:18px;color:var(--nebel-700);max-width:44ch}
+.titelzeile .regal{
+  width:100%;height:auto;justify-self:end;
+  mix-blend-mode:multiply;pointer-events:none;
+  -webkit-mask-image:radial-gradient(closest-side,#000 62%,transparent 98%);
+  mask-image:radial-gradient(closest-side,#000 62%,transparent 98%);
+  animation:schwebt 6s ease-in-out infinite alternate;
+}
+@keyframes schwebt{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+@media (max-width:860px){
+  .titelzeile .bahn{grid-template-columns:1fr;gap:10px}
+  .titelzeile .regal{max-width:340px;justify-self:center}
+}
+@media (prefers-reduced-motion:reduce){.titelzeile .regal{animation:none}}
 
 /* ---------- die Bänder ---------- */
 .baender{border-top:0.5px solid var(--nebel-200)}
@@ -93,11 +110,30 @@ body{background:var(--grund);color:var(--tinte);overflow-x:hidden}
   .reihe .doppel{display:none}
 }
 
-/* ---------- Schluss ---------- */
-.ref-schluss{margin-top:clamp(50px,7vw,90px);text-align:center;padding-bottom:clamp(50px,7vw,90px)}
-.ref-schluss h2{font-size:clamp(28px,4vw,50px);max-width:20ch;margin-inline:auto}
-.ref-schluss p{margin-top:14px;font-size:17px;color:var(--nebel-700);max-width:44ch;margin-inline:auto}
-.ref-schluss .knopfreihe{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+/* ---------- der Abend-Kasten als Abschluss (wie auf der Startseite) ---------- */
+.ref-schluss{margin-top:clamp(50px,7vw,90px);padding-bottom:clamp(50px,7vw,90px)}
+.ref-schluss .kasten{
+  border-radius:32px;padding:clamp(40px,6vw,80px);color:#fff;position:relative;overflow:hidden;
+  min-height:clamp(320px,36vw,440px);display:flex;flex-direction:column;justify-content:center;
+  background:
+    linear-gradient(100deg, rgba(30,24,72,.94) 0%, rgba(59,52,134,.78) 46%, rgba(24,21,47,.24) 78%, rgba(24,21,47,.55) 100%),
+    url('bilder/abend-kopf.jpg') right center/cover no-repeat;
+}
+.ref-schluss .kasten::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 82% 40%,rgba(255,190,120,.14),transparent 55%);
+}
+.ref-schluss h2{color:#fff;font-size:clamp(28px,4vw,52px);max-width:17ch}
+.ref-schluss p{margin-top:14px;font-size:17px;color:rgba(255,255,255,.82);max-width:44ch}
+.ref-schluss .knopfreihe{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap;position:relative;z-index:1}
+.ref-schluss .knopf.hell{background:#fff;color:var(--lila-800);box-shadow:0 12px 30px rgba(24,21,47,.28)}
+.ref-schluss .knopf.klar{background:rgba(255,255,255,.14);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.4)}
+@media (max-width:760px){
+  .ref-schluss .kasten{background:
+    linear-gradient(160deg, rgba(30,24,72,.94) 0%, rgba(59,52,134,.82) 60%, rgba(24,21,47,.5) 100%),
+    url('bilder/abend-kopf.jpg') center 20%/cover no-repeat}
+  .ref-schluss .knopf{width:100%}
+}
 </style>
 </head>
 <body>
@@ -117,8 +153,11 @@ body{background:var(--grund);color:var(--tinte);overflow-x:hidden}
 
   <div class="titelzeile">
     <div class="bahn">
-      <h1>Gebaut, <em>nicht versprochen</em>.</h1>
-      <p>Drei Werke der Werkstatt, im Vorbeiziehen. Anhalten lohnt sich.</p>
+      <div>
+        <h1>Gebaut, <em>nicht versprochen</em>.</h1>
+        <p>Drei Werke der Werkstatt ziehen unten vorbei. Halt ein Band an, und es zeigt dir mehr.</p>
+      </div>
+      <img class="regal" src="bilder/regal.jpg" alt="Vier Köpfe aus Papier auf einem Regal">
     </div>
   </div>
 
@@ -196,11 +235,13 @@ body{background:var(--grund);color:var(--tinte);overflow-x:hidden}
   </div>
 
   <div class="ref-schluss bahn">
-    <h2>Lieber direkt reden?</h2>
-    <p>Ruf an oder schreib. Wir sagen dir ehrlich, ob sich dein Vorhaben lohnt.</p>
-    <div class="knopfreihe">
-      <a class="knopf primaer" href="mailto:hello@quorogroup.com?subject=Was mich aufhält">Erzähl uns, was dich aufhält</a>
-      <a class="knopf leise" href="tel:+4936155898702">+49 361 55898702</a>
+    <div class="kasten">
+      <h2>Dein Projekt könnte das nächste Werk sein.</h2>
+      <p>Eine Mail genügt. Du bekommst keine Broschüre zurück, sondern eine Einschätzung und einen Vorschlag für den ersten Wurf.</p>
+      <div class="knopfreihe">
+        <a class="knopf hell" href="mailto:hello@quorogroup.com?subject=Was mich aufhält">Erzähl uns, was dich aufhält</a>
+        <a class="knopf klar" href="tel:+4936155898702">+49 361 55898702</a>
+      </div>
     </div>
   </div>
 
