@@ -155,7 +155,7 @@
 }
 @media (prefers-reduced-motion:reduce){
   .kino{height:auto}
-  .kino .haftet{position:static;height:auto;padding:calc(72px + 40px) 0 60px}
+  .kino .haftet{position:static;height:auto;padding:calc(var(--kopfhoehe) + 40px) 0 60px}
   .kino .lichthof,.kino .blatt,.kino .fortschritt,.kino .schleierlinks{display:none}
   .kino canvas{position:static;transform:none;display:block;margin:0 auto;height:auto;width:min(520px,86vw)}
   .kino .wort{position:static;transform:none;opacity:1;max-width:min(680px,100% - 48px);margin:18px auto 0}
@@ -270,7 +270,7 @@
 /* ---------- Abschnittsköpfe ---------- */
 .kopfzeile{max-width:min(760px,100%)}
 .kopfzeile p{margin-top:16px;font-size:18px;color:var(--nebel-700)}
-section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
+section.bahn{padding-top:var(--luft);scroll-margin-top:var(--kopfhoehe)}
 
 /* ---------- Schluss ---------- */
 .schluss{
@@ -302,12 +302,12 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
 <header class="kopf" id="kopf">
   <div class="bahn">
     <a class="wortmarke" href="#oben"><img src="bilder/quoro-icon.svg" alt=""><span>quoroAI</span></a>
+    <button class="menue" type="button" aria-label="Menü" aria-expanded="false"><span></span></button>
     <nav>
-      <a href="#tag">Der Tag</a>
-      <a href="#tag" data-tag-ziel="0.60">Preise</a>
-      <a href="#tag" data-tag-ziel="0.74">Daten</a>
+      <a href="index.html" aria-current="page">Plattform</a>
       <a href="plattform.html">Im Detail</a>
-      <a href="#bauen">Wir bauen</a>
+      <a href="referenzen.html">Arbeiten</a>
+      <a class="knopf primaer" href="#schluss">Beratung anlegen</a>
     </nav>
     <a class="knopf primaer" href="#schluss">Beratung anlegen</a>
   </div>
@@ -453,27 +453,15 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
   <div class="bahn">
     <div class="spalten">
       <div>
-        <a class="wortmarke" href="#oben"><img src="bilder/quoro-icon.svg" alt=""><span>quoroAI</span></a>
-        <p style="margin-top:14px;max-width:34ch">Die Plattform, auf der Unternehmensberatungen ihren Kunden einen KI-Berater unter der eigenen Marke geben.</p>
+        <a class="wortmarke" href="index.html"><img src="bilder/quoro-icon.svg" alt=""><span>quoroAI</span></a>
+        <p style="margin-top:12px;max-width:32ch">Wir bauen Köpfe: Plattformen, Websites, Software und Automatisierungen.</p>
       </div>
       <div>
-        <h4>Plattform</h4>
+        <h4>Seiten</h4>
         <ul>
-          <li><a href="#tag">Ein Tag mit ihm</a></li>
-          <li><a href="#tag" data-tag-ziel="0.60">Preise</a></li>
-          <li><a href="#tag" data-tag-ziel="0.74">Daten</a></li>
-          <li><a href="plattform.html">Alles im Detail</a></li>
-          <li><a href="#schluss">Heute Abend</a></li>
-          <li><a href="#bauen">Wir bauen Köpfe</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>Recht</h4>
-        <ul>
-          <li><a href="#">Impressum</a></li>
-          <li><a href="#">Datenschutz</a></li>
-          <li><a href="#">AGB</a></li>
-          <li><a href="#">Auftragsverarbeitung</a></li>
+          <li><a href="index.html">Die Plattform</a></li>
+          <li><a href="plattform.html">Im Detail</a></li>
+          <li><a href="referenzen.html">Unsere Arbeiten</a></li>
         </ul>
       </div>
       <div>
@@ -481,13 +469,13 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
         <ul>
           <li><a href="mailto:hello@quorogroup.com">hello@quorogroup.com</a></li>
           <li><a href="tel:+4936155898702">+49 361 55898702</a></li>
-          <li>Bahnhofstraße 38<br>99084 Erfurt</li>
+          <li>Bahnhofstraße 38, 99084 Erfurt</li>
         </ul>
       </div>
     </div>
     <div class="abbinder">
       <span>Quoro Advisory GmbH</span>
-      <span>Entwurf, nicht veröffentlicht</span>
+      <span><a href="#">Impressum</a> und <a href="#">Datenschutz</a></span>
     </div>
   </div>
 </footer>
@@ -812,11 +800,6 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
   var ruhig = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------- Kopfzeile bekommt eine Kante, sobald die Seite läuft ---------- */
-  var kopf = document.getElementById('kopf');
-  function kante() { kopf.classList.toggle('gescrollt', window.scrollY > 8); }
-  window.addEventListener('scroll', kante, { passive: true });
-  kante();
-
   /* ---------- Auftauchen ---------- */
   var beobachter = new IntersectionObserver(function (eintraege) {
     eintraege.forEach(function (e) {
@@ -837,5 +820,6 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
 })();
 </script>
 <script src="kontakt.js"></script>
+<script src="chrom.js"></script>
 </body>
 </html>

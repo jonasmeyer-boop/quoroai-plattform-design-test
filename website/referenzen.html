@@ -18,7 +18,7 @@
 body{background:var(--grund);color:var(--tinte);overflow-x:hidden}
 
 /* ---------- ein Wort, dann die Bänder ---------- */
-.titelzeile{padding:calc(72px + clamp(30px,4.6vw,60px)) 0 clamp(22px,3.2vw,42px);text-align:center}
+.titelzeile{padding:calc(var(--kopfhoehe) + clamp(30px,4.6vw,60px)) 0 clamp(22px,3.2vw,42px);text-align:center}
 .titelzeile h1{font-size:clamp(38px,5.8vw,84px);line-height:1.02}
 .titelzeile h1 em{font-style:normal;color:var(--lila-600)}
 
@@ -122,11 +122,14 @@ body{background:var(--grund);color:var(--tinte);overflow-x:hidden}
 <header class="kopf" id="kopf">
   <div class="bahn">
     <a class="wortmarke" href="index.html"><img src="bilder/quoro-icon.svg" alt=""><span>quoroAI</span></a>
+    <button class="menue" type="button" aria-label="Menü" aria-expanded="false"><span></span></button>
     <nav>
-      <a href="plattform.html">Die Plattform</a>
-      <a href="index.html">Die Startseite</a>
+      <a href="index.html">Plattform</a>
+      <a href="plattform.html">Im Detail</a>
+      <a href="referenzen.html" aria-current="page">Arbeiten</a>
+      <a class="knopf primaer" href="mailto:hello@quorogroup.com?subject=Was mich aufhält">Projekt anfragen</a>
     </nav>
-    <a class="knopf primaer" href="mailto:hello@quorogroup.com?subject=Was mich aufhält">Erzähl uns, was dich aufhält</a>
+    <a class="knopf primaer" href="mailto:hello@quorogroup.com?subject=Was mich aufhält">Projekt anfragen</a>
   </div>
 </header>
 
@@ -229,20 +232,14 @@ body{background:var(--grund);color:var(--tinte);overflow-x:hidden}
     <div class="spalten">
       <div>
         <a class="wortmarke" href="index.html"><img src="bilder/quoro-icon.svg" alt=""><span>quoroAI</span></a>
-        <p style="margin-top:14px;max-width:34ch">Wir bauen Köpfe: Plattformen, Websites, Software und Automatisierungen.</p>
+        <p style="margin-top:12px;max-width:32ch">Wir bauen Köpfe: Plattformen, Websites, Software und Automatisierungen.</p>
       </div>
       <div>
-        <h4>Arbeiten</h4>
+        <h4>Seiten</h4>
         <ul>
-          <li><a href="plattform.html">Die Plattform</a></li>
-          <li><a href="index.html">Die Startseite</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>Recht</h4>
-        <ul>
-          <li><a href="#">Impressum</a></li>
-          <li><a href="#">Datenschutz</a></li>
+          <li><a href="index.html">Die Plattform</a></li>
+          <li><a href="plattform.html">Im Detail</a></li>
+          <li><a href="referenzen.html">Unsere Arbeiten</a></li>
         </ul>
       </div>
       <div>
@@ -250,13 +247,13 @@ body{background:var(--grund);color:var(--tinte);overflow-x:hidden}
         <ul>
           <li><a href="mailto:hello@quorogroup.com">hello@quorogroup.com</a></li>
           <li><a href="tel:+4936155898702">+49 361 55898702</a></li>
-          <li>Bahnhofstraße 38<br>99084 Erfurt</li>
+          <li>Bahnhofstraße 38, 99084 Erfurt</li>
         </ul>
       </div>
     </div>
     <div class="abbinder">
       <span>Quoro Advisory GmbH</span>
-      <span>Entwurf, nicht veröffentlicht</span>
+      <span><a href="#">Impressum</a> und <a href="#">Datenschutz</a></span>
     </div>
   </div>
 </footer>
@@ -265,11 +262,6 @@ body{background:var(--grund);color:var(--tinte);overflow-x:hidden}
 (function () {
   'use strict';
   var ruhig = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var kopf = document.getElementById('kopf');
-  function kante() { kopf.classList.toggle('gescrollt', window.scrollY > 8); }
-  window.addEventListener('scroll', kante, { passive: true });
-  kante();
-
   var reihen = Array.prototype.slice.call(document.querySelectorAll('.reihe'));
 
   /* Nahtlose Schleife: der Inhalt wird verdoppelt, die Animation läuft bis
@@ -307,5 +299,6 @@ body{background:var(--grund);color:var(--tinte);overflow-x:hidden}
 })();
 </script>
 <script src="kontakt.js"></script>
+<script src="chrom.js"></script>
 </body>
 </html>

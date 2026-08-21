@@ -28,6 +28,7 @@
 
   /* Vertikaler Takt der Seite: ein Abschnitt atmet, zwei Abschnitte trennen sich */
   --luft:clamp(88px,11vw,160px);
+  --kopfhoehe:64px;
   --bahn:1180px;
 }
 
@@ -113,41 +114,81 @@ p{max-width:62ch}
 .karte{background:var(--flaeche);border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);padding:26px}
 .karte.gehoben{box-shadow:0 14px 40px rgba(24,21,47,.07)}
 
-/* ---------- Kopfzeile ---------- */
+/* ---------- Kopfzeile: schlank, drei Wege, am Telefon ein Menü ---------- */
 .kopf{
-  position:fixed;top:0;left:0;right:0;z-index:90;height:72px;
+  position:fixed;top:0;left:0;right:0;z-index:90;height:var(--kopfhoehe);
   display:flex;align-items:center;
-  background:rgba(253,253,254,.7);
+  background:rgba(253,253,254,.72);
   backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%);
-  border-bottom:0.5px solid transparent;transition:border-color .3s ease,background .3s ease;
+  border-bottom:0.5px solid transparent;transition:border-color .3s ease;
 }
 .kopf.gescrollt{border-bottom-color:var(--nebel-200)}
-.kopf .bahn{display:flex;align-items:center;justify-content:space-between;gap:20px}
-.wortmarke{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--tinte)}
-.wortmarke img{width:30px;height:30px;border-radius:8px}
-.wortmarke span{font-family:var(--schrift-schau);font-weight:600;font-size:19px;letter-spacing:-.02em}
-.kopf nav{display:flex;align-items:center;gap:28px}
+.kopf .bahn{display:flex;align-items:center;gap:20px}
+.wortmarke{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--tinte);flex-shrink:0}
+.wortmarke img{width:28px;height:28px;border-radius:8px}
+.wortmarke span{font-family:var(--schrift-schau);font-weight:600;font-size:18px;letter-spacing:-.02em}
+.kopf nav{display:flex;align-items:center;gap:26px;margin-left:auto}
+.kopf nav .knopf{display:none}
 .kopf nav a{color:var(--nebel-700);text-decoration:none;font-size:15px;font-weight:500;transition:color .2s}
 .kopf nav a:hover{color:var(--tinte)}
-.kopf .knopf{min-height:42px;padding:0 20px;font-size:15px}
+.kopf nav a[aria-current=page]{color:var(--tinte);font-weight:600}
+.kopf .knopf{min-height:40px;padding:0 18px;font-size:14.5px;flex-shrink:0}
+.kopf .menue{
+  display:none;margin-left:auto;width:42px;height:42px;flex-shrink:0;
+  align-items:center;justify-content:center;
+  border:0.5px solid var(--nebel-200);border-radius:12px;background:rgba(255,255,255,.7);
+  cursor:pointer;color:var(--tinte);
+}
+.kopf .menue span{display:block;width:17px;height:1.5px;background:currentColor;border-radius:2px;position:relative;transition:transform .25s var(--kurve),background .2s}
+.kopf .menue span::before,.kopf .menue span::after{
+  content:"";position:absolute;left:0;width:17px;height:1.5px;background:currentColor;border-radius:2px;
+  transition:transform .25s var(--kurve);
+}
+.kopf .menue span::before{top:-6px}
+.kopf .menue span::after{top:6px}
+.kopf.offen .menue span{background:transparent}
+.kopf.offen .menue span::before{transform:translateY(6px) rotate(45deg)}
+.kopf.offen .menue span::after{transform:translateY(-6px) rotate(-45deg)}
 @media (max-width:860px){
-  .kopf nav{display:none}
+  .kopf .menue{display:flex}
+  .kopf nav{
+    position:fixed;left:0;right:0;top:var(--kopfhoehe);margin:0;
+    flex-direction:column;align-items:stretch;gap:0;padding:8px 20px 20px;
+    background:var(--grund);
+    box-shadow:0 24px 60px rgba(24,21,47,.18);
+    border-bottom:0.5px solid var(--nebel-200);
+    transform:translateY(-12px);opacity:0;pointer-events:none;
+    transition:opacity .25s var(--kurve),transform .25s var(--kurve);
+  }
+  .kopf.offen nav{transform:none;opacity:1;pointer-events:auto}
+  .kopf nav a{padding:14px 0;font-size:17px;border-bottom:0.5px solid var(--nebel-200)}
+  .kopf nav a:last-child{border-bottom:0}
+  .kopf .bahn > .knopf{display:none}
+  .kopf nav .knopf{display:inline-flex;margin-top:14px;width:100%;min-height:48px;font-size:16px}
 }
-@media (max-width:560px){
-  .kopf .knopf{padding:0 16px;font-size:14px}
-  .wortmarke span{font-size:17px}
-}
+@media (prefers-reduced-motion:reduce){.kopf nav{transition:none}}
 
-/* ---------- Fuß ---------- */
-footer.fuss{border-top:0.5px solid var(--nebel-200);padding:64px 0 40px;margin-top:var(--luft);color:var(--nebel-600);font-size:15px}
-footer.fuss .spalten{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:40px}
-footer.fuss h4{font-size:13px;font-weight:700;color:var(--tinte);text-transform:none;margin-bottom:14px}
-footer.fuss ul{list-style:none;display:grid;gap:9px}
+/* ---------- Fuß: schlank, drei Spalten, am Telefon gestapelt ---------- */
+footer.fuss{
+  border-top:0.5px solid var(--nebel-200);margin-top:var(--luft);
+  padding:44px 0 32px;color:var(--nebel-600);font-size:14.5px;
+}
+footer.fuss .spalten{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:36px}
+footer.fuss h4{font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--tinte);margin-bottom:12px}
+footer.fuss ul{list-style:none;display:grid;gap:8px}
 footer.fuss a{color:var(--nebel-600);text-decoration:none}
 footer.fuss a:hover{color:var(--lila-700)}
-footer.fuss .abbinder{margin-top:48px;padding-top:22px;border-top:0.5px solid var(--nebel-200);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13.5px;color:var(--nebel-500)}
-@media (max-width:760px){footer.fuss .spalten{grid-template-columns:1fr 1fr}}
-@media (max-width:460px){footer.fuss .spalten{grid-template-columns:1fr}}
+footer.fuss .abbinder{
+  margin-top:34px;padding-top:18px;border-top:0.5px solid var(--nebel-200);
+  display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  font-size:13px;color:var(--nebel-500);
+}
+@media (max-width:760px){
+  footer.fuss{padding:34px 0 26px}
+  footer.fuss .spalten{grid-template-columns:1fr 1fr;gap:26px}
+  footer.fuss .spalten > :first-child{grid-column:1 / -1}
+  footer.fuss .abbinder{margin-top:26px;flex-direction:column;gap:6px}
+}
 
 /* ---------- Auftauchen beim Scrollen (IntersectionObserver setzt .da) ---------- */
 .taucht{opacity:0;transform:translateY(18px);transition:opacity .8s var(--kurve),transform .8s var(--kurve)}

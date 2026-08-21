@@ -119,7 +119,7 @@
         <button type="button" data-thema="Eine Website">Eine Website</button>
         <button type="button" data-thema="Software oder Plattform">Software / Plattform</button>
         <button type="button" data-thema="Automatisierung">Automatisierung</button>
-        <button type="button" data-thema="Die quoroAI-Plattform">Die Plattform</button>
+        <button type="button" data-thema="Etwas anderes">Etwas anderes</button>
       </div>
       <div class="kd-frage">
         <textarea name="frage" placeholder="Zum Beispiel: Wir tippen jede Woche dieselben Angebote von Hand, und keiner weiß, wo die aktuelle Preisliste liegt." aria-label="Was hält dich auf?"></textarea>

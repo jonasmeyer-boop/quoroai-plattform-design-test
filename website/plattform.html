@@ -15,7 +15,7 @@
    Zahlen aus zahlen.js (Quelle: Produkt-Repo src/lib/plans.ts und
    platform/preise.ts, am 2026-08-21 gegengelesen). Marker: DETAILSEITE-V1 */
 
-section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
+section.bahn{padding-top:var(--luft);scroll-margin-top:var(--kopfhoehe)}
 .kopfzeile{max-width:min(760px,100%)}
 .kopfzeile p{margin-top:16px;font-size:18px;color:var(--nebel-700)}
 .knopfreihe{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
@@ -28,8 +28,8 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
    das Bild blendet und setzt sich, der Text wechselt links, unten läuft
    die Fortschrittslinie. Ruhige Fassung: die Folien untereinander. */
 .tour{height:560vh;position:relative}
-.tour .haftet{position:sticky;top:0;height:100svh;overflow:hidden;background:var(--grund);padding-top:72px}
-.tour .folie{position:absolute;inset:72px 0 0 0;opacity:0;pointer-events:none;
+.tour .haftet{position:sticky;top:0;height:100svh;overflow:hidden;background:var(--grund);padding-top:var(--kopfhoehe)}
+.tour .folie{position:absolute;inset:var(--kopfhoehe) 0 0 0;opacity:0;pointer-events:none;
   display:grid;grid-template-columns:.72fr 1.28fr;gap:44px;align-items:center;
   padding:0 clamp(24px,5vw,80px)}
 .tour .folie .rahmen{
@@ -51,7 +51,7 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
 }
 @media (prefers-reduced-motion:reduce){
   .tour{height:auto}
-  .tour .haftet{position:static;height:auto;overflow:visible;padding-top:calc(72px + 30px)}
+  .tour .haftet{position:static;height:auto;overflow:visible;padding-top:calc(var(--kopfhoehe) + 30px)}
   .tour .folie{position:static;opacity:1;pointer-events:auto;margin:0 auto 56px;max-width:min(1180px,100% - 48px);padding:0}
   .tour .fortschritt{display:none}
 }
@@ -146,10 +146,12 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
 <header class="kopf" id="kopf">
   <div class="bahn">
     <a class="wortmarke" href="index.html"><img src="bilder/quoro-icon.svg" alt=""><span>quoroAI</span></a>
+    <button class="menue" type="button" aria-label="Menü" aria-expanded="false"><span></span></button>
     <nav>
-      <a href="#tour">Die Tour</a>
-      <a href="#preise">Preise</a>
-      <a href="#fragen">Fragen</a>
+      <a href="index.html">Plattform</a>
+      <a href="plattform.html" aria-current="page">Im Detail</a>
+      <a href="referenzen.html">Arbeiten</a>
+      <a class="knopf primaer" href="index.html#schluss">Beratung anlegen</a>
     </nav>
     <a class="knopf primaer" href="index.html#schluss">Beratung anlegen</a>
   </div>
@@ -308,23 +310,14 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
     <div class="spalten">
       <div>
         <a class="wortmarke" href="index.html"><img src="bilder/quoro-icon.svg" alt=""><span>quoroAI</span></a>
-        <p style="margin-top:14px;max-width:34ch">Die Plattform, auf der Unternehmensberatungen ihren Mandanten einen KI-Berater unter der eigenen Marke geben.</p>
+        <p style="margin-top:12px;max-width:32ch">Wir bauen Köpfe: Plattformen, Websites, Software und Automatisierungen.</p>
       </div>
       <div>
-        <h4>Diese Seite</h4>
+        <h4>Seiten</h4>
         <ul>
-          <li><a href="#tour">Die Tour</a></li>
-          <li><a href="#preise">Preise</a></li>
-          <li><a href="#fragen">Fragen</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>Recht</h4>
-        <ul>
-          <li><a href="#">Impressum</a></li>
-          <li><a href="#">Datenschutz</a></li>
-          <li><a href="#">AGB</a></li>
-          <li><a href="#">Auftragsverarbeitung</a></li>
+          <li><a href="index.html">Die Plattform</a></li>
+          <li><a href="plattform.html">Im Detail</a></li>
+          <li><a href="referenzen.html">Unsere Arbeiten</a></li>
         </ul>
       </div>
       <div>
@@ -332,13 +325,13 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
         <ul>
           <li><a href="mailto:hello@quorogroup.com">hello@quorogroup.com</a></li>
           <li><a href="tel:+4936155898702">+49 361 55898702</a></li>
-          <li>Bahnhofstraße 38<br>99084 Erfurt</li>
+          <li>Bahnhofstraße 38, 99084 Erfurt</li>
         </ul>
       </div>
     </div>
     <div class="abbinder">
       <span>Quoro Advisory GmbH</span>
-      <span>Entwurf, nicht veröffentlicht</span>
+      <span><a href="#">Impressum</a> und <a href="#">Datenschutz</a></span>
     </div>
   </div>
 </footer>
@@ -347,11 +340,6 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
 <script>
 (function () {
   'use strict';
-  var kopf = document.getElementById('kopf');
-  function kante() { kopf.classList.toggle('gescrollt', window.scrollY > 8); }
-  window.addEventListener('scroll', kante, { passive: true });
-  kante();
-
   var beobachter = new IntersectionObserver(function (eintraege) {
     eintraege.forEach(function (e) {
       if (e.isIntersecting) { e.target.classList.add('da'); beobachter.unobserve(e.target); }
@@ -441,5 +429,6 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
 })();
 </script>
 <script src="kontakt.js"></script>
+<script src="chrom.js"></script>
 </body>
 </html>
