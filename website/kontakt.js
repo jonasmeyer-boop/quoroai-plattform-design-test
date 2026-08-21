@@ -119,8 +119,8 @@
   wurzel.setAttribute('aria-modal', 'true');
   wurzel.setAttribute('aria-label', 'Erzähl uns, was dich aufhält');
   wurzel.innerHTML = `
-    <img class="kd-blatt" src="bilder/flieger.jpg" alt="" style="width:200px;top:8%;right:10%;--dreh:6deg">
-    <img class="kd-blatt" src="bilder/blasen.jpg" alt="" style="width:230px;bottom:7%;left:7%;--dreh:-4deg;animation-delay:1.4s">
+    <img class="kd-blatt" src="bilder/flieger.webp" alt="" style="width:200px;top:8%;right:10%;--dreh:6deg">
+    <img class="kd-blatt" src="bilder/blasen.webp" alt="" style="width:230px;bottom:7%;left:7%;--dreh:-4deg;animation-delay:1.4s">
     <form class="kd-karte" novalidate>
       <button type="button" class="kd-zu" aria-label="Schließen">&#10005;</button>
       <h2>Was hält dich auf?</h2>

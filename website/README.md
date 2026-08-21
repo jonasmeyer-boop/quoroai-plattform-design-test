@@ -1,41 +1,66 @@
 # website/ — der öffentliche Auftritt von quoroAI
 
-Eigener Bereich für die Marketing-Website. **Der Ordner ist bewusst
-eigenständig:** eigene Schriften, eigenes CSS, eigene Zahlen. Er lässt sich im
-Ganzen löschen, ohne dass an `entwuerfe/` etwas fehlt. Umgekehrt liest hier
-nichts aus `entwuerfe/`.
+Eigener Bereich für die Website. **Der Ordner ist bewusst eigenständig:**
+eigene Schriften, eigenes CSS, eigene Zahlen. Er lässt sich im Ganzen
+löschen, ohne dass an `entwuerfe/` etwas fehlt. Umgekehrt liest hier nichts
+aus `entwuerfe/`.
 
-## Was hier liegt
+Stand 2026-08-21: **go-live-fertig**, bis auf die zwei Sperren am Ende.
 
-| Datei | Was es ist |
+## Die Seiten
+
+| Datei | Adresse live | Was es ist |
+|---|---|---|
+| `index.html` | `/` | Startseite. Vier Akte: weißer Nullpunkt mit dem Firmenspruch, die Belege fliegen ein, der Kopf entsteht und dreht sich, dann der Tag von 06:12 bis 23:04 und der Abend-Aufruf. |
+| `plattform.html` | `/plattform/` | Das Produkt im Detail: fünf echte Flächen als Scroll-Kino, Preise mit Rechner, die Fragen. |
+| `referenzen.html` | `/arbeiten/` | Die Arbeiten als laufende Bänder; wer eines anhält, bekommt ein Popup. |
+| `impressum.html` | `/impressum/` | Anbieterkennzeichnung, Stand 8. Juli 2026. |
+| `datenschutz.html` | `/datenschutz/` | Datenschutzerklärung, Stand 21. August 2026. |
+| `agb.html` | `/agb/` | Weiterleitung in die Anwendung. |
+| `404.html` | Fehlerseite | Mit Weg zurück und Impressum im Fuß. |
+
+## Die Bausteine
+
+| Datei | Rolle |
 |---|---|
-| `index.html` | **Die Startseite** (Jonas' Wahl: Entwurf A). Hero ist das Scroll-Kino: aus einer Wolke fliegender Belege setzt sich beim Scrollen ein Kopf aus Papier zusammen (61 Bilder unter `bilder/kino/`, fal.ai: FLUX-Motiv + Kling-Film, gescrubbt per Canvas mit Multiply). Danach Markenwechsel, Werkzeuge, Preisrechner, Daten. |
-| `variante-a.html` | Entwurf A „Der weiße Raum", der Stand vor dem Kino. Kino-Moment ist der Markenwechsel. |
-| `variante-b.html` | Entwurf B „Die Werkbank": laut, plakative Schauschrift. Kino-Moment ist der Aufbau eines Vermerks. Nicht gewählt, bleibt als Referenz. |
-| `stil.css` | Marke und Bausteine. Tokens sind eine Kopie aus `entwuerfe/system.css` (Lila #6f63e8, Clash Display, General Sans). |
-| `zahlen.js` | Die geteilten Zahlen des Auftritts. Werte aus `entwuerfe/preise.js` kopiert, keine Fläche tippt einen Betrag ins Markup. |
-| `schriften/`, `bilder/` | Kopien der beiden Schriften und des Logos. |
+| `stil.css` | Marke, Kopf, Fuß, Knöpfe, Glas. Tokens sind eine Kopie aus `entwuerfe/system.css`. |
+| `recht.css` | Leseflächen der Rechtsseiten. |
+| `chrom.js` | Kante an der Kopfzeile, Menü am Telefon. |
+| `kontakt.js` | Der Kontakt-Dialog samt Versand an die bestehende Edge Function. |
+| `einwilligung.js` | Cookie-Banner und Google Analytics, portiert aus dem alten Auftritt. |
+| `zahlen.js` | Tarife, Staffel, Gebühr. Kopie aus `entwuerfe/preise.js`. |
+| `sitemap.xml`, `robots.txt`, `manifest.webmanifest`, `llms.txt` | Für Suchmaschinen und KI-Antwortmaschinen. |
+| `umleitungen.caddy` | 42 dauerhafte Umleitungen der alten Adressen. |
+| `AUSROLLEN.md` | Wie die Seiten auf den Server kommen und was danach zu prüfen ist. |
 
 ## Woher die Angaben stammen
 
-Zahlen aus `entwuerfe/preise.js` (149 € je Beratung und Monat, Zugänge 19 bis
-149 €, Staffel 25/35/45 %). Anschrift, Register und Kontakt aus
-`entwuerfe/quoro-impressum.html`. Die Aussagen zur Verarbeitung aus
-`entwuerfe/quoro-datenschutz.html` (Supabase Frankfurt, Hetzner Falkenstein,
-Sprachmodell über AWS Bedrock in der EU, kein Training mit Kundeninhalten).
+Beträge aus `entwuerfe/preise.js`, Fragen-Kontingente aus dem Produkt-Repo
+(`src/lib/plans.ts`). Anschrift, Register und Kontakt aus dem Impressum des
+bestehenden Auftritts. Die Aussagen zur Verarbeitung aus dessen
+Datenschutzerklärung, angepasst an das, was diese Seite wirklich tut.
 Ändert sich dort etwas, wird es hier nachgezogen.
 
-Die drei Beratungen im White-Label-Beispiel (Hellwig & Partner, Nordlicht
-Consulting, Kanzlei Brehm) sind erfunden und auf der Seite als erfunden
-gekennzeichnet.
+Die drei Beratungen im Beispiel (Hellwig & Partner, Nordlicht Consulting,
+Kanzlei Brehm) sind erfunden und auf der Seite als erfunden gekennzeichnet.
+
+## Bilder
+
+Alles in WebP, zusammen 13 MB (vorher 26 MB als JPEG, bei gleicher Optik).
+Einzige Ausnahme ist `bilder/teilen.jpg`, das Vorschaubild fürs Teilen.
 
 ## Vorschau
 
     python3 -m http.server 8099 --bind 127.0.0.1
     # http://127.0.0.1:8099/website/index.html
 
-## Offen
+## Zwei Sperren vor dem Go-Live
 
-Entschieden ist: nur die Startseite, richtig fertig (Chronik 2026-08-20).
-Unterseiten gibt es nicht; die Rechtsverweise im Fuß sind bewusst tot, bis
-dieser Umfang neu entschieden wird.
+1. **Das Formular sendet erst, wenn die Server-Regel den Supabase-Host
+   kennt** — und die hängt am Supabase-Vertrag (AVV), der noch nicht
+   unterschrieben ist. Bis dahin fällt der Dialog sichtbar auf das
+   Mailprogramm zurück.
+2. **Google Analytics braucht dieselbe Regel** für
+   `googletagmanager.com` und `google-analytics.com`.
+
+Beides steht in `AUSROLLEN.md` mit den konkreten Zeilen.
