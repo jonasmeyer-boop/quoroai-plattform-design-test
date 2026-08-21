@@ -236,28 +236,27 @@
   .tag .moment .objekt{position:static;transform:none;height:130px}
 }
 
-/* ---------- Wir bauen Köpfe: der zweite Geschäftsbereich, ein Block ----------
-   Kurz und knackig auf derselben Seite (Jonas, 2026-08-21): das Regal der
-   Papierköpfe, ein Satz, drei Zeilen, eine Mail. Keine zweite Seite. */
-.bauen{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;margin-top:44px}
-.bauen .regal{width:100%;height:auto;
+/* ---------- Der Anbau: die Werkstatt-Zeile unter dem Abend-Kasten ----------
+   Jonas, 2026-08-21: kein eigener Abschnitt mehr — eine stille Zeile direkt
+   unter dem Call-to-Action, für alle, die mehr brauchen als die Plattform. */
+.anbau{
+  margin-top:22px;scroll-margin-top:80px;
+  display:flex;align-items:center;gap:26px;
+  padding:20px 26px;border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);
+  background:var(--flaeche);
+}
+.anbau img{
+  height:88px;width:auto;flex-shrink:0;
   mix-blend-mode:multiply;pointer-events:none;
   -webkit-mask-image:radial-gradient(closest-side,#000 62%,transparent 98%);
-  mask-image:radial-gradient(closest-side,#000 62%,transparent 98%)}
-.bauen h2 em{font-style:normal;color:var(--lila-600)}
-.bauen .stroeme{list-style:none;margin-top:24px;display:grid;gap:0}
-.bauen .stroeme li{
-  display:flex;justify-content:space-between;gap:18px;align-items:baseline;
-  padding:13px 0;border-bottom:0.5px solid var(--nebel-200);font-size:16.5px;
+  mask-image:radial-gradient(closest-side,#000 62%,transparent 98%);
 }
-.bauen .stroeme li:first-child{border-top:0.5px solid var(--nebel-200)}
-.bauen .stroeme b{font-weight:600}
-.bauen .stroeme span{color:var(--nebel-600);font-size:14.5px;text-align:right}
-@media (max-width:860px){
-  .bauen{grid-template-columns:1fr;gap:26px}
-  .bauen .regal{max-width:420px;justify-self:center}
-  .bauen .stroeme span{display:none}
-  .bauen .knopfreihe .knopf{width:100%}
+.anbau p{font-size:15.5px;color:var(--nebel-700);max-width:none}
+.anbau b{color:var(--tinte)}
+.anbau a{font-weight:600;white-space:nowrap}
+@media (max-width:760px){
+  .anbau{flex-direction:column;text-align:center;gap:14px;padding:20px 18px}
+  .anbau a{white-space:normal}
 }
 
 /* ---------- Abschnittsköpfe ---------- */
@@ -416,28 +415,6 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
     </div>
   </section>
 
-  <!-- ---------- Wir bauen Köpfe: der zweite Geschäftsbereich ---------- -->
-  <section id="bauen" class="bahn">
-    <div class="kopfzeile taucht">
-      <h2>Übrigens: wir bauen <em style="font-style:normal;color:var(--lila-600)">Köpfe</em>. Auch deinen.</h2>
-      <p>quoroAI ist auch eine Werkstatt. Websites, Plattformen, Software und Automatisierungen, alles mit KI gebaut. Diese Seite hier ist die Kostprobe.</p>
-    </div>
-    <div class="bauen">
-      <div class="taucht">
-        <ul class="stroeme">
-          <li><b>Websites, die verkaufen.</b><span>in Tagen, nicht Monaten</span></li>
-          <li><b>Software und Plattformen nach Maß.</b><span>diese Plattform ist die Referenz</span></li>
-          <li><b>Automatisierung mit KI.</b><span>dein Ablauf, minus die Handarbeit</span></li>
-        </ul>
-        <div class="knopfreihe">
-          <a class="knopf primaer" href="mailto:hello@quorogroup.com?subject=Was mich aufhält">Erzähl uns, was dich aufhält</a>
-          <a class="knopf leise" href="tel:+4936155898702">+49 361 55898702</a>
-        </div>
-      </div>
-      <img class="regal taucht" src="bilder/regal.jpg" alt="Vier Köpfe aus Papier auf einem Regal">
-    </div>
-  </section>
-
   <!-- ---------- Schluss ---------- -->
   <section id="schluss" class="bahn">
     <div class="schluss taucht">
@@ -447,6 +424,10 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
         <a class="knopf hell" href="#">Beratung anlegen</a>
         <a class="knopf klar" href="#">Vorführung vereinbaren</a>
       </div>
+    </div>
+    <div class="anbau taucht" id="bauen">
+      <img src="bilder/regal.jpg" alt="Vier Köpfe aus Papier auf einem Regal">
+      <p><b>Und wenn du darüber hinaus Unterstützung brauchst:</b> wir bauen auch Websites, Software und Automatisierungen, alles mit KI. Diese Seite ist die Kostprobe. <a href="mailto:hello@quorogroup.com?subject=Was mich aufhält">Erzähl uns, was dich aufhält</a>.</p>
     </div>
   </section>
 
