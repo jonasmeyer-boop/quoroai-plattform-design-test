@@ -25,7 +25,7 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
    Vollbild, die drei Werke hängen als Glastafeln im Gang. */
 .galerie{height:900vh;position:relative}
 .galerie .haftet{position:sticky;top:0;height:100svh;overflow:hidden;background:var(--grund)}
-.galerie canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);min-width:100%;min-height:100%;pointer-events:none}
+.galerie canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) translate(var(--kx,0px),var(--ky,0px)) scale(var(--kz,1));min-width:100%;min-height:100%;pointer-events:none;will-change:transform}
 .galerie .schleier{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 62%,transparent 46%,rgba(253,253,254,.42) 100%)}
 .galerie .auftakt-wort{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;
@@ -101,7 +101,7 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
         <p>Komm mit durch die Galerie. Jedes Stück kannst du anfassen.</p>
       </div>
 
-      <div class="tafel" data-fenster="0.10,0.34">
+      <div class="tafel rechts" data-fenster="0.10,0.32">
         <span class="nummer">WERK 1</span>
         <h2>Die Plattform für Beratungen.</h2>
         <p>Jeder Mandant bekommt einen Berater unter der Marke seiner Beratung, samt Mandaten, Zeiten und tagegenauer Abrechnung. Vollständig White Label, Daten in der EU.</p>
@@ -109,7 +109,7 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
         <a class="knopf hell" href="plattform.html">Die Tour ansehen</a>
       </div>
 
-      <div class="tafel rechts" data-fenster="0.38,0.62">
+      <div class="tafel" data-fenster="0.40,0.62">
         <span class="nummer">WERK 2</span>
         <h2>Die Seite, von der du kommst.</h2>
         <p>Der Kopf aus tausend Belegen, die Drehung, der Tag von 06:12 bis 23:04. Kein Baukasten, jede Bewegung und jedes Motiv aus der eigenen Werkstatt, gebaut in Tagen.</p>
@@ -117,7 +117,7 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
         <a class="knopf hell" href="index.html">Noch einmal erleben</a>
       </div>
 
-      <div class="tafel" data-fenster="0.66,0.90">
+      <div class="tafel rechts" data-fenster="0.70,0.88">
         <span class="nummer">WERK 3</span>
         <h2>Die Bildwerkstatt dahinter.</h2>
         <p>Motive und Filme wie dieser Saal hier: entworfen, gerechnet, geprüft und verbaut in Stunden statt Wochen. Dieselbe Werkstatt baut die Bildwelt deiner Marke.</p>
@@ -240,6 +240,30 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
       stift.drawImage(b, (cw - bw) / 2, (ch - bh) / 2, bw, bh);
     }
     function seg(p, a, b) { return Math.min(Math.max((p - a) / (b - a), 0), 1); }
+    function weich(t) { return t * t * (3 - 2 * t); }
+    /* Glocke: weich hinein, halten, weich hinaus */
+    function glocke(t) { return Math.min(weich(seg(t, 0, .3)), weich(seg(1 - t, 0, .3)), 1); }
+
+    /* Die Regie: an jedem Werk lenkt der Blick zum Kopf ein (Seite -1 links,
+       +1 rechts), der Film hält dabei an. Zwischen den Werken läuft die Fahrt. */
+    var beats = [
+      { a: .10, b: .32, seite: -1, bild: 26 },
+      { a: .40, b: .62, seite: 1,  bild: 58 },
+      { a: .70, b: .88, seite: -1, bild: 92 }
+    ];
+    /* Der Film läuft zwischen den Halten linear: Stützpunkte (p, Bild) */
+    var stuetzen = [[0, 0]];
+    beats.forEach(function (b) { stuetzen.push([b.a, b.bild], [b.b, b.bild]); });
+    stuetzen.push([1, BILDER - 1]);
+    function bildFuer(p) {
+      for (var i = 1; i < stuetzen.length; i++) {
+        if (p <= stuetzen[i][0]) {
+          var t = (p - stuetzen[i - 1][0]) / (stuetzen[i][0] - stuetzen[i - 1][0] || 1);
+          return Math.round(stuetzen[i - 1][1] + (stuetzen[i][1] - stuetzen[i - 1][1]) * t);
+        }
+      }
+      return BILDER - 1;
+    }
 
     var laeuft = false;
     function messen() {
@@ -247,8 +271,24 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
       var r = galerie.getBoundingClientRect();
       var weg = r.height - window.innerHeight;
       var p = weg > 0 ? Math.min(Math.max(-r.top / weg, 0), 1) : 0;
-      male(Math.min(BILDER - 1, Math.round(p * (BILDER - 1))));
+      male(Math.min(BILDER - 1, bildFuer(p)));
       auftakt.style.opacity = (1 - seg(p, 0, .07)).toFixed(3);
+
+      /* die Kamera: einlenken, zoomen, halten, lösen — und am Ende in die Tür */
+      var kz = 1, kx = 0, ky = 0;
+      beats.forEach(function (b) {
+        var t = seg(p, b.a, b.b);
+        if (t <= 0 || t >= 1) return;
+        var k = glocke(t);
+        kz = 1 + .58 * k;
+        kx = -b.seite * window.innerWidth * .17 * k;
+        ky = window.innerHeight * .05 * k;
+      });
+      var tuer = weich(seg(p, .92, 1));
+      kz += .28 * tuer;
+      leinwand.style.setProperty('--kz', kz.toFixed(4));
+      leinwand.style.setProperty('--kx', kx.toFixed(1) + 'px');
+      leinwand.style.setProperty('--ky', ky.toFixed(1) + 'px');
       balken.style.setProperty('--stand', p.toFixed(4));
       tafeln.forEach(function (t) {
         var x = seg(p, t.a, t.b);
