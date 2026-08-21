@@ -1,0 +1,13 @@
+{
+  "name": "quoroAI",
+  "short_name": "quoroAI",
+  "description": "Die Plattform, auf der Unternehmensberatungen ihren Mandanten einen KI-Berater unter der eigenen Marke geben.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdfdfe",
+  "theme_color": "#6f63e8",
+  "lang": "de",
+  "icons": [
+    { "src": "/bilder/quoro-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

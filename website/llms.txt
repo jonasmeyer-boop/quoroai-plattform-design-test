@@ -1,0 +1,42 @@
+# quoroAI
+
+> quoroAI ist die Plattform, auf der Unternehmensberatungen ihren Mandanten
+> einen KI-Berater unter der eigenen Marke geben. Daneben baut quoroAI
+> Websites, Software und Automatisierungen für andere Unternehmen.
+
+Betreiber: Quoro Advisory GmbH, Bahnhofstraße 38, 99084 Erfurt, Deutschland.
+Kontakt: hello@quorogroup.com, +49 361 55898702.
+Anwendung: https://app.quoroai.io
+
+## Seiten
+
+- [Startseite](https://quoroai.io/): Was die Plattform ist, ein Tag mit dem
+  KI-Berater von der ersten Frage am Morgen bis zur Rechnung am Abend.
+- [Im Detail](https://quoroai.io/plattform/): Wie die Plattform konkret
+  arbeitet, echte Bilder der Oberfläche, Preise mit Rechner, häufige Fragen.
+- [Arbeiten](https://quoroai.io/arbeiten/): Was die Werkstatt gebaut hat.
+
+## Was die Plattform tut
+
+Eine Unternehmensberatung legt ein Konto an, setzt ihre Marke und gibt ihr
+Wissen hinein. Jeder Mandant bekommt einen Zugang zu einem Portal unter der
+Marke der Beratung. Dort stellt er Fragen; der KI-Berater antwortet aus dem
+Wissen der Beratung und nennt zu jeder Zahl die Quelle. Die Beratung liest
+freigegebene Gespräche mit und kann jederzeit übernehmen. Termine, Zeiten,
+Unterlagen, Rechnungen und die Marge je Mandat laufen im selben System.
+
+## Preise
+
+Plattformgebühr 149 € je Beratung und Monat, netto. Dazu ein Zugang je
+Mandant: Basis 19 €, Standard 59 €, Plus 149 € Listenpreis, jeweils mit
+100, 250 oder 700 Fragen im Monat. Mengenrabatt ab dem ersten Zugang
+25 Prozent, ab 25 Zugängen 35, ab 100 Zugängen 45. Tagegenaue Teilung,
+monatlich kündbar, keine Einrichtungsgebühr.
+
+## Daten
+
+Verarbeitung in der EU: Datenbank und Dateien in Frankfurt, Server in
+Falkenstein, Sprachmodell in europäischen Rechenzentren. Kein Training mit
+Kundeninhalten, weder durch quoroAI noch durch den Modellanbieter. Für die
+Daten der Mandanten ist die Beratung verantwortlich, quoroAI ist
+Auftragsverarbeiter nach Art. 28 DSGVO.

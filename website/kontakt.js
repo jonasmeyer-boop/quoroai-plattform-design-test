@@ -174,13 +174,17 @@
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') schliessen(); });
 
   var ZIEL = 'webmaster@quoroai.io';
-  /* Der Weg des Versands. Solange ENDPUNKT leer ist, öffnet der Dialog das
-     Mailprogramm mit fertigem Text — ehrlich und ohne Fremddienst. Sobald der
-     eigene Endpunkt im Produkt steht (Auftrag vom 2026-08-21), hier eintragen:
-     dann geht die Anfrage direkt raus, ohne dass jemand sein Postfach öffnet.
-     FormSubmit ist bewusst RAUS: zwei ausgelöste Aktivierungen kamen nie an,
-     und als US-Dienst wäre er ein AVV-Fall. */
-  var ENDPUNKT = '';
+  /* Der Weg des Versands: die Edge Function, die der bestehende Auftritt schon
+     benutzt (Supabase-Projekt quoro-landing, Region Frankfurt). Sie schreibt die
+     Anfrage in die Datenbank, schickt uns die Benachrichtigung über Resend an
+     ZIEL und dem Absender eine Eingangsbestätigung; Rate-Limits und
+     Herkunftsprüfung stecken dort drin. Ein zweiter Weg wird nicht gebaut.
+     FormSubmit war der erste Versuch und ist RAUS: zwei ausgelöste
+     Aktivierungen kamen nie an, und als US-Dienst wäre er ein AVV-Fall.
+     ACHTUNG: Die Funktion antwortet bei Absagen mit 400 oder 429. Wir messen
+     deshalb am Status, nicht am Rumpf — genau daran ist der Vorgänger
+     gescheitert (200 mit success:false). */
+  var ENDPUNKT = 'https://uqfiodcqpssyflynzgoc.supabase.co/functions/v1/contact';
   var fehler = karte.querySelector('.kd-fehler');
   var senden = karte.querySelector('.kd-senden');
 
@@ -224,7 +228,7 @@
     senden.textContent = 'Wird gesendet';
 
     if (!ENDPUNKT) {
-      /* Kein eigener Endpunkt: der ehrliche Weg über das Mailprogramm. */
+      /* Kein Endpunkt eingetragen: der ehrliche Weg über das Mailprogramm. */
       senden.disabled = false;
       senden.textContent = 'Abschicken';
       mailtoWeg(betreff, leib);
@@ -232,15 +236,21 @@
       return;
     }
 
+    /* Feldnamen wie im bestehenden Auftritt: name, email, message, source.
+       Das Thema steht im Text, damit der Wire-Vertrag der Funktion unberührt
+       bleibt (Retention-Sweep und Betroffenen-Export hängen daran). */
     fetch(ENDPUNKT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ thema: thema || '', anfrage: frage, name: name, mail: mail })
+      body: JSON.stringify({
+        name: name || 'ohne Namen',
+        email: mail,
+        message: (thema ? 'Thema: ' + thema + '\n\n' : '') + frage,
+        source: 'website-dialog'
+      })
     }).then(function (a) {
-      if (!a.ok) throw new Error('Absage vom Versand');
-      return a.json().catch(function () { return { ok: true }; });
-    }).then(function (d) {
-      if (d && d.ok === false) throw new Error('Absage vom Versand');
+      /* Der Status ist die Wahrheit: 400 falsche Felder, 429 zu viele Versuche. */
+      if (!a.ok) throw new Error('Absage vom Versand, Status ' + a.status);
       danke();
     }).catch(function () {
       /* Kein Weg soll verloren gehen: dann eben über das Mailprogramm. */
