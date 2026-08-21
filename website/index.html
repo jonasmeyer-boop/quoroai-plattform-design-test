@@ -251,7 +251,8 @@
   display:block;font-family:var(--schrift-schau);font-weight:600;letter-spacing:-.015em;
   font-size:clamp(20px,2.1vw,27px);line-height:1.2;margin-bottom:6px;
 }
-.anbau .knopf{flex-shrink:0;white-space:nowrap}
+.anbau .anbau-knoepfe{display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+.anbau .knopf{white-space:nowrap}
 .anbau img{
   height:88px;width:auto;flex-shrink:0;
   mix-blend-mode:multiply;pointer-events:none;
@@ -261,6 +262,7 @@
 .anbau p{font-size:16px;color:var(--nebel-700);max-width:56ch}
 @media (max-width:860px){
   .anbau{flex-direction:column;text-align:center;gap:16px;padding:24px 18px}
+  .anbau .anbau-knoepfe{width:100%}
   .anbau .knopf{width:100%;white-space:normal}
   .anbau p{max-width:none}
 }
@@ -438,7 +440,10 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
         <span class="hook">Diese Seite hat dich bis ganz nach unten gezogen.</span>
         <p>Stell dir vor, deine tut das auch. Oder das, was dich jede Woche Stunden kostet, erledigt sich ab nächstem Monat von selbst.</p>
       </div>
-      <a class="knopf primaer" href="mailto:hello@quorogroup.com?subject=Was mich aufhält">Erzähl uns, was dich aufhält</a>
+      <div class="anbau-knoepfe">
+        <a class="knopf primaer" href="mailto:hello@quorogroup.com?subject=Was mich aufhält">Erzähl uns, was dich aufhält</a>
+        <a class="knopf leise" href="referenzen.html">Unsere Arbeiten</a>
+      </div>
     </div>
   </section>
 
