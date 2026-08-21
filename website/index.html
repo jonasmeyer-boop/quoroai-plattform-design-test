@@ -23,7 +23,7 @@
    kurz auf und die Leinwand setzt sich mit einem winzigen Impuls. Die
    Schriftzüge stehen auf einem weichen weißen Hof statt zu leuchten, unten
    läuft eine haarfeine Fortschrittslinie. Eine Kurve, eine Dauer, überall. */
-.kino{height:760vh;position:relative}
+.kino{height:900vh;position:relative}
 .kino .haftet{position:sticky;top:0;height:100svh;overflow:hidden;background:var(--grund)}
 .kino .lichthof{
   position:absolute;left:53%;top:50%;width:min(96vh,90vw);aspect-ratio:1;
@@ -111,7 +111,7 @@
 }
 .aufhaenger img{width:22px;height:22px;border-radius:6px}
 @media (max-width:900px){
-  .kino{height:660vh}
+  .kino{height:780vh}
   .kino canvas{left:50%;top:46%;height:min(140svh,225vw);transform:translate(calc(-52% + var(--gleit,0px)),calc(-50% + var(--hub,0px))) scale(var(--nah,1))}
   .kino .lichthof{left:50%;top:46%;width:min(70vh,120vw)}
   .kino .blatt{width:min(40vw,220px)}
@@ -273,15 +273,15 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
       <div class="lichthof" id="lichthof"></div>
       <canvas id="leinwand" aria-hidden="true"></canvas>
       <div id="blaetter" aria-hidden="true"></div>
-      <div class="wort" data-fenster="-0.12,0.18">
+      <div class="wort" data-fenster="-0.12,0.26">
         <div class="gross">Tausend <em>Belege</em>.</div>
         <span class="klein">Bilanzen, Verträge, Auswertungen, Protokolle. Das Wissen deiner Beratung liegt in Ordnern, Postfächern und Köpfen.</span>
       </div>
-      <div class="wort" data-fenster="0.21,0.38">
+      <div class="wort" data-fenster="0.31,0.52">
         <div class="gross">Ein <em>Gedanke</em>.</div>
         <span class="klein">quoroAI liest alles davon und denkt in deiner Methodik. Jede Zahl in der Antwort nennt ihre Quelle.</span>
       </div>
-      <div class="wort" data-fenster="0.50,0.78">
+      <div class="wort" data-fenster="0.60,0.84">
         <div class="gross">Dein <em>Berater</em>.</div>
         <span class="klein">Deine Mandanten fragen um 23 Uhr und bekommen deine Antwort, unter deinem Namen. Du liest jedes Wort mit.</span>
       </div>
@@ -538,12 +538,13 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
 (function () {
   'use strict';
   var ruhig = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var AUFBAU = 61, DREHUNG = 61;
-  var GESAMT = AUFBAU + DREHUNG;
+  var FLUG = 61, AUFBAU = 61, DREHUNG = 61;
+  var GESAMT = FLUG + AUFBAU + DREHUNG;
   function PFAD(i) {
-    return i < AUFBAU
-      ? 'bilder/kino/kopf-' + String(i + 1).padStart(3, '0') + '.jpg'
-      : 'bilder/kino/dreh-' + String(i - AUFBAU + 1).padStart(3, '0') + '.jpg';
+    if (i < FLUG) return 'bilder/kino/flug-' + String(i + 1).padStart(3, '0') + '.jpg';
+    i -= FLUG;
+    if (i < AUFBAU) return 'bilder/kino/kopf-' + String(i + 1).padStart(3, '0') + '.jpg';
+    return 'bilder/kino/dreh-' + String(i - AUFBAU + 1).padStart(3, '0') + '.jpg';
   }
 
   var leinwand = document.getElementById('leinwand');
@@ -564,11 +565,11 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
     b.src = PFAD(i);
   }
   if (ruhig) {
-    lade(AUFBAU - 1);
+    lade(FLUG + AUFBAU - 1);
   } else {
-    lade(0); lade(AUFBAU - 1); lade(GESAMT - 1);
-    for (var i = 1; i < AUFBAU - 1; i++) lade(i);
-    for (var j = AUFBAU; j < GESAMT - 1; j++) lade(j);
+    /* Ruhebild zuerst, dann die Nahtbilder, dann alles der Reihe nach */
+    lade(0); lade(FLUG - 1); lade(FLUG + AUFBAU - 1); lade(GESAMT - 1);
+    for (var i = 1; i < GESAMT - 1; i++) lade(i);
   }
 
   var letztesZiel = 0;
@@ -616,7 +617,7 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
       el.alt = '';
       blattLage.appendChild(el);
       var winkel = zufall(k + 1) * Math.PI * 2;
-      var von = -0.05 + (k / BLATTZAHL) * 0.35;
+      var von = -0.05 + (k / BLATTZAHL) * 0.24;
       blaetter.push({
         el: el,
         a: von, b: von + 0.15 + zufall(k + 7) * 0.05,
@@ -655,17 +656,18 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
   }
 
   if (ruhig) {
-    male(AUFBAU - 1);
+    male(FLUG + AUFBAU - 1);
     finale.classList.add('da');
     return;
   }
 
   /* Die Karte des Films:
-     0,00–0,42  Aufbau (Bilder 0…60), Blätter, Worte 1 und 2
-     0,42–0,47  das Licht blüht, die Leinwand setzt sich
-     0,47–0,80  die Drehung (Bilder 61…120) unter Wort 3
-     0,80–0,86  zweites Aufblühen
-     0,86–1,00  die Bühne belichtet, der Kopf gleitet */
+     0,00–0,28  der Flug: aus dem weißen Nichts fliegen die Blätter herein
+     0,30–0,56  der Aufbau: die Wolke setzt sich zum Kopf
+     0,56–0,61  das Licht blüht, die Leinwand setzt sich
+     0,60–0,86  die Drehung unter Wort 3
+     0,86–0,91  zweites Aufblühen
+     0,90–1,00  die Bühne belichtet, der Kopf gleitet */
   var laeuft = false;
   function messen() {
     laeuft = false;
@@ -673,25 +675,30 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
     var weg = r.height - window.innerHeight;
     var p = weg > 0 ? Math.min(Math.max(-r.top / weg, 0), 1) : 1;
 
+    /* Drei Akte: Flug (leer -> Wolke), Aufbau (Wolke -> Kopf), Drehung. */
     var bild;
-    if (p < .47) {
-      var t = seg(p, 0, .42);
+    if (p < .30) {
+      var f = seg(p, 0, .28);
+      f = 1 - Math.pow(1 - f, 1.8);
+      bild = Math.min(FLUG - 1, Math.round(f * (FLUG - 1)));
+    } else if (p < .60) {
+      var t = seg(p, .30, .56);
       t = 1 - Math.pow(1 - t, 2.2);
-      bild = Math.min(AUFBAU - 1, Math.round(t * (AUFBAU - 1)));
+      bild = FLUG + Math.min(AUFBAU - 1, Math.round(t * (AUFBAU - 1)));
     } else {
-      var d = seg(p, .47, .80);                 /* die Drehung läuft linear */
-      bild = AUFBAU + Math.min(DREHUNG - 1, Math.round(d * (DREHUNG - 1)));
+      var d = seg(p, .60, .86);
+      bild = FLUG + AUFBAU + Math.min(DREHUNG - 1, Math.round(d * (DREHUNG - 1)));
     }
     male(bild);
 
-    var setzt1 = Math.sin(seg(p, .42, .47) * Math.PI);
-    var setzt2 = Math.sin(seg(p, .80, .86) * Math.PI);
-    var nah = 1.18 - .18 * seg(p, 0, .42) + .012 * (setzt1 + setzt2);
-    var ausklang = seg(p, .86, .97);
+    var setzt1 = Math.sin(seg(p, .56, .61) * Math.PI);
+    var setzt2 = Math.sin(seg(p, .86, .91) * Math.PI);
+    var nah = 1.18 - .18 * seg(p, 0, .56) + .012 * (setzt1 + setzt2);
+    var ausklang = seg(p, .90, .99);
     nah -= .14 * ausklang;
     var schmal = window.matchMedia('(max-width: 900px)').matches;
     var gleit = schmal ? 0 : ausklang * window.innerWidth * .11;
-    var hub = -seg(p, 0, .42) * window.innerHeight * .02;
+    var hub = -seg(p, 0, .56) * window.innerHeight * .02;
     leinwand.style.setProperty('--nah', nah.toFixed(4));
     leinwand.style.setProperty('--gleit', gleit.toFixed(1) + 'px');
     leinwand.style.setProperty('--hub', hub.toFixed(1) + 'px');
@@ -708,16 +715,16 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
       w.style.transform = 'translateY(-50%) translateY(' + ((1 - auf) * 14).toFixed(1) + 'px) scale(' + (.985 + .025 * t).toFixed(4) + ')';
     });
 
-    var schein = .10 + .16 * seg(p, 0, .42) + .18 * setzt1 + .22 * setzt2;
+    var schein = .10 + .16 * seg(p, 0, .56) + .18 * setzt1 + .22 * setzt2;
     lichthof.style.setProperty('--schein', schein.toFixed(3));
     lichthof.style.setProperty('--puls', (1 + .10 * (setzt1 + setzt2)).toFixed(3));
 
     wink.style.opacity = p > .03 ? 0 : 1;
-    fortschritt.style.setProperty('--stand', seg(p, 0, .80).toFixed(4));
-    fortschritt.style.setProperty('--linie-da', p >= .84 ? 0 : 1);
-    fortschritt.style.opacity = p >= .84 ? 0 : 1;
+    fortschritt.style.setProperty('--stand', seg(p, 0, .86).toFixed(4));
+    fortschritt.style.setProperty('--linie-da', p >= .89 ? 0 : 1);
+    fortschritt.style.opacity = p >= .89 ? 0 : 1;
 
-    var da = p >= .87;
+    var da = p >= .90;
     finale.classList.toggle('da', da);
     schleierlinks.classList.toggle('da', da);
   }
