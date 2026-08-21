@@ -4,7 +4,8 @@
 > einen KI-Berater unter der eigenen Marke geben. Daneben baut quoroAI
 > Websites, Software und Automatisierungen für andere Unternehmen.
 
-Betreiber: Quoro Advisory GmbH, Bahnhofstraße 38, 99084 Erfurt, Deutschland.
+Betreiber: quoroAI GmbH, Bahnhofstraße 38, 99084 Erfurt, Deutschland.
+Amtsgericht Jena, HRB 525069. Geschäftsführer: Hannes Freyer.
 Kontakt: hello@quorogroup.com, +49 361 55898702.
 Anwendung: https://whitelabel.quoroai.io
 

@@ -520,10 +520,18 @@ main > .bogen{animation:none;opacity:1;translate:none}
         <span class="v-marke">Zum Vorlesen</span>
         „Ich würde gern mitschreiben lassen, damit ich Ihnen hinterher ein Protokoll schicken kann. Die Tonaufnahme wird nach dem Termin gelöscht, es bleibt nur das Blatt. Ist Ihnen das recht?"
       </div>
+      <!-- Beide Antworten stehen hier, gleichrangig (Issue #87, entschieden
+           2026-08-21). Bis dahin gab es nur den Ja-Knopf, und das Nein war
+           über einen Vorführungs-Griff im nächsten Zustand erreichbar. Wer
+           gefragt hat und ein Nein bekommt, steht dann vor einer Fläche, die
+           seine Antwort nicht kennt — und drückt am Ende doch Ja. Das Nein
+           ist leiser, aber es ist da: die Entscheidung liegt beim Kunden,
+           nicht bei der Gestaltung. -->
       <div class="griffe">
         <button class="knopf primaer" id="fragen" type="button">Gefragt, er hat zugestimmt</button>
-        <span class="nebensatz">Du fragst ihn, im Gespräch. Der KI-Berater sitzt nicht mit am Tisch — dieses Gespräch läuft am Telefon, im Videocall oder im Raum, nicht durch die Plattform.</span>
+        <button class="knopf leise" id="fragen-nein" type="button">Er hat abgelehnt</button>
       </div>
+      <span class="nebensatz">Du fragst ihn, im Gespräch. Der KI-Berater sitzt nicht mit am Tisch — dieses Gespräch läuft am Telefon, im Videocall oder im Raum, nicht durch die Plattform.</span>
     </div>
 
     <!-- Zustand 2: die Feststellung. Sie ist ausdrücklich DEIN Wort, nicht
@@ -582,6 +590,32 @@ main > .bogen{animation:none;opacity:1;translate:none}
     </div>
 
     <!-- Zustand 5: beendet. Die Tonspur ist weg, und das steht da. -->
+    <!-- Der Wartezustand (Issue #87, entschieden 2026-08-21). Zwischen
+         „Termin beenden" und dem fertigen Blatt liegt echte Arbeit: die
+         Tonspur wird abgeschrieben, und das dauert. Ohne diesen Zustand
+         stünde die Fläche still da und niemand wüsste, ob sie noch lebt.
+         Er sagt auch, dass man weggehen darf — die Arbeit läuft ohne den
+         Blick darauf weiter. -->
+    <div id="schritt-wartet" hidden>
+      <div class="wartet" role="status" aria-live="polite">
+        <span class="w-punkte" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span><b>Der Ton wird abgeschrieben.</b> Das dauert etwa so lange wie ein Zehntel des Termins — bei 58 Minuten also gut fünf. Du kannst weggehen; das Blatt liegt danach hier und die Glocke sagt Bescheid. <b>Die Tonspur wird gelöscht, sobald das Blatt steht</b>, nicht früher: sonst wäre ein Abbruch das Ende von beidem.</span>
+      </div>
+    </div>
+
+    <!-- Der dritte Fall: der Kunde hat es sich im Termin anders überlegt.
+         Dann entsteht kein Blatt, und der Ton stirbt sofort — nicht erst nach
+         dem Abschreiben. Ein Widerruf, der erst nach der Verarbeitung wirkt,
+         ist keiner. -->
+    <div id="schritt-widerrufen" hidden>
+      <div class="geloescht" role="status" aria-live="polite">
+        <b>Er hat es sich anders überlegt, und damit ist es vorbei.</b> Die Aufnahme ist gelöscht, sofort und ohne Abschreiben. Es entsteht kein Protokoll und keine Aufgabenkarte — was du dir gemerkt hast, ist ebenfalls weg. Was bleibt, sind deine eigenen Notizen, wenn du welche getippt hast.
+      </div>
+      <div class="abgelegt">
+        <span><b>1,0 Std.</b> stehen als erfasste Zeit auf dem Mandat, mit dem Termin als Grund. Der Termin hat stattgefunden — das ändert der Widerruf nicht. <a href="beratung-mandat.html">Im Mandat ansehen</a></span>
+      </div>
+    </div>
+
     <div id="schritt-ende" hidden>
       <div class="geloescht" role="status" aria-live="polite">
         <b>Der Termin ist beendet, die Aufnahme gelöscht.</b> 58 Minuten Ton sind nirgends mehr gespeichert — bei quoroAI nicht und bei deiner Beratung nicht. Was bleibt, ist das Blatt darunter. Deshalb trägt es auch keine Zeitmarken: es gäbe nichts mehr, wohin sie führen.

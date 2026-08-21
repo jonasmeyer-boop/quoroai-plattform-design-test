@@ -27,7 +27,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
-{"@type":"Organization","@id":"https://quoroai.io/#organisation","name":"quoroAI","legalName":"Quoro Advisory GmbH","url":"https://quoroai.io/","logo":"https://quoroai.io/bilder/quoro-icon.svg","email":"hello@quorogroup.com","telephone":"+49 361 55898702","address":{"@type":"PostalAddress","streetAddress":"Bahnhofstraße 38","postalCode":"99084","addressLocality":"Erfurt","addressCountry":"DE"},"identifier":{"@type":"PropertyValue","name":"HRB","value":"517650"},"founder":{"@type":"Person","name":"Hannes Freyer"},"sameAs":["https://www.linkedin.com/company/quoroai/","https://www.instagram.com/quoroai","https://www.wikidata.org/wiki/Q140286054"]},
+{"@type":"Organization","@id":"https://quoroai.io/#organisation","name":"quoroAI","legalName":"quoroAI GmbH","url":"https://quoroai.io/","logo":"https://quoroai.io/bilder/quoro-icon.svg","email":"hello@quorogroup.com","telephone":"+49 361 55898702","address":{"@type":"PostalAddress","streetAddress":"Bahnhofstraße 38","postalCode":"99084","addressLocality":"Erfurt","addressCountry":"DE"},"identifier":{"@type":"PropertyValue","name":"HRB","value":"525069"},"founder":{"@type":"Person","name":"Hannes Freyer"},"sameAs":["https://www.linkedin.com/company/quoroai/","https://www.instagram.com/quoroai","https://www.wikidata.org/wiki/Q140286054"]},
 {"@type":"WebSite","@id":"https://quoroai.io/#website","url":"https://quoroai.io/","name":"quoroAI","inLanguage":"de-DE","publisher":{"@id":"https://quoroai.io/#organisation"}}
 ]}
 </script>
@@ -39,7 +39,7 @@
    Der eine Kino-Moment ist der Markenwechsel: dasselbe Kundenportal wandert
    beim Scrollen durch drei Beratungsmarken, Gerüst bleibt, Marke wechselt.
    Das ist genau das Versprechen der Plattform, vorgeführt statt versprochen.
-   Marker: WEBSITE-INDEX-V5 (aus Entwurf A; der Kino-Kopf kommt als eigener Abschnitt) */
+   Marker: WEBSITE-INDEX-V7 (aus Entwurf A; der Kino-Kopf kommt als eigener Abschnitt) */
 
 /* ---------- Das Kino: der Kopf setzt sich zusammen ----------
    Fassung 3 (Jonas: hochwertig statt laut). Bildfüllender Kopf, die Kamera
@@ -320,6 +320,46 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:var(--kopfhoehe)}
 .schluss .knopfreihe{margin-top:34px;position:relative;z-index:1}
 .schluss .knopf.hell{background:#fff;color:var(--lila-800);box-shadow:0 12px 30px rgba(24,21,47,.28)}
 .schluss .knopf.klar{background:rgba(255,255,255,.14);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.4)}
+
+/* ---------- Die fünf: Menschen nach dem Werkzeug ---------- */
+.fuenf{margin-top:var(--luft);text-align:center}
+.fuenf h2{margin-bottom:14px}
+.fuenf .vorsatz{max-width:58ch;margin:0 auto;color:var(--nebel-600)}
+.gesichter{display:grid;grid-template-columns:repeat(5,1fr);gap:22px;margin-top:52px}
+.gesichter figure{margin:0}
+.gesichter img{
+  width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--radius-karte);
+  box-shadow:0 14px 34px rgba(24,21,47,.16);
+  transition:transform .5s var(--kurve),box-shadow .5s var(--kurve);
+}
+.gesichter figure:nth-child(odd) img{transform:rotate(-1.6deg)}
+.gesichter figure:nth-child(even) img{transform:rotate(1.6deg)}
+@media (hover:hover){
+  .gesichter figure:hover img{transform:rotate(0) translateY(-6px);box-shadow:0 22px 48px rgba(24,21,47,.22)}
+}
+.gesichter figcaption{margin-top:14px;font-size:14px;line-height:1.45;color:var(--nebel-500)}
+.gesichter figcaption b{display:block;color:var(--tinte);font-weight:600;font-size:15px}
+.fuenf .register{max-width:64ch;margin:46px auto 0;font-size:15px;color:var(--nebel-500)}
+.fuenf .register b{color:var(--tinte);font-weight:600}
+@media (max-width:860px){
+  .gesichter{grid-template-columns:repeat(3,1fr);gap:16px}
+  .gesichter figure:nth-child(4){grid-column:1/2}
+  .gesichter figure:nth-child(5){grid-column:2/3}
+}
+@media (max-width:520px){
+  .gesichter{grid-template-columns:repeat(2,1fr)}
+  .gesichter figure:nth-child(5){grid-column:1/-1;width:50%;margin-inline:auto}
+}
+@media (prefers-reduced-motion:reduce){.gesichter img{transform:none!important;transition:none}}
+
+/* ---------- Die Unterschrift unter der Seite ---------- */
+.signatur{margin-top:64px;padding-top:34px;border-top:0.5px solid var(--nebel-200);text-align:center}
+.signatur p{max-width:none;color:var(--nebel-600);font-size:16px;margin-bottom:14px}
+.signatur .name{
+  display:block;font-family:var(--schrift-schau);font-weight:500;
+  font-size:clamp(26px,3.2vw,36px);letter-spacing:-.01em;color:var(--tinte);
+}
+.signatur .rolle{display:block;margin-top:6px;font-size:14px;color:var(--nebel-500)}
 </style>
 </head>
 <body>
@@ -448,6 +488,23 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:var(--kopfhoehe)}
     </div>
   </section>
 
+
+  <!-- ---------- Die fünf ---------- -->
+  <section class="bahn fuenf">
+    <div class="taucht">
+      <h2>Hinter dem Kopf stehen fünf.</h2>
+      <p class="vorsatz">Wir kommen aus der Beratung, nicht aus dem Hype. Hannes führt seit 2020 die Quoro Advisory GmbH in Erfurt. Dieses Werkzeug haben wir gebaut, weil es uns dort selbst gefehlt hat.</p>
+    </div>
+    <div class="gesichter taucht">
+      <figure><img src="bilder/team/hannes.webp" alt="Hannes Freyer"><figcaption><b>Hannes Freyer</b>Geschäftsführer</figcaption></figure>
+      <figure><img src="bilder/team/jonas.webp" alt="Jonas Meyer"><figcaption><b>Jonas Meyer</b>Gesellschafter, Entwicklung</figcaption></figure>
+      <figure><img src="bilder/team/lucy.webp" alt="Lucy Eva Baumann"><figcaption><b>Lucy Eva Baumann</b>Personal</figcaption></figure>
+      <figure><img src="bilder/team/tobias.webp" alt="Tobias Zwiener"><figcaption><b>Tobias Zwiener</b>Marketing</figcaption></figure>
+      <figure><img src="bilder/team/marcel.webp" alt="Marcel Rademacher"><figcaption><b>Marcel Rademacher</b>Recht</figcaption></figure>
+    </div>
+    <p class="register taucht">quoroAI GmbH, seit dem 18. August 2026 im Handelsregister des Amtsgerichts Jena unter <b>HRB 525069</b>. Kein Postfach, keine Anonymität: In unseren Verträgen steht, was gilt, nicht was gut klingt.</p>
+  </section>
+
   <!-- ---------- Schluss ---------- -->
   <section id="schluss" class="bahn">
     <div class="schluss taucht">
@@ -468,6 +525,12 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:var(--kopfhoehe)}
         <a class="knopf primaer" href="mailto:hello@quorogroup.com?subject=Was mich aufhält">Erzähl uns, was dich aufhält</a>
         <a class="knopf leise" href="referenzen.html">Unsere Arbeiten</a>
       </div>
+    </div>
+
+    <div class="signatur taucht">
+      <p>Läuft unter meinem Namen und meiner eingetragenen Firma.</p>
+      <span class="name">Hannes Freyer</span>
+      <span class="rolle">Geschäftsführer, quoroAI GmbH, Erfurt</span>
     </div>
   </section>
 
@@ -498,7 +561,7 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:var(--kopfhoehe)}
       </div>
     </div>
     <div class="abbinder">
-      <span>Quoro Advisory GmbH</span>
+      <span>quoroAI GmbH</span>
       <span><a href="impressum.html">Impressum</a>, <a href="datenschutz.html">Datenschutz</a> und <a href="#" data-cookie-einstellungen>Cookie-Einstellungen</a></span>
     </div>
   </div>

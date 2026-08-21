@@ -1,7 +1,7 @@
 /* quoroai-plattform-design · Die Rechtsflächen von quoroAI: eine Lesefläche,
    vier Dokumente (AGB, AVV, Impressum, Datenschutz). Ergänzt system.css,
    ersetzt es nie — hier stehen nur die Regeln, die eine reine Lesefläche
-   braucht und die es sonst nirgends gibt. Marker: RECHT-CSS-V5
+   braucht und die es sonst nirgends gibt. Marker: RECHT-CSS-V6
 
    V5: lange Überschriften trennen, statt die Seite quer zu schieben.
    V4: die Fingermaße greifen auch an schmaler Breite, nicht nur am groben
@@ -113,7 +113,7 @@
 .recht .tabelle .wo{color:var(--nebel-600);white-space:nowrap}
 
 /* ---------- Was nur ein Vertrag braucht (.vertrag) ----------
-   AGB und AVV sind Verträge zwischen der Quoro Advisory GmbH und der
+   AGB und AVV sind Verträge zwischen der quoroAI GmbH und der
    Beratung. Sie lesen sich anders als eine Datenschutzerklärung: man springt
    zu einer Ziffer, man zitiert sie, und man muss den Text behalten dürfen. */
 
