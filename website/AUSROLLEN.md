@@ -67,26 +67,58 @@ Reihenfolge:
 
 ## Was der Server erlauben muss
 
-Die Sicherheitsregel (CSP) auf der Box muss zwei Hosts kennen, sonst
-funktionieren Analyse und Formular nicht:
+Die Sicherheitsregel (CSP) kommt aus `/etc/caddy/Caddyfile` auf der Box. Am
+21.08.2026 gemessen, was sie heute sendet:
 
-- `https://www.googletagmanager.com` für Google Analytics (`script-src`),
-  `https://*.google-analytics.com` für den Datenversand (`connect-src`),
-- `https://uqfiodcqpssyflynzgoc.supabase.co` für das Kontaktformular
-  (`connect-src`).
+```
+default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval';
+style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;
+media-src 'self'; font-src 'self';
+connect-src 'self' https://app.quoroai.io; …
+```
 
-Dazu kommt, was die Seiten selbst brauchen: **`style-src 'unsafe-inline'`** und
-**`script-src 'unsafe-inline'`**. Die Seiten tragen Stil- und Skriptblöcke
-direkt im Dokument (unter anderem die strukturierten Daten auf der Startseite
-und die Stile, die Kontakt-Dialog und Einwilligungs-Banner zur Laufzeit
-einhängen). Steht auf der Box eine strenge Regel ohne diese beiden Werte, ist
-die Seite live ohne Gestaltung und ohne Kino. Im Repo liegt keine
-CSP-Datei — den Ist-Stand kennt nur, wer auf die Box sieht. **Vor dem Wechsel
-also den geltenden CSP-Header abfragen, nicht annehmen.**
+**Die gute Nachricht: die Seite läuft darunter vollständig.** Nachgestellt mit
+genau diesem Header über dem gebauten Docroot: Schriften, Gestaltung,
+Scroll-Kino, alle Bilder, null Fehler in der Konsole. `'unsafe-inline'` steht
+für Stile und Skripte schon drin, die Seiten brauchen keine Lockerung dafür.
 
-**Achtung:** Die Freischaltung des Formular-Hosts hängt am Supabase-Vertrag
-(AVV), der noch nicht unterschrieben ist. Solange er fehlt, bleibt die Regel
-bewusst zu; das Formular fällt dann sichtbar auf das Mailprogramm zurück.
+Zwei Dinge sind trotzdem tot, und beide fallen sichtbar zurück:
+
+**1. Google Analytics lädt nicht.** `script-src` kennt den Google-Host nicht.
+Gemessen: nach „Einverstanden" hängt das Banner das Skript ein, der Browser
+blockt es, kein `_ga`-Cookie entsteht, die Seite läuft weiter. Nötig wäre
+
+```
+script-src … https://www.googletagmanager.com
+connect-src … https://*.google-analytics.com
+```
+
+Das ist derselbe Zustand wie beim alten Auftritt: dort ist GA4 seit jeher tot,
+und es steht dort ausdrücklich, dass die Lockerung bewusst nicht geschrieben
+wurde. **Vor dem Schalten also: Vertrag mit Google prüfen, dann den Header.**
+
+**2. Das Kontaktformular sendet nicht.** `connect-src` kennt den
+Supabase-Host nicht. Gemessen: der Dialog zeigt „Der Versand hakt gerade",
+nennt `webmaster@quoroai.io` im Klartext, lässt den getippten Text stehen und
+öffnet zusätzlich das Mailprogramm. Nötig wäre
+
+```
+connect-src 'self' https://app.quoroai.io https://uqfiodcqpssyflynzgoc.supabase.co
+```
+
+> **SPERRE — diese Zeile erst setzen, wenn der AVV mit Supabase angenommen
+> ist.** Vertragspartner ist die Supabase Pte. Ltd., Singapur: kein
+> Angemessenheitsbeschluss, und die Standardvertragsklauseln stecken in genau
+> diesem Vertrag. Wird die Zeile vorher gesetzt, läuft die Verarbeitung ohne
+> Vertrag nach Art. 28 DSGVO und ohne Transfergrundlage nach Kapitel V — für
+> jede Anfrage, die danach eintrifft. Zuerst der Vertrag, dann der Header.
+> Dieselbe Sperre steht wörtlich im Repo `quoroai-website` unter
+> `deploy/live/README.md`.
+
+Beide Änderungen brauchen root auf `167.233.120.5` und danach
+`caddy validate` und `systemctl reload caddy`. Der Schlüssel, der hier
+vorliegt, öffnet nur einen Käfig ohne Verb dafür. `~/.ssh/quoro_hr_deploy`
+ist zwar eine echte root-Shell, aber auf einer **anderen** Box.
 
 ## Prüfen nach dem Ausrollen
 
