@@ -241,22 +241,28 @@
    unter dem Call-to-Action, für alle, die mehr brauchen als die Plattform. */
 .anbau{
   margin-top:22px;scroll-margin-top:80px;
-  display:flex;align-items:center;gap:26px;
-  padding:20px 26px;border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);
-  background:var(--flaeche);
+  display:flex;align-items:center;gap:28px;
+  padding:26px 30px;border-radius:var(--radius-karte);
+  background:linear-gradient(120deg,var(--lila-050),var(--flaeche) 55%);
+  box-shadow:0 0 0 1.5px var(--lila-400),0 22px 60px rgba(111,99,232,.26);
 }
+.anbau .worte{flex:1}
+.anbau .hook{
+  display:block;font-family:var(--schrift-schau);font-weight:600;letter-spacing:-.015em;
+  font-size:clamp(20px,2.1vw,27px);line-height:1.2;margin-bottom:6px;
+}
+.anbau .knopf{flex-shrink:0;white-space:nowrap}
 .anbau img{
   height:88px;width:auto;flex-shrink:0;
   mix-blend-mode:multiply;pointer-events:none;
   -webkit-mask-image:radial-gradient(closest-side,#000 62%,transparent 98%);
   mask-image:radial-gradient(closest-side,#000 62%,transparent 98%);
 }
-.anbau p{font-size:15.5px;color:var(--nebel-700);max-width:none}
-.anbau b{color:var(--tinte)}
-.anbau a{font-weight:600;white-space:nowrap}
-@media (max-width:760px){
-  .anbau{flex-direction:column;text-align:center;gap:14px;padding:20px 18px}
-  .anbau a{white-space:normal}
+.anbau p{font-size:16px;color:var(--nebel-700);max-width:56ch}
+@media (max-width:860px){
+  .anbau{flex-direction:column;text-align:center;gap:16px;padding:24px 18px}
+  .anbau .knopf{width:100%;white-space:normal}
+  .anbau p{max-width:none}
 }
 
 /* ---------- Abschnittsköpfe ---------- */
@@ -427,7 +433,11 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:60px}
     </div>
     <div class="anbau taucht" id="bauen">
       <img src="bilder/regal.jpg" alt="Vier Köpfe aus Papier auf einem Regal">
-      <p><b>Diese Seite hat dich bis ganz nach unten gezogen.</b> Stell dir vor, deine tut das auch. Oder das, was dich jede Woche Stunden kostet, erledigt sich ab nächstem Monat von selbst. <a href="mailto:hello@quorogroup.com?subject=Was mich aufhält">Erzähl uns, was dich aufhält</a>.</p>
+      <div class="worte">
+        <span class="hook">Diese Seite hat dich bis ganz nach unten gezogen.</span>
+        <p>Stell dir vor, deine tut das auch. Oder das, was dich jede Woche Stunden kostet, erledigt sich ab nächstem Monat von selbst.</p>
+      </div>
+      <a class="knopf primaer" href="mailto:hello@quorogroup.com?subject=Was mich aufhält">Erzähl uns, was dich aufhält</a>
     </div>
   </section>
 
