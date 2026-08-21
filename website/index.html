@@ -39,7 +39,7 @@
    Der eine Kino-Moment ist der Markenwechsel: dasselbe Kundenportal wandert
    beim Scrollen durch drei Beratungsmarken, Gerüst bleibt, Marke wechselt.
    Das ist genau das Versprechen der Plattform, vorgeführt statt versprochen.
-   Marker: WEBSITE-INDEX-V7 (aus Entwurf A; der Kino-Kopf kommt als eigener Abschnitt) */
+   Marker: WEBSITE-INDEX-V8 (aus Entwurf A; der Kino-Kopf kommt als eigener Abschnitt) */
 
 /* ---------- Das Kino: der Kopf setzt sich zusammen ----------
    Fassung 3 (Jonas: hochwertig statt laut). Bildfüllender Kopf, die Kamera
@@ -325,8 +325,8 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:var(--kopfhoehe)}
 .fuenf{margin-top:var(--luft);text-align:center}
 .fuenf h2{margin-bottom:14px}
 .fuenf .vorsatz{max-width:58ch;margin:0 auto;color:var(--nebel-600)}
-.gesichter{display:grid;grid-template-columns:repeat(5,1fr);gap:22px;margin-top:52px}
-.gesichter figure{margin:0}
+.gesichter{display:flex;flex-wrap:wrap;justify-content:center;gap:22px;margin-top:52px}
+.gesichter figure{margin:0;width:calc((100% - 4*22px)/5)}
 .gesichter img{
   width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--radius-karte);
   box-shadow:0 14px 34px rgba(24,21,47,.16);
@@ -342,13 +342,11 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:var(--kopfhoehe)}
 .fuenf .register{max-width:64ch;margin:46px auto 0;font-size:15px;color:var(--nebel-500)}
 .fuenf .register b{color:var(--tinte);font-weight:600}
 @media (max-width:860px){
-  .gesichter{grid-template-columns:repeat(3,1fr);gap:16px}
-  .gesichter figure:nth-child(4){grid-column:1/2}
-  .gesichter figure:nth-child(5){grid-column:2/3}
+  .gesichter{gap:16px}
+  .gesichter figure{width:calc((100% - 2*16px)/3)}
 }
 @media (max-width:520px){
-  .gesichter{grid-template-columns:repeat(2,1fr)}
-  .gesichter figure:nth-child(5){grid-column:1/-1;width:50%;margin-inline:auto}
+  .gesichter figure{width:calc((100% - 16px)/2)}
 }
 @media (prefers-reduced-motion:reduce){.gesichter img{transform:none!important;transition:none}}
 
@@ -493,7 +491,7 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:var(--kopfhoehe)}
   <section class="bahn fuenf">
     <div class="taucht">
       <h2>Hinter dem Kopf stehen fünf.</h2>
-      <p class="vorsatz">Wir kommen aus der Beratung, nicht aus dem Hype. Hannes führt seit 2020 die Quoro Advisory GmbH in Erfurt. Dieses Werkzeug haben wir gebaut, weil es uns dort selbst gefehlt hat.</p>
+      <p class="vorsatz">Hannes führt seit 2020 die Quoro Advisory GmbH in Erfurt. Dieses Werkzeug haben wir gebaut, weil es uns dort selbst gefehlt hat.</p>
     </div>
     <div class="gesichter taucht">
       <figure><img src="bilder/team/hannes.webp" alt="Hannes Freyer"><figcaption><b>Hannes Freyer</b>Geschäftsführer</figcaption></figure>
@@ -502,7 +500,7 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:var(--kopfhoehe)}
       <figure><img src="bilder/team/tobias.webp" alt="Tobias Zwiener"><figcaption><b>Tobias Zwiener</b>Marketing</figcaption></figure>
       <figure><img src="bilder/team/marcel.webp" alt="Marcel Rademacher"><figcaption><b>Marcel Rademacher</b>Recht</figcaption></figure>
     </div>
-    <p class="register taucht">quoroAI GmbH, seit dem 18. August 2026 im Handelsregister des Amtsgerichts Jena unter <b>HRB 525069</b>. Kein Postfach, keine Anonymität: In unseren Verträgen steht, was gilt, nicht was gut klingt.</p>
+    <p class="register taucht">quoroAI GmbH, Bahnhofstraße 38, Erfurt. Amtsgericht Jena, <b>HRB 525069</b>, eingetragen am 18. August 2026.</p>
   </section>
 
   <!-- ---------- Schluss ---------- -->
