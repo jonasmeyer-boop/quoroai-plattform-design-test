@@ -1,8 +1,14 @@
-/* quoroai-plattform-design · website/ · Der Kontakt-Dialog, ein Baustein für
-   alle Seiten. Jeder Mail-CTA öffnet ihn; ohne JavaScript bleibt der
-   mailto-Verweis der Weg. Das Formular beginnt wie das Produkt-Portal mit
-   der Frage, nicht mit Feldern; gesendet wird ehrlich per Mail (mailto mit
-   vorgefülltem Text), es gibt keinen Server. Marker: KONTAKT-V1 */
+/* quoroai-plattform-design · website/ · Der Kontakt-Dialog. Eingebunden auf
+   den Seiten, die einen Mail-CTA tragen (index.html, referenzen.html) — ein
+   CTA mit Klasse `knopf` und mailto-Ziel öffnet ihn. Mailto-Verweise ohne
+   diese Klasse, etwa im Fuß, bleiben bewusst echte Mail-Links.
+   Das Formular beginnt wie das Produkt-Portal mit der Frage, nicht mit
+   Feldern. Gesendet wird an die Supabase-Funktion `contact` (siehe ENDPUNKT
+   weiter unten), die eine Mail an webmaster@quoroai.io auslöst. Schlägt das
+   fehl — auch weil die Sicherheitsregel des Servers den Host noch nicht
+   erlaubt, solange der AVV fehlt —, fällt der Dialog sichtbar auf mailto
+   zurück. Ohne JavaScript bleibt der mailto-Verweis der Weg.
+   Marker: KONTAKT-V4 */
 (function () {
   'use strict';
 
@@ -197,11 +203,8 @@
     karte.innerHTML =
       '<button type="button" class="kd-zu" aria-label="Schließen">&#10005;</button>' +
       '<div class="kd-danke"><div class="kd-haken">&#10003;</div>' +
-      '<h2>' + (ENDPUNKT ? 'Angekommen.' : 'Fast geschafft.') + '</h2>' +
-      '<p>' + (ENDPUNKT
-        ? 'Wir melden uns bei dir, meist am selben Tag. Kein Newsletter, keine Broschüre.'
-        : 'Dein Mailprogramm ist offen und die Nachricht steht schon fertig darin. Einmal senden, dann liegt sie bei uns.') +
-      '</p></div>';
+      '<h2>Angekommen.</h2>' +
+      '<p>Wir melden uns bei dir, meist am selben Tag. Kein Newsletter, keine Broschüre.</p></div>';
     karte.querySelector('.kd-zu').addEventListener('click', schliessen);
   }
 
@@ -227,18 +230,13 @@
     senden.disabled = true;
     senden.textContent = 'Wird gesendet';
 
-    if (!ENDPUNKT) {
-      /* Kein Endpunkt eingetragen: der ehrliche Weg über das Mailprogramm. */
-      senden.disabled = false;
-      senden.textContent = 'Abschicken';
-      mailtoWeg(betreff, leib);
-      danke();
-      return;
-    }
-
     /* Feldnamen wie im bestehenden Auftritt: name, email, message, source.
        Das Thema steht im Text, damit der Wire-Vertrag der Funktion unberührt
-       bleibt (Retention-Sweep und Betroffenen-Export hängen daran). */
+       bleibt. Der neue source-Wert ist geprüft und unbedenklich: der
+       Löschlauf `landing_retention_sweep()` räumt die ganze Tabelle nach
+       Alter (6 Monate, IP nach 30 Tagen) und filtert NICHT nach source
+       (Migration 20260807100200, Zeilen 58 bis 79). Die Zusage in Ziffer 5
+       der Datenschutzerklärung gilt damit auch für Anfragen von hier. */
     fetch(ENDPUNKT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -253,16 +251,25 @@
       if (!a.ok) throw new Error('Absage vom Versand, Status ' + a.status);
       danke();
     }).catch(function () {
-      /* Kein Weg soll verloren gehen: dann eben über das Mailprogramm. */
+      /* Kein Weg darf verloren gehen. Das Mailprogramm allein reicht dafür
+         nicht: auf vielen Firmenrechnern ist keines eingerichtet, dann
+         passiert sichtbar NICHTS und die Nachricht ist weg. Deshalb steht
+         die Adresse hier im Klartext, zum Kopieren, und der Text bleibt im
+         Feld stehen. */
       senden.disabled = false;
       senden.textContent = 'Abschicken';
-      fehler.textContent = 'Der Versand hakt gerade. Wir öffnen dein Mailprogramm.';
-      window.setTimeout(function () { mailtoWeg(betreff, leib); }, 900);
+      fehler.innerHTML = 'Der Versand hakt gerade. Schick uns die Zeilen bitte direkt an ' +
+        '<a href="mailto:' + ZIEL + '">' + ZIEL + '</a>, dein Text bleibt hier stehen. ' +
+        'Wir versuchen es auch über dein Mailprogramm.';
+      window.setTimeout(function () { mailtoWeg(betreff, leib); }, 1200);
     });
   });
 
-  /* Jeder Mail-CTA öffnet den Dialog; das mailto bleibt der Weg ohne Skript. */
-  Array.prototype.forEach.call(document.querySelectorAll('a[href^="mailto:"]'), function (a) {
+  /* Die KNÖPFE öffnen den Dialog; die nackte Adresse im Fuß und in den
+     Rechtstexten bleibt ein echter mailto-Verweis. Wer dort klickt, will
+     schreiben und nicht ausfüllen — und § 5 DDG verlangt eine Adresse, die
+     wirklich eine ist. Ohne Skript bleibt überall das mailto der Weg. */
+  Array.prototype.forEach.call(document.querySelectorAll('a.knopf[href^="mailto:"]'), function (a) {
     a.addEventListener('click', function (ev) {
       ev.preventDefault();
       oeffnen();

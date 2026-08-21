@@ -30,7 +30,8 @@ Stand 2026-08-21: **go-live-fertig**, bis auf die zwei Sperren am Ende.
 | `einwilligung.js` | Cookie-Banner und Google Analytics, portiert aus dem alten Auftritt. |
 | `zahlen.js` | Tarife, Staffel, Gebühr. Kopie aus `entwuerfe/preise.js`. |
 | `sitemap.xml`, `robots.txt`, `manifest.webmanifest`, `llms.txt` | Für Suchmaschinen und KI-Antwortmaschinen. |
-| `umleitungen.caddy` | 42 dauerhafte Umleitungen der alten Adressen. |
+| `umleitungen.caddy` | Dauerhafte Umleitungen der alten Adressen, jede mit und ohne Schrägstrich. |
+| `ausrollen.sh` | Baut den Server-Ordner. Zieht alle Pfade absolut und prüft sich selbst nach. |
 | `AUSROLLEN.md` | Wie die Seiten auf den Server kommen und was danach zu prüfen ist. |
 
 ## Woher die Angaben stammen
