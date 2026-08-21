@@ -1,0 +1,182 @@
+/* quoroai-plattform-design · website/ · Der Kontakt-Dialog, ein Baustein für
+   alle Seiten. Jeder Mail-CTA öffnet ihn; ohne JavaScript bleibt der
+   mailto-Verweis der Weg. Das Formular beginnt wie das Produkt-Portal mit
+   der Frage, nicht mit Feldern; gesendet wird ehrlich per Mail (mailto mit
+   vorgefülltem Text), es gibt keinen Server. Marker: KONTAKT-V1 */
+(function () {
+  'use strict';
+
+  var css = `
+  .kd-schleier{
+    position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:20px;
+    background:rgba(253,253,254,.72);
+    backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);
+    opacity:0;pointer-events:none;transition:opacity .35s cubic-bezier(.16,1,.3,1);
+  }
+  .kd-schleier.da{opacity:1;pointer-events:auto}
+  .kd-blatt{
+    position:absolute;mix-blend-mode:multiply;pointer-events:none;
+    -webkit-mask-image:radial-gradient(closest-side,#000 60%,transparent 98%);
+    mask-image:radial-gradient(closest-side,#000 60%,transparent 98%);
+    animation:kd-schwebt 6s ease-in-out infinite alternate;
+  }
+  @keyframes kd-schwebt{from{transform:translateY(0) rotate(var(--dreh,0deg))}to{transform:translateY(-14px) rotate(var(--dreh,0deg))}}
+  .kd-karte{
+    position:relative;width:min(680px,100%);max-height:calc(100svh - 40px);overflow:auto;
+    border-radius:24px;padding:clamp(26px,4vw,44px);
+    background:rgba(255,255,255,.86);
+    backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
+    border:1px solid rgba(255,255,255,.85);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 40px 110px rgba(59,52,134,.30);
+    transform:translateY(22px) scale(.985);filter:blur(6px);
+    transition:transform .45s cubic-bezier(.16,1,.3,1),filter .45s cubic-bezier(.16,1,.3,1);
+  }
+  .kd-schleier.da .kd-karte{transform:none;filter:none}
+  .kd-zu{
+    position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:50%;
+    border:0.5px solid var(--nebel-200);background:rgba(255,255,255,.8);cursor:pointer;
+    display:grid;place-items:center;color:var(--nebel-600);font-size:17px;line-height:1;
+    transition:color .2s,border-color .2s;
+  }
+  .kd-zu:hover{color:var(--tinte);border-color:var(--lila-400)}
+  .kd-karte h2{font-size:clamp(26px,3.4vw,40px);line-height:1.1;max-width:14ch}
+  .kd-karte .kd-unter{margin-top:8px;font-size:15px;color:var(--nebel-600)}
+  .kd-themen{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+  .kd-themen button{
+    padding:9px 16px;border-radius:999px;border:0.5px solid var(--nebel-200);
+    background:rgba(255,255,255,.7);font:inherit;font-size:14px;font-weight:600;
+    color:var(--nebel-600);cursor:pointer;transition:all .2s cubic-bezier(.16,1,.3,1);
+  }
+  .kd-themen button[aria-pressed=true]{
+    border-color:var(--lila-600);color:var(--lila-800);background:var(--lila-050);
+    box-shadow:0 0 0 1px var(--lila-600);
+  }
+  .kd-frage{position:relative;margin-top:18px}
+  .kd-frage textarea{
+    width:100%;min-height:120px;padding:16px 18px;font:inherit;font-size:16px;
+    color:var(--tinte);background:#fff;border:0.5px solid var(--nebel-300);
+    border-radius:16px;resize:vertical;outline:none;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .kd-frage textarea:focus{border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+  .kd-zeile{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  .kd-zeile input{
+    width:100%;min-height:48px;padding:0 16px;font:inherit;font-size:15px;color:var(--tinte);
+    background:#fff;border:0.5px solid var(--nebel-300);border-radius:14px;outline:none;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .kd-zeile input:focus{border-color:var(--lila-500);box-shadow:0 0 0 4px var(--lila-100)}
+  .kd-fuss{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:20px;flex-wrap:wrap}
+  .kd-fuss .kd-wort{font-size:13px;color:var(--nebel-500);max-width:34ch}
+  .kd-senden{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    min-height:50px;padding:0 26px;border-radius:999px;border:0;cursor:pointer;
+    font:inherit;font-size:16px;font-weight:600;color:#fff;
+    background:linear-gradient(180deg,var(--lila-500),var(--lila-700));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 5px rgba(24,21,47,.22),0 10px 24px rgba(111,99,232,.38);
+    position:relative;overflow:hidden;
+    transition:transform .12s cubic-bezier(.16,1,.3,1),box-shadow .25s cubic-bezier(.16,1,.3,1);
+  }
+  .kd-senden:active{transform:scale(.97)}
+  .kd-senden::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%) no-repeat -120px 0/100px 100%;
+  }
+  @media (hover:hover){
+    .kd-senden:hover::after{animation:kd-glanz 1.6s ease-in-out infinite}
+    .kd-senden:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 5px rgba(24,21,47,.22),0 16px 36px rgba(111,99,232,.5)}
+  }
+  @keyframes kd-glanz{0%{background-position:-120px 0}60%,100%{background-position:calc(100% + 120px) 0}}
+  @media (max-width:600px){
+    .kd-zeile{grid-template-columns:1fr}
+    .kd-fuss{flex-direction:column;align-items:stretch;text-align:center}
+    .kd-senden{width:100%}
+    .kd-blatt{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .kd-schleier,.kd-karte{transition:none}
+    .kd-blatt{animation:none}
+    .kd-senden:hover::after{animation:none}
+  }`;
+
+  var stil = document.createElement('style');
+  stil.textContent = css;
+  document.head.appendChild(stil);
+
+  var wurzel = document.createElement('div');
+  wurzel.className = 'kd-schleier';
+  wurzel.setAttribute('role', 'dialog');
+  wurzel.setAttribute('aria-modal', 'true');
+  wurzel.setAttribute('aria-label', 'Erzähl uns, was dich aufhält');
+  wurzel.innerHTML = `
+    <img class="kd-blatt" src="bilder/flieger.jpg" alt="" style="width:200px;top:8%;right:10%;--dreh:6deg">
+    <img class="kd-blatt" src="bilder/blasen.jpg" alt="" style="width:230px;bottom:7%;left:7%;--dreh:-4deg;animation-delay:1.4s">
+    <form class="kd-karte" novalidate>
+      <button type="button" class="kd-zu" aria-label="Schließen">&#10005;</button>
+      <h2>Was hält dich auf?</h2>
+      <p class="kd-unter">Schreib es, wie du es einem Kollegen erzählen würdest. Fachbegriffe sind unser Problem, nicht deins.</p>
+      <div class="kd-themen" role="group" aria-label="Worum geht es?">
+        <button type="button" data-thema="Eine Website">Eine Website</button>
+        <button type="button" data-thema="Software oder Plattform">Software / Plattform</button>
+        <button type="button" data-thema="Automatisierung">Automatisierung</button>
+        <button type="button" data-thema="Die quoroAI-Plattform">Die Plattform</button>
+      </div>
+      <div class="kd-frage">
+        <textarea name="frage" placeholder="Zum Beispiel: Wir tippen jede Woche dieselben Angebote von Hand, und keiner weiß, wo die aktuelle Preisliste liegt." aria-label="Was hält dich auf?"></textarea>
+      </div>
+      <div class="kd-zeile">
+        <input type="text" name="name" placeholder="Dein Name" aria-label="Dein Name" autocomplete="name">
+        <input type="email" name="mail" placeholder="Deine E-Mail" aria-label="Deine E-Mail" autocomplete="email">
+      </div>
+      <div class="kd-fuss">
+        <span class="kd-wort">Landet als Mail bei uns. Antwort von einem Menschen, meist am selben Tag.</span>
+        <button type="submit" class="kd-senden">Abschicken</button>
+      </div>
+    </form>`;
+  document.body.appendChild(wurzel);
+
+  var karte = wurzel.querySelector('.kd-karte');
+  var themen = Array.prototype.slice.call(wurzel.querySelectorAll('.kd-themen button'));
+  var thema = '';
+
+  function oeffnen() {
+    wurzel.classList.add('da');
+    document.body.style.overflow = 'hidden';
+    window.setTimeout(function () { wurzel.querySelector('textarea').focus(); }, 380);
+  }
+  function schliessen() {
+    wurzel.classList.remove('da');
+    document.body.style.overflow = '';
+  }
+
+  themen.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var war = b.getAttribute('aria-pressed') === 'true';
+      themen.forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+      if (!war) { b.setAttribute('aria-pressed', 'true'); thema = b.dataset.thema; }
+      else { thema = ''; }
+    });
+  });
+
+  wurzel.querySelector('.kd-zu').addEventListener('click', schliessen);
+  wurzel.addEventListener('click', function (ev) { if (ev.target === wurzel) schliessen(); });
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') schliessen(); });
+
+  karte.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var frage = karte.querySelector('[name=frage]').value.trim();
+    var name = karte.querySelector('[name=name]').value.trim();
+    var betreff = thema ? thema + ': was mich aufhält' : 'Was mich aufhält';
+    var leib = frage + (name ? '\n\n' + name : '');
+    location.href = 'mailto:hello@quorogroup.com?subject=' +
+      encodeURIComponent(betreff) + '&body=' + encodeURIComponent(leib);
+  });
+
+  /* Jeder Mail-CTA öffnet den Dialog; das mailto bleibt der Weg ohne Skript. */
+  Array.prototype.forEach.call(document.querySelectorAll('a[href^="mailto:"]'), function (a) {
+    a.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      oeffnen();
+    });
+  });
+})();
