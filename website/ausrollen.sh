@@ -44,7 +44,7 @@ cp "$quelle"/googlefb0080e3f9d15d81.html "$quelle"/50ce7df4a14c418306e7037f455b3
 find "$quelle"/wurzel -maxdepth 1 -type f ! -name 'LIESMICH.md' -exec cp {} "$bau"/ \;
 cp "$quelle"/index.html "$quelle"/404.html "$bau"/
 
-for paar in "plattform.html:plattform" "referenzen.html:arbeiten" \
+for paar in "berater.html:berater" "plattform.html:plattform" "referenzen.html:arbeiten" \
             "impressum.html:impressum" "datenschutz.html:datenschutz" "agb.html:agb"; do
   datei="${paar%%:*}"; ordner="${paar##*:}"
   mkdir -p "$bau/$ordner"
@@ -54,7 +54,8 @@ done
 python3 - "$bau" <<'PY'
 import glob, os, re, sys
 ziel = sys.argv[1]
-adressen = {'index.html': '/', 'plattform.html': '/plattform/', 'referenzen.html': '/arbeiten/',
+adressen = {'index.html': '/', 'berater.html': '/berater/', 'plattform.html': '/plattform/',
+            'referenzen.html': '/arbeiten/',
             'impressum.html': '/impressum/', 'datenschutz.html': '/datenschutz/', 'agb.html': '/agb/'}
 
 # --- Seiten ---

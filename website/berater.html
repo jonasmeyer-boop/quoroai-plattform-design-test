@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>quoroAI — Software, die mitdenkt</title>
+<title>Der Berater für deine Firma — quoroAI</title>
 <meta name="description" content="Wir bauen Software, die mitdenkt: einen Berater für deine Unterlagen, dieselbe Software unter der Marke deiner Beratung, und alles andere, was dich Zeit kostet. Mandate, Termine, Zeiten und Abrechnung im selben Haus.">
 <link rel="icon" href="bilder/favicon.ico" sizes="any">
 <link rel="icon" href="bilder/quoro-icon.svg" type="image/svg+xml">
@@ -39,7 +39,7 @@
    Der eine Kino-Moment ist der Markenwechsel: dasselbe Kundenportal wandert
    beim Scrollen durch drei Beratungsmarken, Gerüst bleibt, Marke wechselt.
    Das ist genau das Versprechen der Plattform, vorgeführt statt versprochen.
-   Marker: WEBSITE-INDEX-V10 (aus Entwurf A; der Kino-Kopf kommt als eigener Abschnitt) */
+   Marker: BERATER-V1 (aus Entwurf A; der Kino-Kopf kommt als eigener Abschnitt) */
 
 /* ---------- Das Kino: der Kopf setzt sich zusammen ----------
    Fassung 3 (Jonas: hochwertig statt laut). Bildfüllender Kopf, die Kamera
@@ -389,6 +389,116 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:var(--kopfhoehe)}
   .wege{grid-template-columns:1fr;gap:16px}
   .dreimal .vorsatz{margin-bottom:36px}
 }
+
+/* ---------- Kopf einer Unterseite: ruhig, ohne zweite Show ---------- */
+.seitenkopf{
+  display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;
+  padding-top:calc(var(--kopfhoehe) + 56px);
+}
+.seitenkopf h1{margin-top:18px}
+.seitenkopf .vorsatz{margin-top:18px;max-width:52ch;color:var(--nebel-600)}
+.seitenkopf .knopfreihe{margin-top:28px}
+.seitenkopf .seitenbild{
+  width:100%;max-width:400px;justify-self:end;
+  /* multiply lässt das Weiß des Bildes verschwinden, das Objekt bleibt stehen.
+     Voraussetzung ist ein Bild, dessen Grund WIRKLICH 255 ist — sonst zeichnet
+     sich ein Kasten ab. Deshalb ist der Weißpunkt vorher angehoben. */
+  mix-blend-mode:multiply;
+}
+@media (max-width:860px){
+  .seitenkopf{grid-template-columns:1fr;gap:24px;padding-top:calc(var(--kopfhoehe) + 34px)}
+  .seitenkopf .seitenbild{max-width:320px;justify-self:center;order:-1}
+}
+/* ---------- Die Tour: fünf Flächen als Scroll-Kino ----------
+   Die Seite beginnt direkt im Produkt. Gepinnter Lauf, fünf Folien:
+   das Bild blendet und setzt sich, der Text wechselt links, unten läuft
+   die Fortschrittslinie. Ruhige Fassung: die Folien untereinander. */
+.tour{height:560vh;position:relative}
+.tour .haftet{position:sticky;top:0;height:100svh;overflow:hidden;background:var(--grund);padding-top:var(--kopfhoehe)}
+.tour .folie{position:absolute;inset:var(--kopfhoehe) 0 0 0;opacity:0;pointer-events:none;
+  display:grid;grid-template-columns:.72fr 1.28fr;gap:44px;align-items:center;
+  padding:0 clamp(24px,5vw,80px)}
+.tour .folie .rahmen{
+  border-radius:18px;overflow:hidden;border:0.5px solid var(--nebel-200);
+  box-shadow:0 30px 80px rgba(59,52,134,.20);background:#fff;will-change:transform;
+}
+.tour .folie .rahmen img{display:block;width:100%;height:auto}
+.tour .folie .kicker{font-size:13px;font-weight:700;color:var(--lila-700);letter-spacing:.05em}
+.tour .folie h3{margin-top:8px;font-size:clamp(24px,2.6vw,36px);line-height:1.15}
+.tour .folie p{margin-top:10px;font-size:16.5px;color:var(--nebel-700);max-width:38ch}
+.tour .fortschritt{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--nebel-200)}
+.tour .fortschritt i{display:block;height:100%;width:calc(var(--stand,0) * 100%);background:linear-gradient(90deg,var(--lila-400),var(--lila-600))}
+@media (max-width:900px){
+  .tour{height:480vh}
+  .tour .folie{grid-template-columns:1fr;gap:16px;align-content:center;padding:0 16px}
+  .tour .folie .rahmen{order:-1}
+  .tour .folie h3{font-size:clamp(21px,5.6vw,26px)}
+  .tour .folie p{font-size:14.5px;max-width:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .tour{height:auto}
+  .tour .haftet{position:static;height:auto;overflow:visible;padding-top:calc(var(--kopfhoehe) + 30px)}
+  .tour .folie{position:static;opacity:1;pointer-events:auto;margin:0 auto 56px;max-width:min(1180px,100% - 48px);padding:0}
+  .tour .fortschritt{display:none}
+}
+
+/* ---------- Preise: drei Wege ohne Tabelle ---------- */
+#preise,#fragen{margin-top:var(--luft)}
+.kopfzeile{text-align:center;max-width:64ch;margin:0 auto 46px}
+.kopfzeile p{margin:14px auto 0;color:var(--nebel-600)}
+.preiswege{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.preisweg{background:var(--flaeche);border:0.5px solid var(--nebel-200);border-radius:var(--radius-karte);padding:28px 26px}
+.preisweg .name{display:block;font-family:var(--schrift-schau);font-weight:600;font-size:20px;margin-bottom:10px}
+.preisweg p{font-size:15.5px;color:var(--nebel-600);max-width:none}
+.preisnote{max-width:62ch;margin:34px auto 0;text-align:center;font-size:15px;color:var(--nebel-500)}
+@media (max-width:860px){.preiswege{grid-template-columns:1fr;gap:14px}}
+
+/* ---------- Fragen ---------- */
+.fragen{margin-top:36px;border-top:0.5px solid var(--nebel-200)}
+.fragen details{border-bottom:0.5px solid var(--nebel-200)}
+.fragen summary{
+  list-style:none;cursor:pointer;display:flex;align-items:baseline;justify-content:space-between;gap:20px;
+  padding:22px 0;font-family:var(--schrift-schau);font-weight:600;font-size:clamp(18px,2vw,23px);letter-spacing:-.01em;
+}
+.fragen summary::-webkit-details-marker{display:none}
+.fragen summary .zeichen{
+  flex-shrink:0;width:26px;height:26px;border-radius:50%;position:relative;align-self:center;
+  border:1px solid var(--nebel-300);transition:transform .3s var(--kurve),border-color .3s var(--kurve);
+}
+.fragen summary .zeichen::before,.fragen summary .zeichen::after{
+  content:"";position:absolute;left:50%;top:50%;background:var(--nebel-600);
+  transform:translate(-50%,-50%);transition:background .3s;
+}
+.fragen summary .zeichen::before{width:10px;height:1.5px}
+.fragen summary .zeichen::after{width:1.5px;height:10px}
+.fragen details[open] summary .zeichen{transform:rotate(45deg);border-color:var(--lila-500)}
+.fragen details[open] summary .zeichen::before,.fragen details[open] summary .zeichen::after{background:var(--lila-700)}
+.fragen .antworttext{padding:0 46px 24px 0;font-size:16px;color:var(--nebel-700);max-width:68ch}
+
+/* ---------- der Abend-Kasten als Abschluss (wie auf der Startseite) ---------- */
+.detail-schluss{padding-bottom:0}
+.detail-schluss .kasten{
+  border-radius:32px;padding:clamp(40px,6vw,80px);color:#fff;position:relative;overflow:hidden;
+  min-height:clamp(320px,36vw,440px);display:flex;flex-direction:column;justify-content:center;
+  background:
+    linear-gradient(100deg, rgba(30,24,72,.94) 0%, rgba(59,52,134,.78) 46%, rgba(24,21,47,.24) 78%, rgba(24,21,47,.55) 100%),
+    url('bilder/abend-kopf.webp') right center/cover no-repeat;
+}
+.detail-schluss .kasten::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 82% 40%,rgba(255,190,120,.14),transparent 55%);
+}
+.detail-schluss h2{color:#fff;font-size:clamp(28px,4vw,52px);max-width:17ch}
+.detail-schluss p{margin-top:14px;font-size:17px;color:rgba(255,255,255,.82);max-width:44ch}
+.detail-schluss .knopfreihe{margin-top:28px;position:relative;z-index:1}
+.detail-schluss .knopf.hell{background:#fff;color:var(--lila-800);box-shadow:0 12px 30px rgba(24,21,47,.28)}
+.detail-schluss .knopf.klar{background:rgba(255,255,255,.14);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.4)}
+@media (max-width:760px){
+  .detail-schluss .kasten{background:
+    linear-gradient(160deg, rgba(30,24,72,.94) 0%, rgba(59,52,134,.82) 60%, rgba(24,21,47,.5) 100%),
+    url('bilder/abend-kopf.webp') center 20%/cover no-repeat}
+  .detail-schluss .knopf{width:100%}
+}
 </style>
 </head>
 <body>
@@ -398,8 +508,8 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:var(--kopfhoehe)}
     <a class="wortmarke" href="#oben"><img src="bilder/quoro-icon.svg" alt=""><span>quoroAI</span></a>
     <button class="menue" type="button" aria-label="Menü" aria-expanded="false"><span></span></button>
     <nav>
-      <a href="index.html" aria-current="page">quoroAI</a>
-      <a href="berater.html">Der Berater</a>
+      <a href="index.html">quoroAI</a>
+      <a href="berater.html" aria-current="page">Der Berater</a>
       <a href="plattform.html">Für Beratungen</a>
       <a href="referenzen.html">Arbeiten</a>
       <a class="knopf primaer" href="#schluss">Sprich mit uns</a>
@@ -409,103 +519,141 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:var(--kopfhoehe)}
 
 <main id="oben">
 
-  <!-- ---------- Das Kino: der Kopf setzt sich zusammen ---------- -->
-  <section class="kino" aria-label="Aus tausend Belegen setzt sich ein Kopf zusammen">
-    <div class="haftet">
-      <div class="lichthof" id="lichthof"></div>
-      <canvas id="leinwand" aria-hidden="true"></canvas>
-      <div id="blaetter" aria-hidden="true"></div>
-      <div class="spruch" id="spruch">
-        <span>Expand Horizons.</span>
-        <span class="zwei">Shape Tomorrow.</span>
-      </div>
-      <div class="wort" data-fenster="0.035,0.26">
-        <div class="gross">Tausend <em>Belege</em>.</div>
-        <span class="klein">Bilanzen, Verträge, Auswertungen, Protokolle. In jeder Firma liegt das Wissen in Ordnern, Postfächern und Köpfen.</span>
-      </div>
-      <div class="wort" data-fenster="0.31,0.52">
-        <div class="gross">Ein <em>Gedanke</em>.</div>
-        <span class="klein">Software kann das lesen und darin weiterdenken. Nicht im Allgemeinen, sondern in genau diesem Fall.</span>
-      </div>
-      <div class="wort" data-fenster="0.60,0.84">
-        <div class="gross">Ein <em>Kopf</em>.</div>
-        <span class="klein">Der antwortet, wenn jemand fragt. Um 23 Uhr genauso wie um 9, und mit der Quelle unter jeder Zahl.</span>
-      </div>
-      <div class="schleierlinks" id="schleierlinks"></div>
-      <div class="finale" id="finale">
-        <span class="aufhaenger"><img src="bilder/quoro-icon.svg" alt="">quoroAI aus Erfurt</span>
-        <h1 style="margin-top:20px">Wir bauen <em>Software, die mitdenkt</em>.</h1>
-        <p class="vorsatz">Einen Berater, der deine Unterlagen kennt. Dieselbe Software unter der Marke deiner Beratung. Und alles andere, was dich jede Woche Stunden kostet.</p>
-        <div class="knopfreihe">
-          <a class="knopf primaer" href="#dreimal">Was wir bauen</a>
-          <a class="knopf leise" href="#schluss">Sprich mit uns</a>
-        </div>
-        <p class="unterzeile">Software aus Erfurt, Daten in Frankfurt und Falkenstein.</p>
-      </div>
-      <div class="wink" id="wink" aria-hidden="true"><i></i></div>
-      <div class="fortschritt" id="fortschritt" aria-hidden="true"><i></i></div>
-    </div>
-  </section>
-
-  <!-- ---------- Die drei Wege ---------- -->
-  <section class="bahn">
-    <div class="dreimal taucht" id="dreimal">
-      <h2>Drei Wege, dasselbe Handwerk.</h2>
-      <p class="vorsatz">Den Kopf von oben geben wir auf zwei Arten weiter. Und wenn du etwas ganz anderes brauchst, bauen wir das auch.</p>
-      <div class="wege">
-        <a class="weg" href="berater.html">
-          <span class="nummer">Für deine Firma</span>
-          <h3>Der Kopf, den du selbst fragst.</h3>
-          <p>Deine Unterlagen, deine Fragen, deine Antworten. Betrieben von uns, für Unternehmen jeder Größe.</p>
-          <span class="mehr">Den Berater ansehen</span>
-        </a>
-        <a class="weg" href="plattform.html">
-          <span class="nummer">Für Unternehmensberatungen</span>
-          <h3>Derselbe Kopf, unter deiner Marke.</h3>
-          <p>Deine Mandanten fragen auf deiner Adresse, in deiner Methodik. Du liest mit, und die Arbeit rechnet sich gleich mit ab.</p>
-          <span class="mehr">Die Plattform ansehen</span>
-        </a>
-        <a class="weg" href="referenzen.html">
-          <span class="nummer">Wenn du etwas anderes brauchst</span>
-          <h3>Websites, Software, Automatisierungen.</h3>
-          <p>Diese Seite hier haben wir gebaut. Und das, was dich jede Woche Stunden kostet, erledigt sich ab nächstem Monat von selbst.</p>
-          <span class="mehr">Was wir bauen</span>
-        </a>
-      </div>
-    </div>
-
-  </section>
-
-  <!-- ---------- Die fünf ---------- -->
-  <section class="bahn fuenf">
+  <!-- ---------- Kopf der Berater-Seite ---------- -->
+  <section class="bahn seitenkopf">
     <div class="taucht">
-      <h2>Hinter dem Kopf stehen fünf.</h2>
-      <p class="vorsatz">Hannes führt seit 2020 die Quoro Advisory GmbH in Erfurt. Aus der Beratung kam die Frage, aus der Werkstatt kam die Antwort.</p>
+      <span class="aufhaenger"><img src="bilder/quoro-icon.svg" alt="">Für Unternehmen jeder Größe</span>
+      <h1><em>Ein zweiter Kopf</em> für deine Firma.</h1>
+      <p class="vorsatz">Die Frage, für die du dir sonst einen Berater holst, beantwortet er aus deinen eigenen Unterlagen. Mit der Quelle unter jeder Zahl, und um 23 Uhr genauso wie um 9.</p>
+      <div class="knopfreihe">
+        <a class="knopf primaer" href="#schluss">Sprich mit uns</a>
+        <a class="knopf leise" href="index.html">Wer wir sind</a>
+      </div>
     </div>
-    <div class="gesichter taucht">
-      <figure><img src="bilder/team/hannes.webp" alt="Hannes Freyer"><figcaption><b>Hannes Freyer</b>Gesellschafter, Geschäftsführer</figcaption></figure>
-      <figure><img src="bilder/team/jonas.webp" alt="Jonas Meyer"><figcaption><b>Jonas Meyer</b>Gesellschafter, Entwicklung</figcaption></figure>
-      <figure><img src="bilder/team/lucy.webp" alt="Lucy Eva Baumann"><figcaption><b>Lucy Eva Baumann</b>Personal</figcaption></figure>
-      <figure><img src="bilder/team/tobias.webp" alt="Tobias Zwiener"><figcaption><b>Tobias Zwiener</b>Marketing</figcaption></figure>
-      <figure><img src="bilder/team/marcel.webp" alt="Marcel Rademacher"><figcaption><b>Marcel Rademacher</b>Recht</figcaption></figure>
+    <img class="seitenbild taucht" src="bilder/kopf-seite.webp" alt="Ein Kopf aus Papier">
+  </section>
+
+
+  <!-- ---------- Die Tour: fünf Flächen aus dem laufenden Entwurf ---------- -->
+  <section id="tour" class="tour" aria-label="Der Berater in fünf Bildern">
+    <div class="haftet">
+      <div class="folie" data-fenster="-0.15,0.2">
+        <div class="text">
+          <span class="kicker">DIE FRAGE</span>
+          <h3>Es beginnt mit einer Frage, nicht mit einem Menü.</h3>
+          <p>Du schreibst, was dich beschäftigt. Keine Maske, keine Kategorien, kein Formular vorher.</p>
+        </div>
+        <div class="rahmen"><img src="bilder/berater/gespraech.webp" alt="Der Berater fragt: Womit ringst du gerade?"></div>
+      </div>
+      <div class="folie" data-fenster="0.2,0.4">
+        <div class="text">
+          <span class="kicker">DEIN TAG</span>
+          <h3>Was ansteht, steht vorne.</h3>
+          <p>Offene Punkte, Fristen und was wir von dir brauchen. Alles auf einer Seite, ohne Suchen.</p>
+        </div>
+        <div class="rahmen"><img src="bilder/berater/uebersicht.webp" alt="Die Übersicht mit offenen Punkten und Fristen"></div>
+      </div>
+      <div class="folie" data-fenster="0.4,0.6">
+        <div class="text">
+          <span class="kicker">DEINE PAPIERE</span>
+          <h3>Deine Unterlagen, mit jeder Fassung.</h3>
+          <p>Verträge, Abschlüsse, Auswertungen. Er weiß, welche Fassung gilt, und sagt dir, wenn eine fehlt.</p>
+        </div>
+        <div class="rahmen"><img src="bilder/berater/unterlagen.webp" alt="Die Unterlagen mit Fassungen und Freigaben"></div>
+      </div>
+      <div class="folie" data-fenster="0.6,0.8">
+        <div class="text">
+          <span class="kicker">WAS DAZU GEHÖRT</span>
+          <h3>Und wenn ein Mensch ranmuss, buchst du einen.</h3>
+          <p>Manches gehört nicht in ein Gespräch mit Software. Dann steht der Termin daneben, mit Preis.</p>
+        </div>
+        <div class="rahmen"><img src="bilder/berater/leistungen.webp" alt="Leistungen und buchbare Termine"></div>
+      </div>
+      <div class="folie" data-fenster="0.8,1.05">
+        <div class="text">
+          <span class="kicker">DIE RECHNUNG</span>
+          <h3>Was es kostet, steht vorher da.</h3>
+          <p>Jede Position mit Datum und Nachweis. Keine Sammelposten, keine Überraschung am Monatsende.</p>
+        </div>
+        <div class="rahmen"><img src="bilder/berater/rechnungen.webp" alt="Rechnungen mit Positionen und Nachweisen"></div>
+      </div>
+      <div class="fortschritt" aria-hidden="true"><i></i></div>
     </div>
-    <p class="register taucht">quoroAI GmbH, Bahnhofstraße 38, Erfurt. Amtsgericht Jena, <b>HRB 525069</b>, eingetragen am 18. August 2026.</p>
+  </section>
+
+  <!-- ---------- Preise ---------- -->
+  <section id="preise" class="bahn">
+    <div class="kopfzeile taucht">
+      <h2>Was es kostet.</h2>
+      <p>Ein fester Betrag im Monat, und du weißt vorher, was drin ist. Keine Stundensätze, keine Abrechnung nach Aufwand, keine Nachforderung am Monatsende.</p>
+    </div>
+    <div class="preiswege">
+      <div class="preisweg taucht">
+        <span class="name">Der Berater</span>
+        <p>Fragen, Unterlagen, Verlauf. Der Umfang bestimmt den Betrag, und der steht vor dem ersten Klick fest.</p>
+      </div>
+      <div class="preisweg taucht">
+        <span class="name">Ein Mensch dazu</span>
+        <p>Wo es haftungsrelevant wird, buchst du einen Berater von uns. Je Termin, mit Preis daneben, ohne Vertrag darüber.</p>
+      </div>
+      <div class="preisweg taucht">
+        <span class="name">Was nicht kommt</span>
+        <p>Keine Einrichtungsgebühr, keine Mindestlaufzeit, keine Kündigungsfrist. Monatlich, und du gehst, wann du willst.</p>
+      </div>
+    </div>
+    <p class="preisnote taucht">Die Zahl nennen wir im Gespräch, nicht in einer Tabelle mit Sternchen: sie hängt daran, wie viel du fragst und wie viel wir für dich lesen. Ein Anruf, und du weißt es.</p>
+  </section>
+
+  <!-- ---------- Fragen ---------- -->
+  <section id="fragen" class="bahn">
+    <div class="kopfzeile taucht">
+      <h2>Was du jetzt fragst.</h2>
+    </div>
+    <div class="fragen taucht">
+      <details>
+        <summary>Was, wenn er Unsinn erzählt?<span class="zeichen"></span></summary>
+        <div class="antworttext">
+          <p>Unter jeder Zahl steht das Papier, aus dem sie kommt. Du kannst jeden Satz nachschlagen, bevor du dich darauf verlässt. Und wo er nichts findet, sagt er das, statt sich etwas auszudenken.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Ersetzt das meinen Steuerberater?<span class="zeichen"></span></summary>
+        <div class="antworttext">
+          <p>Nein, und er behauptet es auch nicht. Er ersetzt die Stunden davor: sortieren, nachschlagen, vorbereiten. Was Rechts- oder Steuerberatung ist, bleibt bei denen, die dafür haften.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Lernt er aus meinen Unterlagen?<span class="zeichen"></span></summary>
+        <div class="antworttext">
+          <p>Nein. Deine Inhalte trainieren kein Modell, weder unseres noch das eines Anbieters. Sie liegen in der EU und werden gelöscht, wenn du gehst.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Wie viel muss ich vorbereiten?<span class="zeichen"></span></summary>
+        <div class="antworttext">
+          <p>Wenig. Du lädst hoch, was du hast, auch unsortiert. Was fehlt, sagt er dir, statt darauf zu warten.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Ich bin klein. Lohnt sich das?<span class="zeichen"></span></summary>
+        <div class="antworttext">
+          <p>Die Frage nach dem Preis eines Auftrags kostet dich dieselbe Stunde, ob du zehn oder tausend Leute hast. Bei zehn tut sie nur mehr weh, weil du sie selbst hast.</p>
+        </div>
+      </details>
+    </div>
   </section>
 
   <!-- ---------- Schluss ---------- -->
   <section id="schluss" class="bahn">
-    <div class="schluss taucht">
-      <h2>Erzähl uns, was dich aufhält.</h2>
-      <p>Eine Frage, ein Projekt oder nur eine Vermutung, dass es besser geht. Wir sagen dir, ob wir das können, und was es kostet.</p>
-      <div class="knopfreihe">
-        <a class="knopf hell" href="mailto:hello@quorogroup.com?subject=Was mich aufhält">Sprich mit uns</a>
-        <a class="knopf klar" href="referenzen.html">Unsere Arbeiten</a>
+    <div class="detail-schluss taucht">
+      <div class="kasten">
+        <h2>Die nächste Frage kommt heute Abend.</h2>
+        <p>Erzähl uns, welche das ist. Wir sagen dir, ob er sie beantworten kann, und was das kostet.</p>
+        <div class="knopfreihe">
+          <a class="knopf hell" href="mailto:hello@quorogroup.com?subject=Meine Frage an quoroAI">Sprich mit uns</a>
+          <a class="knopf klar" href="index.html">Wer wir sind</a>
+        </div>
       </div>
-    </div>
-    <div class="signatur taucht">
-      <p>Läuft unter meinem Namen und meiner eingetragenen Firma.</p>
-      <span class="name">Hannes Freyer</span>
-      <span class="rolle">Geschäftsführer, quoroAI GmbH, Erfurt</span>
     </div>
   </section>
 
@@ -645,217 +793,6 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:var(--kopfhoehe)}
   });
 })();
 </script>
-<script>
-/* Das Kino, Fassung 4: zwei Akte. Erst setzen sich die Belege zum Kopf
-   zusammen (61 Bilder), dann dreht sich der Kopf einmal um die eigene
-   Achse (60 Bilder) unter dem dritten Schriftzug. Die Blätter fliegen mit
-   echter 3D-Kippung herein. Beide Bildfolgen teilen sich eine Leinwand;
-   der Übergang ist nahtlos, weil die Drehung mit dem fertigen Kopf beginnt. */
-(function () {
-  'use strict';
-  var ruhig = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var FLUG = 61, AUFBAU = 61, DREHUNG = 61;
-  var GESAMT = FLUG + AUFBAU + DREHUNG;
-  function PFAD(i) {
-    if (i < FLUG) return 'bilder/kino/flug-' + String(i + 1).padStart(3, '0') + '.webp';
-    i -= FLUG;
-    if (i < AUFBAU) return 'bilder/kino/kopf-' + String(i + 1).padStart(3, '0') + '.webp';
-    return 'bilder/kino/dreh-' + String(i - AUFBAU + 1).padStart(3, '0') + '.webp';
-  }
-
-  var leinwand = document.getElementById('leinwand');
-  var stift = leinwand.getContext('2d');
-  var kino = document.querySelector('.kino');
-  var lichthof = document.getElementById('lichthof');
-  var finale = document.getElementById('finale');
-  var schleierlinks = document.getElementById('schleierlinks');
-  var fortschritt = document.getElementById('fortschritt');
-  var wink = document.getElementById('wink');
-  var spruch = document.getElementById('spruch');
-  var worte = Array.prototype.slice.call(document.querySelectorAll('.kino .wort'));
-
-  /* ---------- Bilder: Aufbau zuerst, die Drehung gestaffelt danach ---------- */
-  var vorrat = new Array(GESAMT);
-  function lade(i) {
-    var b = new Image();
-    b.onload = function () { vorrat[i] = b; if (i === 0 || i === letztesZiel || ruhig) male(letztesZiel); };
-    b.src = PFAD(i);
-  }
-  if (ruhig) {
-    lade(FLUG + AUFBAU - 1);
-  } else {
-    /* Ruhebild zuerst, dann die Nahtbilder, dann alles der Reihe nach */
-    lade(0); lade(FLUG - 1); lade(FLUG + AUFBAU - 1); lade(GESAMT - 1);
-    for (var i = 1; i < GESAMT - 1; i++) lade(i);
-  }
-
-  var letztesZiel = 0;
-  function naechstesGeladene(z) {
-    if (vorrat[z]) return vorrat[z];
-    for (var a = 1; a < GESAMT; a++) {
-      if (vorrat[z - a]) return vorrat[z - a];
-      if (vorrat[z + a]) return vorrat[z + a];
-    }
-    return null;
-  }
-
-  var schleier = null;
-  function bemesse() {
-    var kante = Math.min(2048, Math.round(leinwand.getBoundingClientRect().width * Math.min(window.devicePixelRatio || 1, 2))) || 1440;
-    if (kante === leinwand.width) return;
-    leinwand.width = kante; leinwand.height = kante;
-    schleier = stift.createRadialGradient(kante / 2, kante / 2, kante * .30, kante / 2, kante / 2, kante * .52);
-    schleier.addColorStop(0, 'rgba(255,255,255,0)');
-    schleier.addColorStop(1, 'rgba(255,255,255,1)');
-  }
-  bemesse();
-  function male(z) {
-    letztesZiel = z;
-    var b = naechstesGeladene(z);
-    if (!b) return;
-    stift.clearRect(0, 0, leinwand.width, leinwand.height);
-    stift.drawImage(b, 0, 0, leinwand.width, leinwand.height);
-    stift.fillStyle = schleier;
-    stift.fillRect(0, 0, leinwand.width, leinwand.height);
-  }
-
-  function seg(p, a, b) { return Math.min(Math.max((p - a) / (b - a), 0), 1); }
-  function zufall(i) { var x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); }
-
-  /* ---------- Die fliegenden Blätter: mit Kippung im Raum ---------- */
-  var blattLage = document.getElementById('blaetter');
-  var BLATTZAHL = window.matchMedia('(max-width: 900px)').matches ? 6 : 10;
-  var blaetter = [];
-  if (!ruhig) {
-    for (var k = 0; k < BLATTZAHL; k++) {
-      var el = document.createElement('img');
-      el.className = 'blatt';
-      el.src = 'bilder/kino/blatt-' + (1 + (k % 4)) + '.webp';
-      el.alt = '';
-      blattLage.appendChild(el);
-      var winkel = zufall(k + 1) * Math.PI * 2;
-      var von = -0.05 + (k / BLATTZAHL) * 0.24;
-      blaetter.push({
-        el: el,
-        a: von, b: von + 0.15 + zufall(k + 7) * 0.05,
-        x0: Math.cos(winkel), y0: Math.sin(winkel),
-        zielX: (zufall(k + 13) - 0.35) * 0.16,
-        zielY: (zufall(k + 29) - 0.5) * 0.28,
-        gross: 1.6 + zufall(k + 41) * 0.8,
-        klein: 0.09 + zufall(k + 53) * 0.08,
-        dreh0: (zufall(k + 61) - 0.5) * 80,
-        dreh1: (zufall(k + 71) - 0.5) * 200,
-        kippX0: (zufall(k + 83) - 0.5) * 70,   /* Kippung im Raum: taumelt herein */
-        kippY0: (zufall(k + 97) - 0.5) * 90
-      });
-    }
-  }
-  function malBlaetter(p) {
-    var vw = window.innerWidth, vh = window.innerHeight;
-    var weit = Math.max(vw, vh) * 0.66;
-    blaetter.forEach(function (s) {
-      var t = seg(p, s.a, s.b);
-      if (t <= 0 || t >= 1) { s.el.style.opacity = 0; return; }
-      var e = 1 - Math.pow(1 - t, 2.2);
-      var x = s.x0 * weit * (1 - e) + s.zielX * vw * e;
-      var y = s.y0 * weit * (1 - e) + s.zielY * vh * e;
-      var gr = s.gross * Math.pow(s.klein / s.gross, e);
-      var dreh = s.dreh0 + (s.dreh1 - s.dreh0) * e;
-      var kx = s.kippX0 * (1 - e), ky = s.kippY0 * (1 - e);
-      var unschaerfe = (1 - e) * 4;
-      s.el.style.opacity = Math.min(1, t * 6) * (t > .9 ? (1 - t) * 10 : 1);
-      s.el.style.filter = unschaerfe > .4 ? 'blur(' + unschaerfe.toFixed(1) + 'px)' : 'none';
-      s.el.style.transform =
-        'translate(calc(-50% + ' + x.toFixed(1) + 'px), calc(-50% + ' + y.toFixed(1) + 'px)) ' +
-        'rotateX(' + kx.toFixed(1) + 'deg) rotateY(' + ky.toFixed(1) + 'deg) ' +
-        'rotate(' + dreh.toFixed(1) + 'deg) scale(' + gr.toFixed(3) + ')';
-    });
-  }
-
-  if (ruhig) {
-    male(FLUG + AUFBAU - 1);
-    finale.classList.add('da');
-    return;
-  }
-
-  /* Die Karte des Films:
-     0,00–0,28  der Flug: aus dem weißen Nichts fliegen die Blätter herein
-     0,30–0,56  der Aufbau: die Wolke setzt sich zum Kopf
-     0,56–0,61  das Licht blüht, die Leinwand setzt sich
-     0,60–0,86  die Drehung unter Wort 3
-     0,86–0,91  zweites Aufblühen
-     0,90–1,00  die Bühne belichtet, der Kopf gleitet */
-  var laeuft = false;
-  function messen() {
-    laeuft = false;
-    var r = kino.getBoundingClientRect();
-    var weg = r.height - window.innerHeight;
-    var p = weg > 0 ? Math.min(Math.max(-r.top / weg, 0), 1) : 1;
-
-    /* Drei Akte: Flug (leer -> Wolke), Aufbau (Wolke -> Kopf), Drehung. */
-    var bild;
-    if (p < .30) {
-      var f = seg(p, 0, .28);
-      f = 1 - Math.pow(1 - f, 1.8);
-      bild = Math.min(FLUG - 1, Math.round(f * (FLUG - 1)));
-    } else if (p < .60) {
-      var t = seg(p, .30, .56);
-      t = 1 - Math.pow(1 - t, 2.2);
-      bild = FLUG + Math.min(AUFBAU - 1, Math.round(t * (AUFBAU - 1)));
-    } else {
-      var d = seg(p, .60, .86);
-      bild = FLUG + AUFBAU + Math.min(DREHUNG - 1, Math.round(d * (DREHUNG - 1)));
-    }
-    male(bild);
-
-    var setzt1 = Math.sin(seg(p, .56, .61) * Math.PI);
-    var setzt2 = Math.sin(seg(p, .86, .91) * Math.PI);
-    var nah = 1.18 - .18 * seg(p, 0, .56) + .012 * (setzt1 + setzt2);
-    var ausklang = seg(p, .90, .99);
-    nah -= .14 * ausklang;
-    var schmal = window.matchMedia('(max-width: 900px)').matches;
-    var gleit = schmal ? 0 : ausklang * window.innerWidth * .11;
-    var hub = -seg(p, 0, .56) * window.innerHeight * .02;
-    leinwand.style.setProperty('--nah', nah.toFixed(4));
-    leinwand.style.setProperty('--gleit', gleit.toFixed(1) + 'px');
-    leinwand.style.setProperty('--hub', hub.toFixed(1) + 'px');
-
-    malBlaetter(p);
-
-    worte.forEach(function (w) {
-      var f = w.dataset.fenster.split(',');
-      var t = seg(p, parseFloat(f[0]), parseFloat(f[1]));
-      if (t <= 0 || t >= 1) { w.style.opacity = 0; return; }
-      var auf = Math.min(1, t * 5);
-      var ab = t > .85 ? (1 - t) / .15 : 1;
-      w.style.opacity = (auf * ab).toFixed(3);
-      w.style.transform = 'translateY(-50%) translateY(' + ((1 - auf) * 14).toFixed(1) + 'px) scale(' + (.985 + .025 * t).toFixed(4) + ')';
-    });
-
-    var schein = .10 + .16 * seg(p, 0, .56) + .18 * setzt1 + .22 * setzt2;
-    lichthof.style.setProperty('--schein', schein.toFixed(3));
-    lichthof.style.setProperty('--puls', (1 + .10 * (setzt1 + setzt2)).toFixed(3));
-
-    wink.style.opacity = p > .03 ? 0 : 1;
-    spruch.style.opacity = (1 - seg(p, 0, .045)).toFixed(3);
-    fortschritt.style.setProperty('--stand', seg(p, 0, .86).toFixed(4));
-    fortschritt.style.setProperty('--linie-da', p >= .89 ? 0 : 1);
-    fortschritt.style.opacity = p >= .89 ? 0 : 1;
-
-    var da = p >= .90;
-    finale.classList.toggle('da', da);
-    schleierlinks.classList.toggle('da', da);
-  }
-  window.addEventListener('scroll', function () {
-    if (!laeuft) { laeuft = true; requestAnimationFrame(messen); }
-  }, { passive: true });
-  window.addEventListener('resize', function () {
-    bemesse();
-    if (!laeuft) { laeuft = true; requestAnimationFrame(messen); }
-  }, { passive: true });
-  messen();
-})();
-</script>
 
 <script>
 (function () {
@@ -885,5 +822,49 @@ section.bahn{padding-top:var(--luft);scroll-margin-top:var(--kopfhoehe)}
 <script src="kontakt.js"></script>
 <script src="chrom.js"></script>
 <script src="einwilligung.js"></script>
+<script>
+(function () {
+  'use strict';
+  /* Die Tour: Folien blenden am Fortschritt, das Bild setzt sich. */
+  var ruhig = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var tour = document.querySelector('.tour');
+  if (tour && !ruhig) {
+    var folien = Array.prototype.slice.call(tour.querySelectorAll('.folie')).map(function (f) {
+      var w = f.dataset.fenster.split(',');
+      return { el: f, a: parseFloat(w[0]), b: parseFloat(w[1]),
+               rahmen: f.querySelector('.rahmen'), text: f.querySelector('.text') };
+    });
+    var balken = tour.querySelector('.fortschritt i');
+    function seg(p, a, b) { return Math.min(Math.max((p - a) / (b - a), 0), 1); }
+    var laeuft = false;
+    function messen() {
+      laeuft = false;
+      var r = tour.getBoundingClientRect();
+      var weg = r.height - window.innerHeight;
+      var p = weg > 0 ? Math.min(Math.max(-r.top / weg, 0), 1) : 0;
+      balken.style.setProperty('--stand', p.toFixed(4));
+      folien.forEach(function (f, i) {
+        var t = seg(p, f.a, f.b);
+        var istLetzte = i === folien.length - 1;
+        if (t <= 0 || (t >= 1 && !istLetzte)) { f.el.style.opacity = 0; f.el.style.pointerEvents = 'none'; return; }
+        var auf = Math.min(1, t * 6);
+        var ab = (!istLetzte && t > .86) ? (1 - t) / .14 : 1;
+        f.el.style.opacity = (auf * ab).toFixed(3);
+        f.el.style.pointerEvents = 'auto';
+        var e = 1 - Math.pow(1 - Math.min(t * 2, 1), 3);
+        f.rahmen.style.transform = 'translateY(' + ((1 - e) * 40).toFixed(1) + 'px) scale(' + (.965 + .035 * e).toFixed(4) + ')';
+        f.text.style.transform = 'translateY(' + ((1 - auf) * 18).toFixed(1) + 'px)';
+      });
+    }
+    window.addEventListener('scroll', function () {
+      if (!laeuft) { laeuft = true; requestAnimationFrame(messen); }
+    }, { passive: true });
+    window.addEventListener('resize', function () {
+      if (!laeuft) { laeuft = true; requestAnimationFrame(messen); }
+    }, { passive: true });
+    messen();
+  }
+})();
+</script>
 </body>
 </html>

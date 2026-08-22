@@ -79,7 +79,18 @@ window.Marke = (function () {
      recht: {anschrift: 'Kestner Beratung GmbH\nKäthe-Kollwitz-Straße 84\n04109 Leipzig',
              vertretungRolle: 'Geschäftsführung', vertretung: 'Ines Kestner', telefon: '+49 341 3390260',
              mail: 'kontakt@kestner-beratung.de', register: 'Amtsgericht Leipzig, HRB 000000 (Beispiel)',
-             ust: 'DE000000000 (Beispiel)', aufsicht: 'Sächsische Datenschutz- und Transparenzbeauftragte'}}
+             ust: 'DE000000000 (Beispiel)', aufsicht: 'Sächsische Datenschutz- und Transparenzbeauftragte'}},
+    /* Die fünfte Marke ist die EINZIGE echte in dieser Liste: quoroAI betreibt
+       die Plattform auch für sich selbst und gibt den Berater damit direkt an
+       Unternehmen. Ihre Rechtsangaben sind deshalb keine Platzhalter, sondern
+       stimmen — quoroAI GmbH, Amtsgericht Jena HRB 525069, eingetragen am
+       18.08.2026. Wer hier etwas ändert, ändert eine Pflichtangabe.
+       Sie steht am Ende, damit Index 0 die Sehproben unverändert lässt. */
+    {name: 'quoroAI',             anrede: 'du',  blau: '#6f63e8', stift: '#5a4cd6', tinte: '#18152f', papier: '#fdfdfe',
+     recht: {anschrift: 'quoroAI GmbH\nBahnhofstraße 38\n99084 Erfurt',
+             vertretungRolle: 'Geschäftsführung', vertretung: 'Hannes Freyer', telefon: '+49 361 55898702',
+             mail: 'hello@quorogroup.com', register: 'Amtsgericht Jena, HRB 525069',
+             ust: '', aufsicht: 'Thüringer Landesbeauftragter für den Datenschutz und die Informationsfreiheit'}}
   ];
   var idx = 0;
   try { idx = parseInt(sessionStorage.getItem('marke') || '0', 10); } catch (e) {}
