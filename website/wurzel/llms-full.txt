@@ -1,8 +1,0 @@
-# quoroAI
-
-Diese Datei gehörte zum vorherigen Auftritt und beschrieb Inhalte, die es so
-nicht mehr gibt. Der vollständige, aktuelle Überblick steht in einer Datei:
-
-  https://quoroai.io/llms.txt
-
-Dort stehen Angebot, Preise, Kontakt und die Adressen der Unterseiten.
